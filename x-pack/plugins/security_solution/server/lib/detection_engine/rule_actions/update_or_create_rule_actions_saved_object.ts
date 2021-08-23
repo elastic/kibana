@@ -25,6 +25,7 @@ export const updateOrCreateRuleActionsSavedObject = async ({
   actions,
   throttle,
 }: UpdateOrCreateRuleActionsSavedObject): Promise<RuleActions> => {
+  // console.log('-----> throttle is:', throttle);
   const ruleActions = await getRuleActionsSavedObject({ ruleAlertId, savedObjectsClient });
 
   if (ruleActions != null) {

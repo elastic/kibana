@@ -30,12 +30,14 @@ export const updateRulesNotifications = async ({
   name,
   throttle,
 }: UpdateRulesNotifications): Promise<RuleActions> => {
+  // console.log('---> updateRulesNotifications throttle:', throttle);
   const ruleActions = await updateOrCreateRuleActionsSavedObject({
     savedObjectsClient,
     ruleAlertId,
     actions,
     throttle,
   });
+  // console.log('---> ruleActions.alertThrottle:', ruleActions.alertThrottle);
 
   await updateNotifications({
     rulesClient,

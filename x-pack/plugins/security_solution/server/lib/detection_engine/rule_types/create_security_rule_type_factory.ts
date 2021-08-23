@@ -258,6 +258,7 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory = ({
             logger.info(buildRuleMessage(`Found ${createdSignalsCount} signals for notification.`));
 
             if (createdSignalsCount) {
+              // TODO: Implement the throttle the same way here
               const alertInstance = services.alertInstanceFactory(alertId);
               scheduleNotificationActions({
                 alertInstance,

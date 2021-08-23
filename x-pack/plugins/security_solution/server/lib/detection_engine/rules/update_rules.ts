@@ -7,7 +7,10 @@
 
 /* eslint-disable complexity */
 
-import { DEFAULT_MAX_SIGNALS } from '../../../../common/constants';
+import {
+  DEFAULT_MAX_SIGNALS,
+  NOTIFICATION_THROTTLE_NO_ACTIONS,
+} from '../../../../common/constants';
 import { transformRuleToAlertAction } from '../../../../common/detection_engine/transform_actions';
 import { PartialAlert } from '../../../../../alerting/server';
 import { readRules } from './read_rules';
@@ -16,6 +19,7 @@ import { addTags } from './add_tags';
 import { typeSpecificSnakeToCamel } from '../schemas/rule_converters';
 import { InternalRuleUpdate, RuleParams } from '../schemas/rule_schemas';
 import { enableRule } from './enable_rule';
+import { transformToAlertThrottle, transformToNotifyWhen } from './utils';
 
 export const updateRules = async ({
   spaceId,
@@ -73,18 +77,22 @@ export const updateRules = async ({
       ...typeSpecificParams,
     },
     schedule: { interval: ruleUpdate.interval ?? '5m' },
-    actions:
-      ruleUpdate.throttle === 'rule'
-        ? (ruleUpdate.actions ?? []).map(transformRuleToAlertAction)
-        : [],
-    throttle: null,
-    notifyWhen: null,
+    actions: ruleUpdate.actions != null ? ruleUpdate.actions.map(transformRuleToAlertAction) : [],
+    throttle: transformToAlertThrottle(ruleUpdate.throttle),
+    notifyWhen: transformToNotifyWhen(ruleUpdate.throttle),
   };
 
   const update = await rulesClient.update({
     id: existingRule.id,
     data: newInternalRule,
   });
+
+  // mutes or unmutes the rule actions depending on the throttle
+  if (existingRule.muteAll && ruleUpdate.throttle !== NOTIFICATION_THROTTLE_NO_ACTIONS) {
+    await rulesClient.unmuteAll({ id: update.id });
+  } else if (!existingRule.muteAll && ruleUpdate.throttle === NOTIFICATION_THROTTLE_NO_ACTIONS) {
+    await rulesClient.muteAll({ id: update.id });
+  }
 
   if (existingRule.enabled && enabled === false) {
     await rulesClient.disable({ id: existingRule.id });

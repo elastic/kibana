@@ -21,6 +21,9 @@ export const updateNotifications = async ({
   interval,
 }: UpdateNotificationParams): Promise<PartialAlert<RuleNotificationAlertTypeParams> | null> => {
   const notification = await readNotifications({ rulesClient, id: undefined, ruleAlertId });
+  // console.log('---> my ruleAlertId:', JSON.stringify(ruleAlertId, null, 2));
+  // console.log('---> my interval:', JSON.stringify(interval, null, 2));
+  // console.log('---> my notification:', JSON.stringify(notification, null, 2));
 
   if (interval && notification) {
     return rulesClient.update<RuleNotificationAlertTypeParams>({

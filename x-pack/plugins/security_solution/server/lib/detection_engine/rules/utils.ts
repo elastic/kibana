@@ -53,6 +53,7 @@ import {
   EventCategoryOverrideOrUndefined,
 } from '../../../../common/detection_engine/schemas/common/schemas';
 import { PartialFilter } from '../types';
+import { NotifyWhen } from '../schemas/rule_schemas';
 
 export const calculateInterval = (
   interval: string | undefined,
@@ -165,5 +166,23 @@ export const calculateName = ({
     // the name of "untitled" just in case a rule name became null or undefined at
     // some point since TypeScript allows it.
     return 'untitled';
+  }
+};
+
+export const transformToNotifyWhen = (throttle: string | null | undefined): NotifyWhen | null => {
+  if (throttle == null || throttle === 'no_actions') {
+    return null; // Although I return null, this does not change the value of the "notifyWhen" and it keeps the current value of "notifyWhen"
+  } else if (throttle === 'rule') {
+    return 'onActiveAlert';
+  } else {
+    return 'onThrottleInterval';
+  }
+};
+
+export const transformToAlertThrottle = (throttle: string | null | undefined): string | null => {
+  if (throttle == null || throttle === 'rule' || throttle === 'no_actions') {
+    return null;
+  } else {
+    return throttle;
   }
 };

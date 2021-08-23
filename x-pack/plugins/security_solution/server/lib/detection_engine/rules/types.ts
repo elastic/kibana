@@ -256,6 +256,7 @@ export interface CreateRulesOptions {
   concurrentSearches: ConcurrentSearchesOrUndefined;
   itemsPerSearch: ItemsPerSearchOrUndefined;
   threatLanguage: ThreatLanguageOrUndefined;
+  throttle: string | null; // TODO: Do we have better types here?
   timestampOverride: TimestampOverrideOrUndefined;
   to: To;
   type: Type;
@@ -315,6 +316,7 @@ export interface PatchRulesOptions {
   threatQuery: ThreatQueryOrUndefined;
   threatMapping: ThreatMappingOrUndefined;
   threatLanguage: ThreatLanguageOrUndefined;
+  throttle: string | null | undefined; // TODO: Do we have better types here?
   timestampOverride: TimestampOverrideOrUndefined;
   to: ToOrUndefined;
   type: TypeOrUndefined;

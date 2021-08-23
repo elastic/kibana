@@ -11,7 +11,10 @@ import { createRuleValidateTypeDependents } from '../../../../../common/detectio
 import { createRulesBulkSchema } from '../../../../../common/detection_engine/schemas/request/create_rules_bulk_schema';
 import { rulesBulkSchema } from '../../../../../common/detection_engine/schemas/response/rules_bulk_schema';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
-import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
+import {
+  DETECTION_ENGINE_RULES_URL,
+  NOTIFICATION_THROTTLE_NO_ACTIONS,
+} from '../../../../../common/constants';
 import { SetupPlugins } from '../../../../plugin';
 import { buildMlAuthz } from '../../../machine_learning/authz';
 import { throwHttpError } from '../../../machine_learning/validation';
@@ -102,6 +105,11 @@ export const createRulesBulkRoute = (
               const createdRule = await rulesClient.create({
                 data: internalRule,
               });
+
+              // mutes if we are creating the rule with the explicit no actions
+              if (payloadRule.throttle === NOTIFICATION_THROTTLE_NO_ACTIONS) {
+                await rulesClient.muteAll({ id: createdRule.id });
+              }
 
               const ruleActions = await updateRulesNotifications({
                 ruleAlertId: createdRule.id,

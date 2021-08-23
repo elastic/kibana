@@ -11,10 +11,15 @@ import {
 } from '../../../../common/detection_engine/utils';
 import { transformRuleToAlertAction } from '../../../../common/detection_engine/transform_actions';
 import { SanitizedAlert } from '../../../../../alerting/common';
-import { SERVER_APP_ID, SIGNALS_ID } from '../../../../common/constants';
+import {
+  NOTIFICATION_THROTTLE_NO_ACTIONS,
+  SERVER_APP_ID,
+  SIGNALS_ID,
+} from '../../../../common/constants';
 import { CreateRulesOptions } from './types';
 import { addTags } from './add_tags';
 import { PartialFilter, RuleTypeParams } from '../types';
+import { transformToAlertThrottle, transformToNotifyWhen } from './utils';
 
 export const createRules = async ({
   rulesClient,
@@ -59,6 +64,7 @@ export const createRules = async ({
   threatMapping,
   threshold,
   timestampOverride,
+  throttle,
   to,
   type,
   references,
@@ -67,7 +73,7 @@ export const createRules = async ({
   exceptionsList,
   actions,
 }: CreateRulesOptions): Promise<SanitizedAlert<RuleTypeParams>> => {
-  return rulesClient.create<RuleTypeParams>({
+  const rule = await rulesClient.create<RuleTypeParams>({
     data: {
       name,
       tags: addTags(tags, ruleId, immutable),
@@ -126,8 +132,15 @@ export const createRules = async ({
       schedule: { interval },
       enabled,
       actions: actions.map(transformRuleToAlertAction),
-      throttle: null,
-      notifyWhen: null,
+      throttle: transformToAlertThrottle(throttle),
+      notifyWhen: transformToNotifyWhen(throttle),
     },
   });
+
+  // Mute the rule if it is first created with the explicit no actions
+  if (throttle === NOTIFICATION_THROTTLE_NO_ACTIONS) {
+    await rulesClient.muteAll({ id: rule.id });
+  }
+
+  return rule;
 };

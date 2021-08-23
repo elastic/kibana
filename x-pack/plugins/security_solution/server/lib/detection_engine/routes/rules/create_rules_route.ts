@@ -8,7 +8,10 @@
 import { transformError, getIndexExists } from '@kbn/securitysolution-es-utils';
 import { IRuleDataClient } from '../../../../../../rule_registry/server';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
-import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
+import {
+  DETECTION_ENGINE_RULES_URL,
+  NOTIFICATION_THROTTLE_NO_ACTIONS,
+} from '../../../../../common/constants';
 import { SetupPlugins } from '../../../../plugin';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { buildMlAuthz } from '../../../machine_learning/authz';
@@ -94,6 +97,11 @@ export const createRulesRoute = (
         const createdRule = await rulesClient.create({
           data: internalRule,
         });
+
+        // mutes if we are creating the rule with the explicit no actions
+        if (request.body.throttle === NOTIFICATION_THROTTLE_NO_ACTIONS) {
+          await rulesClient.muteAll({ id: createdRule.id });
+        }
 
         const ruleActions = await updateRulesNotifications({
           ruleAlertId: createdRule.id,

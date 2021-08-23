@@ -171,6 +171,7 @@ export const patchRulesRoute = (
           threatQuery,
           threatMapping,
           threatLanguage,
+          throttle,
           concurrentSearches,
           itemsPerSearch,
           timestampOverride,

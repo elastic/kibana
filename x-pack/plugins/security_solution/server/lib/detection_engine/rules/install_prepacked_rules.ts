@@ -113,6 +113,7 @@ export const installPrepackagedRules = (
         threatIndex,
         threatIndicatorPath,
         threshold,
+        throttle: null, // At this time there is no pre-packaged actions
         timestampOverride,
         references,
         note,

@@ -32,6 +32,7 @@ import { SanitizedAlert } from '../../../../../alerting/common';
 import { IRuleStatusSOAttributes } from '../rules/types';
 import { transformTags } from '../routes/rules/utils';
 import { RuleExecutionStatus } from '../../../../common/detection_engine/schemas/common/schemas';
+import { transformToAlertThrottle, transformToNotifyWhen } from '../rules/utils';
 
 // These functions provide conversions from the request API schema to the internal rule schema and from the internal rule schema
 // to the response API schema. This provides static type-check assurances that the internal schema is in sync with the API schema for
@@ -156,9 +157,9 @@ export const convertCreateAPIToInternalSchema = (
     },
     schedule: { interval: input.interval ?? '5m' },
     enabled: input.enabled ?? true,
-    actions: input.throttle === 'rule' ? (input.actions ?? []).map(transformRuleToAlertAction) : [],
-    throttle: null,
-    notifyWhen: null,
+    actions: input.actions != null ? input.actions.map(transformRuleToAlertAction) : [],
+    throttle: transformToAlertThrottle(input.throttle),
+    notifyWhen: transformToNotifyWhen(input.throttle),
   };
 };
 

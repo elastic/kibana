@@ -125,6 +125,7 @@ export const createPromises = (
       references,
       version,
       note,
+      throttle,
       anomaly_threshold: anomalyThreshold,
       timeline_id: timelineId,
       timeline_title: timelineTitle,
@@ -188,6 +189,7 @@ export const createPromises = (
       timelineTitle,
       machineLearningJobId,
       exceptionsList,
+      throttle,
       actions: undefined,
     });
   });

@@ -7,6 +7,7 @@
 
 import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { defaults } from 'lodash/fp';
+import { NOTIFICATION_THROTTLE_NO_ACTIONS } from '../../../../common/constants';
 import { PartialAlert } from '../../../../../alerting/server';
 import { transformRuleToAlertAction } from '../../../../common/detection_engine/transform_actions';
 import {
@@ -17,7 +18,14 @@ import { internalRuleUpdate, RuleParams } from '../schemas/rule_schemas';
 import { addTags } from './add_tags';
 import { enableRule } from './enable_rule';
 import { PatchRulesOptions } from './types';
-import { calculateInterval, calculateName, calculateVersion, removeUndefined } from './utils';
+import {
+  calculateInterval,
+  calculateName,
+  calculateVersion,
+  removeUndefined,
+  transformToAlertThrottle,
+  transformToNotifyWhen,
+} from './utils';
 
 class PatchError extends Error {
   public readonly statusCode: number;
@@ -26,6 +34,8 @@ class PatchError extends Error {
     this.statusCode = statusCode;
   }
 }
+
+/* eslint complexity: ["error", 21]*/
 
 export const patchRules = async ({
   rulesClient,
@@ -68,6 +78,7 @@ export const patchRules = async ({
   concurrentSearches,
   itemsPerSearch,
   timestampOverride,
+  throttle,
   to,
   type,
   references,
@@ -179,8 +190,8 @@ export const patchRules = async ({
 
   const newRule = {
     tags: addTags(tags ?? rule.tags, rule.params.ruleId, rule.params.immutable),
-    throttle: null,
-    notifyWhen: null,
+    throttle: throttle !== undefined ? transformToAlertThrottle(throttle) : rule.throttle,
+    notifyWhen: throttle !== undefined ? transformToNotifyWhen(throttle) : rule.notifyWhen,
     name: calculateName({ updatedName: name, originalName: rule.name }),
     schedule: {
       interval: calculateInterval(interval, rule.schedule.interval),
@@ -188,6 +199,7 @@ export const patchRules = async ({
     actions: actions?.map(transformRuleToAlertAction) ?? rule.actions,
     params: removeUndefined(nextParams),
   };
+
   const [validated, errors] = validate(newRule, internalRuleUpdate);
   if (errors != null || validated === null) {
     throw new PatchError(`Applying patch would create invalid rule: ${errors}`, 400);
@@ -197,6 +209,17 @@ export const patchRules = async ({
     id: rule.id,
     data: validated,
   });
+
+  // mutes or un-mutes the rule actions depending on the throttle
+  if (rule.muteAll && throttle !== undefined && throttle !== NOTIFICATION_THROTTLE_NO_ACTIONS) {
+    await rulesClient.unmuteAll({ id: update.id });
+  } else if (
+    !rule.muteAll &&
+    throttle !== undefined &&
+    throttle === NOTIFICATION_THROTTLE_NO_ACTIONS
+  ) {
+    await rulesClient.muteAll({ id: update.id });
+  }
 
   if (rule.enabled && enabled === false) {
     await rulesClient.disable({ id: rule.id });
