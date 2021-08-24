@@ -67,6 +67,7 @@ const rewriteBodyRes: RewriteResponseCase<SanitizedAlert<AlertTypeParams>> = ({
   notifyWhen,
   muteAll,
   mutedInstanceIds,
+  legacyId,
   executionStatus: { lastExecutionDate, ...executionStatus },
   ...rest
 }) => ({
@@ -78,6 +79,7 @@ const rewriteBodyRes: RewriteResponseCase<SanitizedAlert<AlertTypeParams>> = ({
   created_at: createdAt,
   updated_at: updatedAt,
   api_key_owner: apiKeyOwner,
+  legacy_id: legacyId,
   notify_when: notifyWhen,
   mute_all: muteAll,
   muted_alert_ids: mutedInstanceIds,

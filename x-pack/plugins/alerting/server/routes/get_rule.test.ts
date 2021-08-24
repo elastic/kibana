@@ -57,6 +57,7 @@ describe('getRuleRoute', () => {
     apiKeyOwner: '',
     throttle: '30s',
     mutedInstanceIds: [],
+    legacyId: null,
     executionStatus: {
       status: 'unknown',
       lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
@@ -74,6 +75,7 @@ describe('getRuleRoute', () => {
     muted_alert_ids: mockedAlert.mutedInstanceIds,
     created_at: mockedAlert.createdAt,
     updated_at: mockedAlert.updatedAt,
+    legacy_id: mockedAlert.legacyId,
     id: mockedAlert.id,
     execution_status: {
       status: mockedAlert.executionStatus.status,

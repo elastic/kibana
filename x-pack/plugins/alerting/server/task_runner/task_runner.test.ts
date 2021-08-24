@@ -143,6 +143,7 @@ describe('Task Runner', () => {
     enabled: true,
     alertTypeId: alertType.id,
     apiKey: '',
+    legacyId: null,
     apiKeyOwner: 'elastic',
     schedule: { interval: '10s' },
     name: 'alert-name',

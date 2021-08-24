@@ -161,6 +161,7 @@ export interface CreateOptions<Params extends AlertTypeParams> {
     | 'mutedInstanceIds'
     | 'actions'
     | 'executionStatus'
+    | 'legacyId'
   > & { actions: NormalizedAlertAction[] };
   options?: {
     id?: string;

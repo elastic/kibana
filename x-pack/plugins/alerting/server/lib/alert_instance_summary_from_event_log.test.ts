@@ -655,6 +655,7 @@ const BaseAlert: SanitizedAlert<{ bar: boolean }> = {
   params: { bar: true },
   actions: [],
   createdBy: null,
+  legacyId: null,
   updatedBy: null,
   createdAt: new Date(),
   updatedAt: new Date(),

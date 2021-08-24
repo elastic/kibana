@@ -34,6 +34,7 @@ const rewriteBodyRes: RewriteResponseCase<SanitizedAlert<AlertTypeParams>> = ({
   executionStatus,
   actions,
   scheduledTaskId,
+  legacyId,
   ...rest
 }) => ({
   ...rest,
@@ -45,6 +46,7 @@ const rewriteBodyRes: RewriteResponseCase<SanitizedAlert<AlertTypeParams>> = ({
   api_key_owner: apiKeyOwner,
   notify_when: notifyWhen,
   mute_all: muteAll,
+  legacy_id: legacyId,
   muted_alert_ids: mutedInstanceIds,
   scheduled_task_id: scheduledTaskId,
   execution_status: executionStatus && {

@@ -54,6 +54,7 @@ describe('getAlertRoute', () => {
     updatedBy: '',
     apiKey: '',
     apiKeyOwner: '',
+    legacyId: null,
     throttle: '30s',
     mutedInstanceIds: [],
     executionStatus: {

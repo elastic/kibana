@@ -31,6 +31,7 @@ const alert: SanitizedAlert<{
   apiKeyOwner: null,
   throttle: null,
   notifyWhen: null,
+  legacyId: null,
   muteAll: false,
   mutedInstanceIds: [],
   executionStatus: {
