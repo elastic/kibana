@@ -25,7 +25,6 @@ export const UI_SETTINGS = {
   COURIER_SET_REQUEST_PREFERENCE: 'courier:setRequestPreference',
   COURIER_CUSTOM_REQUEST_PREFERENCE: 'courier:customRequestPreference',
   COURIER_MAX_CONCURRENT_SHARD_REQUESTS: 'courier:maxConcurrentShardRequests',
-  COURIER_BATCH_SEARCHES: 'courier:batchSearches',
   SEARCH_INCLUDE_FROZEN: 'search:includeFrozen',
   SEARCH_TIMEOUT: 'search:timeout',
   HISTOGRAM_BAR_TARGET: 'histogram:barTarget',

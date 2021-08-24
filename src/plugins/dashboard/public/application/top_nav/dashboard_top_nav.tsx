@@ -478,7 +478,7 @@ export function DashboardTopNav({
       dashboardAppState.getLatestDashboardState().viewMode,
       dashboardTopNavActions,
       {
-        hideWriteControls: dashboardCapabilities.hideWriteControls,
+        showWriteControls: dashboardCapabilities.showWriteControls,
         isDirty: Boolean(dashboardAppState.hasUnsavedChanges),
         isSaveInProgress: state.isSaveInProgress,
         isNewDashboard: !savedDashboard.id,

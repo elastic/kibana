@@ -16,13 +16,13 @@ import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { getProcessorEventForAggregatedTransactions } from '../helpers/aggregated_transactions';
 
 interface ServiceAgent {
-  service?: {
-    runtime: {
-      name: string;
-    };
-  };
   agent?: {
     name: string;
+  };
+  service?: {
+    runtime?: {
+      name?: string;
+    };
   };
 }
 
@@ -50,7 +50,7 @@ export async function getServiceAgent({
     },
     body: {
       size: 1,
-      _source: [SERVICE_RUNTIME_NAME, AGENT_NAME],
+      _source: [AGENT_NAME, SERVICE_RUNTIME_NAME],
       query: {
         bool: {
           filter: [
@@ -58,15 +58,15 @@ export async function getServiceAgent({
             ...rangeQuery(start, end),
             {
               exists: {
-                field: SERVICE_RUNTIME_NAME,
-              },
-            },
-            {
-              exists: {
                 field: AGENT_NAME,
               },
             },
           ],
+          should: {
+            exists: {
+              field: SERVICE_RUNTIME_NAME,
+            },
+          },
         },
       },
     },
@@ -80,6 +80,6 @@ export async function getServiceAgent({
     return {};
   }
 
-  const { service, agent } = response.hits.hits[0]._source as ServiceAgent;
-  return { agentName: agent?.name, runtimeName: service?.runtime.name };
+  const { agent, service } = response.hits.hits[0]._source as ServiceAgent;
+  return { agentName: agent?.name, runtimeName: service?.runtime?.name };
 }
