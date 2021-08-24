@@ -15,6 +15,7 @@ import { fetchTransactionDurationFieldCandidates } from '../correlations/queries
 import type { SearchServiceFetchParams } from '../../../../common/search_strategies/correlations/types';
 import { fetchFailedTransactionsCorrelationPValues } from './queries/query_failure_correlation';
 import { ERROR_CORRELATION_THRESHOLD } from './constants';
+import { EVENT_OUTCOME } from '../../../../common/elasticsearch_fieldnames';
 
 export const asyncErrorCorrelationSearchServiceProvider = (
   esClient: ElasticsearchClient,
@@ -35,10 +36,11 @@ export const asyncErrorCorrelationSearchServiceProvider = (
         includeFrozen,
       };
 
-      const { fieldCandidates } = await fetchTransactionDurationFieldCandidates(
-        esClient,
-        params
-      );
+      const {
+        fieldCandidates: candidates,
+      } = await fetchTransactionDurationFieldCandidates(esClient, params);
+
+      const fieldCandidates = candidates.filter((t) => !(t === EVENT_OUTCOME));
 
       addLogMessage(`Identified ${fieldCandidates.length} fieldCandidates.`);
 

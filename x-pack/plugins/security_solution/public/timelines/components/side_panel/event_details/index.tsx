@@ -17,7 +17,6 @@ import {
 import React, { useState, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
-import { AlertConsumers } from '@kbn/rule-data-utils';
 import { BrowserFields, DocValueFields } from '../../../../common/containers/source';
 import { ExpandableEvent, ExpandableEventTitle } from './expandable_event';
 import { useTimelineEventsDetails } from '../../../containers/details';
@@ -51,7 +50,6 @@ const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
 `;
 
 interface EventDetailsPanelProps {
-  alertConsumers?: AlertConsumers[];
   browserFields: BrowserFields;
   docValueFields: DocValueFields[];
   entityType?: EntityType;
@@ -68,10 +66,7 @@ interface EventDetailsPanelProps {
   timelineId: string;
 }
 
-const SECURITY_SOLUTION_ALERT_CONSUMERS: AlertConsumers[] = [AlertConsumers.SIEM];
-
 const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
-  alertConsumers = SECURITY_SOLUTION_ALERT_CONSUMERS, // Default to Security Solution so only other applications have to pass this in
   browserFields,
   docValueFields,
   entityType = 'events', // Default to events so only alerts have to pass entityType in
@@ -82,7 +77,6 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
   timelineId,
 }) => {
   const [loading, detailsData] = useTimelineEventsDetails({
-    alertConsumers,
     docValueFields,
     entityType,
     indexName: expandedEvent.indexName ?? '',
