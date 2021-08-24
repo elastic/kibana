@@ -6,7 +6,7 @@
  */
 
 import React, { memo, ReactNode, useCallback, useEffect, useRef, useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiTextColor } from '@elastic/eui';
 import styled from 'styled-components';
 import { OutputHistory } from './components/output_history';
 import { CommandInput, CommandInputProps } from './components/command_input';
@@ -72,7 +72,12 @@ export const Console = memo<ConsoleProps>(({ prompt }) => {
 
       if (!commandDefinition) {
         setHistoryItems((prevState) => {
-          return [...prevState, <HistoryItem>{`unknown command: ${command.input}`}</HistoryItem>];
+          return [
+            ...prevState,
+            <HistoryItem>
+              <EuiTextColor color="danger">{`unknown command: ${command.input}`}</EuiTextColor>
+            </HistoryItem>,
+          ];
         });
       }
     },
