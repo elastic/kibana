@@ -170,7 +170,7 @@ const EventRenderedViewComponent = ({
         // eslint-disable-next-line react/display-name
         render: (name: unknown, item: TimelineItem) => {
           const ruleName = get(item, `ecs.signal.rule.name`); /* `ecs.${ALERT_RULE_NAME}`*/
-          const ruleId = get(item, `ecs.signal.rule.id}`); /* `ecs.${ALERT_RULE_ID}`*/
+          const ruleId = get(item, `ecs.signal.rule.id`); /* `ecs.${ALERT_RULE_ID}`*/
           return <RuleName name={ruleName} id={ruleId} />;
         },
       },

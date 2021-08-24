@@ -166,6 +166,69 @@ describe('ManageSpacePage', () => {
     });
   });
 
+  it('sets calculated fields for existing spaces', async () => {
+    // The Spaces plugin provides functions to calculate the initials and color of a space if they have not been customized. The new space
+    // management page explicitly sets these fields when a new space is created, but it should also handle existing "legacy" spaces that do
+    // not already have these fields set.
+    const spaceToUpdate = {
+      id: 'existing-space',
+      name: 'Existing Space',
+      description: 'hey an existing space',
+      color: undefined,
+      initials: undefined,
+      imageUrl: undefined,
+      disabledFeatures: [],
+    };
+
+    const spacesManager = spacesManagerMock.create();
+    spacesManager.getSpace = jest.fn().mockResolvedValue({
+      ...spaceToUpdate,
+    });
+    spacesManager.getActiveSpace = jest.fn().mockResolvedValue(space);
+
+    const onLoadSpace = jest.fn();
+
+    const wrapper = mountWithIntl(
+      <ManageSpacePage
+        spaceId={'existing-space'}
+        spacesManager={(spacesManager as unknown) as SpacesManager}
+        onLoadSpace={onLoadSpace}
+        getFeatures={featuresStart.getFeatures}
+        notifications={notificationServiceMock.createStartContract()}
+        history={history}
+        capabilities={{
+          navLinks: {},
+          management: {},
+          catalogue: {},
+          spaces: { manage: true },
+        }}
+      />
+    );
+
+    await waitFor(() => {
+      wrapper.update();
+      expect(spacesManager.getSpace).toHaveBeenCalledWith('existing-space');
+    });
+
+    expect(onLoadSpace).toHaveBeenCalledWith({
+      ...spaceToUpdate,
+    });
+
+    await Promise.resolve();
+
+    wrapper.update();
+
+    // not changing anything, just clicking the "Update space" button
+    await clickSaveButton(wrapper);
+
+    expect(spacesManager.updateSpace).toHaveBeenCalledWith({
+      ...spaceToUpdate,
+      color: '#E7664C',
+      initials: 'ES',
+      imageUrl: '',
+    });
+  });
+
   it('notifies when there is an error retrieving features', async () => {
     const spacesManager = spacesManagerMock.create();
     spacesManager.createSpace = jest.fn(spacesManager.createSpace);
