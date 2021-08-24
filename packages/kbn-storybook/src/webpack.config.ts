@@ -61,6 +61,7 @@ export default function ({ config: storybookConfig }: { config: Configuration })
                     resolve(REPO_ROOT, 'src/core/public/core_app/styles/_globals_v7light.scss')
                   )};\n`;
                 },
+                implementation: require('node-sass'),
                 sassOptions: {
                   includePaths: [resolve(REPO_ROOT, 'node_modules')],
                 },
