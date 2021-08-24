@@ -333,7 +333,8 @@ const nestedDeepLinks: SecurityDeepLinks = {
 };
 
 /**
- * A function that generates the plugin deepLinks
+ * A function that generates the plugin deepLinks structure
+ * used by Kibana to build the global side navigation and application search results
  * @param enableExperimental ExperimentalFeatures arg
  * @param licenseType optional string for license level, if not provided basic is assumed.
  * @param capabilities optional arg for app start capabilities
