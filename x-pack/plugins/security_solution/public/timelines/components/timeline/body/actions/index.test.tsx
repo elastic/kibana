@@ -12,9 +12,12 @@ import { TestProviders, mockTimelineModel, mockTimelineData } from '../../../../
 import { Actions } from '.';
 import { useShallowEqualSelector } from '../../../../../common/hooks/use_selector';
 import { mockTimelines } from '../../../../../common/mock/mock_timelines_plugin';
-
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
+jest.mock('../../../../../common/hooks/use_experimental_features', () => ({
+  useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(false),
+}));
 jest.mock('../../../../../common/hooks/use_selector', () => ({
-  useShallowEqualSelector: jest.fn(),
+  useShallowEqualSelector: jest.fn().mockReturnValue(mockTimelineModel),
 }));
 jest.mock(
   '../../../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline',
@@ -87,10 +90,6 @@ const defaultProps = {
 };
 
 describe('Actions', () => {
-  beforeEach(() => {
-    (useShallowEqualSelector as jest.Mock).mockReturnValue(mockTimelineModel);
-  });
-
   test('it renders a checkbox for selecting the event when `showCheckboxes` is `true`', () => {
     const wrapper = mount(
       <TestProviders>
@@ -112,6 +111,7 @@ describe('Actions', () => {
   });
 
   test('it does NOT render a checkbox for selecting the event when `tGridEnabled` is `true`', () => {
+    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
     const wrapper = mount(
       <TestProviders>
         <Actions {...defaultProps} />
