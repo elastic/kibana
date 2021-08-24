@@ -25,6 +25,7 @@ import { getTimeRangeComparison } from '../../../shared/time_comparison/get_time
 import { OverviewTableContainer } from '../../../shared/overview_table_container';
 import { getColumns } from './get_column';
 import { useApmParams } from '../../../../hooks/use_apm_params';
+import { useTimeRange } from '../../../../hooks/use_time_range';
 
 interface Props {
   serviceName: string;
@@ -58,7 +59,7 @@ const INITIAL_STATE_DETAILED_STATISTICS: ErrorGroupDetailedStatistics = {
 
 export function ServiceOverviewErrorsTable({ serviceName }: Props) {
   const {
-    urlParams: { start, end, comparisonType, comparisonEnabled },
+    urlParams: { comparisonType, comparisonEnabled },
   } = useUrlParams();
   const { transactionType } = useApmServiceContext();
   const [tableOptions, setTableOptions] = useState<{
@@ -72,6 +73,12 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
     sort: DEFAULT_SORT,
   });
 
+  const {
+    query: { environment, kuery, rangeFrom, rangeTo },
+  } = useApmParams('/services/:serviceName/overview');
+
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
+
   const { comparisonStart, comparisonEnd } = getTimeRangeComparison({
     start,
     end,
@@ -81,10 +88,6 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
 
   const { pageIndex, sort } = tableOptions;
   const { direction, field } = sort;
-
-  const {
-    query: { environment, kuery },
-  } = useApmParams('/services/:serviceName/overview');
 
   const { data = INITIAL_STATE_MAIN_STATISTICS, status } = useFetcher(
     (callApmApi) => {
