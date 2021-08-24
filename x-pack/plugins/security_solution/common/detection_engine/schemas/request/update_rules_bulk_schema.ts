@@ -6,7 +6,10 @@
  */
 
 import * as t from 'io-ts';
-import { updateRulesSchema } from './rule_schemas';
+import { racUpdateRulesSchema, updateRulesSchema } from './rule_schemas';
 
 export const updateRulesBulkSchema = t.array(updateRulesSchema);
 export type UpdateRulesBulkSchema = t.TypeOf<typeof updateRulesBulkSchema>;
+
+export const racUpdateRulesBulkSchema = t.array(racUpdateRulesSchema);
+export type RACUpdateRulesBulkSchema = t.TypeOf<typeof racUpdateRulesBulkSchema>;

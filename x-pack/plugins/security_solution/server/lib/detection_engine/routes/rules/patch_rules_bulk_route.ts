@@ -25,10 +25,12 @@ import { patchRules } from '../../rules/patch_rules';
 import { updateRulesNotifications } from '../../rules/update_rules_notifications';
 import { readRules } from '../../rules/read_rules';
 import { PartialFilter } from '../../types';
+import { IRuleDataClient } from '../../../../../../rule_registry/server';
 
 export const patchRulesBulkRoute = (
   router: SecuritySolutionPluginRouter,
-  ml: SetupPlugins['ml']
+  ml: SetupPlugins['ml'],
+  ruleDataClient?: IRuleDataClient | null
 ) => {
   router.patch(
     {
@@ -43,6 +45,7 @@ export const patchRulesBulkRoute = (
       },
     },
     async (context, request, response) => {
+      const isRuleRegistryEnabled = ruleDataClient != null;
       const siemResponse = buildSiemResponse(response);
 
       const rulesClient = context.alerting?.getRulesClient();
@@ -183,6 +186,7 @@ export const patchRulesBulkRoute = (
               machineLearningJobId,
               actions,
               exceptionsList,
+              isRuleRegistryEnabled,
             });
             if (rule != null && rule.enabled != null && rule.name != null) {
               const ruleActions = await updateRulesNotifications({

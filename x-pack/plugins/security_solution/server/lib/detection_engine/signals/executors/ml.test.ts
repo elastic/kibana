@@ -17,17 +17,13 @@ import { findMlSignals } from '../find_ml_signals';
 import { bulkCreateMlSignals } from '../bulk_create_ml_signals';
 import { mlPluginServerMock } from '../../../../../../ml/server/mocks';
 import { sampleRuleSO } from '../__mocks__/es_results';
+import { createRuleDataClientMock } from '../../../../../../rule_registry/server/rule_data_client/rule_data_client.mock';
 
 jest.mock('../find_ml_signals');
 jest.mock('../bulk_create_ml_signals');
 
-describe('ml_executor', () => {
-  let jobsSummaryMock: jest.Mock;
-  let mlMock: ReturnType<typeof mlPluginServerMock.createSetupContract>;
-  const exceptionItems = [getExceptionListItemSchemaMock()];
-  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
-  let alertServices: AlertServicesMock;
-  const params = getMlRuleParams();
+const createMocks = (isRuleRegistryEnabled: boolean) => {
+  const params = getMlRuleParams(isRuleRegistryEnabled);
   const mlSO = sampleRuleSO(params);
   const tuple = {
     from: dateMath.parse(params.from)!,
@@ -40,9 +36,24 @@ describe('ml_executor', () => {
     name: mlSO.attributes.name,
     index: mlSO.attributes.params.outputIndex,
   });
+  return {
+    buildRuleMessage,
+    mlSO,
+    tuple,
+  };
+};
+
+describe('ml_executor', () => {
+  let jobsSummaryMock: jest.Mock;
+  let mlMock: ReturnType<typeof mlPluginServerMock.createSetupContract>;
+  const exceptionItems = [getExceptionListItemSchemaMock()];
+  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
+  let alertServices: AlertServicesMock;
+  let ruleDataClientMock = createRuleDataClientMock();
 
   beforeEach(() => {
     jobsSummaryMock = jest.fn();
+    ruleDataClientMock = createRuleDataClientMock();
     alertServices = alertsMock.createAlertServices();
     logger = loggingSystemMock.createLogger();
     mlMock = mlPluginServerMock.createSetupContract();
@@ -63,7 +74,11 @@ describe('ml_executor', () => {
     });
   });
 
-  it('should throw an error if ML plugin was not available', async () => {
+  test.each([
+    ['Legacy', undefined],
+    ['RAC', ruleDataClientMock],
+  ])('should throw an error if ML plugin was not available - %s', async (_, ruleDataClient) => {
+    const { buildRuleMessage, mlSO, tuple } = createMocks(ruleDataClient != null);
     await expect(
       mlExecutor({
         rule: mlSO,
@@ -80,48 +95,62 @@ describe('ml_executor', () => {
     ).rejects.toThrow('ML plugin unavailable during rule execution');
   });
 
-  it('should record a partial failure if Machine learning job summary was null', async () => {
-    jobsSummaryMock.mockResolvedValue([]);
-    const response = await mlExecutor({
-      rule: mlSO,
-      tuple,
-      ml: mlMock,
-      exceptionItems,
-      services: alertServices,
-      logger,
-      buildRuleMessage,
-      listClient: getListClientMock(),
-      bulkCreate: jest.fn(),
-      wrapHits: jest.fn(),
-    });
-    expect(logger.warn).toHaveBeenCalled();
-    expect(logger.warn.mock.calls[0][0]).toContain('Machine learning job(s) are not started');
-    expect(response.warningMessages.length).toEqual(1);
-  });
+  test.each([
+    ['Legacy', undefined],
+    ['RAC', ruleDataClientMock],
+  ])(
+    'should record a partial failure if Machine learning job summary was null - %s',
+    async (_, ruleDataClient) => {
+      const { buildRuleMessage, mlSO, tuple } = createMocks(ruleDataClient != null);
+      jobsSummaryMock.mockResolvedValue([]);
+      const response = await mlExecutor({
+        rule: mlSO,
+        tuple,
+        ml: mlMock,
+        exceptionItems,
+        services: alertServices,
+        logger,
+        buildRuleMessage,
+        listClient: getListClientMock(),
+        bulkCreate: jest.fn(),
+        wrapHits: jest.fn(),
+      });
+      expect(logger.warn).toHaveBeenCalled();
+      expect(logger.warn.mock.calls[0][0]).toContain('Machine learning job(s) are not started');
+      expect(response.warningMessages.length).toEqual(1);
+    }
+  );
 
-  it('should record a partial failure if Machine learning job was not started', async () => {
-    jobsSummaryMock.mockResolvedValue([
-      {
-        id: 'some_job_id',
-        jobState: 'starting',
-        datafeedState: 'started',
-      },
-    ]);
+  test.each([
+    ['Legacy', undefined],
+    ['RAC', ruleDataClientMock],
+  ])(
+    'should record a partial failure if Machine learning job was not started - %s',
+    async (_, ruleDataClient) => {
+      const { buildRuleMessage, mlSO, tuple } = createMocks(ruleDataClient != null);
+      jobsSummaryMock.mockResolvedValue([
+        {
+          id: 'some_job_id',
+          jobState: 'starting',
+          datafeedState: 'started',
+        },
+      ]);
 
-    const response = await mlExecutor({
-      rule: mlSO,
-      tuple,
-      ml: mlMock,
-      exceptionItems,
-      services: alertServices,
-      logger,
-      buildRuleMessage,
-      listClient: getListClientMock(),
-      bulkCreate: jest.fn(),
-      wrapHits: jest.fn(),
-    });
-    expect(logger.warn).toHaveBeenCalled();
-    expect(logger.warn.mock.calls[0][0]).toContain('Machine learning job(s) are not started');
-    expect(response.warningMessages.length).toEqual(1);
-  });
+      const response = await mlExecutor({
+        rule: mlSO,
+        tuple,
+        ml: mlMock,
+        exceptionItems,
+        services: alertServices,
+        logger,
+        buildRuleMessage,
+        listClient: getListClientMock(),
+        bulkCreate: jest.fn(),
+        wrapHits: jest.fn(),
+      });
+      expect(logger.warn).toHaveBeenCalled();
+      expect(logger.warn.mock.calls[0][0]).toContain('Machine learning job(s) are not started');
+      expect(response.warningMessages.length).toEqual(1);
+    }
+  );
 });

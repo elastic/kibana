@@ -46,6 +46,7 @@ export const patchRulesRoute = (
       },
     },
     async (context, request, response) => {
+      const isRuleRegistryEnabled = ruleDataClient != null;
       const siemResponse = buildSiemResponse(response);
       const validationErrors = patchRuleValidateTypeDependents(request.body);
       if (validationErrors.length) {
@@ -126,7 +127,7 @@ export const patchRulesRoute = (
         }
 
         const existingRule = await readRules({
-          isRuleRegistryEnabled: false, // TODO: support RAC
+          isRuleRegistryEnabled,
           rulesClient,
           ruleId,
           id,
@@ -186,6 +187,7 @@ export const patchRulesRoute = (
           machineLearningJobId,
           actions,
           exceptionsList,
+          isRuleRegistryEnabled,
         });
         if (rule != null && rule.enabled != null && rule.name != null) {
           const ruleActions = await updateRulesNotifications({
@@ -203,7 +205,12 @@ export const patchRulesRoute = (
             spaceId: context.securitySolution.getSpaceId(),
           });
 
-          const [validated, errors] = transformValidate(rule, ruleActions, ruleStatuses[0]);
+          const [validated, errors] = transformValidate(
+            rule,
+            ruleActions,
+            ruleStatuses[0],
+            isRuleRegistryEnabled
+          );
           if (errors != null) {
             return siemResponse.error({ statusCode: 500, body: errors });
           } else {

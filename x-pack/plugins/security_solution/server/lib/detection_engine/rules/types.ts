@@ -332,6 +332,7 @@ export interface PatchRulesOptions {
   exceptionsList: ListArrayOrUndefined;
   actions: RuleAlertAction[] | undefined;
   rule: SanitizedAlert<RuleParams> | null;
+  isRuleRegistryEnabled: boolean;
 }
 
 export interface ReadRuleOptions {

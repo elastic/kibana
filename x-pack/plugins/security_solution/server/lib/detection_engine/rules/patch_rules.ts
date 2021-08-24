@@ -77,6 +77,7 @@ export const patchRules = async ({
   anomalyThreshold,
   machineLearningJobId,
   actions,
+  isRuleRegistryEnabled,
 }: PatchRulesOptions): Promise<PartialAlert<RuleParams> | null> => {
   if (rule == null) {
     return null;

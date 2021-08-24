@@ -38,10 +38,13 @@ import {
   getQueryRuleParams,
   getThreatRuleParams,
 } from '../../schemas/rule_schemas.mock';
+import { createRuleDataClientMock } from '../../../../../../rule_registry/server/rule_data_client/rule_data_client.mock';
 
 type PromiseFromStreams = ImportRulesSchemaDecoded | Error;
 
 describe('utils', () => {
+  const ruleDataClientMock = createRuleDataClientMock();
+
   describe('transformAlertToRule', () => {
     test('should work with a full data set', () => {
       const fullRule = getAlertMock(getQueryRuleParams(false));
@@ -83,8 +86,11 @@ describe('utils', () => {
       expect(rule).toEqual(expected);
     });
 
-    test('transforms ML Rule fields', () => {
-      const mlRule = getAlertMock(getMlRuleParams());
+    test.each([
+      ['Legacy', undefined],
+      ['RAC', ruleDataClientMock],
+    ])('transforms ML Rule fields - %s', (_, ruleDataClient) => {
+      const mlRule = getAlertMock(getMlRuleParams(ruleDataClient != null));
       mlRule.params.anomalyThreshold = 55;
       mlRule.params.machineLearningJobId = ['some_job_id'];
       mlRule.params.type = 'machine_learning';

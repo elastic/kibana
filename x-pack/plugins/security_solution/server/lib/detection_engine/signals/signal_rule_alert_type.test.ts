@@ -413,7 +413,7 @@ describe('signal_rule_alert_type', () => {
 
     describe('ML rule', () => {
       it('should not call checkPrivileges if ML rule', async () => {
-        const ruleAlert = getAlertMock(getMlRuleParams());
+        const ruleAlert = getAlertMock(getMlRuleParams(false));
         alertServices.savedObjectsClient.get.mockResolvedValue({
           id: 'id',
           type: 'type',

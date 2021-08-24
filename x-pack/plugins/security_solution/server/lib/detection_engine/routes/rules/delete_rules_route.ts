@@ -76,7 +76,7 @@ export const deleteRulesRoute = (
           ruleStatuses,
           id: rule.id,
         });
-        const transformed = transform(rule, undefined, ruleStatuses[0]);
+        const transformed = transform(rule, undefined, ruleStatuses[0], ruleDataClient != null);
         if (transformed == null) {
           return siemResponse.error({ statusCode: 500, body: 'failed to transform alert' });
         } else {
