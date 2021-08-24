@@ -9,6 +9,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiScreenReaderOnly, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { debounce } from 'lodash';
+import { decompressFromEncodedURIComponent } from 'lz-string';
 import { parse } from 'query-string';
 import React, { CSSProperties, useCallback, useEffect, useRef, useState } from 'react';
 import { ace } from '../../../../../../../es_ui_shared/public';
@@ -118,6 +119,17 @@ function EditorUI({ initialTextValue }: EditorProps) {
           editor.highlightCurrentRequestsAndUpdateActionBar();
           coreEditor.getContainer().focus();
         });
+      }
+
+      // If we have a data URI instead of HTTP, LZ-decode it.
+      if (/^data:/.test(url)) {
+        const data = decompressFromEncodedURIComponent(url.replace(/^data:text\/plain,/, '')) ?? '';
+        const coreEditor = editor.getCoreEditor();
+        editor.update(data, true);
+        editor.moveToNextRequestEdge(false);
+        coreEditor.clearSelection();
+        editor.highlightCurrentRequestsAndUpdateActionBar();
+        coreEditor.getContainer().focus();
       }
     };
 
