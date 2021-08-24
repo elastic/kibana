@@ -1,5 +1,5 @@
 {
-  "id": "newsfeedFixtures",
+  "id": "codeCoverageTestPlugin",
   "owner": {
     "name": "Core",
     "githubTeam": "kibana-core"
