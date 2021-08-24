@@ -50,7 +50,7 @@ export interface TableProps {
   capabilities: ApplicationStart['capabilities'];
   onDelete: () => void;
   onActionRefresh: (objects: Array<{ type: string; id: string }>) => void;
-  onExport: (includeReferencesDeep: boolean) => void;
+  onExport: (exportOptions: { includeReferences: boolean; includeNamespaces: boolean }) => void;
   goInspectObject: (obj: SavedObjectWithMetadata) => void;
   pageIndex: number;
   pageSize: number;
@@ -70,6 +70,7 @@ interface TableState {
   parseErrorMessage: any;
   isExportPopoverOpen: boolean;
   isIncludeReferencesDeepChecked: boolean;
+  isIncludeNamespacesChecked: boolean;
   activeAction?: SavedObjectsManagementAction;
 }
 
@@ -79,6 +80,7 @@ export class Table extends PureComponent<TableProps, TableState> {
     parseErrorMessage: null,
     isExportPopoverOpen: false,
     isIncludeReferencesDeepChecked: true,
+    isIncludeNamespacesChecked: true,
     activeAction: undefined,
   };
 
@@ -118,10 +120,19 @@ export class Table extends PureComponent<TableProps, TableState> {
     }));
   };
 
+  toggleIsIncludeNamespacesChecked = () => {
+    this.setState((state) => ({
+      isIncludeNamespacesChecked: !state.isIncludeNamespacesChecked,
+    }));
+  };
+
   onExportClick = () => {
     const { onExport } = this.props;
-    const { isIncludeReferencesDeepChecked } = this.state;
-    onExport(isIncludeReferencesDeepChecked);
+    const { isIncludeReferencesDeepChecked, isIncludeNamespacesChecked } = this.state;
+    onExport({
+      includeReferences: isIncludeReferencesDeepChecked,
+      includeNamespaces: isIncludeNamespacesChecked,
+    });
     this.setState({ isExportPopoverOpen: false });
   };
 
@@ -393,6 +404,19 @@ export class Table extends PureComponent<TableProps, TableState> {
                   }
                   checked={this.state.isIncludeReferencesDeepChecked}
                   onChange={this.toggleIsIncludeReferencesDeepChecked}
+                />
+              </EuiFormRow>
+              <EuiFormRow>
+                <EuiSwitch
+                  name="includeNamespaces"
+                  label={
+                    <FormattedMessage
+                      id="savedObjectsManagement.objectsTable.exportObjectsConfirmModal.includeNamespaces"
+                      defaultMessage="Include namespace information"
+                    />
+                  }
+                  checked={this.state.isIncludeNamespacesChecked}
+                  onChange={this.toggleIsIncludeNamespacesChecked}
                 />
               </EuiFormRow>
               <EuiFormRow>

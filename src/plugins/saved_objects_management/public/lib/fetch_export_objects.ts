@@ -7,16 +7,19 @@
  */
 
 import { HttpStart } from 'src/core/public';
+import { ObjectIdentifier } from './get_object_id';
 
 export async function fetchExportObjects(
   http: HttpStart,
-  objects: any[],
-  includeReferencesDeep: boolean = false
+  objects: ObjectIdentifier[],
+  includeReferencesDeep: boolean = false,
+  includeNamespaces: boolean = false
 ): Promise<Blob> {
   return http.post('/api/saved_objects/_export', {
     body: JSON.stringify({
       objects,
       includeReferencesDeep,
+      includeNamespaces,
     }),
   });
 }

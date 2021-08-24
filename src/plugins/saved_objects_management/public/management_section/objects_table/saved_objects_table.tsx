@@ -36,6 +36,7 @@ import {
   getTagFindReferences,
   SpacesInfo,
   getObjectRowIdentifier,
+  getObjectIdentifier,
 } from '../../lib';
 import { SavedObjectWithMetadata } from '../../types';
 import {
@@ -379,14 +380,22 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     });
   };
 
-  onExport = async (includeReferencesDeep: boolean) => {
+  onExport = async ({
+    includeReferences,
+    includeNamespaces,
+  }: {
+    includeReferences: boolean;
+    includeNamespaces: boolean;
+  }) => {
     const { selectedSavedObjects } = this.state;
-    const { notifications, http } = this.props;
-    const objectsToExport = selectedSavedObjects.map((obj) => ({ id: obj.id, type: obj.type }));
+    const { notifications, http, spacesInfo } = this.props;
+    const objectsToExport = selectedSavedObjects.map((obj) =>
+      getObjectIdentifier(obj, spacesInfo?.active?.id)
+    );
 
     let blob;
     try {
-      blob = await fetchExportObjects(http, objectsToExport, includeReferencesDeep);
+      blob = await fetchExportObjects(http, objectsToExport, includeReferences, includeNamespaces);
     } catch (e) {
       notifications.toasts.addDanger({
         title: i18n.translate('savedObjectsManagement.objectsTable.export.dangerNotification', {
