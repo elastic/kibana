@@ -10,7 +10,6 @@ const { BuildkiteClient } = require('kibana-buildkite-library');
     if (ex.response) {
       console.error('HTTP Error Response Body', ex.response.data);
       console.error('HTTP Error Response Status', ex.response.status);
-      console.error('HTTP Error Response Headers', ex.response.headers);
     }
     console.error(ex);
     process.exit(1);
