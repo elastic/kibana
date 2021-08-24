@@ -17,7 +17,7 @@ To access an elasticsearch instance that has live data you have two options:
 
 #### A. Connect to Elasticsearch on Cloud (internal devs only)
 
-Find the credentials for the cluster [here](https://github.com/elastic/apm-dev/blob/master/docs/credentials/apm-ui-clusters.md#apmelstcco)
+Find the credentials for the cluster [here](https://github.com/elastic/observability-dev/blob/master/docs/observability-clusters.md)
 
 #### B. Start Elastic Stack and APM data generators
 
