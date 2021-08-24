@@ -1358,29 +1358,29 @@
     is-absolute "^1.0.0"
     is-negated-glob "^1.0.0"
 
-"@elastic/apm-rum-core@^5.11.0":
-  version "5.11.0"
-  resolved "https://registry.yarnpkg.com/@elastic/apm-rum-core/-/apm-rum-core-5.11.0.tgz#6cfebb62d5ac33cf5ec9dfbe206f120ff5d17ecc"
-  integrity sha512-JqxsVU6/gHfWe3DiJ7uN0h0e+zFd8LbcC5i/Pa14useiKOVn4r7dHeKoWkBSJCY63cl76hotCbtgqkuVgWVzmA==
+"@elastic/apm-rum-core@^5.12.1":
+  version "5.12.1"
+  resolved "https://registry.yarnpkg.com/@elastic/apm-rum-core/-/apm-rum-core-5.12.1.tgz#ad78787876c68b9ce718d1c42b8e7b12b12eaa69"
+  integrity sha512-b9CyqLdu2rSdjqi5Pc2bNfQCRQT26GjQzCTpJq1WoewDaoivsPoUDrY7tCJV+j3rmRSxG7vX91pM5SygjFr7aA==
   dependencies:
     error-stack-parser "^1.3.5"
     opentracing "^0.14.3"
     promise-polyfill "^8.1.3"
 
-"@elastic/apm-rum-react@^1.2.11":
-  version "1.2.11"
-  resolved "https://registry.yarnpkg.com/@elastic/apm-rum-react/-/apm-rum-react-1.2.11.tgz#945436cbe90507fda85016c0e3a44984c3f0a9c8"
-  integrity sha512-kl+NdNZ0eANAD7DlN3fFR7M9NeEW21rINh9aLSmEMQedUNNn+3K9oQzD4MirjV1TA5hsLSeGiCKrfPzja9Ynjw==
+"@elastic/apm-rum-react@^1.3.1":
+  version "1.3.1"
+  resolved "https://registry.yarnpkg.com/@elastic/apm-rum-react/-/apm-rum-react-1.3.1.tgz#2b1a5cfe3763538d7e655816a333162696f906c9"
+  integrity sha512-nJebgxMUWsWWz93v39ok0DwFGUvv9qZkA+oElUzCKyVvWpgHsWE2pvgjthrvay64qzfEg5QeM56ywaef9V13rw==
   dependencies:
-    "@elastic/apm-rum" "^5.8.0"
+    "@elastic/apm-rum" "^5.9.1"
     hoist-non-react-statics "^3.3.0"
 
-"@elastic/apm-rum@^5.8.0":
-  version "5.8.0"
-  resolved "https://registry.yarnpkg.com/@elastic/apm-rum/-/apm-rum-5.8.0.tgz#ab88dc9e955b7fa2f00d5541d242a91a44c0c931"
-  integrity sha512-lje3SxwqhRkogCsBUsK9y0cn1Kv3dj4Ukbt4VbmNr44KRYoY9A3gTm5e5qKLF6DgsPCOc9EZBF36a0Wtjlkt/g==
+"@elastic/apm-rum@^5.9.1":
+  version "5.9.1"
+  resolved "https://registry.yarnpkg.com/@elastic/apm-rum/-/apm-rum-5.9.1.tgz#23b12650d443ec0a5f7c6b7b4039334e42d2fe8a"
+  integrity sha512-NJAdzxXxf+LeCI0Dz3P+RMVY66C8sAztIg4tvnrhvBqxf8d7se+FpYw3oYjw3BZ8UDycmXEaIqEGcynUUndgqA==
   dependencies:
-    "@elastic/apm-rum-core" "^5.11.0"
+    "@elastic/apm-rum-core" "^5.12.1"
 
 "@elastic/app-search-javascript@^7.13.1":
   version "7.13.1"
