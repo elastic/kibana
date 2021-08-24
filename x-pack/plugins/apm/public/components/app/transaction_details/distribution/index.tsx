@@ -29,6 +29,7 @@ import { useUiTracker } from '../../../../../../observability/public';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { isErrorMessage } from '../../correlations/utils/is_error_message';
+import { useTimeRange } from '../../../../hooks/use_time_range';
 
 const DEFAULT_PERCENTILE_THRESHOLD = 95;
 // Enforce min height so it's consistent across all tabs on the same level
@@ -71,12 +72,14 @@ export function TransactionDistribution({
   const { serviceName, transactionType } = useApmServiceContext();
 
   const {
-    query: { kuery, environment },
+    query: { kuery, environment, rangeFrom, rangeTo },
   } = useApmParams('/services/:serviceName/transactions/view');
+
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const { urlParams } = useUrlParams();
 
-  const { transactionName, start, end } = urlParams;
+  const { transactionName } = urlParams;
 
   const [showSelection, setShowSelection] = useState(false);
 
