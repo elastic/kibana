@@ -11,7 +11,11 @@ import classNames from 'classnames';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiIcon } from '@elastic/eui';
 import { DocViewer } from '../../../../../components/doc_viewer/doc_viewer';
-import { FilterManager, IndexPattern, IndexPatternField } from '../../../../../../../../data/public';
+import {
+  FilterManager,
+  IndexPattern,
+  IndexPatternField,
+} from '../../../../../../../../data/public';
 import { TableCell } from './table_row/table_cell';
 import { ElasticSearchHit, DocViewFilterFn } from '../../../../../doc_views/doc_views_types';
 import { trimAngularSpan } from '../../../../../components/table/table_helper';
@@ -68,7 +72,8 @@ export const TableRow = ({
         indexPattern,
         showMultiFields
       ),
-    [indexPattern, showMultiFields]);
+    [indexPattern, showMultiFields]
+  );
 
   // toggle display of the rows details, a full list of the fields from each row
   const toggleRow = () => setOpen((prevOpen) => !prevOpen);

@@ -90,22 +90,13 @@ export const DocViewerTable = ({
     };
   }, []);
 
-  const fieldsToShow = useMemo(() => {
-    if (!indexPattern) {
-      return [];
-    }
-    return getFieldsToShow(
-      indexPattern.fields.map((fld) => fld.name),
-      indexPattern,
-      showMultiFields
-    );
-  }, [indexPattern, showMultiFields]);
-
   if (!indexPattern) {
     return null;
   }
 
   const flattened = indexPattern?.flattenHit(hit);
+  const fieldsToShow = getFieldsToShow(Object.keys(flattened), indexPattern, showMultiFields);
+
   const items: FieldRecord[] = Object.keys(flattened)
     .filter((fieldName) => {
       return fieldsToShow.includes(fieldName);
