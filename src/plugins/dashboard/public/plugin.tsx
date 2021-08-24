@@ -80,7 +80,7 @@ import { UrlGeneratorState } from '../../share/public';
 import { ExportCSVAction } from './application/actions/export_csv_action';
 import { dashboardFeatureCatalog } from './dashboard_strings';
 import { replaceUrlHashQuery } from '../../kibana_utils/public';
-import { SpacesOssPluginStart } from './services/spaces';
+import { SpacesPluginStart } from './services/spaces';
 
 declare module '../../share/public' {
   export interface UrlGeneratorStateMapping {
@@ -118,7 +118,7 @@ export interface DashboardStartDependencies {
   savedObjects: SavedObjectsStart;
   presentationUtil: PresentationUtilPluginStart;
   savedObjectsTaggingOss?: SavedObjectTaggingOssPluginStart;
-  spacesOss?: SpacesOssPluginStart;
+  spaces?: SpacesPluginStart;
   visualizations: VisualizationsStart;
 }
 
@@ -183,31 +183,12 @@ export class DashboardPlugin
     const getStartServices = async () => {
       const [coreStart, deps] = await core.getStartServices();
 
-      const useHideChrome = ({ toggleChrome } = { toggleChrome: true }) => {
-        React.useEffect(() => {
-          if (toggleChrome) {
-            coreStart.chrome.setIsVisible(false);
-          }
-
-          return () => {
-            if (toggleChrome) {
-              coreStart.chrome.setIsVisible(true);
-            }
-          };
-        }, [toggleChrome]);
-      };
-
-      const ExitFullScreenButton: React.FC<
-        ExitFullScreenButtonProps & {
-          toggleChrome: boolean;
-        }
-      > = ({ toggleChrome, ...props }) => {
-        useHideChrome({ toggleChrome });
-        return <ExitFullScreenButtonUi {...props} />;
+      const ExitFullScreenButton: React.FC<ExitFullScreenButtonProps> = (props) => {
+        return <ExitFullScreenButtonUi {...props} chrome={coreStart.chrome} />;
       };
       return {
         SavedObjectFinder: getSavedObjectFinder(coreStart.savedObjects, coreStart.uiSettings),
-        hideWriteControls: deps.kibanaLegacy.dashboardConfig.getHideWriteControls(),
+        showWriteControls: Boolean(coreStart.application.capabilities.dashboard.showWriteControls),
         notifications: coreStart.notifications,
         application: coreStart.application,
         uiSettings: coreStart.uiSettings,

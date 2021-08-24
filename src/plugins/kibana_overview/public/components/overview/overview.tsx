@@ -16,14 +16,15 @@ import {
   EuiScreenReaderOnly,
   EuiSpacer,
   EuiTitle,
-  EuiToken,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { CoreStart } from 'kibana/public';
+import { i18n } from '@kbn/i18n';
 import {
   RedirectAppLinks,
   useKibana,
   KibanaPageTemplate,
+  KibanaPageTemplateSolutionNavAvatar,
   KibanaPageTemplateProps,
   overviewPageActions,
   OverviewPageFooter,
@@ -65,7 +66,7 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
       .sort(sortByOrder);
 
   const getSolutionGraphicURL = (solutionId: string) =>
-    `/plugins/${PLUGIN_ID}/assets/solutions_${solutionId}_2x.png`;
+    `/plugins/kibanaReact/assets/solutions_${solutionId}.svg`;
 
   const findFeatureById = (featureId: string) => features.find(({ id }) => id === featureId);
   const kibanaApps = features.filter(({ solutionId }) => solutionId === 'kibana').sort(sortByOrder);
@@ -73,7 +74,9 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
   const manageDataFeatures = getFeaturesByCategory(FeatureCatalogueCategory.ADMIN);
   const devTools = findFeatureById('console');
   const noDataConfig: KibanaPageTemplateProps['noDataConfig'] = {
-    solution: 'Analytics',
+    solution: i18n.translate('kibanaOverview.noDataConfig.solutionName', {
+      defaultMessage: `Analytics`,
+    }),
     logo: 'logoKibana',
     actions: {
       beats: {
@@ -90,9 +93,9 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
 
   useEffect(() => {
     const fetchIsNewKibanaInstance = async () => {
-      const resp = await indexPatternService.getTitles();
+      const hasUserIndexPattern = await indexPatternService.hasUserIndexPattern().catch(() => true);
 
-      setNewKibanaInstance(resp.length === 0);
+      setNewKibanaInstance(!hasUserIndexPattern);
     };
 
     fetchIsNewKibanaInstance();
@@ -130,7 +133,7 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
     <KibanaPageTemplate
       pageHeader={{
         iconType: 'logoKibana',
-        pageTitle: <FormattedMessage defaultMessage="Kibana" id="kibanaOverview.header.title" />,
+        pageTitle: <FormattedMessage defaultMessage="Analytics" id="kibanaOverview.header.title" />,
         rightSideItems: overviewPageActions({
           addBasePath,
           application,
@@ -213,12 +216,10 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
                           description={description ? description : ''}
                           href={addBasePath(path)}
                           icon={
-                            <EuiToken
-                              className="kbnOverviewSolution__icon"
-                              fill="light"
+                            <KibanaPageTemplateSolutionNavAvatar
+                              name={title}
                               iconType={icon}
-                              shape="circle"
-                              size="l"
+                              size="xl"
                             />
                           }
                           image={addBasePath(getSolutionGraphicURL(snakeCase(id)))}

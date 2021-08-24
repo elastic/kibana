@@ -35,7 +35,7 @@ export const useAlertsPrivileges = (): UseAlertsPrivelegesReturn => {
     hasIndexUpdateDelete: null,
     hasIndexMaintenance: null,
   });
-  const { detectionEnginePrivileges } = useUserPrivileges();
+  const { detectionEnginePrivileges, alertsPrivileges } = useUserPrivileges();
 
   useEffect(() => {
     if (detectionEnginePrivileges.error != null) {
@@ -62,17 +62,13 @@ export const useAlertsPrivileges = (): UseAlertsPrivelegesReturn => {
           hasEncryptionKey: privilege.has_encryption_key,
           hasIndexManage: privilege.index[indexName].manage && privilege.cluster.manage,
           hasIndexMaintenance: privilege.index[indexName].maintenance,
-          hasIndexRead: privilege.index[indexName].read,
-          hasIndexWrite:
-            privilege.index[indexName].create ||
-            privilege.index[indexName].create_doc ||
-            privilege.index[indexName].index ||
-            privilege.index[indexName].write,
+          hasIndexRead: alertsPrivileges.read,
+          hasIndexWrite: alertsPrivileges.crud,
           hasIndexUpdateDelete: privilege.index[indexName].write,
         });
       }
     }
-  }, [detectionEnginePrivileges.result]);
+  }, [detectionEnginePrivileges.result, alertsPrivileges]);
 
   return { loading: detectionEnginePrivileges.loading, ...privileges };
 };
