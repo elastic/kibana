@@ -19,6 +19,9 @@ import { createRuleMock } from './rule';
 import { listMock } from '../../../../../../lists/server/mocks';
 import { ruleRegistryMocks } from '../../../../../../rule_registry/server/mocks';
 import { RuleParams } from '../../schemas/rule_schemas';
+// this is only used in tests
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { createDefaultAlertExecutorOptions } from '../../../../../../rule_registry/server/utils/rule_executor_test_utils';
 
 export const createRuleTypeMocks = (
   ruleType: string = 'query',
@@ -97,10 +100,12 @@ export const createRuleTypeMocks = (
     scheduleActions,
     executor: async ({ params }: { params: Record<string, unknown> }) => {
       return alertExecutor({
+        ...createDefaultAlertExecutorOptions({
+          params,
+          alertId: v4(),
+          state: {},
+        }),
         services,
-        params,
-        alertId: v4(),
-        startedAt: new Date(),
       });
     },
   };

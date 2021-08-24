@@ -7,18 +7,6 @@
 
 import { loggerMock } from '@kbn/logging/mocks';
 import {
-  elasticsearchServiceMock,
-  savedObjectsClientMock,
-} from '../../../../../src/core/server/mocks';
-import {
-  AlertExecutorOptions,
-  AlertInstanceContext,
-  AlertInstanceState,
-  AlertTypeParams,
-  AlertTypeState,
-} from '../../../alerting/server';
-import { alertsMock } from '../../../alerting/server/mocks';
-import {
   ALERT_ID,
   ALERT_RULE_CATEGORY,
   ALERT_RULE_CONSUMER,
@@ -36,6 +24,7 @@ import {
 } from '../../common/technical_rule_data_field_names';
 import { createRuleDataClientMock } from '../rule_data_client/rule_data_client.mock';
 import { createLifecycleExecutor } from './create_lifecycle_executor';
+import { createDefaultAlertExecutorOptions } from './rule_executor_test_utils';
 
 describe('createLifecycleExecutor', () => {
   it('wraps and unwraps the original executor state', async () => {
@@ -347,62 +336,3 @@ type TestRuleState = Record<string, unknown> & {
 const initialRuleState: TestRuleState = {
   aRuleStateKey: 'INITIAL_RULE_STATE_VALUE',
 };
-
-const createDefaultAlertExecutorOptions = <
-  Params extends AlertTypeParams = never,
-  State extends AlertTypeState = never,
-  InstanceState extends AlertInstanceState = {},
-  InstanceContext extends AlertInstanceContext = {},
-  ActionGroupIds extends string = ''
->({
-  alertId = 'ALERT_ID',
-  ruleName = 'ALERT_RULE_NAME',
-  params,
-  state,
-  createdAt = new Date(),
-  startedAt = new Date(),
-  updatedAt = new Date(),
-}: {
-  alertId?: string;
-  ruleName?: string;
-  params: Params;
-  state: State;
-  createdAt?: Date;
-  startedAt?: Date;
-  updatedAt?: Date;
-}): AlertExecutorOptions<Params, State, InstanceState, InstanceContext, ActionGroupIds> => ({
-  alertId,
-  createdBy: 'CREATED_BY',
-  startedAt,
-  name: ruleName,
-  rule: {
-    updatedBy: null,
-    tags: [],
-    name: ruleName,
-    createdBy: null,
-    actions: [],
-    enabled: true,
-    consumer: 'CONSUMER',
-    producer: 'ALERT_PRODUCER',
-    schedule: { interval: '1m' },
-    throttle: null,
-    createdAt,
-    updatedAt,
-    notifyWhen: null,
-    ruleTypeId: 'RULE_TYPE_ID',
-    ruleTypeName: 'RULE_TYPE_NAME',
-  },
-  tags: [],
-  params,
-  spaceId: 'SPACE_ID',
-  services: {
-    alertInstanceFactory: alertsMock.createAlertServices<InstanceState, InstanceContext>()
-      .alertInstanceFactory,
-    savedObjectsClient: savedObjectsClientMock.create(),
-    scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient(),
-  },
-  state,
-  updatedBy: null,
-  previousStartedAt: null,
-  namespace: undefined,
-});
