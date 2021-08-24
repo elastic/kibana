@@ -6,6 +6,5 @@ streams:
     - name: test_var
       type: text
       title: Test Var
-      required: true
       show_user: true
       default: Test Value
