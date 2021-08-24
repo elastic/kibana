@@ -6,4 +6,10 @@
  * Side Public License, v 1.
  */
 
-// stub
+import { FtrProviderContext } from '../../../ftr_provider_context';
+
+export default function ({ loadTestFile }: FtrProviderContext) {
+  describe('has user index pattern', () => {
+    loadTestFile(require.resolve('./has_user_index_pattern'));
+  });
+}

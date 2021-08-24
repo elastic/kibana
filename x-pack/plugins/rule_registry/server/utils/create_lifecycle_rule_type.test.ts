@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { loggerMock } from '@kbn/logging/target/mocks';
+import { loggerMock } from '@kbn/logging/mocks';
 import { castArray, omit, mapValues } from 'lodash';
 import { RuleDataClient } from '../rule_data_client';
 import { createRuleDataClientMock } from '../rule_data_client/create_rule_data_client_mock';

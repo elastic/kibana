@@ -13,6 +13,7 @@ import {
   ContentType,
   DataStream,
   ICustomFields,
+  ITLSFields,
   contentTypesToMode,
 } from './types';
 import { SyntheticsPolicyEditExtension } from './synthetics_policy_edit_extension';
@@ -20,6 +21,7 @@ import {
   MonitorTypeContextProvider,
   HTTPContextProvider,
   TCPContextProvider,
+  TLSFieldsContextProvider,
   defaultTCPSimpleFields,
   defaultHTTPSimpleFields,
   defaultICMPSimpleFields,
@@ -35,7 +37,12 @@ import {
  */
 export const SyntheticsPolicyEditExtensionWrapper = memo<PackagePolicyEditExtensionComponentProps>(
   ({ policy: currentPolicy, newPolicy, onChange }) => {
-    const { enableTLS: isTLSEnabled, config: defaultConfig, monitorType } = useMemo(() => {
+    const {
+      enableTLS: isTLSEnabled,
+      config: defaultConfig,
+      monitorType,
+      tlsConfig: defaultTLSConfig,
+    } = useMemo(() => {
       const fallbackConfig: PolicyConfig = {
         [DataStream.HTTP]: {
           ...defaultHTTPSimpleFields,
@@ -57,7 +64,7 @@ export const SyntheticsPolicyEditExtensionWrapper = memo<PackagePolicyEditExtens
         const fallbackConfigForMonitorType = fallbackConfig[type] as Partial<ICustomFields>;
 
         const configKeys: ConfigKeys[] = Object.values(ConfigKeys);
-        const formatttedDefaultConfigForMonitorType = configKeys.reduce(
+        const formattedDefaultConfigForMonitorType = configKeys.reduce(
           (acc: Record<string, unknown>, key: ConfigKeys) => {
             const value = vars?.[key]?.value;
             switch (key) {
@@ -148,10 +155,23 @@ export const SyntheticsPolicyEditExtensionWrapper = memo<PackagePolicyEditExtens
 
         const formattedDefaultConfig: PolicyConfig = {
           ...fallbackConfig,
-          [type]: formatttedDefaultConfigForMonitorType,
+          [type]: formattedDefaultConfigForMonitorType,
         };
 
-        return { config: formattedDefaultConfig, enableTLS, monitorType: type };
+        const tlsConfig: ITLSFields = {
+          [ConfigKeys.TLS_CERTIFICATE_AUTHORITIES]:
+            formattedDefaultConfigForMonitorType[ConfigKeys.TLS_CERTIFICATE_AUTHORITIES],
+          [ConfigKeys.TLS_CERTIFICATE]:
+            formattedDefaultConfigForMonitorType[ConfigKeys.TLS_CERTIFICATE],
+          [ConfigKeys.TLS_KEY]: formattedDefaultConfigForMonitorType[ConfigKeys.TLS_KEY],
+          [ConfigKeys.TLS_KEY_PASSPHRASE]:
+            formattedDefaultConfigForMonitorType[ConfigKeys.TLS_KEY_PASSPHRASE],
+          [ConfigKeys.TLS_VERIFICATION_MODE]:
+            formattedDefaultConfigForMonitorType[ConfigKeys.TLS_VERIFICATION_MODE],
+          [ConfigKeys.TLS_VERSION]: formattedDefaultConfigForMonitorType[ConfigKeys.TLS_VERSION],
+        } as ITLSFields;
+
+        return { config: formattedDefaultConfig, enableTLS, monitorType: type, tlsConfig };
       };
 
       return getDefaultConfig();
@@ -159,18 +179,20 @@ export const SyntheticsPolicyEditExtensionWrapper = memo<PackagePolicyEditExtens
 
     return (
       <MonitorTypeContextProvider defaultValue={monitorType}>
-        <HTTPContextProvider defaultValues={defaultConfig[DataStream.HTTP]}>
-          <TCPContextProvider defaultValues={defaultConfig[DataStream.TCP]}>
-            <ICMPSimpleFieldsContextProvider defaultValues={defaultConfig[DataStream.ICMP]}>
-              <SyntheticsPolicyEditExtension
-                newPolicy={newPolicy}
-                onChange={onChange}
-                defaultConfig={defaultConfig}
-                isTLSEnabled={isTLSEnabled}
-              />
-            </ICMPSimpleFieldsContextProvider>
-          </TCPContextProvider>
-        </HTTPContextProvider>
+        <TLSFieldsContextProvider defaultValues={isTLSEnabled ? defaultTLSConfig : undefined}>
+          <HTTPContextProvider defaultValues={defaultConfig[DataStream.HTTP]}>
+            <TCPContextProvider defaultValues={defaultConfig[DataStream.TCP]}>
+              <ICMPSimpleFieldsContextProvider defaultValues={defaultConfig[DataStream.ICMP]}>
+                <SyntheticsPolicyEditExtension
+                  newPolicy={newPolicy}
+                  onChange={onChange}
+                  defaultConfig={defaultConfig}
+                  isTLSEnabled={isTLSEnabled}
+                />
+              </ICMPSimpleFieldsContextProvider>
+            </TCPContextProvider>
+          </HTTPContextProvider>
+        </TLSFieldsContextProvider>
       </MonitorTypeContextProvider>
     );
   }

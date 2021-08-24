@@ -8,7 +8,7 @@
 import { Capabilities, HttpSetup, SavedObjectReference } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { RecursiveReadonly } from '@kbn/utility-types';
-import { Ast } from '@kbn/interpreter/target/common';
+import { Ast } from '@kbn/interpreter/common';
 import { EmbeddableStateWithType } from 'src/plugins/embeddable/common';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
 import { IndexPatternsContract, TimefilterContract } from '../../../../../src/plugins/data/public';
