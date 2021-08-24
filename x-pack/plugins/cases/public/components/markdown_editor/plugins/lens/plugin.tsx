@@ -328,7 +328,7 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
                     'xpack.cases.markdownEditor.plugins.lens.betaDescription',
                     {
                       defaultMessage:
-                        'Cases Lens plugin is not GA. Please help us by reporting any bugs.',
+                        'This module is not GA. You can only insert one lens per comment for now. Please help us by reporting bugs.',
                     }
                   )}
                 />
@@ -360,8 +360,8 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
       <EuiModalFooter>
         <EuiButton onClick={handleClose} fill>
           <FormattedMessage
-            id="xpack.cases.markdownEditor.plugins.lens.cancelButtonLabel"
-            defaultMessage="Cancel"
+            id="xpack.cases.markdownEditor.plugins.lens.closeButtonLabel"
+            defaultMessage="Close"
           />
         </EuiButton>
       </EuiModalFooter>
