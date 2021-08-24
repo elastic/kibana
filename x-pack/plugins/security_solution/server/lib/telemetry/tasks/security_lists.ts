@@ -15,14 +15,14 @@ import {
   ConcreteTaskInstance,
   TaskManagerSetupContract,
   TaskManagerStartContract,
-} from '../../../../task_manager/server';
+} from '../../../../../task_manager/server';
 import {
   LIST_ENDPOINT_EXCEPTION,
   LIST_ENDPOINT_EVENT_FILTER,
   TELEMETRY_CHANNEL_LISTS,
-} from './constants';
-import { batchTelemetryRecords, templateEndpointExceptions, templateTrustedApps } from './helpers';
-import { TelemetryEventsSender } from './sender';
+} from '../constants';
+import { batchTelemetryRecords, templateEndpointExceptions, templateTrustedApps } from '../helpers';
+import { TelemetryEventsSender } from '../sender';
 
 export const TelemetrySecuityListsTaskConstants = {
   TIMEOUT: '3m',

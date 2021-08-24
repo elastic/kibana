@@ -6,13 +6,10 @@
  */
 
 import { loggingSystemMock } from 'src/core/server/mocks';
-import { TaskStatus } from '../../../../task_manager/server';
-import { taskManagerMock } from '../../../../task_manager/server/mocks';
+import { TaskStatus } from '../../../../../task_manager/server';
+import { taskManagerMock } from '../../../../../task_manager/server/mocks';
 
-import {
-  TelemetryExceptionListsTask,
-  TelemetrySecuityListsTaskConstants,
-} from './security_lists_task';
+import { TelemetryExceptionListsTask, TelemetrySecuityListsTaskConstants } from './security_lists';
 import { createMockTelemetryEventsSender, MockExceptionListsTask } from './mocks';
 
 describe('test exception list telemetry task functionality', () => {

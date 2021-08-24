@@ -11,21 +11,21 @@ import {
   ConcreteTaskInstance,
   TaskManagerSetupContract,
   TaskManagerStartContract,
-} from '../../../../task_manager/server';
+} from '../../../../../task_manager/server';
 import {
   batchTelemetryRecords,
   getPreviousEpMetaTaskTimestamp,
   isPackagePolicyList,
-} from './helpers';
-import { TelemetryEventsSender } from './sender';
-import { PolicyData } from '../../../common/endpoint/types';
-import { FLEET_ENDPOINT_PACKAGE } from '../../../../fleet/common';
+} from '../helpers';
+import { TelemetryEventsSender } from '../sender';
+import { PolicyData } from '../../../../common/endpoint/types';
+import { FLEET_ENDPOINT_PACKAGE } from '../../../../../fleet/common';
 import {
   EndpointMetricsAggregation,
   EndpointPolicyResponseAggregation,
   EndpointPolicyResponseDocument,
-} from './types';
-import { TELEMETRY_CHANNEL_ENDPOINT_META } from './constants';
+} from '../types';
+import { TELEMETRY_CHANNEL_ENDPOINT_META } from '../constants';
 
 export const TelemetryEndpointTaskConstants = {
   TIMEOUT: '5m',

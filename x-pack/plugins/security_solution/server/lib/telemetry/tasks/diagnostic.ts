@@ -11,9 +11,9 @@ import {
   ConcreteTaskInstance,
   TaskManagerSetupContract,
   TaskManagerStartContract,
-} from '../../../../task_manager/server';
-import { getPreviousDiagTaskTimestamp } from './helpers';
-import { TelemetryEventsSender, TelemetryEvent } from './sender';
+} from '../../../../../task_manager/server';
+import { getPreviousDiagTaskTimestamp } from '../helpers';
+import { TelemetryEventsSender, TelemetryEvent } from '../sender';
 
 export const TelemetryDiagTaskConstants = {
   TIMEOUT: '1m',

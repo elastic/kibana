@@ -18,9 +18,7 @@ import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '../../../../task_manager/server';
-import { TelemetryDiagTask } from './diagnostic_task';
-import { TelemetryEndpointTask } from './endpoint_task';
-import { TelemetryExceptionListsTask } from './security_lists_task';
+import { DiagnosticTask, EndpointTask, ExceptionListsTask } from './tasks';
 import { EndpointAppContextService } from '../../endpoint/endpoint_app_context_services';
 import { AgentService, AgentPolicyServiceInterface } from '../../../../fleet/server';
 import { getTrustedAppsList } from '../../endpoint/routes/trusted_apps/service';
@@ -62,15 +60,15 @@ export class TelemetryEventsSender {
   private isSending = false;
   private queue: TelemetryEvent[] = [];
   private isOptedIn?: boolean = true; // Assume true until the first check
-  private diagTask?: TelemetryDiagTask;
-  private epMetricsTask?: TelemetryEndpointTask;
-  private exceptionListTask?: TelemetryExceptionListsTask;
   private agentService?: AgentService;
   private agentPolicyService?: AgentPolicyServiceInterface;
   private esClient?: ElasticsearchClient;
   private savedObjectsClient?: SavedObjectsClientContract;
   private exceptionListClient?: ExceptionListClient;
   private telemetryUsageCounter?: UsageCounter;
+  private diagnosticTask?: DiagnosticTask;
+  private endpointTask?: EndpointTask;
+  private exceptionListsTask?: ExceptionListsTask;
 
   constructor(logger: Logger) {
     this.logger = logger.get('telemetry_events');
@@ -85,9 +83,9 @@ export class TelemetryEventsSender {
     this.telemetryUsageCounter = telemetryUsageCounter;
 
     if (taskManager) {
-      this.diagTask = new TelemetryDiagTask(this.logger, taskManager, this);
-      this.epMetricsTask = new TelemetryEndpointTask(this.logger, taskManager, this);
-      this.exceptionListTask = new TelemetryExceptionListsTask(this.logger, taskManager, this);
+      this.diagnosticTask = new DiagnosticTask(this.logger, taskManager, this);
+      this.endpointTask = new EndpointTask(this.logger, taskManager, this);
+      this.exceptionListsTask = new ExceptionListsTask(this.logger, taskManager, this);
     }
   }
 
@@ -105,11 +103,11 @@ export class TelemetryEventsSender {
     this.savedObjectsClient = (core?.savedObjects.createInternalRepository() as unknown) as SavedObjectsClientContract;
     this.exceptionListClient = exceptionListClient;
 
-    if (taskManager && this.diagTask && this.epMetricsTask) {
-      this.logger.debug(`Starting diagnostic and endpoint telemetry tasks`);
-      this.diagTask.start(taskManager);
-      this.epMetricsTask.start(taskManager);
-      this.exceptionListTask?.start(taskManager);
+    if (taskManager && this.diagnosticTask && this.endpointTask && this.exceptionListsTask) {
+      this.logger.debug(`starting security telemetry tasks`);
+      this.diagnosticTask.start(taskManager);
+      this.endpointTask.start(taskManager);
+      this.exceptionListsTask?.start(taskManager);
     }
 
     this.logger.debug(`Starting local task`);
