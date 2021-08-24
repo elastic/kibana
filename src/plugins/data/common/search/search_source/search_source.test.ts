@@ -14,6 +14,7 @@ import { AggConfigs, AggTypesRegistryStart, ES_SEARCH_STRATEGY } from '../../';
 import { mockAggTypesRegistry } from '../aggs/test_helpers';
 import { RequestResponder } from 'src/plugins/inspector/common';
 import { switchMap } from 'rxjs/operators';
+import { Filter } from '@kbn/es-query';
 
 const getComputedFields = () => ({
   storedFields: [],
@@ -824,7 +825,7 @@ describe('SearchSource', () => {
     test('should serialize filters', () => {
       const filter = [
         {
-          query: 'query',
+          query: { q: 'query' },
           meta: {
             alias: 'alias',
             disabled: false,
@@ -842,7 +843,7 @@ describe('SearchSource', () => {
       searchSource.setField('index', indexPattern123);
       const filter = [
         {
-          query: 'query',
+          query: { q: 'query' },
           meta: {
             alias: 'alias',
             disabled: false,
@@ -883,9 +884,9 @@ describe('SearchSource', () => {
   });
 
   describe('getSerializedFields', () => {
-    const filter = [
+    const filter: Filter[] = [
       {
-        query: 'query',
+        query: { q: 'query' },
         meta: {
           alias: 'alias',
           disabled: false,
@@ -914,7 +915,9 @@ describe('SearchSource', () => {
                 "index": "456",
                 "negate": false,
               },
-              "query": "query",
+              "query": Object {
+                "q": "query",
+              },
             },
           ],
           "index": "123",
