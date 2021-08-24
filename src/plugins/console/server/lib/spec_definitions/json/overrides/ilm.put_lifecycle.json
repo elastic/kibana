@@ -1,6 +1,7 @@
 {
   "ilm.put_lifecycle": {
     "data_autocomplete_rules": {
+      "_meta": {},
       "policy": {
         "phases": {
           "warm": {
@@ -31,7 +32,7 @@
                 "forcemerge": {
                   "max_num_segments": 1
                 }
-              }  
+              }
             },
             "min_age": "1d",
             "actions": {
@@ -85,7 +86,7 @@
                     "_ip": ""
                   }
                 }
-              }  
+              }
             },
             "min_age": "1d",
             "actions": {
@@ -123,7 +124,7 @@
                   "max_docs": 1000,
                   "max_size": "5gb"
                 }
-              }  
+              }
             },
             "min_age": "1d",
             "actions": {
@@ -148,6 +149,11 @@
             "min_age": "1d",
             "actions": {
               "delete": {}
+            }
+          },
+          "frozen": {
+            "actions": {
+              "searchable_snapshots": {}
             }
           }
         }
