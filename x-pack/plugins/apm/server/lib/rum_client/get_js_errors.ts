@@ -6,7 +6,8 @@
  */
 
 import { mergeProjection } from '../../projections/util/merge_projection';
-import { Setup, SetupTimeRange } from '../helpers/setup_request';
+import { SetupTimeRange } from '../helpers/setup_request';
+import { SetupUX } from '../../routes/rum_client';
 import { getRumErrorsProjection } from '../../projections/rum_page_load_transactions';
 import {
   ERROR_EXC_MESSAGE,
@@ -23,7 +24,7 @@ export async function getJSErrors({
   pageIndex,
   urlQuery,
 }: {
-  setup: Setup & SetupTimeRange;
+  setup: SetupUX & SetupTimeRange;
   pageSize: number;
   pageIndex: number;
   urlQuery?: string;

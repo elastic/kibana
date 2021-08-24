@@ -4,16 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { SERVICE_NAME } from '../../../common/elasticsearch_fieldnames';
-import { Setup, SetupTimeRange } from '../helpers/setup_request';
+import { SetupTimeRange } from '../helpers/setup_request';
+import { SetupUX } from '../../routes/rum_client';
 import { getRumPageLoadTransactionsProjection } from '../../projections/rum_page_load_transactions';
 import { mergeProjection } from '../../projections/util/merge_projection';
 
 export async function getRumServices({
   setup,
 }: {
-  setup: Setup & SetupTimeRange;
+  setup: SetupUX & SetupTimeRange;
 }) {
   const projection = getRumPageLoadTransactionsProjection({
     setup,
