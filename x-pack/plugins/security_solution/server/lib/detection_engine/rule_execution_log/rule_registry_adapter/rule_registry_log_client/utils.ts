@@ -7,8 +7,8 @@
 
 import { SearchSort } from '@elastic/elasticsearch/api/types';
 import { EVENT_ACTION, TIMESTAMP } from '@kbn/rule-data-utils';
-import { RuleExecutionStatus } from '../../../../../common/detection_engine/schemas/common/schemas';
-import { ExecutionMetric } from '../types';
+import { RuleExecutionStatus } from '../../../../../../common/detection_engine/schemas/common/schemas';
+import { ExecutionMetric } from '../../types';
 import { RULE_STATUS, EVENT_SEQUENCE, EVENT_DURATION, EVENT_END } from './constants';
 
 const METRIC_FIELDS = {
