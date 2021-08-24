@@ -28,6 +28,10 @@ export const ALERT_RULE_RISK_SCORE =
 
 export const ALERT_RULE_SEVERITY = '[data-test-subj="formatted-field-kibana.alert.rule.severity"]';
 
+export const ALERT_RISK_SCORE = '[data-test-subj="formatted-field-kibana.alert.risk_score"]';
+
+export const ALERT_SEVERITY = '[data-test-subj="formatted-field-kibana.alert.severity"]';
+
 export const ALERT_DATA_GRID = '[data-test-subj="dataGridWrapper"]';
 
 export const CLOSE_ALERT_BTN = '[data-test-subj="close-alert-status"]';

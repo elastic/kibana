@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { ALERT_RULE_NAME, ALERT_RULE_RISK_SCORE, ALERT_RULE_TYPE } from '@kbn/rule-data-utils';
+import { ALERT_RULE_NAME, ALERT_RISK_SCORE, ALERT_RULE_TYPE } from '@kbn/rule-data-utils';
 import {
   DragEffects,
   DraggableWrapper,
@@ -110,7 +110,7 @@ export const getHostRulesColumns = (): HostRulesColumns => [
               name: `${riskScore}`,
               kqlQuery: '',
               queryMatch: {
-                field: ALERT_RULE_RISK_SCORE,
+                field: ALERT_RISK_SCORE,
                 value: riskScore,
                 operator: IS_OPERATOR,
               },

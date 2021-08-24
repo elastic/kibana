@@ -23,7 +23,7 @@ import React from 'react';
 import styled from 'styled-components';
 
 import { ThreatMapping, Type } from '@kbn/securitysolution-io-ts-alerting-types';
-import { ALERT_RULE_RISK_SCORE } from '@kbn/rule-data-utils';
+import { ALERT_RISK_SCORE } from '@kbn/rule-data-utils';
 import { MATCHES, AND, OR } from '../../../../common/components/threat_match/translations';
 import { assertUnreachable } from '../../../../../common/utility_types';
 import * as i18nSeverity from '../severity_mapping/translations';
@@ -351,7 +351,7 @@ export const buildRiskScoreDescription = (riskScore: AboutStepRiskScore): ListIt
                 <EuiFlexItem grow={false}>
                   <EuiIcon type={'sortRight'} />
                 </EuiFlexItem>
-                <EuiFlexItem>{`${ALERT_RULE_RISK_SCORE}`}</EuiFlexItem>
+                <EuiFlexItem>{`${ALERT_RISK_SCORE}`}</EuiFlexItem>
               </EuiFlexGroup>
             ),
           };

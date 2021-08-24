@@ -9,7 +9,7 @@ import { mount } from 'enzyme';
 import { cloneDeep } from 'lodash/fp';
 import React from 'react';
 
-import { ALERT_REASON, ALERT_RULE_SEVERITY } from '@kbn/rule-data-utils';
+import { ALERT_REASON, ALERT_SEVERITY } from '@kbn/rule-data-utils';
 import { mockBrowserFields } from '../../../../common/containers/source/mock';
 import { DragDropContextWrapper } from '../../../../common/components/drag_and_drop/drag_drop_context_wrapper';
 import { defaultHeaders, mockTimelineData, TestProviders } from '../../../../common/mock';
@@ -56,7 +56,7 @@ describe('RenderCellValue', () => {
     const wrapper = mount(
       <TestProviders>
         <DragDropContextWrapper browserFields={mockBrowserFields}>
-          <RenderCellValue {...props} columnId={ALERT_RULE_SEVERITY} />
+          <RenderCellValue {...props} columnId={ALERT_SEVERITY} />
         </DragDropContextWrapper>
       </TestProviders>
     );

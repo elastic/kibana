@@ -86,92 +86,94 @@ exports[`Details Panel Component DetailsPanel:EventDetails: rendering it should 
               "apache",
             ],
           },
-          "signal": Object {
-            "rule": Object {
-              "created_at": Array [
-                "2020-01-10T21:11:45.839Z",
-              ],
-              "created_by": Array [
-                "elastic",
-              ],
-              "description": Array [
-                "24/7",
-              ],
-              "enabled": Array [
-                true,
-              ],
-              "false_positives": Array [
-                "test-1",
-              ],
-              "filters": Array [],
-              "from": Array [
-                "now-300s",
-              ],
-              "id": Array [
-                "b5ba41ab-aaf3-4f43-971b-bdf9434ce0ea",
-              ],
-              "immutable": Array [
-                false,
-              ],
-              "index": Array [
-                "auditbeat-*",
-              ],
-              "interval": Array [
-                "5m",
-              ],
-              "language": Array [
-                "kuery",
-              ],
-              "max_signals": Array [
-                100,
-              ],
-              "note": Array [
-                "# this is some markdown documentation",
-              ],
-              "output_index": Array [
-                ".siem-signals-default",
-              ],
-              "query": Array [
-                "user.name: root or user.name: admin",
-              ],
-              "references": Array [
-                "www.test.co",
-              ],
-              "risk_score": Array [
-                "21",
-              ],
-              "rule_id": Array [
-                "rule-id-1",
-              ],
-              "saved_id": Array [
-                "Garrett's IP",
-              ],
-              "severity": Array [
-                "low",
-              ],
-              "tags": Array [],
-              "threat": Array [],
-              "timeline_id": Array [
-                "1234-2136-11ea-9864-ebc8cc1cb8c2",
-              ],
-              "timeline_title": Array [
-                "Untitled timeline",
-              ],
-              "to": Array [
-                "now",
-              ],
-              "type": Array [
-                "saved_query",
-              ],
-              "updated_at": Array [
-                "2020-01-10T21:11:45.839Z",
-              ],
-              "updated_by": Array [
-                "elastic",
-              ],
-              "version": Array [
-                "1",
-              ],
+          "kibana": Object {
+            "alert": Object {
+              "rule": Object {
+                "created_at": Array [
+                  "2020-01-10T21:11:45.839Z",
+                ],
+                "created_by": Array [
+                  "elastic",
+                ],
+                "description": Array [
+                  "24/7",
+                ],
+                "enabled": Array [
+                  true,
+                ],
+                "false_positives": Array [
+                  "test-1",
+                ],
+                "filters": Array [],
+                "from": Array [
+                  "now-300s",
+                ],
+                "id": Array [
+                  "b5ba41ab-aaf3-4f43-971b-bdf9434ce0ea",
+                ],
+                "immutable": Array [
+                  false,
+                ],
+                "index": Array [
+                  "auditbeat-*",
+                ],
+                "interval": Array [
+                  "5m",
+                ],
+                "language": Array [
+                  "kuery",
+                ],
+                "max_signals": Array [
+                  100,
+                ],
+                "note": Array [
+                  "# this is some markdown documentation",
+                ],
+                "output_index": Array [
+                  ".siem-signals-default",
+                ],
+                "query": Array [
+                  "user.name: root or user.name: admin",
+                ],
+                "references": Array [
+                  "www.test.co",
+                ],
+                "risk_score": Array [
+                  "21",
+                ],
+                "rule_id": Array [
+                  "rule-id-1",
+                ],
+                "saved_id": Array [
+                  "Garrett's IP",
+                ],
+                "severity": Array [
+                  "low",
+                ],
+                "tags": Array [],
+                "threat": Array [],
+                "timeline_id": Array [
+                  "1234-2136-11ea-9864-ebc8cc1cb8c2",
+                ],
+                "timeline_title": Array [
+                  "Untitled timeline",
+                ],
+                "to": Array [
+                  "now",
+                ],
+                "type": Array [
+                  "saved_query",
+                ],
+                "updated_at": Array [
+                  "2020-01-10T21:11:45.839Z",
+                ],
+                "updated_by": Array [
+                  "elastic",
+                ],
+                "version": Array [
+                  "1",
+                ],
+              },
             },
           },
           "source": Object {
@@ -324,92 +326,94 @@ exports[`Details Panel Component DetailsPanel:EventDetails: rendering it should 
                 "apache",
               ],
             },
-            "signal": Object {
-              "rule": Object {
-                "created_at": Array [
-                  "2020-01-10T21:11:45.839Z",
-                ],
-                "created_by": Array [
-                  "elastic",
-                ],
-                "description": Array [
-                  "24/7",
-                ],
-                "enabled": Array [
-                  true,
-                ],
-                "false_positives": Array [
-                  "test-1",
-                ],
-                "filters": Array [],
-                "from": Array [
-                  "now-300s",
-                ],
-                "id": Array [
-                  "b5ba41ab-aaf3-4f43-971b-bdf9434ce0ea",
-                ],
-                "immutable": Array [
-                  false,
-                ],
-                "index": Array [
-                  "auditbeat-*",
-                ],
-                "interval": Array [
-                  "5m",
-                ],
-                "language": Array [
-                  "kuery",
-                ],
-                "max_signals": Array [
-                  100,
-                ],
-                "note": Array [
-                  "# this is some markdown documentation",
-                ],
-                "output_index": Array [
-                  ".siem-signals-default",
-                ],
-                "query": Array [
-                  "user.name: root or user.name: admin",
-                ],
-                "references": Array [
-                  "www.test.co",
-                ],
-                "risk_score": Array [
-                  "21",
-                ],
-                "rule_id": Array [
-                  "rule-id-1",
-                ],
-                "saved_id": Array [
-                  "Garrett's IP",
-                ],
-                "severity": Array [
-                  "low",
-                ],
-                "tags": Array [],
-                "threat": Array [],
-                "timeline_id": Array [
-                  "1234-2136-11ea-9864-ebc8cc1cb8c2",
-                ],
-                "timeline_title": Array [
-                  "Untitled timeline",
-                ],
-                "to": Array [
-                  "now",
-                ],
-                "type": Array [
-                  "saved_query",
-                ],
-                "updated_at": Array [
-                  "2020-01-10T21:11:45.839Z",
-                ],
-                "updated_by": Array [
-                  "elastic",
-                ],
-                "version": Array [
-                  "1",
-                ],
+            "kibana": Object {
+              "alert": Object {
+                "rule": Object {
+                  "created_at": Array [
+                    "2020-01-10T21:11:45.839Z",
+                  ],
+                  "created_by": Array [
+                    "elastic",
+                  ],
+                  "description": Array [
+                    "24/7",
+                  ],
+                  "enabled": Array [
+                    true,
+                  ],
+                  "false_positives": Array [
+                    "test-1",
+                  ],
+                  "filters": Array [],
+                  "from": Array [
+                    "now-300s",
+                  ],
+                  "id": Array [
+                    "b5ba41ab-aaf3-4f43-971b-bdf9434ce0ea",
+                  ],
+                  "immutable": Array [
+                    false,
+                  ],
+                  "index": Array [
+                    "auditbeat-*",
+                  ],
+                  "interval": Array [
+                    "5m",
+                  ],
+                  "language": Array [
+                    "kuery",
+                  ],
+                  "max_signals": Array [
+                    100,
+                  ],
+                  "note": Array [
+                    "# this is some markdown documentation",
+                  ],
+                  "output_index": Array [
+                    ".siem-signals-default",
+                  ],
+                  "query": Array [
+                    "user.name: root or user.name: admin",
+                  ],
+                  "references": Array [
+                    "www.test.co",
+                  ],
+                  "risk_score": Array [
+                    "21",
+                  ],
+                  "rule_id": Array [
+                    "rule-id-1",
+                  ],
+                  "saved_id": Array [
+                    "Garrett's IP",
+                  ],
+                  "severity": Array [
+                    "low",
+                  ],
+                  "tags": Array [],
+                  "threat": Array [],
+                  "timeline_id": Array [
+                    "1234-2136-11ea-9864-ebc8cc1cb8c2",
+                  ],
+                  "timeline_title": Array [
+                    "Untitled timeline",
+                  ],
+                  "to": Array [
+                    "now",
+                  ],
+                  "type": Array [
+                    "saved_query",
+                  ],
+                  "updated_at": Array [
+                    "2020-01-10T21:11:45.839Z",
+                  ],
+                  "updated_by": Array [
+                    "elastic",
+                  ],
+                  "version": Array [
+                    "1",
+                  ],
+                },
               },
             },
             "source": Object {
@@ -626,92 +630,94 @@ Array [
                   "apache",
                 ],
               },
-              "signal": Object {
-                "rule": Object {
-                  "created_at": Array [
-                    "2020-01-10T21:11:45.839Z",
-                  ],
-                  "created_by": Array [
-                    "elastic",
-                  ],
-                  "description": Array [
-                    "24/7",
-                  ],
-                  "enabled": Array [
-                    true,
-                  ],
-                  "false_positives": Array [
-                    "test-1",
-                  ],
-                  "filters": Array [],
-                  "from": Array [
-                    "now-300s",
-                  ],
-                  "id": Array [
-                    "b5ba41ab-aaf3-4f43-971b-bdf9434ce0ea",
-                  ],
-                  "immutable": Array [
-                    false,
-                  ],
-                  "index": Array [
-                    "auditbeat-*",
-                  ],
-                  "interval": Array [
-                    "5m",
-                  ],
-                  "language": Array [
-                    "kuery",
-                  ],
-                  "max_signals": Array [
-                    100,
-                  ],
-                  "note": Array [
-                    "# this is some markdown documentation",
-                  ],
-                  "output_index": Array [
-                    ".siem-signals-default",
-                  ],
-                  "query": Array [
-                    "user.name: root or user.name: admin",
-                  ],
-                  "references": Array [
-                    "www.test.co",
-                  ],
-                  "risk_score": Array [
-                    "21",
-                  ],
-                  "rule_id": Array [
-                    "rule-id-1",
-                  ],
-                  "saved_id": Array [
-                    "Garrett's IP",
-                  ],
-                  "severity": Array [
-                    "low",
-                  ],
-                  "tags": Array [],
-                  "threat": Array [],
-                  "timeline_id": Array [
-                    "1234-2136-11ea-9864-ebc8cc1cb8c2",
-                  ],
-                  "timeline_title": Array [
-                    "Untitled timeline",
-                  ],
-                  "to": Array [
-                    "now",
-                  ],
-                  "type": Array [
-                    "saved_query",
-                  ],
-                  "updated_at": Array [
-                    "2020-01-10T21:11:45.839Z",
-                  ],
-                  "updated_by": Array [
-                    "elastic",
-                  ],
-                  "version": Array [
-                    "1",
-                  ],
+              "kibana": Object {
+                "alert": Object {
+                  "rule": Object {
+                    "created_at": Array [
+                      "2020-01-10T21:11:45.839Z",
+                    ],
+                    "created_by": Array [
+                      "elastic",
+                    ],
+                    "description": Array [
+                      "24/7",
+                    ],
+                    "enabled": Array [
+                      true,
+                    ],
+                    "false_positives": Array [
+                      "test-1",
+                    ],
+                    "filters": Array [],
+                    "from": Array [
+                      "now-300s",
+                    ],
+                    "id": Array [
+                      "b5ba41ab-aaf3-4f43-971b-bdf9434ce0ea",
+                    ],
+                    "immutable": Array [
+                      false,
+                    ],
+                    "index": Array [
+                      "auditbeat-*",
+                    ],
+                    "interval": Array [
+                      "5m",
+                    ],
+                    "language": Array [
+                      "kuery",
+                    ],
+                    "max_signals": Array [
+                      100,
+                    ],
+                    "note": Array [
+                      "# this is some markdown documentation",
+                    ],
+                    "output_index": Array [
+                      ".siem-signals-default",
+                    ],
+                    "query": Array [
+                      "user.name: root or user.name: admin",
+                    ],
+                    "references": Array [
+                      "www.test.co",
+                    ],
+                    "risk_score": Array [
+                      "21",
+                    ],
+                    "rule_id": Array [
+                      "rule-id-1",
+                    ],
+                    "saved_id": Array [
+                      "Garrett's IP",
+                    ],
+                    "severity": Array [
+                      "low",
+                    ],
+                    "tags": Array [],
+                    "threat": Array [],
+                    "timeline_id": Array [
+                      "1234-2136-11ea-9864-ebc8cc1cb8c2",
+                    ],
+                    "timeline_title": Array [
+                      "Untitled timeline",
+                    ],
+                    "to": Array [
+                      "now",
+                    ],
+                    "type": Array [
+                      "saved_query",
+                    ],
+                    "updated_at": Array [
+                      "2020-01-10T21:11:45.839Z",
+                    ],
+                    "updated_by": Array [
+                      "elastic",
+                    ],
+                    "version": Array [
+                      "1",
+                    ],
+                  },
                 },
               },
               "source": Object {
@@ -841,92 +847,94 @@ Array [
                               "apache",
                             ],
                           },
-                          "signal": Object {
-                            "rule": Object {
-                              "created_at": Array [
-                                "2020-01-10T21:11:45.839Z",
-                              ],
-                              "created_by": Array [
-                                "elastic",
-                              ],
-                              "description": Array [
-                                "24/7",
-                              ],
-                              "enabled": Array [
-                                true,
-                              ],
-                              "false_positives": Array [
-                                "test-1",
-                              ],
-                              "filters": Array [],
-                              "from": Array [
-                                "now-300s",
-                              ],
-                              "id": Array [
-                                "b5ba41ab-aaf3-4f43-971b-bdf9434ce0ea",
-                              ],
-                              "immutable": Array [
-                                false,
-                              ],
-                              "index": Array [
-                                "auditbeat-*",
-                              ],
-                              "interval": Array [
-                                "5m",
-                              ],
-                              "language": Array [
-                                "kuery",
-                              ],
-                              "max_signals": Array [
-                                100,
-                              ],
-                              "note": Array [
-                                "# this is some markdown documentation",
-                              ],
-                              "output_index": Array [
-                                ".siem-signals-default",
-                              ],
-                              "query": Array [
-                                "user.name: root or user.name: admin",
-                              ],
-                              "references": Array [
-                                "www.test.co",
-                              ],
-                              "risk_score": Array [
-                                "21",
-                              ],
-                              "rule_id": Array [
-                                "rule-id-1",
-                              ],
-                              "saved_id": Array [
-                                "Garrett's IP",
-                              ],
-                              "severity": Array [
-                                "low",
-                              ],
-                              "tags": Array [],
-                              "threat": Array [],
-                              "timeline_id": Array [
-                                "1234-2136-11ea-9864-ebc8cc1cb8c2",
-                              ],
-                              "timeline_title": Array [
-                                "Untitled timeline",
-                              ],
-                              "to": Array [
-                                "now",
-                              ],
-                              "type": Array [
-                                "saved_query",
-                              ],
-                              "updated_at": Array [
-                                "2020-01-10T21:11:45.839Z",
-                              ],
-                              "updated_by": Array [
-                                "elastic",
-                              ],
-                              "version": Array [
-                                "1",
-                              ],
+                          "kibana": Object {
+                            "alert": Object {
+                              "rule": Object {
+                                "created_at": Array [
+                                  "2020-01-10T21:11:45.839Z",
+                                ],
+                                "created_by": Array [
+                                  "elastic",
+                                ],
+                                "description": Array [
+                                  "24/7",
+                                ],
+                                "enabled": Array [
+                                  true,
+                                ],
+                                "false_positives": Array [
+                                  "test-1",
+                                ],
+                                "filters": Array [],
+                                "from": Array [
+                                  "now-300s",
+                                ],
+                                "id": Array [
+                                  "b5ba41ab-aaf3-4f43-971b-bdf9434ce0ea",
+                                ],
+                                "immutable": Array [
+                                  false,
+                                ],
+                                "index": Array [
+                                  "auditbeat-*",
+                                ],
+                                "interval": Array [
+                                  "5m",
+                                ],
+                                "language": Array [
+                                  "kuery",
+                                ],
+                                "max_signals": Array [
+                                  100,
+                                ],
+                                "note": Array [
+                                  "# this is some markdown documentation",
+                                ],
+                                "output_index": Array [
+                                  ".siem-signals-default",
+                                ],
+                                "query": Array [
+                                  "user.name: root or user.name: admin",
+                                ],
+                                "references": Array [
+                                  "www.test.co",
+                                ],
+                                "risk_score": Array [
+                                  "21",
+                                ],
+                                "rule_id": Array [
+                                  "rule-id-1",
+                                ],
+                                "saved_id": Array [
+                                  "Garrett's IP",
+                                ],
+                                "severity": Array [
+                                  "low",
+                                ],
+                                "tags": Array [],
+                                "threat": Array [],
+                                "timeline_id": Array [
+                                  "1234-2136-11ea-9864-ebc8cc1cb8c2",
+                                ],
+                                "timeline_title": Array [
+                                  "Untitled timeline",
+                                ],
+                                "to": Array [
+                                  "now",
+                                ],
+                                "type": Array [
+                                  "saved_query",
+                                ],
+                                "updated_at": Array [
+                                  "2020-01-10T21:11:45.839Z",
+                                ],
+                                "updated_by": Array [
+                                  "elastic",
+                                ],
+                                "version": Array [
+                                  "1",
+                                ],
+                              },
                             },
                           },
                           "source": Object {
@@ -1097,92 +1105,94 @@ Array [
                     "apache",
                   ],
                 },
-                "signal": Object {
-                  "rule": Object {
-                    "created_at": Array [
-                      "2020-01-10T21:11:45.839Z",
-                    ],
-                    "created_by": Array [
-                      "elastic",
-                    ],
-                    "description": Array [
-                      "24/7",
-                    ],
-                    "enabled": Array [
-                      true,
-                    ],
-                    "false_positives": Array [
-                      "test-1",
-                    ],
-                    "filters": Array [],
-                    "from": Array [
-                      "now-300s",
-                    ],
-                    "id": Array [
-                      "b5ba41ab-aaf3-4f43-971b-bdf9434ce0ea",
-                    ],
-                    "immutable": Array [
-                      false,
-                    ],
-                    "index": Array [
-                      "auditbeat-*",
-                    ],
-                    "interval": Array [
-                      "5m",
-                    ],
-                    "language": Array [
-                      "kuery",
-                    ],
-                    "max_signals": Array [
-                      100,
-                    ],
-                    "note": Array [
-                      "# this is some markdown documentation",
-                    ],
-                    "output_index": Array [
-                      ".siem-signals-default",
-                    ],
-                    "query": Array [
-                      "user.name: root or user.name: admin",
-                    ],
-                    "references": Array [
-                      "www.test.co",
-                    ],
-                    "risk_score": Array [
-                      "21",
-                    ],
-                    "rule_id": Array [
-                      "rule-id-1",
-                    ],
-                    "saved_id": Array [
-                      "Garrett's IP",
-                    ],
-                    "severity": Array [
-                      "low",
-                    ],
-                    "tags": Array [],
-                    "threat": Array [],
-                    "timeline_id": Array [
-                      "1234-2136-11ea-9864-ebc8cc1cb8c2",
-                    ],
-                    "timeline_title": Array [
-                      "Untitled timeline",
-                    ],
-                    "to": Array [
-                      "now",
-                    ],
-                    "type": Array [
-                      "saved_query",
-                    ],
-                    "updated_at": Array [
-                      "2020-01-10T21:11:45.839Z",
-                    ],
-                    "updated_by": Array [
-                      "elastic",
-                    ],
-                    "version": Array [
-                      "1",
-                    ],
+                "kibana": Object {
+                  "alert": Object {
+                    "rule": Object {
+                      "created_at": Array [
+                        "2020-01-10T21:11:45.839Z",
+                      ],
+                      "created_by": Array [
+                        "elastic",
+                      ],
+                      "description": Array [
+                        "24/7",
+                      ],
+                      "enabled": Array [
+                        true,
+                      ],
+                      "false_positives": Array [
+                        "test-1",
+                      ],
+                      "filters": Array [],
+                      "from": Array [
+                        "now-300s",
+                      ],
+                      "id": Array [
+                        "b5ba41ab-aaf3-4f43-971b-bdf9434ce0ea",
+                      ],
+                      "immutable": Array [
+                        false,
+                      ],
+                      "index": Array [
+                        "auditbeat-*",
+                      ],
+                      "interval": Array [
+                        "5m",
+                      ],
+                      "language": Array [
+                        "kuery",
+                      ],
+                      "max_signals": Array [
+                        100,
+                      ],
+                      "note": Array [
+                        "# this is some markdown documentation",
+                      ],
+                      "output_index": Array [
+                        ".siem-signals-default",
+                      ],
+                      "query": Array [
+                        "user.name: root or user.name: admin",
+                      ],
+                      "references": Array [
+                        "www.test.co",
+                      ],
+                      "risk_score": Array [
+                        "21",
+                      ],
+                      "rule_id": Array [
+                        "rule-id-1",
+                      ],
+                      "saved_id": Array [
+                        "Garrett's IP",
+                      ],
+                      "severity": Array [
+                        "low",
+                      ],
+                      "tags": Array [],
+                      "threat": Array [],
+                      "timeline_id": Array [
+                        "1234-2136-11ea-9864-ebc8cc1cb8c2",
+                      ],
+                      "timeline_title": Array [
+                        "Untitled timeline",
+                      ],
+                      "to": Array [
+                        "now",
+                      ],
+                      "type": Array [
+                        "saved_query",
+                      ],
+                      "updated_at": Array [
+                        "2020-01-10T21:11:45.839Z",
+                      ],
+                      "updated_by": Array [
+                        "elastic",
+                      ],
+                      "version": Array [
+                        "1",
+                      ],
+                    },
                   },
                 },
                 "source": Object {
@@ -1275,92 +1285,94 @@ Array [
                                 "apache",
                               ],
                             },
-                            "signal": Object {
-                              "rule": Object {
-                                "created_at": Array [
-                                  "2020-01-10T21:11:45.839Z",
-                                ],
-                                "created_by": Array [
-                                  "elastic",
-                                ],
-                                "description": Array [
-                                  "24/7",
-                                ],
-                                "enabled": Array [
-                                  true,
-                                ],
-                                "false_positives": Array [
-                                  "test-1",
-                                ],
-                                "filters": Array [],
-                                "from": Array [
-                                  "now-300s",
-                                ],
-                                "id": Array [
-                                  "b5ba41ab-aaf3-4f43-971b-bdf9434ce0ea",
-                                ],
-                                "immutable": Array [
-                                  false,
-                                ],
-                                "index": Array [
-                                  "auditbeat-*",
-                                ],
-                                "interval": Array [
-                                  "5m",
-                                ],
-                                "language": Array [
-                                  "kuery",
-                                ],
-                                "max_signals": Array [
-                                  100,
-                                ],
-                                "note": Array [
-                                  "# this is some markdown documentation",
-                                ],
-                                "output_index": Array [
-                                  ".siem-signals-default",
-                                ],
-                                "query": Array [
-                                  "user.name: root or user.name: admin",
-                                ],
-                                "references": Array [
-                                  "www.test.co",
-                                ],
-                                "risk_score": Array [
-                                  "21",
-                                ],
-                                "rule_id": Array [
-                                  "rule-id-1",
-                                ],
-                                "saved_id": Array [
-                                  "Garrett's IP",
-                                ],
-                                "severity": Array [
-                                  "low",
-                                ],
-                                "tags": Array [],
-                                "threat": Array [],
-                                "timeline_id": Array [
-                                  "1234-2136-11ea-9864-ebc8cc1cb8c2",
-                                ],
-                                "timeline_title": Array [
-                                  "Untitled timeline",
-                                ],
-                                "to": Array [
-                                  "now",
-                                ],
-                                "type": Array [
-                                  "saved_query",
-                                ],
-                                "updated_at": Array [
-                                  "2020-01-10T21:11:45.839Z",
-                                ],
-                                "updated_by": Array [
-                                  "elastic",
-                                ],
-                                "version": Array [
-                                  "1",
-                                ],
+                            "kibana": Object {
+                              "alert": Object {
+                                "rule": Object {
+                                  "created_at": Array [
+                                    "2020-01-10T21:11:45.839Z",
+                                  ],
+                                  "created_by": Array [
+                                    "elastic",
+                                  ],
+                                  "description": Array [
+                                    "24/7",
+                                  ],
+                                  "enabled": Array [
+                                    true,
+                                  ],
+                                  "false_positives": Array [
+                                    "test-1",
+                                  ],
+                                  "filters": Array [],
+                                  "from": Array [
+                                    "now-300s",
+                                  ],
+                                  "id": Array [
+                                    "b5ba41ab-aaf3-4f43-971b-bdf9434ce0ea",
+                                  ],
+                                  "immutable": Array [
+                                    false,
+                                  ],
+                                  "index": Array [
+                                    "auditbeat-*",
+                                  ],
+                                  "interval": Array [
+                                    "5m",
+                                  ],
+                                  "language": Array [
+                                    "kuery",
+                                  ],
+                                  "max_signals": Array [
+                                    100,
+                                  ],
+                                  "note": Array [
+                                    "# this is some markdown documentation",
+                                  ],
+                                  "output_index": Array [
+                                    ".siem-signals-default",
+                                  ],
+                                  "query": Array [
+                                    "user.name: root or user.name: admin",
+                                  ],
+                                  "references": Array [
+                                    "www.test.co",
+                                  ],
+                                  "risk_score": Array [
+                                    "21",
+                                  ],
+                                  "rule_id": Array [
+                                    "rule-id-1",
+                                  ],
+                                  "saved_id": Array [
+                                    "Garrett's IP",
+                                  ],
+                                  "severity": Array [
+                                    "low",
+                                  ],
+                                  "tags": Array [],
+                                  "threat": Array [],
+                                  "timeline_id": Array [
+                                    "1234-2136-11ea-9864-ebc8cc1cb8c2",
+                                  ],
+                                  "timeline_title": Array [
+                                    "Untitled timeline",
+                                  ],
+                                  "to": Array [
+                                    "now",
+                                  ],
+                                  "type": Array [
+                                    "saved_query",
+                                  ],
+                                  "updated_at": Array [
+                                    "2020-01-10T21:11:45.839Z",
+                                  ],
+                                  "updated_by": Array [
+                                    "elastic",
+                                  ],
+                                  "version": Array [
+                                    "1",
+                                  ],
+                                },
                               },
                             },
                             "source": Object {
@@ -1485,92 +1497,94 @@ Array [
                 "apache",
               ],
             },
-            "signal": Object {
-              "rule": Object {
-                "created_at": Array [
-                  "2020-01-10T21:11:45.839Z",
-                ],
-                "created_by": Array [
-                  "elastic",
-                ],
-                "description": Array [
-                  "24/7",
-                ],
-                "enabled": Array [
-                  true,
-                ],
-                "false_positives": Array [
-                  "test-1",
-                ],
-                "filters": Array [],
-                "from": Array [
-                  "now-300s",
-                ],
-                "id": Array [
-                  "b5ba41ab-aaf3-4f43-971b-bdf9434ce0ea",
-                ],
-                "immutable": Array [
-                  false,
-                ],
-                "index": Array [
-                  "auditbeat-*",
-                ],
-                "interval": Array [
-                  "5m",
-                ],
-                "language": Array [
-                  "kuery",
-                ],
-                "max_signals": Array [
-                  100,
-                ],
-                "note": Array [
-                  "# this is some markdown documentation",
-                ],
-                "output_index": Array [
-                  ".siem-signals-default",
-                ],
-                "query": Array [
-                  "user.name: root or user.name: admin",
-                ],
-                "references": Array [
-                  "www.test.co",
-                ],
-                "risk_score": Array [
-                  "21",
-                ],
-                "rule_id": Array [
-                  "rule-id-1",
-                ],
-                "saved_id": Array [
-                  "Garrett's IP",
-                ],
-                "severity": Array [
-                  "low",
-                ],
-                "tags": Array [],
-                "threat": Array [],
-                "timeline_id": Array [
-                  "1234-2136-11ea-9864-ebc8cc1cb8c2",
-                ],
-                "timeline_title": Array [
-                  "Untitled timeline",
-                ],
-                "to": Array [
-                  "now",
-                ],
-                "type": Array [
-                  "saved_query",
-                ],
-                "updated_at": Array [
-                  "2020-01-10T21:11:45.839Z",
-                ],
-                "updated_by": Array [
-                  "elastic",
-                ],
-                "version": Array [
-                  "1",
-                ],
+            "kibana": Object {
+              "alert": Object {
+                "rule": Object {
+                  "created_at": Array [
+                    "2020-01-10T21:11:45.839Z",
+                  ],
+                  "created_by": Array [
+                    "elastic",
+                  ],
+                  "description": Array [
+                    "24/7",
+                  ],
+                  "enabled": Array [
+                    true,
+                  ],
+                  "false_positives": Array [
+                    "test-1",
+                  ],
+                  "filters": Array [],
+                  "from": Array [
+                    "now-300s",
+                  ],
+                  "id": Array [
+                    "b5ba41ab-aaf3-4f43-971b-bdf9434ce0ea",
+                  ],
+                  "immutable": Array [
+                    false,
+                  ],
+                  "index": Array [
+                    "auditbeat-*",
+                  ],
+                  "interval": Array [
+                    "5m",
+                  ],
+                  "language": Array [
+                    "kuery",
+                  ],
+                  "max_signals": Array [
+                    100,
+                  ],
+                  "note": Array [
+                    "# this is some markdown documentation",
+                  ],
+                  "output_index": Array [
+                    ".siem-signals-default",
+                  ],
+                  "query": Array [
+                    "user.name: root or user.name: admin",
+                  ],
+                  "references": Array [
+                    "www.test.co",
+                  ],
+                  "risk_score": Array [
+                    "21",
+                  ],
+                  "rule_id": Array [
+                    "rule-id-1",
+                  ],
+                  "saved_id": Array [
+                    "Garrett's IP",
+                  ],
+                  "severity": Array [
+                    "low",
+                  ],
+                  "tags": Array [],
+                  "threat": Array [],
+                  "timeline_id": Array [
+                    "1234-2136-11ea-9864-ebc8cc1cb8c2",
+                  ],
+                  "timeline_title": Array [
+                    "Untitled timeline",
+                  ],
+                  "to": Array [
+                    "now",
+                  ],
+                  "type": Array [
+                    "saved_query",
+                  ],
+                  "updated_at": Array [
+                    "2020-01-10T21:11:45.839Z",
+                  ],
+                  "updated_by": Array [
+                    "elastic",
+                  ],
+                  "version": Array [
+                    "1",
+                  ],
+                },
               },
             },
             "source": Object {
@@ -1700,92 +1714,94 @@ Array [
                             "apache",
                           ],
                         },
-                        "signal": Object {
-                          "rule": Object {
-                            "created_at": Array [
-                              "2020-01-10T21:11:45.839Z",
-                            ],
-                            "created_by": Array [
-                              "elastic",
-                            ],
-                            "description": Array [
-                              "24/7",
-                            ],
-                            "enabled": Array [
-                              true,
-                            ],
-                            "false_positives": Array [
-                              "test-1",
-                            ],
-                            "filters": Array [],
-                            "from": Array [
-                              "now-300s",
-                            ],
-                            "id": Array [
-                              "b5ba41ab-aaf3-4f43-971b-bdf9434ce0ea",
-                            ],
-                            "immutable": Array [
-                              false,
-                            ],
-                            "index": Array [
-                              "auditbeat-*",
-                            ],
-                            "interval": Array [
-                              "5m",
-                            ],
-                            "language": Array [
-                              "kuery",
-                            ],
-                            "max_signals": Array [
-                              100,
-                            ],
-                            "note": Array [
-                              "# this is some markdown documentation",
-                            ],
-                            "output_index": Array [
-                              ".siem-signals-default",
-                            ],
-                            "query": Array [
-                              "user.name: root or user.name: admin",
-                            ],
-                            "references": Array [
-                              "www.test.co",
-                            ],
-                            "risk_score": Array [
-                              "21",
-                            ],
-                            "rule_id": Array [
-                              "rule-id-1",
-                            ],
-                            "saved_id": Array [
-                              "Garrett's IP",
-                            ],
-                            "severity": Array [
-                              "low",
-                            ],
-                            "tags": Array [],
-                            "threat": Array [],
-                            "timeline_id": Array [
-                              "1234-2136-11ea-9864-ebc8cc1cb8c2",
-                            ],
-                            "timeline_title": Array [
-                              "Untitled timeline",
-                            ],
-                            "to": Array [
-                              "now",
-                            ],
-                            "type": Array [
-                              "saved_query",
-                            ],
-                            "updated_at": Array [
-                              "2020-01-10T21:11:45.839Z",
-                            ],
-                            "updated_by": Array [
-                              "elastic",
-                            ],
-                            "version": Array [
-                              "1",
-                            ],
+                        "kibana": Object {
+                          "alert": Object {
+                            "rule": Object {
+                              "created_at": Array [
+                                "2020-01-10T21:11:45.839Z",
+                              ],
+                              "created_by": Array [
+                                "elastic",
+                              ],
+                              "description": Array [
+                                "24/7",
+                              ],
+                              "enabled": Array [
+                                true,
+                              ],
+                              "false_positives": Array [
+                                "test-1",
+                              ],
+                              "filters": Array [],
+                              "from": Array [
+                                "now-300s",
+                              ],
+                              "id": Array [
+                                "b5ba41ab-aaf3-4f43-971b-bdf9434ce0ea",
+                              ],
+                              "immutable": Array [
+                                false,
+                              ],
+                              "index": Array [
+                                "auditbeat-*",
+                              ],
+                              "interval": Array [
+                                "5m",
+                              ],
+                              "language": Array [
+                                "kuery",
+                              ],
+                              "max_signals": Array [
+                                100,
+                              ],
+                              "note": Array [
+                                "# this is some markdown documentation",
+                              ],
+                              "output_index": Array [
+                                ".siem-signals-default",
+                              ],
+                              "query": Array [
+                                "user.name: root or user.name: admin",
+                              ],
+                              "references": Array [
+                                "www.test.co",
+                              ],
+                              "risk_score": Array [
+                                "21",
+                              ],
+                              "rule_id": Array [
+                                "rule-id-1",
+                              ],
+                              "saved_id": Array [
+                                "Garrett's IP",
+                              ],
+                              "severity": Array [
+                                "low",
+                              ],
+                              "tags": Array [],
+                              "threat": Array [],
+                              "timeline_id": Array [
+                                "1234-2136-11ea-9864-ebc8cc1cb8c2",
+                              ],
+                              "timeline_title": Array [
+                                "Untitled timeline",
+                              ],
+                              "to": Array [
+                                "now",
+                              ],
+                              "type": Array [
+                                "saved_query",
+                              ],
+                              "updated_at": Array [
+                                "2020-01-10T21:11:45.839Z",
+                              ],
+                              "updated_by": Array [
+                                "elastic",
+                              ],
+                              "version": Array [
+                                "1",
+                              ],
+                            },
                           },
                         },
                         "source": Object {
@@ -1956,92 +1972,94 @@ Array [
                   "apache",
                 ],
               },
-              "signal": Object {
-                "rule": Object {
-                  "created_at": Array [
-                    "2020-01-10T21:11:45.839Z",
-                  ],
-                  "created_by": Array [
-                    "elastic",
-                  ],
-                  "description": Array [
-                    "24/7",
-                  ],
-                  "enabled": Array [
-                    true,
-                  ],
-                  "false_positives": Array [
-                    "test-1",
-                  ],
-                  "filters": Array [],
-                  "from": Array [
-                    "now-300s",
-                  ],
-                  "id": Array [
-                    "b5ba41ab-aaf3-4f43-971b-bdf9434ce0ea",
-                  ],
-                  "immutable": Array [
-                    false,
-                  ],
-                  "index": Array [
-                    "auditbeat-*",
-                  ],
-                  "interval": Array [
-                    "5m",
-                  ],
-                  "language": Array [
-                    "kuery",
-                  ],
-                  "max_signals": Array [
-                    100,
-                  ],
-                  "note": Array [
-                    "# this is some markdown documentation",
-                  ],
-                  "output_index": Array [
-                    ".siem-signals-default",
-                  ],
-                  "query": Array [
-                    "user.name: root or user.name: admin",
-                  ],
-                  "references": Array [
-                    "www.test.co",
-                  ],
-                  "risk_score": Array [
-                    "21",
-                  ],
-                  "rule_id": Array [
-                    "rule-id-1",
-                  ],
-                  "saved_id": Array [
-                    "Garrett's IP",
-                  ],
-                  "severity": Array [
-                    "low",
-                  ],
-                  "tags": Array [],
-                  "threat": Array [],
-                  "timeline_id": Array [
-                    "1234-2136-11ea-9864-ebc8cc1cb8c2",
-                  ],
-                  "timeline_title": Array [
-                    "Untitled timeline",
-                  ],
-                  "to": Array [
-                    "now",
-                  ],
-                  "type": Array [
-                    "saved_query",
-                  ],
-                  "updated_at": Array [
-                    "2020-01-10T21:11:45.839Z",
-                  ],
-                  "updated_by": Array [
-                    "elastic",
-                  ],
-                  "version": Array [
-                    "1",
-                  ],
+              "kibana": Object {
+                "alert": Object {
+                  "rule": Object {
+                    "created_at": Array [
+                      "2020-01-10T21:11:45.839Z",
+                    ],
+                    "created_by": Array [
+                      "elastic",
+                    ],
+                    "description": Array [
+                      "24/7",
+                    ],
+                    "enabled": Array [
+                      true,
+                    ],
+                    "false_positives": Array [
+                      "test-1",
+                    ],
+                    "filters": Array [],
+                    "from": Array [
+                      "now-300s",
+                    ],
+                    "id": Array [
+                      "b5ba41ab-aaf3-4f43-971b-bdf9434ce0ea",
+                    ],
+                    "immutable": Array [
+                      false,
+                    ],
+                    "index": Array [
+                      "auditbeat-*",
+                    ],
+                    "interval": Array [
+                      "5m",
+                    ],
+                    "language": Array [
+                      "kuery",
+                    ],
+                    "max_signals": Array [
+                      100,
+                    ],
+                    "note": Array [
+                      "# this is some markdown documentation",
+                    ],
+                    "output_index": Array [
+                      ".siem-signals-default",
+                    ],
+                    "query": Array [
+                      "user.name: root or user.name: admin",
+                    ],
+                    "references": Array [
+                      "www.test.co",
+                    ],
+                    "risk_score": Array [
+                      "21",
+                    ],
+                    "rule_id": Array [
+                      "rule-id-1",
+                    ],
+                    "saved_id": Array [
+                      "Garrett's IP",
+                    ],
+                    "severity": Array [
+                      "low",
+                    ],
+                    "tags": Array [],
+                    "threat": Array [],
+                    "timeline_id": Array [
+                      "1234-2136-11ea-9864-ebc8cc1cb8c2",
+                    ],
+                    "timeline_title": Array [
+                      "Untitled timeline",
+                    ],
+                    "to": Array [
+                      "now",
+                    ],
+                    "type": Array [
+                      "saved_query",
+                    ],
+                    "updated_at": Array [
+                      "2020-01-10T21:11:45.839Z",
+                    ],
+                    "updated_by": Array [
+                      "elastic",
+                    ],
+                    "version": Array [
+                      "1",
+                    ],
+                  },
                 },
               },
               "source": Object {
@@ -2134,92 +2152,94 @@ Array [
                               "apache",
                             ],
                           },
-                          "signal": Object {
-                            "rule": Object {
-                              "created_at": Array [
-                                "2020-01-10T21:11:45.839Z",
-                              ],
-                              "created_by": Array [
-                                "elastic",
-                              ],
-                              "description": Array [
-                                "24/7",
-                              ],
-                              "enabled": Array [
-                                true,
-                              ],
-                              "false_positives": Array [
-                                "test-1",
-                              ],
-                              "filters": Array [],
-                              "from": Array [
-                                "now-300s",
-                              ],
-                              "id": Array [
-                                "b5ba41ab-aaf3-4f43-971b-bdf9434ce0ea",
-                              ],
-                              "immutable": Array [
-                                false,
-                              ],
-                              "index": Array [
-                                "auditbeat-*",
-                              ],
-                              "interval": Array [
-                                "5m",
-                              ],
-                              "language": Array [
-                                "kuery",
-                              ],
-                              "max_signals": Array [
-                                100,
-                              ],
-                              "note": Array [
-                                "# this is some markdown documentation",
-                              ],
-                              "output_index": Array [
-                                ".siem-signals-default",
-                              ],
-                              "query": Array [
-                                "user.name: root or user.name: admin",
-                              ],
-                              "references": Array [
-                                "www.test.co",
-                              ],
-                              "risk_score": Array [
-                                "21",
-                              ],
-                              "rule_id": Array [
-                                "rule-id-1",
-                              ],
-                              "saved_id": Array [
-                                "Garrett's IP",
-                              ],
-                              "severity": Array [
-                                "low",
-                              ],
-                              "tags": Array [],
-                              "threat": Array [],
-                              "timeline_id": Array [
-                                "1234-2136-11ea-9864-ebc8cc1cb8c2",
-                              ],
-                              "timeline_title": Array [
-                                "Untitled timeline",
-                              ],
-                              "to": Array [
-                                "now",
-                              ],
-                              "type": Array [
-                                "saved_query",
-                              ],
-                              "updated_at": Array [
-                                "2020-01-10T21:11:45.839Z",
-                              ],
-                              "updated_by": Array [
-                                "elastic",
-                              ],
-                              "version": Array [
-                                "1",
-                              ],
+                          "kibana": Object {
+                            "alert": Object {
+                              "rule": Object {
+                                "created_at": Array [
+                                  "2020-01-10T21:11:45.839Z",
+                                ],
+                                "created_by": Array [
+                                  "elastic",
+                                ],
+                                "description": Array [
+                                  "24/7",
+                                ],
+                                "enabled": Array [
+                                  true,
+                                ],
+                                "false_positives": Array [
+                                  "test-1",
+                                ],
+                                "filters": Array [],
+                                "from": Array [
+                                  "now-300s",
+                                ],
+                                "id": Array [
+                                  "b5ba41ab-aaf3-4f43-971b-bdf9434ce0ea",
+                                ],
+                                "immutable": Array [
+                                  false,
+                                ],
+                                "index": Array [
+                                  "auditbeat-*",
+                                ],
+                                "interval": Array [
+                                  "5m",
+                                ],
+                                "language": Array [
+                                  "kuery",
+                                ],
+                                "max_signals": Array [
+                                  100,
+                                ],
+                                "note": Array [
+                                  "# this is some markdown documentation",
+                                ],
+                                "output_index": Array [
+                                  ".siem-signals-default",
+                                ],
+                                "query": Array [
+                                  "user.name: root or user.name: admin",
+                                ],
+                                "references": Array [
+                                  "www.test.co",
+                                ],
+                                "risk_score": Array [
+                                  "21",
+                                ],
+                                "rule_id": Array [
+                                  "rule-id-1",
+                                ],
+                                "saved_id": Array [
+                                  "Garrett's IP",
+                                ],
+                                "severity": Array [
+                                  "low",
+                                ],
+                                "tags": Array [],
+                                "threat": Array [],
+                                "timeline_id": Array [
+                                  "1234-2136-11ea-9864-ebc8cc1cb8c2",
+                                ],
+                                "timeline_title": Array [
+                                  "Untitled timeline",
+                                ],
+                                "to": Array [
+                                  "now",
+                                ],
+                                "type": Array [
+                                  "saved_query",
+                                ],
+                                "updated_at": Array [
+                                  "2020-01-10T21:11:45.839Z",
+                                ],
+                                "updated_by": Array [
+                                  "elastic",
+                                ],
+                                "version": Array [
+                                  "1",
+                                ],
+                              },
                             },
                           },
                           "source": Object {

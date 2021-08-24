@@ -9,7 +9,7 @@ import { EuiDataGridColumn } from '@elastic/eui';
 import {
   ALERT_DURATION,
   ALERT_REASON,
-  ALERT_RULE_SEVERITY,
+  ALERT_SEVERITY,
   ALERT_WORKFLOW_STATUS,
 } from '@kbn/rule-data-utils';
 
@@ -47,7 +47,7 @@ export const columns: Array<
   {
     columnHeaderType: defaultColumnHeaderType,
     displayAsText: i18n.ALERTS_HEADERS_SEVERITY,
-    id: ALERT_RULE_SEVERITY,
+    id: ALERT_SEVERITY,
     initialWidth: 102,
   },
   {

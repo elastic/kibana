@@ -13,8 +13,8 @@ import styled from 'styled-components';
 import {
   ALERT_RULE_UUID,
   ALERT_RULE_NAME,
-  ALERT_RULE_RISK_SCORE,
-  ALERT_RULE_SEVERITY,
+  ALERT_RISK_SCORE,
+  ALERT_SEVERITY,
   ALERT_WORKFLOW_STATUS,
 } from '@kbn/rule-data-utils';
 import * as i18n from './translations';
@@ -78,8 +78,8 @@ const defaultDisplayFields: EventSummaryField[] = [
     linkField: ALERT_RULE_UUID,
     label: ALERTS_HEADERS_RULE,
   },
-  { id: ALERT_RULE_SEVERITY, label: ALERTS_HEADERS_SEVERITY },
-  { id: ALERT_RULE_RISK_SCORE, label: ALERTS_HEADERS_RISK_SCORE },
+  { id: ALERT_SEVERITY, label: ALERTS_HEADERS_SEVERITY },
+  { id: ALERT_RISK_SCORE, label: ALERTS_HEADERS_RISK_SCORE },
   { id: 'host.name' },
   { id: 'agent.id', overrideField: AGENT_STATUS_FIELD_NAME, label: i18n.AGENT_STATUS },
   { id: 'user.name' },

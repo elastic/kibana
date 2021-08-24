@@ -9,7 +9,7 @@ import { mount } from 'enzyme';
 import { cloneDeep } from 'lodash/fp';
 import React from 'react';
 
-import { ALERT_RULE_RISK_SCORE } from '@kbn/rule-data-utils';
+import { ALERT_RISK_SCORE } from '@kbn/rule-data-utils';
 import { columnRenderers } from '../body/renderers';
 import { getColumnRenderer } from '../body/renderers/get_column_renderer';
 import { DragDropContextWrapper } from '../../../../common/components/drag_and_drop/drag_drop_context_wrapper';
@@ -27,7 +27,7 @@ const mockImplementation = {
 };
 
 describe('DefaultCellRenderer', () => {
-  const columnId = ALERT_RULE_RISK_SCORE;
+  const columnId = ALERT_RISK_SCORE;
   const eventId = '_id-123';
   const isDetails = true;
   const isExpandable = true;

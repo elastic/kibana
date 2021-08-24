@@ -10,7 +10,7 @@ import {
   ALERT_REASON,
   ALERT_RULE_UUID,
   ALERT_RULE_NAME,
-  ALERT_RULE_SEVERITY,
+  ALERT_SEVERITY,
 } from '@kbn/rule-data-utils';
 import { ColumnHeaderOptions } from '../../../../../common';
 import { defaultColumnHeaderType } from '../../../../timelines/components/timeline/body/column_headers/default_headers';
@@ -39,7 +39,7 @@ export const columns: Array<
   },
   {
     columnHeaderType: defaultColumnHeaderType,
-    id: ALERT_RULE_SEVERITY,
+    id: ALERT_SEVERITY,
     displayAsText: i18n.ALERTS_HEADERS_SEVERITY,
     initialWidth: 104,
   },

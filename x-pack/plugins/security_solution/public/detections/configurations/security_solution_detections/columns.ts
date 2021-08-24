@@ -9,8 +9,8 @@ import { EuiDataGridColumn } from '@elastic/eui';
 import {
   ALERT_RULE_UUID,
   ALERT_RULE_NAME,
-  ALERT_RULE_RISK_SCORE,
-  ALERT_RULE_SEVERITY,
+  ALERT_RISK_SCORE,
+  ALERT_SEVERITY,
   ALERT_RULE_TYPE,
   ALERT_RULE_VERSION,
   ALERT_REASON,
@@ -59,13 +59,13 @@ export const columns: Array<
   {
     columnHeaderType: defaultColumnHeaderType,
     displayAsText: i18n.ALERTS_HEADERS_SEVERITY,
-    id: ALERT_RULE_SEVERITY,
+    id: ALERT_SEVERITY,
     initialWidth: 105,
   },
   {
     columnHeaderType: defaultColumnHeaderType,
     displayAsText: i18n.ALERTS_HEADERS_RISK_SCORE,
-    id: ALERT_RULE_RISK_SCORE,
+    id: ALERT_RISK_SCORE,
     initialWidth: 100,
   },
   {

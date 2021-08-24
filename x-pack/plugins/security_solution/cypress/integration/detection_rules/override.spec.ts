@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ALERT_RULE_RISK_SCORE } from '@kbn/rule-data-utils';
+import { ALERT_RISK_SCORE } from '@kbn/rule-data-utils';
 import { formatMitreAttackDescription } from '../../helpers/rules';
 import {
   getIndexPatterns,
@@ -140,7 +140,7 @@ describe('Detection rules, override', () => {
       getDetails(RISK_SCORE_DETAILS).should('have.text', this.rule.riskScore);
       getDetails(RISK_SCORE_OVERRIDE_DETAILS).should(
         'have.text',
-        `${this.rule.riskOverride}${ALERT_RULE_RISK_SCORE}`
+        `${this.rule.riskOverride}${ALERT_RISK_SCORE}`
       );
       getDetails(RULE_NAME_OVERRIDE_DETAILS).should('have.text', this.rule.nameOverride);
       getDetails(REFERENCE_URLS_DETAILS).should((details) => {

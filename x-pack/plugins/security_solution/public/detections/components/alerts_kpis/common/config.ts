@@ -7,16 +7,16 @@
 
 import {
   ALERT_RULE_NAME,
-  ALERT_RULE_RISK_SCORE,
-  ALERT_RULE_SEVERITY,
+  ALERT_RISK_SCORE,
+  ALERT_SEVERITY,
   ALERT_RULE_TYPE,
 } from '@kbn/rule-data-utils';
 import type { AlertsStackByOption } from './types';
 import { ALERT_RULE_THREAT_TACTIC_NAME } from '../../../../../../timelines/common/alerts';
 
 export const alertsStackByOptions: AlertsStackByOption[] = [
-  { text: ALERT_RULE_RISK_SCORE, value: ALERT_RULE_RISK_SCORE },
-  { text: ALERT_RULE_SEVERITY, value: ALERT_RULE_SEVERITY },
+  { text: ALERT_RISK_SCORE, value: ALERT_RISK_SCORE },
+  { text: ALERT_SEVERITY, value: ALERT_SEVERITY },
   { text: ALERT_RULE_THREAT_TACTIC_NAME, value: ALERT_RULE_THREAT_TACTIC_NAME },
   { text: 'destination.ip', value: 'destination.ip' },
   { text: 'event.action', value: 'event.action' },

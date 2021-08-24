@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ALERT_RULE_NAME, ALERT_RULE_RISK_SCORE, ALERT_RULE_TYPE } from '@kbn/rule-data-utils';
+import { ALERT_RULE_NAME, ALERT_RISK_SCORE, ALERT_RULE_TYPE } from '@kbn/rule-data-utils';
 import { isEmpty } from 'lodash/fp';
 import { Direction, HostRulesRequestOptions } from '../../../../../../common/search_strategy';
 import { createQueryFilterClauses } from '../../../../../utils/build_query';
@@ -40,7 +40,7 @@ export const buildHostRulesQuery = ({
       aggs: {
         risk_score: {
           sum: {
-            field: ALERT_RULE_RISK_SCORE,
+            field: ALERT_RISK_SCORE,
           },
         },
         rule_name: {
@@ -53,7 +53,7 @@ export const buildHostRulesQuery = ({
           aggs: {
             risk_score: {
               sum: {
-                field: ALERT_RULE_RISK_SCORE,
+                field: ALERT_RISK_SCORE,
               },
             },
             rule_type: {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ALERT_RULE_RISK_SCORE } from '@kbn/rule-data-utils';
+import { ALERT_RISK_SCORE } from '@kbn/rule-data-utils';
 import { isEmpty } from 'lodash/fp';
 import {
   ALERT_RULE_THREAT_TACTIC_NAME,
@@ -44,7 +44,7 @@ export const buildHostTacticsQuery = ({
       aggs: {
         risk_score: {
           sum: {
-            field: ALERT_RULE_RISK_SCORE,
+            field: ALERT_RISK_SCORE,
           },
         },
         tactic: {
@@ -59,7 +59,7 @@ export const buildHostTacticsQuery = ({
               aggs: {
                 risk_score: {
                   sum: {
-                    field: ALERT_RULE_RISK_SCORE,
+                    field: ALERT_RISK_SCORE,
                   },
                 },
               },
