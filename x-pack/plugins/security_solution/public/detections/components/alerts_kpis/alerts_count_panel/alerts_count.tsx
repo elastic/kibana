@@ -40,6 +40,7 @@ const getAlertsCountTableColumns = (
         return (
           <DefaultDraggable
             field={selectedStackByOption}
+            hideTopN={true}
             id={`alert-count-draggable-${selectedStackByOption}-${value}`}
             value={value}
           />
