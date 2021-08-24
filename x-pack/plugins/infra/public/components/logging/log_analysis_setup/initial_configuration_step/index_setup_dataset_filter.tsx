@@ -60,7 +60,13 @@ export const IndexSetupDatasetFilter: React.FC<{
   );
 
   const datasetFilterButton = (
-    <EuiFilterButton disabled={isDisabled} isSelected={isVisible} onClick={show}>
+    <EuiFilterButton
+      disabled={isDisabled}
+      isSelected={isVisible}
+      onClick={show}
+      iconType="arrowDown"
+      size="s"
+    >
       <FormattedMessage
         id="xpack.infra.analysisSetup.indexDatasetFilterIncludeAllButtonLabel"
         defaultMessage="{includeType, select, includeAll {All datasets} includeSome {{includedDatasetCount, plural, one {# dataset} other {# datasets}}}}"

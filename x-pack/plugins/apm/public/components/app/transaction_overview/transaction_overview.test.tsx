@@ -16,7 +16,7 @@ import { UrlParamsProvider } from '../../../context/url_params_context/url_param
 import { IUrlParams } from '../../../context/url_params_context/types';
 import * as useFetcherHook from '../../../hooks/use_fetcher';
 import * as useServiceTransactionTypesHook from '../../../context/apm_service/use_service_transaction_types_fetcher';
-import * as useServiceAgentNameHook from '../../../context/apm_service/use_service_agent_name_fetcher';
+import * as useServiceAgentNameHook from '../../../context/apm_service/use_service_agent_fetcher';
 import {
   disableConsoleWarning,
   renderWithTheme,
@@ -52,9 +52,10 @@ function setup({
 
   // mock agent
   jest
-    .spyOn(useServiceAgentNameHook, 'useServiceAgentNameFetcher')
+    .spyOn(useServiceAgentNameHook, 'useServiceAgentFetcher')
     .mockReturnValue({
       agentName: 'nodejs',
+      runtimeName: 'node',
       error: undefined,
       status: useFetcherHook.FETCH_STATUS.SUCCESS,
     });

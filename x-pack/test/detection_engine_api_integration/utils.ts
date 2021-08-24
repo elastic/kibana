@@ -10,8 +10,7 @@ import type { ApiResponse } from '@elastic/elasticsearch';
 import { Context } from '@elastic/elasticsearch/lib/Transport';
 import type { estypes } from '@elastic/elasticsearch';
 import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
-import { SuperTest } from 'supertest';
-import supertestAsPromised from 'supertest-as-promised';
+import type SuperTest from 'supertest';
 import type {
   ListArray,
   NonEmptyEntriesArray,
@@ -400,7 +399,7 @@ export const getSimpleMlRuleOutput = (ruleId = 'rule-1'): Partial<RulesSchema> =
  * @param supertest The supertest agent.
  */
 export const deleteAllAlerts = async (
-  supertest: SuperTest<supertestAsPromised.Test>
+  supertest: SuperTest.SuperTest<SuperTest.Test>
 ): Promise<void> => {
   await countDownTest(
     async () => {
@@ -488,7 +487,7 @@ export const deleteAllRulesStatuses = async (es: KibanaClient): Promise<void> =>
  * @param supertest The supertest client library
  */
 export const createSignalsIndex = async (
-  supertest: SuperTest<supertestAsPromised.Test>
+  supertest: SuperTest.SuperTest<SuperTest.Test>
 ): Promise<void> => {
   await countDownTest(async () => {
     await supertest.post(DETECTION_ENGINE_INDEX_URL).set('kbn-xsrf', 'true').send();
@@ -501,7 +500,7 @@ export const createSignalsIndex = async (
  * @param supertest The supertest client library
  */
 export const deleteSignalsIndex = async (
-  supertest: SuperTest<supertestAsPromised.Test>
+  supertest: SuperTest.SuperTest<SuperTest.Test>
 ): Promise<void> => {
   await countDownTest(async () => {
     await supertest.delete(DETECTION_ENGINE_INDEX_URL).set('kbn-xsrf', 'true').send();
@@ -768,26 +767,22 @@ export const waitFor = async (
   maxTimeout: number = 20000,
   timeoutWait: number = 10
 ): Promise<void> => {
-  await new Promise<void>(async (resolve, reject) => {
-    let found = false;
-    let numberOfTries = 0;
-    while (!found && numberOfTries < Math.floor(maxTimeout / timeoutWait)) {
-      const itPasses = await functionToTest();
-      if (itPasses) {
-        found = true;
-      } else {
-        numberOfTries++;
-      }
-      await new Promise((resolveTimeout) => setTimeout(resolveTimeout, timeoutWait));
-    }
-    if (found) {
-      resolve();
+  let found = false;
+  let numberOfTries = 0;
+
+  while (!found && numberOfTries < Math.floor(maxTimeout / timeoutWait)) {
+    if (await functionToTest()) {
+      found = true;
     } else {
-      reject(
-        new Error(`timed out waiting for function condition to be true within ${functionName}`)
-      );
+      numberOfTries++;
     }
-  });
+
+    await new Promise((resolveTimeout) => setTimeout(resolveTimeout, timeoutWait));
+  }
+
+  if (!found) {
+    throw new Error(`timed out waiting for function condition to be true within ${functionName}`);
+  }
 };
 
 /**
@@ -887,7 +882,7 @@ export const countDownTest = async (
  * @param rule The rule to create
  */
 export const createRule = async (
-  supertest: SuperTest<supertestAsPromised.Test>,
+  supertest: SuperTest.SuperTest<SuperTest.Test>,
   rule: CreateRulesSchema
 ): Promise<FullResponseSchema> => {
   const { body } = await supertest
@@ -905,7 +900,7 @@ export const createRule = async (
  * @param rule The rule to create
  */
 export const updateRule = async (
-  supertest: SuperTest<supertestAsPromised.Test>,
+  supertest: SuperTest.SuperTest<SuperTest.Test>,
   updatedRule: UpdateRulesSchema
 ): Promise<FullResponseSchema> => {
   const { body } = await supertest
@@ -921,7 +916,7 @@ export const updateRule = async (
  * creates a new action and expects a 200 and does not do any retries.
  * @param supertest The supertest deps
  */
-export const createNewAction = async (supertest: SuperTest<supertestAsPromised.Test>) => {
+export const createNewAction = async (supertest: SuperTest.SuperTest<SuperTest.Test>) => {
   const { body } = await supertest
     .post('/api/actions/action')
     .set('kbn-xsrf', 'true')
@@ -936,7 +931,7 @@ export const createNewAction = async (supertest: SuperTest<supertestAsPromised.T
  * @param supertest The supertest deps
  */
 export const findImmutableRuleById = async (
-  supertest: SuperTest<supertestAsPromised.Test>,
+  supertest: SuperTest.SuperTest<SuperTest.Test>,
   ruleId: string
 ): Promise<{
   page: number;
@@ -960,7 +955,7 @@ export const findImmutableRuleById = async (
  * @param supertest The supertest deps
  */
 export const getPrePackagedRulesStatus = async (
-  supertest: SuperTest<supertestAsPromised.Test>
+  supertest: SuperTest.SuperTest<SuperTest.Test>
 ): Promise<PrePackagedRulesAndTimelinesStatusSchema> => {
   const { body } = await supertest
     .get(`${DETECTION_ENGINE_PREPACKAGED_URL}/_status`)
@@ -977,7 +972,7 @@ export const getPrePackagedRulesStatus = async (
  * @param rule The rule to create
  */
 export const createExceptionList = async (
-  supertest: SuperTest<supertestAsPromised.Test>,
+  supertest: SuperTest.SuperTest<SuperTest.Test>,
   exceptionList: CreateExceptionListSchema
 ): Promise<ExceptionListSchema> => {
   const { body } = await supertest
@@ -995,7 +990,7 @@ export const createExceptionList = async (
  * @param rule The rule to create
  */
 export const createExceptionListItem = async (
-  supertest: SuperTest<supertestAsPromised.Test>,
+  supertest: SuperTest.SuperTest<SuperTest.Test>,
   exceptionListItem: CreateExceptionListItemSchema
 ): Promise<ExceptionListItemSchema> => {
   const { body } = await supertest
@@ -1013,7 +1008,7 @@ export const createExceptionListItem = async (
  * @param rule The rule to create
  */
 export const getRule = async (
-  supertest: SuperTest<supertestAsPromised.Test>,
+  supertest: SuperTest.SuperTest<SuperTest.Test>,
   ruleId: string
 ): Promise<RulesSchema> => {
   const { body } = await supertest
@@ -1024,7 +1019,7 @@ export const getRule = async (
 };
 
 export const waitForAlertToComplete = async (
-  supertest: SuperTest<supertestAsPromised.Test>,
+  supertest: SuperTest.SuperTest<SuperTest.Test>,
   id: string
 ): Promise<void> => {
   await waitFor(async () => {
@@ -1042,7 +1037,7 @@ export const waitForAlertToComplete = async (
  * @param supertest Deps
  */
 export const waitForRuleSuccessOrStatus = async (
-  supertest: SuperTest<supertestAsPromised.Test>,
+  supertest: SuperTest.SuperTest<SuperTest.Test>,
   id: string,
   status: 'succeeded' | 'failed' | 'partial failure' | 'warning' = 'succeeded'
 ): Promise<void> => {
@@ -1063,7 +1058,7 @@ export const waitForRuleSuccessOrStatus = async (
  * @param numberOfSignals The number of signals to wait for, default is 1
  */
 export const waitForSignalsToBePresent = async (
-  supertest: SuperTest<supertestAsPromised.Test>,
+  supertest: SuperTest.SuperTest<SuperTest.Test>,
   numberOfSignals = 1,
   signalIds: string[]
 ): Promise<void> => {
@@ -1078,7 +1073,7 @@ export const waitForSignalsToBePresent = async (
  * @param supertest Deps
  */
 export const getSignalsByRuleIds = async (
-  supertest: SuperTest<supertestAsPromised.Test>,
+  supertest: SuperTest.SuperTest<SuperTest.Test>,
   ruleIds: string[]
 ): Promise<
   estypes.SearchResponse<{
@@ -1103,7 +1098,7 @@ export const getSignalsByRuleIds = async (
  * @param ids Array of the rule ids
  */
 export const getSignalsByIds = async (
-  supertest: SuperTest<supertestAsPromised.Test>,
+  supertest: SuperTest.SuperTest<SuperTest.Test>,
   ids: string[],
   size?: number
 ): Promise<
@@ -1128,7 +1123,7 @@ export const getSignalsByIds = async (
  * @param ids Rule id
  */
 export const getSignalsById = async (
-  supertest: SuperTest<supertestAsPromised.Test>,
+  supertest: SuperTest.SuperTest<SuperTest.Test>,
   id: string
 ): Promise<
   estypes.SearchResponse<{
@@ -1147,7 +1142,7 @@ export const getSignalsById = async (
 };
 
 export const installPrePackagedRules = async (
-  supertest: SuperTest<supertestAsPromised.Test>
+  supertest: SuperTest.SuperTest<SuperTest.Test>
 ): Promise<void> => {
   await countDownTest(async () => {
     const { status } = await supertest
@@ -1166,7 +1161,7 @@ export const installPrePackagedRules = async (
  * @param osTypes The os types to optionally add or not to add to the container
  */
 export const createContainerWithEndpointEntries = async (
-  supertest: SuperTest<supertestAsPromised.Test>,
+  supertest: SuperTest.SuperTest<SuperTest.Test>,
   endpointEntries: Array<{
     entries: NonEmptyEntriesArray;
     osTypes: OsTypeArray | undefined;
@@ -1226,7 +1221,7 @@ export const createContainerWithEndpointEntries = async (
  * @param osTypes The os types to optionally add or not to add to the container
  */
 export const createContainerWithEntries = async (
-  supertest: SuperTest<supertestAsPromised.Test>,
+  supertest: SuperTest.SuperTest<SuperTest.Test>,
   entries: NonEmptyEntriesArray[]
 ): Promise<ListArray> => {
   // If not given any endpoint entries, return without any
@@ -1284,7 +1279,7 @@ export const createContainerWithEntries = async (
  * @param osTypes The os types to optionally add or not to add to the container
  */
 export const createRuleWithExceptionEntries = async (
-  supertest: SuperTest<supertestAsPromised.Test>,
+  supertest: SuperTest.SuperTest<SuperTest.Test>,
   rule: CreateRulesSchema,
   entries: NonEmptyEntriesArray[],
   endpointEntries?: Array<{
@@ -1367,7 +1362,7 @@ export const startSignalsMigration = async ({
   indices,
   supertest,
 }: {
-  supertest: SuperTest<supertestAsPromised.Test>;
+  supertest: SuperTest.SuperTest<SuperTest.Test>;
   indices: string[];
 }): Promise<CreateMigrationResponse[]> => {
   const {
@@ -1391,7 +1386,7 @@ export const finalizeSignalsMigration = async ({
   migrationIds,
   supertest,
 }: {
-  supertest: SuperTest<supertestAsPromised.Test>;
+  supertest: SuperTest.SuperTest<SuperTest.Test>;
   migrationIds: string[];
 }): Promise<FinalizeMigrationResponse[]> => {
   const {
@@ -1406,7 +1401,7 @@ export const finalizeSignalsMigration = async ({
 };
 
 export const getOpenSignals = async (
-  supertest: SuperTest<supertestAsPromised.Test>,
+  supertest: SuperTest.SuperTest<SuperTest.Test>,
   es: KibanaClient,
   rule: FullResponseSchema
 ) => {

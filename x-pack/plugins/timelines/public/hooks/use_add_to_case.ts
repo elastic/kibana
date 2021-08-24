@@ -4,17 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { isEmpty } from 'lodash';
+import { get, isEmpty } from 'lodash/fp';
 import { useState, useCallback, useMemo, SyntheticEvent } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
+import { ALERT_RULE_NAME, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 import { Case, SubCase } from '../../../cases/common';
 import { TimelinesStartServices } from '../types';
+import { TimelineItem } from '../../common/';
 import { tGridActions } from '../store/t_grid';
 import { useDeepEqualSelector } from './use_selector';
 import { createUpdateSuccessToaster } from '../components/actions/timeline/cases/helpers';
-import { AddToCaseActionProps } from '../components/actions/timeline/cases/add_to_case_action';
+import { AddToCaseActionProps } from '../components/actions';
 
 interface UseAddToCase {
   addNewCaseClick: () => void;
@@ -83,7 +85,6 @@ export const useAddToCase = ({
 }: AddToCaseActionProps): UseAddToCase => {
   const eventId = event?.ecs._id ?? '';
   const eventIndex = event?.ecs._index ?? '';
-  const rule = event?.ecs.signal?.rule;
   const dispatch = useDispatch();
   // TODO: use correct value in standalone or integrated.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -154,6 +155,7 @@ export const useAddToCase = ({
       updateCase?: (newCase: Case) => void
     ) => {
       dispatch(tGridActions.setOpenAddToNewCase({ id: eventId, isOpen: false }));
+      const { ruleId, ruleName } = normalizedEventFields(event);
       if (postComment) {
         await postComment({
           caseId: theCase.id,
@@ -162,8 +164,8 @@ export const useAddToCase = ({
             alertId: eventId,
             index: eventIndex ?? '',
             rule: {
-              id: rule?.id != null ? rule.id[0] : null,
-              name: rule?.name != null ? rule.name[0] : null,
+              id: ruleId,
+              name: ruleName,
             },
             owner: appId,
           },
@@ -171,7 +173,7 @@ export const useAddToCase = ({
         });
       }
     },
-    [eventId, eventIndex, rule, appId, dispatch]
+    [eventId, eventIndex, appId, dispatch, event]
   );
   const onCaseSuccess = useCallback(
     async (theCase: Case) => {
@@ -239,3 +241,26 @@ export const useAddToCase = ({
     isCreateCaseFlyoutOpen,
   };
 };
+
+export function normalizedEventFields(event?: TimelineItem) {
+  const ruleUuidData = event && event.data.find(({ field }) => field === ALERT_RULE_UUID);
+  const ruleNameData = event && event.data.find(({ field }) => field === ALERT_RULE_NAME);
+  const ruleUuidValueData = ruleUuidData && ruleUuidData.value && ruleUuidData.value[0];
+  const ruleNameValueData = ruleNameData && ruleNameData.value && ruleNameData.value[0];
+
+  const ruleUuid =
+    ruleUuidValueData ??
+    get(`ecs.${ALERT_RULE_UUID}[0]`, event) ??
+    get(`ecs.signal.rule.id[0]`, event) ??
+    null;
+  const ruleName =
+    ruleNameValueData ??
+    get(`ecs.${ALERT_RULE_NAME}[0]`, event) ??
+    get(`ecs.signal.rule.name[0]`, event) ??
+    null;
+
+  return {
+    ruleId: ruleUuid,
+    ruleName,
+  };
+}

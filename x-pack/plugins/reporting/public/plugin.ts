@@ -25,7 +25,7 @@ import {
 } from '../../../../src/plugins/home/public';
 import { ManagementSetup, ManagementStart } from '../../../../src/plugins/management/public';
 import { LicensingPluginSetup, LicensingPluginStart } from '../../licensing/public';
-import { constants, getDefaultLayoutSelectors } from '../common';
+import { constants } from '../common';
 import { durationToNumber } from '../common/schema_utils';
 import { JobId, JobSummarySet } from '../common/types';
 import { ReportingSetup, ReportingStart } from './';
@@ -121,7 +121,6 @@ export class ReportingPublicPlugin
   private getContract(core?: CoreSetup) {
     if (core) {
       this.contract = {
-        getDefaultLayoutSelectors,
         usesUiCapabilities: () => this.config.roles?.enabled === false,
         components: getSharedComponents(core, this.getApiClient(core.http, core.uiSettings)),
       };

@@ -139,7 +139,9 @@ export class PointInTimeFinder<T = unknown, A = unknown>
 
   private async open() {
     try {
-      const { id } = await this.#client.openPointInTimeForType(this.#findOptions.type);
+      const { id } = await this.#client.openPointInTimeForType(this.#findOptions.type, {
+        namespaces: this.#findOptions.namespaces,
+      });
       this.#pitId = id;
       this.#open = true;
     } catch (e) {

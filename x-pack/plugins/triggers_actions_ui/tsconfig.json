@@ -24,5 +24,6 @@
     { "path": "../../../src/plugins/kibana_react/tsconfig.json" },
     { "path": "../../../src/plugins/kibana_utils/tsconfig.json" },
     { "path": "../../../src/plugins/management/tsconfig.json" },
+    { "path": "../spaces/tsconfig.json" },
   ]
 }
