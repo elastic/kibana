@@ -1,8 +1,7 @@
 [[whats-the-right-app]]
-== What’s the right app for you?
+== What’s the right Analytics app for you?
 
-{kib} has a wealth of apps, each with its own area of specialty.
-Scan this table to quickly find the app that gets you to our goal.
+Scan this table to quickly find the Analytics app that gets you to our goal.
 
 |See the full list of {kib} features
 |The https://www.elastic.co/kibana/features[{kib} features page on elastic.co]
@@ -35,49 +34,6 @@ Scan this table to quickly find the app that gets you to our goal.
 
 |Share your data
 |<<dashboard, Dashboard>>, <<canvas, Canvas>>, <<discover,Discover>>
-
-2+|*Build a search experience*
-
-|Create a search experience for your workplace
-|https://www.elastic.co/guide/en/workplace-search/current/workplace-search-getting-started.html[Workplace Search]
-
-|Build a search experience for your app
-|https://www.elastic.co/guide/en/app-search/current/getting-started.html[App Search]
-
-
-2+|*Monitor, analyze, and react to events*
-
-|Monitor software services and applications in real-time by collecting performance information
-|{observability-guide}/apm.html[APM]
-
-|Monitor the availability of your sites and services
-|{observability-guide}/monitor-uptime.html[Uptime]
-
-|Search, filter, and tail all your logs
-|{observability-guide}/monitor-logs.html[Logs]
-
-|Analyze metrics from your infrastructure, apps, and services
-|{observability-guide}/analyze-metrics.html[Metrics]
-
-2+|*Prevent, detect, and respond to threats*
-
-|Create and manage rules for suspicious source events, and view the alerts these rules create.
-|{security-guide}/detection-engine-overview.html[Detections]
-
-|View all hosts and host-related security events.
-|{security-guide}/hosts-overview.html[Hosts]
-
-|View key network activity metrics via an interactive map.
-|{security-guide}/network-page-overview.html[Network]
-
-|Investigate alerts and complex threats, such as lateral movement of malware across hosts in your network.
-|{security-guide}/timelines-ui.html[Timelines]
-
-|Create and track security issues
-|{security-guide}/cases-overview.html[Cases]
-
-|View and manage hosts that are running Endpoint Security
-|{security-guide}/admin-page-ov.html[Administration]
 
 2+|*Administer your Kibana instance*
 

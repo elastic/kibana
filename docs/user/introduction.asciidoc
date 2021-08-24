@@ -336,6 +336,121 @@ Available types: `application`, `canvas-workpad`, `dashboard`, `index-pattern`, 
 `type:(dashboard or canvas-workpad) logs` +
 |===
 
+[[whats-the-right-app]]
+== What’s the right app for you?
+
+{kib} has a wealth of apps, each with its own area of specialty.
+Scan this table to quickly find the app that gets you to our goal.
+
+|See the full list of {kib} features
+|The https://www.elastic.co/kibana/features[{kib} features page on elastic.co]
+
+[cols=2*]
+|===
+
+2+| *Get started*
+
+|Get {kib}
+|https://www.elastic.co/cloud/elasticsearch-service/signup[Sign up for a free trial] and start exploring data in minutes.
+
+|Don’t know where to begin
+|The home page.  If you’re looking to explore and visualize your data, follow
+the <<get-started,Get started with Analytics>>.
+
+|Add data
+|The Add data page, available from the home page.
+
+|See the full list of {kib} features
+|The https://www.elastic.co/kibana/features[{kib} features page on elastic.co]
+
+2+| *Analyze and visualize your data*
+
+|Know what’s in your data
+|<<discover,Discover>>
+
+|Create charts and other visualizations
+|<<dashboard, Dashboard>>
+
+|Show your data from different perspectives
+|<<dashboard, Dashboard>>
+
+|Work with location data
+|<<maps, Maps>>
+
+|Create a presentation of your data
+|<<canvas, Canvas>>
+
+|Generate models for your data’s behavior
+|<<xpack-ml, {ml-cap}>>
+
+|Explore connections in your data
+|<<xpack-graph, Graph>>
+
+|Share your data
+|<<dashboard, Dashboard>>, <<canvas, Canvas>>, <<discover,Discover>>
+
+2+|*Build a search experience*
+
+|Create a search experience for your workplace
+|https://www.elastic.co/guide/en/workplace-search/current/workplace-search-getting-started.html[Workplace Search]
+
+|Build a search experience for your app
+|https://www.elastic.co/guide/en/app-search/current/getting-started.html[App Search]
+
+
+2+|*Monitor, analyze, and react to events*
+
+|Monitor software services and applications in real-time by collecting performance information
+|{observability-guide}/apm.html[APM]
+
+|Monitor the availability of your sites and services
+|{observability-guide}/monitor-uptime.html[Uptime]
+
+|Search, filter, and tail all your logs
+|{observability-guide}/monitor-logs.html[Logs]
+
+|Analyze metrics from your infrastructure, apps, and services
+|{observability-guide}/analyze-metrics.html[Metrics]
+
+2+|*Prevent, detect, and respond to threats*
+
+|Create and manage rules for suspicious source events, and view the alerts these rules create.
+|{security-guide}/detection-engine-overview.html[Detections]
+
+|View all hosts and host-related security events.
+|{security-guide}/hosts-overview.html[Hosts]
+
+|View key network activity metrics via an interactive map.
+|{security-guide}/network-page-overview.html[Network]
+
+|Investigate alerts and complex threats, such as lateral movement of malware across hosts in your network.
+|{security-guide}/timelines-ui.html[Timelines]
+
+|Create and track security issues
+|{security-guide}/cases-overview.html[Cases]
+
+|View and manage hosts that are running Endpoint Security
+|{security-guide}/admin-page-ov.html[Administration]
+
+2+|*Administer your Kibana instance*
+
+|Manage your Elasticsearch data
+|<<manage-data,Stack Management > Data>>
+
+|Set up rules
+|<<create-and-manage-rules,Stack Management > Rules and Connectors>>
+
+|Organize your workspace and users
+|<<xpack-spaces,Stack Management > Spaces>>
+
+|Define user roles and privileges
+|<<xpack-security,Stack Management > Users>>
+
+|Customize {kib} to suit your needs
+|<<advanced-options,Stack Management > Advanced Settings>>
+
+|===
+
 [float]
 [[try-kibana]]
 === How to get help
