@@ -181,7 +181,6 @@ export const apmConfigMapping: Record<
   'apm-server.auth.anonymous.enabled': {
     name: 'anonymous_enabled',
     type: 'bool',
-    getValue: () => true,
   },
   'apm-server.auth.anonymous.allow_agent': {
     name: 'anonymous_allow_agent',

@@ -6,7 +6,7 @@
  */
 import { getDurationRt } from '../../../../../common/agent_configuration/runtime_types/duration_rt';
 import { getIntegerRt } from '../../../../../common/agent_configuration/runtime_types/integer_rt';
-import { PackagePolicyVars, Setting } from '../typings';
+import { PackagePolicyVars, SettingsRow } from '../typings';
 import {
   mergeNewVars,
   isSettingsFormValid,
@@ -16,7 +16,7 @@ import {
 describe('settings utils', () => {
   describe('validateSettingValue', () => {
     it('returns invalid when setting is required and value is empty', () => {
-      const setting: Setting = {
+      const setting: SettingsRow = {
         key: 'foo',
         type: 'text',
         required: true,
@@ -27,7 +27,7 @@ describe('settings utils', () => {
       });
     });
     it('returns valid when setting is NOT required and value is empty', () => {
-      const setting: Setting = {
+      const setting: SettingsRow = {
         key: 'foo',
         type: 'text',
       };
@@ -37,7 +37,7 @@ describe('settings utils', () => {
       });
     });
     it('returns valid when setting does not have a validation property', () => {
-      const setting: Setting = {
+      const setting: SettingsRow = {
         key: 'foo',
         type: 'text',
       };
@@ -47,7 +47,7 @@ describe('settings utils', () => {
       });
     });
     it('returns valid after validating duration value', () => {
-      const setting: Setting = {
+      const setting: SettingsRow = {
         key: 'foo',
         type: 'text',
         validation: getDurationRt({ min: '1ms' }),
@@ -58,7 +58,7 @@ describe('settings utils', () => {
       });
     });
     it('returns invalid after validating duration value', () => {
-      const setting: Setting = {
+      const setting: SettingsRow = {
         key: 'foo',
         type: 'text',
         validation: getDurationRt({ min: '1ms' }),
@@ -69,7 +69,7 @@ describe('settings utils', () => {
       });
     });
     it('returns valid after validating integer value', () => {
-      const setting: Setting = {
+      const setting: SettingsRow = {
         key: 'foo',
         type: 'text',
         validation: getIntegerRt({ min: 1 }),
@@ -80,7 +80,7 @@ describe('settings utils', () => {
       });
     });
     it('returns invalid after validating integer value', () => {
-      const setting: Setting = {
+      const setting: SettingsRow = {
         key: 'foo',
         type: 'text',
         validation: getIntegerRt({ min: 1 }),
@@ -92,7 +92,7 @@ describe('settings utils', () => {
     });
 
     it('returns valid when required and value is empty', () => {
-      const setting: Setting = {
+      const setting: SettingsRow = {
         key: 'foo',
         type: 'text',
         required: true,
@@ -104,7 +104,7 @@ describe('settings utils', () => {
     });
   });
   describe('isSettingsFormValid', () => {
-    const settings: Setting[] = [
+    const settings: SettingsRow[] = [
       { key: 'foo', type: 'text', required: true },
       {
         key: 'bar',

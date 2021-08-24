@@ -6,15 +6,15 @@
  */
 
 import { getApmSettings } from './apm_settings';
-import { Setting, BasicSetting } from '../typings';
+import { SettingsRow, BasicSettingRow } from '../typings';
 import { isSettingsFormValid } from '../settings_form/utils';
 
 describe('apm_settings', () => {
   describe('getApmSettings', () => {
-    function findSetting(key: string, settings: Setting[]) {
+    function findSetting(key: string, settings: SettingsRow[]) {
       return settings.find(
         (setting) => setting.type !== 'advanced_setting' && setting.key === key
-      ) as BasicSetting;
+      ) as BasicSettingRow;
     }
     ['host', 'url'].map((key) => {
       it(`returns read only ${key} when on cloud`, () => {

@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { isRight } from 'fp-ts/lib/Either';
 import { PathReporter } from 'io-ts/lib/PathReporter';
 import { isEmpty, isFinite } from 'lodash';
-import { PackagePolicyVars, Setting, BasicSetting } from '../typings';
+import { PackagePolicyVars, SettingsRow, BasicSettingRow } from '../typings';
 
 export const REQUIRED_LABEL = i18n.translate(
   'xpack.apm.fleet_integration.settings.requiredLabel',
@@ -33,10 +33,10 @@ export function mergeNewVars(
 }
 
 export function isSettingsFormValid(
-  parentSettings: Setting[],
+  parentSettings: SettingsRow[],
   vars: PackagePolicyVars
 ) {
-  function isSettingsValid(settings: Setting[]): boolean {
+  function isSettingsValid(settings: SettingsRow[]): boolean {
     return !settings
       .map((setting) => {
         if (setting.type === 'advanced_setting') {
@@ -58,7 +58,7 @@ export function isSettingsFormValid(
   return isSettingsValid(parentSettings);
 }
 
-export function validateSettingValue(setting: BasicSetting, value?: any) {
+export function validateSettingValue(setting: BasicSettingRow, value?: any) {
   if (!isFinite(value) && isEmpty(value)) {
     return {
       isValid: !setting.required,

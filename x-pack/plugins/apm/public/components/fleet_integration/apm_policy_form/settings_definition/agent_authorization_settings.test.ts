@@ -6,12 +6,12 @@
  */
 
 import { getAgentAuthorizationSettings } from './agent_authorization_settings';
-import { Setting } from '../typings';
+import { SettingsRow } from '../typings';
 import { isSettingsFormValid } from '../settings_form/utils';
 
 describe('apm-fleet-apm-integration', () => {
   describe('getAgentAuthorizationSettings', () => {
-    function findSetting(key: string, settings: Setting[]) {
+    function findSetting(key: string, settings: SettingsRow[]) {
       return settings.find(
         (setting) => setting.type !== 'advanced_setting' && setting.key === key
       );

@@ -32,6 +32,7 @@ export function APMPolicyForm({
   isCloudPolicy,
   updateAPMPolicy,
 }: Props) {
+  console.log('### caue ~ vars', vars);
   const {
     apmSettings,
     rumSettings,

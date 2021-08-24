@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
-import { PackagePolicyVars, Setting } from '../typings';
+import { PackagePolicyVars, SettingsRow } from '../typings';
 import { FormRowSetting } from './form_row_setting';
 import { validateSettingValue } from './utils';
 
@@ -28,22 +28,22 @@ function FormRow({
   vars,
   onChange,
 }: {
-  initialSetting: Setting;
+  initialSetting: SettingsRow;
   vars?: PackagePolicyVars;
   onChange: FormRowOnChange;
 }) {
-  function getSettingFormRow(setting: Setting) {
-    if (setting.type === 'advanced_setting') {
+  function getSettingFormRow(row: SettingsRow) {
+    if (row.type === 'advanced_setting') {
       return (
         <AdvancedOptions>
-          {setting.settings.map((advancedSetting) =>
+          {row.settings.map((advancedSetting) =>
             getSettingFormRow(advancedSetting)
           )}
         </AdvancedOptions>
       );
     }
 
-    const { key } = setting;
+    const { key } = row;
     const configEntry = vars?.[key];
     // hides a field that doesn't have its key defined in vars.
     // This is most likely to happen when a field is no longer supported in the current package version
@@ -51,36 +51,30 @@ function FormRow({
       return null;
     }
     const { value } = configEntry;
-    const { isValid, message } = validateSettingValue(setting, value);
+    const { isValid, message } = validateSettingValue(row, value);
     return (
       <React.Fragment key={key}>
         <EuiDescribedFormGroup
-          title={<h3>{setting.rowTitle}</h3>}
-          description={setting.rowDescription}
+          title={<h3>{row.rowTitle}</h3>}
+          description={row.rowDescription}
         >
           <EuiFormRow
-            label={setting.label}
+            label={row.label}
             isInvalid={!isValid}
             error={isValid ? undefined : message}
-            helpText={<EuiText size="xs">{setting.helpText}</EuiText>}
+            helpText={<EuiText size="xs">{row.helpText}</EuiText>}
             labelAppend={
               <EuiText size="xs" color="subdued">
-                {setting.labelAppend}
+                {row.labelAppend}
               </EuiText>
             }
           >
-            <FormRowSetting
-              setting={setting}
-              onChange={onChange}
-              value={value}
-            />
+            <FormRowSetting row={row} onChange={onChange} value={value} />
           </EuiFormRow>
         </EuiDescribedFormGroup>
-        {setting.settings &&
+        {row.settings &&
           value &&
-          setting.settings.map((childSettings) =>
-            getSettingFormRow(childSettings)
-          )}
+          row.settings.map((childSettings) => getSettingFormRow(childSettings))}
       </React.Fragment>
     );
   }
@@ -91,7 +85,7 @@ export interface SettingsSection {
   id: string;
   title: string;
   subtitle?: string;
-  settings: Setting[];
+  settings: SettingsRow[];
 }
 
 interface Props {
