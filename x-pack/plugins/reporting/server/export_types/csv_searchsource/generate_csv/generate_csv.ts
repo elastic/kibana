@@ -66,7 +66,6 @@ function isPlainStringArray(
 export class CsvGenerator {
   private _columns?: string[];
   private _formatters?: Record<string, FieldFormat>;
-  private includeFrozen: boolean;
   private csvContainsFormulas = false;
   private maxSizeReached = false;
   private csvRowCount = 0;
@@ -84,8 +83,9 @@ export class CsvGenerator {
   private async scan(
     index: IndexPattern,
     searchSource: ISearchSource,
-    scrollSettings: CsvExportSettings['scroll']
+    settings: CsvExportSettings
   ) {
+    const { scroll: scrollSettings, includeFrozen } = settings;
     const searchBody = searchSource.getSearchRequestBody();
     this.logger.debug(`executing search request`);
     const searchParams = {
@@ -94,9 +94,10 @@ export class CsvGenerator {
         index: index.title,
         scroll: scrollSettings.duration,
         size: scrollSettings.size,
-        ignore_throttled: this.includeFrozen,
+        ignore_throttled: !includeFrozen,
       },
     };
+
     const results = (
       await this.clients.data.search(searchParams, { strategy: ES_SEARCH_STRATEGY }).toPromise()
     ).rawResponse as estypes.SearchResponse<unknown>;
@@ -328,7 +329,7 @@ export class CsvGenerator {
         let results: estypes.SearchResponse<unknown> | undefined;
         if (scrollId == null) {
           // open a scroll cursor in Elasticsearch
-          results = await this.scan(index, searchSource, scrollSettings);
+          results = await this.scan(index, searchSource, settings);
           scrollId = results?._scroll_id;
           if (results.hits?.total != null) {
             totalRecords = results.hits.total as number;
