@@ -51,14 +51,14 @@ describe('logHealthMetrics', () => {
     logHealthMetrics(health, logger, config);
 
     const debugCalls = (logger as jest.Mocked<Logger>).debug.mock.calls;
-    const performanceMessage = `Detected potential performance issue with Task Manager. Set 'xpack.task_manager.monitored_stats_health_verbose_log.enabled: true' in your Kibana.yml to enable debug logging`;
+    const performanceMessage = /^Task Manager detected a degradation in performance/;
     const lastStatsMessage = /^Latest Monitored Stats: \{.*\}$/;
     expect(debugCalls[0][0] as string).toMatch(lastStatsMessage);
     expect(debugCalls[1][0] as string).toMatch(lastStatsMessage);
-    expect(debugCalls[2][0] as string).toBe(performanceMessage);
+    expect(debugCalls[2][0] as string).toMatch(performanceMessage);
     expect(debugCalls[3][0] as string).toMatch(lastStatsMessage);
     expect(debugCalls[4][0] as string).toMatch(lastStatsMessage);
-    expect(debugCalls[5][0] as string).toBe(performanceMessage);
+    expect(debugCalls[5][0] as string).toMatch(performanceMessage);
   });
 
   it('should not log a warning message to enable verbose logging when the status goes from Warning to OK', () => {

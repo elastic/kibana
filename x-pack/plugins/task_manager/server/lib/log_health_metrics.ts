@@ -44,6 +44,7 @@ export function logHealthMetrics(
   }
 
   const message = `Latest Monitored Stats: ${JSON.stringify(monitoredHealth)}`;
+  const detectedProblemMessage = `Task Manager detected a degradation in performance. This is usually temporary, and Kibana can recover automatically. If the problem persists, check the docs for troubleshooting information: https://www.elastic.co/guide/en/kibana/current/task-manager-health-monitoring.html .`;
   if (enabled) {
     const driftInSeconds = (monitoredHealth.stats.runtime?.value.drift.p99 ?? 0) / 1000;
     if (
@@ -80,9 +81,7 @@ export function logHealthMetrics(
     // This is legacy support - we used to always show this
     logger.debug(message);
     if (logLevel !== LogLevel.Debug && lastLogLevel === LogLevel.Debug) {
-      logger.debug(
-        `Detected potential performance issue with Task Manager. Set 'xpack.task_manager.monitored_stats_health_verbose_log.enabled: true' in your Kibana.yml to enable debug logging`
-      );
+      logger.debug(detectedProblemMessage);
     }
   }
 
