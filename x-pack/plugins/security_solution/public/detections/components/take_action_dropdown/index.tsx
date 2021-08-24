@@ -9,21 +9,20 @@ import React, { useState, useCallback, useMemo } from 'react';
 import { EuiContextMenuPanel, EuiButton, EuiPopover } from '@elastic/eui';
 import type { ExceptionListType } from '@kbn/securitysolution-io-ts-list-types';
 import { isEmpty } from 'lodash/fp';
-import { TimelineEventsDetailsItem, TimelineId } from '../../../../common';
+import { TimelineEventsDetailsItem } from '../../../../common';
 import { TAKE_ACTION } from '../alerts_table/alerts_utility_bar/translations';
 import { useExceptionActions } from '../alerts_table/timeline_actions/use_add_exception_actions';
 import { useAlertsActions } from '../alerts_table/timeline_actions/use_alerts_actions';
 import { useInvestigateInTimeline } from '../alerts_table/timeline_actions/use_investigate_in_timeline';
-import { useGetUserCasesPermissions, useKibana } from '../../../common/lib/kibana';
-import { useInsertTimeline } from '../../../cases/components/use_insert_timeline';
+
 import { useEventFilterAction } from '../alerts_table/timeline_actions/use_event_filter_action';
 import { useHostIsolationAction } from '../host_isolation/use_host_isolation_action';
 import { getFieldValue } from '../host_isolation/helpers';
 import type { Ecs } from '../../../../common/ecs';
 import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
 import { endpointAlertCheck } from '../../../common/utils/endpoint_alert_check';
-import { APP_ID } from '../../../../common/constants';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { useAddToCaseActions } from '../alerts_table/timeline_actions/use_add_to_case_actions';
 
 interface ActionsData {
   alertStatus: Status;
@@ -61,11 +60,8 @@ export const TakeActionDropdown = React.memo(
     refetch,
     timelineId,
   }: TakeActionDropdownProps) => {
-    const casePermissions = useGetUserCasesPermissions();
     const tGridEnabled = useIsExperimentalFeatureEnabled('tGridEnabled');
 
-    const { timelines: timelinesUi } = useKibana().services;
-    const insertTimelineHook = useInsertTimeline;
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
     const actionsData = useMemo(
@@ -175,46 +171,16 @@ export const TakeActionDropdown = React.memo(
       [eventFilterActionItems, exceptionActionItems, statusActionItems, isEvent, actionsData.ruleId]
     );
 
-    const addToCaseProps = useMemo(
-      () =>
-        ecsData?._id
-          ? {
-              event: {
-                data: detailsData?.map((d) => ({ field: d.field, value: d.values })) ?? [],
-                ecs: ecsData,
-                _id: ecsData?._id,
-              },
-              useInsertTimeline: insertTimelineHook,
-              casePermissions,
-              appId: APP_ID,
-              onClose: afterCaseSelection,
-            }
-          : null,
-      [afterCaseSelection, casePermissions, detailsData, ecsData, insertTimelineHook]
-    );
-
-    const hasWritePermissions = useGetUserCasesPermissions()?.crud ?? false;
-
-    const addToCasesActionItems = useMemo(
-      () =>
-        [
-          TimelineId.detectionsPage,
-          TimelineId.detectionsRulesDetailsPage,
-          TimelineId.active,
-        ].includes(timelineId as TimelineId) &&
-        hasWritePermissions &&
-        addToCaseProps
-          ? [
-              timelinesUi.getAddToExistingCaseButton(addToCaseProps),
-              timelinesUi.getAddToNewCaseButton(addToCaseProps),
-            ]
-          : [],
-      [timelineId, hasWritePermissions, addToCaseProps, timelinesUi]
-    );
+    const { addToCaseActionItems } = useAddToCaseActions({
+      ecsData,
+      nonEcsData: detailsData?.map((d) => ({ field: d.field, value: d.values })) ?? [],
+      afterCaseSelection,
+      timelineId,
+    });
 
     const items: React.ReactElement[] = useMemo(
       () => [
-        ...(tGridEnabled ? addToCasesActionItems : []),
+        ...(tGridEnabled ? addToCaseActionItems : []),
         ...alertsActionItems,
         ...hostIsolationActionItems,
         ...investigateInTimelineActionItems,
@@ -222,7 +188,7 @@ export const TakeActionDropdown = React.memo(
       [
         tGridEnabled,
         alertsActionItems,
-        addToCasesActionItems,
+        addToCaseActionItems,
         hostIsolationActionItems,
         investigateInTimelineActionItems,
       ]
