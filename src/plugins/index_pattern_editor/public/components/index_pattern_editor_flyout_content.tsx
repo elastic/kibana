@@ -60,7 +60,7 @@ export interface Props {
 }
 
 const editorTitle = i18n.translate('indexPatternEditor.title', {
-  defaultMessage: 'Create index pattern',
+  defaultMessage: 'Create data view',
 });
 
 const IndexPatternEditorFlyoutContentComponent = ({
