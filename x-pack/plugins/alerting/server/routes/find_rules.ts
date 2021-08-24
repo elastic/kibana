@@ -77,6 +77,7 @@ const rewriteBodyRes: RewriteResponseCase<FindResult<AlertTypeParams>> = ({
         executionStatus,
         actions,
         scheduledTaskId,
+        legacyId,
         ...rest
       }) => ({
         ...rest,
@@ -86,6 +87,7 @@ const rewriteBodyRes: RewriteResponseCase<FindResult<AlertTypeParams>> = ({
         created_at: createdAt,
         updated_at: updatedAt,
         api_key_owner: apiKeyOwner,
+        legacy_id: legacyId,
         notify_when: notifyWhen,
         mute_all: muteAll,
         muted_alert_ids: mutedInstanceIds,
