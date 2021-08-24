@@ -7,7 +7,9 @@
  */
 
 // Mocking the module to avoid waiting for a valid ES connection during these unit tests
-jest.mock('./is_valid_connection');
+jest.mock('./is_valid_connection', () => ({
+  isValidConnection: jest.fn(),
+}));
 
 // Mocking this module to force different statuses to help with the unit tests
 jest.mock('./version_check/ensure_es_version', () => ({
@@ -29,7 +31,8 @@ import { configSchema, ElasticsearchConfig } from './elasticsearch_config';
 import { ElasticsearchService } from './elasticsearch_service';
 import { elasticsearchClientMock } from './client/mocks';
 import { duration } from 'moment';
-import { pollEsNodesVersion } from './version_check/ensure_es_version';
+import { isValidConnection as isValidConnectionMock } from './is_valid_connection';
+import { pollEsNodesVersion as pollEsNodesVersionMocked } from './version_check/ensure_es_version';
 const { pollEsNodesVersion: pollEsNodesVersionActual } = jest.requireActual(
   './version_check/ensure_es_version'
 );
@@ -73,7 +76,7 @@ beforeEach(() => {
   MockClusterClient.mockImplementation(() => mockClusterClientInstance);
 
   // @ts-expect-error TS does not get that `pollEsNodesVersion` is mocked
-  pollEsNodesVersion.mockImplementation(pollEsNodesVersionActual);
+  pollEsNodesVersionMocked.mockImplementation(pollEsNodesVersionActual);
 });
 
 afterEach(() => jest.clearAllMocks());
@@ -230,7 +233,7 @@ describe('#start', () => {
     const observable$ = new BehaviorSubject<NodesVersionCompatibility>(defaultMessage);
 
     // @ts-expect-error this module is mocked, so `mockImplementation` is an allowed property
-    pollEsNodesVersion.mockImplementation(() => observable$);
+    pollEsNodesVersionMocked.mockImplementation(() => observable$);
 
     await elasticsearchService.setup(setupDeps);
     await elasticsearchService.start();
@@ -243,6 +246,37 @@ describe('#start', () => {
     expect(loggingSystemMock.collect(coreContext.logger).error).toEqual([
       ['Something went terribly wrong!'],
     ]);
+  });
+
+  describe('skipStartupConnectionCheck', () => {
+    it('should validate the connection by default', async () => {
+      await elasticsearchService.setup(setupDeps);
+      expect(isValidConnectionMock).not.toHaveBeenCalled();
+      await elasticsearchService.start();
+      expect(isValidConnectionMock).toHaveBeenCalledTimes(1);
+    });
+
+    it('should validate the connection when `false`', async () => {
+      mockConfig$.next({
+        ...(await mockConfig$.pipe(first()).toPromise()),
+        skipStartupConnectionCheck: false,
+      });
+      await elasticsearchService.setup(setupDeps);
+      expect(isValidConnectionMock).not.toHaveBeenCalled();
+      await elasticsearchService.start();
+      expect(isValidConnectionMock).toHaveBeenCalledTimes(1);
+    });
+
+    it('should not validate the connection when `true`', async () => {
+      mockConfig$.next({
+        ...(await mockConfig$.pipe(first()).toPromise()),
+        skipStartupConnectionCheck: true,
+      });
+      await elasticsearchService.setup(setupDeps);
+      expect(isValidConnectionMock).not.toHaveBeenCalled();
+      await elasticsearchService.start();
+      expect(isValidConnectionMock).not.toHaveBeenCalled();
+    });
   });
 
   describe('#createClient', () => {

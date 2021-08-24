@@ -110,8 +110,10 @@ export class ElasticsearchService
       }
     });
 
-    // Ensure that the connection is established and the product is valid before moving on
-    await isValidConnection(this.esNodesCompatibility$);
+    if (!config.skipStartupConnectionCheck) {
+      // Ensure that the connection is established and the product is valid before moving on
+      await isValidConnection(this.esNodesCompatibility$);
+    }
 
     return {
       client: this.client!,

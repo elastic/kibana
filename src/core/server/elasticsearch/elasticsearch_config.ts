@@ -153,6 +153,7 @@ export const configSchema = schema.object({
     }),
     schema.boolean({ defaultValue: false })
   ),
+  skipStartupConnectionCheck: schema.boolean({ defaultValue: false }),
 });
 
 const deprecations: ConfigDeprecationProvider = () => [
@@ -220,6 +221,10 @@ export const config: ServiceConfigDescriptor<ElasticsearchConfigType> = {
  * @public
  */
 export class ElasticsearchConfig {
+  /**
+   * Skip the valid connection check during startup.
+   */
+  public readonly skipStartupConnectionCheck: boolean;
   /**
    * The interval between health check requests Kibana sends to the Elasticsearch.
    */
@@ -337,6 +342,7 @@ export class ElasticsearchConfig {
     this.password = rawConfig.password;
     this.serviceAccountToken = rawConfig.serviceAccountToken;
     this.customHeaders = rawConfig.customHeaders;
+    this.skipStartupConnectionCheck = rawConfig.skipStartupConnectionCheck;
 
     const { alwaysPresentCertificate, verificationMode } = rawConfig.ssl;
     const { key, keyPassphrase, certificate, certificateAuthorities } = readKeyAndCerts(rawConfig);
