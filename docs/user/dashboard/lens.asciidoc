@@ -40,7 +40,7 @@ If you already know the visualization type you want to use, and how you want to 
 
 . Before you drag fields to the workspace, open the *Chart type* dropdown, then select the visualization type.  
 
-. To view more visualizations that *Lens* automatically created for the fields, click the *Suggestions*. If one of the *Suggestions* meets your visualization needs, click *Save and return* to add it to the dashboard.
+. To view more visualizations that *Lens* automatically created for the fields, click *Suggestions*. If one of the *Suggestions* meets your visualization needs, click *Save and return* to add it to the dashboard.
 
 *Choose the data you want to visualize.* 
 
