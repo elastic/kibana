@@ -7,4 +7,3 @@
  */
 
 export { handleSourceColumnState } from './state_helpers';
-export { PromiseServiceCreator } from './promises';

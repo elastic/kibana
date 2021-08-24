@@ -8,10 +8,8 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import angular, { auto } from 'angular';
 import { BehaviorSubject } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
-
 import {
   AppMountParameters,
   AppUpdater,
@@ -40,14 +38,12 @@ import { DocViewerTable } from './application/components/table/table';
 import {
   setDocViewsRegistry,
   setUrlTracker,
-  setAngularModule,
   setServices,
   setHeaderActionMenuMounter,
   setUiActions,
   setScopedHistory,
   getScopedHistory,
   syncHistoryLocations,
-  getServices,
 } from './kibana_services';
 import { createSavedSearchesLoader } from './saved_searches';
 import { registerFeature } from './register_feature';
@@ -189,9 +185,6 @@ export interface DiscoverStartPlugins {
   indexPatternFieldEditor: IndexPatternFieldEditorStart;
 }
 
-const innerAngularName = 'app/discover';
-const embeddableAngularName = 'app/discoverEmbeddable';
-
 /**
  * Contains Discover, one of the oldest parts of Kibana
  * There are 2 kinds of Angular bootstrapped for rendering, additionally to the main Angular
@@ -203,10 +196,8 @@ export class DiscoverPlugin
 
   private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
   private docViewsRegistry: DocViewsRegistry | null = null;
-  private embeddableInjector: auto.IInjectorService | null = null;
   private stopUrlTracking: (() => void) | undefined = undefined;
   private servicesInitialized: boolean = false;
-  private innerAngularInitialized: boolean = false;
 
   /**
    * @deprecated
@@ -317,7 +308,6 @@ export class DiscoverPlugin
       stopUrlTracker();
     };
 
-    this.docViewsRegistry.setAngularInjectorGetter(this.getEmbeddableInjector);
     core.application.register({
       id: 'discover',
       title: 'Discover',
@@ -347,7 +337,7 @@ export class DiscoverPlugin
 
         const { renderApp } = await import('./application/application');
         params.element.classList.add('dscAppWrapper');
-        const unmount = await renderApp(innerAngularName, params.element);
+        const unmount = await renderApp('discoverEmbeddable', params.element);
         return () => {
           params.element.classList.remove('dscAppWrapper');
           unmount();
@@ -397,22 +387,6 @@ export class DiscoverPlugin
     // there are some start dependencies necessary, for this reason
     // initializeInnerAngular + initializeServices are assigned at start and used
     // when the application/embeddable is mounted
-    this.initializeInnerAngular = async () => {
-      if (this.innerAngularInitialized) {
-        return;
-      }
-      // this is used by application mount and tests
-      const { getInnerAngularModule } = await import('./application/angular/get_inner_angular');
-      await plugins.kibanaLegacy.loadAngularBootstrap();
-      const module = getInnerAngularModule(
-        innerAngularName,
-        core,
-        plugins,
-        this.initializerContext
-      );
-      setAngularModule(module);
-      this.innerAngularInitialized = true;
-    };
 
     setUiActions(plugins.uiActions);
 
@@ -420,12 +394,7 @@ export class DiscoverPlugin
       if (this.servicesInitialized) {
         return { core, plugins };
       }
-      const services = await buildServices(
-        core,
-        plugins,
-        this.initializerContext,
-        this.getEmbeddableInjector
-      );
+      const services = await buildServices(core, plugins, this.initializerContext);
       setServices(services);
       this.servicesInitialized = true;
 
@@ -452,10 +421,6 @@ export class DiscoverPlugin
    * register embeddable with a slimmer embeddable version of inner angular
    */
   private registerEmbeddable(core: CoreSetup<DiscoverStartPlugins>, plugins: DiscoverSetupPlugins) {
-    if (!this.getEmbeddableInjector) {
-      throw Error('Discover plugin method getEmbeddableInjector is undefined');
-    }
-
     const getStartServices = async () => {
       const [coreStart, deps] = await core.getStartServices();
       return {
@@ -464,25 +429,7 @@ export class DiscoverPlugin
       };
     };
 
-    const factory = new SearchEmbeddableFactory(getStartServices, this.getEmbeddableInjector);
+    const factory = new SearchEmbeddableFactory(getStartServices);
     plugins.embeddable.registerEmbeddableFactory(factory.type, factory);
   }
-
-  private getEmbeddableInjector = async () => {
-    if (!this.embeddableInjector) {
-      if (!this.initializeServices) {
-        throw Error('Discover plugin getEmbeddableInjector:  initializeServices is undefined');
-      }
-      const { core, plugins } = await this.initializeServices();
-      await getServices().kibanaLegacy.loadAngularBootstrap();
-      const { getInnerAngularModuleEmbeddable } = await import(
-        './application/angular/get_inner_angular'
-      );
-      getInnerAngularModuleEmbeddable(embeddableAngularName, core, plugins);
-      const mountpoint = document.createElement('div');
-      this.embeddableInjector = angular.bootstrap(mountpoint, [embeddableAngularName]);
-    }
-
-    return this.embeddableInjector;
-  };
 }

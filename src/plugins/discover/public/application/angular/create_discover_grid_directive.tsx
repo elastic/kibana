@@ -44,28 +44,3 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
     </I18nProvider>
   );
 }
-
-/**
- * this is just needed for the embeddable
- */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function createDiscoverGridDirective(reactDirective: any) {
-  return reactDirective(DiscoverGridEmbeddable, [
-    ['columns', { watchDepth: 'collection' }],
-    ['indexPattern', { watchDepth: 'reference' }],
-    ['isLoading', { watchDepth: 'reference' }],
-    ['onAddColumn', { watchDepth: 'reference', wrapApply: false }],
-    ['onFilter', { watchDepth: 'reference', wrapApply: false }],
-    ['onRemoveColumn', { watchDepth: 'reference', wrapApply: false }],
-    ['onSetColumns', { watchDepth: 'reference', wrapApply: false }],
-    ['onSort', { watchDepth: 'reference', wrapApply: false }],
-    ['rows', { watchDepth: 'collection' }],
-    ['sampleSize', { watchDepth: 'reference' }],
-    ['searchDescription', { watchDepth: 'reference' }],
-    ['searchTitle', { watchDepth: 'reference' }],
-    ['settings', { watchDepth: 'reference' }],
-    ['showTimeCol', { watchDepth: 'value' }],
-    ['sort', { watchDepth: 'value' }],
-    ['className', { watchDepth: 'value' }],
-  ]);
-}
