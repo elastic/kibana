@@ -16,7 +16,7 @@ import { CoreSetup } from 'src/core/public';
 import { ManagementAppMountParams } from '../../../management/public';
 import { StartDependencies, SavedObjectsManagementPluginStart } from '../plugin';
 import { ISavedObjectsManagementServiceRegistry } from '../services';
-import { getAllowedTypes, getSpaceInfo } from './../lib';
+import { getAllowedTypes } from './../lib';
 
 interface MountParams {
   core: CoreSetup<StartDependencies, SavedObjectsManagementPluginStart>;
@@ -50,7 +50,6 @@ export const mountManagementSection = async ({
   coreStart.chrome.docTitle.change(title);
 
   const capabilities = coreStart.application.capabilities;
-  const spacesInfo = await getSpaceInfo(spacesOss);
 
   const RedirectToHomeIfUnauthorized: React.FunctionComponent = ({ children }) => {
     const allowed = capabilities?.management?.kibana?.objects ?? false;
@@ -85,7 +84,6 @@ export const mountManagementSection = async ({
                   coreStart={coreStart}
                   taggingApi={savedObjectsTaggingOss?.getTaggingApi()}
                   spacesApi={spacesApi}
-                  spacesInfo={spacesInfo}
                   dataStart={data}
                   serviceRegistry={serviceRegistry}
                   actionRegistry={pluginStart.actions}

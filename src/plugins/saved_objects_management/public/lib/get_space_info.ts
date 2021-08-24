@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { Space } from '../../../spaces_oss/common';
-import type { SpacesOssPluginStart } from '../../../spaces_oss/public';
+import type { Space } from '../../../../../x-pack/plugins/spaces/common';
+import type { SpacesReactContextValue } from '../../../../../x-pack/plugins/spaces/public';
 
 export interface SpacesInfo {
   active: Space;
@@ -15,10 +15,13 @@ export interface SpacesInfo {
 }
 
 export const getSpaceInfo = async (
-  spaceApi?: SpacesOssPluginStart
+  spaceApi?: SpacesReactContextValue<any>
 ): Promise<SpacesInfo | undefined> => {
-  if (spaceApi?.isSpacesAvailable) {
-    const [active, all] = await Promise.all([spaceApi.getActiveSpace(), spaceApi.getSpaces()]);
+  if (spaceApi) {
+    const [active, all] = await Promise.all([
+      spaceApi.spacesManager.getActiveSpace(),
+      spaceApi.spacesManager.getSpaces(),
+    ]);
     return {
       active,
       all,

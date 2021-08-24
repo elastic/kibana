@@ -56,7 +56,6 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
       }),
       getActiveSpace$: () => this.spacesManager.onActiveSpaceChange$,
       getActiveSpace: () => this.spacesManager.getActiveSpace(),
-      getSpaces: () => this.spacesManager.getSpaces(),
     };
 
     if (plugins.home) {

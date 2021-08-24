@@ -22,7 +22,7 @@ import {
   SavedObjectsManagementColumnServiceStart,
 } from '../services';
 import { SavedObjectsTable } from './objects_table';
-import type { SpacesInfo } from '../lib';
+import { TableContextProvider, TableContextConsumer } from './table_context';
 
 const getEmptyFunctionComponent: React.FC<SpacesContextProps> = ({ children }) => <>{children}</>;
 
@@ -31,7 +31,6 @@ const SavedObjectsTablePage = ({
   dataStart,
   taggingApi,
   spacesApi,
-  spacesInfo,
   allowedTypes,
   serviceRegistry,
   actionRegistry,
@@ -42,7 +41,6 @@ const SavedObjectsTablePage = ({
   dataStart: DataPublicPluginStart;
   taggingApi?: SavedObjectsTaggingApi;
   spacesApi?: SpacesApi;
-  spacesInfo?: SpacesInfo;
   allowedTypes: string[];
   serviceRegistry: ISavedObjectsManagementServiceRegistry;
   actionRegistry: SavedObjectsManagementActionServiceStart;
@@ -81,37 +79,43 @@ const SavedObjectsTablePage = ({
 
   return (
     <ContextWrapper>
-      <SavedObjectsTable
-        initialQuery={initialQuery}
-        allowedTypes={allowedTypes}
-        serviceRegistry={serviceRegistry}
-        actionRegistry={actionRegistry}
-        columnRegistry={columnRegistry}
-        taggingApi={taggingApi}
-        spacesInfo={spacesInfo}
-        savedObjectsClient={coreStart.savedObjects.client}
-        indexPatterns={dataStart.indexPatterns}
-        search={dataStart.search}
-        http={coreStart.http}
-        overlays={coreStart.overlays}
-        notifications={coreStart.notifications}
-        applications={coreStart.application}
-        perPageConfig={itemsPerPage}
-        goInspectObject={(savedObject) => {
-          const { editUrl } = savedObject.meta;
-          if (editUrl) {
-            return coreStart.application.navigateToUrl(
-              coreStart.http.basePath.prepend(`/app${editUrl}`)
-            );
-          }
-        }}
-        canGoInApp={(savedObject) => {
-          const { inAppUrl } = savedObject.meta;
-          if (!inAppUrl) return false;
-          if (!inAppUrl.uiCapabilitiesPath) return true;
-          return Boolean(get(capabilities, inAppUrl.uiCapabilitiesPath));
-        }}
-      />
+      <TableContextProvider spacesApi={spacesApi}>
+        <TableContextConsumer>
+          {(tableContext) => (
+            <SavedObjectsTable
+              initialQuery={initialQuery}
+              allowedTypes={allowedTypes}
+              serviceRegistry={serviceRegistry}
+              actionRegistry={actionRegistry}
+              columnRegistry={columnRegistry}
+              taggingApi={taggingApi}
+              spacesInfo={tableContext.spacesInfo}
+              savedObjectsClient={coreStart.savedObjects.client}
+              indexPatterns={dataStart.indexPatterns}
+              search={dataStart.search}
+              http={coreStart.http}
+              overlays={coreStart.overlays}
+              notifications={coreStart.notifications}
+              applications={coreStart.application}
+              perPageConfig={itemsPerPage}
+              goInspectObject={(savedObject) => {
+                const { editUrl } = savedObject.meta;
+                if (editUrl) {
+                  return coreStart.application.navigateToUrl(
+                    coreStart.http.basePath.prepend(`/app${editUrl}`)
+                  );
+                }
+              }}
+              canGoInApp={(savedObject) => {
+                const { inAppUrl } = savedObject.meta;
+                if (!inAppUrl) return false;
+                if (!inAppUrl.uiCapabilitiesPath) return true;
+                return Boolean(get(capabilities, inAppUrl.uiCapabilitiesPath));
+              }}
+            />
+          )}
+        </TableContextConsumer>
+      </TableContextProvider>
     </ContextWrapper>
   );
 };
