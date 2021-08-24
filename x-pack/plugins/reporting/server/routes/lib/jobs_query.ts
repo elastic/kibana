@@ -102,11 +102,12 @@ export function jobsQueryFactory(reportingCore: ReportingCore): JobsQueryFactory
       return (
         response?.body.hits?.hits.map((report: SearchHit<ReportSource>) => {
           const { _source: reportSource, ...reportHead } = report;
-          if (reportSource) {
-            const reportInstance = new Report({ ...reportSource, ...reportHead });
-            return reportInstance.toApiJSON();
+          if (!reportSource) {
+            throw new Error(`Search hit did not include _source!`);
           }
-          throw new Error(`Search hit did not include _source!`);
+
+          const reportInstance = new Report({ ...reportSource, ...reportHead });
+          return reportInstance.toApiJSON();
         }) ?? []
       );
     },
@@ -155,11 +156,11 @@ export function jobsQueryFactory(reportingCore: ReportingCore): JobsQueryFactory
       });
 
       const response = await execQuery((elasticsearchClient) =>
-        elasticsearchClient.search({ body, index: getIndex() })
+        elasticsearchClient.search<ReportSource>({ body, index: getIndex() })
       );
 
-      const result = response?.body.hits.hits[0] as SearchHit<ReportSource> | undefined;
-      if (!result || !result._source) {
+      const result = response?.body.hits?.hits?.[0];
+      if (!result?._source) {
         logger.warning(`No hits resulted in search`);
         return;
       }
