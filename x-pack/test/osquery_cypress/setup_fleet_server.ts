@@ -9,7 +9,6 @@ import { ChildProcess, spawn } from 'child_process';
 import { copyFile } from 'fs/promises';
 import { unlinkSync } from 'fs';
 import { resolve } from 'path';
-import axios from 'axios';
 import { ToolingLog } from '@kbn/dev-utils';
 interface ElasticsearchConfig {
   host: string;
@@ -27,10 +26,11 @@ export class FleetManager {
     this.esConfig = esConfig;
     this.directoryPath = directoryPath;
     this.log = log;
+    this.fleetProcess = null;
   }
   public async setup(): Promise<void> {
     this.log.info('Setting fleet up');
-    await copyFile(resolve(__dirname, 'fleet-server.yml'), resolve('.', 'fleet-server.yml'));
+    await copyFile(resolve(__dirname, 'fleet_server.yml'), resolve('.', 'fleet-server.yml'));
     return new Promise((res, rej) => {
       const env = {
         ELASTICSEARCH_HOSTS: this.esConfig.host,
