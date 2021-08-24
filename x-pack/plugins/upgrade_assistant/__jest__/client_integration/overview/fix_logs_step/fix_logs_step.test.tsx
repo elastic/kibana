@@ -188,7 +188,7 @@ describe('Overview - Fix deprecation logs step', () => {
       expect(exists('hasWarningsCallout')).toBe(false);
     });
 
-    test('Handles errors', async () => {
+    test('Handles errors and has a way to retry', async () => {
       const error = {
         statusCode: 500,
         error: 'Internal server error',
@@ -201,12 +201,23 @@ describe('Overview - Fix deprecation logs step', () => {
         testBed = await setupOverviewPage();
       });
 
-      // const { exists, component } = testBed;
-      const { component } = testBed;
+      const { find, exists, component } = testBed;
 
       component.update();
 
-      // TODO: ASSERT THAT ERROR IS SHOWN OR SOMETHING..
+      expect(exists('errorCallout')).toBe(true);
+
+      httpRequestsMockHelpers.setLoadDeprecationLogsCountResponse({
+        count: 0,
+      });
+
+      await act(async () => {
+        find('errorResetButton').simulate('click');
+      });
+
+      component.update();
+
+      expect(exists('noWarningsCallout')).toBe(true);
     });
 
     test('Allows user to reset last stored date', async () => {
