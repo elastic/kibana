@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { memo, ReactNode, useCallback, useState } from 'react';
-import { EuiPanel, EuiSpacer } from '@elastic/eui';
+import React, { memo, ReactNode, useCallback, useEffect, useRef, useState } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
 import styled from 'styled-components';
 import { OutputHistory } from './components/output_history';
 import { CommandInput, CommandInputProps } from './components/command_input';
@@ -18,12 +18,12 @@ import { HistoryItemComponent, HistoryItem } from './components/history_item';
 
 const ConsoleWindow = styled(EuiPanel)`
   min-width: ${({ theme }) => theme.eui.euiBreakpoints.s};
+  min-height: 300px;
+  max-height: 100%;
+  overflow-y: auto;
+
   background-color: ${({ theme }) => theme.eui.euiCodeBlockBackgroundColor} !important;
   color: ${({ theme }) => theme.eui.euiCodeBlockColor} !important;
-
-  .output {
-    min-height: 300px;
-  }
 `;
 
 // FIXME: PT add CommonProps to the type below
@@ -35,6 +35,7 @@ export const Console = memo<ConsoleProps>(({ prompt }) => {
 
   const consoleService = useConsoleService();
   const [historyItems, setHistoryItems] = useState<HistoryItemComponent[]>([]);
+  const consoleWindowRef = useRef<HTMLDivElement | null>(null);
 
   const handleOnExecute = useCallback<CommandInputProps['onExecute']>(
     (command) => {
@@ -78,11 +79,24 @@ export const Console = memo<ConsoleProps>(({ prompt }) => {
     [consoleService]
   );
 
+  // Anytime we add a new item to the history, scroll down so that command input remains visible
+  useEffect(() => {
+    if (historyItems.length && consoleWindowRef.current) {
+      consoleWindowRef.current.scrollTop = consoleWindowRef.current.scrollHeight;
+    }
+  }, [historyItems.length]);
+
   return (
     <EuiThemeProvider darkMode={true}>
-      <ConsoleWindow>
-        <OutputHistory className="output">{historyItems}</OutputHistory>
-        <CommandInput onExecute={handleOnExecute} prompt={prompt} />
+      <ConsoleWindow panelRef={consoleWindowRef}>
+        <EuiFlexGroup direction="column">
+          <EuiFlexItem grow={true}>
+            <OutputHistory>{historyItems}</OutputHistory>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <CommandInput onExecute={handleOnExecute} prompt={prompt} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </ConsoleWindow>
     </EuiThemeProvider>
   );
