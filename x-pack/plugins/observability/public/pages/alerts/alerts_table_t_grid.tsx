@@ -32,7 +32,7 @@ import {
   EuiDataGridColumn,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiContextMenu,
+  EuiContextMenuPanel,
   EuiPopover,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -210,26 +210,21 @@ function ObservabilityActions({
     onUpdateFailure: onAlertStatusUpdated,
   });
 
-  const actionsPanels = useMemo(() => {
+  const actionsMenuItems = useMemo(() => {
     return [
-      {
-        id: 0,
-        content: [
-          timelines.getAddToExistingCaseButton({
-            event,
-            casePermissions,
-            appId: observabilityFeatureId,
-            onClose: afterCaseSelection,
-          }),
-          timelines.getAddToNewCaseButton({
-            event,
-            casePermissions,
-            appId: observabilityFeatureId,
-            onClose: afterCaseSelection,
-          }),
-          ...(alertPermissions.crud ? statusActionItems : []),
-        ],
-      },
+      timelines.getAddToExistingCaseButton({
+        event,
+        casePermissions,
+        appId: observabilityFeatureId,
+        onClose: afterCaseSelection,
+      }),
+      timelines.getAddToNewCaseButton({
+        event,
+        casePermissions,
+        appId: observabilityFeatureId,
+        onClose: afterCaseSelection,
+      }),
+      ...(alertPermissions.crud ? statusActionItems : []),
     ];
   }, [afterCaseSelection, casePermissions, timelines, event, statusActionItems, alertPermissions]);
 
@@ -253,26 +248,28 @@ function ObservabilityActions({
             aria-label="View alert in app"
           />
         </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiPopover
-            button={
-              <EuiButtonIcon
-                display="empty"
-                size="s"
-                color="text"
-                iconType="boxesHorizontal"
-                aria-label="More"
-                onClick={() => toggleActionsPopover(eventId)}
-              />
-            }
-            isOpen={openActionsPopoverId === eventId}
-            closePopover={closeActionsPopover}
-            panelPaddingSize="none"
-            anchorPosition="downLeft"
-          >
-            <EuiContextMenu panels={actionsPanels} initialPanelId={0} />
-          </EuiPopover>
-        </EuiFlexItem>
+        {actionsMenuItems.length > 0 && (
+          <EuiFlexItem>
+            <EuiPopover
+              button={
+                <EuiButtonIcon
+                  display="empty"
+                  size="s"
+                  color="text"
+                  iconType="boxesHorizontal"
+                  aria-label="More"
+                  onClick={() => toggleActionsPopover(eventId)}
+                />
+              }
+              isOpen={openActionsPopoverId === eventId}
+              closePopover={closeActionsPopover}
+              panelPaddingSize="none"
+              anchorPosition="downLeft"
+            >
+              <EuiContextMenuPanel size="s" items={actionsMenuItems} />
+            </EuiPopover>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     </>
   );
