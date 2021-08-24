@@ -23,7 +23,7 @@ import { EuiRadioGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import * as usng from 'usng.js';
-import { isNull } from 'lodash';
+import { isNaN, isNull } from 'lodash';
 import { MapCenter } from '../../../../common/descriptor_types';
 import { MapSettings } from '../../../reducers/map';
 
@@ -65,7 +65,7 @@ interface State {
   zoom: number | string;
   coord: string;
   mgrs: string;
-  utm: { northing: string; easting: string; zoneNumber: any; zone: string };
+  utm: { northing: string; easting: string; zoneNumber: any; zoneLetter: any; zone: string };
   isCoordPopoverOpen: boolean;
 }
 
@@ -81,6 +81,7 @@ export class SetViewControl extends Component<Props, State> {
       northing: '',
       easting: '',
       zoneNumber: '',
+      zoneLetter: '',
       zone: '',
     },
     isCoordPopoverOpen: false,
@@ -173,8 +174,15 @@ export class SetViewControl extends Component<Props, State> {
   };
 
   _onUTMChange = (name: 'easting' | 'northing' | 'zone', evt: ChangeEvent<HTMLInputElement>) => {
+    let value = evt.target.value;
     const updateObj: { [name: string]: any } = { ...this.state.utm };
-    updateObj[name] = isNull(evt.target.value) ? '' : evt.target.value;
+    updateObj[name] = isNull(value) ? '' : value;
+    if(name === 'zone' && value.length > 0){
+      let zoneLetter = value.substring(value.length - 1);
+      let zoneNumber = value.substring(0, value.length - 1);
+      updateObj['zoneLetter'] = isNaN(zoneLetter) ? zoneLetter : '';
+      updateObj['zoneNumber'] =  isNaN(zoneNumber) ? '' : zoneNumber;
+    }
     this.setState(
       {
         // @ts-ignore
@@ -206,7 +214,7 @@ export class SetViewControl extends Component<Props, State> {
 
       this.setState({ mgrs, utm });
     } else {
-      this.setState({ mgrs: '', utm: { northing: '', easting: '', zoneNumber: '', zone: '' } });
+      this.setState({ mgrs: '', utm: { northing: '', easting: '', zoneNumber: '', zoneLetter: '', zone: '' } });
     }
   };
 
@@ -238,7 +246,7 @@ export class SetViewControl extends Component<Props, State> {
       this.setState({
         lat: '',
         lon: '',
-        utm: { northing: '', easting: '', zoneNumber: '', zone: '' },
+        utm: { northing: '', easting: '', zoneNumber: '', zoneLetter: '', zone: '' },
       });
     }
   };
@@ -324,12 +332,13 @@ export class SetViewControl extends Component<Props, State> {
     let point;
     try {
       point = convertMGRStoLL(value);
+      console.log('MGRS Point here: ', point);
     } catch (err) {
       point = undefined;
       // eslint-disable-next-line no-console
     }
 
-    const isInvalid = value === '' || point === undefined;
+    const isInvalid = value === '' || point === undefined || (!point.north || isNaN(point.north)) || (!point.south || isNaN(point.south)) || (!point.east || isNaN(point.east)) || (!point.west || isNaN(point.west));
     const error = isInvalid ? i18n.translate('xpack.maps.setViewControl.mgrsInvalid', {
       defaultMessage: 'MGRS is invalid'
     }) : null;
@@ -494,7 +503,7 @@ export class SetViewControl extends Component<Props, State> {
       dataTestSubj: 'longitudeInput',
     });
 
-    const { component: mgrsFormRow } = this._renderMGRSFormRow({
+    const { isInvalid: isMGRSInvalid, component: mgrsFormRow } = this._renderMGRSFormRow({
       value: this.state.mgrs,
       onChange: this._onMGRSChange,
       label: i18n.translate('xpack.maps.setViewControl.mgrsLabel', {
@@ -503,7 +512,7 @@ export class SetViewControl extends Component<Props, State> {
       dataTestSubj: 'mgrsInput',
     });
 
-    const { component: utmZoneRow } = this._renderUTMZoneRow({
+    const { isInvalid: isUtmZoneInvalid, component: utmZoneRow } = this._renderUTMZoneRow({
       value: this.state.utm !== undefined ? this.state.utm.zone : '',
       onChange: this._onUTMZoneChange,
       label: i18n.translate('xpack.maps.setViewControl.utmZoneLabel', {
@@ -512,7 +521,7 @@ export class SetViewControl extends Component<Props, State> {
       dataTestSubj: 'utmZoneInput',
     });
 
-    const { component: utmEastingRow } = this._renderUTMEastingRow({
+    const { isInvalid: isUtmEastingInvalid, component: utmEastingRow } = this._renderUTMEastingRow({
       value: this.state.utm !== undefined ? this.state.utm.easting : '',
       onChange: this._onUTMEastingChange,
       label: i18n.translate('xpack.maps.setViewControl.utmEastingLabel', {
@@ -521,7 +530,7 @@ export class SetViewControl extends Component<Props, State> {
       dataTestSubj: 'utmEastingInput',
     });
 
-    const { component: utmNorthingRow } = this._renderUTMNorthingRow({
+    const { isInvalid: isUtmNorthingInvalid, component: utmNorthingRow } = this._renderUTMNorthingRow({
       value: this.state.utm !== undefined ? this.state.utm.northing : '',
       onChange: this._onUTMNorthingChange,
       label: i18n.translate('xpack.maps.setViewControl.utmNorthingLabel', {
@@ -611,7 +620,7 @@ export class SetViewControl extends Component<Props, State> {
           <EuiButton
             size="s"
             fill
-            disabled={isLatInvalid || isLonInvalid || isZoomInvalid}
+            disabled={isLatInvalid || isLonInvalid || isZoomInvalid || isMGRSInvalid || isUtmZoneInvalid || isUtmEastingInvalid || isUtmNorthingInvalid}
             onClick={this._onSubmit}
             data-test-subj="submitViewButton"
           >
@@ -668,11 +677,14 @@ function convertLatLonToUTM(lat: any, lon: any) {
     norwest = 'S';
   }
 
-  utmCoord.zoneLetter = isNaN(lat) ? '' : converter.UTMLetterDesignator(lat);
-  utmCoord.zone = `${utmCoord.zoneNumber}${utmCoord.zoneLetter}`;
-  utmCoord.easting = Math.round(utmCoord.easting);
-  utmCoord.northing = Math.round(utmCoord.northing);
-  utmCoord.str = `${utmCoord.zoneNumber}${utmCoord.zoneLetter} ${utmCoord.easting}${eastwest} ${utmCoord.northing}${norwest}`;
+  if(utmCoord !== "undefined"){
+    utmCoord.zoneLetter = isNaN(lat) ? '' : converter.UTMLetterDesignator(lat);
+    utmCoord.zone = `${utmCoord.zoneNumber}${utmCoord.zoneLetter}`;
+    utmCoord.easting = Math.round(utmCoord.easting);
+    utmCoord.northing = Math.round(utmCoord.northing);
+    utmCoord.str = `${utmCoord.zoneNumber}${utmCoord.zoneLetter} ${utmCoord.easting}${eastwest} ${utmCoord.northing}${norwest}`;
+  }
+  
 
   return utmCoord;
 }
