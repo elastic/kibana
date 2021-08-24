@@ -30,47 +30,15 @@ export class UpgradeAssistantPageObject extends FtrService {
     });
   }
 
-  async toggleDeprecationLogging() {
-    this.log.debug('toggleDeprecationLogging()');
-    await this.testSubjects.click('upgradeAssistantDeprecationToggle');
-  }
-
-  async isDeprecationLoggingEnabled() {
-    const isDeprecationEnabled = await this.testSubjects.getAttribute(
-      'upgradeAssistantDeprecationToggle',
-      'aria-checked'
-    );
-    this.log.debug(`Deprecation enabled == ${isDeprecationEnabled}`);
-    return isDeprecationEnabled === 'true';
-  }
-
-  async deprecationLoggingEnabledLabel() {
-    const loggingEnabledLabel = await this.find.byCssSelector(
-      '[data-test-subj="upgradeAssistantDeprecationToggle"] ~ span'
-    );
-    return await loggingEnabledLabel.getVisibleText();
-  }
-
-  async clickTab(tabId: string) {
+  async clickEsDeprecationsPanel() {
     return await this.retry.try(async () => {
-      this.log.debug('clickTab()');
-      await this.find.clickByCssSelector(`.euiTabs .euiTab#${tabId}`);
+      await this.testSubjects.click('esStatsPanel');
     });
   }
 
-  async waitForTelemetryHidden() {
-    const self = this;
-    await this.retry.waitFor('Telemetry to disappear.', async () => {
-      return (await self.isTelemetryExists()) === false;
+  async clickKibanaDeprecationsPanel() {
+    return await this.retry.try(async () => {
+      await this.testSubjects.click('kibanaStatsPanel');
     });
-  }
-
-  async issueSummaryText() {
-    this.log.debug('expectIssueSummary()');
-    return await this.testSubjects.getVisibleText('upgradeAssistantIssueSummary');
-  }
-
-  async isTelemetryExists() {
-    return await this.testSubjects.exists('upgradeAssistantTelemetryRunning');
   }
 }

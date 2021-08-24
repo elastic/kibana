@@ -448,6 +448,12 @@ export default async function ({ readConfigFile }) {
         global_upgrade_assistant_role: {
           elasticsearch: {
             cluster: ['manage'],
+            indices: [
+              {
+                names: ['*'],
+                privileges: ['read', 'delete', 'create_index', 'view_index_metadata'],
+              },
+            ],
           },
           kibana: [
             {
