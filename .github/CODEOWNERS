@@ -280,7 +280,6 @@
 # Security
 /src/core/server/csp/ @elastic/kibana-security @elastic/kibana-core
 /src/plugins/security_oss/ @elastic/kibana-security
-/src/plugins/spaces_oss/ @elastic/kibana-security
 /src/plugins/interactive_setup/ @elastic/kibana-security
 /test/security_functional/ @elastic/kibana-security
 /x-pack/plugins/spaces/ @elastic/kibana-security
@@ -424,6 +423,17 @@
 #CC# /x-pack/plugins/logstash/ @elastic/logstash
 
 # Reporting
+/x-pack/examples/reporting_example/ @elastic/kibana-reporting-services @elastic/kibana-app-services
+/x-pack/plugins/reporting/ @elastic/kibana-reporting-services @elastic/kibana-app-services
+/x-pack/test/functional/apps/dashboard/reporting/ @elastic/kibana-reporting-services @elastic/kibana-app-services
+/x-pack/test/functional/apps/reporting/ @elastic/kibana-reporting-services @elastic/kibana-app-services
+/x-pack/test/functional/apps/reporting_management/ @elastic/kibana-reporting-services @elastic/kibana-app-services
+/x-pack/test/functional/es_archives/lens/reporting/ @elastic/kibana-reporting-services @elastic/kibana-app-services
+/x-pack/test/functional/es_archives/reporting/ @elastic/kibana-reporting-services @elastic/kibana-app-services
+/x-pack/test/functional/fixtures/kbn_archiver/reporting/ @elastic/kibana-reporting-services @elastic/kibana-app-services
+/x-pack/test/reporting_api_integration/ @elastic/kibana-reporting-services @elastic/kibana-app-services
+/x-pack/test/reporting_functional/ @elastic/kibana-reporting-services @elastic/kibana-app-services
+/x-pack/test/stack_functional_integration/apps/reporting/ @elastic/kibana-reporting-services @elastic/kibana-app-services
 #CC# /x-pack/plugins/reporting/ @elastic/kibana-reporting-services
 
 
