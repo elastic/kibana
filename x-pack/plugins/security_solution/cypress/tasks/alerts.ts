@@ -75,7 +75,7 @@ export const viewThreatDetails = () => {
 export const setEnrichmentDates = (from?: string, to?: string) => {
   cy.get(ENRICHMENT_QUERY_RANGE_PICKER).within(() => {
     if (from) {
-      cy.get(ENRICHMENT_QUERY_START_INPUT).type(`{selectall}${from}{enter}`);
+      cy.get(ENRICHMENT_QUERY_START_INPUT).first().type(`{selectall}${from}{enter}`);
     }
     if (to) {
       cy.get(ENRICHMENT_QUERY_END_INPUT).type(`{selectall}${to}{enter}`);
