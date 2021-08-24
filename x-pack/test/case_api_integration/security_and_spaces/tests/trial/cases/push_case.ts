@@ -275,6 +275,8 @@ export default ({ getService }: FtrProviderContext): void => {
         action: 'push-to-service',
         action_by: defaultUser,
         old_value: null,
+        old_val_connector_id: null,
+        new_val_connector_id: connector.id,
         case_id: `${postedCase.id}`,
         comment_id: null,
         sub_case_id: '',
@@ -284,7 +286,6 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(parsedNewValue).to.eql({
         pushed_at: pushedCase.external_service!.pushed_at,
         pushed_by: defaultUser,
-        connector_id: connector.id,
         connector_name: connector.name,
         external_id: '123',
         external_title: 'INC01',

@@ -45,14 +45,18 @@ export default function createGetTests({ getService }: FtrProviderContext) {
 
         expect(connectorUserAction.action_field.length).eql(1);
         expect(connectorUserAction.action_field[0]).eql('connector');
+        expect(connectorUserAction.old_val_connector_id).to.eql(
+          'c1900ac0-017f-11eb-93f8-d161651bf509'
+        );
         expect(oldValue).to.eql({
-          id: 'c1900ac0-017f-11eb-93f8-d161651bf509',
           name: 'none',
           type: '.none',
           fields: null,
         });
+        expect(connectorUserAction.new_val_connector_id).to.eql(
+          'b1900ac0-017f-11eb-93f8-d161651bf509'
+        );
         expect(newValue).to.eql({
-          id: 'b1900ac0-017f-11eb-93f8-d161651bf509',
           name: 'none',
           type: '.none',
           fields: null,
