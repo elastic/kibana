@@ -16,7 +16,6 @@ import {
   MockApmPluginContextWrapper,
 } from '../../../context/apm_plugin/mock_apm_plugin_context';
 import * as hooks from '../../../hooks/use_fetcher';
-import * as urlParamsHooks from '../../../context/url_params_context/use_url_params';
 import * as useApmParamsHooks from '../../../hooks/use_apm_params';
 
 function Wrapper({ children }: { children?: ReactNode }) {
@@ -69,15 +68,6 @@ describe('TraceLink', () => {
 
   describe('when no transaction is found', () => {
     it('renders a trace page', () => {
-      jest.spyOn(urlParamsHooks, 'useUrlParams').mockReturnValue({
-        rangeId: 0,
-        refreshTimeRange: jest.fn(),
-        uxUiFilters: {},
-        urlParams: {
-          rangeFrom: 'now-24h',
-          rangeTo: 'now',
-        },
-      });
       jest.spyOn(hooks, 'useFetcher').mockReturnValue({
         data: { transaction: undefined },
         status: hooks.FETCH_STATUS.SUCCESS,
@@ -103,15 +93,6 @@ describe('TraceLink', () => {
   });
 
   describe('transaction page', () => {
-    beforeAll(() => {
-      jest.spyOn(urlParamsHooks, 'useUrlParams').mockReturnValue({
-        rangeId: 0,
-        refreshTimeRange: jest.fn(),
-        uxUiFilters: {},
-        urlParams: {},
-      });
-    });
-
     it('renders with date range params', () => {
       const transaction = {
         service: { name: 'foo' },

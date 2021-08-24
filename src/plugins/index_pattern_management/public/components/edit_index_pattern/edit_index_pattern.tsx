@@ -49,8 +49,8 @@ const confirmModalOptionsDelete = {
   confirmButtonText: i18n.translate('indexPatternManagement.editIndexPattern.deleteButton', {
     defaultMessage: 'Delete',
   }),
-  title: i18n.translate('indexPatternManagement.editIndexPattern.deleteHeader', {
-    defaultMessage: 'Delete index pattern?',
+  title: i18n.translate('indexPatternManagement.editDataView.deleteHeader', {
+    defaultMessage: 'Delete data view?',
   }),
 };
 
@@ -129,8 +129,8 @@ export const EditIndexPattern = withRouter(
       }
     );
 
-    const headingAriaLabel = i18n.translate('indexPatternManagement.editIndexPattern.detailsAria', {
-      defaultMessage: 'Index pattern details',
+    const headingAriaLabel = i18n.translate('indexPatternManagement.editDataView.detailsAria', {
+      defaultMessage: 'Data view details',
     });
 
     chrome.docTitle.change(indexPattern.title);
