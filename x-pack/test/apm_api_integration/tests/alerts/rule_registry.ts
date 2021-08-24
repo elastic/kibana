@@ -115,6 +115,16 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       await new Promise((resolve) => {
         setTimeout(resolve, BULK_INDEX_DELAY);
       });
+
+      /**
+       * When calling refresh on an index pattern .alerts-observability.apm.alerts* (as was originally the hard-coded string in this test)
+       * The response from Elasticsearch is a 200, even if no indices which match that index pattern have been created.
+       * When calling refresh on a concrete index alias .alerts-observability.apm.alerts-default for instance,
+       * we receive a 404 error index_not_found_exception when no indices have been created which match that alias (obviously).
+       * Since we are receiving a concrete index alias from the observability api instead of a kibana index pattern
+       * and we understand / expect that this index does not exist at certain points of the test, we can try-catch at certain points without caring if the call fails.
+       * There are points in the code where we do want to ensure we get the appropriate error message back
+       */
       try {
         await es.indices.refresh({
           index: targetIndices[0],
@@ -135,11 +145,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     it('does not bootstrap indices on plugin startup', async () => {
       const { body: targetIndices } = await getAlertsTargetIndices();
       try {
-        await es.indices.get({
+        const res = await es.indices.get({
           index: targetIndices[0],
           expand_wildcards: 'open',
           allow_no_indices: true,
         });
+        expect(res).to.be.empty();
       } catch (exc) {
         expect(exc.statusCode).to.eql(404);
       }
@@ -152,12 +163,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       };
 
       before(async () => {
-        try {
-          await es.indices.delete({
-            index: APM_METRIC_INDEX_NAME,
-          });
-          // eslint-disable-next-line no-empty
-        } catch (exc) {}
         await es.indices.create({
           index: APM_METRIC_INDEX_NAME,
           body: {
@@ -260,18 +265,15 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           }
         }
 
-        try {
-          await es.deleteByQuery({
-            index: targetIndices[0],
-            body: {
-              query: {
-                match_all: {},
-              },
+        await es.deleteByQuery({
+          index: targetIndices[0],
+          body: {
+            query: {
+              match_all: {},
             },
-            refresh: true,
-          });
-          // eslint-disable-next-line no-empty
-        } catch (exc) {}
+          },
+          refresh: true,
+        });
 
         await es.indices.delete({
           index: APM_METRIC_INDEX_NAME,
@@ -287,7 +289,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         const { body: targetIndices } = await getAlertsTargetIndices();
 
         try {
-          await es.search({
+          const res = await es.search({
             index: targetIndices[0],
             body: {
               query: {
@@ -301,6 +303,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               },
             },
           });
+          expect(res).to.be.empty();
         } catch (exc) {
           expect(exc.message).contain('index_not_found_exception');
         }
@@ -318,7 +321,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         alert = await waitUntilNextExecution(alert);
 
         try {
-          await es.search({
+          const res = await es.search({
             index: targetIndices[0],
             body: {
               query: {
@@ -332,6 +335,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               },
             },
           });
+          expect(res).to.be.empty();
         } catch (exc) {
           expect(exc.message).contain('index_not_found_exception');
         }
