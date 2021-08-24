@@ -63,6 +63,7 @@ export interface Alert<Params extends AlertTypeParams = never> {
   alertTypeId: string;
   consumer: string;
   schedule: IntervalSchedule;
+  legacyId: string | null;
   actions: AlertAction[];
   params: Params;
   scheduledTaskId?: string;

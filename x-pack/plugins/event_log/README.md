@@ -284,7 +284,8 @@ interface EventLogClient {
   findEventsBySavedObjectIds(
     type: string,
     ids: string[],
-    options?: Partial<FindOptionsType>
+    options?: Partial<FindOptionsType>,
+    legacyIds?: string[]
   ): Promise<QueryEventsBySavedObjectResult>;
 }
 
@@ -404,7 +405,8 @@ export interface IEventLogClient {
   findEventsBySavedObjectIds(
     type: string,
     ids: string[],
-    options?: Partial<FindOptionsType>
+    options?: Partial<FindOptionsType>,
+    legacyIds?: string[]
   ): Promise<QueryEventsBySavedObjectResult>;
 }
 ```

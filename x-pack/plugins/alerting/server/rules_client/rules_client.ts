@@ -502,13 +502,18 @@ export class RulesClient {
     this.logger.debug(`getAlertInstanceSummary(): search the event log for alert ${id}`);
     let events: IEvent[];
     try {
-      const queryResults = await eventLogClient.findEventsBySavedObjectIds('alert', [id], {
-        page: 1,
-        per_page: 10000,
-        start: parsedDateStart.toISOString(),
-        end: dateNow.toISOString(),
-        sort_order: 'desc',
-      });
+      const queryResults = await eventLogClient.findEventsBySavedObjectIds(
+        'alert',
+        [id],
+        {
+          page: 1,
+          per_page: 10000,
+          start: parsedDateStart.toISOString(),
+          end: dateNow.toISOString(),
+          sort_order: 'desc',
+        },
+        !!alert.legacyId ? [alert.legacyId] : undefined
+      );
       events = queryResults.data;
     } catch (err) {
       this.logger.debug(
@@ -1542,7 +1547,6 @@ export class RulesClient {
       notifyWhen,
       scheduledTaskId,
       params,
-      legacyId, // exclude from result because it is an internal variable
       executionStatus,
       schedule,
       actions,
