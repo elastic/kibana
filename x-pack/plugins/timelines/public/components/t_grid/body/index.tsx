@@ -308,12 +308,18 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
       ({ eventIds, isSelected }: { eventIds: string[]; isSelected: boolean }) => {
         setSelected({
           id,
-          eventIds: getEventIdToDataMapping(data, eventIds, queryFields),
+          eventIds: getEventIdToDataMapping(
+            data,
+            eventIds,
+            queryFields,
+            hasAlertsCrud ?? false,
+            hasAlertsCrudPermissions
+          ),
           isSelected,
           isSelectAllChecked: isSelected && selectedCount + 1 === data.length,
         });
       },
-      [setSelected, id, data, selectedCount, queryFields]
+      [setSelected, id, data, queryFields, hasAlertsCrud, hasAlertsCrudPermissions, selectedCount]
     );
 
     const onSelectPage: OnSelectAll = useCallback(
@@ -324,13 +330,15 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
               eventIds: getEventIdToDataMapping(
                 data,
                 data.map((event) => event._id),
-                queryFields
+                queryFields,
+                hasAlertsCrud ?? false,
+                hasAlertsCrudPermissions
               ),
               isSelected,
               isSelectAllChecked: isSelected,
             })
           : clearSelected({ id }),
-      [setSelected, clearSelected, id, data, queryFields]
+      [setSelected, id, data, queryFields, hasAlertsCrud, hasAlertsCrudPermissions, clearSelected]
     );
 
     // Sync to selectAll so parent components can select all events
