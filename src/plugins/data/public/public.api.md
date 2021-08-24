@@ -1167,7 +1167,10 @@ export const INDEX_PATTERN_SAVED_OBJECT_TYPE = "index-pattern";
 export class IndexPattern implements IIndexPattern {
     // Warning: (ae-forgotten-export) The symbol "IndexPatternDeps" needs to be exported by the entry point index.d.ts
     constructor({ spec, fieldFormats, shortDotsEnable, metaFields, }: IndexPatternDeps);
-    addRuntimeField(name: string, runtimeField: RuntimeField): void;
+    // Warning: (ae-forgotten-export) The symbol "RuntimeCompositeWithSubFields" needs to be exported by the entry point index.d.ts
+    addRuntimeComposite(name: string, runtimeComposite: RuntimeCompositeWithSubFields): IndexPatternField[];
+    // Warning: (ae-forgotten-export) The symbol "EnhancedRuntimeField" needs to be exported by the entry point index.d.ts
+    addRuntimeField(name: string, enhancedRuntimeField: EnhancedRuntimeField): IndexPatternField;
     // @deprecated
     addScriptedField(name: string, script: string, fieldType?: string): Promise<void>;
     readonly allowNoIndex: boolean;
@@ -1206,7 +1209,9 @@ export class IndexPattern implements IIndexPattern {
             field: any;
             format: string;
         }[];
-        runtimeFields: Record<string, RuntimeField>;
+        runtimeFields: {
+            [x: string]: RuntimeField;
+        };
     };
     // (undocumented)
     getFieldAttrs: () => {
@@ -1229,6 +1234,9 @@ export class IndexPattern implements IIndexPattern {
         typeMeta?: string | undefined;
         type?: string | undefined;
     };
+    // Warning: (ae-forgotten-export) The symbol "RuntimeComposite" needs to be exported by the entry point index.d.ts
+    getRuntimeComposite(name: string): RuntimeComposite | null;
+    getRuntimeCompositeWithSubFields(name: string): RuntimeCompositeWithSubFields | null;
     getRuntimeField(name: string): RuntimeField | null;
     // @deprecated (undocumented)
     getScriptedFields(): IndexPatternField[];
@@ -1248,6 +1256,7 @@ export class IndexPattern implements IIndexPattern {
     isTimeNanosBased(): boolean;
     // (undocumented)
     metaFields: string[];
+    removeRuntimeComposite(name: string): void;
     removeRuntimeField(name: string): void;
     // @deprecated
     removeScriptedField(fieldName: string): void;
@@ -1288,6 +1297,8 @@ export interface IndexPatternAttributes {
     fields: string;
     // (undocumented)
     intervalName?: string;
+    // (undocumented)
+    runtimeCompositeMap?: string;
     // (undocumented)
     runtimeFieldMap?: string;
     // (undocumented)
@@ -1439,6 +1450,8 @@ export interface IndexPatternSpec {
     id?: string;
     // @deprecated (undocumented)
     intervalName?: string;
+    // (undocumented)
+    runtimeCompositeMap?: Record<string, RuntimeComposite>;
     // (undocumented)
     runtimeFieldMap?: Record<string, RuntimeField>;
     // (undocumented)
@@ -1959,6 +1972,12 @@ export type RefreshInterval = {
     pause: boolean;
     value: number;
 };
+
+// Warning: (ae-forgotten-export) The symbol "RUNTIME_FIELD_TYPES" needs to be exported by the entry point index.d.ts
+// Warning: (ae-missing-release-tag) "RuntimeType" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export type RuntimeType = typeof RUNTIME_FIELD_TYPES[number];
 
 // Warning: (ae-missing-release-tag) "SavedQuery" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //

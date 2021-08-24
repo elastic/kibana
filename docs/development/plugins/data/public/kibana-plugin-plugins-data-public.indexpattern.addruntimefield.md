@@ -9,7 +9,7 @@ Add a runtime field - Appended to existing mapped field or a new field is create
 <b>Signature:</b>
 
 ```typescript
-addRuntimeField(name: string, runtimeField: RuntimeField): void;
+addRuntimeField(name: string, enhancedRuntimeField: EnhancedRuntimeField): IndexPatternField;
 ```
 
 ## Parameters
@@ -17,9 +17,9 @@ addRuntimeField(name: string, runtimeField: RuntimeField): void;
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  name | <code>string</code> |  |
-|  runtimeField | <code>RuntimeField</code> |  |
+|  enhancedRuntimeField | <code>EnhancedRuntimeField</code> |  |
 
 <b>Returns:</b>
 
-`void`
+`IndexPatternField`
 

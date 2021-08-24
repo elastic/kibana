@@ -45,7 +45,8 @@ export declare class IndexPattern implements IIndexPattern
 
 |  Method | Modifiers | Description |
 |  --- | --- | --- |
-|  [addRuntimeField(name, runtimeField)](./kibana-plugin-plugins-data-public.indexpattern.addruntimefield.md) |  | Add a runtime field - Appended to existing mapped field or a new field is created as appropriate |
+|  [addRuntimeComposite(name, runtimeComposite)](./kibana-plugin-plugins-data-public.indexpattern.addruntimecomposite.md) |  | Create a runtime composite and add its subFields to the index pattern fields list |
+|  [addRuntimeField(name, enhancedRuntimeField)](./kibana-plugin-plugins-data-public.indexpattern.addruntimefield.md) |  | Add a runtime field - Appended to existing mapped field or a new field is created as appropriate |
 |  [addScriptedField(name, script, fieldType)](./kibana-plugin-plugins-data-public.indexpattern.addscriptedfield.md) |  | Add scripted field to field list |
 |  [getAggregationRestrictions()](./kibana-plugin-plugins-data-public.indexpattern.getaggregationrestrictions.md) |  |  |
 |  [getAsSavedObjectBody()](./kibana-plugin-plugins-data-public.indexpattern.getassavedobjectbody.md) |  | Returns index pattern as saved object body for saving |
@@ -54,6 +55,8 @@ export declare class IndexPattern implements IIndexPattern
 |  [getFormatterForField(field)](./kibana-plugin-plugins-data-public.indexpattern.getformatterforfield.md) |  | Provide a field, get its formatter |
 |  [getFormatterForFieldNoDefault(fieldname)](./kibana-plugin-plugins-data-public.indexpattern.getformatterforfieldnodefault.md) |  | Get formatter for a given field name. Return undefined if none exists |
 |  [getNonScriptedFields()](./kibana-plugin-plugins-data-public.indexpattern.getnonscriptedfields.md) |  |  |
+|  [getRuntimeComposite(name)](./kibana-plugin-plugins-data-public.indexpattern.getruntimecomposite.md) |  | Returns runtime composite if exists |
+|  [getRuntimeCompositeWithSubFields(name)](./kibana-plugin-plugins-data-public.indexpattern.getruntimecompositewithsubfields.md) |  | Returns runtime composite (if exists) with its subFields |
 |  [getRuntimeField(name)](./kibana-plugin-plugins-data-public.indexpattern.getruntimefield.md) |  | Returns runtime field if exists |
 |  [getScriptedFields()](./kibana-plugin-plugins-data-public.indexpattern.getscriptedfields.md) |  |  |
 |  [getSourceFiltering()](./kibana-plugin-plugins-data-public.indexpattern.getsourcefiltering.md) |  | Get the source filtering configuration for that index. |
@@ -61,6 +64,7 @@ export declare class IndexPattern implements IIndexPattern
 |  [hasRuntimeField(name)](./kibana-plugin-plugins-data-public.indexpattern.hasruntimefield.md) |  | Checks if runtime field exists |
 |  [isTimeBased()](./kibana-plugin-plugins-data-public.indexpattern.istimebased.md) |  |  |
 |  [isTimeNanosBased()](./kibana-plugin-plugins-data-public.indexpattern.istimenanosbased.md) |  |  |
+|  [removeRuntimeComposite(name)](./kibana-plugin-plugins-data-public.indexpattern.removeruntimecomposite.md) |  | Remove a runtime composite with its associated subFields |
 |  [removeRuntimeField(name)](./kibana-plugin-plugins-data-public.indexpattern.removeruntimefield.md) |  | Remove a runtime field - removed from mapped field or removed unmapped field as appropriate. Doesn't clear associated field attributes. |
 |  [removeScriptedField(fieldName)](./kibana-plugin-plugins-data-public.indexpattern.removescriptedfield.md) |  | Remove scripted field from field list |
 |  [replaceAllRuntimeFields(newFields)](./kibana-plugin-plugins-data-public.indexpattern.replaceallruntimefields.md) |  | Replaces all existing runtime fields with new fields |
