@@ -11,7 +11,6 @@ import { SavedObjectTypeRegistry } from 'src/core/server';
 import { savedObjectsClientMock } from 'src/core/server/mocks';
 
 import { DEFAULT_SPACE_ID } from '../../common/constants';
-import type { SpacesClient } from '../spaces_client';
 import { spacesClientMock } from '../spaces_client/spaces_client.mock';
 import { spacesServiceMock } from '../spaces_service/spaces_service.mock';
 import { SpacesSavedObjectsClient } from './spaces_saved_objects_client';
@@ -68,6 +67,8 @@ const ERROR_NAMESPACE_SPECIFIED = 'Spaces currently determines the namespaces';
       const request = createMockRequest();
       const baseClient = createMockClient();
       const spacesService = createSpacesService(currentSpace.id);
+      const spacesClient = spacesClientMock.create();
+      spacesService.createSpacesClient.mockReturnValue(spacesClient);
 
       const client = new SpacesSavedObjectsClient({
         request,
@@ -75,7 +76,7 @@ const ERROR_NAMESPACE_SPECIFIED = 'Spaces currently determines the namespaces';
         getSpacesService: () => spacesService,
         typeRegistry,
       });
-      return { client, baseClient, spacesService };
+      return { client, baseClient, spacesClient };
     };
 
     describe('#get', () => {
@@ -168,10 +169,8 @@ const ERROR_NAMESPACE_SPECIFIED = 'Spaces currently determines the namespaces';
       const EMPTY_RESPONSE = { saved_objects: [], total: 0, per_page: 20, page: 1 };
 
       test(`returns empty result if user is unauthorized in this space`, async () => {
-        const { client, baseClient, spacesService } = createSpacesSavedObjectsClient();
-        const spacesClient = spacesClientMock.create();
+        const { client, baseClient, spacesClient } = createSpacesSavedObjectsClient();
         spacesClient.getAll.mockResolvedValue([]);
-        spacesService.createSpacesClient.mockReturnValue(spacesClient);
 
         const options = Object.freeze({ type: 'foo', namespaces: ['some-ns'] });
         const actualReturnValue = await client.find(options);
@@ -181,10 +180,8 @@ const ERROR_NAMESPACE_SPECIFIED = 'Spaces currently determines the namespaces';
       });
 
       test(`returns empty result if user is unauthorized in any space`, async () => {
-        const { client, baseClient, spacesService } = createSpacesSavedObjectsClient();
-        const spacesClient = spacesClientMock.create();
+        const { client, baseClient, spacesClient } = createSpacesSavedObjectsClient();
         spacesClient.getAll.mockRejectedValue(Boom.unauthorized());
-        spacesService.createSpacesClient.mockReturnValue(spacesClient);
 
         const options = Object.freeze({ type: 'foo', namespaces: ['some-ns'] });
         const actualReturnValue = await client.find(options);
@@ -234,7 +231,7 @@ const ERROR_NAMESPACE_SPECIFIED = 'Spaces currently determines the namespaces';
       });
 
       test(`passes options.namespaces along`, async () => {
-        const { client, baseClient, spacesService } = createSpacesSavedObjectsClient();
+        const { client, baseClient, spacesClient } = createSpacesSavedObjectsClient();
         const expectedReturnValue = {
           saved_objects: [createMockResponse()],
           total: 1,
@@ -243,9 +240,6 @@ const ERROR_NAMESPACE_SPECIFIED = 'Spaces currently determines the namespaces';
         };
         baseClient.find.mockReturnValue(Promise.resolve(expectedReturnValue));
 
-        const spacesClient = spacesService.createSpacesClient(
-          null as any
-        ) as jest.Mocked<SpacesClient>;
         spacesClient.getAll.mockImplementation(() =>
           Promise.resolve([
             { id: 'ns-1', name: '', disabledFeatures: [] },
@@ -265,7 +259,7 @@ const ERROR_NAMESPACE_SPECIFIED = 'Spaces currently determines the namespaces';
       });
 
       test(`filters options.namespaces based on authorization`, async () => {
-        const { client, baseClient, spacesService } = createSpacesSavedObjectsClient();
+        const { client, baseClient, spacesClient } = createSpacesSavedObjectsClient();
         const expectedReturnValue = {
           saved_objects: [createMockResponse()],
           total: 1,
@@ -274,9 +268,6 @@ const ERROR_NAMESPACE_SPECIFIED = 'Spaces currently determines the namespaces';
         };
         baseClient.find.mockReturnValue(Promise.resolve(expectedReturnValue));
 
-        const spacesClient = spacesService.createSpacesClient(
-          null as any
-        ) as jest.Mocked<SpacesClient>;
         spacesClient.getAll.mockImplementation(() =>
           Promise.resolve([
             { id: 'ns-1', name: '', disabledFeatures: [] },
@@ -296,7 +287,7 @@ const ERROR_NAMESPACE_SPECIFIED = 'Spaces currently determines the namespaces';
       });
 
       test(`translates options.namespace: ['*']`, async () => {
-        const { client, baseClient, spacesService } = createSpacesSavedObjectsClient();
+        const { client, baseClient, spacesClient } = createSpacesSavedObjectsClient();
         const expectedReturnValue = {
           saved_objects: [createMockResponse()],
           total: 1,
@@ -305,9 +296,6 @@ const ERROR_NAMESPACE_SPECIFIED = 'Spaces currently determines the namespaces';
         };
         baseClient.find.mockReturnValue(Promise.resolve(expectedReturnValue));
 
-        const spacesClient = spacesService.createSpacesClient(
-          null as any
-        ) as jest.Mocked<SpacesClient>;
         spacesClient.getAll.mockImplementation(() =>
           Promise.resolve([
             { id: 'ns-1', name: '', disabledFeatures: [] },
@@ -534,10 +522,8 @@ const ERROR_NAMESPACE_SPECIFIED = 'Spaces currently determines the namespaces';
 
     describe('#openPointInTimeForType', () => {
       test(`throws error if if user is unauthorized in this space`, async () => {
-        const { client, baseClient, spacesService } = createSpacesSavedObjectsClient();
-        const spacesClient = spacesClientMock.create();
+        const { client, baseClient, spacesClient } = createSpacesSavedObjectsClient();
         spacesClient.getAll.mockResolvedValue([]);
-        spacesService.createSpacesClient.mockReturnValue(spacesClient);
 
         await expect(
           client.openPointInTimeForType('foo', { namespaces: ['bar'] })
@@ -547,10 +533,8 @@ const ERROR_NAMESPACE_SPECIFIED = 'Spaces currently determines the namespaces';
       });
 
       test(`throws error if if user is unauthorized in any space`, async () => {
-        const { client, baseClient, spacesService } = createSpacesSavedObjectsClient();
-        const spacesClient = spacesClientMock.create();
+        const { client, baseClient, spacesClient } = createSpacesSavedObjectsClient();
         spacesClient.getAll.mockRejectedValue(Boom.unauthorized());
-        spacesService.createSpacesClient.mockReturnValue(spacesClient);
 
         await expect(
           client.openPointInTimeForType('foo', { namespaces: ['bar'] })
@@ -560,13 +544,10 @@ const ERROR_NAMESPACE_SPECIFIED = 'Spaces currently determines the namespaces';
       });
 
       test(`filters options.namespaces based on authorization`, async () => {
-        const { client, baseClient, spacesService } = createSpacesSavedObjectsClient();
+        const { client, baseClient, spacesClient } = createSpacesSavedObjectsClient();
         const expectedReturnValue = { id: 'abc123' };
         baseClient.openPointInTimeForType.mockReturnValue(Promise.resolve(expectedReturnValue));
 
-        const spacesClient = spacesService.createSpacesClient(
-          null as any
-        ) as jest.Mocked<SpacesClient>;
         spacesClient.getAll.mockImplementation(() =>
           Promise.resolve([
             { id: 'ns-1', name: '', disabledFeatures: [] },
@@ -585,13 +566,10 @@ const ERROR_NAMESPACE_SPECIFIED = 'Spaces currently determines the namespaces';
       });
 
       test(`translates options.namespaces: ['*']`, async () => {
-        const { client, baseClient, spacesService } = createSpacesSavedObjectsClient();
+        const { client, baseClient, spacesClient } = createSpacesSavedObjectsClient();
         const expectedReturnValue = { id: 'abc123' };
         baseClient.openPointInTimeForType.mockReturnValue(Promise.resolve(expectedReturnValue));
 
-        const spacesClient = spacesService.createSpacesClient(
-          null as any
-        ) as jest.Mocked<SpacesClient>;
         spacesClient.getAll.mockImplementation(() =>
           Promise.resolve([
             { id: 'ns-1', name: '', disabledFeatures: [] },
