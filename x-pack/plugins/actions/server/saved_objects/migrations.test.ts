@@ -121,23 +121,68 @@ describe('successful migrations', () => {
   });
 
   describe('8.0.0', () => {
-    test('resolveSavedObjectIdsInActionTaskParams', () => {
+    test('resolveSavedObjectIdsInActionTaskParams in default namespace', () => {
       const migration800 = getMigrations(encryptedSavedObjectsSetup)['8.0.0'];
       const action = getActionTaskParamsMockData({
-        relatedSavedObjects: {
-          id: '1234',
-          type: 'action',
-          typeId: 'test',
-          namespace: 'some-namespace',
-        },
+        relatedSavedObjects: [
+          {
+            id: '1234',
+            type: 'action',
+            typeId: 'test',
+            namespace: 'some-namespace',
+          },
+        ],
       });
       const migratedAction = migration800(action, context);
       expect(migratedAction).toEqual({
-        ...action,
         attributes: {
-          ...omit(action.attributes, ['relatedSavedObjects']),
-          actionId: '12333',
+          actionId: '1234',
+          params: `{ spaceId: 'user1', actionId: '1234' }`,
         },
+        id: action.id,
+        namespaces: ['default'],
+        references: [
+          {
+            id: '1234',
+            name: 'test',
+            type: 'action',
+          },
+        ],
+        type: 'action_task_params',
+      });
+    });
+
+    test('moveRelatedSavedObjects and resolveSavedObjectIdsInActionTaskParams', () => {
+      const migration800 = getMigrations(encryptedSavedObjectsSetup)['8.0.0'];
+      const action = getActionTaskParamsMockData(
+        {
+          relatedSavedObjects: [
+            {
+              id: '1234',
+              type: 'action',
+              typeId: 'test',
+              namespace: 'some-namespace',
+            },
+          ],
+        },
+        ['customuser']
+      );
+      const migratedAction = migration800(action, context);
+      expect(migratedAction).toEqual({
+        attributes: {
+          actionId: '90d1105f-08df-5215-a129-1e4e9dc81f86',
+          params: `{ spaceId: 'user1', actionId: '1234' }`,
+        },
+        id: action.id,
+        namespaces: ['customuser'],
+        references: [
+          {
+            id: '1234',
+            name: 'test',
+            type: 'action',
+          },
+        ],
+        type: 'action_task_params',
       });
     });
   });
@@ -275,7 +320,8 @@ function getMockData(
 }
 
 function getActionTaskParamsMockData(
-  overwrites: Record<string, unknown> = {}
+  overwrites: Record<string, unknown> = {},
+  namespaces: string[] = ['default']
 ): SavedObjectUnsanitizedDoc<ActionTaskParams> {
   return {
     attributes: {
@@ -285,6 +331,7 @@ function getActionTaskParamsMockData(
       ...overwrites,
     },
     id: uuid.v4(),
+    namespaces,
     type: 'action_task_params',
   };
 }

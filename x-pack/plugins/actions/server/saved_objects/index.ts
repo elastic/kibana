@@ -11,6 +11,7 @@ import type {
   SavedObjectsServiceSetup,
   SavedObjectsTypeMappingDefinition,
 } from 'kibana/server';
+import Semver from 'semver';
 import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
 import mappings from './mappings.json';
 import { getMigrations } from './migrations';
@@ -28,13 +29,14 @@ export function setupSavedObjects(
   savedObjects: SavedObjectsServiceSetup,
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup,
   actionTypeRegistry: ActionTypeRegistry,
-  taskManagerIndex: string
+  taskManagerIndex: string,
+  kibanaVersion: string
 ) {
   savedObjects.registerType({
     name: ACTION_SAVED_OBJECT_TYPE,
     hidden: true,
-    namespaceType: 'multiple-isolated',
-    convertToMultiNamespaceTypeVersion: '8.0.0',
+    namespaceType: Semver.lt(kibanaVersion, '8.0.0') ? 'single' : 'multiple-isolated',
+    convertToMultiNamespaceTypeVersion: Semver.lt(kibanaVersion, '8.0.0') ? undefined : '8.0.0',
     mappings: mappings.action as SavedObjectsTypeMappingDefinition,
     migrations: getMigrations(encryptedSavedObjects),
     management: {
@@ -70,8 +72,8 @@ export function setupSavedObjects(
   savedObjects.registerType({
     name: ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
     hidden: true,
-    namespaceType: 'multiple-isolated',
-    convertToMultiNamespaceTypeVersion: '8.0.0',
+    namespaceType: Semver.lt(kibanaVersion, '8.0.0') ? 'single' : 'multiple-isolated',
+    convertToMultiNamespaceTypeVersion: Semver.lt(kibanaVersion, '8.0.0') ? undefined : '8.0.0',
     mappings: mappings.action_task_params as SavedObjectsTypeMappingDefinition,
     excludeOnUpgrade: async ({ readonlyEsClient }) => {
       const oldestIdleActionTask = await getOldestIdleActionTask(
