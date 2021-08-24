@@ -7,7 +7,7 @@
  */
 import type { estypes } from '@elastic/elasticsearch';
 import { map, reduce, mapValues, has, get, keys, pickBy } from 'lodash';
-import type { FieldFilter, Filter, FilterMeta } from './types';
+import type { Filter, FilterMeta } from './types';
 import type { IndexPatternBase, IndexPatternFieldBase } from '../../es_query';
 
 const OPERANDS_IN_RANGE = 2;
@@ -34,6 +34,7 @@ const dateComparators = {
 
 /**
  * An interface for all possible range filter params
+ * It is similar, but not identical to estypes.QueryDslRangeQuery
  * @public
  */
 export interface RangeFilterParams {
@@ -57,25 +58,25 @@ export type RangeFilterMeta = FilterMeta & {
   formattedValue?: string;
 };
 
-export interface EsRangeFilter {
-  range: { [key: string]: RangeFilterParams };
-}
+export type ScriptedRangeFilter = Filter & {
+  meta: RangeFilterMeta;
+  script: {
+    script: estypes.InlineScript;
+  };
+};
+
+export type MatchAllRangeFilter = Filter & {
+  meta: RangeFilterMeta;
+  match_all: estypes.QueryDslQueryContainer['match_all'];
+};
 
 /**
  * @public
  */
-export type RangeFilter = Filter &
-  EsRangeFilter & {
-    meta: RangeFilterMeta;
-    script?: {
-      script: {
-        params: any;
-        lang: estypes.ScriptLanguage;
-        source: string;
-      };
-    };
-    match_all?: any;
-  };
+export type RangeFilter = Filter & {
+  meta: RangeFilterMeta;
+  range: { [key: string]: RangeFilterParams };
+};
 
 /**
  * @param filter
@@ -83,7 +84,7 @@ export type RangeFilter = Filter &
  *
  * @public
  */
-export const isRangeFilter = (filter?: FieldFilter): filter is RangeFilter => has(filter, 'range');
+export const isRangeFilter = (filter?: Filter): filter is RangeFilter => has(filter, 'range');
 
 /**
  *
@@ -92,7 +93,7 @@ export const isRangeFilter = (filter?: FieldFilter): filter is RangeFilter => ha
  *
  * @public
  */
-export const isScriptedRangeFilter = (filter: FieldFilter): filter is RangeFilter => {
+export const isScriptedRangeFilter = (filter: Filter): filter is ScriptedRangeFilter => {
   const params: RangeFilterParams = get(filter, 'script.script.params', {});
 
   return hasRangeKeys(params);
@@ -125,19 +126,13 @@ export const buildRangeFilter = (
   params: RangeFilterParams,
   indexPattern: IndexPatternBase,
   formattedValue?: string
-): RangeFilter => {
-  const filter: any = { meta: { index: indexPattern.id, params: {} } };
-
-  if (formattedValue) {
-    filter.meta.formattedValue = formattedValue;
-  }
-
+): RangeFilter | ScriptedRangeFilter | MatchAllRangeFilter => {
   params = mapValues(params, (value: any) => (field.type === 'number' ? parseFloat(value) : value));
 
   if ('gte' in params && 'gt' in params) throw new Error('gte and gt are mutually exclusive');
   if ('lte' in params && 'lt' in params) throw new Error('lte and lt are mutually exclusive');
 
-  const totalInfinite = ['gt', 'lt'].reduce((acc: number, op: any) => {
+  const totalInfinite = ['gt', 'lt'].reduce((acc, op) => {
     const key = op in params ? op : `${op}e`;
     const isInfinite = Math.abs(get(params, key)) === Infinity;
 
@@ -151,33 +146,36 @@ export const buildRangeFilter = (
     return acc;
   }, 0);
 
+  const meta: RangeFilterMeta = {
+    index: indexPattern.id,
+    params: {},
+    field: field.name,
+    ...(formattedValue ? { formattedValue } : {}),
+  };
+
   if (totalInfinite === OPERANDS_IN_RANGE) {
-    filter.match_all = {};
-    filter.meta.field = field.name;
+    return { meta, match_all: {} } as MatchAllRangeFilter;
   } else if (field.scripted) {
-    filter.script = getRangeScript(field, params);
-    filter.script.script.params.value = formatValue(filter.script.script.params);
-
-    filter.meta.field = field.name;
+    const scr = getRangeScript(field, params);
+    // TODO: type mismatch enforced
+    scr.script.params.value = formatValue(scr.script.params as any);
+    return { meta, script: scr } as ScriptedRangeFilter;
   } else {
-    filter.range = {};
-    filter.range[field.name] = params;
+    return { meta, range: { [field.name]: params } } as RangeFilter;
   }
-
-  return filter as RangeFilter;
 };
 
 /**
  * @internal
  */
 export const getRangeScript = (field: IndexPatternFieldBase, params: RangeFilterParams) => {
-  const knownParams = mapValues(
-    pickBy(params, (val, key: any) => key in operators),
+  const knownParams: estypes.InlineScript['params'] = mapValues(
+    pickBy(params, (val, key) => key in operators),
     (value) => (field.type === 'number' && typeof value === 'string' ? parseFloat(value) : value)
   );
   let script = map(
     knownParams,
-    (val: any, key: string) => '(' + field.script + ')' + get(operators, key) + key
+    (_: unknown, key) => '(' + field.script + ')' + get(operators, key) + key
   ).join(' && ');
 
   // We must wrap painless scripts in a lambda in case they're more than a simple expression
@@ -201,7 +199,7 @@ export const getRangeScript = (field: IndexPatternFieldBase, params: RangeFilter
     script: {
       source: script,
       params: knownParams,
-      lang: field.lang,
+      lang: field.lang!,
     },
   };
 };

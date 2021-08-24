@@ -333,7 +333,8 @@ const nestedDeepLinks: SecurityDeepLinks = {
 };
 
 /**
- * A function that generates the plugin deepLinks
+ * A function that generates the plugin deepLinks structure
+ * used by Kibana to build the global side navigation and application search results
  * @param enableExperimental ExperimentalFeatures arg
  * @param licenseType optional string for license level, if not provided basic is assumed.
  * @param capabilities optional arg for app start capabilities
@@ -367,6 +368,16 @@ export function getDeepLinks(
           deepLinks: [],
         };
       }
+      if (
+        deepLinkId === SecurityPageName.detections &&
+        capabilities != null &&
+        capabilities.siem.read_alerts === false
+      ) {
+        return {
+          ...deepLink,
+          deepLinks: baseDeepLinks.filter(({ id }) => id !== SecurityPageName.alerts),
+        };
+      }
       if (isPremiumLicense(licenseType) && subPluginDeepLinks?.premium) {
         return {
           ...deepLink,
@@ -398,45 +409,8 @@ export function updateGlobalNavigation({
   updater$: Subject<AppUpdater>;
   enableExperimental: ExperimentalFeatures;
 }) {
-  const deepLinks = getDeepLinks(enableExperimental, undefined, capabilities);
-  const updatedDeepLinks = deepLinks.map((link) => {
-    switch (link.id) {
-      case SecurityPageName.case:
-        return {
-          ...link,
-          navLinkStatus: capabilities.siem.read_cases
-            ? AppNavLinkStatus.visible
-            : AppNavLinkStatus.hidden,
-          searchable: capabilities.siem.read_cases === true,
-        };
-      case SecurityPageName.detections:
-        return {
-          ...link,
-          deepLinks:
-            link.deepLinks != null
-              ? [
-                  ...link.deepLinks.map((detLink) => {
-                    if (detLink.id === SecurityPageName.alerts) {
-                      return {
-                        ...detLink,
-                        navLinkStatus: capabilities.siem.read_alerts
-                          ? AppNavLinkStatus.visible
-                          : AppNavLinkStatus.hidden,
-                        searchable: capabilities.siem.read_alerts === true,
-                      };
-                    }
-                    return detLink;
-                  }),
-                ]
-              : [],
-        };
-      default:
-        return link;
-    }
-  });
-
   updater$.next(() => ({
     navLinkStatus: AppNavLinkStatus.hidden, // needed to prevent showing main nav link
-    deepLinks: updatedDeepLinks,
+    deepLinks: getDeepLinks(enableExperimental, undefined, capabilities),
   }));
 }
