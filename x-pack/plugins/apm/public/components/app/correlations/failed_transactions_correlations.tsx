@@ -45,6 +45,7 @@ import type { SearchServiceParams } from '../../../../common/search_strategies/c
 import type { FailedTransactionsCorrelationValue } from '../../../../common/search_strategies/failure_correlations/types';
 import { Summary } from '../../shared/Summary';
 import { asPercent } from '../../../../common/utils/formatters';
+import { useTimeRange } from '../../../hooks/use_time_range';
 
 export function FailedTransactionsCorrelations({
   onFilter,
@@ -59,11 +60,13 @@ export function FailedTransactionsCorrelations({
   const { serviceName, transactionType } = useApmServiceContext();
 
   const {
-    query: { kuery, environment },
+    query: { kuery, environment, rangeFrom, rangeTo },
   } = useApmParams('/services/:serviceName');
 
   const { urlParams } = useUrlParams();
-  const { transactionName, start, end } = urlParams;
+  const { transactionName } = urlParams;
+
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const inspectEnabled = uiSettings.get<boolean>(enableInspectEsQueries);
 

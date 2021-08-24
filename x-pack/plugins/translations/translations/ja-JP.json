@@ -20307,7 +20307,6 @@
     "xpack.securitySolution.detectionEngine.missingPrivilegesCallOut.cannotEditLists": "これらの権限がない場合は、値リストを作成したり編集したりできません。",
     "xpack.securitySolution.detectionEngine.missingPrivilegesCallOut.cannotEditRules": "その権限がない場合、検出エンジンルールを作製したり編集したりできません。",
     "xpack.securitySolution.detectionEngine.missingPrivilegesCallOut.messageBody.essenceDescription": "この機能のすべてにアクセスするには、次の権限が必要です。サポートについては、管理者にお問い合わせください。",
-    "xpack.securitySolution.detectionEngine.missingPrivilegesCallOut.messageBody.messageDetail": "{essence}不足している権限：{privileges}関連するドキュメント：{docs}",
     "xpack.securitySolution.detectionEngine.missingPrivilegesCallOut.messageBody.missingFeaturePrivileges": "{index}機能の{privileges}権限が不足しています。{explanation}",
     "xpack.securitySolution.detectionEngine.missingPrivilegesCallOut.messageBody.missingIndexPrivileges": "{index}インデックスの{privileges}権限が不足しています。{explanation}",
     "xpack.securitySolution.detectionEngine.missingPrivilegesCallOut.messageTitle": "権限が不十分です",
