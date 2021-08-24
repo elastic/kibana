@@ -48,8 +48,15 @@ export function getLensAttributeService(
       return { id: savedDoc.savedObjectId };
     },
     unwrapMethod: async (savedObjectId: string): Promise<LensSavedObjectAttributes> => {
-      const attributes = documentToAttributes(await savedObjectStore.load(savedObjectId));
-      return attributes;
+      const { saved_object: savedObject } = await savedObjectStore.load(savedObjectId);
+      const { attributes, references, type } = savedObject;
+      const document = {
+        ...attributes,
+        references,
+        savedObjectId,
+        type,
+      };
+      return documentToAttributes(document);
     },
     checkForDuplicateTitle: (props: OnSaveProps) => {
       const savedObjectsClient = core.savedObjects.client;
