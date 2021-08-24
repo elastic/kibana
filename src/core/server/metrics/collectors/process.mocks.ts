@@ -21,5 +21,5 @@ export function createMockOpsProcessMetrics(): OpsProcessMetrics {
     event_loop_delay_histogram: histogram,
     pid: 1,
     uptime_in_millis: 1,
-  }
+  };
 }

@@ -14,7 +14,7 @@ import {
   createRootWithCorePlugins,
 } from '../../../../../../../core/test_helpers/kbn_server';
 import { rollDailyData } from '../daily';
-import { mocked } from '../../../../../../../core/server/metrics/event_loop_delays/event_loop_delays_monitor.mocks';
+import { metricsServiceMock } from '../../../../../../../core/server/mocks';
 
 import {
   SAVED_OBJECTS_DAILY_TYPE,
@@ -26,17 +26,16 @@ import moment from 'moment';
 const { startES } = createTestServers({
   adjustTimeout: (t: number) => jest.setTimeout(t),
 });
-
+const eventLoopDelaysMonitor = metricsServiceMock.createEventLoopDelaysMonitor();
 function createRawObject(date: moment.MomentInput) {
   const pid = Math.round(Math.random() * 10000);
   return {
     type: SAVED_OBJECTS_DAILY_TYPE,
     id: serializeSavedObjectId({ pid, date }),
     attributes: {
-      ...mocked.createHistogram({
-        fromTimestamp: moment(date).startOf('day').toISOString(),
-        lastUpdatedAt: moment(date).toISOString(),
-      }),
+      ...eventLoopDelaysMonitor.collect(),
+      fromTimestamp: moment(date).startOf('day').toISOString(),
+      lastUpdatedAt: moment(date).toISOString(),
       processId: pid,
     },
   };

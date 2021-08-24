@@ -63,6 +63,7 @@ const mockedResponse: StatusResponse = {
     },
     process: {
       name: 'server_worker' as const,
+      pid: 1,
       memory: {
         heap: {
           size_limit: 1000000,
@@ -73,24 +74,25 @@ const mockedResponse: StatusResponse = {
       },
       event_loop_delay: 1,
       event_loop_delay_histogram: mocked.createHistogram(),
-      pid: 1,
       uptime_in_millis: 1,
     },
-    processes: [{
-      name: 'server_worker' as const,
-      memory: {
-        heap: {
-          size_limit: 1000000,
-          used_in_bytes: 100,
-          total_in_bytes: 0,
+    processes: [
+      {
+        name: 'server_worker' as const,
+        pid: 1,
+        memory: {
+          heap: {
+            size_limit: 1000000,
+            used_in_bytes: 100,
+            total_in_bytes: 0,
+          },
+          resident_set_size_in_bytes: 1,
         },
-        resident_set_size_in_bytes: 1,
+        event_loop_delay: 1,
+        event_loop_delay_histogram: mocked.createHistogram(),
+        uptime_in_millis: 1,
       },
-      event_loop_delay: 1,
-      event_loop_delay_histogram: mocked.createHistogram(),
-      pid: 1,
-      uptime_in_millis: 1,
-    }],
+    ],
     response_times: {
       avg_in_millis: 4000,
       max_in_millis: 8000,

@@ -8,7 +8,9 @@
 
 import { MetricsCollector } from './types';
 
-const createCollector = <T = any>(collectReturnValue: any = {}): jest.Mocked<MetricsCollector<T>> => {
+const createCollector = <T = any>(
+  collectReturnValue: any = {}
+): jest.Mocked<MetricsCollector<T>> => {
   const collector: jest.Mocked<MetricsCollector<T>> = {
     collect: jest.fn().mockResolvedValue(collectReturnValue),
     reset: jest.fn(),

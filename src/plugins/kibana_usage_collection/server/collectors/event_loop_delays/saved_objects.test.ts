@@ -11,9 +11,8 @@ import {
   serializeSavedObjectId,
   deleteHistogramSavedObjects,
 } from './saved_objects';
-import { savedObjectsRepositoryMock } from '../../../../../core/server/mocks';
+import { savedObjectsRepositoryMock, metricsServiceMock } from '../../../../../core/server/mocks';
 import type { SavedObjectsFindResponse } from '../../../../../core/server/';
-import { mocked } from '../../../../../core/server/metrics/event_loop_delays/event_loop_delays_monitor.mocks';
 
 describe('serializeSavedObjectId', () => {
   it('returns serialized id', () => {
@@ -23,9 +22,8 @@ describe('serializeSavedObjectId', () => {
 });
 
 describe('storeHistogram', () => {
-  const mockHistogram = mocked.createHistogram();
+  const eventLoopDelaysMonitor = metricsServiceMock.createEventLoopDelaysMonitor();
   const mockInternalRepository = savedObjectsRepositoryMock.create();
-
   jest.useFakeTimers('modern');
   const mockNow = jest.getRealSystemTime();
   jest.setSystemTime(mockNow);
@@ -34,6 +32,7 @@ describe('storeHistogram', () => {
   afterAll(() => jest.useRealTimers());
 
   it('stores histogram data in a savedObject', async () => {
+    const mockHistogram = eventLoopDelaysMonitor.collect();
     await storeHistogram(mockHistogram, mockInternalRepository);
     const pid = process.pid;
     const id = serializeSavedObjectId({ date: mockNow, pid });

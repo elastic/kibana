@@ -9,7 +9,6 @@
 import type { MetricsCollector } from './types';
 import { createMockOpsProcessMetrics } from './process.mocks';
 
-
 const createMock = () => {
   const mocked: jest.Mocked<MetricsCollector<any>> = {
     collect: jest.fn(),

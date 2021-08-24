@@ -9,6 +9,7 @@
 import v8, { HeapInfo } from 'v8';
 import { ProcessMetricsCollector } from './process';
 
+/* eslint-disable dot-notation */
 describe('ProcessMetricsCollector', () => {
   let collector: ProcessMetricsCollector;
 
@@ -28,10 +29,13 @@ describe('ProcessMetricsCollector', () => {
   });
 
   it('collects event loop delay', () => {
+    const mockEventLoopDelayMonitor = { collect: jest.fn().mockReturnValue({ mean: 13 }) };
+    // @ts-expect-error-next-line readonly private method.
+    collector['eventLoopDelayMonitor'] = mockEventLoopDelayMonitor;
     const metrics = collector.collect();
-
     expect(metrics).toHaveLength(1);
-    expect(metrics[0].event_loop_delay).toBeGreaterThan(0);
+    expect(metrics[0].event_loop_delay).toBe(13);
+    expect(mockEventLoopDelayMonitor.collect).toBeCalledTimes(1);
   });
 
   it('collects uptime info from the process', () => {

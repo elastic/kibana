@@ -33,11 +33,10 @@ export class OpsMetricsCollector implements MetricsCollector<OpsMetrics> {
       this.osCollector.collect(),
       this.serverCollector.collect(),
     ]);
-    const mainProcess = ProcessMetricsCollector.getMainThreadMetrics(processes) || processes[0];
 
     return {
       collected_at: new Date(),
-      process: mainProcess,
+      process: processes[0],
       processes,
       os,
       ...server,
