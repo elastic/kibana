@@ -11,7 +11,6 @@
  * This way plugins can do targeted imports to reduce the final code bundle
  */
 import {
-  AlertConsumers as AlertConsumersTyped,
   ALERT_DURATION as ALERT_DURATION_TYPED,
   ALERT_STATUS as ALERT_STATUS_TYPED,
   ALERT_REASON as ALERT_REASON_TYPED,
@@ -33,7 +32,7 @@ import {
   EuiDataGridColumn,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiContextMenu,
+  EuiContextMenuPanel,
   EuiPopover,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -61,13 +60,12 @@ import { LazyAlertsFlyout } from '../..';
 import { parseAlert } from './parse_alert';
 import { CoreStart } from '../../../../../../src/core/public';
 
-const AlertConsumers: typeof AlertConsumersTyped = AlertConsumersNonTyped;
 const ALERT_DURATION: typeof ALERT_DURATION_TYPED = ALERT_DURATION_NON_TYPED;
 const ALERT_STATUS: typeof ALERT_STATUS_TYPED = ALERT_STATUS_NON_TYPED;
 const ALERT_REASON: typeof ALERT_REASON_TYPED = ALERT_REASON_NON_TYPED;
 
 interface AlertsTableTGridProps {
-  indexName: string;
+  indexNames: string[];
   rangeFrom: string;
   rangeTo: string;
   kuery: string;
@@ -145,13 +143,6 @@ const NO_ROW_RENDER: RowRenderer[] = [];
 
 const trailingControlColumns: never[] = [];
 
-const OBSERVABILITY_ALERT_CONSUMERS = [
-  AlertConsumers.APM,
-  AlertConsumers.LOGS,
-  AlertConsumers.INFRASTRUCTURE,
-  AlertConsumers.UPTIME,
-];
-
 function ObservabilityActions({
   data,
   eventId,
@@ -219,26 +210,21 @@ function ObservabilityActions({
     onUpdateFailure: onAlertStatusUpdated,
   });
 
-  const actionsPanels = useMemo(() => {
+  const actionsMenuItems = useMemo(() => {
     return [
-      {
-        id: 0,
-        content: [
-          timelines.getAddToExistingCaseButton({
-            event,
-            casePermissions,
-            appId: observabilityFeatureId,
-            onClose: afterCaseSelection,
-          }),
-          timelines.getAddToNewCaseButton({
-            event,
-            casePermissions,
-            appId: observabilityFeatureId,
-            onClose: afterCaseSelection,
-          }),
-          ...(alertPermissions.crud ? statusActionItems : []),
-        ],
-      },
+      timelines.getAddToExistingCaseButton({
+        event,
+        casePermissions,
+        appId: observabilityFeatureId,
+        onClose: afterCaseSelection,
+      }),
+      timelines.getAddToNewCaseButton({
+        event,
+        casePermissions,
+        appId: observabilityFeatureId,
+        onClose: afterCaseSelection,
+      }),
+      ...(alertPermissions.crud ? statusActionItems : []),
     ];
   }, [afterCaseSelection, casePermissions, timelines, event, statusActionItems, alertPermissions]);
 
@@ -262,33 +248,35 @@ function ObservabilityActions({
             aria-label="View alert in app"
           />
         </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiPopover
-            button={
-              <EuiButtonIcon
-                display="empty"
-                size="s"
-                color="text"
-                iconType="boxesHorizontal"
-                aria-label="More"
-                onClick={() => toggleActionsPopover(eventId)}
-              />
-            }
-            isOpen={openActionsPopoverId === eventId}
-            closePopover={closeActionsPopover}
-            panelPaddingSize="none"
-            anchorPosition="downLeft"
-          >
-            <EuiContextMenu panels={actionsPanels} initialPanelId={0} />
-          </EuiPopover>
-        </EuiFlexItem>
+        {actionsMenuItems.length > 0 && (
+          <EuiFlexItem>
+            <EuiPopover
+              button={
+                <EuiButtonIcon
+                  display="empty"
+                  size="s"
+                  color="text"
+                  iconType="boxesHorizontal"
+                  aria-label="More"
+                  onClick={() => toggleActionsPopover(eventId)}
+                />
+              }
+              isOpen={openActionsPopoverId === eventId}
+              closePopover={closeActionsPopover}
+              panelPaddingSize="none"
+              anchorPosition="downLeft"
+            >
+              <EuiContextMenuPanel size="s" items={actionsMenuItems} />
+            </EuiPopover>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     </>
   );
 }
 
 export function AlertsTableTGrid(props: AlertsTableTGridProps) {
-  const { indexName, rangeFrom, rangeTo, kuery, status, setRefetch, addToQuery } = props;
+  const { indexNames, rangeFrom, rangeTo, kuery, status, setRefetch, addToQuery } = props;
   const { timelines } = useKibana<{ timelines: TimelinesUIStart }>().services;
 
   const [flyoutAlert, setFlyoutAlert] = useState<TopAlert | undefined>(undefined);
@@ -326,7 +314,6 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
     const type: TGridType = 'standalone';
     const sortDirection: SortDirection = 'desc';
     return {
-      alertConsumers: OBSERVABILITY_ALERT_CONSUMERS,
       appId: observabilityFeatureId,
       casePermissions,
       type,
@@ -335,7 +322,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
       defaultCellActions: getDefaultCellActions({ addToQuery }),
       end: rangeTo,
       filters: [],
-      indexNames: [indexName],
+      indexNames,
       itemsPerPage: 10,
       itemsPerPageOptions: [10, 25, 50],
       loadingText: i18n.translate('xpack.observability.alertsTable.loadingTextLabel', {
@@ -370,7 +357,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
     };
   }, [
     casePermissions,
-    indexName,
+    indexNames,
     kuery,
     leadingControlColumns,
     rangeFrom,

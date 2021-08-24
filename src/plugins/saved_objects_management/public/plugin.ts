@@ -8,6 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { CoreSetup, CoreStart, Plugin } from 'src/core/public';
+import type { SpacesPluginStart } from '../../../../x-pack/plugins/spaces/public';
 import { ManagementSetup } from '../../management/public';
 import { DataPublicPluginStart } from '../../data/public';
 import { DashboardStart } from '../../dashboard/public';
@@ -15,7 +16,6 @@ import { DiscoverStart } from '../../discover/public';
 import { HomePublicPluginSetup, FeatureCatalogueCategory } from '../../home/public';
 import { VisualizationsStart } from '../../visualizations/public';
 import { SavedObjectTaggingOssPluginStart } from '../../saved_objects_tagging_oss/public';
-import type { SpacesOssPluginStart } from '../../spaces_oss/public';
 import {
   SavedObjectsManagementActionService,
   SavedObjectsManagementActionServiceSetup,
@@ -50,7 +50,7 @@ export interface StartDependencies {
   visualizations?: VisualizationsStart;
   discover?: DiscoverStart;
   savedObjectsTaggingOss?: SavedObjectTaggingOssPluginStart;
-  spacesOss?: SpacesOssPluginStart;
+  spaces?: SpacesPluginStart;
 }
 
 export class SavedObjectsManagementPlugin
@@ -116,9 +116,9 @@ export class SavedObjectsManagementPlugin
     };
   }
 
-  public start(core: CoreStart, { data }: StartDependencies) {
-    const actionStart = this.actionService.start();
-    const columnStart = this.columnService.start();
+  public start(_core: CoreStart, { spaces: spacesApi }: StartDependencies) {
+    const actionStart = this.actionService.start(spacesApi);
+    const columnStart = this.columnService.start(spacesApi);
 
     return {
       actions: actionStart,
