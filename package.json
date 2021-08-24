@@ -99,7 +99,7 @@
     "@elastic/datemath": "link:bazel-bin/packages/elastic-datemath",
     "@elastic/elasticsearch": "npm:@elastic/elasticsearch-canary@^8.0.0-canary.18",
     "@elastic/ems-client": "7.15.0",
-    "@elastic/eui": "37.3.0",
+    "@elastic/eui": "37.3.1",
     "@elastic/filesaver": "1.1.2",
     "@elastic/good": "^9.0.1-kibana3",
     "@elastic/maki": "6.3.0",

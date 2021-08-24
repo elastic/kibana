@@ -75,7 +75,7 @@ export const LICENSE_OVERRIDES = {
   '@mapbox/jsonlint-lines-primitives@2.0.2': ['MIT'], // license in readme https://github.com/tmcw/jsonlint
   'node-sql-parser@3.6.1': ['(GPL-2.0 OR MIT)'], // GPL-2.0* https://github.com/taozhi8833998/node-sql-parser
   '@elastic/ems-client@7.15.0': ['Elastic License 2.0'],
-  '@elastic/eui@37.3.0': ['SSPL-1.0 OR Elastic License 2.0'],
+  '@elastic/eui@37.3.1': ['SSPL-1.0 OR Elastic License 2.0'],
 
   // TODO can be removed if the https://github.com/jindw/xmldom/issues/239 is released
   'xmldom@0.1.27': ['MIT'],
