@@ -7,11 +7,11 @@
 
 import { isLeft } from 'fp-ts/lib/Either';
 import { PathReporter } from 'io-ts/lib/PathReporter';
-import { technicalRuleFieldMap } from '../../../../../../rule_registry/common/assets/field_maps/technical_rule_field_map';
+import { technicalRuleFieldMap } from '../../../../../../../rule_registry/common/assets/field_maps/technical_rule_field_map';
 import {
   mergeFieldMaps,
   runtimeTypeFromFieldMap,
-} from '../../../../../../rule_registry/common/field_map';
+} from '../../../../../../../rule_registry/common/field_map';
 import { ruleExecutionFieldMap } from './rule_execution_field_map';
 
 const ruleExecutionLogRuntimeType = runtimeTypeFromFieldMap(
