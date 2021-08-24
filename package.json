@@ -688,6 +688,7 @@
     "css-loader": "^3.4.2",
     "cssnano": "^4.1.11",
     "cypress": "^6.8.0",
+    "cypress-axe": "^0.13.0",
     "cypress-cucumber-preprocessor": "^2.5.2",
     "cypress-multi-reporters": "^1.4.0",
     "cypress-pipe": "^2.0.0",

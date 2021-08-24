@@ -52,45 +52,6 @@
       },
       {
         "parentPluginId": "core",
-        "id": "def-public.ChromeBrand",
-        "type": "Interface",
-        "tags": [],
-        "label": "ChromeBrand",
-        "description": [],
-        "path": "src/core/public/chrome/types.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "core",
-            "id": "def-public.ChromeBrand.logo",
-            "type": "string",
-            "tags": [],
-            "label": "logo",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/core/public/chrome/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "core",
-            "id": "def-public.ChromeBrand.smallLogo",
-            "type": "string",
-            "tags": [],
-            "label": "smallLogo",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/core/public/chrome/types.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "core",
         "id": "def-public.ChromeDocTitle",
         "type": "Interface",
         "tags": [],
@@ -273,7 +234,7 @@
           "CommonEuiButtonEmptyProps",
           ", {}>> & ",
           "CommonEuiButtonEmptyProps",
-          " & { href?: string | undefined; onClick?: ((event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => void) | undefined; } & React.AnchorHTMLAttributes<HTMLAnchorElement>), \"iconType\" | \"data-test-subj\" | \"target\" | \"rel\">"
+          " & { href?: string | undefined; onClick?: ((event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => void) | undefined; } & React.AnchorHTMLAttributes<HTMLAnchorElement>), \"data-test-subj\" | \"target\" | \"iconType\" | \"rel\">"
         ],
         "path": "src/core/public/chrome/ui/header/header_help_menu.tsx",
         "deprecated": false,
@@ -362,7 +323,7 @@
           "CommonEuiButtonEmptyProps",
           ", {}>> & ",
           "CommonEuiButtonEmptyProps",
-          " & { href?: string | undefined; onClick?: ((event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => void) | undefined; } & React.AnchorHTMLAttributes<HTMLAnchorElement>), \"iconType\" | \"data-test-subj\" | \"target\" | \"rel\">"
+          " & { href?: string | undefined; onClick?: ((event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => void) | undefined; } & React.AnchorHTMLAttributes<HTMLAnchorElement>), \"data-test-subj\" | \"target\" | \"iconType\" | \"rel\">"
         ],
         "path": "src/core/public/chrome/ui/header/header_help_menu.tsx",
         "deprecated": false,
@@ -436,7 +397,7 @@
           "CommonEuiButtonEmptyProps",
           ", {}>> & ",
           "CommonEuiButtonEmptyProps",
-          " & { href?: string | undefined; onClick?: ((event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => void) | undefined; } & React.AnchorHTMLAttributes<HTMLAnchorElement>), \"iconType\" | \"data-test-subj\" | \"target\" | \"rel\">"
+          " & { href?: string | undefined; onClick?: ((event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => void) | undefined; } & React.AnchorHTMLAttributes<HTMLAnchorElement>), \"data-test-subj\" | \"target\" | \"iconType\" | \"rel\">"
         ],
         "path": "src/core/public/chrome/ui/header/header_help_menu.tsx",
         "deprecated": false,
@@ -510,7 +471,7 @@
           "CommonEuiButtonEmptyProps",
           ", {}>> & ",
           "CommonEuiButtonEmptyProps",
-          " & { href?: string | undefined; onClick?: ((event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => void) | undefined; } & React.AnchorHTMLAttributes<HTMLAnchorElement>), \"iconType\" | \"data-test-subj\" | \"target\" | \"rel\">"
+          " & { href?: string | undefined; onClick?: ((event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => void) | undefined; } & React.AnchorHTMLAttributes<HTMLAnchorElement>), \"data-test-subj\" | \"target\" | \"iconType\" | \"rel\">"
         ],
         "path": "src/core/public/chrome/ui/header/header_help_menu.tsx",
         "deprecated": false,
@@ -1095,38 +1056,6 @@
           },
           {
             "parentPluginId": "core",
-            "id": "def-public.ChromeNavLinks.showOnly",
-            "type": "Function",
-            "tags": [],
-            "label": "showOnly",
-            "description": [
-              "\nRemove all navlinks except the one matching the given id.\n"
-            ],
-            "signature": [
-              "(id: string) => void"
-            ],
-            "path": "src/core/public/chrome/nav_links/nav_links_service.ts",
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "core",
-                "id": "def-public.ChromeNavLinks.showOnly.$1",
-                "type": "string",
-                "tags": [],
-                "label": "id",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "src/core/public/chrome/nav_links/nav_links_service.ts",
-                "deprecated": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "core",
             "id": "def-public.ChromeNavLinks.enableForcedAppSwitcherNavigation",
             "type": "Function",
             "tags": [],
@@ -1438,111 +1367,6 @@
           },
           {
             "parentPluginId": "core",
-            "id": "def-public.ChromeStart.setAppTitle",
-            "type": "Function",
-            "tags": [],
-            "label": "setAppTitle",
-            "description": [
-              "\nSets the current app's title\n"
-            ],
-            "signature": [
-              "(appTitle: string) => void"
-            ],
-            "path": "src/core/public/chrome/types.ts",
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "core",
-                "id": "def-public.ChromeStart.setAppTitle.$1",
-                "type": "string",
-                "tags": [],
-                "label": "appTitle",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "src/core/public/chrome/types.ts",
-                "deprecated": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "core",
-            "id": "def-public.ChromeStart.getBrand$",
-            "type": "Function",
-            "tags": [],
-            "label": "getBrand$",
-            "description": [
-              "\nGet an observable of the current brand information."
-            ],
-            "signature": [
-              "() => ",
-              "Observable",
-              "<",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCoreChromePluginApi",
-                "section": "def-public.ChromeBrand",
-                "text": "ChromeBrand"
-              },
-              ">"
-            ],
-            "path": "src/core/public/chrome/types.ts",
-            "deprecated": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "core",
-            "id": "def-public.ChromeStart.setBrand",
-            "type": "Function",
-            "tags": [],
-            "label": "setBrand",
-            "description": [
-              "\nSet the brand configuration.\n"
-            ],
-            "signature": [
-              "(brand: ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCoreChromePluginApi",
-                "section": "def-public.ChromeBrand",
-                "text": "ChromeBrand"
-              },
-              ") => void"
-            ],
-            "path": "src/core/public/chrome/types.ts",
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "core",
-                "id": "def-public.ChromeStart.setBrand.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "brand",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCoreChromePluginApi",
-                    "section": "def-public.ChromeBrand",
-                    "text": "ChromeBrand"
-                  }
-                ],
-                "path": "src/core/public/chrome/types.ts",
-                "deprecated": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "core",
             "id": "def-public.ChromeStart.getIsVisible$",
             "type": "Function",
             "tags": [],
@@ -1584,89 +1408,6 @@
                 "description": [],
                 "signature": [
                   "boolean"
-                ],
-                "path": "src/core/public/chrome/types.ts",
-                "deprecated": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "core",
-            "id": "def-public.ChromeStart.getApplicationClasses$",
-            "type": "Function",
-            "tags": [],
-            "label": "getApplicationClasses$",
-            "description": [
-              "\nGet the current set of classNames that will be set on the application container."
-            ],
-            "signature": [
-              "() => ",
-              "Observable",
-              "<string[]>"
-            ],
-            "path": "src/core/public/chrome/types.ts",
-            "deprecated": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "core",
-            "id": "def-public.ChromeStart.addApplicationClass",
-            "type": "Function",
-            "tags": [],
-            "label": "addApplicationClass",
-            "description": [
-              "\nAdd a className that should be set on the application container."
-            ],
-            "signature": [
-              "(className: string) => void"
-            ],
-            "path": "src/core/public/chrome/types.ts",
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "core",
-                "id": "def-public.ChromeStart.addApplicationClass.$1",
-                "type": "string",
-                "tags": [],
-                "label": "className",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "src/core/public/chrome/types.ts",
-                "deprecated": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "core",
-            "id": "def-public.ChromeStart.removeApplicationClass",
-            "type": "Function",
-            "tags": [],
-            "label": "removeApplicationClass",
-            "description": [
-              "\nRemove a className added with `addApplicationClass()`. If className is unknown it is ignored."
-            ],
-            "signature": [
-              "(className: string) => void"
-            ],
-            "path": "src/core/public/chrome/types.ts",
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "core",
-                "id": "def-public.ChromeStart.removeApplicationClass.$1",
-                "type": "string",
-                "tags": [],
-                "label": "className",
-                "description": [],
-                "signature": [
-                  "string"
                 ],
                 "path": "src/core/public/chrome/types.ts",
                 "deprecated": false,
@@ -2174,7 +1915,7 @@
         "description": [],
         "signature": [
           "CommonProps",
-          " & { text: React.ReactNode; href?: string | undefined; onClick?: ((event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => void) | undefined; truncate?: boolean | undefined; }"
+          " & { text: React.ReactNode; href?: string | undefined; onClick?: ((event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => void) | undefined; truncate?: boolean | undefined; 'aria-current'?: boolean | \"date\" | \"location\" | \"page\" | \"time\" | \"true\" | \"false\" | \"step\" | undefined; }"
         ],
         "path": "src/core/public/chrome/types.ts",
         "deprecated": false,
@@ -2188,7 +1929,7 @@
         "label": "ChromeHelpExtensionLinkBase",
         "description": [],
         "signature": [
-          "{ iconType?: string | React.ComponentClass<{}, any> | React.FunctionComponent<{}> | undefined; 'data-test-subj'?: string | undefined; target?: string | undefined; rel?: string | undefined; }"
+          "{ 'data-test-subj'?: string | undefined; target?: string | undefined; iconType?: string | React.ComponentClass<{}, any> | React.FunctionComponent<{}> | undefined; rel?: string | undefined; }"
         ],
         "path": "src/core/public/chrome/ui/header/header_help_menu.tsx",
         "deprecated": false,

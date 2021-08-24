@@ -721,9 +721,7 @@
             "label": "kibanaLegacy",
             "description": [],
             "signature": [
-              "{ dashboardConfig: ",
-              "DashboardConfig",
-              "; loadFontAwesome: () => Promise<void>; loadAngularBootstrap: () => Promise<void>; config: Readonly<{} & { defaultAppId: string; }>; } | undefined"
+              "{ loadFontAwesome: () => Promise<void>; loadAngularBootstrap: () => Promise<void>; config: Readonly<{} & { defaultAppId: string; }>; } | undefined"
             ],
             "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
             "deprecated": false
