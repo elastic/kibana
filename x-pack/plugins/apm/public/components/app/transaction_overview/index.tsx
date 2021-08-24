@@ -14,6 +14,7 @@ import { IUrlParams } from '../../../context/url_params_context/types';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useFallbackToTransactionsFetcher } from '../../../hooks/use_fallback_to_transactions_fetcher';
+import { useTimeRange } from '../../../hooks/use_time_range';
 import { AggregatedTransactionsBadge } from '../../shared/aggregated_transactions_badge';
 import { TransactionCharts } from '../../shared/charts/transaction_charts';
 import { fromQuery, toQuery } from '../../shared/Links/url_helpers';
@@ -45,8 +46,10 @@ function getRedirectLocation({
 
 export function TransactionOverview() {
   const {
-    query: { environment, kuery },
+    query: { environment, kuery, rangeFrom, rangeTo },
   } = useApmParams('/services/:serviceName/transactions');
+
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const { fallbackToTransactions } = useFallbackToTransactionsFetcher({
     kuery,
@@ -76,7 +79,12 @@ export function TransactionOverview() {
           <EuiSpacer size="s" />
         </>
       )}
-      <TransactionCharts kuery={kuery} environment={environment} />
+      <TransactionCharts
+        kuery={kuery}
+        environment={environment}
+        start={start}
+        end={end}
+      />
       <EuiSpacer size="s" />
       <EuiPanel hasBorder={true}>
         <TransactionsTable
@@ -85,6 +93,8 @@ export function TransactionOverview() {
           showAggregationAccurateCallout
           environment={environment}
           kuery={kuery}
+          start={start}
+          end={end}
         />
       </EuiPanel>
     </>

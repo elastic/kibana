@@ -34,7 +34,6 @@ export function ApmMainTemplate({
 
   const ObservabilityPageTemplate =
     services.observability.navigation.PageTemplate;
-
   return (
     <ObservabilityPageTemplate
       pageHeader={{
