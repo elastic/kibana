@@ -92,7 +92,7 @@ export const getFieldEditorOpener = ({
 
     if (fieldName && !field) {
       const err = i18n.translate('indexPatternFieldEditor.noSuchFieldName', {
-        defaultMessage: "Field named '{fieldName}' not found on index pattern",
+        defaultMessage: "Field named '{fieldName}' not found in this data view",
         values: { fieldName },
       });
       notifications.toasts.addDanger(err);
