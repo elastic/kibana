@@ -18,7 +18,7 @@ import { useEnvironmentsFetcher } from '../../../hooks/use_environments_fetcher'
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { fromQuery, toQuery } from '../Links/url_helpers';
 import { useApmParams } from '../../../hooks/use_apm_params';
-import { getDateRange } from '../../../context/url_params_context/helpers';
+import { useTimeRange } from '../../../hooks/use_time_range';
 
 function updateEnvironmentUrl(
   history: History,
@@ -67,15 +67,17 @@ export function EnvironmentFilter() {
   const apmParams = useApmParams('/*', true);
   const { urlParams } = useUrlParams();
 
-  const { start, end } =
-    apmParams?.query &&
-    'rangeFrom' in apmParams.query &&
-    'rangeTo' in apmParams.query
-      ? getDateRange({
-          rangeFrom: apmParams.query.rangeFrom,
-          rangeTo: apmParams.query.rangeTo,
-        })
-      : { start: undefined, end: undefined };
+  const rangeFrom =
+    apmParams?.query && 'rangeFrom' in apmParams.query
+      ? apmParams.query.rangeFrom
+      : undefined;
+
+  const rangeTo =
+    apmParams?.query && 'rangeTo' in apmParams.query
+      ? apmParams.query.rangeTo
+      : undefined;
+
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo, optional: true });
 
   const { environment } = urlParams;
   const { environments, status = 'loading' } = useEnvironmentsFetcher({
