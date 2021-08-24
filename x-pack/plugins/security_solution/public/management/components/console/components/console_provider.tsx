@@ -22,7 +22,7 @@ ConsoleProvider.displayName = 'ConsoleProvider';
 
 export type ConsoleProviderComponent = typeof ConsoleProvider;
 
-export const useConsoleProvider = <T extends ConsoleServiceInterface>(): T => {
+export const useConsoleService = <T extends ConsoleServiceInterface>(): T => {
   const consoleService = useContext(ConsoleContext);
 
   if (!consoleService) {

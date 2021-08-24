@@ -6,5 +6,5 @@
  */
 
 export * from './console';
-export { ConsoleServiceInterface } from './service/console_service';
 export * from './components/console_provider';
+export * from './service/console_service';

@@ -41,68 +41,82 @@ const CommandInputContainer = styled.div`
 `;
 
 export interface CommandInputProps extends CommonProps {
+  onExecute: (command: { input: string }) => void;
   prompt?: string;
+  isWaiting?: boolean;
 }
 
-export const CommandInput = memo<CommandInputProps>(({ prompt = '>', ...commonProps }) => {
-  // TODO:PT make entire area "focus'able and when user is not "within" then make cursor stop blinking and only have a white border
+export const CommandInput = memo<CommandInputProps>(
+  ({ prompt = '>', onExecute, ...commonProps }) => {
+    // TODO:PT Support having a "console not focused" mode where the cursor will not blink
 
-  const [textEntered, setTextEntered] = useState<string>('');
-  const focusRef: KeyCaptureProps['focusRef'] = useRef(null);
-  const textDisplayRef = useRef<HTMLDivElement | null>(null);
+    const [textEntered, setTextEntered] = useState<string>('');
+    const focusRef: KeyCaptureProps['focusRef'] = useRef(null);
+    const textDisplayRef = useRef<HTMLDivElement | null>(null);
 
-  const handleTypingAreaClick = useCallback<MouseEventHandler>((ev) => {
-    // FIXME:PT Only focus if user did not click/select text on the input area
+    const handleTypingAreaClick = useCallback<MouseEventHandler>((ev) => {
+      // FIXME:PT move this to the entire console window, so that clicking it focuses the cursor
 
-    if (focusRef.current) {
-      focusRef.current();
-    }
-  }, []);
-
-  const handleKeyCapture = useCallback<KeyCaptureProps['onCapture']>(({ value, eventDetails }) => {
-    setTextEntered((prevState) => {
-      let updatedState = prevState + value;
-
-      switch (eventDetails.keyCode) {
-        // DELETE
-        case 8:
-          if (updatedState.length) {
-            updatedState = updatedState.replace(/.$/, '');
-          }
-          break;
-
-        // ENTER
-        case 13:
-          console.log(`user pressed ENTER. Run command`);
-          break;
+      // If user selected text, then don't focus (else they lose selection)
+      if ((window.getSelection()?.toString() ?? '').length > 0) {
+        return;
       }
 
-      return updatedState;
-    });
-  }, []);
+      if (focusRef.current) {
+        focusRef.current();
+      }
+    }, []);
 
-  return (
-    <CommandInputContainer {...commonProps} onClick={handleTypingAreaClick}>
-      <EuiFlexGroup
-        wrap={true}
-        responsive={false}
-        alignItems="flexStart"
-        gutterSize="none"
-        justifyContent="flexStart"
-        ref={textDisplayRef}
-      >
-        <EuiFlexItem grow={false}>
-          <span className="eui-displayInlineBlock prompt">{prompt}</span>
-        </EuiFlexItem>
-        <EuiFlexItem className="textEntered" grow={false}>
-          {textEntered}
-        </EuiFlexItem>
-        <EuiFlexItem grow>
-          <span className="cursor" />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <KeyCapture onCapture={handleKeyCapture} focusRef={focusRef} />
-    </CommandInputContainer>
-  );
-});
+    const handleKeyCapture = useCallback<KeyCaptureProps['onCapture']>(
+      ({ value, eventDetails }) => {
+        setTextEntered((prevState) => {
+          let updatedState = prevState + value;
+
+          switch (eventDetails.keyCode) {
+            // DELETE
+            // remove the last character from the text entered
+            case 8:
+              if (updatedState.length) {
+                updatedState = updatedState.replace(/.$/, '');
+              }
+              break;
+
+            // ENTER
+            // Execute command and blank out the input area
+            case 13:
+              onExecute({ input: updatedState });
+              return '';
+          }
+
+          return updatedState;
+        });
+      },
+      []
+    );
+
+    return (
+      <CommandInputContainer {...commonProps} onClick={handleTypingAreaClick}>
+        <EuiFlexGroup
+          wrap={true}
+          responsive={false}
+          alignItems="flexStart"
+          gutterSize="none"
+          justifyContent="flexStart"
+          ref={textDisplayRef}
+        >
+          <EuiFlexItem grow={false}>
+            <span className="eui-displayInlineBlock prompt">{prompt}</span>
+          </EuiFlexItem>
+          <EuiFlexItem className="textEntered" grow={false}>
+            {textEntered}
+          </EuiFlexItem>
+          <EuiFlexItem grow>
+            <span className="cursor" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <KeyCapture onCapture={handleKeyCapture} focusRef={focusRef} />
+      </CommandInputContainer>
+    );
+  }
+);
 CommandInput.displayName = 'CommandInput';
