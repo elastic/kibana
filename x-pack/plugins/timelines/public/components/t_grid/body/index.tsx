@@ -209,10 +209,7 @@ const transformControlColumns = ({
         if (columnId === 'checkbox-control-column' && hasAlertsCrudPermissions != null) {
           const alertConsumers =
             data[rowIndex].data.find((d) => d.field === ALERT_RULE_CONSUMER)?.value ?? [];
-          disabled = alertConsumers.reduce<boolean>(
-            (acc, consumer) => acc || !hasAlertsCrudPermissions(consumer),
-            false
-          );
+          disabled = alertConsumers.some((consumer) => !hasAlertsCrudPermissions(consumer));
         }
 
         return (

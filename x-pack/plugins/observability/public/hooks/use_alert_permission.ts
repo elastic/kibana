@@ -15,10 +15,26 @@ export interface UseGetUserAlertsPermissionsProps {
   featureId: string | null;
 }
 
+type O11yPrivilegesUi = Record<
+  string,
+  {
+    save: boolean;
+    show: boolean;
+  }
+>;
+
 export const getAlertsPermissions = (
-  uiCapabilities: RecursiveReadonly<Record<string, any>>,
+  uiCapabilities: RecursiveReadonly<O11yPrivilegesUi>,
   featureId: string
 ) => {
+  if (!featureId || !uiCapabilities[featureId]) {
+    return {
+      crud: false,
+      read: false,
+      loading: false,
+      featureId,
+    };
+  }
   const capabilitiesCanUserCRUD: boolean =
     typeof uiCapabilities[featureId].save === 'boolean' ? uiCapabilities[featureId].save : false;
   const capabilitiesCanUserRead: boolean =
@@ -32,7 +48,7 @@ export const getAlertsPermissions = (
 };
 
 export const useGetUserAlertsPermissions = (
-  uiCapabilities: RecursiveReadonly<Record<string, any>>,
+  uiCapabilities: RecursiveReadonly<O11yPrivilegesUi>,
   featureId?: string
 ): UseGetUserAlertsPermissionsProps => {
   const [alertsPermissions, setAlertsPermissions] = useState<UseGetUserAlertsPermissionsProps>({
