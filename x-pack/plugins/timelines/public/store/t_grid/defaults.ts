@@ -73,7 +73,7 @@ export const tGridDefaults: SubsetTGridModel = {
   indexNames: [],
   isLoading: false,
   isSelectAllChecked: false,
-  itemsPerPage: 25,
+  itemsPerPage: 50,
   itemsPerPageOptions: [10, 25, 50, 100],
   loadingEventIds: [],
   selectedEventIds: {},
