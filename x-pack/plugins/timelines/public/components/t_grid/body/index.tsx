@@ -71,6 +71,7 @@ import { checkBoxControlColumn } from './control_columns';
 import type { EuiTheme } from '../../../../../../../src/plugins/kibana_react/common';
 import { ViewSelection } from '../event_rendered_view/selector';
 import { EventRenderedView } from '../event_rendered_view';
+import { useDataGridHeightHack } from './height_hack';
 
 const StatefulAlertStatusBulkActions = lazy(
   () => import('../toolbar/bulk_actions/alert_status_bulk_actions')
@@ -689,10 +690,14 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
       [id, dispatch]
     );
 
+    const height = useDataGridHeightHack(pageSize);
+
     return (
       <>
         {tableView === 'gridView' && (
           <EuiDataGrid
+            height={height}
+            id={'body-data-grid'}
             data-test-subj="body-data-grid"
             aria-label={i18n.TGRID_BODY_ARIA_LABEL}
             columns={columnsWithCellActions}
