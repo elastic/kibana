@@ -114,6 +114,8 @@ export default function createGetTests({ getService }: FtrProviderContext) {
           )!;
 
           const newValDecoded = JSON.parse(userAction.new_value!);
+          expect(newValDecoded.description).to.be('a description');
+          expect(newValDecoded.title).to.be('a case');
           expect(newValDecoded.connector).not.have.property('id');
           // the connector id should be none so it should be removed
           expect(userAction.new_val_connector_id).to.be(null);
@@ -145,7 +147,11 @@ export default function createGetTests({ getService }: FtrProviderContext) {
             'e7882d70-005e-11ec-91f1-6daf2ab59fb5'
           )!;
 
-          expect(JSON.parse(userAction.new_value!).connector).to.not.have.property('id');
+          const newValDecoded = JSON.parse(userAction.new_value!);
+          expect(newValDecoded.description).to.be('a description');
+          expect(newValDecoded.title).to.be('a case');
+
+          expect(newValDecoded.connector).to.not.have.property('id');
           expect(userAction.new_val_connector_id).to.be('d92243b0-005e-11ec-91f1-6daf2ab59fb5');
           expect(userAction.old_val_connector_id).to.be(null);
         });
@@ -156,7 +162,9 @@ export default function createGetTests({ getService }: FtrProviderContext) {
             'e9471b80-005e-11ec-91f1-6daf2ab59fb5'
           )!;
 
-          expect(JSON.parse(userAction.new_value!)).to.not.have.property('connector_id');
+          const newValDecoded = JSON.parse(userAction.new_value!);
+          expect(newValDecoded.connector_name).to.be('a jira connector');
+          expect(newValDecoded).to.not.have.property('connector_id');
           expect(userAction.new_val_connector_id).to.be('d92243b0-005e-11ec-91f1-6daf2ab59fb5');
           expect(userAction.old_val_connector_id).to.be(null);
         });
@@ -167,6 +175,8 @@ export default function createGetTests({ getService }: FtrProviderContext) {
             'efe9de50-005e-11ec-91f1-6daf2ab59fb5'
           )!;
 
+          const newValDecoded = JSON.parse(userAction.new_value!);
+          expect(newValDecoded.comment).to.be('a comment');
           expect(userAction.new_val_connector_id).to.be(null);
           expect(userAction.old_val_connector_id).to.be(null);
         });
@@ -177,8 +187,14 @@ export default function createGetTests({ getService }: FtrProviderContext) {
             '16cd9e30-005f-11ec-91f1-6daf2ab59fb5'
           )!;
 
-          expect(JSON.parse(userAction.new_value!)).to.not.have.property('id');
-          expect(JSON.parse(userAction.old_value!)).to.not.have.property('id');
+          const newValDecoded = JSON.parse(userAction.new_value!);
+          const oldValDecoded = JSON.parse(userAction.old_value!);
+
+          expect(newValDecoded.name).to.be('a different jira connector');
+          expect(oldValDecoded.name).to.be('a jira connector');
+
+          expect(newValDecoded).to.not.have.property('id');
+          expect(oldValDecoded).to.not.have.property('id');
           expect(userAction.new_val_connector_id).to.be('0a572860-005f-11ec-91f1-6daf2ab59fb5');
           expect(userAction.old_val_connector_id).to.be('d92243b0-005e-11ec-91f1-6daf2ab59fb5');
         });
@@ -189,7 +205,11 @@ export default function createGetTests({ getService }: FtrProviderContext) {
             '1ea33bb0-005f-11ec-91f1-6daf2ab59fb5'
           )!;
 
-          expect(JSON.parse(userAction.new_value!)).to.not.have.property('connector_id');
+          const newValDecoded = JSON.parse(userAction.new_value!);
+
+          expect(newValDecoded.connector_name).to.be('a different jira connector');
+
+          expect(newValDecoded).to.not.have.property('connector_id');
           expect(userAction.new_val_connector_id).to.be('0a572860-005f-11ec-91f1-6daf2ab59fb5');
           expect(userAction.old_val_connector_id).to.be(null);
         });

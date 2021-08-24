@@ -484,6 +484,34 @@ describe('user action transform utils', () => {
           ]
         `);
       });
+
+      it('returns the transformed connector and the description', () => {
+        const details = { ...createConnectorObject(), description: 'a description' };
+
+        const { transformedActionDetails } = extractConnectorIdHelper({
+          action: 'create',
+          actionFields: ['connector'],
+          actionDetails: details,
+          fieldType: UserActionFieldType.Old,
+        })!;
+
+        const parsedJson = JSON.parse(transformedActionDetails);
+
+        expect(parsedJson).toMatchInlineSnapshot(`
+          Object {
+            "connector": Object {
+              "fields": Object {
+                "issueType": "bug",
+                "parent": "2",
+                "priority": "high",
+              },
+              "name": ".jira",
+              "type": ".jira",
+            },
+            "description": "a description",
+          }
+        `);
+      });
     });
 
     describe('update action', () => {

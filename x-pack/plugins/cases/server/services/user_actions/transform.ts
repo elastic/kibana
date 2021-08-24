@@ -115,27 +115,41 @@ export function extractConnectorIdHelper({
   fieldType: UserActionFieldType;
 }): { transformedActionDetails: string; references: SavedObjectReference[] } {
   let transformedActionDetails: unknown = actionDetails;
-  let references: SavedObjectReference[] = [];
+  let referencesToReturn: SavedObjectReference[] = [];
 
   try {
     if (isCreateCaseConnector(action, actionFields, actionDetails)) {
-      ({ transformedActionDetails, references } = transformCreateConnector(
-        actionDetails.connector,
-        fieldType
-      ));
+      const {
+        transformedActionDetails: transformedConnectorPortion,
+        references,
+      } = transformCreateConnector(actionDetails.connector, fieldType);
+
+      // the above call only transforms the connector portion of the action details so let's add back
+      // the rest of the details and we'll overwrite the connector portion when the transformed one
+      transformedActionDetails = {
+        ...actionDetails,
+        ...transformedConnectorPortion,
+      };
+      referencesToReturn = references;
     } else if (isUpdateCaseConnector(action, actionFields, actionDetails)) {
-      ({ transformedActionDetails, references } = transformUpdateConnector(
+      ({ transformedActionDetails, references: referencesToReturn } = transformUpdateConnector(
         actionDetails,
         fieldType
       ));
     } else if (isPushConnector(action, actionFields, actionDetails)) {
-      ({ transformedActionDetails, references } = transformPushConnector(actionDetails, fieldType));
+      ({ transformedActionDetails, references: referencesToReturn } = transformPushConnector(
+        actionDetails,
+        fieldType
+      ));
     }
   } catch (error) {
     // ignore any errors, we'll just return whatever was passed in for action details in that case
   }
 
-  return { transformedActionDetails: JSON.stringify(transformedActionDetails), references };
+  return {
+    transformedActionDetails: JSON.stringify(transformedActionDetails),
+    references: referencesToReturn,
+  };
 }
 
 function isCreateCaseConnector(
@@ -169,7 +183,10 @@ interface ExtractedConnector {
 function transformCreateConnector(
   connector: CaseConnector,
   fieldType: UserActionFieldType
-): ExtractedConnector {
+): {
+  transformedActionDetails: { connector: unknown };
+  references: SavedObjectReference[];
+} {
   const { transformedConnector, references } = transformConnectorIdToReference(
     ConnectorIdReferenceName[fieldType],
     connector
@@ -278,7 +295,10 @@ export const PushConnectorIdReferenceName: Record<
 function transformPushConnector(
   externalService: CaseExternalService,
   fieldType: UserActionFieldType
-): ExtractedConnector {
+): {
+  transformedActionDetails: {} | null;
+  references: SavedObjectReference[];
+} {
   const { transformedPushConnector, references } = transformPushConnectorIdToReference(
     PushConnectorIdReferenceName[fieldType],
     externalService

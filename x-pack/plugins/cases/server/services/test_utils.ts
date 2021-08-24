@@ -54,7 +54,7 @@ export const createESJiraConnector = (
       { key: 'parent', value: '2' },
     ],
     type: ConnectorTypes.jira,
-    ...(overrides && { ...overrides }),
+    ...overrides,
   };
 };
 
@@ -94,7 +94,7 @@ export const createExternalService = (
     email: 'testemail@elastic.co',
     username: 'elastic',
   },
-  ...(overrides && { ...overrides }),
+  ...overrides,
 });
 
 export const basicCaseFields = {
@@ -200,7 +200,7 @@ export const createSavedObjectReferences = ({
 ];
 
 export const createConnectorObject = (overrides?: Partial<CaseConnector>) => ({
-  connector: { ...createJiraConnector(), ...(overrides && { ...overrides }) },
+  connector: { ...createJiraConnector(), ...overrides },
 });
 
 export const createSOFindResponse = <T>(savedObjects: Array<SavedObjectsFindResult<T>>) => ({
