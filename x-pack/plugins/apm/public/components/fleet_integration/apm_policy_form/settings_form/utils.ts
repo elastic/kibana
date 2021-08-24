@@ -8,8 +8,8 @@
 import { i18n } from '@kbn/i18n';
 import { isRight } from 'fp-ts/lib/Either';
 import { PathReporter } from 'io-ts/lib/PathReporter';
-import { isEmpty } from 'lodash';
-import { PackagePolicyVars, SettingDefinition, Setting } from '../typings';
+import { isEmpty, isFinite } from 'lodash';
+import { PackagePolicyVars, Setting, BasicSetting } from '../typings';
 
 export const REQUIRED_LABEL = i18n.translate(
   'xpack.apm.fleet_integration.settings.requiredLabel',
@@ -33,13 +33,13 @@ export function mergeNewVars(
 }
 
 export function isSettingsFormValid(
-  parentSettings: SettingDefinition[],
+  parentSettings: Setting[],
   vars: PackagePolicyVars
 ) {
-  function isSettingsValid(settings: SettingDefinition[]): boolean {
+  function isSettingsValid(settings: Setting[]): boolean {
     return !settings
       .map((setting) => {
-        if (setting.type === 'advanced_settings') {
+        if (setting.type === 'advanced_setting') {
           return isSettingsValid(setting.settings);
         }
 
@@ -58,11 +58,11 @@ export function isSettingsFormValid(
   return isSettingsValid(parentSettings);
 }
 
-export function validateSettingValue(setting: Setting, value?: any) {
+export function validateSettingValue(setting: BasicSetting, value?: any) {
   if (!isFinite(value) && isEmpty(value)) {
     return {
       isValid: !setting.required,
-      message: setting.required ? REQUIRED_FIELD : '',
+      message: REQUIRED_FIELD,
     };
   }
 

@@ -7,12 +7,14 @@
 
 import { i18n } from '@kbn/i18n';
 import { getIntegerRt } from '../../../../../common/agent_configuration/runtime_types/integer_rt';
-import { PackagePolicyVars, SettingDefinition } from '../typings';
-import { isSettingsFormValid, OPTIONAL_LABEL } from '../settings_form/utils';
+import { OPTIONAL_LABEL } from '../settings_form/utils';
+import { Setting } from '../typings';
 
-export function getAgentAuthorizationSettings(
-  isCloudPolicy: boolean
-): SettingDefinition[] {
+export function getAgentAuthorizationSettings({
+  isCloudPolicy,
+}: {
+  isCloudPolicy: boolean;
+}): Setting[] {
   return [
     {
       type: 'boolean',
@@ -161,11 +163,4 @@ export function getAgentAuthorizationSettings(
       ],
     },
   ];
-}
-
-export function isAgentAuthorizationFormValid(
-  newVars: PackagePolicyVars,
-  agentAuthorizationSettings: SettingDefinition[]
-) {
-  return isSettingsFormValid(agentAuthorizationSettings, newVars);
 }

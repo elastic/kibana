@@ -7,14 +7,14 @@
 import { i18n } from '@kbn/i18n';
 import { getDurationRt } from '../../../../../common/agent_configuration/runtime_types/duration_rt';
 import { getIntegerRt } from '../../../../../common/agent_configuration/runtime_types/integer_rt';
-import { PackagePolicyVars, SettingDefinition } from '../typings';
-import {
-  isSettingsFormValid,
-  OPTIONAL_LABEL,
-  REQUIRED_LABEL,
-} from '../settings_form/utils';
+import { OPTIONAL_LABEL, REQUIRED_LABEL } from '../settings_form/utils';
+import { Setting } from '../typings';
 
-export function getApmSettings(isCloudPolicy: boolean): SettingDefinition[] {
+export function getApmSettings({
+  isCloudPolicy,
+}: {
+  isCloudPolicy: boolean;
+}): Setting[] {
   return [
     {
       type: 'text',
@@ -53,7 +53,7 @@ export function getApmSettings(isCloudPolicy: boolean): SettingDefinition[] {
       required: true,
     },
     {
-      type: 'advanced_settings',
+      type: 'advanced_setting',
       settings: [
         {
           key: 'max_header_bytes',
@@ -218,11 +218,4 @@ export function getApmSettings(isCloudPolicy: boolean): SettingDefinition[] {
       ],
     },
   ];
-}
-
-export function isAPMFormValid(
-  newVars: PackagePolicyVars,
-  apmSettings: SettingDefinition[]
-) {
-  return isSettingsFormValid(apmSettings, newVars);
 }

@@ -7,14 +7,8 @@
 import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
-import {
-  getAgentAuthorizationSettings,
-  isAgentAuthorizationFormValid,
-} from './settings_definition/agent_authorization_settings';
-import {
-  getApmSettings,
-  isAPMFormValid,
-} from './settings_definition/apm_settings';
+import { getAgentAuthorizationSettings } from './settings_definition/agent_authorization_settings';
+import { getApmSettings } from './settings_definition/apm_settings';
 import {
   getRUMSettings,
   isRUMFormValid,
@@ -23,8 +17,8 @@ import {
   getTLSSettings,
   isTLSFormValid,
 } from './settings_definition/tls_settings';
-import { SettingsForm } from './settings_form';
-import { mergeNewVars } from './settings_form/utils';
+import { SettingsForm, SettingsSection } from './settings_form';
+import { isSettingsFormValid, mergeNewVars } from './settings_form/utils';
 import { PackagePolicyVars } from './typings';
 
 interface Props {
@@ -45,10 +39,12 @@ export function APMPolicyForm({
     agentAuthorizationSettings,
   } = useMemo(() => {
     return {
-      apmSettings: getApmSettings(isCloudPolicy),
+      apmSettings: getApmSettings({ isCloudPolicy }),
       rumSettings: getRUMSettings(),
       tlsSettings: getTLSSettings(),
-      agentAuthorizationSettings: getAgentAuthorizationSettings(isCloudPolicy),
+      agentAuthorizationSettings: getAgentAuthorizationSettings({
+        isCloudPolicy,
+      }),
     };
   }, [isCloudPolicy]);
 
@@ -58,15 +54,15 @@ export function APMPolicyForm({
 
     // Validate the entire form before sending it to fleet
     const isFormValid =
-      isAPMFormValid(newVars, apmSettings) &&
+      isSettingsFormValid(apmSettings, newVars) &&
       isRUMFormValid(newVars, rumSettings) &&
       isTLSFormValid(newVars, tlsSettings) &&
-      isAgentAuthorizationFormValid(newVars, agentAuthorizationSettings);
+      isSettingsFormValid(agentAuthorizationSettings, newVars);
 
     updateAPMPolicy(newVars, isFormValid);
   }
 
-  const settingsDefinition = [
+  const settingsSections: SettingsSection[] = [
     {
       id: 'apm',
       title: i18n.translate(
@@ -115,11 +111,11 @@ export function APMPolicyForm({
 
   return (
     <>
-      {settingsDefinition.map(({ id, ...settingDefinition }) => {
+      {settingsSections.map((settingsSection) => {
         return (
-          <React.Fragment key={id}>
+          <React.Fragment key={settingsSection.id}>
             <SettingsForm
-              {...settingDefinition}
+              settingsSection={settingsSection}
               vars={vars}
               onChange={handleFormChange}
             />

@@ -5,24 +5,25 @@
  * 2.0.
  */
 
-import { getApmSettings, isAPMFormValid } from './apm_settings';
-import { SettingDefinition, Setting } from '../typings';
+import { getApmSettings } from './apm_settings';
+import { Setting, BasicSetting } from '../typings';
+import { isSettingsFormValid } from '../settings_form/utils';
 
 describe('apm_settings', () => {
   describe('getApmSettings', () => {
-    function findSetting(key: string, settings: SettingDefinition[]): Setting {
+    function findSetting(key: string, settings: Setting[]) {
       return settings.find(
-        (setting) => setting.type !== 'advanced_settings' && setting.key === key
-      ) as Setting;
+        (setting) => setting.type !== 'advanced_setting' && setting.key === key
+      ) as BasicSetting;
     }
     ['host', 'url'].map((key) => {
       it(`returns read only ${key} when on cloud`, () => {
-        const settings = getApmSettings(true);
+        const settings = getApmSettings({ isCloudPolicy: true });
         const setting = findSetting(key, settings);
         expect(setting.readOnly).toBeTruthy();
       });
       it(`returns ${key} when NOT on cloud`, () => {
-        const settings = getApmSettings(false);
+        const settings = getApmSettings({ isCloudPolicy: false });
         const setting = findSetting(key, settings);
         expect(setting.readOnly).toBeFalsy();
       });
@@ -33,21 +34,27 @@ describe('apm_settings', () => {
     describe('validates integer fields', () => {
       ['max_header_bytes', 'max_event_bytes'].map((key) => {
         it(`returns false when ${key} is lower than 1`, () => {
-          const settings = getApmSettings(true);
+          const settings = getApmSettings({ isCloudPolicy: true });
           expect(
-            isAPMFormValid({ [key]: { value: 0, type: 'integer' } }, settings)
+            isSettingsFormValid(settings, {
+              [key]: { value: 0, type: 'integer' },
+            })
           ).toBeFalsy();
 
           expect(
-            isAPMFormValid({ [key]: { value: -1, type: 'integer' } }, settings)
+            isSettingsFormValid(settings, {
+              [key]: { value: -1, type: 'integer' },
+            })
           ).toBeFalsy();
         });
       });
       ['max_connections'].map((key) => {
         it(`returns false when ${key} is lower than 0`, () => {
-          const settings = getApmSettings(true);
+          const settings = getApmSettings({ isCloudPolicy: true });
           expect(
-            isAPMFormValid({ [key]: { value: -1, type: 'integer' } }, settings)
+            isSettingsFormValid(settings, {
+              [key]: { value: -1, type: 'integer' },
+            })
           ).toBeFalsy();
         });
       });
@@ -56,8 +63,8 @@ describe('apm_settings', () => {
     describe('validates required fields', () => {
       ['host', 'url'].map((key) => {
         it(`return false when  ${key} is not defined`, () => {
-          const settings = getApmSettings(true);
-          expect(isAPMFormValid({}, settings)).toBeFalsy();
+          const settings = getApmSettings({ isCloudPolicy: true });
+          expect(isSettingsFormValid(settings, {})).toBeFalsy();
         });
       });
     });
@@ -66,12 +73,11 @@ describe('apm_settings', () => {
       ['idle_timeout', 'read_timeout', 'shutdown_timeout', 'write_timeout'].map(
         (key) => {
           it(`return false when  ${key} lower then 1ms`, () => {
-            const settings = getApmSettings(true);
+            const settings = getApmSettings({ isCloudPolicy: true });
             expect(
-              isAPMFormValid(
-                { [key]: { value: '0ms', type: 'text' } },
-                settings
-              )
+              isSettingsFormValid(settings, {
+                [key]: { value: '0ms', type: 'text' },
+              })
             ).toBeFalsy();
           });
         }

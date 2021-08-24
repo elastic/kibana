@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import { PackagePolicyVars, SettingDefinition } from '../typings';
+import { PackagePolicyVars, Setting } from '../typings';
 import {
   isSettingsFormValid,
   OPTIONAL_LABEL,
@@ -14,7 +14,7 @@ import {
 
 const TLS_ENABLED_KEY = 'tls_enabled';
 
-export function getTLSSettings(): SettingDefinition[] {
+export function getTLSSettings(): Setting[] {
   return [
     {
       key: TLS_ENABLED_KEY,
@@ -86,7 +86,7 @@ export function getTLSSettings(): SettingDefinition[] {
 
 export function isTLSFormValid(
   newVars: PackagePolicyVars,
-  tlsSettings: SettingDefinition[]
+  tlsSettings: Setting[]
 ) {
   // only validates TLS when its flag is enabled
   return (

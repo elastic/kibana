@@ -22,12 +22,12 @@ export type PackagePolicyVars = Record<string, PackagePolicyConfigRecordEntry>;
 
 export type SettingValidation = t.Type<any, string, unknown>;
 
-interface AdvancedSettings {
-  type: 'advanced_settings';
-  settings: SettingDefinition[];
+interface AdvancedSetting {
+  type: 'advanced_setting';
+  settings: Setting[];
 }
 
-export interface Setting {
+export interface BasicSetting {
   type:
     | 'text'
     | 'combo'
@@ -43,10 +43,10 @@ export interface Setting {
   helpText?: string;
   placeholder?: string;
   labelAppend?: string;
-  settings?: SettingDefinition[];
+  settings?: Setting[];
   validation?: SettingValidation;
   required?: boolean;
   readOnly?: boolean;
 }
 
-export type SettingDefinition = Setting | AdvancedSettings;
+export type Setting = BasicSetting | AdvancedSetting;

@@ -16,10 +16,10 @@ import {
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { FormRowOnChange } from './';
-import { SettingDefinition } from '../typings';
+import { Setting } from '../typings';
 
 interface Props {
-  setting: SettingDefinition;
+  setting: Setting;
   value?: any;
   onChange: FormRowOnChange;
 }

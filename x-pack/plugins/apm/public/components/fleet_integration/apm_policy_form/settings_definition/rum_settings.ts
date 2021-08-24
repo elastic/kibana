@@ -5,11 +5,11 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import { PackagePolicyVars, SettingDefinition } from '../typings';
+import { PackagePolicyVars, Setting } from '../typings';
 import { isSettingsFormValid, OPTIONAL_LABEL } from '../settings_form/utils';
 
 const ENABLE_RUM_KEY = 'enable_rum';
-export function getRUMSettings(): SettingDefinition[] {
+export function getRUMSettings(): Setting[] {
   return [
     {
       key: ENABLE_RUM_KEY,
@@ -80,7 +80,7 @@ export function getRUMSettings(): SettingDefinition[] {
           ),
         },
         {
-          type: 'advanced_settings',
+          type: 'advanced_setting',
           settings: [
             {
               key: 'rum_library_pattern',
@@ -123,7 +123,7 @@ export function getRUMSettings(): SettingDefinition[] {
 
 export function isRUMFormValid(
   newVars: PackagePolicyVars,
-  rumSettings: SettingDefinition[]
+  rumSettings: Setting[]
 ) {
   // only validates RUM when its flag is enabled
   return (
