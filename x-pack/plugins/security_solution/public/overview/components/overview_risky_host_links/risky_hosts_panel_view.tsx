@@ -73,6 +73,8 @@ export const RiskyHostsPanelView: React.FC<LinkPanelViewProps> = ({
     <LinkPanel
       {...{
         dataTestSubj: 'risky-hosts-dashboard-links',
+        defaultSortOrder: 'desc',
+        defaultSortField: 'count',
         button: useMemo(
           () => (
             <EuiButton

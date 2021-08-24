@@ -49,6 +49,8 @@ const sortAndChunkItems = (
 const LinkPanelComponent = ({
   button,
   columns,
+  defaultSortField,
+  defaultSortOrder,
   infoPanel,
   listItems,
   panelTitle,
@@ -59,6 +61,8 @@ const LinkPanelComponent = ({
 }: {
   button: React.ReactNode;
   columns: Array<EuiTableFieldDataColumnType<LinkPanelListItem>>;
+  defaultSortField?: string;
+  defaultSortOrder?: 'asc' | 'desc';
   infoPanel?: React.ReactNode;
   listItems: LinkPanelListItem[];
   panelTitle: string;
@@ -68,8 +72,8 @@ const LinkPanelComponent = ({
   dataTestSubj: string;
 }) => {
   const [pageIndex, setPageIndex] = useState(0);
-  const [sortField, setSortField] = useState<string | number>('title');
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+  const [sortField, setSortField] = useState<string | number>(defaultSortField ?? 'title');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>(defaultSortOrder ?? 'asc');
 
   const onTableChange = ({ page, sort }: CriteriaWithPagination<LinkPanelListItem>) => {
     const { index } = page;
