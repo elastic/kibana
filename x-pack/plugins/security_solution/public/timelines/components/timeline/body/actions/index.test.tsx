@@ -10,7 +10,6 @@ import React from 'react';
 
 import { TestProviders, mockTimelineModel, mockTimelineData } from '../../../../../common/mock';
 import { Actions } from '.';
-import { useShallowEqualSelector } from '../../../../../common/hooks/use_selector';
 import { mockTimelines } from '../../../../../common/mock/mock_timelines_plugin';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 jest.mock('../../../../../common/hooks/use_experimental_features', () => ({
