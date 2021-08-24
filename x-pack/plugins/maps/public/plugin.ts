@@ -36,6 +36,7 @@ import type {
   VisualizationsSetup,
   VisualizationsStart,
 } from '../../../../src/plugins/visualizations/public';
+import type { Plugin as ExpressionsPublicPlugin } from '../../../../src/plugins/expressions/public';
 import { APP_ICON_SOLUTION, APP_ID, MAP_SAVED_OBJECT_TYPE } from '../common/constants';
 import { VISUALIZE_GEO_FIELD_TRIGGER } from '../../../../src/plugins/ui_actions/public';
 import { visualizeGeoFieldAction } from './trigger_actions/visualize_geo_field_action';
@@ -73,9 +74,18 @@ import {
   MapsAppRegionMapLocatorDefinition,
   MapsAppTileMapLocatorDefinition,
 } from './locators';
+import {
+  createRegionMapFn,
+  regionMapRenderer,
+  regionMapVisType,
+  createTileMapFn,
+  tileMapRenderer,
+  tileMapVisType,
+} from './legacy_visualizations';
 import { SecurityPluginStart } from '../../security/public';
 
 export interface MapsPluginSetupDependencies {
+  expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
   inspector: InspectorSetupContract;
   home?: HomePublicPluginSetup;
   visualizations: VisualizationsSetup;
@@ -177,6 +187,14 @@ export class MapsPlugin
         return renderApp(params, UsageTracker);
       },
     });
+
+    // register wrapper around legacy tile_map and region_map visualizations
+    plugins.expressions.registerFunction(createRegionMapFn);
+    plugins.expressions.registerRenderer(regionMapRenderer);
+    plugins.visualizations.createBaseVisualization(regionMapVisType);
+    plugins.expressions.registerFunction(createTileMapFn);
+    plugins.expressions.registerRenderer(tileMapRenderer);
+    plugins.visualizations.createBaseVisualization(tileMapVisType);
   }
 
   public start(core: CoreStart, plugins: MapsPluginStartDependencies): MapsStartApi {

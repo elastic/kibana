@@ -84,7 +84,7 @@ describe('Overview - Fix deprecated settings step', () => {
       component.update();
 
       expect(exists('esStatsPanel')).toBe(true);
-      expect(find('esStatsPanel').find('a').props().href).toBe('/es_deprecations/cluster');
+      expect(find('esStatsPanel').find('a').props().href).toBe('/es_deprecations');
     });
 
     describe('Renders ES errors', () => {
