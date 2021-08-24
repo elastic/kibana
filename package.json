@@ -93,7 +93,7 @@
     "yarn": "^1.21.1"
   },
   "dependencies": {
-    "@babel/runtime": "^7.12.18",
+    "@babel/runtime": "^7.12.5",
     "@elastic/apm-rum": "^5.8.0",
     "@elastic/apm-rum-react": "^1.2.11",
     "@elastic/charts": "34.1.1",

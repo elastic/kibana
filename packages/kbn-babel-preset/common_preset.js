@@ -37,7 +37,7 @@ const plugins = [
   [
     require.resolve('@babel/plugin-transform-runtime'),
     {
-      version: '^7.12.18',
+      version: '^7.12.5',
     },
   ],
 ];

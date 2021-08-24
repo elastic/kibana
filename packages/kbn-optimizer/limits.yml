@@ -1,118 +1,118 @@
 pageLoadAssetSize:
   advancedSettings: 27596
-  alerting: 162537
-  apm: 117932
+  alerting: 106936
+  apm: 64385
   apmOss: 18996
-  bfetch: 101343
+  bfetch: 51874
   canvas: 1066647
-  charts: 172827
-  cloud: 84376
+  charts: 95000
+  cloud: 21076
   console: 46091
-  core: 635409
-  crossClusterReplication: 111368
-  dashboard: 417337
+  core: 435325
+  crossClusterReplication: 65408
+  dashboard: 374194
   dashboardEnhanced: 65646
-  data: 1035855
+  data: 824229
   dataEnhanced: 50420
-  devTools: 95351
-  discover: 163593
+  devTools: 38637
+  discover: 99999
   discoverEnhanced: 42730
   embeddable: 312874
   embeddableEnhanced: 41145
   enterpriseSearch: 35741
   esUiShared: 326654
-  features: 40034
-  fieldFormats: 181789
-  globalSearch: 122547
-  globalSearchBar: 143432
-  globalSearchProviders: 72338
+  expressions: 224136
+  features: 21723
+  fieldFormats: 92628
+  globalSearch: 29696
+  globalSearchBar: 50403
+  globalSearchProviders: 25554
   graph: 31504
   grokdebugger: 26779
-  home: 103202
+  home: 30182
   indexLifecycleManagement: 107090
   indexManagement: 140608
   indexPatternManagement: 28222
-  indexPatternEditor: 54399
-  infra: 284972
-  fleet: 630764
+  indexPatternEditor: 25000
+  infra: 184320
+  fleet: 465774
   ingestPipelines: 58003
   inputControlVis: 172675
   inspector: 148711
   kibanaLegacy: 107711
   kibanaOverview: 56279
-  kibanaReact: 245591
-  kibanaUtils: 307642
+  kibanaReact: 188705
+  kibanaUtils: 198829
   lens: 96624
   licenseManagement: 41817
-  licensing: 89606
-  lists: 39183
-  logstash: 109228
-  management: 100119
-  maps: 168872
-  ml: 149387
-  monitoring: 103298
-  navigation: 60483
-  newsfeed: 85879
-  observability: 182625
+  licensing: 29004
+  lists: 22900
+  logstash: 53548
+  management: 46112
+  maps: 90000
+  ml: 82187
+  monitoring: 80000
+  navigation: 37269
+  newsfeed: 42228
+  observability: 89709
   painlessLab: 179748
   remoteClusters: 51327
-  reporting: 220340
-  rollup: 125774
-  savedObjects: 188358
-  savedObjectsManagement: 167350
-  savedObjectsTagging: 124976
-  savedObjectsTaggingOss: 40400
+  reporting: 183418
+  rollup: 97204
+  savedObjects: 108518
+  savedObjectsManagement: 101836
+  savedObjectsTagging: 59482
+  savedObjectsTaggingOss: 20590
   searchprofiler: 67080
-  security: 227224
-  securityOss: 85735
-  share: 237943
+  security: 95864
+  securityOss: 30806
+  securitySolution: 217673
+  share: 99061
   snapshotRestore: 79032
-  spaces: 148968
-  telemetry: 133151
-  telemetryManagementSection: 104794
-  timelion: 86177
+  spaces: 57868
+  telemetry: 51957
+  telemetryManagementSection: 38586
+  timelion: 29920
   transform: 41007
-  triggersActionsUi: 264308
-  uiActions: 164803
-  uiActionsEnhanced: 407868
+  triggersActionsUi: 100000
+  uiActions: 97717
+  uiActionsEnhanced: 313011
   upgradeAssistant: 81241
-  uptime: 96567
+  uptime: 40825
   urlDrilldown: 70674
-  urlForwarding: 47701
-  usageCollection: 63851
-  visDefaultEditor: 113220
-  visTypeMarkdown: 48188
-  visTypeMetric: 78244
+  urlForwarding: 32579
+  usageCollection: 39762
+  visDefaultEditor: 50178
+  visTypeMarkdown: 30896
+  visTypeMetric: 42790
   visTypeTable: 94934
   visTypeTagcloud: 37575
-  visTypeTimelion: 97862
-  visTypeTimeseries: 112048
+  visTypeTimelion: 68883
+  visTypeTimeseries: 55203
   visTypeVega: 153573
   visTypeVislib: 242838
   visTypeXy: 113478
-  visualizations: 128443
-  visualize: 104737
+  visualizations: 90000
+  visualize: 57431
   watcher: 43598
-  runtimeFields: 58312
-  stackAlerts: 47213
-  presentationUtil: 169472
-  indexPatternFieldEditor: 91783
+  runtimeFields: 41752
+  stackAlerts: 29684
+  presentationUtil: 94301
+  indexPatternFieldEditor: 50000
   osquery: 107090
-  fileUpload: 99750
-  dataVisualizer: 110024
+  fileUpload: 25664
+  dataVisualizer: 27530
   banners: 17946
-  mapsEms: 81756
-  timelines: 441244
-  screenshotMode: 38041
-  visTypePie: 77595
-  expressionRevealImage: 50971
-  cases: 261179
-  expressionError: 41767
-  expressionRepeatImage: 42769
-  expressionImage: 41802
+  mapsEms: 26072
+  timelines: 327300
+  screenshotMode: 17856
+  visTypePie: 35583
+  expressionRevealImage: 25675
+  cases: 144442
+  expressionError: 22127
+  expressionRepeatImage: 22341
+  expressionImage: 19288
   expressionMetric: 22238
-  expressionShape: 72571
+  expressionShape: 34008
   interactiveSetup: 18532
-  expressionTagcloud: 44950
-  expressions: 385120
-  securitySolution: 310687
+  expressionTagcloud: 27505
