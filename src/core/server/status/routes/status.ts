@@ -106,6 +106,7 @@ export const registerStatusRoute = ({ router, config, metrics, status }: Deps) =
           collection_interval_in_millis: metrics.collectionInterval,
           os: lastMetrics.os,
           process: lastMetrics.process,
+          processes: lastMetrics.processes,
           response_times: lastMetrics.response_times,
           concurrent_connections: lastMetrics.concurrent_connections,
           requests: {

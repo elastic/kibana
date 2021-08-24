@@ -7,7 +7,7 @@
  */
 
 import { Observable } from 'rxjs';
-import { OpsProcessMetrics, OpsOsMetrics, OpsServerMetrics } from './collectors';
+import type { OpsProcessMetrics, OpsOsMetrics, OpsServerMetrics } from './collectors';
 
 /**
  * APIs to retrieves metrics gathered and exposed by the core platform.
@@ -51,8 +51,13 @@ export type InternalMetricsServiceStart = MetricsServiceStart;
 export interface OpsMetrics {
   /** Time metrics were recorded at. */
   collected_at: Date;
-  /** Process related metrics */
+  /**
+   * Process related metrics. Deprecated in favor of processes field.
+   * @deprecated
+   */
   process: OpsProcessMetrics;
+  /** Process related metrics. Reports an array of objects for each kibana pid.*/
+  processes: OpsProcessMetrics[];
   /** OS related metrics */
   os: OpsOsMetrics;
   /** server response time stats */

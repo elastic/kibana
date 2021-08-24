@@ -28,14 +28,16 @@ export class OpsMetricsCollector implements MetricsCollector<OpsMetrics> {
   }
 
   public async collect(): Promise<OpsMetrics> {
-    const [process, os, server] = await Promise.all([
+    const [processes, os, server] = await Promise.all([
       this.processCollector.collect(),
       this.osCollector.collect(),
       this.serverCollector.collect(),
     ]);
+
     return {
       collected_at: new Date(),
-      process,
+      process: processes[0],
+      processes,
       os,
       ...server,
     };

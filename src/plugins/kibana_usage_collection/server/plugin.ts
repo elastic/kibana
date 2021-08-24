@@ -21,7 +21,7 @@ import type {
   Logger,
   CoreUsageDataStart,
 } from 'src/core/server';
-import { SavedObjectsClient } from '../../../core/server';
+import { SavedObjectsClient, EventLoopDelaysMonitor } from '../../../core/server';
 import {
   startTrackingEventLoopDelaysUsage,
   startTrackingEventLoopDelaysThreshold,
@@ -92,11 +92,16 @@ export class KibanaUsageCollectionPlugin implements Plugin {
     this.uiSettingsClient = uiSettings.asScopedToClient(savedObjectsClient);
     core.metrics.getOpsMetrics$().subscribe(this.metric$);
     this.coreUsageData = core.coreUsageData;
-    startTrackingEventLoopDelaysUsage(this.savedObjectsClient, this.pluginStop$.asObservable());
+    startTrackingEventLoopDelaysUsage(
+      this.savedObjectsClient,
+      this.pluginStop$.asObservable(),
+      new EventLoopDelaysMonitor()
+    );
     startTrackingEventLoopDelaysThreshold(
       this.eventLoopUsageCounter,
       this.logger,
-      this.pluginStop$.asObservable()
+      this.pluginStop$.asObservable(),
+      new EventLoopDelaysMonitor()
     );
   }
 

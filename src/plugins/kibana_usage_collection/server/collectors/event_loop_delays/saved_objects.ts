@@ -12,8 +12,7 @@ import type {
   ISavedObjectsRepository,
 } from 'kibana/server';
 import moment from 'moment';
-import type { IntervalHistogram } from './event_loop_delays';
-
+import type { IntervalHistogram } from 'kibana/server';
 export const SAVED_OBJECTS_DAILY_TYPE = 'event_loop_delays_daily';
 
 export interface EventLoopDelaysDaily extends SavedObjectAttributes, IntervalHistogram {
