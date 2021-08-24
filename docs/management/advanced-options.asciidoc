@@ -398,14 +398,6 @@ changes.
 [[kibana-search-settings]]
 ==== Search
 
-[horizontal]
-[[courier-batchsearches]]`courier:batchSearches`::
-**Deprecated in 7.6. Starting in 8.0, this setting will be optimized internally.**
-When disabled, dashboard panels will load individually, and search requests will
-terminate when users navigate away or update the query. When enabled, dashboard
-panels will load together when all of the data is loaded, and searches will not
-terminate.
-
 [[courier-customrequestpreference]]`courier:customRequestPreference`::
 {ref}/search-request-body.html#request-body-search-preference[Request preference]
 to use when `courier:setRequestPreference` is set to "custom".
@@ -533,17 +525,6 @@ of the chart. Use numbers between 0 and 1. The lower the number, the more the hi
 
 [[visualization-heatmap-maxbuckets]]`visualization:heatmap:maxBuckets`::
 The maximum number of buckets a datasource can return. High numbers can have a negative impact on your browser rendering performance.
-
-[[visualization-regionmap-showwarnings]]`visualization:regionmap:showWarnings`::
-Shows a warning in a region map when terms cannot be joined to a shape.
-
-[[visualization-tilemap-wmsdefaults]]`visualization:tileMap:WMSdefaults`::
-The default properties for the WMS map server supported in the coordinate map.
-
-[[visualization-tilemap-maxprecision]]`visualization:tileMap:maxPrecision`::
-The maximum geoHash precision displayed in tile maps. 7 is high, 10 is very high,
-and 12 is the maximum. For more information, refer to
-{ref}/search-aggregations-bucket-geohashgrid-aggregation.html#_cell_dimensions_at_the_equator[Cell dimensions at the equator].
 
 [[visualization-visualize-chartslibrary]]`visualization:visualize:legacyChartsLibrary`::
 **The legacy XY charts are deprecated and will not be supported as of 7.16.**

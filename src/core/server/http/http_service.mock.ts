@@ -87,6 +87,7 @@ const createInternalPrebootContractMock = () => {
     csp: CspConfig.DEFAULT,
     externalUrl: ExternalUrlConfig.DEFAULT,
     auth: createAuthMock(),
+    getServerInfo: jest.fn(),
     server: ({
       name: 'http-preboot-server-test',
       version: 'kibana',
@@ -106,6 +107,7 @@ const createPrebootContractMock = () => {
   const mock: HttpServicePrebootMock = {
     registerRoutes: internalMock.registerRoutes,
     basePath: createBasePathMock(),
+    getServerInfo: jest.fn(),
   };
 
   return mock;

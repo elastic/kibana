@@ -19,6 +19,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'keyword',
     _meta: { description: 'Default value of the setting was changed.' },
   },
+  'securitySolution:defaultThreatIndex': {
+    type: 'keyword',
+    _meta: { description: 'Default value of the setting was changed.' },
+  },
   'securitySolution:newsFeedUrl': {
     type: 'keyword',
     _meta: { description: 'Default value of the setting was changed.' },
@@ -138,10 +142,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   },
   'courier:maxConcurrentShardRequests': {
     type: 'long',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'courier:batchSearches': {
-    type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
   'courier:setRequestPreference': {

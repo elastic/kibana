@@ -11,18 +11,19 @@ import { useParams } from 'react-router-dom';
 
 import { useActions, useValues } from 'kea';
 
-import { EuiCode, EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
-
-import { i18n } from '@kbn/i18n';
+import { EuiPanel, EuiSpacer } from '@elastic/eui';
 
 import { EngineLogic, getEngineBreadcrumbs } from '../engine';
 import { AppSearchPageTemplate } from '../layout';
 
+import { CrawlRulesTable } from './components/crawl_rules_table';
 import { CrawlerStatusBanner } from './components/crawler_status_banner';
 import { CrawlerStatusIndicator } from './components/crawler_status_indicator/crawler_status_indicator';
+import { DeduplicationPanel } from './components/deduplication_panel';
 import { DeleteDomainPanel } from './components/delete_domain_panel';
 import { EntryPointsTable } from './components/entry_points_table';
 import { ManageCrawlsPopover } from './components/manage_crawls_popover/manage_crawls_popover';
+import { SitemapsTable } from './components/sitemaps_table';
 import { CRAWLER_TITLE } from './constants';
 import { CrawlerSingleDomainLogic } from './crawler_single_domain_logic';
 
@@ -59,22 +60,24 @@ export const CrawlerSingleDomain: React.FC = () => {
             <EntryPointsTable domain={domain} engineName={engineName} items={domain.entryPoints} />
           </EuiPanel>
           <EuiSpacer size="xl" />
+          <EuiPanel paddingSize="l" hasBorder>
+            <SitemapsTable domain={domain} engineName={engineName} items={domain.sitemaps} />
+          </EuiPanel>
+          <EuiSpacer size="xl" />
+          <EuiPanel paddingSize="l" hasBorder>
+            <CrawlRulesTable
+              domainId={domainId}
+              engineName={engineName}
+              crawlRules={domain.crawlRules}
+              defaultCrawlRule={domain.defaultCrawlRule}
+            />
+          </EuiPanel>
+          <EuiSpacer size="xxl" />
         </>
       )}
-      <EuiTitle size="s">
-        <h2>
-          {i18n.translate(
-            'xpack.enterpriseSearch.appSearch.crawler.singleDomain.deleteDomainTitle',
-            {
-              defaultMessage: 'Delete domain',
-            }
-          )}
-        </h2>
-      </EuiTitle>
-      <EuiSpacer size="m" />
-      <DeleteDomainPanel />
+      <DeduplicationPanel />
       <EuiSpacer size="xl" />
-      <EuiCode>{JSON.stringify(domain, null, 2)}</EuiCode>
+      <DeleteDomainPanel />
     </AppSearchPageTemplate>
   );
 };

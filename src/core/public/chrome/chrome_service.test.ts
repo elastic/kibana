@@ -23,10 +23,12 @@ import { getAppInfo } from '../application/utils';
 class FakeApp implements App {
   public title: string;
   public mount = () => () => {};
+
   constructor(public id: string, public chromeless?: boolean) {
     this.title = `${this.id} App`;
   }
 }
+
 const store = new Map();
 const originalLocalStorage = window.localStorage;
 
@@ -172,36 +174,6 @@ describe('start', () => {
     });
   });
 
-  describe('brand', () => {
-    it('updates/emits the brand as it changes', async () => {
-      const { chrome, service } = await start();
-      const promise = chrome.getBrand$().pipe(toArray()).toPromise();
-
-      chrome.setBrand({
-        logo: 'big logo',
-        smallLogo: 'not so big logo',
-      });
-      chrome.setBrand({
-        logo: 'big logo without small logo',
-      });
-      service.stop();
-
-      await expect(promise).resolves.toMatchInlineSnapshot(`
-                      Array [
-                        Object {},
-                        Object {
-                          "logo": "big logo",
-                          "smallLogo": "not so big logo",
-                        },
-                        Object {
-                          "logo": "big logo without small logo",
-                          "smallLogo": undefined,
-                        },
-                      ]
-                  `);
-    });
-  });
-
   describe('visibility', () => {
     it('emits false when no application is mounted', async () => {
       const { chrome, service } = await start();
@@ -291,54 +263,6 @@ describe('start', () => {
     });
   });
 
-  describe('application classes', () => {
-    it('updates/emits the application classes', async () => {
-      const { chrome, service } = await start();
-      const promise = chrome.getApplicationClasses$().pipe(toArray()).toPromise();
-
-      chrome.addApplicationClass('foo');
-      chrome.addApplicationClass('foo');
-      chrome.addApplicationClass('bar');
-      chrome.addApplicationClass('bar');
-      chrome.addApplicationClass('baz');
-      chrome.removeApplicationClass('bar');
-      chrome.removeApplicationClass('foo');
-      service.stop();
-
-      await expect(promise).resolves.toMatchInlineSnapshot(`
-                      Array [
-                        Array [],
-                        Array [
-                          "foo",
-                        ],
-                        Array [
-                          "foo",
-                        ],
-                        Array [
-                          "foo",
-                          "bar",
-                        ],
-                        Array [
-                          "foo",
-                          "bar",
-                        ],
-                        Array [
-                          "foo",
-                          "bar",
-                          "baz",
-                        ],
-                        Array [
-                          "foo",
-                          "baz",
-                        ],
-                        Array [
-                          "baz",
-                        ],
-                      ]
-                  `);
-    });
-  });
-
   describe('badge', () => {
     it('updates/emits the current badge', async () => {
       const { chrome, service } = await start();
@@ -409,7 +333,9 @@ describe('start', () => {
       const { chrome, service } = await start();
       const promise = chrome.getBreadcrumbsAppendExtension$().pipe(toArray()).toPromise();
 
-      chrome.setBreadcrumbsAppendExtension({ content: (element) => () => {} });
+      chrome.setBreadcrumbsAppendExtension({
+        content: (element) => () => {},
+      });
       service.stop();
 
       await expect(promise).resolves.toMatchInlineSnapshot(`
@@ -523,14 +449,12 @@ describe('start', () => {
 describe('stop', () => {
   it('completes applicationClass$, getIsNavDrawerLocked, breadcrumbs$, isVisible$, and brand$ observables', async () => {
     const { chrome, service } = await start();
-    const promise = Rx.combineLatest(
-      chrome.getBrand$(),
-      chrome.getApplicationClasses$(),
+    const promise = Rx.combineLatest([
       chrome.getIsNavDrawerLocked$(),
       chrome.getBreadcrumbs$(),
       chrome.getIsVisible$(),
-      chrome.getHelpExtension$()
-    ).toPromise();
+      chrome.getHelpExtension$(),
+    ]).toPromise();
 
     service.stop();
     await promise;
@@ -541,14 +465,12 @@ describe('stop', () => {
     service.stop();
 
     await expect(
-      Rx.combineLatest(
-        chrome.getBrand$(),
-        chrome.getApplicationClasses$(),
+      Rx.combineLatest([
         chrome.getIsNavDrawerLocked$(),
         chrome.getBreadcrumbs$(),
         chrome.getIsVisible$(),
-        chrome.getHelpExtension$()
-      ).toPromise()
+        chrome.getHelpExtension$(),
+      ]).toPromise()
     ).resolves.toBe(undefined);
   });
 });

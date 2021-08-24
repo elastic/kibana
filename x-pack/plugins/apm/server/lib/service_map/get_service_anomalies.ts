@@ -37,7 +37,7 @@ export async function getServiceAnomalies({
   environment,
 }: {
   setup: Setup & SetupTimeRange;
-  environment?: string;
+  environment: string;
 }) {
   return withApmSpan('get_service_anomalies', async () => {
     const { ml, start, end } = setup;
@@ -157,7 +157,7 @@ export async function getServiceAnomalies({
 
 export async function getMLJobs(
   anomalyDetectors: ReturnType<MlPluginSetup['anomalyDetectorsProvider']>,
-  environment?: string
+  environment: string
 ) {
   const response = await getMlJobsWithAPMGroup(anomalyDetectors);
 
@@ -166,7 +166,7 @@ export async function getMLJobs(
   const mlJobs = response.jobs.filter(
     (job) => (job.custom_settings?.job_tags?.apm_ml_version ?? 0) >= 2
   );
-  if (environment && environment !== ENVIRONMENT_ALL.value) {
+  if (environment !== ENVIRONMENT_ALL.value) {
     const matchingMLJob = mlJobs.find(
       (job) => job.custom_settings?.job_tags?.environment === environment
     );
@@ -180,7 +180,7 @@ export async function getMLJobs(
 
 export async function getMLJobIds(
   anomalyDetectors: ReturnType<MlPluginSetup['anomalyDetectorsProvider']>,
-  environment?: string
+  environment: string
 ) {
   const mlJobs = await getMLJobs(anomalyDetectors, environment);
   return mlJobs.map((job) => job.job_id);

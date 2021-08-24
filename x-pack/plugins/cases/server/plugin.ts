@@ -18,7 +18,7 @@ import { APP_ID, ENABLE_CASE_CONNECTOR } from '../common';
 import { ConfigType } from './config';
 import { initCaseApi } from './routes/api';
 import {
-  caseCommentSavedObjectType,
+  createCaseCommentSavedObjectType,
   caseConfigureSavedObjectType,
   caseConnectorMappingsSavedObjectType,
   caseSavedObjectType,
@@ -32,6 +32,8 @@ import type { CasesRequestHandlerContext } from './types';
 import { CasesClientFactory } from './client/factory';
 import { SpacesPluginStart } from '../../spaces/server';
 import { PluginStartContract as FeaturesPluginStart } from '../../features/server';
+import { RuleRegistryPluginStartContract } from '../../rule_registry/server';
+import { LensServerPluginSetup } from '../../lens/server';
 
 function createConfig(context: PluginInitializerContext) {
   return context.config.get<ConfigType>();
@@ -40,6 +42,7 @@ function createConfig(context: PluginInitializerContext) {
 export interface PluginsSetup {
   security?: SecurityPluginSetup;
   actions: ActionsPluginSetup;
+  lens: LensServerPluginSetup;
 }
 
 export interface PluginsStart {
@@ -47,6 +50,7 @@ export interface PluginsStart {
   features: FeaturesPluginStart;
   spaces?: SpacesPluginStart;
   actions: ActionsPluginStart;
+  ruleRegistry?: RuleRegistryPluginStartContract;
 }
 
 /**
@@ -66,6 +70,7 @@ export class CasePlugin {
   private readonly log: Logger;
   private clientFactory: CasesClientFactory;
   private securityPluginSetup?: SecurityPluginSetup;
+  private lensEmbeddableFactory?: LensServerPluginSetup['lensEmbeddableFactory'];
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.log = this.initializerContext.logger.get();
@@ -80,8 +85,15 @@ export class CasePlugin {
     }
 
     this.securityPluginSetup = plugins.security;
+    this.lensEmbeddableFactory = plugins.lens.lensEmbeddableFactory;
 
-    core.savedObjects.registerType(caseCommentSavedObjectType);
+    core.savedObjects.registerType(
+      createCaseCommentSavedObjectType({
+        migrationDeps: {
+          lensEmbeddableFactory: this.lensEmbeddableFactory,
+        },
+      })
+    );
     core.savedObjects.registerType(caseConfigureSavedObjectType);
     core.savedObjects.registerType(caseConnectorMappingsSavedObjectType);
     core.savedObjects.registerType(caseSavedObjectType);
@@ -127,14 +139,13 @@ export class CasePlugin {
       },
       featuresPluginStart: plugins.features,
       actionsPluginStart: plugins.actions,
+      ruleRegistryPluginStart: plugins.ruleRegistry,
+      lensEmbeddableFactory: this.lensEmbeddableFactory!,
     });
-
-    const client = core.elasticsearch.client;
 
     const getCasesClientWithRequest = async (request: KibanaRequest): Promise<CasesClient> => {
       return this.clientFactory.create({
         request,
-        scopedClusterClient: client.asScoped(request).asCurrentUser,
         savedObjectsService: core.savedObjects,
       });
     };
@@ -160,7 +171,6 @@ export class CasePlugin {
 
           return this.clientFactory.create({
             request,
-            scopedClusterClient: context.core.elasticsearch.client.asCurrentUser,
             savedObjectsService: savedObjects,
           });
         },

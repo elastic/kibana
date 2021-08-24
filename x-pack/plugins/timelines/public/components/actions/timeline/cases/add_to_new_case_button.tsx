@@ -14,14 +14,14 @@ import * as i18n from './translations';
 
 const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
   ariaLabel = i18n.ACTION_ADD_TO_CASE_ARIA_LABEL,
-  ecsRowData,
+  event,
   useInsertTimeline,
   casePermissions,
   appId,
   onClose,
 }) => {
   const { addNewCaseClick, isDisabled, userCanCrud } = useAddToCase({
-    ecsRowData,
+    event,
     useInsertTimeline,
     casePermissions,
     appId,
@@ -34,8 +34,9 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
         <EuiContextMenuItem
           aria-label={ariaLabel}
           data-test-subj="attach-alert-to-case-button"
-          size="s"
           onClick={addNewCaseClick}
+          // needs forced size="s" since it is lazy loaded and the EuiContextMenuPanel can not initialize the size
+          size="s"
           disabled={isDisabled}
         >
           {i18n.ACTION_ADD_NEW_CASE}

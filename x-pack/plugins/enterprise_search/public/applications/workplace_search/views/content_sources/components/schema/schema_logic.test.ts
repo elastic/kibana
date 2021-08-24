@@ -43,7 +43,7 @@ describe('SchemaLogic', () => {
   const {
     clearFlashMessages,
     flashAPIErrors,
-    setSuccessMessage,
+    flashSuccessToast,
     setErrorMessage,
   } = mockFlashMessageHelpers;
   const { mount } = new LogicMounter(SchemaLogic);
@@ -371,7 +371,7 @@ describe('SchemaLogic', () => {
             }
           );
           await nextTick();
-          expect(setSuccessMessage).toHaveBeenCalledWith(SCHEMA_FIELD_ADDED_MESSAGE);
+          expect(flashSuccessToast).toHaveBeenCalledWith(SCHEMA_FIELD_ADDED_MESSAGE);
           expect(onSchemaSetSuccessSpy).toHaveBeenCalledWith(serverResponse);
         });
 
@@ -430,7 +430,7 @@ describe('SchemaLogic', () => {
             }
           );
           await nextTick();
-          expect(setSuccessMessage).toHaveBeenCalledWith(SCHEMA_UPDATED_MESSAGE);
+          expect(flashSuccessToast).toHaveBeenCalledWith(SCHEMA_UPDATED_MESSAGE);
           expect(onSchemaSetSuccessSpy).toHaveBeenCalledWith(serverResponse);
         });
 

@@ -24,18 +24,19 @@ import {
   ALERT_DURATION,
   ALERT_END,
   ALERT_ID,
-  ALERT_START,
-  ALERT_STATUS,
-  ALERT_UUID,
-  EVENT_ACTION,
-  EVENT_KIND,
   ALERT_RULE_CONSUMER,
   ALERT_RULE_TYPE_ID,
   ALERT_RULE_UUID,
-  TIMESTAMP,
+  ALERT_START,
+  ALERT_STATUS,
+  ALERT_UUID,
+  ALERT_WORKFLOW_STATUS,
+  EVENT_ACTION,
+  EVENT_KIND,
   SPACE_IDS,
+  TIMESTAMP,
 } from '../../common/technical_rule_data_field_names';
-import { RuleDataClient } from '../rule_data_client';
+import { IRuleDataClient } from '../rule_data_client';
 import { AlertExecutorOptionsWithExtraServices } from '../types';
 import { getRuleData } from './get_rule_executor_data';
 
@@ -102,7 +103,7 @@ export type WrappedLifecycleRuleState<State extends AlertTypeState> = AlertTypeS
 
 export const createLifecycleExecutor = (
   logger: Logger,
-  ruleDataClient: PublicContract<RuleDataClient>
+  ruleDataClient: PublicContract<IRuleDataClient>
 ) => <
   Params extends AlertTypeParams = never,
   State extends AlertTypeState = never,
@@ -263,6 +264,7 @@ export const createLifecycleExecutor = (
 
     event[ALERT_START] = started;
     event[ALERT_UUID] = alertUuid;
+    event[ALERT_WORKFLOW_STATUS] = event[ALERT_WORKFLOW_STATUS] ?? 'open';
 
     // not sure why typescript needs the non-null assertion here
     // we already assert the value is not undefined with the ternary

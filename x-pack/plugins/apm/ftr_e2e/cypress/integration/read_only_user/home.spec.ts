@@ -7,7 +7,6 @@
 
 import url from 'url';
 import archives_metadata from '../../fixtures/es_archiver/archives_metadata';
-import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
 
 const { start, end } = archives_metadata['apm_8.0.0'];
 
@@ -28,15 +27,10 @@ const apisToIntercept = [
 ];
 
 describe('Home page', () => {
-  before(() => {
-    esArchiverLoad('apm_8.0.0');
-  });
-  after(() => {
-    esArchiverUnload('apm_8.0.0');
-  });
   beforeEach(() => {
     cy.loginAsReadOnlyUser();
   });
+
   it('Redirects to service page with rangeFrom and rangeTo added to the URL', () => {
     cy.visit('/app/apm');
 
@@ -48,7 +42,7 @@ describe('Home page', () => {
 
   it('includes services with only metric documents', () => {
     cy.visit(
-      `${serviceInventoryHref}&kuery=not%2520(processor.event%2520%253A%2522transaction%2522%2520)`
+      `${serviceInventoryHref}&kuery=not%20(processor.event%3A%22transaction%22)`
     );
     cy.contains('opbeans-python');
     cy.contains('opbeans-java');
