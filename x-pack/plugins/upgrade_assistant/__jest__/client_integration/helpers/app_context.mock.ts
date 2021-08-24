@@ -18,7 +18,7 @@ import { mockKibanaSemverVersion } from '../../../common/constants';
 import { apiService } from '../../../public/application/lib/api';
 import { breadcrumbService } from '../../../public/application/lib/breadcrumbs';
 import { dataPluginMock } from '../../../../../../src/plugins/data/public/mocks';
-import { discoverPluginMock } from '../../../../../../src/plugins/discover/public/mocks';
+import { discoverPluginMock, Start } from '../../../../../../src/plugins/discover/public/mocks';
 
 const discoverMock = discoverPluginMock.createStartContract();
 
@@ -37,7 +37,7 @@ const servicesMock = {
         })
       ),
     },
-  },
+  } as Start,
 };
 
 // We'll mock these values to avoid testing the locators themselves.
