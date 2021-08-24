@@ -55,7 +55,7 @@ export enum ViewResultsActionButtonType {
 
 interface ViewResultsInDiscoverActionProps {
   actionId: string;
-  agentIds: string[];
+  agentIds?: string[];
   buttonType: ViewResultsActionButtonType;
   endDate?: string;
   startDate?: string;
@@ -63,7 +63,7 @@ interface ViewResultsInDiscoverActionProps {
 
 function getLensAttributes(
   actionId: string,
-  agentIds: string[]
+  agentIds?: string[]
 ): TypedLensByValueInput['attributes'] {
   const dataLayer: PersistedIndexPatternLayer = {
     columnOrder: ['8690befd-fd69-4246-af4a-dd485d2a3b38', 'ed999e9d-204c-465b-897f-fe1a125b39ed'],
@@ -117,7 +117,7 @@ function getLensAttributes(
   const agentIdsQuery = {
     bool: {
       minimum_should_match: 1,
-      should: agentIds.map((agentId) => ({ match_phrase: { 'agent.id': agentId } })),
+      should: agentIds?.map((agentId) => ({ match_phrase: { 'agent.id': agentId } })),
     },
   };
 
@@ -169,19 +169,23 @@ function getLensAttributes(
             },
           },
         },
-        {
-          $state: { store: FilterStateStore.APP_STATE },
-          meta: {
-            alias: 'agent IDs',
-            disabled: false,
-            indexRefName: 'filter-index-pattern-0',
-            key: 'query',
-            negate: false,
-            type: 'custom',
-            value: JSON.stringify(agentIdsQuery),
-          },
-          query: agentIdsQuery,
-        },
+        ...(agentIdsQuery
+          ? [
+              {
+                $state: { store: FilterStateStore.APP_STATE },
+                meta: {
+                  alias: 'agent IDs',
+                  disabled: false,
+                  indexRefName: 'filter-index-pattern-0',
+                  key: 'query',
+                  negate: false,
+                  type: 'custom',
+                  value: JSON.stringify(agentIdsQuery),
+                },
+                query: agentIdsQuery,
+              },
+            ]
+          : []),
       ],
       query: { language: 'kuery', query: '' },
       visualization: xyConfig,
@@ -259,16 +263,20 @@ const ViewResultsInDiscoverActionComponent: React.FC<ViewResultsInDiscoverAction
   const urlGenerator = useKibana().services.discover?.urlGenerator;
   const [discoverUrl, setDiscoverUrl] = useState<string>('');
 
+  console.error('useKibana().services.discover', useKibana().services.discover);
+
   useEffect(() => {
     const getDiscoverUrl = async () => {
       if (!urlGenerator?.createUrl) return;
 
-      const agentIdsQuery = {
-        bool: {
-          minimum_should_match: 1,
-          should: agentIds.map((agentId) => ({ match_phrase: { 'agent.id': agentId } })),
-        },
-      };
+      const agentIdsQuery = agentIds?.length
+        ? {
+            bool: {
+              minimum_should_match: 1,
+              should: agentIds.map((agentId) => ({ match_phrase: { 'agent.id': agentId } })),
+            },
+          }
+        : null;
 
       const newUrl = await urlGenerator.createUrl({
         indexPatternId: 'logs-*',
@@ -286,19 +294,23 @@ const ViewResultsInDiscoverActionComponent: React.FC<ViewResultsInDiscoverAction
             query: { match_phrase: { action_id: actionId } },
             $state: { store: FilterStateStore.APP_STATE },
           },
-          {
-            $state: { store: FilterStateStore.APP_STATE },
-            meta: {
-              alias: 'agent IDs',
-              disabled: false,
-              index: 'logs-*',
-              key: 'query',
-              negate: false,
-              type: 'custom',
-              value: JSON.stringify(agentIdsQuery),
-            },
-            query: agentIdsQuery,
-          },
+          ...(agentIdsQuery
+            ? [
+                {
+                  $state: { store: FilterStateStore.APP_STATE },
+                  meta: {
+                    alias: 'agent IDs',
+                    disabled: false,
+                    index: 'logs-*',
+                    key: 'query',
+                    negate: false,
+                    type: 'custom',
+                    value: JSON.stringify(agentIdsQuery),
+                  },
+                  query: agentIdsQuery,
+                },
+              ]
+            : []),
         ],
         refreshInterval: {
           pause: true,
