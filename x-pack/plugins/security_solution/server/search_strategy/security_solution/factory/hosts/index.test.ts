@@ -10,7 +10,7 @@ import { HostsQueries, HostsKpiQueries } from '../../../../../common/search_stra
 import { allHosts } from './all';
 import { hostDetails } from './details';
 import { hostOverview } from './overview';
-import { riskyHosts } from './riskyHosts';
+import { riskyHosts } from './risky_hosts';
 import { firstOrLastSeenHost } from './last_first_seen';
 import { uncommonProcesses } from './uncommon_processes';
 import { authentications, authenticationsEntities } from './authentications';
