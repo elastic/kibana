@@ -142,7 +142,6 @@ const SummaryViewSelectorComponent = ({ viewSelected, onViewChange }: SummaryVie
     >
       <ContainerEuiSelectable>
         <EuiSelectable
-          aria-label="Basic example"
           options={options}
           onChange={onChangeSelectable}
           renderOption={renderOption}

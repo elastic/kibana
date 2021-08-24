@@ -123,10 +123,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
           // The default tab 'Trace samples' should show the log log chart without the correlations analysis part.
           // First assert that the log log chart and its header are present
-          const apmCorrelationsLatencyCorrelationsChartTitle = await testSubjects.getVisibleText(
-            'apmCorrelationsLatencyCorrelationsChartTitle'
+          const apmTransactionDistributionChartTitle = await testSubjects.getVisibleText(
+            'apmTransactionDistributionChartTitle'
           );
-          expect(apmCorrelationsLatencyCorrelationsChartTitle).to.be(testData.logLogChartTitle);
+          expect(apmTransactionDistributionChartTitle).to.be(testData.logLogChartTitle);
           await testSubjects.existOrFail('apmCorrelationsChart');
           // Then assert that the correlation analysis part is not present
           await testSubjects.missingOrFail('apmCorrelationsLatencyCorrelationsTablePanelTitle');
@@ -137,17 +137,17 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await testSubjects.click('apmLatencyCorrelationsTabButton');
 
         await retry.try(async () => {
-          await testSubjects.existOrFail('apmCorrelationsTabContent');
+          await testSubjects.existOrFail('apmLatencyCorrelationsTabContent');
         });
       });
 
       it('loads the correlation results', async function () {
         await retry.try(async () => {
           // Assert that the data fully loaded to 100%
-          const apmCorrelationsLatencyCorrelationsProgressTitle = await testSubjects.getVisibleText(
-            'apmCorrelationsLatencyCorrelationsProgressTitle'
+          const apmLatencyCorrelationsProgressTitle = await testSubjects.getVisibleText(
+            'apmCorrelationsProgressTitle'
           );
-          expect(apmCorrelationsLatencyCorrelationsProgressTitle).to.be('Progress: 100%');
+          expect(apmLatencyCorrelationsProgressTitle).to.be('Progress: 100%');
 
           // Assert that the Correlations Chart and its header are present
           const apmCorrelationsLatencyCorrelationsChartTitle = await testSubjects.getVisibleText(
@@ -159,7 +159,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
           // Assert that results for the given service didn't find any correlations
           const apmCorrelationsTable = await testSubjects.getVisibleText('apmCorrelationsTable');
-          expect(apmCorrelationsTable).to.be('No significant correlations found');
+          expect(apmCorrelationsTable).to.be(
+            'No significant correlations\nCorrelations will only be identified if they have significant impact.\nTry selecting another time range or remove any added filter.'
+          );
         });
       });
     });

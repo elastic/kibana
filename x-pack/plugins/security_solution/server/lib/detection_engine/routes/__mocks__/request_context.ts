@@ -14,14 +14,14 @@ import {
 import { rulesClientMock } from '../../../../../../alerting/server/mocks';
 import { licensingMock } from '../../../../../../licensing/server/mocks';
 import { siemMock } from '../../../../mocks';
-import { RuleExecutionLogClient } from '../../rule_execution_log/__mocks__/rule_execution_log_client';
+import { ruleExecutionLogClientMock } from '../../rule_execution_log/__mocks__/rule_execution_log_client';
 
 const createMockClients = () => ({
   rulesClient: rulesClientMock.create(),
   licensing: { license: licensingMock.createLicenseMock() },
   clusterClient: elasticsearchServiceMock.createScopedClusterClient(),
   savedObjectsClient: savedObjectsClientMock.create(),
-  ruleExecutionLogClient: new RuleExecutionLogClient(),
+  ruleExecutionLogClient: ruleExecutionLogClientMock.create(),
   appClient: siemMock.createClient(),
 });
 

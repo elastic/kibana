@@ -1,5 +1,6 @@
 load("@npm//@bazel/typescript:index.bzl", "ts_config", "ts_project")
 load("@build_bazel_rules_nodejs//:index.bzl", "js_library", "pkg_npm")
+load("//src/dev/bazel:index.bzl", "jsts_transpiler")
 
 PKG_BASE_NAME = "kbn-securitysolution-t-grid"
 
@@ -24,36 +25,37 @@ filegroup(
 )
 
 NPM_MODULE_EXTRA_FILES = [
-  "react/package.json",
   "package.json",
   "README.md",
 ]
 
-SRC_DEPS = [
-  "//packages/kbn-babel-preset",
-  "//packages/kbn-dev-utils",
-  "//packages/kbn-i18n",
-  "@npm//@babel/core",
-  "@npm//babel-loader",
-  "@npm//enzyme",
+RUNTIME_DEPS = [
   "@npm//jest",
   "@npm//lodash",
-  "@npm//react",
   "@npm//react-beautiful-dnd",
   "@npm//tslib",
 ]
 
 TYPES_DEPS = [
-  "@npm//typescript",
-  "@npm//@types/enzyme",
+  "@npm//tslib",
   "@npm//@types/jest",
   "@npm//@types/lodash",
   "@npm//@types/node",
-  "@npm//@types/react",
   "@npm//@types/react-beautiful-dnd",
 ]
 
-DEPS = SRC_DEPS + TYPES_DEPS
+jsts_transpiler(
+  name = "target_node",
+  srcs = SRCS,
+  build_pkg_name = package_name(),
+)
+
+jsts_transpiler(
+  name = "target_web",
+  srcs = SRCS,
+  build_pkg_name = package_name(),
+  config_file = ".babelrc.browser"
+)
 
 ts_config(
   name = "tsconfig",
@@ -64,49 +66,26 @@ ts_config(
   ],
 )
 
-ts_config(
-  name = "tsconfig_browser",
-  src = "tsconfig.browser.json",
-  deps = [
-    "//:tsconfig.base.json",
-    "//:tsconfig.browser.json",
-    "//:tsconfig.browser_bazel.json",
-  ],
-)
-
 ts_project(
-  name = "tsc",
+  name = "tsc_types",
   args = ["--pretty"],
   srcs = SRCS,
-  deps = DEPS,
+  deps = TYPES_DEPS,
   declaration = True,
-  declaration_dir = "target_types",
   declaration_map = True,
-  out_dir = "target_node",
+  emit_declaration_only = True,
+  out_dir = "target_types",
   root_dir = "src",
   source_map = True,
   tsconfig = ":tsconfig",
 )
 
-ts_project(
-  name = "tsc_browser",
-  args = ['--pretty'],
-  srcs = SRCS,
-  deps = DEPS,
-  allow_js = True,
-  declaration = False,
-  out_dir = "target_web",
-  source_map = True,
-  root_dir = "src",
-  tsconfig = ":tsconfig_browser",
-)
-
 js_library(
   name = PKG_BASE_NAME,
-  package_name = PKG_REQUIRE_NAME,
   srcs = NPM_MODULE_EXTRA_FILES,
+  deps = RUNTIME_DEPS + [":target_node", ":target_web", ":tsc_types"],
+  package_name = PKG_REQUIRE_NAME,
   visibility = ["//visibility:public"],
-  deps = [":tsc", ":tsc_browser"] + DEPS,
 )
 
 pkg_npm(

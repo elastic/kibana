@@ -271,6 +271,8 @@ export abstract class Embeddable<TEmbeddableInput extends EmbeddableInput = Embe
     readonly deferEmbeddableLoad: boolean;
     destroy(): void;
     // (undocumented)
+    protected destroyed: boolean;
+    // (undocumented)
     fatalError?: Error;
     // (undocumented)
     getInput$(): Readonly<Rx.Observable<TEmbeddableInput>>;
@@ -369,6 +371,8 @@ export interface EmbeddableEditorState {
     embeddableId?: string;
     // (undocumented)
     originatingApp: string;
+    // (undocumented)
+    originatingPath?: string;
     searchSessionId?: string;
     // (undocumented)
     valueInput?: EmbeddableInput;

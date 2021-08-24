@@ -5,26 +5,21 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import {
-  EuiCallOut,
-  EuiCode,
-  EuiAccordion,
-  EuiPanel,
   EuiIcon,
   EuiBasicTableColumn,
-  EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiProgress,
   EuiSpacer,
-  EuiText,
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { Direction } from '@elastic/eui/src/services/sort/sort_direction';
+import { orderBy } from 'lodash';
+import { EuiTableSortingType } from '@elastic/eui/src/components/basic_table/table_types';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
@@ -41,6 +36,11 @@ import { useApmServiceContext } from '../../../context/apm_service/use_apm_servi
 import { LatencyCorrelationsHelpPopover } from './latency_correlations_help_popover';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { isErrorMessage } from './utils/is_error_message';
+import { CorrelationsLog } from './correlations_log';
+import { CorrelationsEmptyStatePrompt } from './empty_state_prompt';
+import { CrossClusterSearchCompatibilityWarning } from './cross_cluster_search_warning';
+import { CorrelationsProgressControls } from './progress_controls';
+import { useTimeRange } from '../../../hooks/use_time_range';
 
 const DEFAULT_PERCENTILE_THRESHOLD = 95;
 
@@ -52,7 +52,7 @@ interface MlCorrelationsTerms {
   duplicatedFields?: string[];
 }
 
-export function LatencyCorrelations() {
+export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
   const {
     core: { notifications, uiSettings },
   } = useApmPluginContext();
@@ -60,12 +60,14 @@ export function LatencyCorrelations() {
   const { serviceName, transactionType } = useApmServiceContext();
 
   const {
-    query: { kuery, environment },
+    query: { kuery, environment, rangeFrom, rangeTo },
   } = useApmParams('/services/:serviceName');
 
   const { urlParams } = useUrlParams();
 
-  const { transactionName, start, end } = urlParams;
+  const { transactionName } = urlParams;
+
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const displayLog = uiSettings.get<boolean>(enableInspectEsQueries);
 
@@ -80,21 +82,30 @@ export function LatencyCorrelations() {
     startFetch,
     cancelFetch,
     overallHistogram,
-  } = useTransactionLatencyCorrelationsFetcher({
-    environment,
-    kuery,
-    serviceName,
-    transactionName,
-    transactionType,
-    start,
-    end,
-    percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
-  });
+  } = useTransactionLatencyCorrelationsFetcher();
+
+  const startFetchHandler = useCallback(() => {
+    startFetch({
+      environment,
+      kuery,
+      serviceName,
+      transactionName,
+      transactionType,
+      start,
+      end,
+      percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [environment, serviceName, kuery, start, end]);
 
   // start fetching on load
   // we want this effect to execute exactly once after the component mounts
   useEffect(() => {
-    startFetch();
+    if (isRunning) {
+      cancelFetch();
+    }
+
+    startFetchHandler();
 
     return () => {
       // cancel any running async partial request when unmounting the component
@@ -102,7 +113,7 @@ export function LatencyCorrelations() {
       cancelFetch();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [startFetchHandler]);
 
   useEffect(() => {
     if (isErrorMessage(error)) {
@@ -123,15 +134,19 @@ export function LatencyCorrelations() {
     setSelectedSignificantTerm,
   ] = useState<MlCorrelationsTerms | null>(null);
 
-  let selectedHistogram = histograms.length > 0 ? histograms[0] : undefined;
+  const selectedHistogram = useMemo(() => {
+    let selected = histograms.length > 0 ? histograms[0] : undefined;
 
-  if (histograms.length > 0 && selectedSignificantTerm !== null) {
-    selectedHistogram = histograms.find(
-      (h) =>
-        h.field === selectedSignificantTerm.fieldName &&
-        h.value === selectedSignificantTerm.fieldValue
-    );
-  }
+    if (histograms.length > 0 && selectedSignificantTerm !== null) {
+      selected = histograms.find(
+        (h) =>
+          h.field === selectedSignificantTerm.fieldName &&
+          h.value === selectedSignificantTerm.fieldValue
+      );
+    }
+    return selected;
+  }, [histograms, selectedSignificantTerm]);
+
   const history = useHistory();
   const trackApmEvent = useUiTracker({ app: 'apm' });
 
@@ -171,6 +186,7 @@ export function LatencyCorrelations() {
         render: (correlation: number) => {
           return <div>{asPreciseDecimal(correlation, 2)}</div>;
         },
+        sortable: true,
       },
       {
         field: 'fieldName',
@@ -178,6 +194,7 @@ export function LatencyCorrelations() {
           'xpack.apm.correlations.latencyCorrelations.correlationsTable.fieldNameLabel',
           { defaultMessage: 'Field name' }
         ),
+        sortable: true,
       },
       {
         field: 'fieldValue',
@@ -186,6 +203,7 @@ export function LatencyCorrelations() {
           { defaultMessage: 'Field value' }
         ),
         render: (fieldValue: string) => String(fieldValue).slice(0, 50),
+        sortable: true,
       },
       {
         width: '100px',
@@ -204,11 +222,10 @@ export function LatencyCorrelations() {
             onClick: (term: MlCorrelationsTerms) => {
               push(history, {
                 query: {
-                  kuery: `${term.fieldName}:"${encodeURIComponent(
-                    term.fieldValue
-                  )}"`,
+                  kuery: `${term.fieldName}:"${term.fieldValue}"`,
                 },
               });
+              onFilter();
               trackApmEvent({ metric: 'correlations_term_include_filter' });
             },
           },
@@ -226,11 +243,10 @@ export function LatencyCorrelations() {
             onClick: (term: MlCorrelationsTerms) => {
               push(history, {
                 query: {
-                  kuery: `not ${term.fieldName}:"${encodeURIComponent(
-                    term.fieldValue
-                  )}"`,
+                  kuery: `not ${term.fieldName}:"${term.fieldValue}"`,
                 },
               });
+              onFilter();
               trackApmEvent({ metric: 'correlations_term_exclude_filter' });
             },
           },
@@ -241,24 +257,53 @@ export function LatencyCorrelations() {
         ),
       },
     ],
-    [history, trackApmEvent]
+    [history, onFilter, trackApmEvent]
   );
 
-  const histogramTerms: MlCorrelationsTerms[] = useMemo(() => {
-    return histograms.map((d) => {
-      return {
-        fieldName: d.field,
-        fieldValue: d.value,
-        ksTest: d.ksTest,
-        correlation: d.correlation,
-        duplicatedFields: d.duplicatedFields,
-      };
-    });
-  }, [histograms]);
+  const [sortField, setSortField] = useState<keyof MlCorrelationsTerms>(
+    'correlation'
+  );
+  const [sortDirection, setSortDirection] = useState<Direction>('desc');
+
+  const onTableChange = useCallback(({ sort }) => {
+    const { field: currentSortField, direction: currentSortDirection } = sort;
+
+    setSortField(currentSortField);
+    setSortDirection(currentSortDirection);
+  }, []);
+
+  const { histogramTerms, sorting } = useMemo(() => {
+    if (!Array.isArray(histograms)) {
+      return { histogramTerms: [], sorting: undefined };
+    }
+    const orderedTerms = orderBy(
+      histograms.map((d) => {
+        return {
+          fieldName: d.field,
+          fieldValue: d.value,
+          ksTest: d.ksTest,
+          correlation: d.correlation,
+          duplicatedFields: d.duplicatedFields,
+        };
+      }),
+      sortField,
+      sortDirection
+    );
+
+    return {
+      histogramTerms: orderedTerms,
+      sorting: {
+        sort: {
+          field: sortField,
+          direction: sortDirection,
+        },
+      } as EuiTableSortingType<MlCorrelationsTerms>,
+    };
+  }, [histograms, sortField, sortDirection]);
 
   return (
-    <>
-      <EuiFlexGroup data-test-subj="apmCorrelationsTabContent">
+    <div data-test-subj="apmLatencyCorrelationsTabContent">
+      <EuiFlexGroup>
         <EuiFlexItem style={{ flexDirection: 'row', alignItems: 'center' }}>
           <EuiTitle size="xs">
             <h5 data-test-subj="apmCorrelationsLatencyCorrelationsChartTitle">
@@ -270,6 +315,9 @@ export function LatencyCorrelations() {
               )}
             </h5>
           </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <LatencyCorrelationsHelpPopover />
         </EuiFlexItem>
       </EuiFlexGroup>
 
@@ -283,141 +331,60 @@ export function LatencyCorrelations() {
       />
 
       <EuiSpacer size="s" />
+
       <EuiTitle size="xs">
-        <span data-test-subj="apmCorrelationsLatencyCorrelationsTablePanelTitle">
+        <h5 data-test-subj="apmCorrelationsLatencyCorrelationsTablePanelTitle">
           {i18n.translate(
             'xpack.apm.correlations.latencyCorrelations.tableTitle',
             {
               defaultMessage: 'Correlations',
             }
           )}
-        </span>
+        </h5>
       </EuiTitle>
 
       <EuiSpacer size="s" />
 
-      <EuiFlexGroup>
-        <EuiFlexItem grow={false}>
-          {!isRunning && (
-            <EuiButton size="s" onClick={startFetch}>
-              <FormattedMessage
-                id="xpack.apm.correlations.latencyCorrelations.refreshButtonTitle"
-                defaultMessage="Refresh"
-              />
-            </EuiButton>
-          )}
-          {isRunning && (
-            <EuiButton size="s" onClick={cancelFetch}>
-              <FormattedMessage
-                id="xpack.apm.correlations.latencyCorrelations.cancelButtonTitle"
-                defaultMessage="Cancel"
-              />
-            </EuiButton>
-          )}
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiFlexGroup direction="column" gutterSize="none">
-            <EuiFlexItem data-test-subj="apmCorrelationsLatencyCorrelationsProgressTitle">
-              <EuiText size="xs" color="subdued">
-                <FormattedMessage
-                  data-test-subj="apmCorrelationsLatencyCorrelationsProgressTitle"
-                  id="xpack.apm.correlations.latencyCorrelations.progressTitle"
-                  defaultMessage="Progress: {progress}%"
-                  values={{ progress: Math.round(progress * 100) }}
-                />
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiProgress
-                aria-label={i18n.translate(
-                  'xpack.apm.correlations.latencyCorrelations.progressAriaLabel',
-                  { defaultMessage: 'Progress' }
-                )}
-                value={Math.round(progress * 100)}
-                max={100}
-                size="m"
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <LatencyCorrelationsHelpPopover />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <CorrelationsProgressControls
+        progress={progress}
+        isRunning={isRunning}
+        onRefresh={startFetchHandler}
+        onCancel={cancelFetch}
+      />
+
       {ccsWarning && (
         <>
           <EuiSpacer size="m" />
-          <EuiCallOut
-            title={i18n.translate(
-              'xpack.apm.correlations.latencyCorrelations.ccsWarningCalloutTitle',
-              {
-                defaultMessage: 'Cross-cluster search compatibility',
-              }
-            )}
-            color="warning"
-          >
-            <p>
-              {i18n.translate(
-                'xpack.apm.correlations.latencyCorrelations.ccsWarningCalloutBody',
-                {
-                  defaultMessage:
-                    'Data for the correlation analysis could not be fully retrieved. This feature is supported only for 7.14 and later versions.',
-                }
-              )}
-            </p>
-          </EuiCallOut>
+          <CrossClusterSearchCompatibilityWarning version="7.14" />
         </>
       )}
+
       <EuiSpacer size="m" />
+
       <div data-test-subj="apmCorrelationsTable">
-        {histograms.length > 0 && selectedHistogram !== undefined && (
+        {(isRunning || histogramTerms.length > 0) && (
           <CorrelationsTable<MlCorrelationsTerms>
             columns={mlCorrelationColumns}
             significantTerms={histogramTerms}
-            status={FETCH_STATUS.SUCCESS}
+            status={isRunning ? FETCH_STATUS.LOADING : FETCH_STATUS.SUCCESS}
             setSelectedSignificantTerm={setSelectedSignificantTerm}
-            selectedTerm={{
-              fieldName: selectedHistogram.field,
-              fieldValue: selectedHistogram.value,
-            }}
+            selectedTerm={
+              selectedHistogram !== undefined
+                ? {
+                    fieldName: selectedHistogram.field,
+                    fieldValue: selectedHistogram.value,
+                  }
+                : undefined
+            }
+            onTableChange={onTableChange}
+            sorting={sorting}
           />
         )}
-        {histograms.length < 1 && progress > 0.99 ? (
-          <>
-            <EuiSpacer size="m" />
-            <EuiText textAlign="center">
-              <FormattedMessage
-                id="xpack.apm.correlations.latencyCorrelations.noCorrelationsText"
-                defaultMessage="No significant correlations found"
-              />
-            </EuiText>
-          </>
-        ) : null}
+        {histogramTerms.length < 1 && (progress === 1 || !isRunning) && (
+          <CorrelationsEmptyStatePrompt />
+        )}
       </div>
-      {log.length > 0 && displayLog && (
-        <EuiAccordion
-          id="accordion1"
-          buttonContent={i18n.translate(
-            'xpack.apm.correlations.latencyCorrelations.logButtonContent',
-            {
-              defaultMessage: 'Log',
-            }
-          )}
-        >
-          <EuiPanel color="subdued">
-            {log.map((d, i) => {
-              const splitItem = d.split(': ');
-              return (
-                <p key={i}>
-                  <small>
-                    <EuiCode>{splitItem[0]}</EuiCode> {splitItem[1]}
-                  </small>
-                </p>
-              );
-            })}
-          </EuiPanel>
-        </EuiAccordion>
-      )}
-    </>
+      {displayLog && <CorrelationsLog logMessages={log} />}
+    </div>
   );
 }

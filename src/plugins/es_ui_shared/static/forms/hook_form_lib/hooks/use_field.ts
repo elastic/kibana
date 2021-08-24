@@ -7,6 +7,8 @@
  */
 
 import { useMemo, useState, useEffect, useRef, useCallback } from 'react';
+import { Observable } from 'rxjs';
+import { first } from 'rxjs/operators';
 
 import {
   FormHook,
@@ -29,7 +31,11 @@ export const useField = <T, FormType = FormData, I = T>(
   path: string,
   config: FieldConfig<T, FormType, I> & InternalFieldConfig<T> = {},
   valueChangeListener?: (value: I) => void,
-  errorChangeListener?: (errors: string[] | null) => void
+  errorChangeListener?: (errors: string[] | null) => void,
+  {
+    customValidationData$,
+    customValidationData = null,
+  }: { customValidationData$?: Observable<unknown>; customValidationData?: unknown } = {}
 ) => {
   const {
     type = FIELD_TYPES.TEXT,
@@ -81,6 +87,12 @@ export const useField = <T, FormType = FormData, I = T>(
   const hasBeenReset = useRef<boolean>(false);
   const inflightValidation = useRef<(Promise<any> & { cancel?(): void }) | null>(null);
   const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
+  // Keep a ref of the last state (value and errors) notified to the consumer so he does
+  // not get tons of updates whenever he does not wrap the "onChange()" and "onError()" handlers with a useCallback
+  const lastNotifiedState = useRef<{ value?: I; errors: string[] | null }>({
+    value: undefined,
+    errors: null,
+  });
 
   // ----------------------------------
   // -- HELPERS
@@ -131,11 +143,6 @@ export const useField = <T, FormType = FormData, I = T>(
     setPristine(false);
     setIsChangingValue(true);
 
-    // Notify listener
-    if (valueChangeListener) {
-      valueChangeListener(value);
-    }
-
     // Update the form data observable
     __updateFormDataAt(path, value);
 
@@ -171,7 +178,6 @@ export const useField = <T, FormType = FormData, I = T>(
   }, [
     path,
     value,
-    valueChangeListener,
     valueChangeDebounceTime,
     fieldsToValidateOnChange,
     __updateFormDataAt,
@@ -232,6 +238,12 @@ export const useField = <T, FormType = FormData, I = T>(
         return false;
       };
 
+      let dataProvider: () => Promise<unknown> = () => Promise.resolve(null);
+
+      if (customValidationData$) {
+        dataProvider = () => customValidationData$.pipe(first()).toPromise();
+      }
+
       const runAsync = async () => {
         const validationErrors: ValidationError[] = [];
 
@@ -254,6 +266,7 @@ export const useField = <T, FormType = FormData, I = T>(
             form: { getFormData, getFields },
             formData,
             path,
+            customData: { provider: dataProvider, value: customValidationData },
           }) as Promise<ValidationError>;
 
           const validationResult = await inflightValidation.current;
@@ -297,6 +310,7 @@ export const useField = <T, FormType = FormData, I = T>(
             form: { getFormData, getFields },
             formData,
             path,
+            customData: { provider: dataProvider, value: customValidationData },
           });
 
           if (!validationResult) {
@@ -334,7 +348,15 @@ export const useField = <T, FormType = FormData, I = T>(
       // We first try to run the validations synchronously
       return runSync();
     },
-    [cancelInflightValidation, validations, getFormData, getFields, path]
+    [
+      cancelInflightValidation,
+      validations,
+      getFormData,
+      getFields,
+      path,
+      customValidationData,
+      customValidationData$,
+    ]
   );
 
   // ----------------------------------
@@ -376,7 +398,7 @@ export const useField = <T, FormType = FormData, I = T>(
       const validateIteration = ++validateCounter.current;
 
       const onValidationResult = (_validationErrors: ValidationError[]): FieldValidateResponse => {
-        if (validateIteration === validateCounter.current) {
+        if (validateIteration === validateCounter.current && isMounted.current) {
           // This is the most recent invocation
           setValidating(false);
           // Update the errors array
@@ -566,6 +588,18 @@ export const useField = <T, FormType = FormData, I = T>(
     };
   }, [path, __removeField]);
 
+  // Notify listener whenever the value changes
+  useEffect(() => {
+    if (!isMounted.current) {
+      return;
+    }
+
+    if (valueChangeListener && value !== lastNotifiedState.current.value) {
+      valueChangeListener(value);
+      lastNotifiedState.current.value = value;
+    }
+  }, [value, valueChangeListener]);
+
   useEffect(() => {
     // If the field value has been reset, we don't want to call the "onValueChange()"
     // as it will set the "isPristine" state to true or validate the field, which we don't want
@@ -602,8 +636,12 @@ export const useField = <T, FormType = FormData, I = T>(
     if (!isMounted.current) {
       return;
     }
-    if (errorChangeListener) {
-      errorChangeListener(errors.length ? errors.map((error) => error.message) : null);
+
+    const errorMessages = errors.length ? errors.map((error) => error.message) : null;
+
+    if (errorChangeListener && lastNotifiedState.current.errors !== errorMessages) {
+      errorChangeListener(errorMessages);
+      lastNotifiedState.current.errors = errorMessages;
     }
   }, [errors, errorChangeListener]);
 

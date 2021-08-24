@@ -23,8 +23,9 @@ import { ServiceOverviewThroughputChart } from './service_overview_throughput_ch
 import { TransactionsTable } from '../../shared/transactions_table';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useFallbackToTransactionsFetcher } from '../../../hooks/use_fallback_to_transactions_fetcher';
-import { AggregatedTransactionsCallout } from '../../shared/aggregated_transactions_callout';
+import { AggregatedTransactionsBadge } from '../../shared/aggregated_transactions_badge';
 import { useApmRouter } from '../../../hooks/use_apm_router';
+import { useTimeRange } from '../../../hooks/use_time_range';
 
 /**
  * The height a chart should be if it's next to a table with 5 rows and a title.
@@ -36,11 +37,13 @@ export function ServiceOverview() {
   const { agentName, serviceName } = useApmServiceContext();
   const {
     query,
-    query: { environment, kuery },
+    query: { environment, kuery, rangeFrom, rangeTo },
   } = useApmParams('/services/:serviceName/overview');
   const { fallbackToTransactions } = useFallbackToTransactionsFetcher({
     kuery,
   });
+
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   // The default EuiFlexGroup breaks at 768, but we want to break at 992, so we
   // observe the window width and set the flex directions of rows accordingly
@@ -61,12 +64,14 @@ export function ServiceOverview() {
     <AnnotationsContextProvider
       serviceName={serviceName}
       environment={environment}
+      start={start}
+      end={end}
     >
       <ChartPointerEventContextProvider>
         <EuiFlexGroup direction="column" gutterSize="s">
           {fallbackToTransactions && (
             <EuiFlexItem>
-              <AggregatedTransactionsCallout />
+              <AggregatedTransactionsBadge />
             </EuiFlexItem>
           )}
           <EuiFlexItem>
@@ -97,6 +102,8 @@ export function ServiceOverview() {
                     kuery={kuery}
                     environment={environment}
                     fixedHeight={true}
+                    start={start}
+                    end={end}
                   />
                 </EuiPanel>
               </EuiFlexItem>

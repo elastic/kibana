@@ -118,4 +118,12 @@ export interface BulkActionsObjectProp {
 }
 export type BulkActionsProp = boolean | BulkActionsObjectProp;
 
-export type AlertStatus = 'open' | 'closed' | 'in-progress';
+export type AlertWorkflowStatus = 'open' | 'closed' | 'acknowledged';
+
+/**
+ * @deprecated
+ * TODO: remove when `acknowledged` migrations are finished
+ */
+export type InProgressStatus = 'in-progress';
+
+export type AlertStatus = AlertWorkflowStatus | InProgressStatus;

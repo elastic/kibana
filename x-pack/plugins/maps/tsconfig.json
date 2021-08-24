@@ -16,9 +16,26 @@
   "references": [
     { "path": "../../../src/core/tsconfig.json" },
     { "path": "../../../src/plugins/maps_ems/tsconfig.json" },
+    { "path": "../../../src/plugins/dashboard/tsconfig.json" },
+    { "path": "../../../src/plugins/inspector/tsconfig.json" },
+    { "path": "../../../src/plugins/data/tsconfig.json" },
+    { "path": "../../../src/plugins/ui_actions/tsconfig.json" },
+    { "path": "../../../src/plugins/navigation/tsconfig.json" },
+    { "path": "../../../src/plugins/expressions/tsconfig.json" },
+    { "path": "../../../src/plugins/visualizations/tsconfig.json" },
+    { "path": "../../../src/plugins/embeddable/tsconfig.json" },
+    { "path": "../../../src/plugins/saved_objects/tsconfig.json" },
+    { "path": "../../../src/plugins/share/tsconfig.json" },
+    { "path": "../../../src/plugins/presentation_util/tsconfig.json" },
+    { "path": "../../../src/plugins/home/tsconfig.json" },
+    { "path": "../../../src/plugins/charts/tsconfig.json" },
+    { "path": "../../../src/plugins/usage_collection/tsconfig.json" },
+    { "path": "../../../src/plugins/kibana_react/tsconfig.json" },
+    { "path": "../../../src/plugins/kibana_utils/tsconfig.json" },
     { "path": "../features/tsconfig.json" },
     { "path": "../licensing/tsconfig.json" },
     { "path": "../file_upload/tsconfig.json" },
     { "path": "../saved_objects_tagging/tsconfig.json" },
+    { "path": "../security/tsconfig.json" }
   ]
 }
