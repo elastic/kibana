@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-export * from './technical_field_names';
-export * from './alerts_as_data_rbac';
-export * from './alerts_as_data_severity';
-export * from './alerts_as_data_status';
+export const ALERT_STATUS_ACTIVE = 'active';
+export const ALERT_STATUS_RECOVERED = 'recovered';
+
+export type AlertStatus = typeof ALERT_STATUS_ACTIVE | typeof ALERT_STATUS_RECOVERED;

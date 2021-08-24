@@ -6,17 +6,12 @@
  */
 
 import { EuiButtonEmpty, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
+import { IndexPatternBase } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
+import { ALERT_STATUS, ALERT_STATUS_ACTIVE } from '@kbn/rule-data-utils';
 import React, { useCallback, useRef } from 'react';
 import { useHistory } from 'react-router-dom';
 import useAsync from 'react-use/lib/useAsync';
-import { IndexPatternBase } from '@kbn/es-query';
-import { ALERT_STATUS as ALERT_STATUS_TYPED } from '@kbn/rule-data-utils';
-import {
-  ALERT_STATUS as ALERT_STATUS_NON_TYPED,
-  // @ts-expect-error importing from a place other than root because we want to limit what we import from this package
-} from '@kbn/rule-data-utils/target_node/technical_field_names';
-import { ALERT_STATUS_ACTIVE } from '@kbn/rule-data-utils';
 import { ParsedTechnicalFields } from '../../../../rule_registry/common/parse_technical_fields';
 import type { AlertWorkflowStatus } from '../../../common/typings';
 import { ExperimentalBadge } from '../../components/shared/experimental_badge';
@@ -27,10 +22,8 @@ import { RouteParams } from '../../routes';
 import { callObservabilityApi } from '../../services/call_observability_api';
 import { AlertsSearchBar } from './alerts_search_bar';
 import { AlertsTableTGrid } from './alerts_table_t_grid';
-import { WorkflowStatusFilter } from './workflow_status_filter';
 import './styles.scss';
-
-const ALERT_STATUS: typeof ALERT_STATUS_TYPED = ALERT_STATUS_NON_TYPED;
+import { WorkflowStatusFilter } from './workflow_status_filter';
 
 export interface TopAlert {
   fields: ParsedTechnicalFields;
