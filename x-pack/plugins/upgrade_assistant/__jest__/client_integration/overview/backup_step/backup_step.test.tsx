@@ -23,8 +23,9 @@ describe('Overview - Backup Step', () => {
 
   describe('On-prem', () => {
     test('Shows link to Snapshot and Restore', () => {
-      const { exists } = testBed;
+      const { exists, find } = testBed;
       expect(exists('snapshotRestoreLink')).toBe(true);
+      expect(find('snapshotRestoreLink').props().href).toBe('snapshotAndRestoreUrl');
     });
   });
 });

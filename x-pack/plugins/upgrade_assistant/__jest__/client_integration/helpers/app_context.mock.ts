@@ -18,6 +18,17 @@ import { mockKibanaSemverVersion } from '../../../common/constants';
 import { apiService } from '../../../public/application/lib/api';
 import { breadcrumbService } from '../../../public/application/lib/breadcrumbs';
 
+// We'll mock these values to avoid testing the locators themselves.
+const idToUrlMap = {
+  SNAPSHOT_RESTORE_LOCATOR: 'snapshotAndRestoreUrl',
+};
+
+const shareMock = sharePluginMock.createSetupContract();
+shareMock.url.locators.get = (id) => ({
+  // @ts-expect-error This object is missing some properties that we're not using in the UI
+  getUrl: (): string | undefined => idToUrlMap[id],
+});
+
 export const getAppContextMock = (mockHttpClient: HttpSetup) => ({
   http: mockHttpClient,
   docLinks: docLinksServiceMock.createStartContract(),
@@ -32,5 +43,5 @@ export const getAppContextMock = (mockHttpClient: HttpSetup) => ({
   breadcrumbs: breadcrumbService,
   getUrlForApp: applicationServiceMock.createStartContract().getUrlForApp,
   deprecations: deprecationsServiceMock.createStartContract(),
-  share: sharePluginMock.createSetupContract(),
+  share: shareMock,
 });
