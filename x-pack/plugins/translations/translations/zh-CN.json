@@ -20882,7 +20882,6 @@
     "xpack.securitySolution.detectionEngine.missingPrivilegesCallOut.cannotEditLists": "没有这些权限，将无法创建或编辑值列表。",
     "xpack.securitySolution.detectionEngine.missingPrivilegesCallOut.cannotEditRules": "没有该权限，将无法创建或编辑检测引擎规则。",
     "xpack.securitySolution.detectionEngine.missingPrivilegesCallOut.messageBody.essenceDescription": "您需要以下权限，才能完全使用此功能。有关进一步帮助，请联系您的管理员。",
-    "xpack.securitySolution.detectionEngine.missingPrivilegesCallOut.messageBody.messageDetail": "{essence} 缺失权限：{privileges} 相关文档：{docs}",
     "xpack.securitySolution.detectionEngine.missingPrivilegesCallOut.messageBody.missingFeaturePrivileges": "缺失 {privileges} 权限，无法使用 {index} 功能。{explanation}",
     "xpack.securitySolution.detectionEngine.missingPrivilegesCallOut.messageBody.missingIndexPrivileges": "缺失 {privileges} 权限，无法使用 {index} 索引。{explanation}",
     "xpack.securitySolution.detectionEngine.missingPrivilegesCallOut.messageTitle": "权限不足",
