@@ -16,7 +16,6 @@ import { Ecs } from '../../../ecs';
 export interface ActionProps {
   ariaRowindex: number;
   action?: RowCellRender;
-  width?: number;
   columnId: string;
   columnValues: string;
   checked: boolean;

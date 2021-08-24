@@ -32,7 +32,6 @@ const ActionsContainer = styled.div`
 
 const ActionsComponent: React.FC<ActionProps> = ({
   ariaRowindex,
-  width,
   checked,
   columnValues,
   eventId,
@@ -91,9 +90,14 @@ const ActionsComponent: React.FC<ActionProps> = ({
   );
   const eventType = getEventType(ecsData);
 
-  const isEventContextMenuEnabledForEndpoint = useMemo(
-    () => ecsData.event?.kind?.includes('event') && ecsData.agent?.type?.includes('endpoint'),
-    [ecsData.event?.kind, ecsData.agent?.type]
+  const isContextMenuDisabled = useMemo(
+    () =>
+      eventType !== 'signal' &&
+      !(
+        (ecsData.event?.kind?.includes('event') || ecsData.event?.kind?.includes('alert')) &&
+        ecsData.agent?.type?.includes('endpoint')
+      ),
+    [eventType, ecsData.event?.kind, ecsData.agent?.type]
   );
 
   return (
@@ -163,7 +167,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
           key="alert-context-menu"
           ecsRowData={ecsData}
           timelineId={timelineId}
-          disabled={eventType !== 'signal' && !isEventContextMenuEnabledForEndpoint}
+          disabled={isContextMenuDisabled}
           refetch={refetch ?? noop}
           onRuleChange={onRuleChange}
         />
