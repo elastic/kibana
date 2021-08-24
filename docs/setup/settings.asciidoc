@@ -371,7 +371,7 @@ The size limit policy will perform a rollover when the log file reaches a maximu
 
 The time interval policy will rotate the log file every given interval of time. *Default 24h*
 
-| [[regionmap-ES-map]] `map.includeElasticMapsService:` {ess-icon}
+| `map.includeElasticMapsService:` {ess-icon}
  | Set to `false` to disable connections to Elastic Maps Service.
 When `includeElasticMapsService` is turned off, only tile layer configured by <<tilemap-url, `map.tilemap.url`>> is available in <<maps, Maps>>. *Default: `true`*
 
@@ -382,88 +382,6 @@ When `includeElasticMapsService` is turned off, only tile layer configured by <<
  | deprecated:[7.14.0,"In 8.0 and later, this setting will no longer be supported."]
  Set to `true` to proxy all <<maps, Maps application>> Elastic Maps Service
 requests through the {kib} server. *Default: `false`*
-
-| [[regionmap-settings]] `map.regionmap:` {ess-icon}
- | deprecated:[7.14.0,"In 8.0 and later, this setting will no longer be supported."]
- Specifies additional vector layers for
-use in <<maps, Maps>> visualizations. Each layer
-object points to an external vector file that contains a geojson
-FeatureCollection. The file must use the
-https://en.wikipedia.org/wiki/World_Geodetic_System[WGS84 coordinate reference system (ESPG:4326)]
-and only include polygons. If the file is hosted on a separate domain from
-{kib}, the server needs to be CORS-enabled so {kib} can download the file.
-The following example shows a valid region map configuration.
-
-|===
-
-[source,text]
---
-map.regionmap:
-  layers:
-    - name: "Departments of France"
-      url: "http://my.cors.enabled.server.org/france_departements.geojson"
-      attribution: "INRAP"
-      fields:
-          - name: "department"
-            description: "Full department name"
-          - name: "INSEE"
-            description: "INSEE numeric identifier"
---
-
-[cols="2*<"]
-|===
-
-| [[regionmap-attribution]] `map.regionmap.layers[].attribution:` {ess-icon}
- | deprecated:[7.14.0,"In 8.0 and later, this setting will no longer be supported."]
- Optional. References the originating source of the geojson file.
-
-| [[regionmap-fields]] `map.regionmap.layers[].fields[]:` {ess-icon}
- | deprecated:[7.14.0,"In 8.0 and later, this setting will no longer be supported."]
- Mandatory. Each layer
-can contain multiple fields to indicate what properties from the geojson
-features you wish to expose. The following shows how to define multiple
-properties:
-
-|===
-
-[source,text]
---
-map.regionmap:
-  layers:
-    - name: "Departments of France"
-      url: "http://my.cors.enabled.server.org/france_departements.geojson"
-      attribution: "INRAP"
-      fields:
-          - name: "department"
-            description: "Full department name"
-          - name: "INSEE"
-            description: "INSEE numeric identifier"
---
-
-[cols="2*<"]
-|===
-
-| [[regionmap-field-description]] `map.regionmap.layers[].fields[].description:` {ess-icon}
- | deprecated:[7.14.0,"In 8.0 and later, this setting will no longer be supported."]
- Mandatory. The human readable text that is shown under the Options tab when
-building the Region Map visualization.
-
-| [[regionmap-field-name]] `map.regionmap.layers[].fields[].name:` {ess-icon}
- | deprecated:[7.14.0,"In 8.0 and later, this setting will no longer be supported."]
- Mandatory.
-This value is used to do an inner-join between the document stored in
-{es} and the geojson file. For example, if the field in the geojson is
-called `Location` and has city names, there must be a field in {es}
-that holds the same values that {kib} can then use to lookup for the geoshape
-data.
-
-| [[regionmap-name]] `map.regionmap.layers[].name:` {ess-icon}
- | deprecated:[7.14.0,"In 8.0 and later, this setting will no longer be supported."]
- Mandatory. A description of the map being provided.
-
-| [[regionmap-url]] `map.regionmap.layers[].url:` {ess-icon}
- | deprecated:[7.14.0,"In 8.0 and later, this setting will no longer be supported."]
- Mandatory. The location of the geojson file as provided by a webserver.
 
 | [[tilemap-settings]] `map.tilemap.options.attribution:` {ess-icon}
  | The map attribution string.
