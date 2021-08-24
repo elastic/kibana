@@ -13,7 +13,13 @@ import {
   getEditedRule,
   getNewOverrideRule,
 } from '../../objects/rule';
-import { ALERT_GRID_CELL, NUMBER_OF_ALERTS } from '../../screens/alerts';
+import {
+  ALERT_GRID_CELL,
+  ALERT_RISK_SCORE,
+  ALERT_RULE_NAME,
+  ALERT_SEVERITY,
+  NUMBER_OF_ALERTS,
+} from '../../screens/alerts';
 
 import {
   CUSTOM_RULES_BTN,
@@ -215,9 +221,9 @@ describe('Custom detection rules creation', () => {
     waitForAlertsToPopulate();
 
     cy.get(NUMBER_OF_ALERTS).should(($count) => expect(+$count.text().split(' ')[0]).to.be.gte(1));
-    cy.get(ALERT_GRID_CELL).eq(3).contains(this.rule.name);
-    cy.get(ALERT_GRID_CELL).eq(4).contains(this.rule.severity.toLowerCase());
-    cy.get(ALERT_GRID_CELL).eq(5).contains(this.rule.riskScore);
+    cy.get(`${ALERT_GRID_CELL} ${ALERT_RULE_NAME}`).contains(this.rule.name);
+    cy.get(`${ALERT_GRID_CELL} ${ALERT_SEVERITY}`).contains(this.rule.severity.toLowerCase());
+    cy.get(`${ALERT_GRID_CELL} ${ALERT_RISK_SCORE}`).contains(this.rule.riskScore);
   });
 });
 

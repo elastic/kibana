@@ -12,17 +12,6 @@ import {
 } from '@kbn/rule-data-utils';
 import { ValuesType } from 'utility-types';
 
-// TODO: Replace the below located in: x-pack/plugins/security_solution/server/lib/detection_engine/rule_types/field_maps/field_names.ts
-
-// export const ALERT_ANCESTORS = `${ALERT_NAMESPACE}.ancestors`;
-// export const ALERT_DEPTH = `${ALERT_NAMESPACE}.depth`;
-// export const ALERT_ORIGINAL_EVENT = `${ALERT_NAMESPACE}.original_event`;
-// export const ALERT_ORIGINAL_TIME = `${ALERT_NAMESPACE}.original_time`;
-
-/**
- * This file contains the security solution specific Alert fields not contained in the @kbn/rule-data-utils package
- */
-
 // Cast to `as const` to preserve the exact string value when using as a type rather than a value
 export const ALERT_ANCESTORS = `${ALERT_NAMESPACE}.ancestors` as const;
 export const ALERT_ANCESTORS_DEPTH = `${ALERT_ANCESTORS}.depth` as const;

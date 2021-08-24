@@ -8,7 +8,7 @@ import { get, isEmpty } from 'lodash/fp';
 import { useState, useCallback, useMemo, SyntheticEvent } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
-import { ALERT_RULE_NAME, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
+import { ALERT_RULE_NAME, ALERT_RULE_UUID, ALERT_UUID } from '@kbn/rule-data-utils';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 import { Case, SubCase } from '../../../cases/common';
 import { TimelinesStartServices } from '../types';
@@ -120,7 +120,7 @@ export const useAddToCase = ({
   const isAlert = useMemo(() => {
     if (event !== undefined) {
       const data = [...event.data];
-      return data.some(({ field }) => field === 'kibana.alert.uuid');
+      return data.some(({ field }) => field === ALERT_UUID);
     } else {
       return false;
     }

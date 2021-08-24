@@ -245,6 +245,7 @@ export const TIMELINE_EVENTS_FIELDS = [
   'process.executable',
   'process.title',
   'process.working_directory',
+  'signal.rule.threshold',
   'zeek.session_id',
   'zeek.connection.local_resp',
   'zeek.connection.local_orig',

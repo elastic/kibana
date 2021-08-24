@@ -33,7 +33,7 @@ import {
   ALERT_ANCESTORS,
   ALERT_ORIGINAL_EVENT,
   ALERT_ORIGINAL_TIME,
-} from '../../field_maps/field_names';
+} from '../../../../../../../timelines/common/alerts';
 import { SERVER_APP_ID } from '../../../../../../common/constants';
 
 type SignalDoc = SignalSourceHit & {

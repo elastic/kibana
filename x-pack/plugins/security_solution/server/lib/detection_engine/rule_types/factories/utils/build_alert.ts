@@ -25,13 +25,13 @@ import {
 import { invariant } from '../../../../../../common/utils/invariant';
 import { RACAlert } from '../../types';
 import { flattenWithPrefix } from './flatten_with_prefix';
+import { SERVER_APP_ID } from '../../../../../../common/constants';
 import {
   ALERT_ANCESTORS,
   ALERT_DEPTH,
   ALERT_ORIGINAL_EVENT,
   ALERT_ORIGINAL_TIME,
-} from '../../field_maps/field_names';
-import { SERVER_APP_ID } from '../../../../../../common/constants';
+} from '../../../../../../../timelines/common/alerts';
 
 /**
  * Takes an event document and extracts the information needed for the corresponding entry in the child

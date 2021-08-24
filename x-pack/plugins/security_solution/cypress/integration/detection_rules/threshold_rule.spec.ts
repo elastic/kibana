@@ -13,7 +13,13 @@ import {
   ThresholdRule,
 } from '../../objects/rule';
 
-import { ALERT_GRID_CELL, NUMBER_OF_ALERTS } from '../../screens/alerts';
+import {
+  ALERT_GRID_CELL,
+  ALERT_RISK_SCORE,
+  ALERT_RULE_NAME,
+  ALERT_SEVERITY,
+  NUMBER_OF_ALERTS,
+} from '../../screens/alerts';
 
 import {
   CUSTOM_RULES_BTN,
@@ -171,9 +177,9 @@ describe('Detection rules, threshold', () => {
     waitForAlertsToPopulate();
 
     cy.get(NUMBER_OF_ALERTS).should(($count) => expect(+$count.text().split(' ')[0]).to.be.lt(100));
-    cy.get(ALERT_GRID_CELL).eq(3).contains(rule.name);
-    cy.get(ALERT_GRID_CELL).eq(4).contains(rule.severity.toLowerCase());
-    cy.get(ALERT_GRID_CELL).eq(5).contains(rule.riskScore);
+    cy.get(`${ALERT_GRID_CELL} ${ALERT_RULE_NAME}`).contains(rule.name);
+    cy.get(`${ALERT_GRID_CELL} ${ALERT_SEVERITY}`).contains(rule.severity.toLowerCase());
+    cy.get(`${ALERT_GRID_CELL} ${ALERT_RISK_SCORE}`).contains(rule.riskScore);
   });
 
   it('Preview results of keyword using "host.name"', () => {
