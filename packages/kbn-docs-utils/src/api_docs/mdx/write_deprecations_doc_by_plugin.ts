@@ -50,8 +50,9 @@ export function writeDeprecationDocByPlugin(
           firstTen
             .map(
               (ref) =>
-                `[${ref.path.substr(ref.path.lastIndexOf(Path.sep) + 1)}
-                ](https://github.com/elastic/kibana/tree/master/${
+                `[${ref.path.substr(
+                  ref.path.lastIndexOf(Path.sep) + 1
+                )}](https://github.com/elastic/kibana/tree/master/${
                   ref.path
                 }#:~:text=${encodeURIComponent(api.label)})`
             )
