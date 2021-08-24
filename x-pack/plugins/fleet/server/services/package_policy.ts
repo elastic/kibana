@@ -911,41 +911,38 @@ export function overridePackageInputs(
 ): DryRunPackagePolicy {
   if (!inputsOverride) return basePackagePolicy;
 
-  const inputs = [...basePackagePolicy.inputs];
-  const packageName = basePackagePolicy.package!.name;
-  let errors = [];
+  const availablePolicyTemplates = (packageInfo.policy_templates ?? []).map(({ name }) => name);
+
+  const inputs = [
+    ...basePackagePolicy.inputs.filter((input) => {
+      if (!input.policy_template) {
+        return true;
+      }
+
+      return availablePolicyTemplates.includes(input.policy_template);
+    }),
+  ];
+
+  let errors: any[] = [];
 
   for (const override of inputsOverride) {
     let originalInput = inputs.find((i) => i.type === override.type);
 
+    // If there's no corresponding input on the original package policy, just
+    // take the override value from the new package as-is. This case typically
+    // occurs when inputs or package policies are added/removed between versions.
     if (!originalInput) {
-      const e = {
-        error: new IngestManagerError(
-          i18n.translate('xpack.fleet.packagePolicyInputOverrideError', {
-            defaultMessage: 'Input type {inputType} does not exist on package {packageName}',
-            values: {
-              inputType: override.type,
-              packageName,
-            },
-          })
-        ),
-        package: { name: packageName, version: basePackagePolicy.package!.version },
-      };
-
-      if (dryRun) {
-        errors.push({
-          key: override.type,
-          message: String(e.error),
-        });
-        continue;
-      } else {
-        throw e;
-      }
+      inputs.push(override as NewPackagePolicyInput);
+      continue;
     }
 
-    if (typeof override.enabled !== 'undefined') originalInput.enabled = override.enabled;
-    if (typeof override.keep_enabled !== 'undefined')
+    if (typeof override.enabled !== 'undefined') {
+      originalInput.enabled = override.enabled;
+    }
+
+    if (typeof override.keep_enabled !== 'undefined') {
       originalInput.keep_enabled = override.keep_enabled;
+    }
 
     if (override.vars) {
       originalInput = deepMergeVars(originalInput, override);
@@ -957,36 +954,7 @@ export function overridePackageInputs(
           (s) => s.data_stream.dataset === stream.data_stream.dataset
         );
 
-        if (!originalStream) {
-          const streamSet = stream.data_stream.dataset;
-          const e = {
-            error: new IngestManagerError(
-              i18n.translate('xpack.fleet.packagePolicyStreamOverrideError', {
-                defaultMessage:
-                  'Data stream {streamSet} does not exist on {inputType} of package {packageName}',
-                values: {
-                  streamSet,
-                  inputType: override.type,
-                  packageName,
-                },
-              })
-            ),
-            package: { name: packageName, version: basePackagePolicy.package!.version },
-          };
-
-          if (dryRun) {
-            errors.push({
-              key: `${override.type}.streams.${streamSet}`,
-              message: String(e.error),
-            });
-
-            continue;
-          } else {
-            throw e;
-          }
-        }
-
-        if (typeof stream.enabled !== 'undefined') {
+        if (typeof stream.enabled !== 'undefined' && originalStream) {
           originalStream.enabled = stream.enabled;
         }
 

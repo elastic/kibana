@@ -97,12 +97,14 @@ export const validatePackagePolicy = (
   >((varDefs, policyTemplate) => {
     (policyTemplate.inputs || []).forEach((input) => {
       const varDefKey = hasIntegrations ? `${policyTemplate.name}-${input.type}` : input.type;
+
       if ((input.vars || []).length) {
         varDefs[varDefKey] = keyBy(input.vars || [], 'name');
       }
     });
     return varDefs;
   }, {});
+
   const streamsByDatasetAndInput = (packageInfo.data_streams || []).reduce<
     Record<string, RegistryStream>
   >((streams, dataStream) => {

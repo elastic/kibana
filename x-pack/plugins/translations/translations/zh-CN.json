@@ -9967,8 +9967,6 @@
     "xpack.fleet.oldAppTitle": "采集管理器",
     "xpack.fleet.overviewPageSubtitle": "Elastic 代理的集中管理",
     "xpack.fleet.overviewPageTitle": "Fleet",
-    "xpack.fleet.packagePolicyInputOverrideError": "输入类型 {inputType} 在软件包 {packageName} 上不存在",
-    "xpack.fleet.packagePolicyStreamOverrideError": "数据流 {streamSet} 在软件包 {packageName} 的 {inputType} 上不存在",
     "xpack.fleet.packagePolicyValidation.invalidArrayErrorMessage": "格式无效",
     "xpack.fleet.packagePolicyValidation.invalidYamlFormatErrorMessage": "YAML 格式无效",
     "xpack.fleet.packagePolicyValidation.nameRequiredErrorMessage": "“名称”必填",

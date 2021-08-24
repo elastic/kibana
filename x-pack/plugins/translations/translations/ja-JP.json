@@ -9694,8 +9694,6 @@
     "xpack.fleet.oldAppTitle": "Ingest Manager",
     "xpack.fleet.overviewPageSubtitle": "ElasticElasticエージェントの集中管理",
     "xpack.fleet.overviewPageTitle": "Fleet",
-    "xpack.fleet.packagePolicyInputOverrideError": "パッケージ{packageName}には入力タイプ{inputType}が存在しません。",
-    "xpack.fleet.packagePolicyStreamOverrideError": "パッケージ{packageName}の{inputType}にはデータストリーム{streamSet}が存在しません",
     "xpack.fleet.packagePolicyValidation.invalidArrayErrorMessage": "無効なフォーマット",
     "xpack.fleet.packagePolicyValidation.invalidYamlFormatErrorMessage": "YAML形式が無効です",
     "xpack.fleet.packagePolicyValidation.nameRequiredErrorMessage": "名前が必要です",
