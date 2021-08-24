@@ -15,26 +15,8 @@ import { createGetterSetter } from '../../kibana_utils/public';
 import { search } from '../../data/public';
 import { DocViewsRegistry } from './application/doc_views/doc_views_registry';
 
-let angularModule: ng.IModule | null = null;
 let services: DiscoverServices | null = null;
 let uiActions: UiActionsStart;
-
-/**
- * set bootstrapped inner angular module
- */
-export function setAngularModule(module: ng.IModule) {
-  angularModule = module;
-}
-
-/**
- * get boostrapped inner angular module
- */
-export function getAngularModule(): ng.IModule {
-  if (!angularModule) {
-    throw new Error('Discover angular module not yet available');
-  }
-  return angularModule;
-}
 
 export function getServices(): DiscoverServices {
   if (!services) {
