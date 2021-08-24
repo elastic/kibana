@@ -148,7 +148,7 @@ const ERROR_NAMESPACE_SPECIFIED = 'Spaces currently determines the namespaces';
       });
 
       test(`supplements options with the current namespace`, async () => {
-        const { client, baseClient } = createSpacesSavedObjectsClient();
+        const { client, baseClient, spacesClient } = createSpacesSavedObjectsClient();
         const expectedReturnValue = { saved_objects: [createMockResponse()] };
         baseClient.bulkGet.mockReturnValue(Promise.resolve(expectedReturnValue));
 
@@ -162,6 +162,32 @@ const ERROR_NAMESPACE_SPECIFIED = 'Spaces currently determines the namespaces';
           foo: 'bar',
           namespace: currentSpace.expectedNamespace,
         });
+        expect(spacesClient.getAll).not.toHaveBeenCalled();
+      });
+
+      test(`replaces object namespaces '*' with available spaces`, async () => {
+        const { client, baseClient, spacesClient } = createSpacesSavedObjectsClient();
+        spacesClient.getAll.mockResolvedValue([
+          { id: 'available-space-a', name: 'a', disabledFeatures: [] },
+          { id: 'available-space-b', name: 'b', disabledFeatures: [] },
+        ]);
+
+        const objects = [
+          { type: 'foo', id: '1', namespaces: ['*'] },
+          { type: 'bar', id: '2', namespaces: ['*', 'this-is-ignored'] },
+          { type: 'baz', id: '3', namespaces: ['another-space'] },
+        ];
+        await client.bulkGet(objects);
+
+        expect(baseClient.bulkGet).toHaveBeenCalledWith(
+          [
+            { type: 'foo', id: '1', namespaces: ['available-space-a', 'available-space-b'] },
+            { type: 'bar', id: '2', namespaces: ['available-space-a', 'available-space-b'] },
+            { type: 'baz', id: '3', namespaces: ['another-space'] }, // even if another space doesn't exist, it can be specified explicitly
+          ],
+          { namespace: currentSpace.expectedNamespace }
+        );
+        expect(spacesClient.getAll).toHaveBeenCalledTimes(1);
       });
     });
 

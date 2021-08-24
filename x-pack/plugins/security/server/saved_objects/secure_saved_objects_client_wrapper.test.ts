@@ -426,10 +426,17 @@ describe('#bulkGet', () => {
     expect(result).toEqual(apiCallReturnValue);
   });
 
-  test(`checks privileges for user, actions, and namespace`, async () => {
-    const objects = [obj1, obj2];
+  test(`checks privileges for user, actions, namespace, and (object) namespaces`, async () => {
+    const objects = [
+      { ...obj1, namespaces: ['another-ns'] },
+      { ...obj2, namespaces: ['yet-another-ns'] },
+    ];
     const options = { namespace };
-    await expectPrivilegeCheck(client.bulkGet, { objects, options }, namespace);
+    await expectPrivilegeCheck(client.bulkGet, { objects, options }, [
+      namespace,
+      'another-ns',
+      'yet-another-ns',
+    ]);
   });
 
   test(`filters namespaces that the user doesn't have access to`, async () => {

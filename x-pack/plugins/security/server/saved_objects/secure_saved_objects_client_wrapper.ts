@@ -287,11 +287,15 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     options: SavedObjectsBaseOptions = {}
   ) {
     try {
+      const namespaces = objects.reduce(
+        (acc, { namespaces: objNamespaces = [] }) => acc.concat(objNamespaces),
+        [options.namespace]
+      );
       const args = { objects, options };
       await this.legacyEnsureAuthorized(
         this.getUniqueObjectTypes(objects),
         'bulk_get',
-        options.namespace,
+        namespaces,
         {
           args,
         }

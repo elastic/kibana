@@ -219,7 +219,25 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
   ) {
     throwErrorIfNamespaceSpecified(options);
 
-    return await this.client.bulkGet<T>(objects, {
+    let availableSpaces: string[] | undefined;
+    const getAvailableSpaces = async () => {
+      if (!availableSpaces) {
+        availableSpaces = await this.getSearchableSpaces([ALL_SPACES_ID]);
+      }
+      return availableSpaces;
+    };
+
+    const objectsToGet: SavedObjectsBulkGetObject[] = [];
+    for (const object of objects) {
+      const { namespaces } = object;
+      if (namespaces?.includes(ALL_SPACES_ID)) {
+        objectsToGet.push({ ...object, namespaces: await getAvailableSpaces() });
+      } else {
+        objectsToGet.push(object);
+      }
+    }
+
+    return await this.client.bulkGet<T>(objectsToGet, {
       ...options,
       namespace: spaceIdToNamespace(this.spaceId),
     });
