@@ -144,7 +144,6 @@ const timelineAlertsSearchStrategy = <T extends TimelineFactoryQueryTypes>({
     }),
     mergeMap((esSearchRes) => queryFactory.parse(requestWithAlertsIndices, esSearchRes)),
     catchError((err) => {
-      console.log('ERROR!!!:', err); // eslint-disable-line
       throw err;
     })
   );

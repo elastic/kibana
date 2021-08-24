@@ -69,7 +69,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
   const afterItemSelection = useCallback(() => {
     setPopover(false);
   }, []);
-  const ruleId = get(0, ecsRowData?.kibana?.alert?.rule?.id);
+  const ruleId = get(0, ecsRowData?.kibana?.alert?.rule?.uuid);
   const ruleName = get(0, ecsRowData?.kibana?.alert?.rule?.name);
   const { timelines: timelinesUi } = useKibana().services;
   const casePermissions = useGetUserCasesPermissions();
@@ -108,7 +108,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     [addToCaseActionProps, hasWritePermissions, timelineId, timelinesUi]
   );
 
-  const alertStatus = get(0, ecsRowData?.kibana?.alert?.status) as Status;
+  const alertStatus = get(0, ecsRowData?.kibana?.alert?.workflow_status) as Status;
 
   const isEvent = useMemo(() => indexOf(ecsRowData.event?.kind, 'event') !== -1, [ecsRowData]);
 

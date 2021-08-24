@@ -32,6 +32,11 @@ interface AlertHit {
     signal: {
       rule: Rule;
     };
+    kibana: {
+      alert: {
+        rule: Rule;
+      };
+    };
   };
 }
 
@@ -55,7 +60,6 @@ const buildLastAlertQuery = (ruleId: string) => ({
 export const useRuleWithFallback = (ruleId: string): UseRuleWithFallback => {
   const { start, loading: ruleLoading, result: ruleData, error } = useFetchRule();
   const { addError } = useAppToasts();
-
   const fetch = useCallback(() => {
     start({ id: ruleId });
   }, [ruleId, start]);
@@ -78,8 +82,12 @@ export const useRuleWithFallback = (ruleId: string): UseRuleWithFallback => {
   }, [addError, error]);
 
   const rule = useMemo<Rule | undefined>(() => {
-    // TODO: Is this access still kosher?
-    const result = isExistingRule ? ruleData : alertsData?.hits.hits[0]?._source.signal.rule;
+    let result = isExistingRule ? ruleData : null;
+    if (result === null) {
+      result = alertsData?.hits.hits[0]?._source.signal
+        ? alertsData?.hits.hits[0]?._source.signal.rule
+        : alertsData?.hits.hits[0]?._source.kibana.alert.rule;
+    }
     if (result) {
       return transformInput(result);
     }

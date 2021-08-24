@@ -62,7 +62,6 @@ import {
   ALERT_RULE_INDEX,
   ALERT_RULE_LANGUAGE,
   ALERT_RULE_MAX_SIGNALS,
-  ALERT_RULE_OUTPUT_INDEX,
   ALERT_RULE_QUERY,
   ALERT_RULE_SAVED_ID,
   ALERT_RULE_SIZE,
@@ -136,8 +135,8 @@ export const isEvenEqlSequence = (event: Ecs): boolean => {
 };
 /** Return eventType raw or kibana or eql */
 export const getEventType = (event: Ecs): Omit<TimelineEventsType, 'all'> => {
-  if (!isEmpty(event.kibana?.alert?.rule?.id)) {
-    return 'kibana';
+  if (!isEmpty(event.kibana?.alert?.rule?.uuid)) {
+    return 'kibana.alert';
   } else if (!isEmpty(event.eql?.parentId)) {
     return 'eql';
   }
@@ -227,7 +226,6 @@ export const allowSorting = ({
     ALERT_RULE_MAX_SIGNALS,
     ALERT_RULE_NAME,
     ALERT_RULE_NOTE,
-    ALERT_RULE_OUTPUT_INDEX,
     ALERT_RULE_QUERY,
     ALERT_RULE_REFERENCES,
     ALERT_RULE_RISK_SCORE,

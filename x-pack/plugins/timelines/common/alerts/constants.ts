@@ -86,23 +86,21 @@ export const ALERT_THRESHOLD_RESULT_TERMS = `${ALERT_THRESHOLD_RESULT}.terms` as
 export const ALERT_THRESHOLD_RESULT_TERMS_FIELD = `${ALERT_THRESHOLD_RESULT_TERMS}.field` as const;
 export const ALERT_THRESHOLD_RESULT_TERMS_VALUE = `${ALERT_THRESHOLD_RESULT_TERMS}.value` as const;
 export const ALERT_RULE_BUILDING_BLOCK_TYPE = `${ALERT_RULE_NAMESPACE}.building_block_type` as const;
-// TODO: not accounted for in the excel doc
 export const ALERT_RULE_EXCEPTIONS_LIST = `${ALERT_RULE_NAMESPACE}.exceptions_list` as const;
 export const ALERT_RULE_FALSE_POSITIVES = `${ALERT_RULE_NAMESPACE}.false_positives` as const;
-// TODO: not accounted for in the excel doc
 export const ALERT_RULE_FILTERS = `${ALERT_RULE_NAMESPACE}.filters` as const;
 export const ALERT_RULE_IMMUTABLE = `${ALERT_RULE_NAMESPACE}.immutable` as const;
 export const ALERT_RULE_INDEX = `${ALERT_RULE_NAMESPACE}.index` as const;
 export const ALERT_RULE_LANGUAGE = `${ALERT_RULE_NAMESPACE}.language` as const;
 export const ALERT_RULE_MAX_SIGNALS = `${ALERT_RULE_NAMESPACE}.max_signals` as const;
-// TODO: Not supported in new RAC implementation. Can be removed
-export const ALERT_RULE_OUTPUT_INDEX = `${ALERT_RULE_NAMESPACE}.output_index` as const;
 export const ALERT_RULE_QUERY = `${ALERT_RULE_NAMESPACE}.query` as const;
-// TODO: Could be depracated
+// TODO: Could be deprecated
 export const ALERT_RULE_SAVED_ID = `${ALERT_RULE_NAMESPACE}.saved_id` as const;
 // TODO: not accounted for in the excel doc
 export const ALERT_RULE_SIZE = `${ALERT_RULE_NAMESPACE}.size` as const;
-// TODO: not accounted for in the excel doc
+export const ALERT_RULE_THREAT_MAPPING_ENTRIES_FIELD = `${ALERT_RULE_NAMESPACE}.threat_mapping.entries.field` as const;
+export const ALERT_RULE_THREAT_MAPPING_ENTRIES_VALUE = `${ALERT_RULE_NAMESPACE}.threat_mapping.entries.value` as const;
+export const ALERT_RULE_THREAT_MAPPING_ENTRIES_TYPE = `${ALERT_RULE_NAMESPACE}.threat_mapping.entries.type` as const;
 export const ALERT_RULE_THRESHOLD = `${ALERT_RULE_NAMESPACE}.threshold` as const;
 export const ALERT_RULE_TIMELINE_ID = `${ALERT_RULE_NAMESPACE}.timeline_id` as const;
 export const ALERT_RULE_TIMELINE_TITLE = `${ALERT_RULE_NAMESPACE}.timeline_title` as const;
@@ -187,7 +185,6 @@ const securityFields = {
   ALERT_RULE_INDEX,
   ALERT_RULE_LANGUAGE,
   ALERT_RULE_MAX_SIGNALS,
-  ALERT_RULE_OUTPUT_INDEX,
   ALERT_RULE_QUERY,
   ALERT_RULE_SAVED_ID,
   ALERT_RULE_SIZE,

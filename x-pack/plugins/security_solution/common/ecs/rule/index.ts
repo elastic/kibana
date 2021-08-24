@@ -8,6 +8,7 @@
 export interface RuleEcs {
   id?: string[];
   rule_id?: string[];
+  uuid?: string[];
   name?: string[];
   false_positives?: string[];
   saved_id?: string[];

@@ -16,5 +16,6 @@ export interface KibanaEcs {
       id?: string[];
     };
     threshold_result?: unknown;
+    workflow_status?: string[];
   };
 }

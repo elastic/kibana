@@ -128,7 +128,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
         </EventsTdContent>
       </div>
       <>
-        {timelineId !== TimelineId.active && eventType === 'signal' && (
+        {timelineId !== TimelineId.active && eventType === 'kibana.alert' && (
           <InvestigateInTimelineAction
             ariaLabel={i18n.SEND_ALERT_TO_TIMELINE_FOR_ROW({ ariaRowindex, columnValues })}
             key="investigate-in-timeline"
@@ -163,7 +163,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
           key="alert-context-menu"
           ecsRowData={ecsData}
           timelineId={timelineId}
-          disabled={eventType !== 'signal' && !isEventContextMenuEnabledForEndpoint}
+          disabled={eventType !== 'kibana.alert' && !isEventContextMenuEnabledForEndpoint}
           refetch={refetch ?? noop}
           onRuleChange={onRuleChange}
         />

@@ -192,7 +192,6 @@ export const useTimelineEvents = ({
       if (request == null || skip) {
         return;
       }
-      console.log('REQUEST: ', request); // eslint-disable-line
       const asyncSearch = async () => {
         prevTimelineRequest.current = request;
         abortCtrl.current = new AbortController();

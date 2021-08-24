@@ -66,7 +66,7 @@ export const columns: Array<
     columnHeaderType: defaultColumnHeaderType,
     displayAsText: i18n.ALERTS_HEADERS_RISK_SCORE,
     id: ALERT_RULE_RISK_SCORE,
-    initialWidth: 115,
+    initialWidth: 100,
   },
   {
     columnHeaderType: defaultColumnHeaderType,

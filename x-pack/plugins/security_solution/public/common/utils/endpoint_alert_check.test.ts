@@ -23,7 +23,7 @@ describe('Endpoint Alert Check Utility', () => {
       // Must be an Alert
       {
         field: ALERT_RULE_UUID,
-        category: 'signal',
+        category: 'kibana',
         originalValue: 'endpoint',
         values: ['endpoint'],
         isObjectArray: false,

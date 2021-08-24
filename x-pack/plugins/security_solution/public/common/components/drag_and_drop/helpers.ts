@@ -68,7 +68,6 @@ import {
   ALERT_RULE_INDEX,
   ALERT_RULE_LANGUAGE,
   ALERT_RULE_MAX_SIGNALS,
-  ALERT_RULE_OUTPUT_INDEX,
   ALERT_RULE_QUERY,
   ALERT_RULE_SAVED_ID,
   ALERT_RULE_SIZE,
@@ -178,7 +177,6 @@ export const allowTopN = ({
     'numeric',
     'string',
   ].includes(fieldType);
-  console.log('FIELDS: ', browserField, fieldName, hideTopN); // eslint-disable-line
 
   // TODO: remove this explicit allowlist when the ECS documentation includes alerts
   const isAllowlistedNonBrowserField = ([
@@ -223,7 +221,6 @@ export const allowTopN = ({
     ALERT_RULE_MAX_SIGNALS,
     ALERT_RULE_NAME,
     ALERT_RULE_NOTE,
-    ALERT_RULE_OUTPUT_INDEX,
     ALERT_RULE_QUERY,
     ALERT_RULE_REFERENCES,
     ALERT_RULE_RISK_SCORE,

@@ -4,12 +4,27 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { JsonObject, JsonArray } from '@kbn/utility-types';
 import {
+  ALERT_RULE_FROM,
+  ALERT_RULE_NAME,
+  ALERT_RULE_TO,
+  ALERT_RULE_TYPE,
+  ALERT_RULE_UUID,
+  ALERT_WORKFLOW_STATUS,
+} from '@kbn/rule-data-utils';
+import { JsonObject, JsonArray } from '@kbn/utility-types';
+
+import {
+  ALERT_GROUP_ID,
   ALERT_ORIGINAL_TIME,
-  ALERT_RULE_INDEX,
+  ALERT_RULE_BUILDING_BLOCK_TYPE,
+  ALERT_RULE_FILTERS,
   ALERT_RULE_LANGUAGE,
-} from './../../../../plugins/timelines/common/alerts';
+  ALERT_RULE_QUERY,
+  ALERT_RULE_INDEX,
+  ALERT_ORIGINAL_EVENT_KIND,
+  ALERT_ORIGINAL_EVENT_MODULE,
+} from '../../../../plugins/timelines/common';
 
 export const getFilterValue = (hostName: string, from: string, to: string): JsonObject => ({
   bool: {
@@ -53,21 +68,21 @@ export const getFieldsToRequest = (): string[] => [
   'destination.ip',
   'user.name',
   '@timestamp',
-  'signal.status',
-  'signal.group.id',
+  ALERT_WORKFLOW_STATUS,
+  ALERT_GROUP_ID,
   ALERT_ORIGINAL_TIME,
-  'signal.rule.building_block_type',
-  'signal.rule.filters',
-  'signal.rule.from',
+  ALERT_RULE_BUILDING_BLOCK_TYPE,
+  ALERT_RULE_FILTERS,
+  ALERT_RULE_FROM,
   ALERT_RULE_LANGUAGE,
-  'signal.rule.query',
-  'signal.rule.name',
-  'signal.rule.to',
-  'signal.rule.id',
+  ALERT_RULE_QUERY,
+  ALERT_RULE_NAME,
+  ALERT_RULE_TO,
+  ALERT_RULE_UUID,
   ALERT_RULE_INDEX,
-  'signal.rule.type',
-  'signal.original_event.kind',
-  'signal.original_event.module',
+  ALERT_RULE_TYPE,
+  ALERT_ORIGINAL_EVENT_KIND,
+  ALERT_ORIGINAL_EVENT_MODULE,
   'file.path',
   'file.Ext.code_signature.subject_name',
   'file.Ext.code_signature.trusted',

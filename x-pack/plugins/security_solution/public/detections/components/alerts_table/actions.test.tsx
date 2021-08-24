@@ -340,7 +340,7 @@ describe('alert actions', () => {
     });
 
     describe('Eql', () => {
-      test(' with kibana.alert.group.id', async () => {
+      test(`with ${ALERT_GROUP_ID}`, async () => {
         const ecsDataMock: Ecs = {
           ...mockEcsDataWithAlert,
           kibana: {

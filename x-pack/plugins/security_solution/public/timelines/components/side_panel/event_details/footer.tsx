@@ -54,16 +54,16 @@ export const EventDetailsFooter = React.memo(
     timelineId,
   }: EventDetailsFooterProps) => {
     const ruleIndex = useMemo(
-      () => find({ category: 'signal', field: ALERT_RULE_INDEX }, detailsData)?.values,
+      () => find({ category: 'kibana', field: ALERT_RULE_INDEX }, detailsData)?.values,
       [detailsData]
     );
 
     const addExceptionModalWrapperData = useMemo(
       () =>
         [
-          { category: 'signal', field: ALERT_RULE_UUID, name: 'ruleId' },
-          { category: 'signal', field: ALERT_RULE_NAME, name: 'ruleName' },
-          { category: 'signal', field: ALERT_WORKFLOW_STATUS, name: 'alertStatus' },
+          { category: 'kibana', field: ALERT_RULE_UUID, name: 'ruleId' },
+          { category: 'kibana', field: ALERT_RULE_NAME, name: 'ruleName' },
+          { category: 'kibana', field: ALERT_WORKFLOW_STATUS, name: 'alertStatus' },
           { category: '_id', field: '_id', name: 'eventId' },
         ].reduce<AddExceptionModalWrapperData>(
           (acc, curr) => ({

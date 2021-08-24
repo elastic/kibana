@@ -115,8 +115,8 @@ export const isEvenEqlSequence = (event: Ecs): boolean => {
 };
 /** Return eventType raw or signal or eql */
 export const getEventType = (event: Ecs): Omit<TimelineEventsType, 'all'> => {
-  if (!isEmpty(event.kibana?.alert?.rule?.id)) {
-    return 'signal';
+  if (!isEmpty(event.kibana?.alert?.rule?.uuid)) {
+    return 'kibana.alert';
   } else if (!isEmpty(event.eql?.parentId)) {
     return 'eql';
   }

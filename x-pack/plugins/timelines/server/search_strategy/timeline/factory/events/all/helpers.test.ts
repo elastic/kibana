@@ -10,7 +10,7 @@ import {
   ALERT_RULE_TYPE,
   ALERT_RULE_UUID,
   ALERT_RULE_RISK_SCORE,
-  ALERT_STATUS,
+  ALERT_WORKFLOW_STATUS,
   ALERT_RULE_SEVERITY,
   ALERT_RULE_VERSION,
   ALERT_RULE_NAME,
@@ -18,7 +18,6 @@ import {
 } from '@kbn/rule-data-utils';
 import { eventHit } from '@kbn/securitysolution-t-grid';
 import {
-  ALERT_RULE_OUTPUT_INDEX,
   ALERT_RULE_LANGUAGE,
   ALERT_RULE_QUERY,
   ALERT_RULE_INDEX,
@@ -179,7 +178,6 @@ describe('#formatTimelineData', () => {
                 value: 200,
               },
               building_block_type: null,
-              output_index: '.siem-signals-patrykkopycinski-default',
               type: 'threshold',
               rule_name_override: null,
               enabled: true,
@@ -278,12 +276,11 @@ describe('#formatTimelineData', () => {
                 type: 'event',
               },
             ],
-            status: 'open',
+            workflow_status: 'open',
           },
         },
       },
       fields: {
-        [ALERT_RULE_OUTPUT_INDEX]: ['.siem-signals-patrykkopycinski-default'],
         [ALERT_RULE_FROM]: ['now-360s'],
         [ALERT_RULE_LANGUAGE]: ['kuery'],
         '@timestamp': ['2021-01-09T13:41:40.517Z'],
@@ -291,7 +288,7 @@ describe('#formatTimelineData', () => {
         [ALERT_RULE_TYPE]: ['threshold'],
         [ALERT_RULE_UUID]: ['696c24e0-526d-11eb-836c-e1620268b945'],
         [ALERT_RULE_RISK_SCORE]: [21],
-        [ALERT_STATUS]: ['open'],
+        [ALERT_WORKFLOW_STATUS]: ['open'],
         'event.kind': ['signal'],
         [ALERT_ORIGINAL_TIME]: ['2021-01-09T13:39:32.595Z'],
         [ALERT_RULE_SEVERITY]: ['low'],
@@ -344,7 +341,7 @@ describe('#formatTimelineData', () => {
           kibana: {
             alert: {
               original_time: ['2021-01-09T13:39:32.595Z'],
-              status: ['open'],
+              workflow_status: ['open'],
               threshold_result: ['{"count":10000,"value":"2a990c11-f61b-4c8e-b210-da2574e9f9db"}'],
               rule: {
                 building_block_type: [],
@@ -363,7 +360,6 @@ describe('#formatTimelineData', () => {
                 ],
                 language: ['kuery'],
                 name: ['Threshold test'],
-                output_index: ['.siem-signals-patrykkopycinski-default'],
                 risk_score: ['21'],
                 query: ['_id :*'],
                 severity: ['low'],

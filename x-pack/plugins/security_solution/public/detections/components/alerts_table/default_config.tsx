@@ -37,7 +37,6 @@ import {
   ALERT_RULE_QUERY,
 } from '../../../../../timelines/common/alerts';
 
-// TODO: Confirm changes with @dplumlee
 export const buildAlertStatusFilter = (status: Status): Filter[] => {
   const combinedQuery =
     status === 'acknowledged'
@@ -129,12 +128,12 @@ export const buildThreatMatchFilter = (showOnlyThreatIndicatorAlerts: boolean): 
             alias: null,
             disabled: false,
             negate: false,
-            key: 'signal.rule.threat_mapping', // TODO: This needs to be updated to kibana.alert?
+            key: 'signal.rule.threat_mapping', // TODO: Not updating to kibana.alert per: https://github.com/elastic/kibana/pull/107713/files#r692438231
             type: 'exists',
             value: 'exists',
           },
           // @ts-expect-error TODO: Rework parent typings to support ExistsFilter[]
-          exists: { field: 'signal.rule.threat_mapping' }, // TODO: This needs to be updated to kibana.alert?
+          exists: { field: 'signal.rule.threat_mapping' }, // TODO: Not updating to kibana.alert per: https://github.com/elastic/kibana/pull/107713/files#r692438231
         },
       ]
     : [];
@@ -172,7 +171,6 @@ export const requiredFieldsForActions = [
 ];
 
 // TODO: Once we are past experimental phase this code should be removed
-// TODO: Confirm changes with @dplumlee
 export const buildAlertStatusFilterRuleRegistry = (status: Status): Filter[] => {
   const combinedQuery =
     status === 'acknowledged'
