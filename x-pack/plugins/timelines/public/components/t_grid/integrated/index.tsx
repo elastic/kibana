@@ -172,7 +172,6 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
   start,
   tGridEventRenderedViewEnabled,
   trailingControlColumns,
-  tGridEventRenderedViewEnabled,
   unit,
 }) => {
   const dispatch = useDispatch();
