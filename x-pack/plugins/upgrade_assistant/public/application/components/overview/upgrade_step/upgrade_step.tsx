@@ -28,7 +28,7 @@ const i18nTexts = {
     }),
   upgradeStepDescription: i18n.translate('xpack.upgradeAssistant.overview.upgradeStepDescription', {
     defaultMessage:
-      "Once you've resolved all critical issues and verified that your applications are ready, you can upgrade the Elastic Stack.",
+      "Once you've resolved all critical issues and verified that your applications are ready, you can upgrade the Elastic Stack. Be sure to back up your data again before upgrading.",
   }),
   upgradeStepDescriptionForCloud: i18n.translate(
     'xpack.upgradeAssistant.overview.upgradeStepDescriptionForCloud',
@@ -50,10 +50,7 @@ const i18nTexts = {
 
 const UpgradeStep = ({ docLinks }: { docLinks: DocLinksStart }) => {
   const { cloud } = useKibana().services;
-
   const isCloudEnabled: boolean = Boolean(cloud?.isCloudEnabled);
-  const cloudDeploymentUrl: string = `${cloud?.baseUrl ?? ''}/deployments/${cloud?.cloudId ?? ''}`;
-
   let callToAction;
 
   if (isCloudEnabled) {
@@ -61,7 +58,7 @@ const UpgradeStep = ({ docLinks }: { docLinks: DocLinksStart }) => {
       <EuiFlexGroup alignItems="center" gutterSize="s">
         <EuiFlexItem grow={false}>
           <EuiButton
-            href={cloudDeploymentUrl}
+            href={cloud!.deploymentUrl}
             target="_blank"
             data-test-subj="upgradeSetupCloudLink"
             iconSide="right"

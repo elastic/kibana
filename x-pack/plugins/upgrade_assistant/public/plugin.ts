@@ -15,7 +15,7 @@ import { Config } from '../common/config';
 export class UpgradeAssistantUIPlugin
   implements Plugin<void, void, SetupDependencies, StartDependencies> {
   constructor(private ctx: PluginInitializerContext) {}
-  setup(coreSetup: CoreSetup<StartDependencies>, { management, cloud }: SetupDependencies) {
+  setup(coreSetup: CoreSetup<StartDependencies>, { management, cloud, share }: SetupDependencies) {
     const { enabled, readonly } = this.ctx.config.get<Config>();
 
     if (!enabled) {
@@ -56,6 +56,7 @@ export class UpgradeAssistantUIPlugin
           params,
           kibanaVersionInfo,
           readonly,
+          share,
           services
         );
 

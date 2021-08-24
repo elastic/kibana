@@ -24,8 +24,7 @@ interface AlertsCountProps {
 }
 
 const Wrapper = styled.div`
-  overflow: scroll;
-  margin-top: -8px;
+  margin-top: -${({ theme }) => theme.eui.euiSizeS};
 `;
 
 const getAlertsCountTableColumns = (
@@ -41,6 +40,7 @@ const getAlertsCountTableColumns = (
         return (
           <DefaultDraggable
             field={selectedStackByOption}
+            hideTopN={true}
             id={`alert-count-draggable-${selectedStackByOption}-${value}`}
             value={value}
           />
@@ -70,7 +70,7 @@ export const AlertsCount = memo<AlertsCountProps>(({ loading, selectedStackByOpt
     <>
       {loading && <EuiProgress size="xs" position="absolute" color="accent" />}
 
-      <Wrapper data-test-subj="alertsCountTable">
+      <Wrapper data-test-subj="alertsCountTable" className="eui-yScroll">
         <EuiInMemoryTable
           isSelectable={false}
           columns={tableColumns}

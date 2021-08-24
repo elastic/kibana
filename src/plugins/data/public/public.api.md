@@ -740,24 +740,28 @@ export const esFilters: {
     FILTERS: typeof import("@kbn/es-query").FILTERS;
     FilterStateStore: typeof FilterStateStore;
     buildEmptyFilter: (isPinned: boolean, index?: string | undefined) => import("@kbn/es-query").Filter;
-    buildPhrasesFilter: (field: import("@kbn/es-query").IndexPatternFieldBase, params: string[], indexPattern: import("@kbn/es-query").IndexPatternBase) => import("@kbn/es-query").PhrasesFilter;
+    buildPhrasesFilter: (field: import("@kbn/es-query").IndexPatternFieldBase, params: (string | number | boolean)[], indexPattern: import("@kbn/es-query").IndexPatternBase) => import("@kbn/es-query").PhrasesFilter;
     buildExistsFilter: (field: import("@kbn/es-query").IndexPatternFieldBase, indexPattern: import("@kbn/es-query").IndexPatternBase) => import("@kbn/es-query").ExistsFilter;
-    buildPhraseFilter: (field: import("@kbn/es-query").IndexPatternFieldBase, value: string | number | boolean, indexPattern: import("@kbn/es-query").IndexPatternBase) => import("@kbn/es-query").PhraseFilter;
-    buildQueryFilter: (query: any, index: string, alias: string) => import("@kbn/es-query/target_types/filters/build_filters").QueryStringFilter;
-    buildRangeFilter: (field: import("@kbn/es-query").IndexPatternFieldBase, params: import("@kbn/es-query").RangeFilterParams, indexPattern: import("@kbn/es-query").IndexPatternBase, formattedValue?: string | undefined) => import("@kbn/es-query").RangeFilter;
-    isPhraseFilter: (filter: import("@kbn/es-query").FieldFilter) => filter is import("@kbn/es-query").PhraseFilter;
-    isExistsFilter: (filter: import("@kbn/es-query").FieldFilter) => filter is import("@kbn/es-query").ExistsFilter;
-    isPhrasesFilter: (filter: import("@kbn/es-query").FieldFilter) => filter is import("@kbn/es-query").PhrasesFilter;
-    isRangeFilter: (filter?: import("@kbn/es-query").ExistsFilter | import("@kbn/es-query").PhrasesFilter | import("@kbn/es-query").PhraseFilter | import("@kbn/es-query").MatchAllFilter | import("@kbn/es-query").MissingFilter | import("@kbn/es-query").RangeFilter | undefined) => filter is import("@kbn/es-query").RangeFilter;
-    isMatchAllFilter: (filter: import("@kbn/es-query").FieldFilter) => filter is import("@kbn/es-query").MatchAllFilter;
-    isMissingFilter: (filter: import("@kbn/es-query").FieldFilter) => filter is import("@kbn/es-query").MissingFilter;
-    isQueryStringFilter: (filter: import("@kbn/es-query").FieldFilter) => filter is import("@kbn/es-query/target_types/filters/build_filters").QueryStringFilter;
+    buildPhraseFilter: (field: import("@kbn/es-query").IndexPatternFieldBase, value: string | number | boolean, indexPattern: import("@kbn/es-query").IndexPatternBase) => import("@kbn/es-query").PhraseFilter | import("@kbn/es-query").ScriptedPhraseFilter;
+    buildQueryFilter: (query: (Record<string, any> & {
+        query_string?: {
+            query: string;
+        } | undefined;
+    }) | undefined, index: string, alias: string) => import("@kbn/es-query").QueryStringFilter;
+    buildRangeFilter: (field: import("@kbn/es-query").IndexPatternFieldBase, params: import("@kbn/es-query").RangeFilterParams, indexPattern: import("@kbn/es-query").IndexPatternBase, formattedValue?: string | undefined) => import("@kbn/es-query").RangeFilter | import("@kbn/es-query").ScriptedRangeFilter | import("@kbn/es-query/target_types/filters/build_filters").MatchAllRangeFilter;
+    isPhraseFilter: (filter: import("@kbn/es-query").Filter) => filter is import("@kbn/es-query").PhraseFilter;
+    isExistsFilter: (filter: import("@kbn/es-query").Filter) => filter is import("@kbn/es-query").ExistsFilter;
+    isPhrasesFilter: (filter: import("@kbn/es-query").Filter) => filter is import("@kbn/es-query").PhrasesFilter;
+    isRangeFilter: (filter?: import("@kbn/es-query").Filter | undefined) => filter is import("@kbn/es-query").RangeFilter;
+    isMatchAllFilter: (filter: import("@kbn/es-query").Filter) => filter is import("@kbn/es-query").MatchAllFilter;
+    isMissingFilter: (filter: import("@kbn/es-query").Filter) => filter is import("@kbn/es-query").MissingFilter;
+    isQueryStringFilter: (filter: import("@kbn/es-query").Filter) => filter is import("@kbn/es-query").QueryStringFilter;
     isFilterPinned: (filter: import("@kbn/es-query").Filter) => boolean | undefined;
     toggleFilterNegated: (filter: import("@kbn/es-query").Filter) => {
         meta: {
             negate: boolean;
-            alias: string | null;
-            disabled: boolean;
+            alias?: string | null | undefined;
+            disabled?: boolean | undefined;
             controlledBy?: string | undefined;
             index?: string | undefined;
             isMultiIndex?: boolean | undefined;
@@ -769,11 +773,11 @@ export const esFilters: {
         $state?: {
             store: FilterStateStore;
         } | undefined;
-        query?: any;
+        query?: Record<string, any> | undefined;
     };
     disableFilter: (filter: import("@kbn/es-query").Filter) => import("@kbn/es-query").Filter;
     getPhraseFilterField: (filter: import("@kbn/es-query").PhraseFilter) => string;
-    getPhraseFilterValue: (filter: import("@kbn/es-query").PhraseFilter) => string | number | boolean;
+    getPhraseFilterValue: (filter: import("@kbn/es-query").PhraseFilter | import("@kbn/es-query").ScriptedPhraseFilter) => string | number | boolean;
     getDisplayValueFromFilter: typeof getDisplayValueFromFilter;
     compareFilters: (first: import("@kbn/es-query").Filter | import("@kbn/es-query").Filter[], second: import("@kbn/es-query").Filter | import("@kbn/es-query").Filter[], comparatorOptions?: import("@kbn/es-query").FilterCompareOptions | undefined) => boolean;
     COMPARE_ALL_OPTIONS: import("@kbn/es-query").FilterCompareOptions;
@@ -1003,7 +1007,7 @@ export function getSearchParamsFromRequest(searchRequest: SearchRequest, depende
 export function getTime(indexPattern: IIndexPattern | undefined, timeRange: TimeRange, options?: {
     forceNow?: Date;
     fieldName?: string;
-}): import("@kbn/es-query").RangeFilter | undefined;
+}): import("@kbn/es-query").RangeFilter | import("@kbn/es-query").ScriptedRangeFilter | import("@kbn/es-query/target_types/filters/build_filters").MatchAllRangeFilter | undefined;
 
 // Warning: (ae-missing-release-tag) "IAggConfig" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -1149,6 +1153,7 @@ export interface IKibanaSearchResponse<RawResponse = any> {
     loaded?: number;
     rawResponse: RawResponse;
     total?: number;
+    warning?: string;
 }
 
 // Warning: (ae-forgotten-export) The symbol "MetricAggType" needs to be exported by the entry point index.d.ts
@@ -1484,6 +1489,7 @@ export class IndexPatternsService {
     getIds: (refresh?: boolean) => Promise<string[]>;
     getIdsWithTitle: (refresh?: boolean) => Promise<IndexPatternListItem[]>;
     getTitles: (refresh?: boolean) => Promise<string[]>;
+    hasUserIndexPattern(): Promise<boolean>;
     // (undocumented)
     migrate(indexPattern: IndexPattern, newTitle: string): Promise<this>;
     refreshFields: (indexPattern: IndexPattern) => Promise<void>;

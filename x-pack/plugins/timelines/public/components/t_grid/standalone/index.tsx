@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { AlertConsumers } from '@kbn/rule-data-utils';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React, { useEffect, useMemo, useState } from 'react';
@@ -71,7 +70,6 @@ const EventsContainerLoading = styled.div.attrs(({ className = '' }) => ({
 const FullWidthFlexGroup = styled(EuiFlexGroup)<{ $visible: boolean }>`
   overflow: hidden;
   margin: 0;
-  min-height: 490px;
   display: ${({ $visible }) => ($visible ? 'flex' : 'none')};
 `;
 
@@ -80,7 +78,6 @@ const ScrollableFlexItem = styled(EuiFlexItem)`
 `;
 
 export interface TGridStandaloneProps {
-  alertConsumers: AlertConsumers[];
   appId: string;
   casePermissions: {
     crud: boolean;
@@ -98,7 +95,6 @@ export interface TGridStandaloneProps {
   filterStatus: AlertStatus;
   height?: number;
   indexNames: string[];
-  itemsPerPage: number;
   itemsPerPageOptions: number[];
   query: Query;
   onRuleChange?: () => void;
@@ -117,7 +113,6 @@ export interface TGridStandaloneProps {
 
 const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
   afterCaseSelection,
-  alertConsumers,
   appId,
   casePermissions,
   columns,
@@ -130,7 +125,6 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
   footerText,
   filterStatus,
   indexNames,
-  itemsPerPage,
   itemsPerPageOptions,
   onRuleChange,
   query,
@@ -210,7 +204,6 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
     loading,
     { events, updatedAt, loadPage, pageInfo, refetch, totalCount = 0, inspect },
   ] = useTimelineEvents({
-    alertConsumers,
     docValueFields: [],
     entityType,
     excludeEcsData: true,
@@ -286,7 +279,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
           end,
         },
         indexNames,
-        itemsPerPage,
+        itemsPerPage: itemsPerPageStore,
         itemsPerPageOptions,
         showCheckboxes: true,
       })
