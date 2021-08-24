@@ -88,6 +88,7 @@ const createInternalPrebootContractMock = () => {
     csp: CspConfig.DEFAULT,
     externalUrl: ExternalUrlConfig.DEFAULT,
     auth: createAuthMock(),
+    getServerInfo: jest.fn(),
   };
   return mock;
 };
@@ -98,6 +99,7 @@ const createPrebootContractMock = () => {
   const mock: HttpServicePrebootMock = {
     registerRoutes: internalMock.registerRoutes,
     basePath: createBasePathMock(),
+    getServerInfo: jest.fn(),
   };
 
   return mock;
