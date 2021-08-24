@@ -154,7 +154,7 @@ describe('Overview - Fix deprecation logs step', () => {
       httpRequestsMockHelpers.setLoadDeprecationLoggingResponse(getLoggingResponse(true));
     });
 
-    test('Has deprecation warnings', async () => {
+    test('With deprecation warnings', async () => {
       httpRequestsMockHelpers.setLoadDeprecationLogsCountResponse({
         count: 10,
       });
