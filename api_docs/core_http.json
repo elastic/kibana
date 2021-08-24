@@ -130,13 +130,7 @@
             "label": "context",
             "description": [],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.IExecutionContextContainer",
-                "text": "IExecutionContextContainer"
-              },
+              "KibanaExecutionContext",
               " | undefined"
             ],
             "path": "src/core/public/http/types.ts",
@@ -723,13 +717,7 @@
                 "text": "HttpHeadersInit"
               },
               " | undefined; readonly asSystemRequest?: boolean | undefined; readonly asResponse?: boolean | undefined; readonly context?: ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.IExecutionContextContainer",
-                "text": "IExecutionContextContainer"
-              },
+              "KibanaExecutionContext",
               " | undefined; readonly body?: string | Blob | ArrayBufferView | ArrayBuffer | FormData | URLSearchParams | ReadableStream<Uint8Array> | null | undefined; readonly cache?: \"default\" | \"reload\" | \"force-cache\" | \"no-cache\" | \"no-store\" | \"only-if-cached\" | undefined; readonly credentials?: \"include\" | \"omit\" | \"same-origin\" | undefined; readonly integrity?: string | undefined; readonly keepalive?: boolean | undefined; readonly method?: string | undefined; readonly mode?: \"same-origin\" | \"cors\" | \"navigate\" | \"no-cors\" | undefined; readonly redirect?: \"error\" | \"follow\" | \"manual\" | undefined; readonly referrer?: string | undefined; readonly referrerPolicy?: \"\" | \"origin\" | \"no-referrer\" | \"unsafe-url\" | \"same-origin\" | \"no-referrer-when-downgrade\" | \"origin-when-cross-origin\" | \"strict-origin\" | \"strict-origin-when-cross-origin\" | undefined; readonly signal?: AbortSignal | null | undefined; readonly window?: null | undefined; }"
             ],
             "path": "src/core/public/http/types.ts",
@@ -1079,13 +1067,7 @@
                 "text": "HttpHeadersInit"
               },
               " | undefined; readonly asSystemRequest?: boolean | undefined; readonly asResponse?: boolean | undefined; readonly context?: ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.IExecutionContextContainer",
-                "text": "IExecutionContextContainer"
-              },
+              "KibanaExecutionContext",
               " | undefined; readonly body?: string | Blob | ArrayBufferView | ArrayBuffer | FormData | URLSearchParams | ReadableStream<Uint8Array> | null | undefined; readonly cache?: \"default\" | \"reload\" | \"force-cache\" | \"no-cache\" | \"no-store\" | \"only-if-cached\" | undefined; readonly credentials?: \"include\" | \"omit\" | \"same-origin\" | undefined; readonly integrity?: string | undefined; readonly keepalive?: boolean | undefined; readonly method?: string | undefined; readonly mode?: \"same-origin\" | \"cors\" | \"navigate\" | \"no-cors\" | undefined; readonly redirect?: \"error\" | \"follow\" | \"manual\" | undefined; readonly referrer?: string | undefined; readonly referrerPolicy?: \"\" | \"origin\" | \"no-referrer\" | \"unsafe-url\" | \"same-origin\" | \"no-referrer-when-downgrade\" | \"origin-when-cross-origin\" | \"strict-origin\" | \"strict-origin-when-cross-origin\" | undefined; readonly signal?: AbortSignal | null | undefined; readonly window?: null | undefined; }"
             ],
             "path": "src/core/public/http/types.ts",
@@ -2035,15 +2017,7 @@
                 "section": "def-server.KibanaRequest",
                 "text": "KibanaRequest"
               },
-              "<unknown, unknown, unknown, any> | ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.LegacyRequest",
-                "text": "LegacyRequest"
-              },
-              ") => string"
+              "<unknown, unknown, unknown, any>) => string"
             ],
             "path": "src/core/server/http/base_path_service.ts",
             "deprecated": false,
@@ -2051,7 +2025,7 @@
               {
                 "parentPluginId": "core",
                 "id": "def-server.BasePath.get.$1",
-                "type": "CompoundType",
+                "type": "Object",
                 "tags": [],
                 "label": "request",
                 "description": [],
@@ -2063,14 +2037,7 @@
                     "section": "def-server.KibanaRequest",
                     "text": "KibanaRequest"
                   },
-                  "<unknown, unknown, unknown, any> | ",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreHttpPluginApi",
-                    "section": "def-server.LegacyRequest",
-                    "text": "LegacyRequest"
-                  }
+                  "<unknown, unknown, unknown, any>"
                 ],
                 "path": "src/core/server/http/base_path_service.ts",
                 "deprecated": false,
@@ -2099,15 +2066,7 @@
                 "section": "def-server.KibanaRequest",
                 "text": "KibanaRequest"
               },
-              "<unknown, unknown, unknown, any> | ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.LegacyRequest",
-                "text": "LegacyRequest"
-              },
-              ", requestSpecificBasePath: string) => void"
+              "<unknown, unknown, unknown, any>, requestSpecificBasePath: string) => void"
             ],
             "path": "src/core/server/http/base_path_service.ts",
             "deprecated": false,
@@ -2115,7 +2074,7 @@
               {
                 "parentPluginId": "core",
                 "id": "def-server.BasePath.set.$1",
-                "type": "CompoundType",
+                "type": "Object",
                 "tags": [],
                 "label": "request",
                 "description": [],
@@ -2127,14 +2086,7 @@
                     "section": "def-server.KibanaRequest",
                     "text": "KibanaRequest"
                   },
-                  "<unknown, unknown, unknown, any> | ",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreHttpPluginApi",
-                    "section": "def-server.LegacyRequest",
-                    "text": "LegacyRequest"
-                  }
+                  "<unknown, unknown, unknown, any>"
                 ],
                 "path": "src/core/server/http/base_path_service.ts",
                 "deprecated": false,
@@ -3078,15 +3030,7 @@
                 "section": "def-server.KibanaRequest",
                 "text": "KibanaRequest"
               },
-              "<unknown, unknown, unknown, any> | ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.LegacyRequest",
-                "text": "LegacyRequest"
-              },
-              ") => { status: ",
+              "<unknown, unknown, unknown, any>) => { status: ",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -3103,7 +3047,7 @@
               {
                 "parentPluginId": "core",
                 "id": "def-server.request",
-                "type": "CompoundType",
+                "type": "Object",
                 "tags": [],
                 "label": "request",
                 "description": [],
@@ -3115,14 +3059,7 @@
                     "section": "def-server.KibanaRequest",
                     "text": "KibanaRequest"
                   },
-                  "<unknown, unknown, unknown, any> | ",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreHttpPluginApi",
-                    "section": "def-server.LegacyRequest",
-                    "text": "LegacyRequest"
-                  }
+                  "<unknown, unknown, unknown, any>"
                 ],
                 "path": "src/core/server/http/auth_state_storage.ts",
                 "deprecated": false
@@ -3147,15 +3084,7 @@
                 "section": "def-server.KibanaRequest",
                 "text": "KibanaRequest"
               },
-              "<unknown, unknown, unknown, any> | ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.LegacyRequest",
-                "text": "LegacyRequest"
-              },
-              ") => boolean"
+              "<unknown, unknown, unknown, any>) => boolean"
             ],
             "path": "src/core/server/http/types.ts",
             "deprecated": false,
@@ -3164,7 +3093,7 @@
               {
                 "parentPluginId": "core",
                 "id": "def-server.request",
-                "type": "CompoundType",
+                "type": "Object",
                 "tags": [],
                 "label": "request",
                 "description": [],
@@ -3176,14 +3105,7 @@
                     "section": "def-server.KibanaRequest",
                     "text": "KibanaRequest"
                   },
-                  "<unknown, unknown, unknown, any> | ",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreHttpPluginApi",
-                    "section": "def-server.LegacyRequest",
-                    "text": "LegacyRequest"
-                  }
+                  "<unknown, unknown, unknown, any>"
                 ],
                 "path": "src/core/server/http/auth_state_storage.ts",
                 "deprecated": false
@@ -3429,15 +3351,7 @@
                 "section": "def-server.KibanaRequest",
                 "text": "KibanaRequest"
               },
-              "<unknown, unknown, unknown, any> | ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.LegacyRequest",
-                "text": "LegacyRequest"
-              },
-              ") => string; prepend: (path: string) => string; set: (request: ",
+              "<unknown, unknown, unknown, any>) => string; prepend: (path: string) => string; set: (request: ",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -3445,18 +3359,34 @@
                 "section": "def-server.KibanaRequest",
                 "text": "KibanaRequest"
               },
-              "<unknown, unknown, unknown, any> | ",
+              "<unknown, unknown, unknown, any>, requestSpecificBasePath: string) => void; readonly serverBasePath: string; readonly publicBaseUrl?: string | undefined; }"
+            ],
+            "path": "src/core/server/http/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.HttpServicePreboot.getServerInfo",
+            "type": "Function",
+            "tags": [],
+            "label": "getServerInfo",
+            "description": [
+              "\nProvides common {@link HttpServerInfo | information} about the running preboot http server."
+            ],
+            "signature": [
+              "() => ",
               {
                 "pluginId": "core",
                 "scope": "server",
                 "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.LegacyRequest",
-                "text": "LegacyRequest"
-              },
-              ", requestSpecificBasePath: string) => void; readonly serverBasePath: string; readonly publicBaseUrl?: string | undefined; }"
+                "section": "def-server.HttpServerInfo",
+                "text": "HttpServerInfo"
+              }
             ],
             "path": "src/core/server/http/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -3776,15 +3706,7 @@
                 "section": "def-server.KibanaRequest",
                 "text": "KibanaRequest"
               },
-              "<unknown, unknown, unknown, any> | ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.LegacyRequest",
-                "text": "LegacyRequest"
-              },
-              ") => string; prepend: (path: string) => string; set: (request: ",
+              "<unknown, unknown, unknown, any>) => string; prepend: (path: string) => string; set: (request: ",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -3792,15 +3714,7 @@
                 "section": "def-server.KibanaRequest",
                 "text": "KibanaRequest"
               },
-              "<unknown, unknown, unknown, any> | ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.LegacyRequest",
-                "text": "LegacyRequest"
-              },
-              ", requestSpecificBasePath: string) => void; readonly serverBasePath: string; readonly publicBaseUrl?: string | undefined; }"
+              "<unknown, unknown, unknown, any>, requestSpecificBasePath: string) => void; readonly serverBasePath: string; readonly publicBaseUrl?: string | undefined; }"
             ],
             "path": "src/core/server/http/types.ts",
             "deprecated": false
@@ -4022,15 +3936,7 @@
                 "section": "def-server.KibanaRequest",
                 "text": "KibanaRequest"
               },
-              "<unknown, unknown, unknown, any> | ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.LegacyRequest",
-                "text": "LegacyRequest"
-              },
-              ") => string; prepend: (path: string) => string; set: (request: ",
+              "<unknown, unknown, unknown, any>) => string; prepend: (path: string) => string; set: (request: ",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -4038,15 +3944,7 @@
                 "section": "def-server.KibanaRequest",
                 "text": "KibanaRequest"
               },
-              "<unknown, unknown, unknown, any> | ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.LegacyRequest",
-                "text": "LegacyRequest"
-              },
-              ", requestSpecificBasePath: string) => void; readonly serverBasePath: string; readonly publicBaseUrl?: string | undefined; }"
+              "<unknown, unknown, unknown, any>, requestSpecificBasePath: string) => void; readonly serverBasePath: string; readonly publicBaseUrl?: string | undefined; }"
             ],
             "path": "src/core/server/http/types.ts",
             "deprecated": false
@@ -7509,41 +7407,6 @@
       },
       {
         "parentPluginId": "core",
-        "id": "def-server.LegacyRequest",
-        "type": "Interface",
-        "tags": [
-          "deprecated"
-        ],
-        "label": "LegacyRequest",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCoreHttpPluginApi",
-            "section": "def-server.LegacyRequest",
-            "text": "LegacyRequest"
-          },
-          " extends ",
-          "Request"
-        ],
-        "path": "src/core/server/http/router/request.ts",
-        "deprecated": true,
-        "references": [
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/server/saved_objects/index.ts"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/server/saved_objects/index.ts"
-          }
-        ],
-        "children": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "core",
         "id": "def-server.OnPostAuthToolkit",
         "type": "Interface",
         "tags": [],
@@ -9239,15 +9102,7 @@
             "section": "def-server.KibanaRequest",
             "text": "KibanaRequest"
           },
-          "<unknown, unknown, unknown, any> | ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCoreHttpPluginApi",
-            "section": "def-server.LegacyRequest",
-            "text": "LegacyRequest"
-          },
-          ") => Record<string, string | string[]> | undefined"
+          "<unknown, unknown, unknown, any>) => Record<string, string | string[]> | undefined"
         ],
         "path": "src/core/server/http/auth_headers_storage.ts",
         "deprecated": false,
@@ -9258,7 +9113,7 @@
           {
             "parentPluginId": "core",
             "id": "def-server.request",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "request",
             "description": [],
@@ -9270,14 +9125,7 @@
                 "section": "def-server.KibanaRequest",
                 "text": "KibanaRequest"
               },
-              "<unknown, unknown, unknown, any> | ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.LegacyRequest",
-                "text": "LegacyRequest"
-              }
+              "<unknown, unknown, unknown, any>"
             ],
             "path": "src/core/server/http/auth_headers_storage.ts",
             "deprecated": false
@@ -9303,15 +9151,7 @@
             "section": "def-server.KibanaRequest",
             "text": "KibanaRequest"
           },
-          "<unknown, unknown, unknown, any> | ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCoreHttpPluginApi",
-            "section": "def-server.LegacyRequest",
-            "text": "LegacyRequest"
-          },
-          ") => { status: ",
+          "<unknown, unknown, unknown, any>) => { status: ",
           {
             "pluginId": "core",
             "scope": "server",
@@ -9328,7 +9168,7 @@
           {
             "parentPluginId": "core",
             "id": "def-server.request",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "request",
             "description": [],
@@ -9340,14 +9180,7 @@
                 "section": "def-server.KibanaRequest",
                 "text": "KibanaRequest"
               },
-              "<unknown, unknown, unknown, any> | ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.LegacyRequest",
-                "text": "LegacyRequest"
-              }
+              "<unknown, unknown, unknown, any>"
             ],
             "path": "src/core/server/http/auth_state_storage.ts",
             "deprecated": false
@@ -9407,15 +9240,7 @@
             "section": "def-server.KibanaRequest",
             "text": "KibanaRequest"
           },
-          "<unknown, unknown, unknown, any> | ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCoreHttpPluginApi",
-            "section": "def-server.LegacyRequest",
-            "text": "LegacyRequest"
-          },
-          ") => string; prepend: (path: string) => string; set: (request: ",
+          "<unknown, unknown, unknown, any>) => string; prepend: (path: string) => string; set: (request: ",
           {
             "pluginId": "core",
             "scope": "server",
@@ -9423,15 +9248,7 @@
             "section": "def-server.KibanaRequest",
             "text": "KibanaRequest"
           },
-          "<unknown, unknown, unknown, any> | ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCoreHttpPluginApi",
-            "section": "def-server.LegacyRequest",
-            "text": "LegacyRequest"
-          },
-          ", requestSpecificBasePath: string) => void; readonly serverBasePath: string; readonly publicBaseUrl?: string | undefined; }"
+          "<unknown, unknown, unknown, any>, requestSpecificBasePath: string) => void; readonly serverBasePath: string; readonly publicBaseUrl?: string | undefined; }"
         ],
         "path": "src/core/server/http/base_path_service.ts",
         "deprecated": false,
@@ -9455,15 +9272,7 @@
             "section": "def-server.KibanaRequest",
             "text": "KibanaRequest"
           },
-          "<unknown, unknown, unknown, any> | ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCoreHttpPluginApi",
-            "section": "def-server.LegacyRequest",
-            "text": "LegacyRequest"
-          },
-          ") => boolean"
+          "<unknown, unknown, unknown, any>) => boolean"
         ],
         "path": "src/core/server/http/auth_state_storage.ts",
         "deprecated": false,
@@ -9472,7 +9281,7 @@
           {
             "parentPluginId": "core",
             "id": "def-server.request",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "request",
             "description": [],
@@ -9484,14 +9293,7 @@
                 "section": "def-server.KibanaRequest",
                 "text": "KibanaRequest"
               },
-              "<unknown, unknown, unknown, any> | ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.LegacyRequest",
-                "text": "LegacyRequest"
-              }
+              "<unknown, unknown, unknown, any>"
             ],
             "path": "src/core/server/http/auth_state_storage.ts",
             "deprecated": false

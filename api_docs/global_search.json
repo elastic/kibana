@@ -627,15 +627,7 @@
                 "section": "def-server.SavedObjectTypeRegistry",
                 "text": "SavedObjectTypeRegistry"
               },
-              ", \"getType\" | \"getVisibleTypes\" | \"getAllTypes\" | \"getImportableAndExportableTypes\" | \"isNamespaceAgnostic\" | \"isSingleNamespace\" | \"isMultiNamespace\" | \"isShareable\" | \"isHidden\" | \"getIndex\" | \"isImportableAndExportable\">; }; elasticsearch: { legacy: { client: Pick<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.LegacyScopedClusterClient",
-                "text": "LegacyScopedClusterClient"
-              },
-              ", \"callAsCurrentUser\" | \"callAsInternalUser\">; }; }; uiSettings: { client: ",
+              ", \"getType\" | \"getVisibleTypes\" | \"getAllTypes\" | \"getImportableAndExportableTypes\" | \"isNamespaceAgnostic\" | \"isSingleNamespace\" | \"isMultiNamespace\" | \"isShareable\" | \"isHidden\" | \"getIndex\" | \"isImportableAndExportable\">; }; uiSettings: { client: ",
               {
                 "pluginId": "core",
                 "scope": "server",
