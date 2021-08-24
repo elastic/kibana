@@ -43,6 +43,7 @@ test('set correct defaults', () => {
       "requestTimeout": "PT30S",
       "serviceAccountToken": undefined,
       "shardTimeout": "PT30S",
+      "skipStartupConnectionCheck": false,
       "sniffInterval": false,
       "sniffOnConnectionFault": false,
       "sniffOnStart": false,
