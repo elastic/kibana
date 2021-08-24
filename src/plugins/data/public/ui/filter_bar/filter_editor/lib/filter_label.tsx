@@ -57,20 +57,6 @@ export default function FilterLabel({ filter, valueLabel, filterLabelStatus }: F
           {filter.meta.key}: {getValue(`${existsOperator.message}`)}
         </Fragment>
       );
-    case FILTERS.GEO_BOUNDING_BOX:
-      return (
-        <Fragment>
-          {prefix}
-          {filter.meta.key}: {getValue(valueLabel)}
-        </Fragment>
-      );
-    case FILTERS.GEO_POLYGON:
-      return (
-        <Fragment>
-          {prefix}
-          {filter.meta.key}: {getValue(valueLabel)}
-        </Fragment>
-      );
     case FILTERS.PHRASES:
       return (
         <Fragment>

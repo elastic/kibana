@@ -19,18 +19,6 @@ export const EVENTS_TABLE_ARIA_LABEL = ({
     defaultMessage: 'events; Page {activePage} of {totalPages}',
   });
 
-export const UNIT = (totalCount: number) =>
-  i18n.translate('xpack.timelines.timeline.unit', {
-    values: { totalCount },
-    defaultMessage: `{totalCount, plural, =1 {event} other {events}}`,
-  });
-
-export const ALERTS_UNIT = (totalCount: number) =>
-  i18n.translate('xpack.timelines.timeline.alertsUnit', {
-    values: { totalCount },
-    defaultMessage: `{totalCount, plural, =1 {alert} other {alerts}}`,
-  });
-
 export const BULK_ACTION_OPEN_SELECTED = i18n.translate(
   'xpack.timelines.timeline.openSelectedTitle',
   {
