@@ -13,9 +13,8 @@ import { SearchBar } from '../search_bar';
 import {
   GraphState,
   hasFieldsSelector,
-  initializeWorkspace,
-  liveResponseFieldsSelector,
   loadSavedWorkspace,
+  submitSearch,
   workspaceInitializedSelector,
 } from '../../state_management';
 import { FieldManager } from '../field_manager';
@@ -25,7 +24,6 @@ import {
   IndexPatternProvider,
   IndexPatternSavedObject,
   TermIntersect,
-  WorkspaceField,
   WorkspaceNode,
 } from '../../types';
 import { WorkspaceTopNavMenu } from './workspace_top_nav_menu';
@@ -54,7 +52,6 @@ type WorkspaceLayoutProps = Pick<
   | 'capabilities'
   | 'coreStart'
   | 'canEditDrillDownUrls'
-  | 'toastNotifications'
   | 'overlays'
 > & {
   renderCounter: number;
@@ -69,13 +66,12 @@ type WorkspaceLayoutProps = Pick<
 };
 
 interface WorkspaceLayoutStateProps {
-  liveResponseFields: WorkspaceField[];
   workspaceInitialized: boolean;
   hasFields: boolean;
 }
 
 interface WorkspaceLayoutDispatchProps {
-  initializeWorkspace: () => void;
+  submit: (searchTerm: string) => void;
   loadSavedWorkspace: (savedWorkspace: GraphWorkspaceSavedObject) => void;
 }
 
@@ -85,21 +81,19 @@ const WorkspaceLayoutComponent = ({
   loading,
   locationUrl,
   savedWorkspace,
-  liveResponseFields,
   urlQuery,
   hasFields,
   overlays,
   workspaceInitialized,
   indexPatterns,
   indexPatternProvider,
-  toastNotifications,
   capabilities,
   coreStart,
   graphSavePolicy,
   navigation,
   canEditDrillDownUrls,
-  initializeWorkspace: initializeWorkspaceAction,
   loadSavedWorkspace: loadSavedWorkspaceAction,
+  submit,
   setHeaderActionMenu,
   reloadRoute,
 }: WorkspaceLayoutProps & WorkspaceLayoutStateProps & WorkspaceLayoutDispatchProps) => {
@@ -134,61 +128,15 @@ const WorkspaceLayoutComponent = ({
     }
   }, [loadSavedWorkspaceAction, indexPatterns.length, savedWorkspace]);
 
-  const handleError = useCallback(
-    (err: Error | string) => {
-      const toastTitle = i18n.translate('xpack.graph.errorToastTitle', {
-        defaultMessage: 'Graph Error',
-        description: '"Graph" is a product name and should not be translated.',
-      });
-      if (err instanceof Error) {
-        toastNotifications.addError(err, {
-          title: toastTitle,
-        });
-      } else {
-        toastNotifications.addDanger({
-          title: toastTitle,
-          text: String(err),
-        });
-      }
-    },
-    [toastNotifications]
-  );
-
-  const submit = useCallback(
-    (searchTerm: string) => {
-      initializeWorkspaceAction();
-      const numHops = 2;
-      // type casting is safe, at this point workspace should be loaded
-      const curWorkspace = workspace as Workspace;
-      if (searchTerm.startsWith('{')) {
-        try {
-          const query = JSON.parse(searchTerm);
-          if (query.vertices) {
-            // Is a graph explore request
-            curWorkspace.callElasticsearch(query);
-          } else {
-            // Is a regular query DSL query
-            curWorkspace.search(query, liveResponseFields, numHops);
-          }
-        } catch (err) {
-          handleError(err);
-        }
-        return;
-      }
-      curWorkspace.simpleSearch(searchTerm, liveResponseFields, numHops);
-    },
-    [handleError, initializeWorkspaceAction, liveResponseFields, workspace]
-  );
-
   // Allow URLs to include a user-defined text query
   useEffect(() => {
-    if (urlQuery) {
+    if (urlQuery && !initialQuery) {
       setInitialQuery(urlQuery);
-      if (workspace) {
-        submit(urlQuery);
-      }
     }
-  }, [urlQuery, submit, workspace]);
+    if (initialQuery && workspace) {
+      submit(urlQuery);
+    }
+  }, [initialQuery, submit, urlQuery, workspace]);
 
   const onIndexPatternChange = useCallback(
     (indexPattern?: IndexPattern) => setCurrentIndexPattern(indexPattern),
@@ -326,11 +274,10 @@ export const WorkspaceLayout = connect<
   (state: GraphState) => ({
     workspaceInitialized: workspaceInitializedSelector(state),
     hasFields: hasFieldsSelector(state),
-    liveResponseFields: liveResponseFieldsSelector(state),
   }),
   (dispatch) => ({
-    initializeWorkspace: () => {
-      dispatch(initializeWorkspace());
+    submit: (searchTerm: string) => {
+      dispatch(submitSearch(searchTerm));
     },
     loadSavedWorkspace: (savedWorkspace: GraphWorkspaceSavedObject) => {
       dispatch(loadSavedWorkspace(savedWorkspace));

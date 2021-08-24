@@ -35,7 +35,7 @@ import {
 } from '../types';
 import { loadingSaga, savingSaga } from './persistence';
 import { metaDataReducer, MetaDataState, syncBreadcrumbSaga } from './meta_data';
-import { fillWorkspaceSaga, workspaceReducer, WorkspaceState } from './workspace';
+import { fillWorkspaceSaga, submitSearchSaga, workspaceReducer, WorkspaceState } from './workspace';
 
 export interface GraphState {
   fields: FieldsState;
@@ -64,6 +64,7 @@ export interface GraphStoreDependencies {
   chrome: ChromeStart;
   I18nContext: I18nStart['Context'];
   basePath: string;
+  handleSearchQueryError: (err: Error | string) => void;
 }
 
 export function createRootReducer(addBasePath: (url: string) => string) {
@@ -88,6 +89,7 @@ function registerSagas(sagaMiddleware: SagaMiddleware<object>, deps: GraphStoreD
   sagaMiddleware.run(syncBreadcrumbSaga(deps));
   sagaMiddleware.run(syncTemplatesSaga(deps));
   sagaMiddleware.run(fillWorkspaceSaga(deps));
+  sagaMiddleware.run(submitSearchSaga(deps));
 }
 
 export const createGraphStore = (deps: GraphStoreDependencies) => {

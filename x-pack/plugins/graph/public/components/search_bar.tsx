@@ -81,6 +81,12 @@ export function SearchBarComponent(props: SearchBarStateProps & SearchBarProps) 
   const [query, setQuery] = useState<Query>({ language: 'kuery', query: initialQuery || '' });
 
   useEffect(() => {
+    if (initialQuery) {
+      setQuery((prev) => ({ language: prev.language, query: initialQuery }));
+    }
+  }, [initialQuery]);
+
+  useEffect(() => {
     async function fetchPattern() {
       if (currentDatasource) {
         onIndexPatternChange(await indexPatternProvider.get(currentDatasource.id));

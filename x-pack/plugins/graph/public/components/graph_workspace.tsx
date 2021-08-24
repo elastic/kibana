@@ -42,16 +42,16 @@ export interface GraphWorkspaceProps {
 
 export const GraphWorkspace = (props: GraphWorkspaceProps) => {
   /**
-   * It's temporary workaround, which should be removed
-   * after migration `workspace` to redux.
-   * Ref holds mutable `workspace` object. After each `workspace.methodName(...)` call,
-   * which might mutate `workspace` somehow, we need to update react state using
+   * It's temporary workaround, which should be removed after migration `workspace` to redux.
+   * Ref holds mutable `workspace` object. After each `workspace.methodName(...)` call
+   * (which might mutate `workspace` somehow), react state needs to be updated using
    * `workspace.changeHandler()`.
    */
   const workspaceRef = useRef<Workspace>();
 
   /**
-   * `renderCounter` needs to force react state update on workspace changes
+   * Providing `workspaceRef.current` to the hook dependencies or components itself
+   * will not leads to updates, therefore `renderCounter` is used to update react state.
    */
   const [renderCounter, setRenderCounter] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -59,6 +59,26 @@ export const GraphWorkspace = (props: GraphWorkspaceProps) => {
   const handleHttpError = useCallback(
     (error: IHttpFetchError) => {
       props.deps.toastNotifications.addDanger(formatHttpError(error));
+    },
+    [props.deps.toastNotifications]
+  );
+
+  const handleSearchQueryError = useCallback(
+    (err: Error | string) => {
+      const toastTitle = i18n.translate('xpack.graph.errorToastTitle', {
+        defaultMessage: 'Graph Error',
+        description: '"Graph" is a product name and should not be translated.',
+      });
+      if (err instanceof Error) {
+        props.deps.toastNotifications.addError(err, {
+          title: toastTitle,
+        });
+      } else {
+        props.deps.toastNotifications.addDanger({
+          title: toastTitle,
+          text: String(err),
+        });
+      }
     },
     [props.deps.toastNotifications]
   );
@@ -150,6 +170,7 @@ export const GraphWorkspace = (props: GraphWorkspaceProps) => {
       notifyReact: () => setRenderCounter((cur) => ++cur),
       chrome: props.deps.chrome,
       I18nContext: props.deps.coreStart.i18n.Context,
+      handleSearchQueryError,
     })
   );
 
@@ -177,7 +198,6 @@ export const GraphWorkspace = (props: GraphWorkspaceProps) => {
             capabilities={props.deps.capabilities}
             coreStart={props.deps.coreStart}
             canEditDrillDownUrls={props.deps.canEditDrillDownUrls}
-            toastNotifications={props.deps.toastNotifications}
             overlays={props.deps.overlays}
             locationUrl={props.locationUrl}
             reloadRoute={props.reloadRoute}
