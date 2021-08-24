@@ -1,3 +1,7 @@
 .canvasInteractivePage {
   user-select: none;
 }
+
+.canvas-dragging .canvasElement {
+  pointer-events: none;
+}

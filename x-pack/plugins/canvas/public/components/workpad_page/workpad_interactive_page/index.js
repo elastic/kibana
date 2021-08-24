@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { compose, lifecycle, withHandlers, withProps, withState } from 'recompose';
+import { compose, lifecycle, withProps, withState } from 'recompose';
 import { connect } from 'react-redux';
 import { createStore } from '../../../lib/aeroelastic/store';
 import { updater } from '../../../lib/aeroelastic/layout';
@@ -22,7 +22,6 @@ import { selectToplevelNodes } from '../../../state/actions/transient';
 import { crawlTree, globalStateUpdater, shapesForNodes } from '../integration_utils';
 import { CANVAS_EMBEDDABLE_CLASSNAME } from '../../../../common/lib';
 import { InteractiveWorkpadPage as InteractiveComponent } from './interactive_workpad_page';
-import { eventHandlers } from './event_handlers';
 
 const configuration = {
   getAdHocChildAnnotationName: 'adHocChildAnnotation',
@@ -243,18 +242,7 @@ export const InteractivePage = compose(
   })),
   withProps((...props) => ({
     ...props,
-    canDragElement: (element) => {
-      return !isEmbeddableBody(element) && isInWorkpad(element);
-
-      const hasClosest = typeof element.closest === 'function';
-
-      if (hasClosest) {
-        return !element.closest('.embeddable') || element.closest('.embPanel__header');
-      } else {
-        return !closest.call(element, '.embeddable') || closest.call(element, '.embPanel__header');
-      }
-    },
+    canDragElement: (element) => !isEmbeddableBody(element) && isInWorkpad(element),
   })),
-  withHandlers(eventHandlers), // Captures user intent, needs to have reconciled state
   () => InteractiveComponent
 );

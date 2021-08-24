@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { TransformMatrix3d } from '../public/lib/aeroelastic';
 import { ElementPosition } from './elements';
 
 export interface CanvasAsset {
@@ -17,7 +18,7 @@ export interface CanvasAsset {
 export interface CanvasElement {
   id: string;
   position: ElementPosition;
-  type: 'element';
+  type: 'element' | 'rectangleElement';
   expression: string;
   filter: string;
 }
@@ -26,6 +27,24 @@ export interface CanvasGroup {
   id: string;
   position: ElementPosition;
   expression?: string;
+}
+
+export interface CanvasAnnotation {
+  id: string;
+  type: 'annotation';
+  transformMatrix: TransformMatrix3d;
+  width: number;
+  height: number;
+  text: string;
+  subtype:
+    | 'alignmentGuide'
+    | 'adHocChildAnnotation'
+    | 'hoverAnnotation'
+    | 'dragBoxAnnotation'
+    | 'rotationHandle'
+    | 'resizeHandle'
+    | 'resizeConnector'
+    | 'rotationTooltip';
 }
 
 export interface CanvasPage {
