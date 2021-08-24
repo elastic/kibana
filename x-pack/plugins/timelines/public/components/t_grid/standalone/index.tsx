@@ -4,7 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiTitle,
+  EuiText,
+  EuiImage,
+  EuiLoadingSpinner,
+} from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { isEmpty } from 'lodash/fp';
 import React, { useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
@@ -38,7 +47,7 @@ import { useTimelineEvents } from '../../../container';
 import { StatefulBody } from '../body';
 import { Footer, footerHeight } from '../footer';
 import { LastUpdatedAt } from '../..';
-import { SELECTOR_TIMELINE_GLOBAL_CONTAINER, UpdatedFlexItem, UpdatedFlexGroup } from '../styles';
+import { SELECTOR_TIMELINE_GLOBAL_CONTAINER, UpdatedFlexGroup } from '../styles';
 import { InspectButton, InspectButtonContainer } from '../../inspect';
 import { useFetchIndex } from '../../../container/source';
 import { AddToCaseAction } from '../../actions/timeline/cases/add_to_case_action';
@@ -67,11 +76,13 @@ const EventsContainerLoading = styled.div.attrs(({ className = '' }) => ({
   flex-direction: column;
 `;
 
-const FullWidthFlexGroup = styled(EuiFlexGroup)<{ $visible: boolean }>`
+const FullWidthFlexGroup = styled(EuiFlexGroup)<{ $visible: boolean; $color?: string }>`
   overflow: hidden;
   margin: 0;
   min-height: 490px;
   display: ${({ $visible }) => ($visible ? 'flex' : 'none')};
+  background: ${({ $color, theme }) =>
+    $color ? theme.eui.euiPanelBackgroundColorModifiers[$color] : 'transparent'};
 `;
 
 const ScrollableFlexItem = styled(EuiFlexItem)`
@@ -112,6 +123,61 @@ export interface TGridStandaloneProps {
   data?: DataPublicPluginStart;
   unit?: (total: number) => React.ReactNode;
 }
+
+const LoadingGrid: React.FC = () => (
+  <FullWidthFlexGroup $visible={true} $color="subdued" alignItems="center" justifyContent="center">
+    <EuiFlexItem grow={false}>
+      <EuiLoadingSpinner size="xl" />
+    </EuiFlexItem>
+  </FullWidthFlexGroup>
+);
+
+const EmptyGrid: React.FC = () => {
+  const { http } = useKibana().services;
+
+  return (
+    <FullWidthFlexGroup
+      $visible={true}
+      $color="subdued"
+      alignItems="center"
+      justifyContent="center"
+    >
+      <EuiFlexItem grow={false}>
+        <EuiPanel hasBorder={true} style={{ maxWidth: 500 }}>
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiText size="s">
+                <EuiTitle>
+                  <h3>
+                    <FormattedMessage
+                      id="xpack.timelines.tgrid.empty.title"
+                      defaultMessage="No results match your search criteria"
+                    />
+                  </h3>
+                </EuiTitle>
+                <p>
+                  <FormattedMessage
+                    id="xpack.timelines.tgrid.empty.description"
+                    defaultMessage="Try searching over a longer period of time or modifying your search"
+                  />
+                </p>
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiImage
+                size="200"
+                alt="observability overview image"
+                url={http!.basePath.prepend(
+                  '/plugins/timelines/assets/illustration-product-no-results-magnifying-glass.svg'
+                )}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPanel>
+      </EuiFlexItem>
+    </FullWidthFlexGroup>
+  );
+};
 
 const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
   afterCaseSelection,
@@ -227,6 +293,8 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
     () => (totalCount > 0 ? totalCount - deletedEventIds.length : 0),
     [deletedEventIds.length, totalCount]
   );
+  const hasAlerts = totalCountMinusDeleted > 0;
+
   const activeCaseFlowId = useSelector((state: State) => tGridSelectors.activeCaseFlowId(state));
   const selectedEvent = useMemo(() => {
     const matchedEvent = events.find((event) => event.ecs._id === activeCaseFlowId);
@@ -308,60 +376,67 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
               data-timeline-id={STANDALONE_ID}
               data-test-subj={`events-container-loading-${loading}`}
             >
-              <UpdatedFlexGroup gutterSize="s" justifyContent="flexEnd" alignItems="baseline">
-                <UpdatedFlexItem grow={false} $show={!loading}>
-                  <InspectButton title={justTitle} inspect={inspect} loading={loading} />
-                </UpdatedFlexItem>
-                <UpdatedFlexItem grow={false} $show={!loading}>
-                  <LastUpdatedAt updatedAt={updatedAt} />
-                </UpdatedFlexItem>
-              </UpdatedFlexGroup>
-
-              <FullWidthFlexGroup direction="row" $visible={!graphEventId} gutterSize="none">
-                <ScrollableFlexItem grow={1}>
-                  <StatefulBody
-                    activePage={pageInfo.activePage}
-                    browserFields={browserFields}
-                    data={nonDeletedEvents}
-                    defaultCellActions={defaultCellActions}
-                    filterQuery={filterQuery}
-                    id={STANDALONE_ID}
-                    indexNames={indexNames}
-                    isEventViewer={true}
-                    itemsPerPageOptions={itemsPerPageOptionsStore}
-                    leadingControlColumns={leadingControlColumns}
-                    loadPage={loadPage}
-                    refetch={refetch}
-                    renderCellValue={renderCellValue}
-                    rowRenderers={rowRenderers}
-                    onRuleChange={onRuleChange}
-                    querySize={pageInfo.querySize}
-                    tabType={TimelineTabs.query}
-                    tableView="gridView"
-                    totalPages={calculateTotalPages({
-                      itemsCount: totalCountMinusDeleted,
-                      itemsPerPage: itemsPerPageStore,
-                    })}
-                    totalItems={totalCountMinusDeleted}
-                    unit={unit}
-                    filterStatus={filterStatus}
-                    trailingControlColumns={trailingControlColumns}
-                  />
-                  <Footer
-                    activePage={pageInfo.activePage}
-                    data-test-subj="events-viewer-footer"
-                    height={footerHeight}
-                    id={STANDALONE_ID}
-                    isLive={false}
-                    isLoading={loading}
-                    itemsCount={nonDeletedEvents.length}
-                    itemsPerPage={itemsPerPageStore}
-                    itemsPerPageOptions={itemsPerPageOptionsStore}
-                    onChangePage={loadPage}
-                    totalCount={totalCountMinusDeleted}
-                  />
-                </ScrollableFlexItem>
-              </FullWidthFlexGroup>
+              {loading ? (
+                <LoadingGrid />
+              ) : !hasAlerts ? (
+                <EmptyGrid />
+              ) : (
+                <>
+                  <UpdatedFlexGroup gutterSize="s" justifyContent="flexEnd" alignItems="baseline">
+                    <EuiFlexItem grow={false}>
+                      <InspectButton title={justTitle} inspect={inspect} loading={loading} />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <LastUpdatedAt updatedAt={updatedAt} />
+                    </EuiFlexItem>
+                  </UpdatedFlexGroup>
+                  <FullWidthFlexGroup direction="row" $visible={!graphEventId} gutterSize="none">
+                    <ScrollableFlexItem grow={1}>
+                      <StatefulBody
+                        activePage={pageInfo.activePage}
+                        browserFields={browserFields}
+                        data={nonDeletedEvents}
+                        defaultCellActions={defaultCellActions}
+                        filterQuery={filterQuery}
+                        id={STANDALONE_ID}
+                        indexNames={indexNames}
+                        isEventViewer={true}
+                        itemsPerPageOptions={itemsPerPageOptionsStore}
+                        leadingControlColumns={leadingControlColumns}
+                        loadPage={loadPage}
+                        refetch={refetch}
+                        renderCellValue={renderCellValue}
+                        rowRenderers={rowRenderers}
+                        onRuleChange={onRuleChange}
+                        querySize={pageInfo.querySize}
+                        tabType={TimelineTabs.query}
+                        tableView="gridView"
+                        totalPages={calculateTotalPages({
+                          itemsCount: totalCountMinusDeleted,
+                          itemsPerPage: itemsPerPageStore,
+                        })}
+                        totalItems={totalCountMinusDeleted}
+                        unit={unit}
+                        filterStatus={filterStatus}
+                        trailingControlColumns={trailingControlColumns}
+                      />
+                      <Footer
+                        activePage={pageInfo.activePage}
+                        data-test-subj="events-viewer-footer"
+                        height={footerHeight}
+                        id={STANDALONE_ID}
+                        isLive={false}
+                        isLoading={loading}
+                        itemsCount={nonDeletedEvents.length}
+                        itemsPerPage={itemsPerPageStore}
+                        itemsPerPageOptions={itemsPerPageOptionsStore}
+                        onChangePage={loadPage}
+                        totalCount={totalCountMinusDeleted}
+                      />
+                    </ScrollableFlexItem>
+                  </FullWidthFlexGroup>
+                </>
+              )}
             </EventsContainerLoading>
           </>
         ) : null}

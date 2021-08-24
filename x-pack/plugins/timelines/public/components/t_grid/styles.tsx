@@ -466,7 +466,7 @@ export const UpdatedFlexGroup = styled(EuiFlexGroup)`
 `;
 
 export const UpdatedFlexItem = styled(EuiFlexItem)<{ $show: boolean }>`
-  ${({ $show }) => ($show ? '' : 'visibility: hidden;')}
+  ${({ $show = true }) => ($show ? '' : 'visibility: hidden;')}
 `;
 
 export const AlertCount = styled.span`
