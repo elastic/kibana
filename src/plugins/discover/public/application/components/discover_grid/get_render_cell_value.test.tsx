@@ -75,7 +75,7 @@ describe('Discover grid cell rendering', function () {
       rowsSource,
       rowsSource.map((row) => indexPatternMock.flattenHit(row)),
       false,
-      false,
+      [],
       100
     );
     const component = shallow(
@@ -97,7 +97,7 @@ describe('Discover grid cell rendering', function () {
       rowsSource,
       rowsSource.map((row) => indexPatternMock.flattenHit(row)),
       false,
-      false,
+      [],
       100
     );
     const component = shallow(
@@ -148,7 +148,7 @@ describe('Discover grid cell rendering', function () {
       rowsSource,
       rowsSource.map((row) => indexPatternMock.flattenHit(row)),
       false,
-      false,
+      [],
       100
     );
     const component = shallow(
@@ -191,7 +191,7 @@ describe('Discover grid cell rendering', function () {
       rowsFields,
       rowsFields.map((row) => indexPatternMock.flattenHit(row)),
       true,
-      false,
+      [],
       100
     );
     const component = shallow(
@@ -246,7 +246,7 @@ describe('Discover grid cell rendering', function () {
       rowsFields,
       rowsFields.map((row) => indexPatternMock.flattenHit(row)),
       true,
-      false,
+      [],
       // this is the number of rendered items
       1
     );
@@ -289,7 +289,7 @@ describe('Discover grid cell rendering', function () {
       rowsFields,
       rowsFields.map((row) => indexPatternMock.flattenHit(row)),
       true,
-      false,
+      [],
       100
     );
     const component = shallow(
@@ -337,7 +337,7 @@ describe('Discover grid cell rendering', function () {
       rowsFieldsWithTopLevelObject,
       rowsFieldsWithTopLevelObject.map((row) => indexPatternMock.flattenHit(row)),
       true,
-      false,
+      [],
       100
     );
     const component = shallow(
@@ -378,7 +378,7 @@ describe('Discover grid cell rendering', function () {
       rowsFieldsWithTopLevelObject,
       rowsFieldsWithTopLevelObject.map((row) => indexPatternMock.flattenHit(row)),
       true,
-      false,
+      [],
       100
     );
     const component = shallow(
@@ -418,7 +418,7 @@ describe('Discover grid cell rendering', function () {
       rowsFieldsWithTopLevelObject,
       rowsFieldsWithTopLevelObject.map((row) => indexPatternMock.flattenHit(row)),
       true,
-      false,
+      [],
       100
     );
     const component = shallow(
@@ -449,7 +449,7 @@ describe('Discover grid cell rendering', function () {
       rowsFieldsWithTopLevelObject,
       rowsFieldsWithTopLevelObject.map((row) => indexPatternMock.flattenHit(row)),
       true,
-      false,
+      [],
       100
     );
     const component = shallow(
@@ -479,7 +479,7 @@ describe('Discover grid cell rendering', function () {
       rowsSource,
       rowsSource.map((row) => indexPatternMock.flattenHit(row)),
       false,
-      false,
+      [],
       100
     );
     const component = shallow(
@@ -501,7 +501,7 @@ describe('Discover grid cell rendering', function () {
       rowsSource,
       rowsSource.map((row) => indexPatternMock.flattenHit(row)),
       false,
-      false,
+      [],
       100
     );
     const component = shallow(

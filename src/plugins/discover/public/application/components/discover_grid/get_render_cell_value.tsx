@@ -22,14 +22,13 @@ import { DiscoverGridContext } from './discover_grid_context';
 import { JsonCodeEditor } from '../json_code_editor/json_code_editor';
 import { defaultMonacoEditorWidth } from './constants';
 import { EsHitRecord } from '../../angular/context/api/context';
-import { getFieldsToShow } from '../../helpers/get_fields_to_show';
 
 export const getRenderCellValueFn = (
   indexPattern: IndexPattern,
   rows: ElasticSearchHit[] | undefined,
   rowsFlattened: Array<Record<string, unknown>>,
   useNewFieldsApi: boolean,
-  showMultiFields: boolean,
+  fieldsToShow: string[],
   maxDocFieldsDisplayed: number
 ) => ({ rowIndex, columnId, isDetails, setCellProps }: EuiDataGridCellValueElementProps) => {
   const row = rows ? rows[rowIndex] : undefined;
@@ -60,12 +59,6 @@ export const getRenderCellValueFn = (
 
   if (typeof row === 'undefined' || typeof rowFlattened === 'undefined') {
     return <span>-</span>;
-  }
-
-  const { fields } = row;
-  let fieldsToShow = fields || [];
-  if (fields) {
-    fieldsToShow = getFieldsToShow(Object.keys(fields), indexPattern, showMultiFields);
   }
 
   if (
