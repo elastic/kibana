@@ -94,7 +94,7 @@ export class CsvGenerator {
         index: index.title,
         scroll: scrollSettings.duration,
         size: scrollSettings.size,
-        ignore_throttled: !this.includeFrozen,
+        ignore_throttled: this.includeFrozen,
       },
     };
     const results = (
