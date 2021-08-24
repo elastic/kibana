@@ -40,6 +40,7 @@ import { CorrelationsLog } from './correlations_log';
 import { CorrelationsEmptyStatePrompt } from './empty_state_prompt';
 import { CrossClusterSearchCompatibilityWarning } from './cross_cluster_search_warning';
 import { CorrelationsProgressControls } from './progress_controls';
+import { useTimeRange } from '../../../hooks/use_time_range';
 
 const DEFAULT_PERCENTILE_THRESHOLD = 95;
 
@@ -59,12 +60,14 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
   const { serviceName, transactionType } = useApmServiceContext();
 
   const {
-    query: { kuery, environment },
+    query: { kuery, environment, rangeFrom, rangeTo },
   } = useApmParams('/services/:serviceName');
 
   const { urlParams } = useUrlParams();
 
-  const { transactionName, start, end } = urlParams;
+  const { transactionName } = urlParams;
+
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const displayLog = uiSettings.get<boolean>(enableInspectEsQueries);
 

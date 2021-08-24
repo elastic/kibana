@@ -575,6 +575,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
             tGridCellAction({
               data: data.map((row) => row.data),
               browserFields,
+              timelineId: id,
             });
 
           return {
@@ -583,7 +584,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
               header.tGridCellActions?.map(buildAction) ?? defaultCellActions?.map(buildAction),
           };
         }),
-      [browserFields, columnHeaders, data, defaultCellActions]
+      [browserFields, columnHeaders, data, defaultCellActions, id]
     );
 
     const renderTGridCellValue = useMemo(() => {
