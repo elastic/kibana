@@ -115,6 +115,10 @@ for use in their own application.
 |Expression Shape plugin adds a shape function to the expression plugin and an associated renderer. The renderer will display the given shape with selected decorations.
 
 
+|{kib-repo}blob/{branch}/src/plugins/chart_expressions/expression_tagcloud/README.md[expressionTagcloud]
+|Expression Tagcloud plugin adds a tagcloud renderer and function to the expression plugin. The renderer will display the Wordcloud chart.
+
+
 |{kib-repo}blob/{branch}/src/plugins/field_formats/README.md[fieldFormats]
 |Index pattern fields formatters
 
@@ -221,10 +225,6 @@ so they can properly protect the data within their clusters.
 |{kib-repo}blob/{branch}/src/plugins/share/README.md[share]
 |The share plugin contains various utilities for displaying sharing context menu,
 generating deep links to other apps, and creating short URLs.
-
-
-|{kib-repo}blob/{branch}/src/plugins/spaces_oss/README.md[spacesOss]
-|Bridge plugin for consumption of the Spaces feature from OSS plugins.
 
 
 |{kib-repo}blob/{branch}/src/plugins/telemetry/README.md[telemetry]
@@ -366,8 +366,7 @@ The plugin exposes the static DefaultEditorController class to consume.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/cloud/README.md[cloud]
-|The cloud plugin adds cloud specific features to Kibana.
-The client-side plugin configures following values:
+|The cloud plugin adds Cloud-specific features to Kibana.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/cross_cluster_replication/README.md[crossClusterReplication]
@@ -376,10 +375,6 @@ The client-side plugin configures following values:
 
 |<<dashboard-enhanced-plugin>>
 |Adds drilldown capabilities to dashboard.  Owned by the Kibana App team.
-
-
-|{kib-repo}blob/{branch}/x-pack/plugins/dashboard_mode/README.md[dashboardMode]
-|The deprecated dashboard only mode.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/data_enhanced/README.md[dataEnhanced]

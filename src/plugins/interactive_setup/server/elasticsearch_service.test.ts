@@ -308,7 +308,7 @@ describe('ElasticsearchService', () => {
         mockEnrollClient.asScoped.mockReturnValue(mockScopedClusterClient);
 
         await expect(
-          setupContract.enroll({ apiKey: 'apiKey', hosts: ['host1'] })
+          setupContract.enroll({ apiKey: 'apiKey', hosts: ['host1'], caFingerprint: 'DE:AD:BE:EF' })
         ).rejects.toMatchInlineSnapshot(`[ResponseError: {"message":"oh no"}]`);
 
         expect(mockEnrollClient.asScoped).toHaveBeenCalledTimes(1);
@@ -327,7 +327,11 @@ describe('ElasticsearchService', () => {
         mockEnrollClient.asScoped.mockReturnValue(mockScopedClusterClient);
 
         await expect(
-          setupContract.enroll({ apiKey: 'apiKey', hosts: ['host1', 'host2'] })
+          setupContract.enroll({
+            apiKey: 'apiKey',
+            hosts: ['host1', 'host2'],
+            caFingerprint: 'DE:AD:BE:EF',
+          })
         ).rejects.toMatchInlineSnapshot(`[Error: Unable to connect to any of the provided hosts.]`);
 
         expect(mockEnrollClient.close).toHaveBeenCalledTimes(2);
@@ -351,7 +355,7 @@ describe('ElasticsearchService', () => {
         );
 
         await expect(
-          setupContract.enroll({ apiKey: 'apiKey', hosts: ['host1'] })
+          setupContract.enroll({ apiKey: 'apiKey', hosts: ['host1'], caFingerprint: 'DE:AD:BE:EF' })
         ).rejects.toMatchInlineSnapshot(`[ResponseError: {"message":"oh no"}]`);
 
         expect(mockEnrollClient.asScoped).toHaveBeenCalledTimes(1);
@@ -404,7 +408,11 @@ some weird+ca/with
 `;
 
         await expect(
-          setupContract.enroll({ apiKey: 'apiKey', hosts: ['host1', 'host2'] })
+          setupContract.enroll({
+            apiKey: 'apiKey',
+            hosts: ['host1', 'host2'],
+            caFingerprint: 'DE:AD:BE:EF',
+          })
         ).resolves.toEqual({
           ca: expectedCa,
           host: 'host2',
@@ -417,14 +425,17 @@ some weird+ca/with
         // Check that we created clients with the right parameters
         expect(mockElasticsearchPreboot.createClient).toHaveBeenCalledTimes(3);
         expect(mockElasticsearchPreboot.createClient).toHaveBeenCalledWith('enroll', {
+          caFingerprint: 'DE:AD:BE:EF',
           hosts: ['host1'],
           ssl: { verificationMode: 'none' },
         });
         expect(mockElasticsearchPreboot.createClient).toHaveBeenCalledWith('enroll', {
+          caFingerprint: 'DE:AD:BE:EF',
           hosts: ['host2'],
           ssl: { verificationMode: 'none' },
         });
         expect(mockElasticsearchPreboot.createClient).toHaveBeenCalledWith('authenticate', {
+          caFingerprint: 'DE:AD:BE:EF',
           hosts: ['host2'],
           serviceAccountToken: 'some-value',
           ssl: { certificateAuthorities: [expectedCa] },

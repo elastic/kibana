@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { AlertConsumers } from '@kbn/rule-data-utils';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React, { useEffect, useMemo, useState } from 'react';
@@ -80,7 +79,6 @@ const ScrollableFlexItem = styled(EuiFlexItem)`
 `;
 
 export interface TGridStandaloneProps {
-  alertConsumers: AlertConsumers[];
   appId: string;
   casePermissions: {
     crud: boolean;
@@ -117,7 +115,6 @@ export interface TGridStandaloneProps {
 
 const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
   afterCaseSelection,
-  alertConsumers,
   appId,
   casePermissions,
   columns,
@@ -210,7 +207,6 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
     loading,
     { events, updatedAt, loadPage, pageInfo, refetch, totalCount = 0, inspect },
   ] = useTimelineEvents({
-    alertConsumers,
     docValueFields: [],
     entityType,
     excludeEcsData: true,
@@ -313,10 +309,10 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
               data-test-subj={`events-container-loading-${loading}`}
             >
               <UpdatedFlexGroup gutterSize="s" justifyContent="flexEnd" alignItems="baseline">
-                <UpdatedFlexItem grow={false} show={!loading}>
+                <UpdatedFlexItem grow={false} $show={!loading}>
                   <InspectButton title={justTitle} inspect={inspect} loading={loading} />
                 </UpdatedFlexItem>
-                <UpdatedFlexItem grow={false} show={!loading}>
+                <UpdatedFlexItem grow={false} $show={!loading}>
                   <LastUpdatedAt updatedAt={updatedAt} />
                 </UpdatedFlexItem>
               </UpdatedFlexGroup>
