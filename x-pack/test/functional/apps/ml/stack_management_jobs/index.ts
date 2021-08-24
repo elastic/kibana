@@ -12,5 +12,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     this.tags(['mlqa', 'skipFirefox']);
 
     loadTestFile(require.resolve('./synchronize'));
+    loadTestFile(require.resolve('./manage_spaces'));
   });
 }
