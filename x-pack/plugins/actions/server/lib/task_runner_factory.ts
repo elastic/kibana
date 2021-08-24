@@ -77,6 +77,7 @@ export class TaskRunnerFactory {
 
     const taskInfo = {
       scheduled: taskInstance.runAt,
+      attempts: taskInstance.attempts,
     };
 
     return {
