@@ -45,7 +45,7 @@ export const useAddToCaseActions = ({
         : null,
     [ecsData, ariaLabel, nonEcsData, insertTimelineHook, casePermissions, afterCaseSelection]
   );
-  const hasWritePermissions = useGetUserCasesPermissions()?.crud ?? false;
+  const hasWritePermissions = casePermissions?.crud ?? false;
   const addToCaseActionItems = useMemo(
     () =>
       [
