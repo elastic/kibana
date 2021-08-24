@@ -35,13 +35,11 @@ import {
   ALERT_ORIGINAL_EVENT_MODULE,
   ALERT_ORIGINAL_EVENT_KIND,
 } from '../../../../../../timelines/common/alerts';
-import { useInsertTimeline } from '../../../../cases/components/use_insert_timeline';
-import { useGetUserCasesPermissions, useKibana } from '../../../../common/lib/kibana';
+import { useKibana } from '../../../../common/lib/kibana';
 import { useInvestigateInResolverContextItem } from './investigate_in_resolver';
 import { ATTACH_ALERT_TO_CASE_FOR_ROW } from '../../../../timelines/components/timeline/body/translations';
-import { TimelineId } from '../../../../../common';
-import { APP_ID } from '../../../../../common/constants';
 import { useEventFilterAction } from './use_event_filter_action';
+import { useAddToCaseActions } from './use_add_to_case_actions';
 
 interface AlertContextMenuProps {
   ariaLabel?: string;
@@ -72,41 +70,13 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
   const ruleId = get(0, ecsRowData?.kibana?.alert?.rule?.uuid);
   const ruleName = get(0, ecsRowData?.kibana?.alert?.rule?.name);
   const { timelines: timelinesUi } = useKibana().services;
-  const casePermissions = useGetUserCasesPermissions();
-  const insertTimelineHook = useInsertTimeline;
-  const addToCaseActionProps = useMemo(
-    () => ({
-      ariaLabel: ATTACH_ALERT_TO_CASE_FOR_ROW({ ariaRowindex, columnValues }),
-      event: { data: [], ecs: ecsRowData, _id: ecsRowData._id },
-      useInsertTimeline: insertTimelineHook,
-      casePermissions,
-      appId: APP_ID,
-      onClose: afterItemSelection,
-    }),
-    [
-      ariaRowindex,
-      columnValues,
-      ecsRowData,
-      insertTimelineHook,
-      casePermissions,
-      afterItemSelection,
-    ]
-  );
-  const hasWritePermissions = useGetUserCasesPermissions()?.crud ?? false;
-  const addToCaseActionItems = useMemo(
-    () =>
-      [
-        TimelineId.detectionsPage,
-        TimelineId.detectionsRulesDetailsPage,
-        TimelineId.active,
-      ].includes(timelineId as TimelineId) && hasWritePermissions
-        ? [
-            timelinesUi.getAddToExistingCaseButton(addToCaseActionProps),
-            timelinesUi.getAddToNewCaseButton(addToCaseActionProps),
-          ]
-        : [],
-    [addToCaseActionProps, hasWritePermissions, timelineId, timelinesUi]
-  );
+
+  const { addToCaseActionProps, addToCaseActionItems } = useAddToCaseActions({
+    ecsData: ecsRowData,
+    afterCaseSelection: afterItemSelection,
+    timelineId,
+    ariaLabel: ATTACH_ALERT_TO_CASE_FOR_ROW({ ariaRowindex, columnValues }),
+  });
 
   const alertStatus = get(0, ecsRowData?.kibana?.alert?.workflow_status) as Status;
 
@@ -221,7 +191,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
 
   return (
     <>
-      {timelinesUi.getAddToCaseAction(addToCaseActionProps)}
+      {addToCaseActionProps && timelinesUi.getAddToCaseAction(addToCaseActionProps)}
       {items.length > 0 && (
         <div key="actions-context-menu">
           <EventsTdContent textAlign="center" width={DEFAULT_ICON_BUTTON_WIDTH}>

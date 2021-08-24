@@ -85,6 +85,7 @@ const RowActionComponent = ({
       params: {
         eventId,
         indexName: indexName ?? '',
+        ecsData,
       },
     };
 
@@ -95,7 +96,7 @@ const RowActionComponent = ({
         timelineId,
       })
     );
-  }, [dispatch, eventId, indexName, tabType, timelineId]);
+  }, [dispatch, ecsData, eventId, indexName, tabType, timelineId]);
 
   const Action = controlColumn.rowCellRender;
 
