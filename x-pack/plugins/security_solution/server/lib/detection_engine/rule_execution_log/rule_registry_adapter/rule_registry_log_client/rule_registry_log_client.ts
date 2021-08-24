@@ -17,19 +17,19 @@ import {
 } from '@kbn/rule-data-utils';
 import moment from 'moment';
 
-import { mappingFromFieldMap } from '../../../../../../rule_registry/common/mapping_from_field_map';
-import { Dataset, IRuleDataClient } from '../../../../../../rule_registry/server';
-import { SERVER_APP_ID } from '../../../../../common/constants';
-import { RuleExecutionStatus } from '../../../../../common/detection_engine/schemas/common/schemas';
-import { invariant } from '../../../../../common/utils/invariant';
-import { IRuleStatusSOAttributes } from '../../rules/types';
-import { makeFloatString } from '../../signals/utils';
+import { mappingFromFieldMap } from '../../../../../../../rule_registry/common/mapping_from_field_map';
+import { Dataset, IRuleDataClient } from '../../../../../../../rule_registry/server';
+import { SERVER_APP_ID } from '../../../../../../common/constants';
+import { RuleExecutionStatus } from '../../../../../../common/detection_engine/schemas/common/schemas';
+import { invariant } from '../../../../../../common/utils/invariant';
+import { IRuleStatusSOAttributes } from '../../../rules/types';
+import { makeFloatString } from '../../../signals/utils';
 import {
   ExecutionMetric,
   ExecutionMetricArgs,
   IRuleDataPluginService,
   LogStatusChangeArgs,
-} from '../types';
+} from '../../types';
 import { EVENT_SEQUENCE, MESSAGE, RULE_STATUS, RULE_STATUS_SEVERITY } from './constants';
 import { parseRuleExecutionLog, RuleExecutionEvent } from './parse_rule_execution_log';
 import { ruleExecutionFieldMap } from './rule_execution_field_map';
