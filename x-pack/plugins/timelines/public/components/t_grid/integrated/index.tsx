@@ -50,7 +50,6 @@ import { useTimelineEvents } from '../../../container';
 import { StatefulBody } from '../body';
 import { Footer, footerHeight } from '../footer';
 import { SELECTOR_TIMELINE_GLOBAL_CONTAINER, UpdatedFlexGroup, UpdatedFlexItem } from '../styles';
-import * as i18n from '../translations';
 import { Sort } from '../body/sort';
 import { InspectButton, InspectButtonContainer } from '../../inspect';
 import { SummaryViewSelector, ViewSelection } from '../event_rendered_view/selector';
