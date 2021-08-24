@@ -86,7 +86,7 @@ export function UXAppRoot({
   core,
   deps,
   config,
-  corePlugins: { embeddable, maps, observability, data },
+  corePlugins: { embeddable, inspector, maps, observability, data },
   observabilityRuleTypeRegistry,
 }: {
   appMountParameters: AppMountParameters;
@@ -103,6 +103,7 @@ export function UXAppRoot({
     appMountParameters,
     config,
     core,
+    inspector,
     plugins,
     observability,
     observabilityRuleTypeRegistry,
