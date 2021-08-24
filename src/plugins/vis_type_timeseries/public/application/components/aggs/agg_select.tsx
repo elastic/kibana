@@ -12,8 +12,8 @@ import { i18n } from '@kbn/i18n';
 // @ts-ignore
 import { isMetricEnabled } from '../../lib/check_ui_restrictions';
 import { TSVB_METRIC_TYPES } from '../../../../common/enums';
-import { getAggsByType, getAggsByPredicate } from '../../../../common/agg_utis';
-import type { Agg } from '../../../../common/agg_utis';
+import { getAggsByType, getAggsByPredicate } from '../../../../common/agg_utils';
+import type { Agg } from '../../../../common/agg_utils';
 import type { Metric } from '../../../../common/types';
 import { TimeseriesUIRestrictions } from '../../../../common/ui_restrictions';
 
