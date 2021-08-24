@@ -53,10 +53,7 @@ export interface CompositeField extends RuntimeField {
   subFields: Record<string, EnhancedRuntimeField>;
 }
 
-export interface FieldFormatConfig {
-  id: string;
-  params?: { [key: string]: any };
-}
+export type FieldFormatConfig = EnhancedRuntimeField['format'];
 
 export type CloseEditor = () => void;
 
