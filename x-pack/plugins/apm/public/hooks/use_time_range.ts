@@ -21,26 +21,26 @@ interface TimeRange {
 type PartialTimeRange = Pick<TimeRange, 'refreshTimeRange' | 'timeRangeId'> &
   Pick<Partial<TimeRange>, 'start' | 'end' | 'exactStart' | 'exactEnd'>;
 
-export function useTimeRange(
-  range: { rangeFrom?: string; rangeTo?: string },
-  optional: true
-): PartialTimeRange;
+export function useTimeRange(range: {
+  rangeFrom?: string;
+  rangeTo?: string;
+  optional: true;
+}): PartialTimeRange;
 
 export function useTimeRange(range: {
   rangeFrom: string;
   rangeTo: string;
 }): TimeRange;
 
-export function useTimeRange(
-  {
-    rangeFrom,
-    rangeTo,
-  }: {
-    rangeFrom?: string;
-    rangeTo?: string;
-  },
-  optional: boolean = false
-): TimeRange | PartialTimeRange {
+export function useTimeRange({
+  rangeFrom,
+  rangeTo,
+  optional,
+}: {
+  rangeFrom?: string;
+  rangeTo?: string;
+  optional?: boolean;
+}): TimeRange | PartialTimeRange {
   const rangeRef = useRef({ rangeFrom, rangeTo });
 
   const { timeRangeId, incrementTimeRangeId } = useTimeRangeId();

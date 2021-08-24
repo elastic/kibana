@@ -14,7 +14,7 @@ export function useFallbackToTransactionsFetcher({ kuery }: { kuery: string }) {
   const rangeFrom = 'rangeFrom' in query ? query.rangeFrom : undefined;
   const rangeTo = 'rangeTo' in query ? query.rangeTo : undefined;
 
-  const { start, end } = useTimeRange({ rangeFrom, rangeTo }, true);
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo, optional: true });
 
   const { data = { fallbackToTransactions: false } } = useFetcher(
     (callApmApi) => {

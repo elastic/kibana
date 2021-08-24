@@ -34,7 +34,7 @@ export function AlertingFlyout(props: Props) {
   const rangeFrom = 'rangeFrom' in query ? query.rangeFrom : undefined;
   const rangeTo = 'rangeTo' in query ? query.rangeTo : undefined;
 
-  const { start, end } = useTimeRange({ rangeFrom, rangeTo }, true);
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo, optional: true });
 
   const environment =
     'environment' in query ? query.environment : ENVIRONMENT_ALL.value;
