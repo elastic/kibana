@@ -8,13 +8,17 @@ import React, { createContext } from 'react';
 import { GlobalState } from '../url_state';
 import { MonitoringStartPluginDependencies } from '../types';
 
-export const GlobalStateContext = createContext({});
-
 interface GlobalStateProviderProps {
   query: MonitoringStartPluginDependencies['data']['query'];
   toasts: MonitoringStartPluginDependencies['core']['notifications']['toasts'];
   children: React.ReactNode;
 }
+
+interface State {
+  cluster_uuid?: string;
+}
+
+export const GlobalStateContext = createContext({} as State);
 
 export const GlobalStateProvider = ({ query, toasts, children }: GlobalStateProviderProps) => {
   const fakeRootScope: Partial<ng.IRootScopeService> = {
