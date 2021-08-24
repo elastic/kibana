@@ -7,20 +7,27 @@
 
 import { EuiHeaderLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useEffect, useState } from 'react';
-import { useHistory } from 'react-router-dom';
-import { RequestAdapter } from '../../../../../../../src/plugins/inspector/common';
-import { InspectorSession } from '../../../../../../../src/plugins/inspector/public';
+import React from 'react';
+import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { enableInspectEsQueries } from '../../../../../observability/public';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
+import { useInspectorContext } from '../../../context/inspector/use_inspector_context';
 
-interface InspectorProps {}
-const inspectorAdapters = { requests: new RequestAdapter() };
-
-export function Inspector({}: InspectorProps) {
+export function InspectorHeaderLink() {
   const { inspector } = useApmPluginContext();
+  const { inspectorAdapters } = useInspectorContext();
+  const {
+    services: { uiSettings },
+  } = useKibana();
+  const isInspectorEnabled = uiSettings?.get<boolean>(enableInspectEsQueries);
+
   const inspect = () => {
     inspector.open(inspectorAdapters);
   };
+
+  if (!isInspectorEnabled) {
+    return null;
+  }
 
   return (
     <EuiHeaderLink color="primary" onClick={inspect}>

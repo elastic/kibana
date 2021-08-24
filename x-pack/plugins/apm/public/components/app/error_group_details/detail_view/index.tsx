@@ -39,7 +39,6 @@ import {
   logStacktraceTab,
 } from './ErrorTabs';
 import { ExceptionStacktrace } from './exception_stacktrace';
-import { PanelOptionsMenu } from '../../error_group_overview/panel_options_menu';
 
 const HeaderContainer = euiStyled.div`
   display: flex;
@@ -86,7 +85,6 @@ export function DetailView({ errorGroup, urlParams }: Props) {
 
   return (
     <EuiPanel hasBorder={true}>
-      <PanelOptionsMenu data={errorGroup} />
       <HeaderContainer>
         <EuiTitle size="s">
           <h3>

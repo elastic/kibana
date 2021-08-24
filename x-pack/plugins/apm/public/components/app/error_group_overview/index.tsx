@@ -15,22 +15,23 @@ import {
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
+import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useErrorGroupDistributionFetcher } from '../../../hooks/use_error_group_distribution_fetcher';
 import { useFetcher } from '../../../hooks/use_fetcher';
-import { useTimeRange } from '../../../hooks/use_time_range';
 import { ErrorDistribution } from '../error_group_details/Distribution';
 import { ErrorGroupList } from './List';
-import { PanelOptionsMenu } from './panel_options_menu';
 
 export function ErrorGroupOverview() {
   const { serviceName } = useApmServiceContext();
 
   const {
-    query: { environment, kuery, sortField, sortDirection, rangeFrom, rangeTo },
+    query: { environment, kuery, sortField, sortDirection },
   } = useApmParams('/services/:serviceName/errors');
 
-  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
+  const {
+    urlParams: { start, end },
+  } = useUrlParams();
 
   const { errorDistributionData } = useErrorGroupDistributionFetcher({
     serviceName,
@@ -72,8 +73,7 @@ export function ErrorGroupOverview() {
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
       <EuiFlexItem>
-        <EuiPanel>
-          <PanelOptionsMenu data={errorDistributionData} />
+        <EuiPanel hasBorder={true}>
           <ErrorDistribution
             distribution={errorDistributionData}
             title={i18n.translate(
