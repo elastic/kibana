@@ -189,7 +189,7 @@ export const patchRulesRoute = (
             spaceId: context.securitySolution.getSpaceId(),
           });
 
-          const [validated, errors] = transformValidate(rule, undefined, ruleStatuses[0]);
+          const [validated, errors] = transformValidate(rule, ruleStatuses[0]);
           if (errors != null) {
             return siemResponse.error({ statusCode: 500, body: errors });
           } else {

@@ -110,7 +110,6 @@ export const performBulkActionRoute = (
                 });
                 await deleteRules({
                   rulesClient,
-                  savedObjectsClient,
                   ruleStatusClient,
                   ruleStatuses,
                   id: rule.id,

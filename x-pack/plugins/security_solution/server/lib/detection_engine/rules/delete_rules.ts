@@ -9,7 +9,6 @@ import { DeleteRuleOptions } from './types';
 
 export const deleteRules = async ({
   rulesClient,
-  savedObjectsClient, // TODO: Delete this unused parameter
   ruleStatusClient,
   ruleStatuses,
   id,

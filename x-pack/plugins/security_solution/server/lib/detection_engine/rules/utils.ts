@@ -203,7 +203,7 @@ export const transformFromAlertThrottle = (rule: SanitizedAlert<RuleParams>): st
   if (rule.muteAll === true) {
     return NOTIFICATION_THROTTLE_NO_ACTIONS;
   } else if (
-    rule.notifyWhen === 'onActiveAlert' ||
+    (rule.notifyWhen === 'onActiveAlert' && rule.actions.length !== 0) ||
     (rule.throttle == null && rule.notifyWhen == null && rule.actions.length !== 0)
   ) {
     return 'rule';

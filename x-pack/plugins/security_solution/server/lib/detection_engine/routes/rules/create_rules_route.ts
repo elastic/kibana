@@ -97,7 +97,7 @@ export const createRulesRoute = (
           data: internalRule,
         });
 
-        // mutes if we are creating the rule with the explicit no actions
+        // mutes if we are creating the rule with the explicit "no_actions"
         if (request.body.throttle === NOTIFICATION_THROTTLE_NO_ACTIONS) {
           await rulesClient.muteAll({ id: createdRule.id });
         }
@@ -107,7 +107,7 @@ export const createRulesRoute = (
           ruleId: createdRule.id,
           spaceId: context.securitySolution.getSpaceId(),
         });
-        const [validated, errors] = newTransformValidate(createdRule, undefined, ruleStatuses[0]);
+        const [validated, errors] = newTransformValidate(createdRule, ruleStatuses[0]);
         if (errors != null) {
           return siemResponse.error({ statusCode: 500, body: errors });
         } else {

@@ -222,7 +222,7 @@ export const internalRuleUpdate = t.type({
   }),
   actions: actionsCamel,
   params: ruleParams,
-  throttle: throttleOrNull, // "onActionGroupChange" | "onActiveAlert" | "onThrottleInterval"
+  throttle: throttleOrNull,
   notifyWhen,
 });
 export type InternalRuleUpdate = t.TypeOf<typeof internalRuleUpdate>;

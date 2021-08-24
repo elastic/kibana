@@ -12,7 +12,6 @@ import {
   SavedObject,
   SavedObjectAttributes,
   SavedObjectsFindResponse,
-  SavedObjectsClientContract,
   SavedObjectsFindResult,
 } from 'kibana/server';
 import type {
@@ -42,6 +41,8 @@ import type {
   Severity,
   MaxSignalsOrUndefined,
   MaxSignals,
+  ThrottleOrUndefinedOrNull,
+  ThrottleOrNull,
 } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { VersionOrUndefined, Version } from '@kbn/securitysolution-io-ts-types';
 
@@ -256,7 +257,7 @@ export interface CreateRulesOptions {
   concurrentSearches: ConcurrentSearchesOrUndefined;
   itemsPerSearch: ItemsPerSearchOrUndefined;
   threatLanguage: ThreatLanguageOrUndefined;
-  throttle: string | null; // TODO: Do we have better types here?
+  throttle: ThrottleOrNull;
   timestampOverride: TimestampOverrideOrUndefined;
   to: To;
   type: Type;
@@ -316,7 +317,7 @@ export interface PatchRulesOptions {
   threatQuery: ThreatQueryOrUndefined;
   threatMapping: ThreatMappingOrUndefined;
   threatLanguage: ThreatLanguageOrUndefined;
-  throttle: string | null | undefined; // TODO: Do we have better types here?
+  throttle: ThrottleOrUndefinedOrNull;
   timestampOverride: TimestampOverrideOrUndefined;
   to: ToOrUndefined;
   type: TypeOrUndefined;
@@ -336,7 +337,6 @@ export interface ReadRuleOptions {
 
 export interface DeleteRuleOptions {
   rulesClient: RulesClient;
-  savedObjectsClient: SavedObjectsClientContract;
   ruleStatusClient: IRuleExecutionLogClient;
   ruleStatuses: Array<SavedObjectsFindResult<IRuleStatusSOAttributes>>;
   id: Id;

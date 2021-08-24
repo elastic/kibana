@@ -105,7 +105,7 @@ export const createRulesBulkRoute = (
                 data: internalRule,
               });
 
-              // mutes if we are creating the rule with the explicit no actions
+              // mutes if we are creating the rule with the explicit "no_actions"
               if (payloadRule.throttle === NOTIFICATION_THROTTLE_NO_ACTIONS) {
                 await rulesClient.muteAll({ id: createdRule.id });
               }

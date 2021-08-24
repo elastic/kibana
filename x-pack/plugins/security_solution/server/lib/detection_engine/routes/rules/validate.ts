@@ -25,12 +25,10 @@ import {
 } from '../../rules/types';
 import { createBulkErrorObject, BulkError } from '../utils';
 import { transform, transformAlertToRule } from './utils';
-import { RuleActions } from '../../rule_actions/types';
 import { RuleParams } from '../../schemas/rule_schemas';
 
 export const transformValidate = (
   alert: PartialAlert<RuleParams>,
-  ruleActions?: RuleActions | null,
   ruleStatus?: SavedObject<IRuleSavedAttributesSavedObjectAttributes>
 ): [RulesSchema | null, string | null] => {
   const transformed = transform(alert, ruleStatus);
@@ -43,7 +41,6 @@ export const transformValidate = (
 
 export const newTransformValidate = (
   alert: PartialAlert<RuleParams>,
-  ruleActions?: RuleActions | null,
   ruleStatus?: SavedObject<IRuleSavedAttributesSavedObjectAttributes>
 ): [FullResponseSchema | null, string | null] => {
   const transformed = transform(alert, ruleStatus);
