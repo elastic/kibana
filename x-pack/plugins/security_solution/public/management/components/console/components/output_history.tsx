@@ -6,17 +6,26 @@
  */
 
 import React, { memo, PropsWithChildren } from 'react';
-import styled from 'styled-components';
-import { CommonProps } from '@elastic/eui';
+import { CommonProps, EuiFlexGroup } from '@elastic/eui';
 
-const OutputHistoryContainer = styled.div`
-  height: 100%;
-`;
+// const OutputHistoryContainer = styled(EuiFlexGroup)`
+//   height: 100%;
+// `;
 
 export type OutputHistoryProps = CommonProps & PropsWithChildren<{}>;
 
-export const OutputHistory = memo<OutputHistoryProps>(({ children, ...otherProps }) => {
-  return <OutputHistoryContainer {...otherProps}>{children}</OutputHistoryContainer>;
+export const OutputHistory = memo<OutputHistoryProps>(({ children, className }) => {
+  return (
+    <EuiFlexGroup
+      className={className}
+      wrap={true}
+      direction="row"
+      alignItems="flexEnd"
+      responsive={false}
+    >
+      {children}
+    </EuiFlexGroup>
+  );
 });
 
 OutputHistory.displayName = 'OutputHistory';

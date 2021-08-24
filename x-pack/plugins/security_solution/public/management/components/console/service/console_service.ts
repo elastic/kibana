@@ -7,7 +7,7 @@
 
 import { ReactNode } from 'react';
 
-export interface Command {
+export interface CommandDefinition {
   name: string;
   about: string;
   validator?: () => Promise<boolean>;
@@ -21,7 +21,7 @@ export interface Command {
 }
 
 export interface ConsoleServiceInterface {
-  getCommandList(): Command[];
+  getCommandList(): CommandDefinition[];
 
   executeCommand(): Promise<{ result: unknown }>;
 

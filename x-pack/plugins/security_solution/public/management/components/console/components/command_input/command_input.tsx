@@ -41,7 +41,7 @@ const CommandInputContainer = styled.div`
 `;
 
 export interface CommandInputProps extends CommonProps {
-  onExecute: (command: { input: string }) => void;
+  onExecute: (command: { input: string; name: string }) => void;
   prompt?: string;
   isWaiting?: boolean;
 }
@@ -84,7 +84,7 @@ export const CommandInput = memo<CommandInputProps>(
             // ENTER
             // Execute command and blank out the input area
             case 13:
-              onExecute({ input: updatedState });
+              onExecute({ input: updatedState, name: updatedState.trim() });
               return '';
           }
 

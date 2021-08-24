@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import React, { memo, useCallback } from 'react';
-import { EuiPanel } from '@elastic/eui';
+import React, { memo, ReactNode, useCallback, useState } from 'react';
+import { EuiPanel, EuiSpacer } from '@elastic/eui';
 import styled from 'styled-components';
 import { OutputHistory } from './components/output_history';
 import { CommandInput, CommandInputProps } from './components/command_input';
 import { EuiThemeProvider } from '../../../../../../../src/plugins/kibana_react/common';
 import { useConsoleService } from './components/console_provider';
+import { HistoryItemComponent, HistoryItem } from './components/history_item';
 
 // FIXME:PT implement dark mode for the console
 
@@ -33,17 +34,54 @@ export const Console = memo<ConsoleProps>(({ prompt }) => {
   // TODO:PT Think about how much of this is driven by props -vs- the `ConsoleProvider` context
 
   const consoleService = useConsoleService();
+  const [historyItems, setHistoryItems] = useState<HistoryItemComponent[]>([]);
 
-  const handleOnExecute = useCallback<CommandInputProps['onExecute']>((command) => {
-    if (command.input === 'help') {
-      // add help output to the command list
-    }
-  }, []);
+  const handleOnExecute = useCallback<CommandInputProps['onExecute']>(
+    (command) => {
+      // FIXME:PT Most of these can just be static functions of sub-components so that nearly no logic lives here
+
+      if (command.name === 'help') {
+        let helpOutput: ReactNode;
+
+        if (consoleService.getHelp) {
+          helpOutput = consoleService.getHelp();
+        } else {
+          helpOutput = (
+            <p>
+              {'The following commands are available:'}
+              <EuiSpacer />
+              {consoleService.getCommandList().map((commandDefinition) => {
+                return <div>{`${commandDefinition.name} - ${commandDefinition.about}`}</div>;
+              })}
+              <EuiSpacer />
+            </p>
+          );
+        }
+
+        setHistoryItems((prevState) => {
+          return [...prevState, <HistoryItem>{helpOutput}</HistoryItem>];
+        });
+
+        return;
+      }
+
+      const commandDefinition = consoleService
+        .getCommandList()
+        .find((definition) => definition.name === command.name);
+
+      if (!commandDefinition) {
+        setHistoryItems((prevState) => {
+          return [...prevState, <HistoryItem>{`unknown command: ${command.input}`}</HistoryItem>];
+        });
+      }
+    },
+    [consoleService]
+  );
 
   return (
     <EuiThemeProvider darkMode={true}>
       <ConsoleWindow>
-        <OutputHistory className="output">history here</OutputHistory>
+        <OutputHistory className="output">{historyItems}</OutputHistory>
         <CommandInput onExecute={handleOnExecute} prompt={prompt} />
       </ConsoleWindow>
     </EuiThemeProvider>

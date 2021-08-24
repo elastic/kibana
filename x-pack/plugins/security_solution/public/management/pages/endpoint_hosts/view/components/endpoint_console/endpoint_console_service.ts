@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { ConsoleServiceInterface, Command } from '../../../../../components/console';
+import { ConsoleServiceInterface, CommandDefinition } from '../../../../../components/console';
 
 export class EndpointConsoleService implements ConsoleServiceInterface {
-  getCommandList(): Command[] {
+  getCommandList(): CommandDefinition[] {
     return [
       {
         name: 'isolate',
