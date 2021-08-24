@@ -55,7 +55,7 @@ export default function ({ config: storybookConfig }: { config: Configuration })
             {
               loader: 'sass-loader',
               options: {
-                prependData(loaderContext: any) {
+                additionalData(loaderContext: any) {
                   return `@import ${stringifyRequest(
                     loaderContext,
                     resolve(REPO_ROOT, 'src/core/public/core_app/styles/_globals_v7light.scss')

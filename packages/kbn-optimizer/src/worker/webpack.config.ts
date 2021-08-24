@@ -159,7 +159,7 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
                 {
                   loader: 'sass-loader',
                   options: {
-                    prependData(loaderContext: webpack.loader.LoaderContext) {
+                    additionalData(loaderContext: webpack.loader.LoaderContext) {
                       return `@import ${stringifyRequest(
                         loaderContext,
                         Path.resolve(
