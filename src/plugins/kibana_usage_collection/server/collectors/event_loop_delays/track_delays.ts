@@ -9,13 +9,13 @@
 import { takeUntil, finalize, map } from 'rxjs/operators';
 import { Observable, timer } from 'rxjs';
 import type { ISavedObjectsRepository } from 'kibana/server';
+import type { EventLoopDelaysMonitor } from '../../../../../core/server';
 import {
   MONITOR_EVENT_LOOP_DELAYS_START,
   MONITOR_EVENT_LOOP_DELAYS_INTERVAL,
   MONITOR_EVENT_LOOP_DELAYS_RESET,
 } from './constants';
 import { storeHistogram } from './saved_objects';
-import { EventLoopDelaysCollector } from './event_loop_delays';
 
 /**
  * The monitoring of the event loop starts immediately.
@@ -25,6 +25,7 @@ import { EventLoopDelaysCollector } from './event_loop_delays';
 export function startTrackingEventLoopDelaysUsage(
   internalRepository: ISavedObjectsRepository,
   stopMonitoringEventLoop$: Observable<void>,
+  eventLoopDelaysMonitor: EventLoopDelaysMonitor,
   configs: {
     collectionStartDelay?: number;
     collectionInterval?: number;
@@ -37,19 +38,18 @@ export function startTrackingEventLoopDelaysUsage(
     histogramReset = MONITOR_EVENT_LOOP_DELAYS_RESET,
   } = configs;
 
-  const eventLoopDelaysCollector = new EventLoopDelaysCollector();
   const resetOnCount = Math.ceil(histogramReset / collectionInterval);
 
   timer(collectionStartDelay, collectionInterval)
     .pipe(
       map((i) => (i + 1) % resetOnCount === 0),
       takeUntil(stopMonitoringEventLoop$),
-      finalize(() => eventLoopDelaysCollector.stop())
+      finalize(() => eventLoopDelaysMonitor.stop())
     )
     .subscribe(async (shouldReset) => {
-      const histogram = eventLoopDelaysCollector.collect();
+      const histogram = eventLoopDelaysMonitor.collect();
       if (shouldReset) {
-        eventLoopDelaysCollector.reset();
+        eventLoopDelaysMonitor.reset();
       }
       await storeHistogram(histogram, internalRepository);
     });

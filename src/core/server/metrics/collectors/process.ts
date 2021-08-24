@@ -7,15 +7,23 @@
  */
 
 import v8 from 'v8';
-import { Bench } from '@hapi/hoek';
 import { OpsProcessMetrics, MetricsCollector } from './types';
+import { EventLoopDelaysMonitor } from '../event_loop_delays';
 
-export class ProcessMetricsCollector implements MetricsCollector<OpsProcessMetrics> {
-  public async collect(): Promise<OpsProcessMetrics> {
+export class ProcessMetricsCollector implements MetricsCollector<OpsProcessMetrics[]> {
+  static getMainThreadMetrics(processes: OpsProcessMetrics[]): undefined | OpsProcessMetrics {
+    return processes.find(({ name }) => name === 'server_worker');
+  }
+
+  private readonly eventLoopDelayMonitor = new EventLoopDelaysMonitor();
+
+  private getCurrentPidMetrics(): OpsProcessMetrics {
+    const eventLoopDelayHistogram = this.eventLoopDelayMonitor.collect();
     const heapStats = v8.getHeapStatistics();
     const memoryUsage = process.memoryUsage();
-    const [eventLoopDelay] = await Promise.all([getEventLoopDelay()]);
+
     return {
+      name: 'server_worker' as const,
       memory: {
         heap: {
           total_in_bytes: memoryUsage.heapTotal,
@@ -25,19 +33,17 @@ export class ProcessMetricsCollector implements MetricsCollector<OpsProcessMetri
         resident_set_size_in_bytes: memoryUsage.rss,
       },
       pid: process.pid,
-      event_loop_delay: eventLoopDelay,
+      event_loop_delay: eventLoopDelayHistogram.mean,
+      event_loop_delay_histogram: eventLoopDelayHistogram,
       uptime_in_millis: process.uptime() * 1000,
     };
   }
 
-  public reset() {}
-}
+  public collect(): OpsProcessMetrics[] {
+    return [this.getCurrentPidMetrics()];
+  }
 
-const getEventLoopDelay = (): Promise<number> => {
-  const bench = new Bench();
-  return new Promise((resolve) => {
-    setImmediate(() => {
-      return resolve(bench.elapsed());
-    });
-  });
-};
+  public reset() {
+    this.eventLoopDelayMonitor.reset();
+  }
+}
