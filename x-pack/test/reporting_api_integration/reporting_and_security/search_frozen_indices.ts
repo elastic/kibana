@@ -45,7 +45,7 @@ export default function ({ getService }: FtrProviderContext) {
       await kibanaServer.uiSettings.update({ 'csv:quoteValues': true });
       await esSupertest.delete('/test2,test2,test3');
 
-      // setup: add mwhdflaksjefhultiple indices of test data
+      // setup: add multiple indices of test data
       await Promise.all([
         esSupertest
           .post('/test1/_doc')
