@@ -195,19 +195,19 @@ export class ReportingAPIClient implements IReportingAPI {
 
   public getServerBasePath = () => this.http.basePath.serverBasePath;
 
-  public async verifyBrowser() {
-    return await this.http.post(`${API_BASE_URL}/diagnose/browser`, {
+  public verifyBrowser() {
+    return this.http.post(`${API_BASE_URL}/diagnose/browser`, {
       asSystemRequest: true,
     });
   }
 
-  public async verifyScreenCapture() {
-    return await this.http.post(`${API_BASE_URL}/diagnose/screenshot`, {
+  public verifyScreenCapture() {
+    return this.http.post(`${API_BASE_URL}/diagnose/screenshot`, {
       asSystemRequest: true,
     });
   }
 
-  public async migrateReportingIndicesIlmPolicy() {
-    return await this.http.put(`${API_MIGRATE_ILM_POLICY_URL}`);
+  public migrateReportingIndicesIlmPolicy() {
+    return this.http.put(`${API_MIGRATE_ILM_POLICY_URL}`);
   }
 }
