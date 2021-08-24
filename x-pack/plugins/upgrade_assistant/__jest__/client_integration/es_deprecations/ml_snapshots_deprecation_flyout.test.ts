@@ -48,7 +48,7 @@ describe('Machine learning deprecation flyout', () => {
 
   describe('upgrade snapshots', () => {
     it('successfully upgrades snapshots', async () => {
-      const { find, actions, exists } = testBed;
+      const { find, actions } = testBed;
 
       httpRequestsMockHelpers.setUpgradeMlSnapshotResponse({
         nodeId: 'my_node',
