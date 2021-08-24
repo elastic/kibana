@@ -18,36 +18,11 @@ export const config: PluginConfigDescriptor<MapsXPackConfig> = {
   // the value `true` in this context signals configuration is exposed to browser
   exposeToBrowser: {
     enabled: true,
-    showMapVisualizationTypes: true,
     showMapsInspectorAdapter: true,
     preserveDrawingBuffer: true,
   },
   schema: configSchema,
   deprecations: () => [
-    (
-      completeConfig: Record<string, any>,
-      rootPath: string,
-      addDeprecation: AddConfigDeprecation
-    ) => {
-      if (_.get(completeConfig, 'xpack.maps.showMapVisualizationTypes') === undefined) {
-        return completeConfig;
-      }
-      addDeprecation({
-        message: i18n.translate('xpack.maps.deprecation.showMapVisualizationTypes.message', {
-          defaultMessage:
-            'xpack.maps.showMapVisualizationTypes is deprecated and is no longer used',
-        }),
-        correctiveActions: {
-          manualSteps: [
-            i18n.translate('xpack.maps.deprecation.showMapVisualizationTypes.step1', {
-              defaultMessage:
-                'Remove "xpack.maps.showMapVisualizationTypes" in the Kibana config file, CLI flag, or environment variable (in Docker only).',
-            }),
-          ],
-        },
-      });
-      return completeConfig;
-    },
     (
       completeConfig: Record<string, any>,
       rootPath: string,

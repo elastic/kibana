@@ -5,7 +5,8 @@
  * 2.0.
  */
 import { useFetcher } from '../../../../hooks/use_fetcher';
-import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
+import { useApmParams } from '../../../../hooks/use_apm_params';
+import { useTimeRange } from '../../../../hooks/use_time_range';
 
 export function useInstanceDetailsFetcher({
   serviceName,
@@ -15,8 +16,10 @@ export function useInstanceDetailsFetcher({
   serviceNodeName: string;
 }) {
   const {
-    urlParams: { start, end },
-  } = useUrlParams();
+    query: { rangeFrom, rangeTo },
+  } = useApmParams('/services/:serviceName/overview');
+
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const { data, status } = useFetcher(
     (callApmApi) => {

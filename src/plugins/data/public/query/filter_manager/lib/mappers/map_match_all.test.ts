@@ -7,7 +7,7 @@
  */
 
 import { mapMatchAll } from './map_match_all';
-import { MatchAllFilter } from '../../../../../common';
+import { MatchAllFilter } from '@kbn/es-query';
 
 describe('filter_manager/lib', () => {
   describe('mapMatchAll()', () => {
@@ -24,19 +24,6 @@ describe('filter_manager/lib', () => {
           formattedValue: 'bar',
         },
       };
-    });
-
-    describe('when given a filter that is not match_all', () => {
-      test('filter is rejected', async (done) => {
-        delete filter.match_all;
-
-        try {
-          mapMatchAll(filter);
-        } catch (e) {
-          expect(e).toBe(filter);
-          done();
-        }
-      });
     });
 
     describe('when given a match_all filter', () => {
