@@ -86,7 +86,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('7.13 connector', () => {
+    describe('7.13 connector id extraction', () => {
       let userActions: CaseUserActionsResponse;
 
       before(async () => {

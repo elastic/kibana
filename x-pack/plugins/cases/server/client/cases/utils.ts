@@ -21,6 +21,7 @@ import {
   CommentRequestAlertType,
   CommentRequestActionsType,
   CaseUserActionResponse,
+  isPush,
 } from '../../../common';
 import { ActionsClient } from '../../../../actions/server';
 import { CasesClientGetAlertsResponse } from '../../client/alerts/types';
@@ -57,7 +58,7 @@ export const getLatestPushInfo = (
 ): { index: number; pushedInfo: CaseFullExternalService } | null => {
   for (const [index, action] of [...userActions].reverse().entries()) {
     if (
-      isPushToService(action) &&
+      isPush(action.action, action.action_field) &&
       isValidNewValue(action) &&
       connectorId === action.new_val_connector_id
     ) {
@@ -70,16 +71,12 @@ export const getLatestPushInfo = (
           pushedInfo: { ...pushedInfo, connector_id: connectorId },
         };
       } catch (e) {
-        // ignore
+        // ignore parse failures and check the next user action
       }
     }
   }
 
   return null;
-};
-
-const isPushToService = (userAction: CaseUserActionResponse): boolean => {
-  return userAction.action === 'push-to-service' && userAction.action_field.includes('pushed');
 };
 
 type NonNullNewValueAction = Omit<CaseUserActionResponse, 'new_value' | 'new_val_connector_id'> & {
