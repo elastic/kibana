@@ -16,7 +16,7 @@ import { useAppContext } from '../../../../app_context';
 import { Storage } from '../../../../../shared_imports';
 
 const POLLING_INTERVAL = 60000;
-const LOCALSTORAGE_KEY = 'kibana.upgradeAssistant.lastPollingCheck';
+const LS_SETTING_ID = 'kibana.upgradeAssistant.lastCheckpoint';
 const localStorage = new Storage(window.localStorage);
 
 const i18nTexts = {
@@ -54,14 +54,14 @@ const i18nTexts = {
 };
 
 const getPreviousCheckpointDate = () => {
-  const storedValue = moment(localStorage.get(LOCALSTORAGE_KEY));
+  const storedValue = moment(localStorage.get(LS_SETTING_ID));
 
   if (storedValue.isValid()) {
     return storedValue.toISOString();
   }
 
   const now = moment().toISOString();
-  localStorage.set(LOCALSTORAGE_KEY, now);
+  localStorage.set(LS_SETTING_ID, now);
 
   return now;
 };
@@ -84,7 +84,7 @@ export const VerifyChanges: FunctionComponent = () => {
     const now = moment().toISOString();
 
     setPreviousCheck(now);
-    localStorage.set(LOCALSTORAGE_KEY, now);
+    localStorage.set(LS_SETTING_ID, now);
   };
 
   if (!data && isLoading) {
