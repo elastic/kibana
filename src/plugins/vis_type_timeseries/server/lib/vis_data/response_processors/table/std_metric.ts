@@ -24,7 +24,11 @@ export const stdMetric: TableResponseProcessorsFunction = ({
     return next(results);
   }
 
-  if ([TSVB_METRIC_TYPES.PERCENTILE_RANK, TSVB_METRIC_TYPES.PERCENTILE].includes(metric.type)) {
+  if (
+    [TSVB_METRIC_TYPES.PERCENTILE_RANK, TSVB_METRIC_TYPES.PERCENTILE].includes(
+      metric.type as TSVB_METRIC_TYPES
+    )
+  ) {
     return next(results);
   }
 
