@@ -9,7 +9,7 @@ import { buildQueryFilter, Filter } from '@kbn/es-query';
 import { ExpressionValueFilter } from '../../types';
 // @ts-expect-error untyped local
 import { buildBoolArray } from './build_bool_array';
-import { TimeRange } from '../../../../../src/plugins/data/public';
+import { TimeRange } from '../../../../../src/plugins/data/common';
 
 export interface EmbeddableFilterInput {
   filters: Filter[];

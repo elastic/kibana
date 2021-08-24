@@ -59,23 +59,10 @@ export function initializeCreateWorkpadRoute(deps: RouteInitializerDeps) {
         workpad = templateSavedObject.attributes.template;
       }
 
-      const now = new Date().toISOString();
-      const { id: maybeId, ...payload } = workpad;
-
-      const id = maybeId ? maybeId : getId('workpad');
-
-      await context.core.savedObjects.client.create<WorkpadAttributes>(
-        CANVAS_TYPE,
-        {
-          ...payload,
-          '@timestamp': now,
-          '@created': now,
-        },
-        { id }
-      );
+      const createdObject = await context.canvas.workpad.create(workpad);
 
       return response.ok({
-        body: { ...okResponse, id },
+        body: { ...okResponse, id: createdObject.id },
       });
     })
   );

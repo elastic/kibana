@@ -7,8 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { RouteInitializerDeps } from '../';
-import { CANVAS_TYPE, API_ROUTE_WORKPAD } from '../../../common/lib/constants';
-import { WorkpadAttributes } from './workpad_attributes';
+import { API_ROUTE_WORKPAD } from '../../../common/lib/constants';
 import { catchErrorHandler } from '../catch_error_handler';
 
 export function initializeGetWorkpadRoute(deps: RouteInitializerDeps) {
@@ -23,10 +22,7 @@ export function initializeGetWorkpadRoute(deps: RouteInitializerDeps) {
       },
     },
     catchErrorHandler(async (context, request, response) => {
-      const workpad = await context.core.savedObjects.client.get<WorkpadAttributes>(
-        CANVAS_TYPE,
-        request.params.id
-      );
+      const workpad = await context.canvas.workpad.get(request.params.id);
 
       if (
         // not sure if we need to be this defensive
