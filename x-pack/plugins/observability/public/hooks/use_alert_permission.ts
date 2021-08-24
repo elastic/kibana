@@ -15,6 +15,22 @@ export interface UseGetUserAlertsPermissionsProps {
   featureId: string | null;
 }
 
+export const getAlertsPermissions = (
+  uiCapabilities: RecursiveReadonly<Record<string, any>>,
+  featureId: string
+) => {
+  const capabilitiesCanUserCRUD: boolean =
+    typeof uiCapabilities[featureId].save === 'boolean' ? uiCapabilities[featureId].save : false;
+  const capabilitiesCanUserRead: boolean =
+    typeof uiCapabilities[featureId].show === 'boolean' ? uiCapabilities[featureId].show : false;
+  return {
+    crud: capabilitiesCanUserCRUD,
+    read: capabilitiesCanUserRead,
+    loading: false,
+    featureId,
+  };
+};
+
 export const useGetUserAlertsPermissions = (
   uiCapabilities: RecursiveReadonly<Record<string, any>>,
   featureId?: string
@@ -39,20 +55,7 @@ export const useGetUserAlertsPermissions = (
         if (currentAlertPermissions.featureId === featureId) {
           return currentAlertPermissions;
         }
-        const capabilitiesCanUserCRUD: boolean =
-          typeof uiCapabilities[featureId].save === 'boolean'
-            ? uiCapabilities[featureId].save
-            : false;
-        const capabilitiesCanUserRead: boolean =
-          typeof uiCapabilities[featureId].show === 'boolean'
-            ? uiCapabilities[featureId].show
-            : false;
-        return {
-          crud: capabilitiesCanUserCRUD,
-          read: capabilitiesCanUserRead,
-          loading: false,
-          featureId,
-        };
+        return getAlertsPermissions(uiCapabilities, featureId);
       });
     }
   }, [alertsPermissions.featureId, featureId, uiCapabilities]);

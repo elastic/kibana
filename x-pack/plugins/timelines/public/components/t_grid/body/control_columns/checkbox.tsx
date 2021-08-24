@@ -16,6 +16,7 @@ export const RowCheckBox = ({
   checked,
   ariaRowindex,
   columnValues,
+  disabled,
   loadingEventIds,
 }: ActionProps) => {
   const handleSelectEvent = useCallback(
@@ -34,6 +35,7 @@ export const RowCheckBox = ({
       data-test-subj="select-event"
       id={eventId}
       checked={checked}
+      disabled={disabled}
       onChange={handleSelectEvent}
       aria-label={i18n.CHECKBOX_FOR_ROW({ ariaRowindex, columnValues, checked })}
     />

@@ -26,6 +26,7 @@ type Props = EuiDataGridCellValueElementProps & {
   columnHeaders: ColumnHeaderOptions[];
   controlColumn: ControlColumnProps;
   data: TimelineItem[];
+  disabled: boolean;
   index: number;
   isEventViewer: boolean;
   loadingEventIds: Readonly<string[]>;
@@ -44,6 +45,7 @@ const RowActionComponent = ({
   columnHeaders,
   controlColumn,
   data,
+  disabled,
   index,
   isEventViewer,
   loadingEventIds,
@@ -113,6 +115,7 @@ const RowActionComponent = ({
           columnValues={columnValues}
           data={timelineNonEcsData}
           data-test-subj="actions"
+          disabled={disabled}
           ecsData={ecsData}
           eventId={eventId}
           index={index}
