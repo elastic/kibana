@@ -35,7 +35,7 @@ import { ModalContainer } from './modal_container';
 import type { EmbeddablePackageState } from '../../../../../../../../src/plugins/embeddable/public';
 import { SavedObjectFinderUi } from './saved_objects_finder';
 import { useLensDraftComment } from './use_lens_draft_comment';
-import { ADD_VISUALIZATION } from './translations';
+import { VISUALIZATION } from './translations';
 
 const BetaBadgeWrapper = styled.span`
   display: inline-flex;
@@ -374,7 +374,7 @@ export const LensEditor = React.memo(LensEditorComponent);
 export const plugin = {
   name: ID,
   button: {
-    label: ADD_VISUALIZATION,
+    label: VISUALIZATION,
     iconType: 'lensApp',
   },
   helpText: (

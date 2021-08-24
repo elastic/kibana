@@ -5,36 +5,59 @@
  * 2.0.
  */
 
-import { useCallback } from 'react';
-import { ADD_VISUALIZATION } from './translations';
+import { some } from 'lodash';
+import useDebounce from 'react-use/lib/useDebounce';
+import { ContextShape } from '@elastic/eui/src/components/markdown_editor/markdown_context';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { EuiMarkdownAstNode, EuiMarkdownEditorUiPlugin } from '@elastic/eui';
+import { VISUALIZATION } from './translations';
+import { PREFIX } from './constants';
 
 const DISABLED_CLASSNAME = 'euiButtonIcon-isDisabled';
 
-export const useLensButtonToggle = () => {
-  const enableLensButton = useCallback(({ editorRef }) => {
-    if (editorRef && editorRef.textarea && editorRef.toolbar) {
-      const lensPluginButton = editorRef.toolbar?.querySelector(
-        `[aria-label="${ADD_VISUALIZATION}"]`
+interface MarkdownEditorRef {
+  textarea: HTMLTextAreaElement | null;
+  replaceNode: ContextShape['replaceNode'];
+  toolbar: HTMLDivElement | null;
+}
+
+interface UseLensButtonToggleProps {
+  astRef?: React.MutableRefObject<EuiMarkdownAstNode | undefined>;
+  uiPlugins?: EuiMarkdownEditorUiPlugin[] | undefined;
+  editorRef?: React.MutableRefObject<MarkdownEditorRef | null>;
+  value?: string;
+}
+
+export const useLensButtonToggle = ({
+  astRef,
+  editorRef,
+  uiPlugins,
+  value,
+}: UseLensButtonToggleProps) => {
+  const lensPluginAvailable = useRef(false);
+  const [lensNodeSelected, setLensNodeSelected] = useState(false);
+
+  const enableLensButton = useCallback(() => {
+    if (editorRef?.current?.textarea && editorRef.current?.toolbar) {
+      const lensPluginButton = editorRef.current?.toolbar?.querySelector(
+        `[aria-label="${VISUALIZATION}"]`
       );
 
       if (lensPluginButton) {
         const isDisabled = lensPluginButton.className.includes(DISABLED_CLASSNAME);
-
-        if (isDisabled) {
+        const buttonStyle = lensPluginButton.getAttribute('style');
+        if (isDisabled && buttonStyle) {
           lensPluginButton.className = lensPluginButton.className.replace(DISABLED_CLASSNAME, '');
-          lensPluginButton.setAttribute(
-            'style',
-            lensPluginButton.getAttribute('style').replace('pointer-events: none;', '')
-          );
+          lensPluginButton.setAttribute('style', buttonStyle.replace('pointer-events: none;', ''));
         }
       }
     }
-  }, []);
+  }, [editorRef]);
 
-  const disableLensButton = useCallback(({ editorRef }) => {
-    if (editorRef && editorRef.textarea && editorRef.toolbar) {
-      const lensPluginButton = editorRef.toolbar?.querySelector(
-        `[aria-label="${ADD_VISUALIZATION}"]`
+  const disableLensButton = useCallback(() => {
+    if (editorRef?.current?.textarea && editorRef.current.toolbar) {
+      const lensPluginButton = editorRef.current.toolbar?.querySelector(
+        `[aria-label="${VISUALIZATION}"]`
       );
 
       if (lensPluginButton) {
@@ -46,7 +69,67 @@ export const useLensButtonToggle = () => {
         }
       }
     }
-  }, []);
+  }, [editorRef]);
 
-  return { enableLensButton, disableLensButton };
+  useEffect(() => {
+    lensPluginAvailable.current = some(uiPlugins, ['name', 'lens']);
+  }, [uiPlugins]);
+
+  useDebounce(
+    () => {
+      if (lensNodeSelected || !value?.includes(PREFIX)) {
+        enableLensButton();
+      } else {
+        disableLensButton();
+      }
+    },
+    100,
+    [value, lensNodeSelected]
+  );
+
+  // Copied from https://github.com/elastic/eui/blob/master/src/components/markdown_editor/markdown_editor.tsx#L279
+  useEffect(() => {
+    if (
+      editorRef?.current?.textarea == null ||
+      astRef?.current == null ||
+      !lensPluginAvailable.current
+    ) {
+      return;
+    }
+
+    const getCursorNode = () => {
+      const { selectionStart } = editorRef.current?.textarea!;
+
+      let node: EuiMarkdownAstNode = astRef.current!;
+
+      outer: while (true) {
+        if (node.children) {
+          for (let i = 0; i < node.children.length; i++) {
+            const child = node.children[i];
+            if (
+              child.position.start.offset < selectionStart &&
+              selectionStart < child.position.end.offset
+            ) {
+              if (child.type === 'text') break outer; // don't dive into `text` nodes
+              node = child;
+              continue outer;
+            }
+          }
+        }
+        break;
+      }
+
+      setLensNodeSelected(node.type === 'lens');
+    };
+
+    const textarea = editorRef.current?.textarea;
+
+    textarea.addEventListener('keyup', getCursorNode);
+    textarea.addEventListener('mouseup', getCursorNode);
+
+    return () => {
+      textarea.removeEventListener('keyup', getCursorNode);
+      textarea.removeEventListener('mouseup', getCursorNode);
+    };
+  }, [astRef, editorRef]);
 };
