@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable complexity */
+
 import { EuiContextMenuItem } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { DraggableId } from 'react-beautiful-dnd';
@@ -118,6 +120,9 @@ export const useHoverActionItems = ({
    */
   const showFilters =
     values != null && (enableOverflowButton || (!showTopN && !enableOverflowButton));
+
+  const shouldDisableColumnToggle = isObjectArray && field !== 'geo_point';
+
   const allItems = useMemo(
     () =>
       [
@@ -150,7 +155,7 @@ export const useHoverActionItems = ({
             })}
           </div>
         ) : null,
-        toggleColumn ? (
+        toggleColumn && !shouldDisableColumnToggle ? (
           <div data-test-subj="hover-actions-toggle-column" key="hover-actions-toggle-column">
             {getColumnToggleButton({
               Component: enableOverflowButton ? EuiContextMenuItem : undefined,
@@ -236,6 +241,7 @@ export const useHoverActionItems = ({
       isObjectArray,
       onFilterAdded,
       ownFocus,
+      shouldDisableColumnToggle,
       showFilters,
       showTopN,
       stKeyboardEvent,
