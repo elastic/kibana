@@ -14,32 +14,22 @@ import {
   isErrorResponse,
 } from '../../../../../src/plugins/data/public';
 import type {
-  HistogramItem,
   SearchServiceParams,
-  SearchServiceValue,
+  SearchServiceRawResponse,
 } from '../../common/search_strategies/correlations/types';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 import { ApmPluginStartDeps } from '../plugin';
-
-interface RawResponse {
-  percentileThresholdValue?: number;
-  took: number;
-  values: SearchServiceValue[];
-  overallHistogram: HistogramItem[];
-  log: string[];
-  ccsWarning: boolean;
-}
 
 interface TransactionLatencyCorrelationsFetcherState {
   error?: Error;
   isComplete: boolean;
   isRunning: boolean;
   loaded: number;
-  ccsWarning: RawResponse['ccsWarning'];
-  histograms: RawResponse['values'];
-  log: RawResponse['log'];
-  overallHistogram?: RawResponse['overallHistogram'];
-  percentileThresholdValue?: RawResponse['percentileThresholdValue'];
+  ccsWarning: SearchServiceRawResponse['ccsWarning'];
+  histograms: SearchServiceRawResponse['values'];
+  log: SearchServiceRawResponse['log'];
+  overallHistogram?: SearchServiceRawResponse['overallHistogram'];
+  percentileThresholdValue?: SearchServiceRawResponse['percentileThresholdValue'];
   timeTook?: number;
   total: number;
 }
@@ -65,7 +55,9 @@ export const useTransactionLatencyCorrelationsFetcher = () => {
   const abortCtrl = useRef(new AbortController());
   const searchSubscription$ = useRef<Subscription>();
 
-  function setResponse(response: IKibanaSearchResponse<RawResponse>) {
+  function setResponse(
+    response: IKibanaSearchResponse<SearchServiceRawResponse>
+  ) {
     setFetchState((prevState) => ({
       ...prevState,
       isRunning: response.isRunning || false,
@@ -84,6 +76,12 @@ export const useTransactionLatencyCorrelationsFetcher = () => {
             percentileThresholdValue:
               response.rawResponse?.percentileThresholdValue,
           }
+        : {}),
+      // if loading is done but didn't return any data for the overall histogram,
+      // set it to an empty array so the consuming chart component knows loading is done.
+      ...(!response.isRunning &&
+      response.rawResponse?.overallHistogram === undefined
+        ? { overallHistogram: [] }
         : {}),
     }));
   }
@@ -108,12 +106,15 @@ export const useTransactionLatencyCorrelationsFetcher = () => {
 
     // Submit the search request using the `data.search` service.
     searchSubscription$.current = data.search
-      .search<IKibanaSearchRequest, IKibanaSearchResponse<RawResponse>>(req, {
+      .search<
+        IKibanaSearchRequest,
+        IKibanaSearchResponse<SearchServiceRawResponse>
+      >(req, {
         strategy: 'apmCorrelationsSearchStrategy',
         abortSignal: abortCtrl.current.signal,
       })
       .subscribe({
-        next: (res: IKibanaSearchResponse<RawResponse>) => {
+        next: (res: IKibanaSearchResponse<SearchServiceRawResponse>) => {
           setResponse(res);
           if (isCompleteResponse(res)) {
             searchSubscription$.current?.unsubscribe();

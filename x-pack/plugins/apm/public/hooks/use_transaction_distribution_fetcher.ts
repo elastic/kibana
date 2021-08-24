@@ -76,7 +76,7 @@ export function useTransactionDistributionFetcher() {
           }
         : {}),
       // if loading is done but didn't return any data for the overall histogram,
-      // set it to an empty array so the consuming chart component known loading is done.
+      // set it to an empty array so the consuming chart component knows loading is done.
       ...(!response.isRunning &&
       response.rawResponse?.overallHistogram === undefined
         ? { transactionDistribution: [] }
