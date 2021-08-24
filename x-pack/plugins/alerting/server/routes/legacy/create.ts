@@ -6,8 +6,6 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { AlertingRouter } from '../../types';
-import { ILicenseState } from '../../lib/license_state';
 import { verifyApiAccess } from '../../lib/license_api_access';
 import { validateDurationSchema } from '../../lib';
 import { handleDisabledApiKeysError } from './../lib/error_handler';
@@ -19,6 +17,8 @@ import {
   validateNotifyWhenType,
 } from '../../types';
 import { AlertTypeDisabledError } from '../../lib/errors/alert_type_disabled';
+import { RouteOptions } from '..';
+import { countUsageOfPredefinedIds } from '../lib';
 
 export const bodySchema = schema.object({
   name: schema.string(),
@@ -43,7 +43,7 @@ export const bodySchema = schema.object({
   notifyWhen: schema.nullable(schema.string({ validate: validateNotifyWhenType })),
 });
 
-export const createAlertRoute = (router: AlertingRouter, licenseState: ILicenseState) => {
+export const createAlertRoute = ({ router, licenseState, logger, usageCounter }: RouteOptions) => {
   router.post(
     {
       path: `${LEGACY_BASE_ALERT_API_PATH}/alert/{id?}`,
@@ -67,6 +67,21 @@ export const createAlertRoute = (router: AlertingRouter, licenseState: ILicenseS
         const alert = req.body;
         const params = req.params;
         const notifyWhen = alert?.notifyWhen ? (alert.notifyWhen as AlertNotifyWhenType) : null;
+
+        const spaceId = rulesClient.getSpaceId();
+        const shouldWarnId = params?.id && spaceId !== undefined && spaceId !== 'default';
+        if (shouldWarnId) {
+          logger.warn(
+            `POST ${LEGACY_BASE_ALERT_API_PATH}/alert/${params?.id}: Using the "id" path parameter to create rules in a custom space will lead to unexpected behavior in 8.0.0. Consult the Alerting API docs at https://www.elastic.co/guide/en/kibana/current/create-rule-api.html for more details.`
+          );
+        }
+
+        countUsageOfPredefinedIds({
+          predefinedId: params?.id,
+          spaceId,
+          usageCounter,
+        });
+
         try {
           const alertRes: SanitizedAlert<AlertTypeParams> = await rulesClient.create<AlertTypeParams>(
             {
@@ -76,6 +91,13 @@ export const createAlertRoute = (router: AlertingRouter, licenseState: ILicenseS
           );
           return res.ok({
             body: alertRes,
+            ...(shouldWarnId
+              ? {
+                  headers: {
+                    warning: `199 kibana "Using the "id" path parameter to create rules in a custom space will lead to unexpected behavior in 8.0.0. Consult the Alerting API docs at https://www.elastic.co/guide/en/kibana/current/create-rule-api.html for more details."`,
+                  },
+                }
+              : {}),
           });
         } catch (e) {
           if (e instanceof AlertTypeDisabledError) {

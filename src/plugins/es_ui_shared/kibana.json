@@ -3,6 +3,10 @@
   "version": "kibana",
   "ui": true,
   "server": true,
+  "owner": {
+    "name": "Stack Management",
+    "githubTeam": "kibana-stack-management"
+  },
   "extraPublicDirs": [
     "static/forms/components",
     "static/forms/helpers",

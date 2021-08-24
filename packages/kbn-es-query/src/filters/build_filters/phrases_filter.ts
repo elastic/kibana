@@ -6,17 +6,19 @@
  * Side Public License, v 1.
  */
 
-import { FieldFilter, Filter, FilterMeta, FILTERS } from './types';
-import { getPhraseScript } from './phrase_filter';
+import { estypes } from '@elastic/elasticsearch';
+import { Filter, FilterMeta, FILTERS } from './types';
+import { getPhraseScript, PhraseFilterValue } from './phrase_filter';
 import type { IndexPatternFieldBase, IndexPatternBase } from '../../es_query';
 
 export type PhrasesFilterMeta = FilterMeta & {
-  params: string[]; // The unformatted values
+  params: PhraseFilterValue[]; // The unformatted values
   field?: string;
 };
 
 export type PhrasesFilter = Filter & {
   meta: PhrasesFilterMeta;
+  query: estypes.QueryDslQueryContainer;
 };
 
 /**
@@ -25,7 +27,7 @@ export type PhrasesFilter = Filter & {
  *
  * @public
  */
-export const isPhrasesFilter = (filter: FieldFilter): filter is PhrasesFilter =>
+export const isPhrasesFilter = (filter: Filter): filter is PhrasesFilter =>
   filter?.meta?.type === FILTERS.PHRASES;
 
 /** @internal */
@@ -47,7 +49,7 @@ export const getPhrasesFilterField = (filter: PhrasesFilter) => {
  */
 export const buildPhrasesFilter = (
   field: IndexPatternFieldBase,
-  params: string[],
+  params: PhraseFilterValue[],
   indexPattern: IndexPatternBase
 ) => {
   const index = indexPattern.id;

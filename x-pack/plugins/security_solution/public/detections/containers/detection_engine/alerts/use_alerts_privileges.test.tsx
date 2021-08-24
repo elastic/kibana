@@ -87,6 +87,7 @@ const userPrivilegesInitial: ReturnType<typeof useUserPrivileges> = {
     error: undefined,
   },
   endpointPrivileges: { loading: true, canAccessEndpointManagement: false, canAccessFleet: false },
+  alertsPrivileges: { loading: true, crud: false, read: false },
 };
 
 describe('usePrivilegeUser', () => {
@@ -161,8 +162,8 @@ describe('usePrivilegeUser', () => {
         hasEncryptionKey: true,
         hasIndexManage: false,
         hasIndexMaintenance: true,
-        hasIndexRead: true,
-        hasIndexWrite: true,
+        hasIndexRead: false,
+        hasIndexWrite: false,
         hasIndexUpdateDelete: true,
         isAuthenticated: true,
         loading: false,
@@ -186,8 +187,8 @@ describe('usePrivilegeUser', () => {
         hasEncryptionKey: true,
         hasIndexManage: true,
         hasIndexMaintenance: true,
-        hasIndexRead: true,
-        hasIndexWrite: true,
+        hasIndexRead: false,
+        hasIndexWrite: false,
         hasIndexUpdateDelete: true,
         isAuthenticated: true,
         loading: false,

@@ -20,7 +20,7 @@ export const CopySource: Task = {
         'src/**',
         '!src/**/*.{test,test.mocks,mock}.{js,ts,tsx}',
         '!src/**/mocks.ts', // special file who imports .mock files
-        '!src/**/{target,__tests__,__snapshots__,__mocks__}/**',
+        '!src/**/{target,__tests__,__snapshots__,__mocks__,integration_tests,__fixtures__}/**',
         '!src/core/server/core_app/assets/favicons/favicon.distribution.png',
         '!src/core/server/core_app/assets/favicons/favicon.distribution.svg',
         '!src/test_utils/**',
@@ -31,8 +31,9 @@ export const CopySource: Task = {
         '!src/dev/**',
         '!src/setup_node_env/babel_register/index.js',
         '!src/setup_node_env/babel_register/register.js',
+        '!**/jest.config.js',
         '!src/plugins/telemetry/schema/**', // Skip telemetry schemas
-        '!**/public/**/*.{js,ts,tsx,json}',
+        '!**/public/**/*.{js,ts,tsx,json,scss}',
         'typings/**',
         'config/kibana.yml',
         'config/node.options',

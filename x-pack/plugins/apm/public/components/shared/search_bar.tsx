@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
 import {
   EuiCallOut,
   EuiFlexGroup,
@@ -30,6 +31,8 @@ interface Props {
   showKueryBar?: boolean;
   showTimeComparison?: boolean;
   showTransactionTypeSelector?: boolean;
+  kueryBarPlaceholder?: string;
+  kueryBarBoolFilter?: QueryDslQueryContainer[];
 }
 
 function DebugQueryCallout() {
@@ -83,6 +86,8 @@ export function SearchBar({
   showKueryBar = true,
   showTimeComparison = false,
   showTransactionTypeSelector = false,
+  kueryBarBoolFilter,
+  kueryBarPlaceholder,
 }: Props) {
   const { isSmall, isMedium, isLarge, isXl, isXXL, isXXXL } = useBreakPoints();
 
@@ -115,7 +120,10 @@ export function SearchBar({
 
             {showKueryBar && (
               <EuiFlexItem>
-                <KueryBar />
+                <KueryBar
+                  placeholder={kueryBarPlaceholder}
+                  boolFilter={kueryBarBoolFilter}
+                />
               </EuiFlexItem>
             )}
           </EuiFlexGroup>

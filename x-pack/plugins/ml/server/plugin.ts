@@ -17,6 +17,7 @@ import {
   IClusterClient,
   SavedObjectsServiceStart,
   SharedGlobalConfig,
+  UiSettingsServiceStart,
 } from 'kibana/server';
 import type { SecurityPluginSetup } from '../../security/server';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
@@ -60,6 +61,7 @@ import { registerMlAlerts } from './lib/alerts/register_ml_alerts';
 import { ML_ALERT_TYPES } from '../common/constants/alerts';
 import { alertingRoutes } from './routes/alerting';
 import { registerCollector } from './usage';
+import { FieldFormatsStart } from '../../../../src/plugins/field_formats/server';
 
 export type MlPluginSetup = SharedServices;
 export type MlPluginStart = void;
@@ -70,6 +72,8 @@ export class MlServerPlugin
   private mlLicense: MlLicense;
   private capabilities: CapabilitiesStart | null = null;
   private clusterClient: IClusterClient | null = null;
+  private fieldsFormat: FieldFormatsStart | null = null;
+  private uiSettings: UiSettingsServiceStart | null = null;
   private savedObjectsStart: SavedObjectsServiceStart | null = null;
   private spacesPlugin: SpacesPluginSetup | undefined;
   private security: SecurityPluginSetup | undefined;
@@ -204,6 +208,8 @@ export class MlServerPlugin
       resolveMlCapabilities,
       () => this.clusterClient,
       () => getInternalSavedObjectsClient(),
+      () => this.uiSettings,
+      () => this.fieldsFormat,
       () => this.isMlReady
     );
 
@@ -223,7 +229,9 @@ export class MlServerPlugin
     return sharedServicesProviders;
   }
 
-  public start(coreStart: CoreStart): MlPluginStart {
+  public start(coreStart: CoreStart, plugins: PluginsStart): MlPluginStart {
+    this.uiSettings = coreStart.uiSettings;
+    this.fieldsFormat = plugins.fieldFormats;
     this.capabilities = coreStart.capabilities;
     this.clusterClient = coreStart.elasticsearch.client;
     this.savedObjectsStart = coreStart.savedObjects;

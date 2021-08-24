@@ -8,8 +8,8 @@
 import React from 'react';
 
 import { shallowWithIntl } from '@kbn/test/jest';
-import type { Space } from 'src/plugins/spaces_oss/common';
 
+import type { Space } from '../../common';
 import { spacesManagerMock } from '../spaces_manager/mocks';
 import { SpaceSelector } from './space_selector';
 
