@@ -5,11 +5,4 @@
  * 2.0.
  */
 
-import { RuleStatusService } from './rule_status_service';
-
-export const getRuleStatusServiceMock = (): jest.Mocked<RuleStatusService> => ({
-  goingToRun: jest.fn(),
-  success: jest.fn(),
-  partialFailure: jest.fn(),
-  error: jest.fn(),
-});
+export { getBackupStep } from './backup_step';
