@@ -26,6 +26,12 @@ export interface RuntimeField {
     source: string;
   };
   parent?: string;
+  fields?: Record<
+    string,
+    {
+      type: Omit<RuntimeType, 'composite'>;
+    }
+  >;
 }
 
 export interface EnhancedRuntimeField extends RuntimeField {

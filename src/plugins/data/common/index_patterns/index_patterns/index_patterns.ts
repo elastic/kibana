@@ -11,7 +11,7 @@ import { PublicMethodsOf } from '@kbn/utility-types';
 import { INDEX_PATTERN_SAVED_OBJECT_TYPE, SavedObjectsClientCommon } from '../..';
 
 import { createIndexPatternCache } from '.';
-import type { RuntimeField, RuntimeObject } from '../types';
+import type { RuntimeField, RuntimeComposite } from '../types';
 import { IndexPattern } from './index_pattern';
 import {
   createEnsureDefaultIndexPattern,
@@ -380,7 +380,7 @@ export class IndexPatternsService {
         sourceFilters,
         fieldFormatMap,
         runtimeFieldMap,
-        runtimeObjectMap,
+        runtimeCompositeMap,
         typeMeta,
         type,
         fieldAttrs,
@@ -396,8 +396,8 @@ export class IndexPatternsService {
     const parsedRuntimeFieldMap: Record<string, RuntimeField> = runtimeFieldMap
       ? JSON.parse(runtimeFieldMap)
       : {};
-    const parsedRuntimeObjectMap: Record<string, RuntimeObject> = runtimeObjectMap
-      ? JSON.parse(runtimeObjectMap)
+    const parsedRuntimeCompositeMap: Record<string, RuntimeComposite> = runtimeCompositeMap
+      ? JSON.parse(runtimeCompositeMap)
       : {};
 
     return {
@@ -414,7 +414,7 @@ export class IndexPatternsService {
       fieldAttrs: parsedFieldAttrs,
       allowNoIndex,
       runtimeFieldMap: parsedRuntimeFieldMap,
-      runtimeObjectMap: parsedRuntimeObjectMap,
+      runtimeCompositeMap: parsedRuntimeCompositeMap,
     };
   };
 
@@ -494,6 +494,10 @@ export class IndexPatternsService {
 
     spec.fieldFormats = savedObject.attributes.fieldFormatMap
       ? JSON.parse(savedObject.attributes.fieldFormatMap)
+      : {};
+
+    spec.runtimeCompositeMap = savedObject.attributes.runtimeCompositeMap
+      ? JSON.parse(savedObject.attributes.runtimeCompositeMap)
       : {};
 
     const indexPattern = await this.create(spec, true);

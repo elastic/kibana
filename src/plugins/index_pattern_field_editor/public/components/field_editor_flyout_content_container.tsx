@@ -17,7 +17,7 @@ import {
   DataPublicPluginStart,
   UsageCollectionStart,
 } from '../shared_imports';
-import type { Field, PluginStart, InternalFieldType } from '../types';
+import type { Field, PluginStart, InternalFieldType, CompositeField } from '../types';
 import { pluginName } from '../constants';
 import { deserializeField, getRuntimeFieldValidator, getLinks, ApiService } from '../lib';
 import {
@@ -117,7 +117,7 @@ export const FieldEditorFlyoutContentContainer = ({
   );
 
   const saveCompositeRuntime = useCallback(
-    (updatedField: Field): IndexPatternField[] => {
+    (updatedField: CompositeField): IndexPatternField[] => {
       if (field?.type !== undefined && field?.type !== 'composite') {
         // A previous runtime field is now a runtime composite
         indexPattern.removeRuntimeField(field.name);
@@ -126,21 +126,13 @@ export const FieldEditorFlyoutContentContainer = ({
         indexPattern.removeRuntimeComposite(field.name);
       }
 
-      // console.log(updatedField);
-      return [];
-      // --- Temporary hack to create a runtime object ---
-      // const runtimeName = 'aaaObject';
-      // const tempRuntimeObject = {
-      //   name: runtimeName,
-      //   script: updatedField.script!,
-      //   subFields: {
-      //     field_a: updatedField,
-      //     field_b: updatedField,
-      //     field_c: updatedField,
-      //   },
-      // };
-      // return indexPattern.addRuntimeComposite(runtimeName, tempRuntimeObject);
-      // --- end temporary hack ---
+      const { name, script, subFields } = updatedField;
+
+      return indexPattern.addRuntimeComposite(name, {
+        name,
+        script: script!,
+        subFields,
+      });
     },
     [field?.name, field?.type, indexPattern]
   );
@@ -162,7 +154,7 @@ export const FieldEditorFlyoutContentContainer = ({
   );
 
   const saveField = useCallback(
-    async (updatedField: Field) => {
+    async (updatedField: Field | CompositeField) => {
       setIsSaving(true);
 
       if (fieldTypeToProcess === 'runtime') {
@@ -180,7 +172,7 @@ export const FieldEditorFlyoutContentContainer = ({
       try {
         const editedFields: IndexPatternField[] =
           updatedField.type === 'composite'
-            ? saveCompositeRuntime(updatedField)
+            ? saveCompositeRuntime(updatedField as CompositeField)
             : saveRuntimeField(updatedField);
 
         await indexPatternService.updateSavedObject(indexPattern);

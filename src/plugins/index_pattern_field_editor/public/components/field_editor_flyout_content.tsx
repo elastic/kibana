@@ -20,10 +20,10 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-import type { Field } from '../types';
+import type { Field, CompositeField } from '../types';
 import { RuntimeFieldPainlessError } from '../lib';
 import { euiFlyoutClassname } from '../constants';
-import type { RuntimeField } from '../shared_imports';
+import type { RuntimeField, EnhancedRuntimeField } from '../shared_imports';
 import { FlyoutPanels } from './flyout_panels';
 import { useFieldEditorContext } from './field_editor_context';
 import { FieldEditor, FieldEditorFormState } from './field_editor/field_editor';
@@ -51,7 +51,7 @@ export interface Props {
   /**
    * Handler for the "save" footer button
    */
-  onSave: (field: Field) => void;
+  onSave: (field: Field | CompositeField) => void;
   /**
    * Handler for the "cancel" footer button
    */
@@ -79,6 +79,7 @@ const FieldEditorFlyoutContentComponent = ({
   const { indexPattern } = useFieldEditorContext();
   const {
     panel: { isVisible: isPanelVisible },
+    fieldsInScript,
   } = useFieldPreviewContext();
 
   const [formState, setFormState] = useState<FieldEditorFormState>({
@@ -120,18 +121,48 @@ const FieldEditorFlyoutContentComponent = ({
     return !isFormModified;
   }, [isFormModified]);
 
+  const addSubfieldsToField = useCallback(
+    (_field: Field): Field | CompositeField => {
+      if (_field.type === 'composite' && fieldsInScript.length > 0) {
+        const subFields = fieldsInScript.reduce((acc, subFieldName) => {
+          const subField: EnhancedRuntimeField = {
+            // We hardcode "keyword" and "format" for now until the UI
+            // lets us define them for each of the sub fields
+            type: 'keyword' as const,
+            format: _field.format,
+          };
+
+          acc[subFieldName] = subField;
+          return acc;
+        }, {} as Record<string, EnhancedRuntimeField>);
+
+        const updatedField: CompositeField = {
+          type: 'composite',
+          name: _field.name,
+          script: _field.script,
+          subFields,
+        };
+
+        return updatedField;
+      }
+
+      return _field;
+    },
+    [fieldsInScript]
+  );
+
   const onClickSave = useCallback(async () => {
-    const { isValid, data } = await submit();
-    const nameChange = field?.name !== data.name;
-    const typeChange = field?.type !== data.type;
+    const { isValid, data: updatedField } = await submit();
+    const nameChange = field?.name !== updatedField.name;
+    const typeChange = field?.type !== updatedField.type;
 
     if (isValid) {
-      if (data.script) {
+      if (updatedField.script) {
         setIsValidating(true);
 
         const error = await runtimeFieldValidator({
-          type: data.type,
-          script: data.script,
+          type: updatedField.type,
+          script: updatedField.script,
         });
 
         setIsValidating(false);
@@ -148,10 +179,10 @@ const FieldEditorFlyoutContentComponent = ({
           confirmChangeNameOrType: true,
         });
       } else {
-        onSave(data);
+        onSave(addSubfieldsToField(updatedField));
       }
     }
-  }, [onSave, submit, runtimeFieldValidator, field, isEditingExistingField]);
+  }, [onSave, submit, runtimeFieldValidator, field, isEditingExistingField, addSubfieldsToField]);
 
   const onClickCancel = useCallback(() => {
     const canClose = canCloseValidator();
@@ -167,8 +198,8 @@ const FieldEditorFlyoutContentComponent = ({
         <SaveFieldTypeOrNameChangedModal
           fieldName={field?.name!}
           onConfirm={async () => {
-            const { data } = await submit();
-            onSave(data);
+            const { data: updatedField } = await submit();
+            onSave(addSubfieldsToField(updatedField));
           }}
           onCancel={() => {
             setModalVisibility(defaultModalVisibility);

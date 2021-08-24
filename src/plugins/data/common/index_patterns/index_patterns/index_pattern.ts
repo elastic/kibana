@@ -11,6 +11,7 @@ import { FieldAttrs, FieldAttrSet, IndexPatternAttributes } from '../..';
 import type {
   EnhancedRuntimeField,
   RuntimeField,
+  RuntimeType,
   RuntimeComposite,
   RuntimeCompositeWithSubFields,
 } from '../types';
@@ -215,34 +216,42 @@ export class IndexPattern implements IIndexPattern {
     };
   }
 
-  private getComputedRuntimeFields() {
-    // Runtime fields which are **not** created from a parent composite
+  /**
+   * Method to aggregate all the runtime fields which are **not** created
+   * from a parent composite runtime field.
+   * @returns Runtime fields which are **not** created from a parent composite
+   */
+  private getComputedRuntimeFields(): Record<string, RuntimeField> {
     return Object.entries(this.runtimeFieldMap).reduce((acc, [name, field]) => {
       const { type, script, parent } = field;
+
       if (parent !== undefined) {
         return acc;
       }
+
+      const runtimeFieldRequest: RuntimeField = {
+        type,
+        script,
+      };
+
       return {
         ...acc,
-        [name]: { type, script },
+        [name]: runtimeFieldRequest,
       };
     }, {});
   }
 
   /**
-   * This method will need to be updated once ES support the "composite" type
-   * We will need to add an aditional "fields" prop with the subFields.
-   *
-   * This is what ES will be expecting for runtime composites
-   * https://github.com/elastic/elasticsearch/issues/68203
+   * This method reads all the runtime composite fields
+   * and merge into it all the subFields
    *
    * {
    *   "compositeName": {
    *     "type": "composite",
    *     "script": "emit(...)" // script that emits multiple values
-   *     "fields": {  // map of the subFields
+   *     "fields": {  // map of subFields available in the Query
    *       "field_1": {
-   *         "type": "ip"
+   *         "type": "keyword"
    *       },
    *       "field_2": {
    *         "type": "ip"
@@ -251,16 +260,44 @@ export class IndexPattern implements IIndexPattern {
    *   }
    * }
    *
-   * @returns A map of runtime composites
+   * @returns A map of runtime fields
    */
-  private getComputedRuntimeComposites() {
-    // Only return the script and set its type to 'composite'
+  private getComputedRuntimeComposites(): Record<string, RuntimeField> {
     return Object.entries(this.runtimeCompositeMap).reduce((acc, [name, runtimeComposite]) => {
-      const { script } = runtimeComposite;
+      const { script, subFields } = runtimeComposite;
+
+      // Aggregate all the subFields belonging to this runtimeComposite
+      const fields: Record<string, { type: RuntimeType }> = subFields.reduce(
+        (accFields, subFieldName) => {
+          const subField = this.getRuntimeField(`${name}.${subFieldName}`);
+
+          if (!subField) {
+            return accFields;
+          }
+
+          return {
+            ...accFields,
+            [subFieldName]: { type: subField.type },
+          };
+        },
+        {} as Record<string, { type: RuntimeType }>
+      );
+
+      if (Object.keys(fields).length === 0) {
+        // This should never happen, but sending a composite runtime field
+        // with an empty "fields" will break the Query
+        return acc;
+      }
+
+      const runtimeFieldRequest: RuntimeField = {
+        type: 'composite',
+        script,
+        fields,
+      };
+
       return {
         ...acc,
-        // [name]: { type: 'composite', script, fields: { ... } },
-        [name]: { type: 'keyword', script }, // Temp to make demo work
+        [name]: runtimeFieldRequest,
       };
     }, {});
   }

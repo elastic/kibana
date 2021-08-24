@@ -42,7 +42,11 @@ export const getFieldDeleteModalOpener = ({
 }: Dependencies) => (options: OpenFieldDeleteModalOptions): CloseEditor => {
   if (typeof options.fieldName === 'string') {
     const fieldToDelete = options.ctx.indexPattern.getFieldByName(options.fieldName);
-    if (fieldToDelete?.runtimeField?.parent !== undefined) {
+    const parent = fieldToDelete?.runtimeField?.parent;
+    const doesBelongToCompositeField =
+      parent === undefined ? false : options.ctx.indexPattern.getRuntimeComposite(parent) !== null;
+
+    if (doesBelongToCompositeField) {
       console.log( // eslint-disable-line
         'TODO: display a modal to indicate that this field needs to be deleted through its parent.'
       );
