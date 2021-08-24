@@ -1425,10 +1425,10 @@
   dependencies:
     fast-json-stringify "^2.4.1"
 
-"@elastic/ecs-pino-format@^1.1.0":
-  version "1.1.1"
-  resolved "https://registry.yarnpkg.com/@elastic/ecs-pino-format/-/ecs-pino-format-1.1.1.tgz#f996a7a0074155cb6d63499332092bc9c74ac5e4"
-  integrity sha512-I7SzS0JYA8tdfsw4aTR+33HWWCaU7QY759kzt4sXm+O1waILaUWMzW3C2RL0ihQ66M99t+XMhRrA4cKStkHNXg==
+"@elastic/ecs-pino-format@^1.2.0":
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/@elastic/ecs-pino-format/-/ecs-pino-format-1.2.0.tgz#3ee709eb2343b4d1a7a6d23bc467673d8c0de2c2"
+  integrity sha512-7TGPoxPMHkhqdp98u9F1+4aNwktgh8tlG/PX2c/d/RcAqHziaRCc72tuwGLMu9K/w/M5bWz0eKbcFXr4fSZGwg==
   dependencies:
     "@elastic/ecs-helpers" "^1.1.0"
 
@@ -12356,12 +12356,12 @@ elastic-apm-http-client@^9.8.1:
     stream-chopper "^3.0.1"
     unicode-byte-truncate "^1.0.0"
 
-elastic-apm-node@^3.16.0:
-  version "3.16.0"
-  resolved "https://registry.yarnpkg.com/elastic-apm-node/-/elastic-apm-node-3.16.0.tgz#b55ba5c54acd2f40be704dc48c664ddb1729f20f"
-  integrity sha512-WR56cjpvt9ZAAw+4Ct2XjCtmy+lgn5kXZH220TRgC7W71c5uuRdioRJpIdvBPMZmeLnHwzok2+acUB7bxnYvVA==
+elastic-apm-node@^3.20.0:
+  version "3.20.0"
+  resolved "https://registry.yarnpkg.com/elastic-apm-node/-/elastic-apm-node-3.20.0.tgz#c2f3c90a779d8580cceba292c22dad17ff859749"
+  integrity sha512-oaUrj3IrtCUg3kzQnoFClw210OpXaCFzIdMO3EnY7z7+zHcjd5fLEMDHQ64qFzKeMt3aPrLBu6ou0HwuUe48Eg==
   dependencies:
-    "@elastic/ecs-pino-format" "^1.1.0"
+    "@elastic/ecs-pino-format" "^1.2.0"
     after-all-results "^2.0.0"
     async-cache "^1.1.0"
     async-value-promise "^1.1.1"
