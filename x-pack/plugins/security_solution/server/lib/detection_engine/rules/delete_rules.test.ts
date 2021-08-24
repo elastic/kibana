@@ -9,15 +9,15 @@ import { rulesClientMock } from '../../../../../alerting/server/mocks';
 import { deleteRules } from './delete_rules';
 import { SavedObjectsFindResult } from '../../../../../../../src/core/server';
 import { DeleteRuleOptions, IRuleStatusSOAttributes } from './types';
-import { RuleExecutionLogClient } from '../rule_execution_log/__mocks__/rule_execution_log_client';
+import { ruleExecutionLogClientMock } from '../rule_execution_log/__mocks__/rule_execution_log_client';
 
 describe('deleteRules', () => {
   let rulesClient: ReturnType<typeof rulesClientMock.create>;
-  let ruleStatusClient: ReturnType<typeof RuleExecutionLogClient>;
+  let ruleStatusClient: ReturnType<typeof ruleExecutionLogClientMock.create>;
 
   beforeEach(() => {
     rulesClient = rulesClientMock.create();
-    ruleStatusClient = new RuleExecutionLogClient();
+    ruleStatusClient = ruleExecutionLogClientMock.create();
   });
 
   it('should delete the rule along with its actions, and statuses', async () => {
