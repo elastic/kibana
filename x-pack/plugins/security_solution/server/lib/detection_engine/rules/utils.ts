@@ -174,7 +174,12 @@ export const calculateName = ({
   }
 };
 
-// TODO: Write unit tests
+/**
+ * Given a throttle from a "security_solution" rule this will transform it into an "alerting" notifyWhen
+ * on their saved object.
+ * @params throttle The throttle from a "security_solution" rule
+ * @returns The correct "NotifyWhen" for a Kibana alerting.
+ */
 export const transformToNotifyWhen = (throttle: string | null | undefined): NotifyWhen | null => {
   if (throttle == null || throttle === NOTIFICATION_THROTTLE_NO_ACTIONS) {
     return null; // Although I return null, this does not change the value of the "notifyWhen" and it keeps the current value of "notifyWhen"
@@ -185,7 +190,12 @@ export const transformToNotifyWhen = (throttle: string | null | undefined): Noti
   }
 };
 
-// TODO: Write unit tests
+/**
+ * Given a throttle from a "security_solution" rule this will transform it into an "alerting" "throttle"
+ * on their saved object.
+ * @params throttle The throttle from a "security_solution" rule
+ * @returns The "alerting" throttle
+ */
 export const transformToAlertThrottle = (throttle: string | null | undefined): string | null => {
   if (
     throttle == null ||
@@ -198,15 +208,20 @@ export const transformToAlertThrottle = (throttle: string | null | undefined): s
   }
 };
 
-// TODO: Write unit tests
+/**
+ * Given a throttle from an "alerting" Saved Object (SO) this will transform it into a "security_solution"
+ * throttle type.
+ * @params throttle The throttle from a  "alerting" Saved Object (SO)
+ * @returns The "security_solution" throttle
+ */
 export const transformFromAlertThrottle = (rule: SanitizedAlert<RuleParams>): string => {
-  if (rule.muteAll === true) {
+  if (rule.muteAll || rule.actions.length === 0) {
     return NOTIFICATION_THROTTLE_NO_ACTIONS;
   } else if (
-    (rule.notifyWhen === 'onActiveAlert' && rule.actions.length !== 0) ||
-    (rule.throttle == null && rule.notifyWhen == null && rule.actions.length !== 0)
+    rule.notifyWhen === 'onActiveAlert' ||
+    (rule.throttle == null && rule.notifyWhen == null)
   ) {
-    return 'rule';
+    return NOTIFICATION_THROTTLE_RULE;
   } else if (rule.throttle == null) {
     return NOTIFICATION_THROTTLE_NO_ACTIONS;
   } else {

@@ -19,7 +19,6 @@ import {
   SIGNALS_ID,
   DEFAULT_SEARCH_AFTER_PAGE_SIZE,
   SERVER_APP_ID,
-  DEFAULT_RULE_NOTIFICATION_QUERY_SIZE,
 } from '../../../../common/constants';
 import { isMlRule } from '../../../../common/machine_learning/helpers';
 import {
@@ -72,8 +71,8 @@ import { ExperimentalFeatures } from '../../../../common/experimental_features';
 import { injectReferences, extractReferences } from './saved_object_references';
 import { RuleExecutionLogClient } from '../rule_execution_log/rule_execution_log_client';
 import { IRuleDataPluginService } from '../rule_execution_log/types';
-import { getSignals } from '../notifications/get_signals';
 import { RuleExecutionStatus } from '../../../../common/detection_engine/schemas/common/schemas';
+import { scheduleThrottledNotificationActions } from '../notifications/schedule_throttle_notification_actions';
 
 export const signalRulesAlertType = ({
   logger,
@@ -408,46 +407,27 @@ export const signalRulesAlertType = ({
             );
 
             if (savedObject.attributes.throttle != null) {
-              const fromInMsThrottle = parseScheduleDates(`now-${savedObject.attributes.throttle}`);
-              const toInMsThrottle = parseScheduleDates(startedAt.toISOString());
-              if (fromInMsThrottle != null && toInMsThrottle != null) {
-                const resultsLinkThrottle = getNotificationResultsLink({
-                  from: fromInMsThrottle.toISOString(),
-                  to: toInMsThrottle.toISOString(),
-                  id: savedObject.id,
-                  kibanaSiemAppUrl: (meta as { kibana_siem_app_url?: string } | undefined)
-                    ?.kibana_siem_app_url,
-                });
-                const results = await getSignals({
-                  from: `${fromInMsThrottle.valueOf()}`,
-                  to: `${toInMsThrottle.valueOf()}`,
-                  size: DEFAULT_RULE_NOTIFICATION_QUERY_SIZE,
-                  index: outputIndex,
-                  ruleId,
-                  esClient: services.scopedClusterClient.asCurrentUser,
-                });
-                if (results.hits.hits.length !== 0) {
-                  const alertInstance = services.alertInstanceFactory(alertId);
-                  scheduleNotificationActions({
-                    alertInstance,
-                    signalsCount: result.createdSignalsCount,
-                    signals: result.createdSignals,
-                    resultsLink: resultsLinkThrottle,
-                    ruleParams: notificationRuleParams,
-                  });
-                }
-              }
-            } else {
-              if (result.createdSignalsCount) {
-                const alertInstance = services.alertInstanceFactory(alertId);
-                scheduleNotificationActions({
-                  alertInstance,
-                  signalsCount: result.createdSignalsCount,
-                  signals: result.createdSignals,
-                  resultsLink,
-                  ruleParams: notificationRuleParams,
-                });
-              }
+              scheduleThrottledNotificationActions({
+                alertInstance: services.alertInstanceFactory(alertId),
+                throttle: savedObject.attributes.throttle,
+                startedAt,
+                id: savedObject.id,
+                kibanaSiemAppUrl: (meta as { kibana_siem_app_url?: string } | undefined)
+                  ?.kibana_siem_app_url,
+                outputIndex,
+                ruleId,
+                esClient: services.scopedClusterClient.asCurrentUser,
+                notificationRuleParams,
+              });
+            } else if (result.createdSignalsCount) {
+              const alertInstance = services.alertInstanceFactory(alertId);
+              scheduleNotificationActions({
+                alertInstance,
+                signalsCount: result.createdSignalsCount,
+                signals: result.createdSignals,
+                resultsLink,
+                ruleParams: notificationRuleParams,
+              });
             }
           }
 
