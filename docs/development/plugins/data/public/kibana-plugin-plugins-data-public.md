@@ -176,6 +176,7 @@
 |  [RangeFilterMeta](./kibana-plugin-plugins-data-public.rangefiltermeta.md) |  |
 |  [RangeFilterParams](./kibana-plugin-plugins-data-public.rangefilterparams.md) |  |
 |  [RefreshInterval](./kibana-plugin-plugins-data-public.refreshinterval.md) |  |
+|  [RuntimeType](./kibana-plugin-plugins-data-public.runtimetype.md) |  |
 |  [SavedQueryTimeFilter](./kibana-plugin-plugins-data-public.savedquerytimefilter.md) |  |
 |  [SearchBarProps](./kibana-plugin-plugins-data-public.searchbarprops.md) |  |
 |  [StatefulSearchBarProps](./kibana-plugin-plugins-data-public.statefulsearchbarprops.md) |  |

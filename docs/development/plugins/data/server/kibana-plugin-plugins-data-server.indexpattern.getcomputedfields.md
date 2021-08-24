@@ -14,7 +14,9 @@ getComputedFields(): {
             field: any;
             format: string;
         }[];
-        runtimeFields: Record<string, RuntimeField>;
+        runtimeFields: {
+            [x: string]: RuntimeField;
+        };
     };
 ```
 <b>Returns:</b>
@@ -26,6 +28,8 @@ getComputedFields(): {
             field: any;
             format: string;
         }[];
-        runtimeFields: Record<string, RuntimeField>;
+        runtimeFields: {
+            [x: string]: RuntimeField;
+        };
     }`
 
