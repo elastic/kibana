@@ -7,16 +7,11 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 
-import { EuiButtonIcon, EuiContextMenu, EuiPopover, EuiToolTip } from '@elastic/eui';
+import { EuiButtonIcon, EuiContextMenuPanel, EuiPopover, EuiToolTip } from '@elastic/eui';
 import { indexOf } from 'lodash';
 
 import { ExceptionListType } from '@kbn/securitysolution-io-ts-list-types';
 import { get, getOr } from 'lodash/fp';
-import {
-  EuiContextMenuPanelDescriptor,
-  EuiContextMenuPanelItemDescriptor,
-} from '@elastic/eui/src/components/context_menu/context_menu';
-import styled from 'styled-components';
 import { buildGetAlertByIdQuery } from '../../../../common/components/exceptions/helpers';
 import { EventsTdContent } from '../../../../timelines/components/timeline/styles';
 import { DEFAULT_ICON_BUTTON_WIDTH } from '../../../../timelines/components/timeline/helpers';
@@ -54,11 +49,6 @@ interface AlertContextMenuProps {
   onRuleChange?: () => void;
   timelineId: string;
 }
-export const NestedWrapper = styled.span`
-  button.euiContextMenuItem {
-    padding: 0;
-  }
-`;
 
 const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
   ariaLabel = i18n.MORE_ACTIONS,
@@ -99,27 +89,18 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     ]
   );
   const hasWritePermissions = useGetUserCasesPermissions()?.crud ?? false;
-  const addToCaseAction = useMemo(
+  const addToCaseActionItems = useMemo(
     () =>
       [
         TimelineId.detectionsPage,
         TimelineId.detectionsRulesDetailsPage,
         TimelineId.active,
       ].includes(timelineId as TimelineId) && hasWritePermissions
-        ? {
-            actionItem: [
-              {
-                name: i18n.ACTION_ADD_TO_CASE,
-                panel: 2,
-                'data-test-subj': 'attach-alert-to-case-button',
-              },
-            ],
-            content: [
-              timelinesUi.getAddToExistingCaseButton(addToCaseActionProps),
-              timelinesUi.getAddToNewCaseButton(addToCaseActionProps),
-            ],
-          }
-        : { actionItem: [], content: [] },
+        ? [
+            timelinesUi.getAddToExistingCaseButton(addToCaseActionProps),
+            timelinesUi.getAddToNewCaseButton(addToCaseActionProps),
+          ]
+        : [],
     [addToCaseActionProps, hasWritePermissions, timelineId, timelinesUi]
   );
 
@@ -179,11 +160,12 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     onAddEventFilterClick,
   } = useEventFilterModal();
 
-  const { actionItems } = useAlertsActions({
+  const { actionItems: statusActionItems } = useAlertsActions({
     alertStatus,
     eventId: ecsRowData?._id,
     indexName: ecsRowData?._index ?? '',
     timelineId,
+    refetch,
     closePopover,
   });
 
@@ -200,72 +182,59 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     closePopover();
   }, [closePopover, onAddEventFilterClick]);
 
-  const { exceptionActions } = useExceptionActions({
+  const { exceptionActionItems } = useExceptionActions({
     isEndpointAlert,
     onAddExceptionTypeClick: handleOnAddExceptionTypeClick,
   });
-  const investigateInResolverAction = useInvestigateInResolverContextItem({
+  const investigateInResolverActionItems = useInvestigateInResolverContextItem({
     timelineId,
     ecsData: ecsRowData,
     onClose: afterItemSelection,
   });
-  const eventFilterAction = useEventFilterAction({
+  const { eventFilterActionItems } = useEventFilterAction({
     onAddEventFilterClick: handleOnAddEventFilterClick,
   });
-  const items: EuiContextMenuPanelItemDescriptor[] = useMemo(
+  const items: React.ReactElement[] = useMemo(
     () =>
       !isEvent && ruleId
         ? [
-            ...investigateInResolverAction,
-            ...addToCaseAction.actionItem,
-            ...actionItems.map((aI) => ({ name: <NestedWrapper>{aI}</NestedWrapper> })),
-            ...exceptionActions,
+            ...investigateInResolverActionItems,
+            ...addToCaseActionItems,
+            ...statusActionItems,
+            ...exceptionActionItems,
           ]
-        : [...investigateInResolverAction, ...addToCaseAction.actionItem, eventFilterAction],
+        : [...investigateInResolverActionItems, ...addToCaseActionItems, ...eventFilterActionItems],
     [
-      actionItems,
-      addToCaseAction.actionItem,
-      eventFilterAction,
-      exceptionActions,
-      investigateInResolverAction,
+      statusActionItems,
+      addToCaseActionItems,
+      eventFilterActionItems,
+      exceptionActionItems,
+      investigateInResolverActionItems,
       isEvent,
       ruleId,
     ]
   );
 
-  const panels: EuiContextMenuPanelDescriptor[] = useMemo(
-    () => [
-      {
-        id: 0,
-        items,
-      },
-      {
-        id: 2,
-        title: i18n.ACTION_ADD_TO_CASE,
-        content: addToCaseAction.content,
-      },
-    ],
-    [addToCaseAction.content, items]
-  );
-
   return (
     <>
       {timelinesUi.getAddToCaseAction(addToCaseActionProps)}
-      <div key="actions-context-menu">
-        <EventsTdContent textAlign="center" width={DEFAULT_ICON_BUTTON_WIDTH}>
-          <EuiPopover
-            id="singlePanel"
-            button={button}
-            isOpen={isPopoverOpen}
-            closePopover={closePopover}
-            panelPaddingSize="none"
-            anchorPosition="downLeft"
-            repositionOnScroll
-          >
-            <EuiContextMenu size="s" initialPanelId={0} panels={panels} />
-          </EuiPopover>
-        </EventsTdContent>
-      </div>
+      {items.length > 0 && (
+        <div key="actions-context-menu">
+          <EventsTdContent textAlign="center" width={DEFAULT_ICON_BUTTON_WIDTH}>
+            <EuiPopover
+              id="singlePanel"
+              button={button}
+              isOpen={isPopoverOpen}
+              closePopover={closePopover}
+              panelPaddingSize="none"
+              anchorPosition="downLeft"
+              repositionOnScroll
+            >
+              <EuiContextMenuPanel size="s" items={items} />
+            </EuiPopover>
+          </EventsTdContent>
+        </div>
+      )}
       {exceptionModalType != null &&
         ruleId != null &&
         ruleName != null &&
