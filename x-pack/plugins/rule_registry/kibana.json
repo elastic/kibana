@@ -1,8 +1,8 @@
 {
   "id": "ruleRegistry",
   "owner": {
-    "name": "Kibana Alerting",
-    "githubTeam": "kibana-alerting-services"
+    "name": "RAC",
+    "githubTeam": "rac"
   },
   "version": "8.0.0",
   "kibanaVersion": "kibana",

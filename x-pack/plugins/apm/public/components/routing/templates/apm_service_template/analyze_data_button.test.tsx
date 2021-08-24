@@ -53,16 +53,6 @@ describe('AnalyzeDataButton', () => {
     });
   });
 
-  describe('with no environment', () => {
-    it('does not include the environment', () => {
-      render(<Example environment={undefined} />);
-
-      expect((screen.getByRole('link') as HTMLAnchorElement).href).toEqual(
-        'http://localhost/app/observability/exploratory-view#?sr=(apm-series:(dt:mobile,isNew:!t,op:average,rdf:(service.name:!(testServiceName)),rt:kpi-over-time,time:(from:now-15m,to:now)))'
-      );
-    });
-  });
-
   describe('with environment not defined', () => {
     it('does not include the environment', () => {
       render(<Example environment={ENVIRONMENT_NOT_DEFINED.value} />);

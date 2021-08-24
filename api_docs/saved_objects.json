@@ -18,7 +18,13 @@
             "text": "SavedObjectFinderUi"
           },
           " extends React.Component<",
-          "SavedObjectFinderUiProps",
+          {
+            "pluginId": "savedObjects",
+            "scope": "public",
+            "docId": "kibSavedObjectsPluginApi",
+            "section": "def-public.SavedObjectFinderUiProps",
+            "text": "SavedObjectFinderUiProps"
+          },
           ", SavedObjectFinderState, any>"
         ],
         "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
@@ -479,7 +485,13 @@
                 "label": "props",
                 "description": [],
                 "signature": [
-                  "SavedObjectFinderUiProps"
+                  {
+                    "pluginId": "savedObjects",
+                    "scope": "public",
+                    "docId": "kibSavedObjectsPluginApi",
+                    "section": "def-public.SavedObjectFinderUiProps",
+                    "text": "SavedObjectFinderUiProps"
+                  }
                 ],
                 "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
                 "deprecated": false,
@@ -622,6 +634,14 @@
           },
           {
             "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/application/test_helpers/make_default_services.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/application/test_helpers/make_default_services.ts"
+          },
+          {
+            "plugin": "dashboard",
             "path": "src/plugins/dashboard/public/url_generator.ts"
           },
           {
@@ -629,6 +649,14 @@
             "path": "src/plugins/dashboard/public/url_generator.ts"
           },
           {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/url_generator.test.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/url_generator.test.ts"
+          },
+          {
             "plugin": "savedObjectsManagement",
             "path": "src/plugins/saved_objects_management/public/services/service_registry.ts"
           },
@@ -667,6 +695,26 @@
           {
             "plugin": "savedObjectsManagement",
             "path": "src/plugins/saved_objects_management/public/management_section/object_view/components/form.tsx"
+          },
+          {
+            "plugin": "savedObjectsManagement",
+            "path": "src/plugins/saved_objects_management/public/lib/resolve_saved_objects.test.ts"
+          },
+          {
+            "plugin": "savedObjectsManagement",
+            "path": "src/plugins/saved_objects_management/public/lib/resolve_saved_objects.test.ts"
+          },
+          {
+            "plugin": "savedObjectsManagement",
+            "path": "src/plugins/saved_objects_management/public/lib/resolve_saved_objects.test.ts"
+          },
+          {
+            "plugin": "timelion",
+            "path": "src/plugins/timelion/public/services/saved_sheets.ts"
+          },
+          {
+            "plugin": "timelion",
+            "path": "src/plugins/timelion/public/services/saved_sheets.ts"
           }
         ],
         "children": [
@@ -2197,6 +2245,122 @@
           {
             "plugin": "savedObjectsManagement",
             "path": "src/plugins/saved_objects_management/public/lib/resolve_saved_objects.ts"
+          },
+          {
+            "plugin": "visualize",
+            "path": "src/plugins/visualize/public/application/types.ts"
+          },
+          {
+            "plugin": "visualize",
+            "path": "src/plugins/visualize/public/application/types.ts"
+          },
+          {
+            "plugin": "visualize",
+            "path": "src/plugins/visualize/public/application/types.ts"
+          },
+          {
+            "plugin": "visualize",
+            "path": "src/plugins/visualize/public/application/types.ts"
+          },
+          {
+            "plugin": "visualize",
+            "path": "src/plugins/visualize/public/application/utils/get_visualization_instance.ts"
+          },
+          {
+            "plugin": "visualize",
+            "path": "src/plugins/visualize/public/application/utils/get_visualization_instance.ts"
+          },
+          {
+            "plugin": "visDefaultEditor",
+            "path": "src/plugins/vis_default_editor/public/components/sidebar/sidebar_title.tsx"
+          },
+          {
+            "plugin": "visDefaultEditor",
+            "path": "src/plugins/vis_default_editor/public/components/sidebar/sidebar_title.tsx"
+          },
+          {
+            "plugin": "visDefaultEditor",
+            "path": "src/plugins/vis_default_editor/public/components/sidebar/sidebar_title.tsx"
+          },
+          {
+            "plugin": "visDefaultEditor",
+            "path": "src/plugins/vis_default_editor/public/components/sidebar/sidebar.tsx"
+          },
+          {
+            "plugin": "visDefaultEditor",
+            "path": "src/plugins/vis_default_editor/public/components/sidebar/sidebar.tsx"
+          },
+          {
+            "plugin": "savedObjectsManagement",
+            "path": "src/plugins/saved_objects_management/public/lib/resolve_saved_objects.test.ts"
+          },
+          {
+            "plugin": "savedObjectsManagement",
+            "path": "src/plugins/saved_objects_management/public/lib/resolve_saved_objects.test.ts"
+          },
+          {
+            "plugin": "savedObjectsManagement",
+            "path": "src/plugins/saved_objects_management/public/lib/resolve_saved_objects.test.ts"
+          },
+          {
+            "plugin": "savedObjectsManagement",
+            "path": "src/plugins/saved_objects_management/public/lib/resolve_saved_objects.test.ts"
+          },
+          {
+            "plugin": "savedObjectsManagement",
+            "path": "src/plugins/saved_objects_management/public/lib/resolve_saved_objects.test.ts"
+          },
+          {
+            "plugin": "savedObjectsManagement",
+            "path": "src/plugins/saved_objects_management/public/lib/resolve_saved_objects.test.ts"
+          },
+          {
+            "plugin": "visualize",
+            "path": "src/plugins/visualize/target/types/public/application/types.d.ts"
+          },
+          {
+            "plugin": "visualize",
+            "path": "src/plugins/visualize/target/types/public/application/types.d.ts"
+          },
+          {
+            "plugin": "visualize",
+            "path": "src/plugins/visualize/target/types/public/application/types.d.ts"
+          },
+          {
+            "plugin": "visualize",
+            "path": "src/plugins/visualize/target/types/public/application/types.d.ts"
+          },
+          {
+            "plugin": "visDefaultEditor",
+            "path": "src/plugins/vis_default_editor/target/types/public/components/sidebar/sidebar.d.ts"
+          },
+          {
+            "plugin": "visDefaultEditor",
+            "path": "src/plugins/vis_default_editor/target/types/public/components/sidebar/sidebar.d.ts"
+          },
+          {
+            "plugin": "visDefaultEditor",
+            "path": "src/plugins/vis_default_editor/target/types/public/components/sidebar/sidebar_title.d.ts"
+          },
+          {
+            "plugin": "visDefaultEditor",
+            "path": "src/plugins/vis_default_editor/target/types/public/components/sidebar/sidebar_title.d.ts"
+          },
+          {
+            "plugin": "visDefaultEditor",
+            "path": "src/plugins/vis_default_editor/target/types/public/components/sidebar/sidebar_title.d.ts"
+          },
+          {
+            "plugin": "visualize",
+            "path": "src/plugins/visualize/target/types/public/application/utils/get_visualization_instance.d.ts"
+          },
+          {
+            "plugin": "visualize",
+            "path": "src/plugins/visualize/target/types/public/application/utils/get_visualization_instance.d.ts"
+          },
+          {
+            "plugin": "visualize",
+            "path": "src/plugins/visualize/target/types/public/application/utils/get_visualization_instance.d.ts"
           }
         ],
         "children": [
@@ -3647,6 +3811,52 @@
       },
       {
         "parentPluginId": "savedObjects",
+        "id": "def-public.SavedObjectFinderUiProps",
+        "type": "Type",
+        "tags": [],
+        "label": "SavedObjectFinderUiProps",
+        "description": [],
+        "signature": [
+          "({ savedObjects: ",
+          {
+            "pluginId": "core",
+            "scope": "public",
+            "docId": "kibCoreSavedObjectsPluginApi",
+            "section": "def-public.SavedObjectsStart",
+            "text": "SavedObjectsStart"
+          },
+          "; uiSettings: ",
+          {
+            "pluginId": "core",
+            "scope": "public",
+            "docId": "kibCorePluginApi",
+            "section": "def-public.IUiSettingsClient",
+            "text": "IUiSettingsClient"
+          },
+          "; } & SavedObjectFinderFixedPage) | ({ savedObjects: ",
+          {
+            "pluginId": "core",
+            "scope": "public",
+            "docId": "kibCoreSavedObjectsPluginApi",
+            "section": "def-public.SavedObjectsStart",
+            "text": "SavedObjectsStart"
+          },
+          "; uiSettings: ",
+          {
+            "pluginId": "core",
+            "scope": "public",
+            "docId": "kibCorePluginApi",
+            "section": "def-public.IUiSettingsClient",
+            "text": "IUiSettingsClient"
+          },
+          "; } & SavedObjectFinderInitialPageSize)"
+        ],
+        "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "savedObjects",
         "id": "def-public.SaveResult",
         "type": "Type",
         "tags": [],
@@ -3706,6 +3916,10 @@
             {
               "plugin": "dashboard",
               "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts"
+            },
+            {
+              "plugin": "timelion",
+              "path": "src/plugins/timelion/public/services/_saved_sheet.ts"
             }
           ]
         },
@@ -3743,6 +3957,14 @@
             {
               "plugin": "maps",
               "path": "x-pack/plugins/maps/public/routes/list_page/maps_list_view.tsx"
+            },
+            {
+              "plugin": "visualize",
+              "path": "src/plugins/visualize/public/application/components/visualize_listing.tsx"
+            },
+            {
+              "plugin": "visualize",
+              "path": "src/plugins/visualize/public/application/components/visualize_listing.tsx"
             }
           ]
         }
