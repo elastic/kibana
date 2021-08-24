@@ -22,7 +22,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import type { PingResponse } from '../common';
+import type { PingResult } from '../common';
 import type { ValidationErrors } from './use_form';
 import { useForm } from './use_form';
 import { useHttp } from './use_http';
@@ -34,7 +34,7 @@ export interface ClusterAddressFormValues {
 export interface ClusterAddressFormProps {
   defaultValues?: ClusterAddressFormValues;
   onCancel?(): void;
-  onSuccess?(result: PingResponse, values: ClusterAddressFormValues): void;
+  onSuccess?(result: PingResult, values: ClusterAddressFormValues): void;
 }
 
 export const ClusterAddressForm: FunctionComponent<ClusterAddressFormProps> = ({
@@ -74,7 +74,7 @@ export const ClusterAddressForm: FunctionComponent<ClusterAddressFormProps> = ({
       const url = new URL(values.host);
       const host = `${url.protocol}//${url.hostname}:${url.port || 9200}`;
 
-      const result = await http.post<PingResponse>('/internal/interactive_setup/ping', {
+      const result = await http.post<PingResult>('/internal/interactive_setup/ping', {
         body: JSON.stringify({
           hosts: [host],
         }),

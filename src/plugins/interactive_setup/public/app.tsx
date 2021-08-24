@@ -66,7 +66,7 @@ export const App: FunctionComponent = () => {
                 onSuccess={(result, values) =>
                   setCluster({
                     host: values.host,
-                    authRequired: result.statusCode === 401,
+                    authRequired: result.authRequired,
                     certificateChain: result.certificateChain,
                   })
                 }

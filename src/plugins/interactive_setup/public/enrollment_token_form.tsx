@@ -74,8 +74,8 @@ export const EnrollmentTokenForm: FunctionComponent<EnrollmentTokenFormProps> = 
       const decoded = decodeEnrollmentToken(values.token)!;
       await http.post('/internal/interactive_setup/enroll', {
         body: JSON.stringify({
-          hosts: decoded.adr.map((host) => `https://${host}`),
-          apiKey: btoa(decoded.key),
+          hosts: decoded.adr,
+          apiKey: decoded.key,
           caFingerprint: decoded.fgr,
         }),
       });
@@ -195,6 +195,10 @@ export function decodeEnrollmentToken(enrollmentToken: string) {
     ) {
       return;
     }
-    return json;
+    return {
+      ...json,
+      adr: json.adr.map((host) => `https://${host}`),
+      key: btoa(json.key),
+    };
   } catch (error) {} // eslint-disable-line no-empty
 }

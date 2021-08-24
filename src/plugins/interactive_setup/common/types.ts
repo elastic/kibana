@@ -55,11 +55,11 @@ export interface Certificate {
   raw: string;
 }
 
-export interface PingResponse {
+export interface PingResult {
   /**
    * Response status code of ping request.
    */
-  statusCode: number;
+  authRequired: boolean;
 
   /**
    * Full certificate chain of cluster at requested address. Only present if cluster uses HTTPS.

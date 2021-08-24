@@ -6,16 +6,12 @@
  * Side Public License, v 1.
  */
 
-import type {
-  CorePreboot,
-  IBasePath,
-  IRouter,
-  Logger,
-  PluginInitializerContext,
-} from 'src/core/server';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { IBasePath, IRouter, Logger, PrebootServicePreboot } from 'src/core/server';
 
-import type { ElasticsearchConnectionStatus } from '../../common';
 import type { ConfigType } from '../config';
+import type { ElasticsearchServiceSetup } from '../elasticsearch_service';
+import type { KibanaConfigWriter } from '../kibana_config_writer';
 import { defineConfigureRoute } from './configure';
 import { defineEnrollRoutes } from './enroll';
 import { definePingRoute } from './ping';
@@ -27,15 +23,16 @@ export interface RouteDefinitionParams {
   readonly router: IRouter;
   readonly basePath: IBasePath;
   readonly logger: Logger;
+  readonly preboot: PrebootServicePreboot & {
+    completeSetup: (result: { shouldReloadConfig: boolean }) => void;
+  };
+  readonly kibanaConfigWriter: PublicMethodsOf<KibanaConfigWriter>;
+  readonly elasticsearch: ElasticsearchServiceSetup;
   readonly getConfig: () => ConfigType;
-  readonly getElasticsearchConnectionStatus: () => ElasticsearchConnectionStatus;
-  readonly core: CorePreboot;
-  readonly initializerContext: PluginInitializerContext<ConfigType>;
-  readonly completeSetup: (result: { shouldReloadConfig: boolean }) => void;
 }
 
 export function defineRoutes(params: RouteDefinitionParams) {
-  defineConfigureRoute(params);
   defineEnrollRoutes(params);
+  defineConfigureRoute(params);
   definePingRoute(params);
 }

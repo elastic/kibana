@@ -6,13 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { constants } from 'fs';
-import fs from 'fs/promises';
-import yaml from 'js-yaml';
-import path from 'path';
+import { first } from 'rxjs/operators';
 
 import { schema } from '@kbn/config-schema';
 
+import { ElasticsearchConnectionStatus } from '../../common';
+import type { EnrollResult } from '../elasticsearch_service';
 import type { RouteDefinitionParams } from './';
 
 /**
@@ -21,131 +20,91 @@ import type { RouteDefinitionParams } from './';
 export function defineEnrollRoutes({
   router,
   logger,
-  initializerContext,
-  core,
-  completeSetup,
+  kibanaConfigWriter,
+  elasticsearch,
+  preboot,
 }: RouteDefinitionParams) {
   router.post(
     {
       path: '/internal/interactive_setup/enroll',
       validate: {
-        body: schema.oneOf([
-          schema.object({
-            hosts: schema.arrayOf(schema.uri({ scheme: 'https' }), {
-              minSize: 1,
-              maxSize: 1,
-            }),
-            apiKey: schema.string(),
-            caFingerprint: schema.string(),
+        body: schema.object({
+          hosts: schema.arrayOf(schema.uri({ scheme: 'https' }), {
+            minSize: 1,
           }),
-          schema.object({
-            hosts: schema.arrayOf(schema.uri({ scheme: 'https' }), {
-              minSize: 1,
-              maxSize: 1,
-            }),
-            username: schema.string(),
-            password: schema.string(),
-            caFingerprint: schema.string(),
-          }),
-        ]),
+          apiKey: schema.string({ minLength: 1 }),
+          caFingerprint: schema.string({ maxLength: 64, minLength: 64 }),
+        }),
       },
       options: { authRequired: false },
     },
     async (context, request, response) => {
-      if (!core.preboot.isSetupOnHold()) {
-        logger.error(`Invalid request to [path=${request.url.pathname}] outside of preboot phase`);
-        return response.badRequest();
+      if (!preboot.isSetupOnHold()) {
+        logger.error(`Invalid request to [path=${request.url.pathname}] outside of preboot stage`);
+        return response.badRequest({ body: 'Cannot process request outside of preboot stage.' });
       }
 
-      const configPath = initializerContext.env.mode.dev
-        ? initializerContext.env.configs.find((fpath) => path.basename(fpath).includes('dev'))
-        : initializerContext.env.configs[0];
-      if (!configPath) {
-        logger.error('Cannot find config file');
-        return response.customError({ statusCode: 500, body: 'Cannot find config file.' });
-      }
-      const caPath = path.join(path.dirname(configPath), `ca_${Date.now()}.crt`);
-
-      await Promise.all([isWriteable(configPath), isWriteable(caPath)]);
-
-      const enrollClient = core.elasticsearch
-        .createClient('enroll', {
-          hosts: request.body.hosts,
-          ssl: { verificationMode: 'none' },
-          // caFingerprint: request.body.caFingerprint,
-        })
-        .asScoped({
-          headers: {
-            authorization:
-              'apiKey' in request.body
-                ? `ApiKey ${btoa(request.body.apiKey)}`
-                : `Basic ${btoa(`${request.body.username}:${request.body.password}`)}`,
+      const connectionStatus = await elasticsearch.connectionStatus$.pipe(first()).toPromise();
+      if (connectionStatus === ElasticsearchConnectionStatus.Configured) {
+        logger.error(
+          `Invalid request to [path=${request.url.pathname}], Elasticsearch connection is already configured.`
+        );
+        return response.badRequest({
+          body: {
+            message: 'Elasticsearch connection is already configured.',
+            attributes: { type: 'elasticsearch_connection_configured' },
           },
         });
+      }
+
+      // The most probable misconfiguration case is when Kibana process isn't allowed to write to the
+      // Kibana configuration file. We'll still have to handle possible filesystem access errors
+      // when we actually write to the disk, but this preliminary check helps us to avoid unnecessary
+      // enrollment call and communicate that to the user early.
+      const isConfigWritable = await kibanaConfigWriter.isConfigWritable();
+      if (!isConfigWritable) {
+        logger.error('Kibana process does not have enough permissions to write to config file');
+        return response.customError({
+          statusCode: 500,
+          body: {
+            message: 'Kibana process does not have enough permissions to write to config file.',
+            attributes: { type: 'kibana_config_not_writable' },
+          },
+        });
+      }
+
+      let enrollResult: EnrollResult;
+      try {
+        enrollResult = await elasticsearch.enroll({
+          apiKey: request.body.apiKey,
+          hosts: request.body.hosts,
+          caFingerprint: request.body.caFingerprint,
+        });
+      } catch {
+        // For security reasons, we shouldn't leak to the user whether Elasticsearch node couldn't process enrollment
+        // request or we just couldn't connect to any of the provided hosts.
+        return response.customError({
+          statusCode: 500,
+          body: { message: 'Failed to enroll.', attributes: { type: 'enroll_failure' } },
+        });
+      }
 
       try {
-        const enrollResponse = await enrollClient.asCurrentUser.transport.request({
-          method: 'GET',
-          path: '/_security/enroll/kibana',
+        await kibanaConfigWriter.writeConfig(enrollResult);
+      } catch {
+        // For security reasons, we shouldn't leak any filesystem related errors.
+        return response.customError({
+          statusCode: 500,
+          body: {
+            message: 'Failed to save configuration.',
+            attributes: { type: 'kibana_config_failure' },
+          },
         });
-
-        const ca = createCertificate(enrollResponse.body.http_ca);
-
-        const verifyConnectionClient = core.elasticsearch.createClient('verifyConnection', {
-          hosts: request.body.hosts,
-          username: 'kibana_system',
-          password: enrollResponse.body.password,
-          ssl: { certificateAuthorities: [ca] },
-        });
-        await verifyConnectionClient.asInternalUser.security.authenticate();
-
-        await fs.writeFile(caPath, ca);
-        await fs.appendFile(
-          configPath,
-          createConfig({
-            elasticsearch: {
-              hosts: request.body.hosts,
-              username: 'kibana_system',
-              password: enrollResponse.body.password,
-              ssl: { certificateAuthorities: [caPath] },
-            },
-          })
-        );
-
-        completeSetup({ shouldReloadConfig: true });
-
-        return response.noContent();
-      } catch (error) {
-        logger.error(error);
-        return response.customError({ statusCode: 500 });
       }
+
+      preboot.completeSetup({ shouldReloadConfig: true });
+
+      return response.noContent();
     }
   );
-}
-
-export function isWriteable(fpath: string) {
-  return fs.access(fpath, constants.F_OK).then(
-    () => fs.access(fpath, constants.W_OK),
-    () => fs.access(path.dirname(fpath), constants.W_OK)
-  );
-}
-
-// Use X509Certificate once we upgraded to Node v16
-export function createCertificate(pem: string) {
-  if (pem.startsWith('-----BEGIN')) {
-    return pem;
-  }
-  return `-----BEGIN CERTIFICATE-----\n${pem
-    .replace(/_/g, '/')
-    .replace(/-/g, '+')
-    .replace(/([^\n]{1,65})/g, '$1\n')
-    .replace(/\n$/g, '')}\n-----END CERTIFICATE-----\n`;
-}
-
-export function createConfig(config: any) {
-  return `\n\n# This section was automatically generated during setup.\n${yaml.dump(config)}\n`;
-}
-
-export function btoa(str: string) {
-  return Buffer.from(str, 'binary').toString('base64');
 }
