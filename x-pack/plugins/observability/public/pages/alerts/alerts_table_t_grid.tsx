@@ -325,7 +325,6 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
       end: rangeTo,
       filters: [],
       indexNames,
-      itemsPerPage: 10,
       itemsPerPageOptions: [10, 25, 50],
       loadingText: i18n.translate('xpack.observability.alertsTable.loadingTextLabel', {
         defaultMessage: 'loading alerts',

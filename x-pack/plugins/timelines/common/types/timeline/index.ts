@@ -15,6 +15,7 @@ import {
   PinnedEvent,
 } from './pinned_event';
 import { Direction, Maybe } from '../../search_strategy';
+import { Ecs } from '../../ecs';
 
 export * from './actions';
 export * from './cells';
@@ -475,6 +476,7 @@ export type TimelineExpandedEventType =
       params?: {
         eventId: string;
         indexName: string;
+        ecsData?: Ecs;
       };
     }
   | EmptyObject;
