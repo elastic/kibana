@@ -146,7 +146,7 @@ export function FailedTransactionsCorrelations({
                   'xpack.apm.correlations.failedTransactions.correlationsTable.failurePercentageDescription',
                   {
                     defaultMessage:
-                      'Percentage of time the term appear in failed transactions.',
+                      'Percentage of time the term appears in failed transactions.',
                   }
                 )}
               >
@@ -179,7 +179,7 @@ export function FailedTransactionsCorrelations({
                   'xpack.apm.correlations.failedTransactions.correlationsTable.successPercentageDescription',
                   {
                     defaultMessage:
-                      'Percentage of time the term appear in successful transactions.',
+                      'Percentage of time the term appears in successful transactions.',
                   }
                 )}
               >
