@@ -25,19 +25,17 @@ export function getRequestInspectorStats(searchSource: ISearchSource) {
 
   if (index) {
     stats.indexPattern = {
-      // todo - This looks like an index pattern string, verify
-      // maybe it should be the index pattern title
-      label: i18n.translate('data.search.searchSource.indexPatternLabel', {
-        defaultMessage: 'Index pattern',
+      label: i18n.translate('data.search.searchSource.dataViewLabel', {
+        defaultMessage: 'Data view',
       }),
       value: index.title,
-      description: i18n.translate('data.search.searchSource.indexPatternDescription', {
-        defaultMessage: 'The index pattern that connected to the Elasticsearch indices.',
+      description: i18n.translate('data.search.searchSource.dataViewDescription', {
+        defaultMessage: 'The data view that connected to the Elasticsearch indices.',
       }),
     };
     stats.indexPatternId = {
-      label: i18n.translate('data.search.searchSource.indexPatternIdLabel', {
-        defaultMessage: 'Index pattern ID',
+      label: i18n.translate('data.search.searchSource.dataViewIdLabel', {
+        defaultMessage: 'Data view ID',
       }),
       value: index.id!,
       description: i18n.translate('data.search.searchSource.indexPatternIdDescription', {
