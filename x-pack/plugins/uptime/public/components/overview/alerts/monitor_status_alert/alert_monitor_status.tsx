@@ -8,7 +8,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { EuiCallOut, EuiSpacer, EuiHorizontalRule, EuiLoadingSpinner } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { isEmpty } from 'lodash';
 import { FiltersExpressionsSelect, StatusExpressionSelect } from '../monitor_expressions';
 import { AddFilterButton } from './add_filter_btn';
 import { OldAlertCallOut } from './old_alert_call_out';
@@ -31,20 +30,12 @@ export interface AlertMonitorStatusProps {
   };
 }
 
-const hasFilters = (filters: any) => {
-  if (isEmpty(filters)) {
+export const hasFilters = (filters?: { [key: string]: string[] }) => {
+  if (!filters || Object.keys(filters).length === 0) {
     return false;
   }
 
-  let hasFilter = false;
-
-  Object.entries(FILTER_FIELDS).forEach(([_, field]) => {
-    if (!isEmpty(filters[field])) {
-      hasFilter = true;
-    }
-  });
-
-  return hasFilter;
+  return Object.values(FILTER_FIELDS).some((f) => filters[f].length);
 };
 
 export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = (props) => {
