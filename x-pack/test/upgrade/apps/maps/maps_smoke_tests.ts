@@ -19,6 +19,7 @@ export default function ({
   const screenshot = getService('screenshots');
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
+  const browser = getService('browser');
   const SAMPLE_DATA_RANGE = `[
     {
       "from": "now-30d",
@@ -87,20 +88,29 @@ export default function ({
     ];
 
     before(async () => {
-      await kibanaServer.uiSettings.update({
-        [UI_SETTINGS.TIMEPICKER_QUICK_RANGES]: SAMPLE_DATA_RANGE,
-      });
+      await kibanaServer.uiSettings.update(
+        { [UI_SETTINGS.TIMEPICKER_QUICK_RANGES]: SAMPLE_DATA_RANGE },
+        { space: 'default' }
+      );
+      await kibanaServer.uiSettings.update(
+        { [UI_SETTINGS.TIMEPICKER_QUICK_RANGES]: SAMPLE_DATA_RANGE },
+        { space: 'automation' }
+      );
+      await browser.refresh();
     });
 
     spaces.forEach(({ space, basePath }) => {
       describe('space ' + space + ' ecommerce', () => {
         before(async () => {
-          await PageObjects.common.navigateToActualUrl('home', '/tutorial_directory/sampleData', {
-            basePath,
-          });
+          await PageObjects.common.navigateToActualUrl(
+            'maps',
+            'map/' + '2c9c1f60-1909-11e9-919b-ffe5949a18d2',
+            {
+              basePath,
+            }
+          );
           await PageObjects.header.waitUntilLoadingHasFinished();
-          await PageObjects.home.addSampleDataSet('ecommerce');
-          await PageObjects.maps.loadSavedMap('[eCommerce] Orders by Country');
+          await PageObjects.maps.waitForLayersToLoad();
           await PageObjects.maps.toggleLayerVisibility('Road map');
           await PageObjects.maps.toggleLayerVisibility('United Kingdom');
           await PageObjects.maps.toggleLayerVisibility('France');
@@ -120,15 +130,17 @@ export default function ({
           expect(percentDifference.toFixed(3)).to.be.lessThan(0.031);
         });
       });
-
       describe('space ' + space + ' flights', () => {
         before(async () => {
-          await PageObjects.common.navigateToActualUrl('home', '/tutorial_directory/sampleData', {
-            basePath,
-          });
+          await PageObjects.common.navigateToActualUrl(
+            'maps',
+            'map/' + '5dd88580-1906-11e9-919b-ffe5949a18d2',
+            {
+              basePath,
+            }
+          );
           await PageObjects.header.waitUntilLoadingHasFinished();
-          await PageObjects.home.addSampleDataSet('flights');
-          await PageObjects.maps.loadSavedMap('[Flights] Origin Time Delayed');
+          await PageObjects.maps.waitForLayersToLoad();
           await PageObjects.maps.toggleLayerVisibility('Road map');
           await PageObjects.timePicker.setCommonlyUsedTime('sample_data range');
           await PageObjects.maps.enterFullScreen();
@@ -144,15 +156,17 @@ export default function ({
           expect(percentDifference.toFixed(3)).to.be.lessThan(0.031);
         });
       });
-
       describe('space ' + space + ' web logs', () => {
         before(async () => {
-          await PageObjects.common.navigateToActualUrl('home', '/tutorial_directory/sampleData', {
-            basePath,
-          });
+          await PageObjects.common.navigateToActualUrl(
+            'maps',
+            'map/' + 'de71f4f0-1902-11e9-919b-ffe5949a18d2',
+            {
+              basePath,
+            }
+          );
           await PageObjects.header.waitUntilLoadingHasFinished();
-          await PageObjects.home.addSampleDataSet('logs');
-          await PageObjects.maps.loadSavedMap('[Logs] Total Requests and Bytes');
+          await PageObjects.maps.waitForLayersToLoad();
           await PageObjects.maps.toggleLayerVisibility('Road map');
           await PageObjects.maps.toggleLayerVisibility('Total Requests by Country');
           await PageObjects.timePicker.setCommonlyUsedTime('sample_data range');
