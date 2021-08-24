@@ -7,6 +7,8 @@
  */
 
 import _, { each, reject } from 'lodash';
+import { castEsToKbnFieldTypeName } from '@kbn/field-types';
+
 import { FieldAttrs, FieldAttrSet, IndexPatternAttributes } from '../..';
 import type {
   EnhancedRuntimeField,
@@ -24,7 +26,6 @@ import { flattenHitWrapper } from './flatten_hit';
 import { FieldFormatsStartCommon, FieldFormat } from '../../../../field_formats/common';
 import { IndexPatternSpec, TypeMeta, SourceFilter, IndexPatternFieldMap } from '../types';
 import { SerializedFieldFormat } from '../../../../expressions/common';
-import { castEsToKbnFieldTypeName } from '../../kbn_field_types';
 
 interface IndexPatternDeps {
   spec?: IndexPatternSpec;
@@ -219,7 +220,7 @@ export class IndexPattern implements IIndexPattern {
   /**
    * Method to aggregate all the runtime fields which are **not** created
    * from a parent composite runtime field.
-   * @returns Runtime fields which are **not** created from a parent composite
+   * @returns A map of runtime fields
    */
   private getComputedRuntimeFields(): Record<string, RuntimeField> {
     return Object.entries(this.runtimeFieldMap).reduce((acc, [name, field]) => {
@@ -243,7 +244,7 @@ export class IndexPattern implements IIndexPattern {
 
   /**
    * This method reads all the runtime composite fields
-   * and merge into it all the subFields
+   * and aggregate the subFields
    *
    * {
    *   "compositeName": {
@@ -555,7 +556,7 @@ export class IndexPattern implements IIndexPattern {
   }
 
   /**
-   * Add a runtime composite and its subFields to the fields list
+   * Create a runtime composite and add its subFields to the index pattern fields list
    * @param name - The runtime composite name
    * @param runtimeComposite - The runtime composite definition
    */
@@ -581,6 +582,7 @@ export class IndexPattern implements IIndexPattern {
     this.runtimeCompositeMap[name] = {
       name,
       script,
+      // We only need to keep a reference of the subFields names
       subFields: Object.keys(subFields),
     };
 
@@ -615,10 +617,10 @@ export class IndexPattern implements IIndexPattern {
       }
 
       const runtimeField: EnhancedRuntimeField = {
-        type: 'composite',
-        parent: name,
+        type: field.type as RuntimeType,
         customLabel: field.customLabel,
         popularity: field.count,
+        parent: name,
         format: this.getFormatterForFieldNoDefault(field.name)?.toJSON(),
       };
 
