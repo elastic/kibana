@@ -7,10 +7,45 @@
 
 import React from 'react';
 import { screen } from '@testing-library/dom';
-import { AlertMonitorStatusComponent, AlertMonitorStatusProps } from './alert_monitor_status';
+import {
+  AlertMonitorStatusComponent,
+  AlertMonitorStatusProps,
+  hasFilters,
+} from './alert_monitor_status';
 import { render } from '../../../../lib/helper/rtl_helpers';
 
 describe('alert monitor status component', () => {
+  describe('hasFilters', () => {
+    const EMPTY_FILTERS = {
+      tags: [],
+      'url.port': [],
+      'observer.geo.name': [],
+      'monitor.type': [],
+    };
+
+    it('returns false when filters are empty', () => {
+      expect(hasFilters({})).toBe(false);
+    });
+
+    it('returns false when all fields are empty', () => {
+      expect(hasFilters(EMPTY_FILTERS)).toBe(false);
+    });
+
+    it.each([
+      { tags: ['prod'] },
+      { 'url.port': ['5678'] },
+      { 'observer.geo.name': ['Fairbanks'] },
+      { 'monitor.type': ['HTTP'] },
+    ])('returns true if a filter has a field', (testObj) => {
+      expect(
+        hasFilters({
+          ...EMPTY_FILTERS,
+          ...testObj,
+        })
+      ).toBe(true);
+    });
+  });
+
   describe('AlertMonitorStatus', () => {
     const defaultProps: AlertMonitorStatusProps = {
       alertParams: {
