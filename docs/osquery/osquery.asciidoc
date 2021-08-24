@@ -1,6 +1,7 @@
+[chapter]
 [role="xpack"]
-[[osquery]
-== Osquery
+[[osquery]]
+= Osquery
 
 The OSquery Manager integration enables you to centrally manage [Osquery](https://osquery.io/)
 deployments to Elastic Agents in your Fleet and query host data through distributed SQL.
@@ -16,12 +17,12 @@ Osquery results are stored in {es}, so that you can use the
 Elastic Stack to search, analyze, and visualize Osquery data.
 
 [float]
-=== Supported platforms
+== Supported platforms
 
 This integration supports x86_64 bit Windows, Darwin, Arm64, and Linux platforms.
 
 [float]
-=== Access Osquery
+== Access Osquery
 
 After you add the Osquery Manager integration to an agent policy in Fleet,
 access *Osquery* in two ways:
@@ -34,7 +35,7 @@ Select a specific policy or go to the **Advanced** tab, and then select **Run li
 The agents in that policy are pre-selected for the new query or scheduled query group.
 
 [float]
-===  Run live queries
+==  Run live queries
 Run a query against one or more agents or policies. View the
 results in a table, or pivot to *Discover* or *Lens* to further explore the results.
 
@@ -56,7 +57,7 @@ to deliver the action request to an agent to run a query. If the action complete
 the results are still returned.
 
 [float]
-=== Schedule query groups
+== Schedule query groups
 
 Scheduled query groups enable you to organize and schedule queries that run on an interval (seconds) on  Osquerybeat.
 The results of the queries are returned directly to {es} and are viewable in {kib}.
@@ -84,7 +85,7 @@ After selecting a scheduled query group to edit or adding a new scheduled query 
 To save your changes, click **Save query**. Once saved, the changes are pushed out to the agents in the policy.
 
 [float]
-=== Saved queries
+== Saved queries
 The Saved queries page lists all queries that have been saved.
 From the Live queries page, you can create and save a new live query.
 From the **Scheduled query groups** page, you can add saved queries to a scheduled query group.
@@ -99,7 +100,7 @@ Each query contains the following information:
 ** Platform: Sets the operating system required to run the query.
 
 [float]
-=== Query statuses
+== Query statuses
 
 
 [cols="2*<"]
@@ -112,12 +113,12 @@ Each query contains the following information:
 |===
 
 [float]
-==== Default Osquery configuration
+=== Default Osquery configuration
 
 The Osquery binary is executed with the standard osqueryd defaults.
 
 [float]
-==== Osquery results
+=== Osquery results
 
 When you run a live or scheduled query, note the following about Osquery responses:
 
@@ -287,7 +288,7 @@ This is an example of an **error response** for an undefined action query.
 ```
 
 [float]
-=== Upgrade osquery versions
+== Upgrade osquery versions
 The [osquery version](https://github.com/osquery/osquery/releases) available on an Elastic Agent
 is tied to the version of Osquery Beat on the Agent. When a new osquery version is released,
 we do our best to test and verify the impact of the update, then upgrade the osquery version available in Osquery Beat.
@@ -295,7 +296,7 @@ To get the latest version of Osquery Beat,
 [upgrade your Elastic Agent](https://www.elastic.co/guide/en/fleet/master/upgrade-elastic-agent.html).
 
 [float]
-=== Debug issues
+== Debug issues
 If you encounter issues using Osquery Manager, find relevant logs for the elastic-agent
 and Osquerybeat in the installed agent directory, which will look similar to the following example paths.
 Adjust the agent path as needed for your setup.
