@@ -58,7 +58,7 @@ const UserActionPropertyActionsComponent = ({
     [userCanCrud, editLabel, onEditClick, quoteLabel, onQuoteClick, canUseEditor, actionConfig]
   );
 
-  if (!userCanCrud && (!canUseEditor || (canUseEditor && !actionConfig))) {
+  if (!propertyActions.length) {
     return null;
   }
 
