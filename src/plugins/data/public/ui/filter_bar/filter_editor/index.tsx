@@ -77,7 +77,7 @@ class FilterEditorUI extends Component<Props, State> {
       selectedOperator: this.getSelectedOperator(),
       params: getFilterParams(props.filter),
       useCustomLabel: props.filter.meta.alias !== null,
-      customLabel: props.filter.meta.alias,
+      customLabel: props.filter.meta.alias || '',
       queryDsl: JSON.stringify(cleanFilter(props.filter), null, 2),
       isCustomEditorOpen: this.isUnknownFilterType(),
     };
@@ -489,7 +489,7 @@ class FilterEditorUI extends Component<Props, State> {
     const alias = useCustomLabel ? customLabel : null;
 
     if (isCustomEditorOpen) {
-      const { index, disabled, negate } = this.props.filter.meta;
+      const { index, disabled = false, negate = false } = this.props.filter.meta;
       const newIndex = index || this.props.indexPatterns[0].id!;
       const body = JSON.parse(queryDsl);
       const filter = buildCustomFilter(newIndex, body, disabled, negate, alias, $state.store);
@@ -500,7 +500,7 @@ class FilterEditorUI extends Component<Props, State> {
         field,
         operator.type,
         operator.negate,
-        this.props.filter.meta.disabled,
+        this.props.filter.meta.disabled ?? false,
         params ?? '',
         alias,
         $state.store
