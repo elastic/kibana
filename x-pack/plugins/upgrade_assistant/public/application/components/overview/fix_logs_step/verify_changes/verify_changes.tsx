@@ -53,7 +53,7 @@ const i18nTexts = {
   ),
 };
 
-const getPreviousCheck = () => {
+const getPreviousCheckpointDate = () => {
   const storedValue = moment(localStorage.get(LOCALSTORAGE_KEY));
 
   if (storedValue.isValid()) {
@@ -68,7 +68,7 @@ const getPreviousCheck = () => {
 
 export const VerifyChanges: FunctionComponent = () => {
   const { api } = useAppContext();
-  const [previousCheck, setPreviousCheck] = useState(getPreviousCheck());
+  const [previousCheck, setPreviousCheck] = useState(getPreviousCheckpointDate());
   const { data, error, isLoading, resendRequest } = api.getDeprecationLogsCount(previousCheck);
 
   const warningsCount = data?.count || 0;
@@ -87,7 +87,7 @@ export const VerifyChanges: FunctionComponent = () => {
     localStorage.set(LOCALSTORAGE_KEY, now);
   };
 
-  if (isLoading) {
+  if (!data && isLoading) {
     return (
       <EuiFlexGroup>
         <EuiFlexItem>

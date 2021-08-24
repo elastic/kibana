@@ -154,7 +154,7 @@ describe('Overview - Fix deprecation logs step', () => {
       httpRequestsMockHelpers.setLoadDeprecationLoggingResponse(getLoggingResponse(true));
     });
 
-    test('X deprecation warnings', async () => {
+    test('Has deprecation warnings', async () => {
       httpRequestsMockHelpers.setLoadDeprecationLogsCountResponse({
         count: 10,
       });
@@ -163,12 +163,12 @@ describe('Overview - Fix deprecation logs step', () => {
         testBed = await setupOverviewPage();
       });
 
-      const { exists, component } = testBed;
+      const { find, exists, component } = testBed;
 
       component.update();
 
       expect(exists('hasWarningsCallout')).toBe(true);
-      expect(exists('noWarningsCallout')).toBe(false);
+      expect(find('hasWarningsCallout').text()).toContain('10');
     });
 
     test('No deprecation warnings', async () => {
@@ -180,15 +180,15 @@ describe('Overview - Fix deprecation logs step', () => {
         testBed = await setupOverviewPage();
       });
 
-      const { exists, component } = testBed;
+      const { find, exists, component } = testBed;
 
       component.update();
 
       expect(exists('noWarningsCallout')).toBe(true);
-      expect(exists('hasWarningsCallout')).toBe(false);
+      expect(find('noWarningsCallout').text()).toContain('No deprecation warnings');
     });
 
-    test('Handles errors and has a way to retry', async () => {
+    test('Handles errors and can retry', async () => {
       const error = {
         statusCode: 500,
         error: 'Internal server error',
