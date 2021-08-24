@@ -9,7 +9,6 @@
 import React, { Fragment } from 'react';
 import { MAX_DOC_FIELDS_DISPLAYED } from '../../../../../../../common';
 import { getServices, IndexPattern } from '../../../../../../kibana_services';
-import { getFieldsToShow } from '../../../../../helpers/get_fields_to_show';
 
 interface Props {
   defPairs: Array<[string, unknown]>;
@@ -34,7 +33,7 @@ export const formatRow = (
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   hit: Record<string, any>,
   indexPattern: IndexPattern,
-  showMultiFields: boolean
+  fieldsToShow: string[]
 ) => {
   const highlights = hit?.highlight ?? {};
   // Keys are sorted in the hits object
@@ -42,8 +41,6 @@ export const formatRow = (
   const fields = indexPattern.fields;
   const highlightPairs: Array<[string, unknown]> = [];
   const sourcePairs: Array<[string, unknown]> = [];
-  const fieldNames = fields.map((field) => field.name);
-  const fieldsToShow = getFieldsToShow(fieldNames, indexPattern, showMultiFields);
   Object.entries(formatted).forEach(([key, val]) => {
     const displayKey = fields.getByName ? fields.getByName(key)?.displayName : undefined;
     const pairs = highlights[key] ? highlightPairs : sourcePairs;

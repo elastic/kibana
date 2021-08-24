@@ -11,7 +11,7 @@ import classNames from 'classnames';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiIcon } from '@elastic/eui';
 import { DocViewer } from '../../../../../components/doc_viewer/doc_viewer';
-import { FilterManager, IndexPattern } from '../../../../../../../../data/public';
+import { FilterManager, IndexPattern, IndexPatternField } from '../../../../../../../../data/public';
 import { TableCell } from './table_row/table_cell';
 import { ElasticSearchHit, DocViewFilterFn } from '../../../../../doc_views/doc_views_types';
 import { trimAngularSpan } from '../../../../../components/table/table_helper';
@@ -19,6 +19,7 @@ import { getContextUrl } from '../../../../../helpers/get_context_url';
 import { getSingleDocUrl } from '../../../../../helpers/get_single_doc_url';
 import { TableRowDetails } from './table_row_details';
 import { formatRow, formatTopLevelObject } from '../lib/row_formatter';
+import { getFieldsToShow } from '../../../../../helpers/get_fields_to_show';
 
 export type DocTableRow = ElasticSearchHit & {
   isAnchor?: boolean;
@@ -60,6 +61,14 @@ export const TableRow = ({
 
   const flattenedRow = useMemo(() => indexPattern.flattenHit(row), [indexPattern, row]);
   const mapping = useMemo(() => indexPattern.fields.getByName, [indexPattern]);
+  const fieldsToShow = useMemo(
+    () =>
+      getFieldsToShow(
+        indexPattern.fields.map((field: IndexPatternField) => field.name),
+        indexPattern,
+        showMultiFields
+      ),
+    [indexPattern, showMultiFields]);
 
   // toggle display of the rows details, a full list of the fields from each row
   const toggleRow = () => setOpen((prevOpen) => !prevOpen);
@@ -127,7 +136,7 @@ export const TableRow = ({
   }
 
   if (columns.length === 0 && useNewFieldsApi) {
-    const formatted = formatRow(row, indexPattern, showMultiFields);
+    const formatted = formatRow(row, indexPattern, fieldsToShow);
 
     rowCells.push(
       <TableCell
