@@ -13,6 +13,14 @@ import React from 'react';
 import { Ecs } from '../../../../../common/ecs';
 import { mockTimelines } from '../../../../common/mock/mock_timelines_plugin';
 
+jest.mock('@kbn/alerts', () => ({
+  useGetUserAlertsPermissions: () => ({
+    loading: false,
+    crud: true,
+    read: true,
+  }),
+}));
+
 const ecsRowData: Ecs = { _id: '1', agent: { type: ['blah'] } };
 
 const props = {
@@ -36,6 +44,9 @@ jest.mock('../../../../common/lib/kibana', () => ({
   useKibana: () => ({
     services: {
       timelines: { ...mockTimelines },
+      application: {
+        capabilities: { siem: { crud_alerts: true, read_alerts: true } },
+      },
     },
   }),
   useGetUserCasesPermissions: jest.fn().mockReturnValue({
@@ -45,7 +56,8 @@ jest.mock('../../../../common/lib/kibana', () => ({
 }));
 
 const actionMenuButton = '[data-test-subj="timeline-context-menu-button"] button';
-const addToCaseButton = '[data-test-subj="attach-alert-to-case-button"]';
+const addToExistingCaseButton = '[data-test-subj="add-to-existing-case-action"]';
+const addToNewCaseButton = '[data-test-subj="add-to-new-case-action"]';
 
 describe('InvestigateInResolverAction', () => {
   test('it render AddToCase context menu item if timelineId === TimelineId.detectionsPage', () => {
@@ -54,7 +66,8 @@ describe('InvestigateInResolverAction', () => {
     });
 
     wrapper.find(actionMenuButton).simulate('click');
-    expect(wrapper.find(addToCaseButton).first().exists()).toEqual(true);
+    expect(wrapper.find(addToExistingCaseButton).first().exists()).toEqual(true);
+    expect(wrapper.find(addToNewCaseButton).first().exists()).toEqual(true);
   });
 
   test('it render AddToCase context menu item if timelineId === TimelineId.detectionsRulesDetailsPage', () => {
@@ -66,7 +79,8 @@ describe('InvestigateInResolverAction', () => {
     );
 
     wrapper.find(actionMenuButton).simulate('click');
-    expect(wrapper.find(addToCaseButton).first().exists()).toEqual(true);
+    expect(wrapper.find(addToExistingCaseButton).first().exists()).toEqual(true);
+    expect(wrapper.find(addToNewCaseButton).first().exists()).toEqual(true);
   });
 
   test('it render AddToCase context menu item if timelineId === TimelineId.active', () => {
@@ -75,7 +89,8 @@ describe('InvestigateInResolverAction', () => {
     });
 
     wrapper.find(actionMenuButton).simulate('click');
-    expect(wrapper.find(addToCaseButton).first().exists()).toEqual(true);
+    expect(wrapper.find(addToExistingCaseButton).first().exists()).toEqual(true);
+    expect(wrapper.find(addToNewCaseButton).first().exists()).toEqual(true);
   });
 
   test('it does NOT render AddToCase context menu item when timelineId is not in the allowed list', () => {
@@ -83,6 +98,7 @@ describe('InvestigateInResolverAction', () => {
       wrappingComponent: TestProviders,
     });
     wrapper.find(actionMenuButton).simulate('click');
-    expect(wrapper.find(addToCaseButton).first().exists()).toEqual(false);
+    expect(wrapper.find(addToExistingCaseButton).first().exists()).toEqual(false);
+    expect(wrapper.find(addToNewCaseButton).first().exists()).toEqual(false);
   });
 });

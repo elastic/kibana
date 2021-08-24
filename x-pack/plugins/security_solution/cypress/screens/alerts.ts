@@ -31,6 +31,8 @@ export const ALERT_RULE_SEVERITY = '[data-test-subj="draggable-content-signal.ru
 
 export const ALERT_RULE_VERSION = '[data-test-subj="draggable-content-signal.rule.version"]';
 
+export const ALERT_DATA_GRID = '[data-test-subj="dataGridWrapper"]';
+
 export const CLOSE_ALERT_BTN = '[data-test-subj="close-alert-status"]';
 
 export const CLOSE_SELECTED_ALERTS_BTN = '[data-test-subj="close-alert-status"]';
@@ -42,6 +44,8 @@ export const EXPAND_ALERT_BTN = '[data-test-subj="expand-event"]';
 export const ACKNOWLEDGED_ALERTS_FILTER_BTN = '[data-test-subj="acknowledgedAlerts"]';
 
 export const LOADING_ALERTS_PANEL = '[data-test-subj="loading-alerts-panel"]';
+
+export const LOADING_SPINNER = '[data-test-subj="LoadingPanelTimeline"]';
 
 export const MANAGE_ALERT_DETECTION_RULES_BTN = '[data-test-subj="manage-alert-detection-rules"]';
 
