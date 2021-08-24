@@ -272,9 +272,11 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiColumnSorting.button': i18n.translate('core.euiColumnSorting.button', {
       defaultMessage: 'Sort fields',
     }),
-    'euiColumnSorting.buttonActive': i18n.translate('core.euiColumnSorting.buttonActive', {
-      defaultMessage: 'fields sorted',
-    }),
+    'euiColumnSorting.buttonActive': ({ numberOfSortedFields }: EuiValues) =>
+      i18n.translate('core.euiColumnSorting.buttonActive', {
+        defaultMessage: '{numberOfSortedFields, plural, one {# field} other {# fields}} sorted',
+        values: { numberOfSortedFields },
+      }),
     'euiColumnSortingDraggable.activeSortLabel': ({ display }: EuiValues) =>
       i18n.translate('core.euiColumnSortingDraggable.activeSortLabel', {
         defaultMessage: '{display} is sorting this data grid',
@@ -514,16 +516,26 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiFilePicker.clearSelectedFiles': i18n.translate('core.euiFilePicker.clearSelectedFiles', {
       defaultMessage: 'Clear selected files',
     }),
-    'euiFilePicker.filesSelected': i18n.translate('core.euiFilePicker.filesSelected', {
-      defaultMessage: 'files selected',
+    'euiFilePicker.filesSelected': ({ fileCount }: EuiValues) =>
+      i18n.translate('core.euiFilePicker.filesSelected', {
+        defaultMessage: '{fileCount} files selected',
+        values: { fileCount },
+      }),
+    'euiFilePicker.promptText': i18n.translate('core.euiFilePicker.promptText', {
+      defaultMessage: 'Select or drag and drop a file',
     }),
     'euiFilePicker.removeSelected': i18n.translate('core.euiFilePicker.removeSelected', {
       defaultMessage: 'Remove',
     }),
-    'euiFilterButton.filterBadge': ({ count, hasActiveFilters }: EuiValues) =>
-      i18n.translate('core.euiFilterButton.filterBadge', {
-        defaultMessage: '{count} {hasActiveFilters} filters',
-        values: { count, hasActiveFilters: hasActiveFilters ? 'active' : 'available' },
+    'euiFilterButton.filterBadgeActiveAriaLabel': ({ count }: EuiValues) =>
+      i18n.translate('core.euiFilterButton.filterBadgeActiveAriaLabel', {
+        defaultMessage: '{count} active filters',
+        values: { count },
+      }),
+    'euiFilterButton.filterBadgeAvailableAriaLabel': ({ count }: EuiValues) =>
+      i18n.translate('core.euiFilterButton.filterBadgeAvailableAriaLabel', {
+        defaultMessage: '{count} available filters',
+        values: { count },
       }),
     'euiFlyout.closeAriaLabel': i18n.translate('core.euiFlyout.closeAriaLabel', {
       defaultMessage: 'Close this dialog',
