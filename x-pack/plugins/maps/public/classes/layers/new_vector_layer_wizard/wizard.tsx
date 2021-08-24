@@ -87,7 +87,8 @@ export class NewVectorLayerEditor extends Component<RenderWizardArguments, State
       if (!userHasIndexWritePermissions) {
         this._setCreateIndexError(
           i18n.translate('xpack.maps.layers.newVectorLayerWizard.indexPermissionsError', {
-            defaultMessage: 'User missing permissions to create index "{indexName}"',
+            defaultMessage:
+              'You do not have permission to create or import data into index "{indexName}".',
             values: {
               indexName: this.state.indexName,
             },
@@ -152,7 +153,7 @@ export class NewVectorLayerEditor extends Component<RenderWizardArguments, State
       return (
         <EuiCallOut
           title={i18n.translate('xpack.maps.layers.newVectorLayerWizard.createIndexErrorTitle', {
-            defaultMessage: 'Unable to create new index',
+            defaultMessage: 'Unable to create index',
           })}
           color="danger"
           iconType="alert"
