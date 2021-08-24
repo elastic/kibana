@@ -185,7 +185,7 @@ export const patchRulesBulkRoute = (
                 ruleId: rule.id,
                 spaceId: context.securitySolution.getSpaceId(),
               });
-              return transformValidateBulkError(rule.id, rule, undefined, ruleStatuses);
+              return transformValidateBulkError(rule.id, rule, ruleStatuses);
             } else {
               return getIdBulkError({ id, ruleId });
             }

@@ -81,7 +81,7 @@ export const updateRulesBulkRoute = (
                 ruleId: rule.id,
                 spaceId: context.securitySolution.getSpaceId(),
               });
-              return transformValidateBulkError(rule.id, rule, undefined, ruleStatuses);
+              return transformValidateBulkError(rule.id, rule, ruleStatuses);
             } else {
               return getIdBulkError({ id: payloadRule.id, ruleId: payloadRule.rule_id });
             }

@@ -89,7 +89,7 @@ export const deleteRulesBulkRoute = (router: SecuritySolutionPluginRouter) => {
             ruleStatuses,
             id: rule.id,
           });
-          return transformValidateBulkError(idOrRuleIdOrUnknown, rule, undefined, ruleStatuses);
+          return transformValidateBulkError(idOrRuleIdOrUnknown, rule, ruleStatuses);
         } catch (err) {
           return transformBulkError(idOrRuleIdOrUnknown, err);
         }

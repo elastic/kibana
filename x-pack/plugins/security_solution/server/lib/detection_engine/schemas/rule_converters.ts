@@ -23,7 +23,6 @@ import {
   FullResponseSchema,
   ResponseTypeSpecific,
 } from '../../../../common/detection_engine/schemas/request';
-import { RuleActions } from '../rule_actions/types';
 import { AppClient } from '../../../types';
 import { addTags } from '../rules/add_tags';
 import { DEFAULT_MAX_SIGNALS, SERVER_APP_ID, SIGNALS_ID } from '../../../../common/constants';
@@ -32,7 +31,11 @@ import { SanitizedAlert } from '../../../../../alerting/common';
 import { IRuleStatusSOAttributes } from '../rules/types';
 import { transformTags } from '../routes/rules/utils';
 import { RuleExecutionStatus } from '../../../../common/detection_engine/schemas/common/schemas';
-import { transformToAlertThrottle, transformToNotifyWhen } from '../rules/utils';
+import {
+  transformFromAlertThrottle,
+  transformToAlertThrottle,
+  transformToNotifyWhen,
+} from '../rules/utils';
 
 // These functions provide conversions from the request API schema to the internal rule schema and from the internal rule schema
 // to the response API schema. This provides static type-check assurances that the internal schema is in sync with the API schema for
@@ -272,7 +275,6 @@ export const commonParamsCamelToSnake = (params: BaseRuleParams) => {
 
 export const internalRuleToAPIResponse = (
   rule: SanitizedAlert<RuleParams>,
-  ruleActions?: RuleActions | null,
   ruleStatus?: IRuleStatusSOAttributes
 ): FullResponseSchema => {
   const mergedStatus = ruleStatus ? mergeAlertWithSidecarStatus(rule, ruleStatus) : undefined;
@@ -292,8 +294,14 @@ export const internalRuleToAPIResponse = (
     // Type specific security solution rule params
     ...typeSpecificCamelToSnake(rule.params),
     // Actions
-    throttle: ruleActions?.ruleThrottle || 'no_actions',
-    actions: ruleActions?.actions ?? [],
+    throttle: transformFromAlertThrottle(rule),
+    actions:
+      rule?.actions.map((action) => ({
+        group: action.group,
+        id: action.id,
+        action_type_id: action.actionTypeId,
+        params: action.params,
+      })) ?? [],
     // Rule status
     status: mergedStatus?.status ?? undefined,
     status_date: mergedStatus?.statusDate ?? undefined,

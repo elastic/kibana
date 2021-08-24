@@ -27,6 +27,7 @@ import type {
 } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { ListArrayOrUndefined } from '@kbn/securitysolution-io-ts-list-types';
 import type { VersionOrUndefined } from '@kbn/securitysolution-io-ts-types';
+import { SanitizedAlert } from '../../../../../alerting/common';
 import {
   DescriptionOrUndefined,
   AnomalyThresholdOrUndefined,
@@ -53,7 +54,11 @@ import {
   EventCategoryOverrideOrUndefined,
 } from '../../../../common/detection_engine/schemas/common/schemas';
 import { PartialFilter } from '../types';
-import { NotifyWhen } from '../schemas/rule_schemas';
+import { NotifyWhen, RuleParams } from '../schemas/rule_schemas';
+import {
+  NOTIFICATION_THROTTLE_NO_ACTIONS,
+  NOTIFICATION_THROTTLE_RULE,
+} from '../../../../common/constants';
 
 export const calculateInterval = (
   interval: string | undefined,
@@ -169,20 +174,42 @@ export const calculateName = ({
   }
 };
 
+// TODO: Write unit tests
 export const transformToNotifyWhen = (throttle: string | null | undefined): NotifyWhen | null => {
-  if (throttle == null || throttle === 'no_actions') {
+  if (throttle == null || throttle === NOTIFICATION_THROTTLE_NO_ACTIONS) {
     return null; // Although I return null, this does not change the value of the "notifyWhen" and it keeps the current value of "notifyWhen"
-  } else if (throttle === 'rule') {
+  } else if (throttle === NOTIFICATION_THROTTLE_RULE) {
     return 'onActiveAlert';
   } else {
     return 'onThrottleInterval';
   }
 };
 
+// TODO: Write unit tests
 export const transformToAlertThrottle = (throttle: string | null | undefined): string | null => {
-  if (throttle == null || throttle === 'rule' || throttle === 'no_actions') {
+  if (
+    throttle == null ||
+    throttle === NOTIFICATION_THROTTLE_RULE ||
+    throttle === NOTIFICATION_THROTTLE_NO_ACTIONS
+  ) {
     return null;
   } else {
     return throttle;
+  }
+};
+
+// TODO: Write unit tests
+export const transformFromAlertThrottle = (rule: SanitizedAlert<RuleParams>): string => {
+  if (rule.muteAll === true) {
+    return NOTIFICATION_THROTTLE_NO_ACTIONS;
+  } else if (
+    rule.notifyWhen === 'onActiveAlert' ||
+    (rule.throttle == null && rule.notifyWhen == null && rule.actions.length !== 0)
+  ) {
+    return 'rule';
+  } else if (rule.throttle == null) {
+    return NOTIFICATION_THROTTLE_NO_ACTIONS;
+  } else {
+    return rule.throttle;
   }
 };

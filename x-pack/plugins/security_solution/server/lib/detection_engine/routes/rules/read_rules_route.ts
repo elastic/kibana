@@ -72,7 +72,7 @@ export const readRulesRoute = (
             currentStatus.attributes.statusDate = rule.executionStatus.lastExecutionDate.toISOString();
             currentStatus.attributes.status = RuleExecutionStatus.failed;
           }
-          const transformed = transform(rule, undefined, currentStatus);
+          const transformed = transform(rule, currentStatus);
           if (transformed == null) {
             return siemResponse.error({ statusCode: 500, body: 'Internal error transforming' });
           } else {

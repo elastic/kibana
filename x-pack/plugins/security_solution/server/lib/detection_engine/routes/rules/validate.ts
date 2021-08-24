@@ -33,7 +33,7 @@ export const transformValidate = (
   ruleActions?: RuleActions | null,
   ruleStatus?: SavedObject<IRuleSavedAttributesSavedObjectAttributes>
 ): [RulesSchema | null, string | null] => {
-  const transformed = transform(alert, ruleActions, ruleStatus);
+  const transformed = transform(alert, ruleStatus);
   if (transformed == null) {
     return [null, 'Internal error transforming'];
   } else {
@@ -46,7 +46,7 @@ export const newTransformValidate = (
   ruleActions?: RuleActions | null,
   ruleStatus?: SavedObject<IRuleSavedAttributesSavedObjectAttributes>
 ): [FullResponseSchema | null, string | null] => {
-  const transformed = transform(alert, ruleActions, ruleStatus);
+  const transformed = transform(alert, ruleStatus);
   if (transformed == null) {
     return [null, 'Internal error transforming'];
   } else {
@@ -57,12 +57,11 @@ export const newTransformValidate = (
 export const transformValidateBulkError = (
   ruleId: string,
   alert: PartialAlert<RuleParams>,
-  ruleActions?: RuleActions | null, // TODO: Can we remove this now? I don't think anyone is using it anymore.
   ruleStatus?: Array<SavedObjectsFindResult<IRuleStatusSOAttributes>>
 ): RulesSchema | BulkError => {
   if (isAlertType(alert)) {
     if (ruleStatus && ruleStatus?.length > 0 && isRuleStatusSavedObjectType(ruleStatus[0])) {
-      const transformed = transformAlertToRule(alert, ruleActions, ruleStatus[0]);
+      const transformed = transformAlertToRule(alert, ruleStatus[0]);
       const [validated, errors] = validateNonExact(transformed, rulesSchema);
       if (errors != null || validated == null) {
         return createBulkErrorObject({
