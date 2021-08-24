@@ -291,7 +291,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
 
   const casePermissions = useGetUserCasesPermissions();
 
-  const hasAlertsPermissions = useCallback(
+  const hasAlertsCrudPermissions = useCallback(
     (featureId: string) => {
       return getAlertsPermissions(capabilities, featureId).crud;
     },
@@ -337,7 +337,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
       defaultCellActions: getDefaultCellActions({ addToQuery }),
       end: rangeTo,
       filters: [],
-      hasAlertsPermissions,
+      hasAlertsCrudPermissions,
       indexNames,
       itemsPerPage: 10,
       itemsPerPageOptions: [10, 25, 50],
@@ -375,7 +375,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
     casePermissions,
     addToQuery,
     rangeTo,
-    hasAlertsPermissions,
+    hasAlertsCrudPermissions,
     indexNames,
     workflowStatus,
     kuery,

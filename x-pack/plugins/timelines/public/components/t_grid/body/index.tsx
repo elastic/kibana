@@ -104,7 +104,7 @@ interface OwnProps {
   trailingControlColumns?: ControlColumnProps[];
   unit?: (total: number) => React.ReactNode;
   hasAlertsCrud?: boolean;
-  hasAlertsPermissions?: (featureId: string) => boolean;
+  hasAlertsCrudPermissions?: (featureId: string) => boolean;
   totalSelectAllAlerts?: number;
 }
 
@@ -146,7 +146,7 @@ const transformControlColumns = ({
   theme,
   setEventsLoading,
   setEventsDeleted,
-  hasAlertsPermissions,
+  hasAlertsCrudPermissions,
 }: {
   actionColumnsWidth: number;
   columnHeaders: ColumnHeaderOptions[];
@@ -167,7 +167,7 @@ const transformControlColumns = ({
   theme: EuiTheme;
   setEventsLoading: SetEventsLoading;
   setEventsDeleted: SetEventsDeleted;
-  hasAlertsPermissions?: (featureId: string) => boolean;
+  hasAlertsCrudPermissions?: (featureId: string) => boolean;
 }): EuiDataGridControlColumn[] =>
   controlColumns.map(
     ({ id: columnId, headerCellRender = EmptyHeaderCellRender, rowCellRender, width }, i) => ({
@@ -206,11 +206,11 @@ const transformControlColumns = ({
       }: EuiDataGridCellValueElementProps) => {
         addBuildingBlockStyle(data[rowIndex].ecs, theme, setCellProps);
         let disabled = false;
-        if (columnId === 'checkbox-control-column' && hasAlertsPermissions != null) {
+        if (columnId === 'checkbox-control-column' && hasAlertsCrudPermissions != null) {
           const alertConsumers =
             data[rowIndex].data.find((d) => d.field === ALERT_RULE_CONSUMER)?.value ?? [];
           disabled = alertConsumers.reduce<boolean>(
-            (acc, consumer) => acc || !hasAlertsPermissions(consumer),
+            (acc, consumer) => acc || !hasAlertsCrudPermissions(consumer),
             false
           );
         }
@@ -290,7 +290,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     trailingControlColumns = EMPTY_CONTROL_COLUMNS,
     unit = defaultUnit,
     hasAlertsCrud,
-    hasAlertsPermissions,
+    hasAlertsCrudPermissions,
     totalSelectAllAlerts,
   }) => {
     const dispatch = useDispatch();
@@ -563,7 +563,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
           theme,
           setEventsLoading,
           setEventsDeleted,
-          hasAlertsPermissions,
+          hasAlertsCrudPermissions,
         })
       );
     }, [
@@ -586,7 +586,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
       theme,
       setEventsLoading,
       setEventsDeleted,
-      hasAlertsPermissions,
+      hasAlertsCrudPermissions,
     ]);
 
     const columnsWithCellActions: EuiDataGridColumn[] = useMemo(

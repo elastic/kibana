@@ -94,7 +94,7 @@ export interface TGridStandaloneProps {
   filters: Filter[];
   footerText: React.ReactNode;
   filterStatus: AlertStatus;
-  hasAlertsPermissions: (featureId: string) => boolean;
+  hasAlertsCrudPermissions: (featureId: string) => boolean;
   height?: number;
   indexNames: string[];
   itemsPerPage: number;
@@ -127,7 +127,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
   filters,
   footerText,
   filterStatus,
-  hasAlertsPermissions,
+  hasAlertsCrudPermissions,
   indexNames,
   itemsPerPage,
   itemsPerPageOptions,
@@ -231,7 +231,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
       totalSelectAllAlerts: number;
     }>(
       (acc, [featureId, nbrAlerts]) => {
-        const featureHasPermission = hasAlertsPermissions(featureId);
+        const featureHasPermission = hasAlertsCrudPermissions(featureId);
         return {
           hasAlertsCrud: featureHasPermission || acc.hasAlertsCrud,
           totalSelectAllAlerts: featureHasPermission
@@ -244,7 +244,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
         totalSelectAllAlerts: 0,
       }
     );
-  }, [consumers, hasAlertsPermissions]);
+  }, [consumers, hasAlertsCrudPermissions]);
 
   const totalCountMinusDeleted = useMemo(
     () => (totalCount > 0 ? totalCount - deletedEventIds.length : 0),
@@ -349,7 +349,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
                     defaultCellActions={defaultCellActions}
                     filterQuery={filterQuery}
                     hasAlertsCrud={hasAlertsCrud}
-                    hasAlertsPermissions={hasAlertsPermissions}
+                    hasAlertsCrudPermissions={hasAlertsCrudPermissions}
                     id={STANDALONE_ID}
                     indexNames={indexNames}
                     isEventViewer={true}
