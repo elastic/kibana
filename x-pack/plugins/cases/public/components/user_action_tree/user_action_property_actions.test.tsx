@@ -8,6 +8,9 @@
 import React from 'react';
 import { mount, ReactWrapper } from 'enzyme';
 import { UserActionPropertyActions } from './user_action_property_actions';
+
+jest.mock('../../common/lib/kibana');
+
 const onEdit = jest.fn();
 const onQuote = jest.fn();
 const props = {
