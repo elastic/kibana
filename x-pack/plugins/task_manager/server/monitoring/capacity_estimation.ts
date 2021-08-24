@@ -12,6 +12,7 @@ import { RawMonitoringStats, RawMonitoredStat, HealthStatus } from './monitoring
 import { AveragedStat } from './task_run_calcultors';
 import { TaskPersistenceTypes } from './task_run_statistics';
 import { asErr, asOk, map, Result } from '../lib/result_type';
+import { Logger } from '../../../../../src/core/server';
 
 export interface CapacityEstimationStat extends JsonObject {
   observed: {
@@ -44,6 +45,7 @@ function isCapacityEstimationParams(
 }
 
 export function estimateCapacity(
+  logger: Logger,
   capacityStats: CapacityEstimationParams
 ): RawMonitoredStat<CapacityEstimationStat> {
   const workload = capacityStats.workload.value;
@@ -183,13 +185,14 @@ export function estimateCapacity(
   const assumedRequiredThroughputPerMinutePerKibana =
     averageCapacityUsedByNonRecurringAndEphemeralTasksPerKibana +
     averageRecurringRequiredPerMinute / assumedKibanaInstances;
+
+  const status = getHealthStatus(logger, {
+    assumedRequiredThroughputPerMinutePerKibana,
+    assumedAverageRecurringRequiredThroughputPerMinutePerKibana,
+    capacityPerMinutePerKibana,
+  });
   return {
-    status:
-      assumedRequiredThroughputPerMinutePerKibana < capacityPerMinutePerKibana
-        ? HealthStatus.OK
-        : assumedAverageRecurringRequiredThroughputPerMinutePerKibana < capacityPerMinutePerKibana
-        ? HealthStatus.Warning
-        : HealthStatus.Error,
+    status,
     timestamp: new Date().toISOString(),
     value: {
       observed: mapValues(
@@ -220,13 +223,43 @@ export function estimateCapacity(
   };
 }
 
+interface GetHealthStatusParams {
+  assumedRequiredThroughputPerMinutePerKibana: number;
+  assumedAverageRecurringRequiredThroughputPerMinutePerKibana: number;
+  capacityPerMinutePerKibana: number;
+}
+
+function getHealthStatus(logger: Logger, params: GetHealthStatusParams): HealthStatus {
+  const {
+    assumedRequiredThroughputPerMinutePerKibana,
+    assumedAverageRecurringRequiredThroughputPerMinutePerKibana,
+    capacityPerMinutePerKibana,
+  } = params;
+  if (assumedRequiredThroughputPerMinutePerKibana < capacityPerMinutePerKibana) {
+    return HealthStatus.OK;
+  }
+
+  if (assumedAverageRecurringRequiredThroughputPerMinutePerKibana < capacityPerMinutePerKibana) {
+    logger.debug(
+      `setting HealthStatus.Warning because assumedAverageRecurringRequiredThroughputPerMinutePerKibana (${assumedAverageRecurringRequiredThroughputPerMinutePerKibana}) < capacityPerMinutePerKibana (${capacityPerMinutePerKibana})`
+    );
+    return HealthStatus.Warning;
+  }
+
+  logger.debug(
+    `setting HealthStatus.Error because assumedRequiredThroughputPerMinutePerKibana (${assumedRequiredThroughputPerMinutePerKibana}) >= capacityPerMinutePerKibana (${capacityPerMinutePerKibana}) AND assumedAverageRecurringRequiredThroughputPerMinutePerKibana (${assumedAverageRecurringRequiredThroughputPerMinutePerKibana}) >= capacityPerMinutePerKibana (${capacityPerMinutePerKibana})`
+  );
+  return HealthStatus.Error;
+}
+
 export function withCapacityEstimate(
+  logger: Logger,
   monitoredStats: RawMonitoringStats['stats']
 ): RawMonitoringStats['stats'] {
   if (isCapacityEstimationParams(monitoredStats)) {
     return {
       ...monitoredStats,
-      capacity_estimation: estimateCapacity(monitoredStats),
+      capacity_estimation: estimateCapacity(logger, monitoredStats),
     };
   }
   return monitoredStats;
