@@ -15,6 +15,7 @@ export async function fetchExportByTypeAndSearch({
   references,
   namespaces,
   includeReferencesDeep = false,
+  includeNamespaces = false,
 }: {
   http: HttpStart;
   types: string[];
@@ -22,6 +23,7 @@ export async function fetchExportByTypeAndSearch({
   namespaces?: string[];
   references?: SavedObjectsFindOptionsReference[];
   includeReferencesDeep?: boolean;
+  includeNamespaces?: boolean;
 }): Promise<Blob> {
   return http.post('/api/saved_objects/_export', {
     body: JSON.stringify({
@@ -29,6 +31,7 @@ export async function fetchExportByTypeAndSearch({
       search,
       hasReference: references,
       includeReferencesDeep,
+      includeNamespaces,
       namespaces,
     }),
   });

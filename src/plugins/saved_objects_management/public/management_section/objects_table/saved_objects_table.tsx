@@ -97,6 +97,7 @@ export interface SavedObjectsTableState {
   exportAllOptions: ExportAllOption[];
   exportAllSelectedOptions: Record<string, boolean>;
   isIncludeReferencesDeepChecked: boolean;
+  isIncludeNamespacesChecked: boolean;
 }
 
 const unableFindSavedObjectsNotificationMessage = i18n.translate(
@@ -136,6 +137,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       exportAllOptions: [],
       exportAllSelectedOptions: {},
       isIncludeReferencesDeepChecked: true,
+      isIncludeNamespacesChecked: true,
     };
   }
 
@@ -401,7 +403,12 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
   };
 
   onExportAll = async () => {
-    const { exportAllSelectedOptions, isIncludeReferencesDeepChecked, activeQuery } = this.state;
+    const {
+      exportAllSelectedOptions,
+      isIncludeReferencesDeepChecked,
+      isIncludeNamespacesChecked,
+      activeQuery,
+    } = this.state;
     const { notifications, http, taggingApi } = this.props;
     const { queryText, selectedTags, selectedSpaces } = parseQuery(activeQuery);
     const exportTypes = Object.entries(exportAllSelectedOptions).reduce((accum, [id, selected]) => {
@@ -422,6 +429,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         references,
         namespaces: selectedSpaces,
         includeReferencesDeep: isIncludeReferencesDeepChecked,
+        includeNamespaces: isIncludeNamespacesChecked,
       });
     } catch (e) {
       notifications.toasts.addDanger({
@@ -604,6 +612,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       exportAllOptions,
       exportAllSelectedOptions,
       isIncludeReferencesDeepChecked,
+      isIncludeNamespacesChecked,
     } = this.state;
 
     if (!isShowingExportAllOptionsModal) {
@@ -628,6 +637,12 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         onIncludeReferenceChange={(newIncludeReferences) => {
           this.setState({
             isIncludeReferencesDeepChecked: newIncludeReferences,
+          });
+        }}
+        includeNamespaces={isIncludeNamespacesChecked}
+        onIncludeNamespacesChange={(newIncludeNamespaces) => {
+          this.setState({
+            isIncludeNamespacesChecked: newIncludeNamespaces,
           });
         }}
       />

@@ -179,7 +179,7 @@ export const registerExportRoute = (
           ),
           search: schema.maybe(schema.string()),
           namespaces: schema.maybe(schema.arrayOf(schema.string())),
-          includeNamespaces: schema.boolean({ defaultValue: true }),
+          includeNamespaces: schema.boolean({ defaultValue: false }),
           includeReferencesDeep: schema.boolean({ defaultValue: false }),
           excludeExportDetails: schema.boolean({ defaultValue: false }),
         }),
