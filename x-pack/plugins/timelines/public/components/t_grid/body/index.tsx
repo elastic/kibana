@@ -61,7 +61,7 @@ import { DEFAULT_ICON_BUTTON_WIDTH } from '../helpers';
 import type { BrowserFields } from '../../../../common/search_strategy/index_fields';
 import type { OnRowSelected, OnSelectAll } from '../types';
 import type { Refetch } from '../../../store/t_grid/inputs';
-import { StatefulFieldsBrowser } from '../../../';
+import { StatefulEventContext2, StatefulFieldsBrowser } from '../../../';
 import { tGridActions, TGridModel, tGridSelectors, TimelineState } from '../../../store/t_grid';
 import { useDeepEqualSelector } from '../../../hooks/use_selector';
 import { RowAction } from './row_action';
@@ -633,39 +633,48 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
       return Cell;
     }, [columnHeaders, data, id, renderCellValue, tabType, theme, browserFields, rowRenderers]);
 
+    // Store context in state rather than creating object in provider value={} to prevent re-renders caused by a new object being created
+    const [activeStatefulEventContext] = useState({
+      timelineID: id,
+      tabType,
+      enableHostDetailsFlyout: true,
+      enableIpDetailsFlyout: true,
+    });
     return (
       <>
-        {tableView === 'gridView' && (
-          <EuiDataGrid
-            data-test-subj="body-data-grid"
-            aria-label={i18n.TGRID_BODY_ARIA_LABEL}
-            columns={columnsWithCellActions}
-            columnVisibility={{ visibleColumns, setVisibleColumns }}
-            gridStyle={gridStyle}
-            leadingControlColumns={leadingTGridControlColumns}
-            trailingControlColumns={trailingTGridControlColumns}
-            toolbarVisibility={toolbarVisibility}
-            rowCount={data.length}
-            renderCellValue={renderTGridCellValue}
-            inMemory={{ level: 'sorting' }}
-            sorting={{ columns: sortingColumns, onSort }}
-          />
-        )}
-        {tableView === 'eventRenderedView' && (
-          <EventRenderedView
-            alertToolbar={alertToolbar}
-            browserFields={browserFields}
-            events={data}
-            leadingControlColumns={leadingTGridControlColumns ?? []}
-            onChangePage={loadPage}
-            pageIndex={activePage}
-            pageSize={querySize}
-            pageSizeOptions={itemsPerPageOptions}
-            rowRenderers={rowRenderers}
-            timelineId={id}
-            totalItemCount={totalItems}
-          />
-        )}
+        <StatefulEventContext2.Provider value={activeStatefulEventContext}>
+          {tableView === 'gridView' && (
+            <EuiDataGrid
+              data-test-subj="body-data-grid"
+              aria-label={i18n.TGRID_BODY_ARIA_LABEL}
+              columns={columnsWithCellActions}
+              columnVisibility={{ visibleColumns, setVisibleColumns }}
+              gridStyle={gridStyle}
+              leadingControlColumns={leadingTGridControlColumns}
+              trailingControlColumns={trailingTGridControlColumns}
+              toolbarVisibility={toolbarVisibility}
+              rowCount={data.length}
+              renderCellValue={renderTGridCellValue}
+              inMemory={{ level: 'sorting' }}
+              sorting={{ columns: sortingColumns, onSort }}
+            />
+          )}
+          {tableView === 'eventRenderedView' && (
+            <EventRenderedView
+              alertToolbar={alertToolbar}
+              browserFields={browserFields}
+              events={data}
+              leadingControlColumns={leadingTGridControlColumns ?? []}
+              onChangePage={loadPage}
+              pageIndex={activePage}
+              pageSize={querySize}
+              pageSizeOptions={itemsPerPageOptions}
+              rowRenderers={rowRenderers}
+              timelineId={id}
+              totalItemCount={totalItems}
+            />
+          )}
+        </StatefulEventContext2.Provider>
       </>
     );
   }

@@ -31,11 +31,13 @@ import {
 } from '../../../../common/types/timeline';
 import { activeTimeline } from '../../containers/active_timeline_context';
 import { timelineActions } from '../../store/timeline';
-import { StatefulEventContext } from '../timeline/body/events/stateful_event_context';
 import { LinkAnchor } from '../../../common/components/links';
 import { SecurityPageName } from '../../../app/types';
 import { useFormatUrl, getNetworkDetailsUrl } from '../../../common/components/link_to';
 import { encodeIpv6 } from '../../../common/lib/helpers';
+import { StatefulEventContext2 } from '../../../../../timelines/public';
+import { APP_ID } from '../../../../common/constants';
+import { useKibana } from '../../../common/lib/kibana';
 
 const getUniqueId = ({
   contextId,
@@ -167,9 +169,21 @@ const AddressLinksItemComponent: React.FC<AddressLinksItemProps> = ({
   );
 
   const dispatch = useDispatch();
-  const eventContext = useContext(StatefulEventContext);
-  const { formatUrl } = useFormatUrl(SecurityPageName.network);
-  const isInTimelineContext = address && eventContext?.tabType && eventContext?.timelineID;
+  const eventContext = useContext(StatefulEventContext2);
+  const { formatUrl, search } = useFormatUrl(SecurityPageName.network);
+  const { navigateToApp } = useKibana().services.application;
+  const goToNetworkDetails = useCallback(
+    (ev) => {
+      ev.preventDefault();
+      navigateToApp(APP_ID, {
+        deepLinkId: SecurityPageName.network,
+        path: getNetworkDetailsUrl(encodeURIComponent(encodeIpv6(address)), undefined, search),
+      });
+    },
+    [address, navigateToApp, search]
+  );
+  const isInTimelineContext =
+    address && eventContext?.enableIpDetailsFlyout && eventContext?.timelineID;
 
   const openNetworkDetailsSidePanel = useCallback(
     (e) => {
@@ -206,17 +220,27 @@ const AddressLinksItemComponent: React.FC<AddressLinksItemProps> = ({
     () => (
       <Content field={fieldName} tooltipContent={fieldName}>
         <LinkAnchor
-          href={formatUrl(getNetworkDetailsUrl(encodeURIComponent(encodeIpv6(address))))}
+          href={formatUrl(
+            getNetworkDetailsUrl(encodeURIComponent(encodeIpv6(address)), undefined, search)
+          )}
           data-test-subj="network-details"
           // The below is explicitly defined this way as the onClick takes precedence when it and the href are both defined
           // When this component is used outside of timeline (i.e. in the flyout) we would still like it to link to the IP Overview page
-          onClick={isInTimelineContext ? openNetworkDetailsSidePanel : undefined}
+          onClick={isInTimelineContext ? openNetworkDetailsSidePanel : goToNetworkDetails}
         >
           {address}
         </LinkAnchor>
       </Content>
     ),
-    [address, fieldName, formatUrl, isInTimelineContext, openNetworkDetailsSidePanel]
+    [
+      address,
+      fieldName,
+      formatUrl,
+      goToNetworkDetails,
+      isInTimelineContext,
+      openNetworkDetailsSidePanel,
+      search,
+    ]
   );
 
   const render = useCallback(
