@@ -333,6 +333,7 @@ export interface PatchRulesOptions {
   actions: RuleAlertAction[] | undefined;
   rule: SanitizedAlert<RuleParams> | null;
   isRuleRegistryEnabled: boolean;
+  namespace?: string;
 }
 
 export interface ReadRuleOptions {

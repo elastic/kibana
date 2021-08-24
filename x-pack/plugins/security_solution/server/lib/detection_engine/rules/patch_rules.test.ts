@@ -10,39 +10,54 @@ import { getPatchRulesOptionsMock, getPatchMlRulesOptionsMock } from './patch_ru
 import { PatchRulesOptions } from './types';
 
 describe('patchRules', () => {
-  it('should call rulesClient.disable if the rule was enabled and enabled is false', async () => {
-    const rulesOptionsMock = getPatchRulesOptionsMock();
-    const ruleOptions: PatchRulesOptions = {
-      ...rulesOptionsMock,
-      enabled: false,
-    };
-    await patchRules(ruleOptions);
-    expect(ruleOptions.rulesClient.disable).toHaveBeenCalledWith(
-      expect.objectContaining({
-        id: ruleOptions.rule?.id,
-      })
-    );
-  });
-
-  it('should call rulesClient.enable if the rule was disabled and enabled is true', async () => {
-    const rulesOptionsMock = getPatchRulesOptionsMock();
-    const ruleOptions: PatchRulesOptions = {
-      ...rulesOptionsMock,
-      enabled: true,
-    };
-    if (ruleOptions.rule != null) {
-      ruleOptions.rule.enabled = false;
+  test.each([
+    ['Legacy', false],
+    ['RAC', true],
+  ])(
+    'should call rulesClient.disable if the rule was enabled and enabled is false - %s',
+    async (_, isRuleRegistryEnabled) => {
+      const rulesOptionsMock = getPatchRulesOptionsMock(isRuleRegistryEnabled) as PatchRulesOptions;
+      const ruleOptions: PatchRulesOptions = {
+        ...rulesOptionsMock,
+        enabled: false,
+      };
+      await patchRules(ruleOptions);
+      expect(ruleOptions.rulesClient.disable).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: ruleOptions.rule?.id,
+        })
+      );
     }
-    await patchRules(ruleOptions);
-    expect(ruleOptions.rulesClient.enable).toHaveBeenCalledWith(
-      expect.objectContaining({
-        id: ruleOptions.rule?.id,
-      })
-    );
-  });
+  );
 
-  it('calls the rulesClient with legacy ML params', async () => {
-    const rulesOptionsMock = getPatchMlRulesOptionsMock();
+  test.each([
+    ['Legacy', false],
+    ['RAC', true],
+  ])(
+    'should call rulesClient.enable if the rule was disabled and enabled is true - %s',
+    async (_, isRuleRegistryEnabled) => {
+      const rulesOptionsMock = getPatchRulesOptionsMock(isRuleRegistryEnabled) as PatchRulesOptions;
+      const ruleOptions: PatchRulesOptions = {
+        ...rulesOptionsMock,
+        enabled: true,
+      };
+      if (ruleOptions.rule != null) {
+        ruleOptions.rule.enabled = false;
+      }
+      await patchRules(ruleOptions);
+      expect(ruleOptions.rulesClient.enable).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: ruleOptions.rule?.id,
+        })
+      );
+    }
+  );
+
+  test.each([
+    ['Legacy', false],
+    ['RAC', true],
+  ])('calls the rulesClient with legacy ML params - %s', async (_, isRuleRegistryEnabled) => {
+    const rulesOptionsMock = getPatchMlRulesOptionsMock(isRuleRegistryEnabled);
     const ruleOptions: PatchRulesOptions = {
       ...rulesOptionsMock,
       enabled: true,
@@ -63,8 +78,11 @@ describe('patchRules', () => {
     );
   });
 
-  it('calls the rulesClient with new ML params', async () => {
-    const rulesOptionsMock = getPatchMlRulesOptionsMock();
+  test.each([
+    ['Legacy', false],
+    ['RAC', true],
+  ])('calls the rulesClient with new ML params - %s', async (_, isRuleRegistryEnabled) => {
+    const rulesOptionsMock = getPatchMlRulesOptionsMock(isRuleRegistryEnabled);
     const ruleOptions: PatchRulesOptions = {
       ...rulesOptionsMock,
       machineLearningJobId: ['new_job_1', 'new_job_2'],
@@ -87,8 +105,11 @@ describe('patchRules', () => {
   });
 
   describe('regression tests', () => {
-    it("updates the rule's actions if provided", async () => {
-      const rulesOptionsMock = getPatchRulesOptionsMock();
+    test.each([
+      ['Legacy', false],
+      ['RAC', true],
+    ])("updates the rule's actions if provided - %s", async (_, isRuleRegistryEnabled) => {
+      const rulesOptionsMock = getPatchRulesOptionsMock(isRuleRegistryEnabled) as PatchRulesOptions;
       const ruleOptions: PatchRulesOptions = {
         ...rulesOptionsMock,
         actions: [
@@ -121,8 +142,11 @@ describe('patchRules', () => {
       );
     });
 
-    it('does not update actions if none are specified', async () => {
-      const ruleOptions = getPatchRulesOptionsMock();
+    test.each([
+      ['Legacy', false],
+      ['RAC', true],
+    ])('does not update actions if none are specified - %s', async (_, isRuleRegistryEnabled) => {
+      const ruleOptions = getPatchRulesOptionsMock(isRuleRegistryEnabled) as PatchRulesOptions;
       delete ruleOptions.actions;
       if (ruleOptions.rule != null) {
         ruleOptions.rule.actions = [

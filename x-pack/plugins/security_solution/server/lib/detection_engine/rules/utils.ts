@@ -111,6 +111,7 @@ export interface UpdateProperties {
   version: VersionOrUndefined;
   exceptionsList: ListArrayOrUndefined;
   anomalyThreshold: AnomalyThresholdOrUndefined;
+  namespace?: string;
 }
 
 export const calculateVersion = (

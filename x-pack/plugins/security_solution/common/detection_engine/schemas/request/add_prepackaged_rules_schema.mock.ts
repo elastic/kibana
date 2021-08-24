@@ -23,14 +23,14 @@ export const getAddPrepackagedRulesSchemaMock = (): AddPrepackagedRulesSchema =>
   version: 1,
 });
 
-export const getAddPrepackagedRulesSchemaDecodedMock = (): AddPrepackagedRulesSchemaDecoded => ({
+export const getAddPrepackagedRulesSchemaDecodedMock = (isRuleRegistryEnabled: boolean) => ({
   author: [],
   description: 'some description',
   name: 'Query with a rule id',
   query: 'user.name: root or user.name: admin',
   severity: 'high',
   severity_mapping: [],
-  type: 'query',
+  type: isRuleRegistryEnabled ? 'siem.query' : 'query',
   risk_score: 55,
   risk_score_mapping: [],
   language: 'kuery',
@@ -48,6 +48,7 @@ export const getAddPrepackagedRulesSchemaDecodedMock = (): AddPrepackagedRulesSc
   version: 1,
   exceptions_list: [],
   rule_id: 'rule-1',
+  ...(isRuleRegistryEnabled ? { namespace: 'default' } : {}),
 });
 
 export const getAddPrepackagedThreatMatchRulesSchemaMock = (): AddPrepackagedRulesSchema => ({

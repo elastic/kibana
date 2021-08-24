@@ -13,7 +13,7 @@ import {
   normalizeMachineLearningJobIds,
   normalizeThresholdObject,
 } from '../../../../common/detection_engine/utils';
-import { internalRuleUpdate, RuleParams } from '../schemas/rule_schemas';
+import { internalRACRuleUpdate, internalRuleUpdate, RuleParams } from '../schemas/rule_schemas';
 import { addTags } from './add_tags';
 import { enableRule } from './enable_rule';
 import { PatchRulesOptions } from './types';
@@ -78,6 +78,7 @@ export const patchRules = async ({
   machineLearningJobId,
   actions,
   isRuleRegistryEnabled,
+  namespace,
 }: PatchRulesOptions): Promise<PartialAlert<RuleParams> | null> => {
   if (rule == null) {
     return null;
@@ -127,6 +128,7 @@ export const patchRules = async ({
     exceptionsList,
     anomalyThreshold,
     machineLearningJobId,
+    namespace,
   });
 
   const nextParams = defaults(
@@ -175,6 +177,7 @@ export const patchRules = async ({
       machineLearningJobId: machineLearningJobId
         ? normalizeMachineLearningJobIds(machineLearningJobId)
         : undefined,
+      namespace,
     }
   );
 
@@ -189,7 +192,10 @@ export const patchRules = async ({
     actions: actions?.map(transformRuleToAlertAction) ?? rule.actions,
     params: removeUndefined(nextParams),
   };
-  const [validated, errors] = validate(newRule, internalRuleUpdate);
+  const [validated, errors] = validate(
+    newRule,
+    isRuleRegistryEnabled ? internalRACRuleUpdate : internalRuleUpdate
+  );
   if (errors != null || validated === null) {
     throw new PatchError(`Applying patch would create invalid rule: ${errors}`, 400);
   }

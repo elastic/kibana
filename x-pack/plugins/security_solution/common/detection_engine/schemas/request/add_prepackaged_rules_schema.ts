@@ -176,4 +176,5 @@ export type AddPrepackagedRulesSchemaDecoded = Omit<
   threat: Threats;
   throttle: ThrottleOrNull;
   exceptions_list: ListArray;
+  namespace?: string;
 };
