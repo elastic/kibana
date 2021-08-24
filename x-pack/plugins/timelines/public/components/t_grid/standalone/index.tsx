@@ -70,7 +70,6 @@ const EventsContainerLoading = styled.div.attrs(({ className = '' }) => ({
 const FullWidthFlexGroup = styled(EuiFlexGroup)<{ $visible: boolean }>`
   overflow: hidden;
   margin: 0;
-  min-height: 490px;
   display: ${({ $visible }) => ($visible ? 'flex' : 'none')};
 `;
 
@@ -96,7 +95,6 @@ export interface TGridStandaloneProps {
   filterStatus: AlertStatus;
   height?: number;
   indexNames: string[];
-  itemsPerPage: number;
   itemsPerPageOptions: number[];
   query: Query;
   onRuleChange?: () => void;
@@ -127,7 +125,6 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
   footerText,
   filterStatus,
   indexNames,
-  itemsPerPage,
   itemsPerPageOptions,
   onRuleChange,
   query,
@@ -282,7 +279,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
           end,
         },
         indexNames,
-        itemsPerPage,
+        itemsPerPage: itemsPerPageStore,
         itemsPerPageOptions,
         showCheckboxes: true,
       })

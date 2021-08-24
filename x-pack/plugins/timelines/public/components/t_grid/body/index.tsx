@@ -575,6 +575,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
             tGridCellAction({
               data: data.map((row) => row.data),
               browserFields,
+              timelineId: id,
             });
 
           return {
@@ -583,7 +584,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
               header.tGridCellActions?.map(buildAction) ?? defaultCellActions?.map(buildAction),
           };
         }),
-      [browserFields, columnHeaders, data, defaultCellActions]
+      [browserFields, columnHeaders, data, defaultCellActions, id]
     );
 
     const renderTGridCellValue = useMemo(() => {
@@ -595,10 +596,17 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
         const rowData = rowIndex < data.length ? data[rowIndex].data : null;
         const header = columnHeaders.find((h) => h.id === columnId);
         const eventId = rowIndex < data.length ? data[rowIndex]._id : null;
+        const defaultStyles = useMemo(
+          () => ({
+            overflow: 'hidden',
+          }),
+          []
+        );
+        setCellProps({ style: { ...defaultStyles } });
 
         useEffect(() => {
-          addBuildingBlockStyle(data[rowIndex].ecs, theme, setCellProps);
-        }, [rowIndex, setCellProps]);
+          addBuildingBlockStyle(data[rowIndex].ecs, theme, setCellProps, defaultStyles);
+        }, [rowIndex, setCellProps, defaultStyles]);
 
         if (rowData == null || header == null || eventId == null) {
           return null;
