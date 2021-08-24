@@ -181,7 +181,6 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
 
   const [tableView, setTableView] = useState<ViewSelection>('gridView');
   const getManageTimeline = useMemo(() => tGridSelectors.getManageTimelineById(), []);
-  const unit = useMemo(() => (n: number) => i18n.ALERTS_UNIT(n), []);
   const { queryFields, title } = useDeepEqualSelector((state) =>
     getManageTimeline(state, id ?? '')
   );
