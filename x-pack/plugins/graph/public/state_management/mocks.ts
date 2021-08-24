@@ -90,6 +90,7 @@ export function createMockGraphStore({
       find: jest.fn(),
       get: jest.fn(),
     } as unknown) as SavedObjectsClientContract,
+    handleSearchQueryError: jest.fn(),
     ...mockedDepsOverwrites,
   };
   const sagaMiddleware = createSagaMiddleware();
