@@ -11,7 +11,6 @@ export class UpgradeAssistantPageObject extends FtrService {
   private readonly retry = this.ctx.getService('retry');
   private readonly log = this.ctx.getService('log');
   private readonly browser = this.ctx.getService('browser');
-  private readonly find = this.ctx.getService('find');
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly common = this.ctx.getPageObject('common');
 

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import { IndicesCreateRequest } from '@elastic/elasticsearch/api/types';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-const multiFieldsDeprecation = {
+const multiFieldsIndexDeprecation: IndicesCreateRequest = {
   index: 'nested_multi_fields',
   body: {
     mappings: {
@@ -33,7 +33,7 @@ const multiFieldsDeprecation = {
   },
 };
 
-const translogSettingsDeprecation = {
+const translogSettingsIndexDeprecation: IndicesCreateRequest = {
   index: 'deprecated_settings',
   body: {
     settings: {
@@ -48,7 +48,6 @@ export default function upgradeAssistantFunctionalTests({
   getService,
   getPageObjects,
 }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects(['upgradeAssistant', 'common']);
   const retry = getService('retry');
   const security = getService('security');
@@ -64,8 +63,8 @@ export default function upgradeAssistantFunctionalTests({
 
       try {
         // Create two indices that will trigger deprecation warnings to test the ES deprecations page
-        await es.indices.create(multiFieldsDeprecation);
-        await es.indices.create(translogSettingsDeprecation);
+        await es.indices.create(multiFieldsIndexDeprecation);
+        await es.indices.create(translogSettingsIndexDeprecation);
       } catch (e) {
         log.debug('[Setup error] Error creating indices');
         throw e;
@@ -75,7 +74,7 @@ export default function upgradeAssistantFunctionalTests({
     after(async () => {
       try {
         await es.indices.delete({
-          index: [multiFieldsDeprecation.index, translogSettingsDeprecation.index],
+          index: [multiFieldsIndexDeprecation.index, translogSettingsIndexDeprecation.index],
         });
       } catch (e) {
         log.debug('[Cleanup error] Error deleting indices');
