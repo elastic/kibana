@@ -168,12 +168,13 @@ export const Criterion: React.FC<Props> = ({
                   color={errors.field.length === 0 ? 'secondary' : 'danger'}
                   onClick={(e) => {
                     e.stopPropagation();
-                    setIsFieldPopoverOpen(true);
+                    setIsFieldPopoverOpen(!isFieldPopoverOpen);
                   }}
                 />
               }
               isOpen={isFieldPopoverOpen}
               closePopover={() => setIsFieldPopoverOpen(false)}
+              onClick={(e) => e.stopPropagation()}
               ownFocus
               panelPaddingSize="s"
               anchorPosition="downLeft"
@@ -214,12 +215,13 @@ export const Criterion: React.FC<Props> = ({
                   }
                   onClick={(e) => {
                     e.stopPropagation();
-                    setIsComparatorPopoverOpen(true);
+                    setIsComparatorPopoverOpen(!isComparatorPopoverOpen);
                   }}
                 />
               }
               isOpen={isComparatorPopoverOpen}
               closePopover={() => setIsComparatorPopoverOpen(false)}
+              onClick={(e) => e.stopPropagation()}
               ownFocus
               panelPaddingSize="s"
               anchorPosition="downLeft"

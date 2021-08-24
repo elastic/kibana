@@ -331,7 +331,7 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
       },
     },
   }))
-  .case(setActiveTabTimeline, (state, { id, activeTab }) => ({
+  .case(setActiveTabTimeline, (state, { id, activeTab, scrollToTop }) => ({
     ...state,
     timelineById: {
       ...state.timelineById,
@@ -339,6 +339,11 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
         ...state.timelineById[id],
         activeTab,
         prevActiveTab: state.timelineById[id].activeTab,
+        scrollToTop: scrollToTop
+          ? {
+              timestamp: Math.floor(Date.now() / 1000), // convert to seconds to avoid unnecessary rerenders for multiple clicks
+            }
+          : undefined,
       },
     },
   }))

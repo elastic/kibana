@@ -8,13 +8,13 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { EventEmitter } from 'events';
+import type { EventEmitter } from 'events';
+import type { Vis, VisualizeEmbeddableContract } from 'src/plugins/visualizations/public';
+import type { IEditorController, EditorRenderProps } from 'src/plugins/visualize/public';
 
-import { Vis, VisualizeEmbeddableContract } from 'src/plugins/visualizations/public';
-import { IEditorController, EditorRenderProps } from 'src/plugins/visualize/public';
 import { getUISettings, getI18n } from '../services';
 import { VisEditor } from './components/vis_editor_lazy';
-import { TimeseriesVisParams } from '../types';
+import type { TimeseriesVisParams } from '../types';
 
 export const TSVB_EDITOR_NAME = 'tsvbEditor';
 

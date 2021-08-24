@@ -1,9 +1,757 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`Ready for collection observable converts observable to promise 1`] = `
+Object {
+  "fetch": [Function],
+  "isReady": [Function],
+  "schema": Object {
+    "PNG": Object {
+      "available": Object {
+        "type": "boolean",
+      },
+      "deprecated": Object {
+        "type": "long",
+      },
+      "total": Object {
+        "type": "long",
+      },
+    },
+    "_all": Object {
+      "type": "long",
+    },
+    "available": Object {
+      "type": "boolean",
+    },
+    "browser_type": Object {
+      "type": "keyword",
+    },
+    "csv": Object {
+      "available": Object {
+        "type": "boolean",
+      },
+      "deprecated": Object {
+        "type": "long",
+      },
+      "total": Object {
+        "type": "long",
+      },
+    },
+    "csv_searchsource": Object {
+      "available": Object {
+        "type": "boolean",
+      },
+      "deprecated": Object {
+        "type": "long",
+      },
+      "total": Object {
+        "type": "long",
+      },
+    },
+    "enabled": Object {
+      "type": "boolean",
+    },
+    "last7Days": Object {
+      "PNG": Object {
+        "available": Object {
+          "type": "boolean",
+        },
+        "deprecated": Object {
+          "type": "long",
+        },
+        "total": Object {
+          "type": "long",
+        },
+      },
+      "_all": Object {
+        "type": "long",
+      },
+      "csv": Object {
+        "available": Object {
+          "type": "boolean",
+        },
+        "deprecated": Object {
+          "type": "long",
+        },
+        "total": Object {
+          "type": "long",
+        },
+      },
+      "csv_searchsource": Object {
+        "available": Object {
+          "type": "boolean",
+        },
+        "deprecated": Object {
+          "type": "long",
+        },
+        "total": Object {
+          "type": "long",
+        },
+      },
+      "printable_pdf": Object {
+        "app": Object {
+          "canvas workpad": Object {
+            "type": "long",
+          },
+          "dashboard": Object {
+            "type": "long",
+          },
+          "visualization": Object {
+            "type": "long",
+          },
+        },
+        "available": Object {
+          "type": "boolean",
+        },
+        "deprecated": Object {
+          "type": "long",
+        },
+        "layout": Object {
+          "preserve_layout": Object {
+            "type": "long",
+          },
+          "print": Object {
+            "type": "long",
+          },
+        },
+        "total": Object {
+          "type": "long",
+        },
+      },
+      "status": Object {
+        "completed": Object {
+          "type": "long",
+        },
+        "completed_with_warnings": Object {
+          "type": "long",
+        },
+        "failed": Object {
+          "type": "long",
+        },
+        "pending": Object {
+          "type": "long",
+        },
+        "processing": Object {
+          "type": "long",
+        },
+      },
+      "statuses": Object {
+        "completed": Object {
+          "PNG": Object {
+            "canvas workpad": Object {
+              "type": "long",
+            },
+            "dashboard": Object {
+              "type": "long",
+            },
+            "visualization": Object {
+              "type": "long",
+            },
+          },
+          "csv": Object {
+            "canvas workpad": Object {
+              "type": "long",
+            },
+            "dashboard": Object {
+              "type": "long",
+            },
+            "visualization": Object {
+              "type": "long",
+            },
+          },
+          "csv_searchsource": Object {
+            "canvas workpad": Object {
+              "type": "long",
+            },
+            "dashboard": Object {
+              "type": "long",
+            },
+            "visualization": Object {
+              "type": "long",
+            },
+          },
+          "printable_pdf": Object {
+            "canvas workpad": Object {
+              "type": "long",
+            },
+            "dashboard": Object {
+              "type": "long",
+            },
+            "visualization": Object {
+              "type": "long",
+            },
+          },
+        },
+        "completed_with_warnings": Object {
+          "PNG": Object {
+            "canvas workpad": Object {
+              "type": "long",
+            },
+            "dashboard": Object {
+              "type": "long",
+            },
+            "visualization": Object {
+              "type": "long",
+            },
+          },
+          "csv": Object {
+            "canvas workpad": Object {
+              "type": "long",
+            },
+            "dashboard": Object {
+              "type": "long",
+            },
+            "visualization": Object {
+              "type": "long",
+            },
+          },
+          "csv_searchsource": Object {
+            "canvas workpad": Object {
+              "type": "long",
+            },
+            "dashboard": Object {
+              "type": "long",
+            },
+            "visualization": Object {
+              "type": "long",
+            },
+          },
+          "printable_pdf": Object {
+            "canvas workpad": Object {
+              "type": "long",
+            },
+            "dashboard": Object {
+              "type": "long",
+            },
+            "visualization": Object {
+              "type": "long",
+            },
+          },
+        },
+        "failed": Object {
+          "PNG": Object {
+            "canvas workpad": Object {
+              "type": "long",
+            },
+            "dashboard": Object {
+              "type": "long",
+            },
+            "visualization": Object {
+              "type": "long",
+            },
+          },
+          "csv": Object {
+            "canvas workpad": Object {
+              "type": "long",
+            },
+            "dashboard": Object {
+              "type": "long",
+            },
+            "visualization": Object {
+              "type": "long",
+            },
+          },
+          "csv_searchsource": Object {
+            "canvas workpad": Object {
+              "type": "long",
+            },
+            "dashboard": Object {
+              "type": "long",
+            },
+            "visualization": Object {
+              "type": "long",
+            },
+          },
+          "printable_pdf": Object {
+            "canvas workpad": Object {
+              "type": "long",
+            },
+            "dashboard": Object {
+              "type": "long",
+            },
+            "visualization": Object {
+              "type": "long",
+            },
+          },
+        },
+        "pending": Object {
+          "PNG": Object {
+            "canvas workpad": Object {
+              "type": "long",
+            },
+            "dashboard": Object {
+              "type": "long",
+            },
+            "visualization": Object {
+              "type": "long",
+            },
+          },
+          "csv": Object {
+            "canvas workpad": Object {
+              "type": "long",
+            },
+            "dashboard": Object {
+              "type": "long",
+            },
+            "visualization": Object {
+              "type": "long",
+            },
+          },
+          "csv_searchsource": Object {
+            "canvas workpad": Object {
+              "type": "long",
+            },
+            "dashboard": Object {
+              "type": "long",
+            },
+            "visualization": Object {
+              "type": "long",
+            },
+          },
+          "printable_pdf": Object {
+            "canvas workpad": Object {
+              "type": "long",
+            },
+            "dashboard": Object {
+              "type": "long",
+            },
+            "visualization": Object {
+              "type": "long",
+            },
+          },
+        },
+        "processing": Object {
+          "PNG": Object {
+            "canvas workpad": Object {
+              "type": "long",
+            },
+            "dashboard": Object {
+              "type": "long",
+            },
+            "visualization": Object {
+              "type": "long",
+            },
+          },
+          "csv": Object {
+            "canvas workpad": Object {
+              "type": "long",
+            },
+            "dashboard": Object {
+              "type": "long",
+            },
+            "visualization": Object {
+              "type": "long",
+            },
+          },
+          "csv_searchsource": Object {
+            "canvas workpad": Object {
+              "type": "long",
+            },
+            "dashboard": Object {
+              "type": "long",
+            },
+            "visualization": Object {
+              "type": "long",
+            },
+          },
+          "printable_pdf": Object {
+            "canvas workpad": Object {
+              "type": "long",
+            },
+            "dashboard": Object {
+              "type": "long",
+            },
+            "visualization": Object {
+              "type": "long",
+            },
+          },
+        },
+      },
+    },
+    "printable_pdf": Object {
+      "app": Object {
+        "canvas workpad": Object {
+          "type": "long",
+        },
+        "dashboard": Object {
+          "type": "long",
+        },
+        "visualization": Object {
+          "type": "long",
+        },
+      },
+      "available": Object {
+        "type": "boolean",
+      },
+      "deprecated": Object {
+        "type": "long",
+      },
+      "layout": Object {
+        "preserve_layout": Object {
+          "type": "long",
+        },
+        "print": Object {
+          "type": "long",
+        },
+      },
+      "total": Object {
+        "type": "long",
+      },
+    },
+    "status": Object {
+      "completed": Object {
+        "type": "long",
+      },
+      "completed_with_warnings": Object {
+        "type": "long",
+      },
+      "failed": Object {
+        "type": "long",
+      },
+      "pending": Object {
+        "type": "long",
+      },
+      "processing": Object {
+        "type": "long",
+      },
+    },
+    "statuses": Object {
+      "completed": Object {
+        "PNG": Object {
+          "canvas workpad": Object {
+            "type": "long",
+          },
+          "dashboard": Object {
+            "type": "long",
+          },
+          "visualization": Object {
+            "type": "long",
+          },
+        },
+        "csv": Object {
+          "canvas workpad": Object {
+            "type": "long",
+          },
+          "dashboard": Object {
+            "type": "long",
+          },
+          "visualization": Object {
+            "type": "long",
+          },
+        },
+        "csv_searchsource": Object {
+          "canvas workpad": Object {
+            "type": "long",
+          },
+          "dashboard": Object {
+            "type": "long",
+          },
+          "visualization": Object {
+            "type": "long",
+          },
+        },
+        "printable_pdf": Object {
+          "canvas workpad": Object {
+            "type": "long",
+          },
+          "dashboard": Object {
+            "type": "long",
+          },
+          "visualization": Object {
+            "type": "long",
+          },
+        },
+      },
+      "completed_with_warnings": Object {
+        "PNG": Object {
+          "canvas workpad": Object {
+            "type": "long",
+          },
+          "dashboard": Object {
+            "type": "long",
+          },
+          "visualization": Object {
+            "type": "long",
+          },
+        },
+        "csv": Object {
+          "canvas workpad": Object {
+            "type": "long",
+          },
+          "dashboard": Object {
+            "type": "long",
+          },
+          "visualization": Object {
+            "type": "long",
+          },
+        },
+        "csv_searchsource": Object {
+          "canvas workpad": Object {
+            "type": "long",
+          },
+          "dashboard": Object {
+            "type": "long",
+          },
+          "visualization": Object {
+            "type": "long",
+          },
+        },
+        "printable_pdf": Object {
+          "canvas workpad": Object {
+            "type": "long",
+          },
+          "dashboard": Object {
+            "type": "long",
+          },
+          "visualization": Object {
+            "type": "long",
+          },
+        },
+      },
+      "failed": Object {
+        "PNG": Object {
+          "canvas workpad": Object {
+            "type": "long",
+          },
+          "dashboard": Object {
+            "type": "long",
+          },
+          "visualization": Object {
+            "type": "long",
+          },
+        },
+        "csv": Object {
+          "canvas workpad": Object {
+            "type": "long",
+          },
+          "dashboard": Object {
+            "type": "long",
+          },
+          "visualization": Object {
+            "type": "long",
+          },
+        },
+        "csv_searchsource": Object {
+          "canvas workpad": Object {
+            "type": "long",
+          },
+          "dashboard": Object {
+            "type": "long",
+          },
+          "visualization": Object {
+            "type": "long",
+          },
+        },
+        "printable_pdf": Object {
+          "canvas workpad": Object {
+            "type": "long",
+          },
+          "dashboard": Object {
+            "type": "long",
+          },
+          "visualization": Object {
+            "type": "long",
+          },
+        },
+      },
+      "pending": Object {
+        "PNG": Object {
+          "canvas workpad": Object {
+            "type": "long",
+          },
+          "dashboard": Object {
+            "type": "long",
+          },
+          "visualization": Object {
+            "type": "long",
+          },
+        },
+        "csv": Object {
+          "canvas workpad": Object {
+            "type": "long",
+          },
+          "dashboard": Object {
+            "type": "long",
+          },
+          "visualization": Object {
+            "type": "long",
+          },
+        },
+        "csv_searchsource": Object {
+          "canvas workpad": Object {
+            "type": "long",
+          },
+          "dashboard": Object {
+            "type": "long",
+          },
+          "visualization": Object {
+            "type": "long",
+          },
+        },
+        "printable_pdf": Object {
+          "canvas workpad": Object {
+            "type": "long",
+          },
+          "dashboard": Object {
+            "type": "long",
+          },
+          "visualization": Object {
+            "type": "long",
+          },
+        },
+      },
+      "processing": Object {
+        "PNG": Object {
+          "canvas workpad": Object {
+            "type": "long",
+          },
+          "dashboard": Object {
+            "type": "long",
+          },
+          "visualization": Object {
+            "type": "long",
+          },
+        },
+        "csv": Object {
+          "canvas workpad": Object {
+            "type": "long",
+          },
+          "dashboard": Object {
+            "type": "long",
+          },
+          "visualization": Object {
+            "type": "long",
+          },
+        },
+        "csv_searchsource": Object {
+          "canvas workpad": Object {
+            "type": "long",
+          },
+          "dashboard": Object {
+            "type": "long",
+          },
+          "visualization": Object {
+            "type": "long",
+          },
+        },
+        "printable_pdf": Object {
+          "canvas workpad": Object {
+            "type": "long",
+          },
+          "dashboard": Object {
+            "type": "long",
+          },
+          "visualization": Object {
+            "type": "long",
+          },
+        },
+      },
+    },
+  },
+  "type": "reporting",
+}
+`;
+
+exports[`data modeling usage data with meta.isDeprecated jobTypes 1`] = `
+Object {
+  "PNG": Object {
+    "available": true,
+    "deprecated": 0,
+    "total": 0,
+  },
+  "_all": 9,
+  "available": true,
+  "browser_type": undefined,
+  "csv": Object {
+    "available": true,
+    "deprecated": 4,
+    "total": 4,
+  },
+  "csv_searchsource": Object {
+    "available": true,
+    "deprecated": 0,
+    "total": 5,
+  },
+  "enabled": true,
+  "last7Days": Object {
+    "PNG": Object {
+      "available": true,
+      "deprecated": 0,
+      "total": 0,
+    },
+    "_all": 9,
+    "csv": Object {
+      "available": true,
+      "deprecated": 4,
+      "total": 4,
+    },
+    "csv_searchsource": Object {
+      "available": true,
+      "deprecated": 0,
+      "total": 5,
+    },
+    "printable_pdf": Object {
+      "app": Object {
+        "dashboard": 0,
+        "visualization": 0,
+      },
+      "available": true,
+      "deprecated": 0,
+      "layout": Object {
+        "preserve_layout": 0,
+        "print": 0,
+      },
+      "total": 0,
+    },
+    "status": Object {
+      "completed": 9,
+      "failed": 0,
+    },
+    "statuses": Object {
+      "completed": Object {
+        "csv": Object {
+          "search": 4,
+        },
+        "csv_searchsource": Object {
+          "search": 5,
+        },
+      },
+    },
+  },
+  "printable_pdf": Object {
+    "app": Object {
+      "dashboard": 0,
+      "visualization": 0,
+    },
+    "available": true,
+    "deprecated": 0,
+    "layout": Object {
+      "preserve_layout": 0,
+      "print": 0,
+    },
+    "total": 0,
+  },
+  "status": Object {
+    "completed": 9,
+    "failed": 0,
+  },
+  "statuses": Object {
+    "completed": Object {
+      "csv": Object {
+        "search": 4,
+      },
+      "csv_searchsource": Object {
+        "search": 5,
+      },
+    },
+  },
+}
+`;
+
 exports[`data modeling with empty data 1`] = `
 Object {
   "PNG": Object {
     "available": true,
+    "deprecated": 0,
     "total": 0,
   },
   "_all": 0,
@@ -11,25 +759,30 @@ Object {
   "browser_type": undefined,
   "csv": Object {
     "available": true,
+    "deprecated": 0,
     "total": 0,
   },
   "csv_searchsource": Object {
     "available": true,
+    "deprecated": 0,
     "total": 0,
   },
   "enabled": true,
   "last7Days": Object {
     "PNG": Object {
       "available": true,
+      "deprecated": 0,
       "total": 0,
     },
     "_all": 0,
     "csv": Object {
       "available": true,
+      "deprecated": 0,
       "total": 0,
     },
     "csv_searchsource": Object {
       "available": true,
+      "deprecated": 0,
       "total": 0,
     },
     "printable_pdf": Object {
@@ -38,6 +791,7 @@ Object {
         "visualization": 0,
       },
       "available": true,
+      "deprecated": 0,
       "layout": Object {
         "preserve_layout": 0,
         "print": 0,
@@ -56,6 +810,7 @@ Object {
       "visualization": 0,
     },
     "available": true,
+    "deprecated": 0,
     "layout": Object {
       "preserve_layout": 0,
       "print": 0,
@@ -74,6 +829,7 @@ exports[`data modeling with normal looking usage data 1`] = `
 Object {
   "PNG": Object {
     "available": true,
+    "deprecated": 0,
     "total": 3,
   },
   "_all": 12,
@@ -81,25 +837,30 @@ Object {
   "browser_type": undefined,
   "csv": Object {
     "available": true,
+    "deprecated": 0,
     "total": 0,
   },
   "csv_searchsource": Object {
     "available": true,
+    "deprecated": 0,
     "total": 0,
   },
   "enabled": true,
   "last7Days": Object {
     "PNG": Object {
       "available": true,
+      "deprecated": 0,
       "total": 1,
     },
     "_all": 1,
     "csv": Object {
       "available": true,
+      "deprecated": 0,
       "total": 0,
     },
     "csv_searchsource": Object {
       "available": true,
+      "deprecated": 0,
       "total": 0,
     },
     "printable_pdf": Object {
@@ -108,6 +869,7 @@ Object {
         "visualization": 0,
       },
       "available": true,
+      "deprecated": 0,
       "layout": Object {
         "preserve_layout": 0,
         "print": 0,
@@ -134,6 +896,7 @@ Object {
       "visualization": 3,
     },
     "available": true,
+    "deprecated": 0,
     "layout": Object {
       "preserve_layout": 9,
       "print": 0,
@@ -173,6 +936,7 @@ exports[`data modeling with sparse data 1`] = `
 Object {
   "PNG": Object {
     "available": true,
+    "deprecated": 0,
     "total": 1,
   },
   "_all": 4,
@@ -180,25 +944,30 @@ Object {
   "browser_type": undefined,
   "csv": Object {
     "available": true,
+    "deprecated": 1,
     "total": 1,
   },
   "csv_searchsource": Object {
     "available": true,
+    "deprecated": 0,
     "total": 0,
   },
   "enabled": true,
   "last7Days": Object {
     "PNG": Object {
       "available": true,
+      "deprecated": 0,
       "total": 1,
     },
     "_all": 4,
     "csv": Object {
       "available": true,
+      "deprecated": 1,
       "total": 1,
     },
     "csv_searchsource": Object {
       "available": true,
+      "deprecated": 0,
       "total": 0,
     },
     "printable_pdf": Object {
@@ -208,6 +977,7 @@ Object {
         "visualization": 0,
       },
       "available": true,
+      "deprecated": 0,
       "layout": Object {
         "preserve_layout": 2,
         "print": 0,
@@ -238,6 +1008,7 @@ Object {
       "visualization": 0,
     },
     "available": true,
+    "deprecated": 0,
     "layout": Object {
       "preserve_layout": 2,
       "print": 0,

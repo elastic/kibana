@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import type { Capabilities, HttpSetup, SavedObjectReference } from 'kibana/public';
+import type { Capabilities, HttpSetup } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { RecursiveReadonly } from '@kbn/utility-types';
-import { Ast } from '@kbn/interpreter/target/common';
-import { EmbeddableStateWithType } from 'src/plugins/embeddable/common';
+import { Ast } from '@kbn/interpreter/common';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
 import { IndexPatternsContract, TimefilterContract } from '../../../../../src/plugins/data/public';
 import { ReactExpressionRendererType } from '../../../../../src/plugins/expressions/public';
@@ -23,6 +22,7 @@ import { Document } from '../persistence/saved_object_store';
 import { LensAttributeService } from '../lens_attribute_service';
 import { DOC_TYPE } from '../../common';
 import { ErrorMessage } from '../editor_frame_service/types';
+import { extract, inject } from '../../common/embeddable_factory';
 
 export interface LensEmbeddableStartServices {
   timefilter: TimefilterContract;
@@ -112,14 +112,6 @@ export class EmbeddableFactory implements EmbeddableFactoryDefinition {
     );
   }
 
-  extract(state: EmbeddableStateWithType) {
-    let references: SavedObjectReference[] = [];
-    const typedState = (state as unknown) as LensEmbeddableInput;
-
-    if ('attributes' in typedState && typedState.attributes !== undefined) {
-      references = typedState.attributes.references;
-    }
-
-    return { state, references };
-  }
+  extract = extract;
+  inject = inject;
 }

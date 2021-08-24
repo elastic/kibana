@@ -9,11 +9,11 @@ import expect from '@kbn/expect';
 import {
   ALERT_DURATION,
   ALERT_END,
+  ALERT_RULE_UUID,
   ALERT_START,
   ALERT_STATUS,
   ALERT_UUID,
   EVENT_KIND,
-  ALERT_RULE_UUID,
 } from '@kbn/rule-data-utils';
 import { merge, omit } from 'lodash';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
@@ -42,7 +42,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const BULK_INDEX_DELAY = 1000;
   const INDEXING_DELAY = 5000;
 
-  const ALERTS_INDEX_TARGET = '.kibana-alerts-observability.apm.alerts*';
+  const ALERTS_INDEX_TARGET = '.alerts-observability.apm.alerts*';
   const APM_METRIC_INDEX_NAME = 'apm-8.0.0-transaction';
 
   const createTransactionMetric = (override: Record<string, any>) => {
@@ -393,6 +393,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             "kibana.alert.status": Array [
               "open",
             ],
+            "kibana.alert.workflow_status": Array [
+              "open",
+            ],
             "kibana.space_ids": Array [
               "default",
             ],
@@ -499,6 +502,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             ],
             "kibana.alert.status": Array [
               "closed",
+            ],
+            "kibana.alert.workflow_status": Array [
+              "open",
             ],
             "kibana.space_ids": Array [
               "default",
