@@ -7,8 +7,6 @@
  */
 
 import { CoreStart, CoreSetup } from 'kibana/public';
-import { KibanaLegacyStart } from 'src/plugins/kibana_legacy/public';
-import { Subscription } from 'rxjs';
 import { createLegacyUrlForwardApp } from './forward_app';
 import { navigateToLegacyKibanaUrl } from './forward_app/navigate_to_legacy_kibana_url';
 
@@ -20,8 +18,6 @@ export interface ForwardDefinition {
 
 export class UrlForwardingPlugin {
   private forwardDefinitions: ForwardDefinition[] = [];
-  private currentAppId: string | undefined;
-  private currentAppIdSubscription: Subscription | undefined;
 
   public setup(core: CoreSetup<{}, UrlForwardingStart>) {
     core.application.register(createLegacyUrlForwardApp(core, this.forwardDefinitions));
@@ -70,13 +66,7 @@ export class UrlForwardingPlugin {
     };
   }
 
-  public start(
-    { application, http: { basePath }, uiSettings }: CoreStart,
-    { kibanaLegacy }: { kibanaLegacy: KibanaLegacyStart }
-  ) {
-    this.currentAppIdSubscription = application.currentAppId$.subscribe((currentAppId) => {
-      this.currentAppId = currentAppId;
-    });
+  public start({ application, http: { basePath } }: CoreStart) {
     return {
       /**
        * Resolves the provided hash using the registered forwards and navigates to the target app.
@@ -93,12 +83,6 @@ export class UrlForwardingPlugin {
        */
       getForwards: () => this.forwardDefinitions,
     };
-  }
-
-  public stop() {
-    if (this.currentAppIdSubscription) {
-      this.currentAppIdSubscription.unsubscribe();
-    }
   }
 }
 

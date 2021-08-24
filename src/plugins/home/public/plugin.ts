@@ -14,7 +14,6 @@ import {
   PluginInitializerContext,
 } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
-import { first } from 'rxjs/operators';
 
 import {
   EnvironmentService,

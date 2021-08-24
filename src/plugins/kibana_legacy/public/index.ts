@@ -6,11 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { PluginInitializerContext } from 'kibana/public';
 import { KibanaLegacyPlugin } from './plugin';
 
-export const plugin = (initializerContext: PluginInitializerContext) =>
-  new KibanaLegacyPlugin(initializerContext);
+export const plugin = () => new KibanaLegacyPlugin();
 
 export * from './plugin';
 
