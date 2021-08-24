@@ -6,6 +6,7 @@
  */
 
 import _ from 'lodash';
+import { i18n } from '@kbn/i18n';
 import { AnyAction, Dispatch } from 'redux';
 import { ThunkDispatch } from 'redux-thunk';
 import turfBboxPolygon from '@turf/bbox-polygon';
@@ -64,6 +65,7 @@ import { cleanTooltipStateForLayer } from './tooltip_actions';
 import { VectorLayer } from '../classes/layers/vector_layer';
 import { SET_DRAW_MODE } from './ui_actions';
 import { expandToTileBoundaries } from '../../common/geo_tile_utils';
+import { getToasts } from '../kibana_services';
 
 export interface MapExtentState {
   zoom: number;
@@ -384,8 +386,20 @@ export function addNewFeatureToIndex(geometry: Geometry | Position[]) {
     if (!layer || !(layer instanceof VectorLayer)) {
       return;
     }
-    await layer.addFeature(geometry);
-    await dispatch(syncDataForLayer(layer, true));
+
+    try {
+      await layer.addFeature(geometry);
+      await dispatch(syncDataForLayer(layer, true));
+    } catch (e) {
+      getToasts().addError(e, {
+        title: i18n.translate('xpack.maps.mapActions.addFeatureError', {
+          defaultMessage: `Error adding feature to index`,
+        }),
+        toastMessage: i18n.translate('xpack.maps.mapActions.addFeatureErrorNotificationMsg', {
+          defaultMessage: `Only index patterns associated with a single index can be edited`,
+        }),
+      });
+    }
   };
 }
 
@@ -403,7 +417,18 @@ export function deleteFeatureFromIndex(featureId: string) {
     if (!layer || !(layer instanceof VectorLayer)) {
       return;
     }
-    await layer.deleteFeature(featureId);
-    await dispatch(syncDataForLayer(layer, true));
+    try {
+      await layer.deleteFeature(featureId);
+      await dispatch(syncDataForLayer(layer, true));
+    } catch (e) {
+      getToasts().addError(e, {
+        title: i18n.translate('xpack.maps.mapActions.removeFeatureError', {
+          defaultMessage: `Error removing feature from index`,
+        }),
+        toastMessage: i18n.translate('xpack.maps.mapActions.removeFeatureErrorNotificationMsg', {
+          defaultMessage: `Only index patterns associated with a single index can be edited`,
+        }),
+      });
+    }
   };
 }

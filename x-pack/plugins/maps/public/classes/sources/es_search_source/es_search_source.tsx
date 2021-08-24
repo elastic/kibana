@@ -18,7 +18,6 @@ import {
   getSearchService,
   getSecurityService,
   getTimeFilter,
-  getToasts,
 } from '../../../kibana_services';
 import {
   addFieldToDSL,
@@ -759,34 +758,22 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
   }
 
   async _getEditableIndex(): Promise<string> {
-    try {
-      const indexList = await this.getSourceIndexList();
-      if (indexList.length === 0) {
-        throw new Error(
-          i18n.translate('xpack.maps.source.esSearch.indexZeroLengthEditError', {
-            defaultMessage: `There are no indexes associated with this index pattern. Index pattern must be associated with a single index.`,
-          })
-        );
-      }
-      if (indexList.length > 1) {
-        throw new Error(
-          i18n.translate('xpack.maps.source.esSearch.indexOverOneLengthEditError', {
-            defaultMessage: `Multiple indexes are associated with this index pattern. Index pattern must be associated with a single index.`,
-          })
-        );
-      }
-      return indexList[0];
-    } catch (e) {
-      getToasts().addError(e, {
-        title: i18n.translate('xpack.maps.source.esSearch.updateIndexError', {
-          defaultMessage: `Error updating index`,
-        }),
-        toastMessage: i18n.translate('xpack.maps.source.esSearch.editIndexErrorNotificationMsg', {
-          defaultMessage: `Only index patterns associated with a single index can be edited`,
-        }),
-      });
-      return '';
+    const indexList = await this.getSourceIndexList();
+    if (indexList.length === 0) {
+      throw new Error(
+        i18n.translate('xpack.maps.source.esSearch.indexZeroLengthEditError', {
+          defaultMessage: `There are no indexes associated with this index pattern. Index pattern must be associated with a single index.`,
+        })
+      );
     }
+    if (indexList.length > 1) {
+      throw new Error(
+        i18n.translate('xpack.maps.source.esSearch.indexOverOneLengthEditError', {
+          defaultMessage: `Multiple indexes are associated with this index pattern. Index pattern must be associated with a single index.`,
+        })
+      );
+    }
+    return indexList[0];
   }
 
   async addFeature(
@@ -794,16 +781,12 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
     defaultFields: Record<string, Record<string, string>>
   ) {
     const index = await this._getEditableIndex();
-    if (index) {
-      await addFeatureToIndex(index, geometry, this.getGeoFieldName(), defaultFields);
-    }
+    await addFeatureToIndex(index, geometry, this.getGeoFieldName(), defaultFields);
   }
 
   async deleteFeature(featureId: string) {
     const index = await this._getEditableIndex();
-    if (index) {
-      await deleteFeatureFromIndex(index, featureId);
-    }
+    await deleteFeatureFromIndex(index, featureId);
   }
 
   async getUrlTemplateWithMeta(
