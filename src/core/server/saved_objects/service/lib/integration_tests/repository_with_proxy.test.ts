@@ -30,6 +30,8 @@ import {
 } from './repository_with_proxy_utils';
 
 let esServer: kbnTestServer.TestElasticsearchUtils;
+let hapiServer: Hapi.Server;
+
 const registerSOTypes = (setup: InternalCoreSetup) => {
   setup.savedObjects.registerType({
     name: 'my_type',
@@ -54,12 +56,10 @@ const registerSOTypes = (setup: InternalCoreSetup) => {
     namespaceType: 'single',
   });
 };
-// let proxyInterrupt: string | null | undefined = null;
-
-describe('404s from proxies', () => {
+// blocked  pending resolution of https://github.com/elastic/kibana/pull/109755#discussion_r695143757
+describe.skip('404s from proxies', () => {
   let root: Root;
   let start: InternalCoreStart;
-  let hapiServer: Hapi.Server;
 
   beforeAll(async () => {
     setProxyInterrupt(null);
