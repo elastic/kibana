@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { METRIC_TYPES } from '../../../../common/enums';
-import { checkIfNumericMetric } from 'src/plugins/vis_type_timeseries/public/application/components/lib/check_if_numeric_metric';
+import { METRIC_TYPES } from '../../../../../data/common';
+import { TSVB_METRIC_TYPES } from '../../../../common/enums';
+import { checkIfNumericMetric } from './check_if_numeric_metric';
 
 import type { Metric } from '../../../../common/types';
 
@@ -29,28 +30,28 @@ describe('checkIfNumericMetric(metric, fields, indexPattern)', () => {
   });
 
   it('should return true for Average metric', () => {
-    const metric = { field: 'number field', type: METRIC_TYPES.AVERAGE } as Metric;
+    const metric = { field: 'number field', type: METRIC_TYPES.AVG } as Metric;
 
     const actual = checkIfNumericMetric(metric, fields, indexPattern);
     expect(actual).toBe(true);
   });
 
   it('should return true for Top Hit metric with numeric field', () => {
-    const metric = { field: 'number field', type: METRIC_TYPES.TOP_HIT } as Metric;
+    const metric = { field: 'number field', type: TSVB_METRIC_TYPES.TOP_HIT } as Metric;
 
     const actual = checkIfNumericMetric(metric, fields, indexPattern);
     expect(actual).toBe(true);
   });
 
   it('should return false for Top Hit metric with string field', () => {
-    const metric = { field: 'string field', type: METRIC_TYPES.TOP_HIT } as Metric;
+    const metric = { field: 'string field', type: TSVB_METRIC_TYPES.TOP_HIT } as Metric;
 
     const actual = checkIfNumericMetric(metric, fields, indexPattern);
     expect(actual).toBe(false);
   });
 
   it('should return false for Top Hit metric with date field', () => {
-    const metric = { field: 'date field', type: METRIC_TYPES.TOP_HIT } as Metric;
+    const metric = { field: 'date field', type: TSVB_METRIC_TYPES.TOP_HIT } as Metric;
 
     const actual = checkIfNumericMetric(metric, fields, indexPattern);
     expect(actual).toBe(false);

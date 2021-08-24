@@ -60,6 +60,7 @@ describe('agg utils', () => {
         isFieldRequired: true,
         isFilterRatioSupported: false,
         isHistogramSupported: false,
+        isFieldFormattingDisabled: false,
         hasExtendedStats: true,
       };
       const expected = [
@@ -95,6 +96,7 @@ describe('agg utils', () => {
         isFieldRequired: false,
         isFilterRatioSupported: false,
         isHistogramSupported: false,
+        isFieldFormattingDisabled: false,
         hasExtendedStats: false,
       };
       const expected = [
