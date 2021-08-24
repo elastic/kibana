@@ -6,6 +6,5 @@
   "owner": {
     "name": "Kibana App",
     "githubTeam": "kibana-app"
-  },
-  "requiredPlugins": ["kibanaLegacy"]
+  }
 }
