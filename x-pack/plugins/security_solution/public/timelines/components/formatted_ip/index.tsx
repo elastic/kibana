@@ -32,7 +32,7 @@ import {
 import { activeTimeline } from '../../containers/active_timeline_context';
 import { timelineActions } from '../../store/timeline';
 import { NetworkDetailsLink } from '../../../common/components/links';
-import { StatefulEventContext2 } from '../../../../../timelines/public';
+import { StatefulEventContext } from '../../../../../timelines/public';
 
 const getUniqueId = ({
   contextId,
@@ -164,7 +164,7 @@ const AddressLinksItemComponent: React.FC<AddressLinksItemProps> = ({
   );
 
   const dispatch = useDispatch();
-  const eventContext = useContext(StatefulEventContext2);
+  const eventContext = useContext(StatefulEventContext);
   const isInTimelineContext =
     address && eventContext?.enableIpDetailsFlyout && eventContext?.timelineID;
 
@@ -199,6 +199,8 @@ const AddressLinksItemComponent: React.FC<AddressLinksItemProps> = ({
     [eventContext, isInTimelineContext, address, fieldName, dispatch]
   );
 
+  // The below is explicitly defined this way as the onClick takes precedence when it and the href are both defined
+  // When this component is used outside of timeline (i.e. in the flyout) we would still like it to link to the IP Overview page
   const content = useMemo(
     () => (
       <Content field={fieldName} tooltipContent={fieldName}>

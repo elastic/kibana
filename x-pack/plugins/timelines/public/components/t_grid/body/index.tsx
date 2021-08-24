@@ -61,7 +61,7 @@ import { DEFAULT_ICON_BUTTON_WIDTH } from '../helpers';
 import type { BrowserFields } from '../../../../common/search_strategy/index_fields';
 import type { OnRowSelected, OnSelectAll } from '../types';
 import type { Refetch } from '../../../store/t_grid/inputs';
-import { StatefulEventContext2, StatefulFieldsBrowser } from '../../../';
+import { StatefulEventContext, StatefulFieldsBrowser } from '../../../';
 import { tGridActions, TGridModel, tGridSelectors, TimelineState } from '../../../store/t_grid';
 import { useDeepEqualSelector } from '../../../hooks/use_selector';
 import { RowAction } from './row_action';
@@ -642,7 +642,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     });
     return (
       <>
-        <StatefulEventContext2.Provider value={activeStatefulEventContext}>
+        <StatefulEventContext.Provider value={activeStatefulEventContext}>
           {tableView === 'gridView' && (
             <EuiDataGrid
               data-test-subj="body-data-grid"
@@ -674,7 +674,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
               totalItemCount={totalItems}
             />
           )}
-        </StatefulEventContext2.Provider>
+        </StatefulEventContext.Provider>
       </>
     );
   }

@@ -19,7 +19,7 @@ import { getEmptyTagValue } from '../../../../../common/components/empty_value';
 import { TruncatableText } from '../../../../../common/components/truncatable_text';
 import { activeTimeline } from '../../../../containers/active_timeline_context';
 import { timelineActions } from '../../../../store/timeline';
-import { StatefulEventContext2 } from '../../../../../../../timelines/public';
+import { StatefulEventContext } from '../../../../../../../timelines/public';
 
 interface Props {
   contextId: string;
@@ -37,7 +37,7 @@ const HostNameComponent: React.FC<Props> = ({
   value,
 }) => {
   const dispatch = useDispatch();
-  const eventContext = useContext(StatefulEventContext2);
+  const eventContext = useContext(StatefulEventContext);
   const hostName = `${value}`;
   const isInTimelineContext =
     hostName && eventContext?.enableHostDetailsFlyout && eventContext?.timelineID;
@@ -69,6 +69,8 @@ const HostNameComponent: React.FC<Props> = ({
     [dispatch, eventContext, isInTimelineContext, hostName]
   );
 
+  // The below is explicitly defined this way as the onClick takes precedence when it and the href are both defined
+  // When this component is used outside of timeline (i.e. in the flyout) we would still like it to link to the Host Details page
   const content = useMemo(
     () => (
       <HostDetailsLink

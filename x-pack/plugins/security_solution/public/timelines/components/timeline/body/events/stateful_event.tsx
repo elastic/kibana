@@ -40,7 +40,7 @@ import { StatefulRowRenderer } from './stateful_row_renderer';
 import { NOTES_BUTTON_CLASS_NAME } from '../../properties/helpers';
 import { timelineDefaults } from '../../../../store/timeline/defaults';
 import { getMappedNonEcsValue } from '../data_driven_columns';
-import { StatefulEventContext2 } from '../../../../../../../timelines/public';
+import { StatefulEventContext } from '../../../../../../../timelines/public';
 
 interface Props {
   actionsColumnWidth: number;
@@ -259,7 +259,7 @@ const StatefulEventComponent: React.FC<Props> = ({
   );
 
   return (
-    <StatefulEventContext2.Provider value={activeStatefulEventContext}>
+    <StatefulEventContext.Provider value={activeStatefulEventContext}>
       <EventsTrGroup
         $ariaRowindex={ariaRowindex}
         className={STATEFUL_EVENT_CSS_CLASS_NAME}
@@ -319,7 +319,7 @@ const StatefulEventComponent: React.FC<Props> = ({
           {RowRendererContent}
         </EventsTrSupplementContainerWrapper>
       </EventsTrGroup>
-    </StatefulEventContext2.Provider>
+    </StatefulEventContext.Provider>
   );
 };
 

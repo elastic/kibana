@@ -68,7 +68,7 @@ export type GetTGridProps<T extends TGridType> = T extends 'standalone'
   : TGridIntegratedCompProps;
 export type TGridProps = TGridStandaloneCompProps | TGridIntegratedCompProps;
 
-export interface StatefulEventContext {
+export interface StatefulEventContextType {
   tabType: TimelineTabs | undefined;
   timelineID: string;
   enableHostDetailsFlyout: boolean;

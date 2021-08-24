@@ -9,7 +9,7 @@ import { createContext } from 'react';
 import { PluginInitializerContext } from '../../../../src/core/public';
 
 import { TimelinesPlugin } from './plugin';
-import { StatefulEventContext } from './types';
+import type { StatefulEventContextType } from './types';
 export * as tGridActions from './store/t_grid/actions';
 export * as tGridSelectors from './store/t_grid/selectors';
 export type {
@@ -23,12 +23,7 @@ export type {
 } from '../common/search_strategy/common';
 export { Direction } from '../common/search_strategy/common';
 export { tGridReducer } from './store/t_grid/reducer';
-export type {
-  StatefulEventContext,
-  TGridModelForTimeline,
-  TimelineState,
-  TimelinesUIStart,
-} from './types';
+export type { TGridModelForTimeline, TimelineState, TimelinesUIStart } from './types';
 export { TGridType, SortDirection } from './types';
 export {
   ARIA_COLINDEX_ATTRIBUTE,
@@ -67,4 +62,4 @@ export function plugin(initializerContext: PluginInitializerContext) {
   return new TimelinesPlugin(initializerContext);
 }
 
-export const StatefulEventContext2 = createContext<StatefulEventContext | null>(null);
+export const StatefulEventContext = createContext<StatefulEventContextType | null>(null);
