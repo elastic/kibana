@@ -30,7 +30,7 @@ export function getRequestInspectorStats(searchSource: ISearchSource) {
       }),
       value: index.title,
       description: i18n.translate('data.search.searchSource.dataViewDescription', {
-        defaultMessage: 'The data view that connected to the Elasticsearch indices.',
+        defaultMessage: 'The data view that was queried.',
       }),
     };
     stats.indexPatternId = {
