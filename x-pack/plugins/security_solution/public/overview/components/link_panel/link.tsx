@@ -10,11 +10,11 @@ import { EuiLink, EuiText } from '@elastic/eui';
 
 export const Link: React.FC<{ path?: string; copy: string }> = ({ path, copy }) =>
   path ? (
-    <EuiLink href={path} target="_blank">
+    <EuiLink href={path} target="_blank" data-test-subj="panel-link">
       {copy}
     </EuiLink>
   ) : (
-    <EuiText color={'subdued'} size={'s'}>
+    <EuiText color={'subdued'} size={'s'} data-test-subj="panel-no-link">
       {copy}
     </EuiText>
   );

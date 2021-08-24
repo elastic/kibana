@@ -16,11 +16,6 @@ import * as i18n from './translations';
 import { VIEW_DASHBOARD } from '../overview_cti_links/translations';
 import { QUERY_ID as RiskyHostsQueryId } from '../../containers/overview_risky_host_links/use_risky_host_links';
 
-const RiskyHostsDashboardLink: React.FC<{ path?: string }> = (props) => (
-  <Link path={props as string} copy={i18n.LINK_COPY} />
-);
-RiskyHostsDashboardLink.displayName = 'RiskyHostsDashboardLink';
-
 const columns: Array<EuiTableFieldDataColumnType<LinkPanelListItem>> = [
   { name: 'Host Name', field: 'title', sortable: true, truncateText: true, width: '100%' },
   {
@@ -42,7 +37,8 @@ const columns: Array<EuiTableFieldDataColumnType<LinkPanelListItem>> = [
     name: '',
     field: 'path',
     truncateText: true,
-    render: RiskyHostsDashboardLink,
+    // eslint-disable-next-line react/display-name
+    render: (path: string) => <Link path={path} copy={i18n.LINK_COPY} />,
     width: '120px',
   },
 ];

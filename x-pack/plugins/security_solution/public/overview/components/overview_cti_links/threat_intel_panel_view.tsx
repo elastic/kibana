@@ -16,6 +16,7 @@ import { LinkPanelViewProps } from '../link_panel/types';
 import { shortenCountIntoString } from '../../../common/utils/shorten_count_into_string';
 import { Link } from '../link_panel/link';
 import { ID as CTIEventCountQueryId } from '../../containers/overview_cti_links/use_cti_event_counts';
+import { LINK_COPY } from '../overview_risky_host_links/translations';
 
 const columns: Array<EuiTableFieldDataColumnType<LinkPanelListItem>> = [
   { name: 'Name', field: 'title', sortable: true, truncateText: true, width: '100%' },
@@ -32,9 +33,9 @@ const columns: Array<EuiTableFieldDataColumnType<LinkPanelListItem>> = [
     name: '',
     field: 'path',
     truncateText: true,
-    width: '200px',
+    width: '120px',
     // eslint-disable-next-line react/display-name
-    render: (path: string) => <Link path={path} copy={i18n.LINK_COPY} />,
+    render: (path: string) => <Link path={path} copy={LINK_COPY} />,
   },
 ];
 
