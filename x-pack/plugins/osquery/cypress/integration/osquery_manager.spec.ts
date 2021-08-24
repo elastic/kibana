@@ -8,25 +8,21 @@
 import { HEADER } from '../screens/osquery';
 import { OSQUERY_NAVIGATION_LINK } from '../screens/navigation';
 
-import {
-  OSQUERY,
-  NEW_LIVE_QUERY,
-  openNavigationFlyout,
-  navigateTo,
-} from '../tasks/navigation';
+import { OSQUERY, NEW_LIVE_QUERY, openNavigationFlyout, navigateTo } from '../tasks/navigation';
 import { addIntegration } from '../tasks/integrations';
-import { inputQuery, selectAllAgents, submitQuery } from '../tasks/live_query';
+import { checkResults, inputQuery, selectAllAgents, submitQuery } from '../tasks/live_query';
 
 describe('Osquery Manager', () => {
   before(() => {
     return addIntegration(Cypress.env('OSQUERY_POLICY'));
   });
-  
+
   it('Runs live queries', () => {
     navigateTo(NEW_LIVE_QUERY);
     selectAllAgents();
     inputQuery();
     submitQuery();
+    checkResults();
   });
 
   it('Displays Osquery on the navigation flyout once installed ', () => {

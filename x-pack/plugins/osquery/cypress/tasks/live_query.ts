@@ -24,3 +24,7 @@ export const inputQuery = () => {
 export const submitQuery = () => {
   return cy.get(SUBMIT_BUTTON).contains('Submit').click();
 };
+
+export const checkResults = () => {
+  return cy.get('[data-test-subj="dataGridRowCell"]').should('have.lengthOf.above', 0);
+};

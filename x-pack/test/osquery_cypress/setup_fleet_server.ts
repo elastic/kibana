@@ -9,7 +9,7 @@ import { ChildProcess, spawn } from 'child_process';
 import { copyFile } from 'fs/promises';
 import { unlinkSync } from 'fs';
 import { resolve } from 'path';
-import axios from 'axios'
+import axios from 'axios';
 import { ToolingLog } from '@kbn/dev-utils';
 interface ElasticsearchConfig {
   host: string;
@@ -48,7 +48,9 @@ export class FleetManager {
 
   public cleanup() {
     this.log.info('Removing old fleet config');
-    this.fleetProcess.kill(9);
+    if (this.fleetProcess) {
+      this.fleetProcess.kill(9);
+    }
     unlinkSync(resolve('.', 'fleet-server.yml'));
   }
 }

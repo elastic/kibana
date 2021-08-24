@@ -6,8 +6,8 @@
  */
 
 import { ToolingLog } from '@kbn/dev-utils';
-import axios from 'axios';
-import { copyFile, readdir } from 'fs/promises';
+import axios, { AxiosRequestConfig } from 'axios';
+import { copyFile } from 'fs/promises';
 import { ChildProcess, execFileSync, spawn } from 'child_process';
 import { resolve } from 'path';
 import { unlinkSync } from 'fs';
@@ -24,47 +24,54 @@ export class AgentManager {
   private params: AgentManagerParams;
   private log: ToolingLog;
   private agentProcess: ChildProcess;
+  private requestOptions: AxiosRequestConfig;
   public policyId: string;
   constructor(directoryPath: string, params: AgentManagerParams, log: ToolingLog) {
     // TODO: check if the file exists
     this.directoryPath = directoryPath;
     this.log = log;
     this.params = params;
+    this.requestOptions = {
+      headers: {
+        'kbn-xsrf': 'kibana',
+      },
+      auth: {
+        username: this.params.user,
+        password: this.params.password,
+      },
+    };
   }
 
   public getBinaryPath() {
-    return resolve(
-      this.directoryPath,
-      'elastic-agent'
-    );
+    return resolve(this.directoryPath, 'elastic-agent');
   }
 
   public async setup() {
-    this.log.info('Setting the agent up');
-    await axios.post(
-      `${this.params.kibanaUrl}/api/fleet/agents/setup`,
-      {},
-      {
-        headers: {
-          'kbn-xsrf': 'kibana',
-        },
-        auth: {
-          username: this.params.user,
-          password: this.params.password,
-        },
-      }
+    this.log.info('Running agent preconfig');
+    await axios.post(`${this.params.kibanaUrl}/api/fleet/agents/setup`, {}, this.requestOptions);
+
+    this.log.info('Updating the default agent output');
+    const {
+      data: {
+        items: [defaultOutput],
+      },
+    } = await axios.get(this.params.kibanaUrl + '/api/fleet/outputs', this.requestOptions);
+
+    await axios.put(
+      `${this.params.kibanaUrl}/api/fleet/outputs/${defaultOutput.id}`,
+      { hosts: [this.params.elasticHost] },
+      this.requestOptions
     );
+
+    this.log.info('Getting agent enrollment key');
     const { data: apiKeys } = await axios.get(
       this.params.kibanaUrl + '/api/fleet/enrollment-api-keys',
-      {
-        auth: {
-          username: this.params.user,
-          password: this.params.password,
-        },
-      }
+      this.requestOptions
     );
-    const policy = apiKeys.list[1]
-    this.policyId = policy.policy_id as string
+    const policy = apiKeys.list[1];
+    this.policyId = policy.policy_id as string;
+
+    this.log.info('Enrolling the agent');
     const args = [
       'enroll',
       '--insecure',
@@ -75,38 +82,40 @@ export class AgentManager {
     ];
     const agentBinPath = this.getBinaryPath();
     execFileSync(agentBinPath, args, { stdio: 'inherit' });
-    const configPath = resolve(__dirname, 'elastic-agent.yml')
-    this.log.info(`Copying agent config from ${configPath}`)
+
+    // Copy the config file
+    const configPath = resolve(__dirname, this.directoryPath, 'elastic-agent.yml');
+    this.log.info(`Copying agent config from ${configPath}`);
     await copyFile(configPath, resolve('.', 'elastic-agent.yml'));
-    this.agentProcess = spawn(agentBinPath, ['run', '-v', '-e'], {stdio: 'inherit', env:{
-      ELASTIC_HOST: this.params.elasticHost
-    }})
-    let done = false
-    let retries = 0
+
+    this.log.info('Running the agent');
+    this.agentProcess = spawn(agentBinPath, ['run', '-v'], { stdio: 'inherit' });
+
+    // Wait til we see the agent is online
+    let done = false;
+    let retries = 0;
     while (!done) {
-      await new Promise(resolve => setTimeout(resolve, 5000))
-      const {data: agents} = await axios.get(
-        `${this.params.kibanaUrl}/api/fleet/agents`, {
-          auth: {
-            username: this.params.user,
-            password: this.params.password,
-          }
-        }
-      )
-      done = agents.list[0]?.status === 'online'
+      await new Promise((r) => setTimeout(r, 5000));
+      const { data: agents } = await axios.get(
+        `${this.params.kibanaUrl}/api/fleet/agents`,
+        this.requestOptions
+      );
+      done = agents.list[0]?.status === 'online';
       if (++retries > 12) {
-        this.log.error('Giving up on enrolling the agent after an hour')
-        throw new Error('Agent timed out while coming online')
+        this.log.error('Giving up on enrolling the agent after an hour');
+        throw new Error('Agent timed out while coming online');
       }
     }
   }
 
   public cleanup() {
     this.log.info('Cleaning up the agent process');
-    this.agentProcess.kill(9);
+    if (this.agentProcess) {
+      this.agentProcess.kill(9);
+    }
     unlinkSync(resolve('.', 'elastic-agent.yml'));
     this.agentProcess.on('close', () => {
-      this.log.info('Agent process closed')
-    })
+      this.log.info('Agent process closed');
+    });
   }
 }
