@@ -7,6 +7,7 @@
 
 import { useEffect, useState } from 'react';
 import { RecursiveReadonly } from '@kbn/utility-types';
+import { Capabilities } from '../../../../../src/core/types';
 
 export interface UseGetUserAlertsPermissionsProps {
   crud: boolean;
@@ -15,16 +16,8 @@ export interface UseGetUserAlertsPermissionsProps {
   featureId: string | null;
 }
 
-type O11yPrivilegesUi = Record<
-  string,
-  {
-    save: boolean;
-    show: boolean;
-  }
->;
-
 export const getAlertsPermissions = (
-  uiCapabilities: RecursiveReadonly<O11yPrivilegesUi>,
+  uiCapabilities: RecursiveReadonly<Capabilities>,
   featureId: string
 ) => {
   if (!featureId || !uiCapabilities[featureId]) {
@@ -35,20 +28,17 @@ export const getAlertsPermissions = (
       featureId,
     };
   }
-  const capabilitiesCanUserCRUD: boolean =
-    typeof uiCapabilities[featureId].save === 'boolean' ? uiCapabilities[featureId].save : false;
-  const capabilitiesCanUserRead: boolean =
-    typeof uiCapabilities[featureId].show === 'boolean' ? uiCapabilities[featureId].show : false;
+
   return {
-    crud: capabilitiesCanUserCRUD,
-    read: capabilitiesCanUserRead,
+    crud: uiCapabilities[featureId].save as boolean,
+    read: uiCapabilities[featureId].show as boolean,
     loading: false,
     featureId,
   };
 };
 
 export const useGetUserAlertsPermissions = (
-  uiCapabilities: RecursiveReadonly<O11yPrivilegesUi>,
+  uiCapabilities: RecursiveReadonly<Capabilities>,
   featureId?: string
 ): UseGetUserAlertsPermissionsProps => {
   const [alertsPermissions, setAlertsPermissions] = useState<UseGetUserAlertsPermissionsProps>({
