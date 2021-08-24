@@ -257,7 +257,7 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
       // @ts-expect-error undefined is not assignable as QueryDslTermQuery value
       namespaceQuery,
     ];
-    if (!legacyIds) {
+    if (!legacyIds || legacyIds.length === 0) {
       savedObjectsQueryMust.push({
         terms: {
           // default maximum of 65,536 terms, configurable by index.max_terms_count
@@ -277,7 +277,7 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
         },
       },
     ];
-    if (legacyIds) {
+    if (legacyIds && legacyIds.length > 0) {
       musts.push({
         bool: {
           should: [
@@ -302,10 +302,23 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
                     },
                   },
                   {
-                    range: {
-                      'kibana.version': {
-                        lt: '8.0.0',
-                      },
+                    bool: {
+                      should: [
+                        {
+                          range: {
+                            'kibana.version': {
+                              lt: '8.0.0',
+                            },
+                          },
+                        },
+                        {
+                          term: {
+                            'kibana.version': {
+                              value: 'NULL',
+                            },
+                          },
+                        },
+                      ],
                     },
                   },
                 ],

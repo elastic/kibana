@@ -733,10 +733,23 @@ describe('queryEventsBySavedObject', () => {
                             },
                           },
                           {
-                            range: {
-                              'kibana.version': {
-                                lt: '8.0.0',
-                              },
+                            bool: {
+                              should: [
+                                {
+                                  range: {
+                                    'kibana.version': {
+                                      lt: '8.0.0',
+                                    },
+                                  },
+                                },
+                                {
+                                  term: {
+                                    'kibana.version': {
+                                      value: 'NULL',
+                                    },
+                                  },
+                                },
+                              ],
                             },
                           },
                         ],
