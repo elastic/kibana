@@ -101,6 +101,10 @@ const createPlugin = (
       requiredBundles,
       optionalPlugins,
       server,
+      owner: {
+        name: 'Core',
+        githubTeam: 'kibana-core',
+      },
       ui,
     },
     opaqueId: Symbol(id),
