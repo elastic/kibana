@@ -105,7 +105,7 @@ interface OwnProps {
   hasAlertsCrud?: boolean;
 }
 
-const basicUnit = (n: number) => i18n.UNIT(n);
+const defaultUnit = (n: number) => i18n.ALERTS_UNIT(n);
 const NUM_OF_ICON_IN_TIMELINE_ROW = 2;
 
 export const hasAdditionalActions = (id: TimelineId): boolean =>
@@ -273,7 +273,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     totalItems,
     totalPages,
     trailingControlColumns = EMPTY_CONTROL_COLUMNS,
-    unit = basicUnit,
+    unit = defaultUnit,
     hasAlertsCrud,
   }) => {
     const dispatch = useDispatch();

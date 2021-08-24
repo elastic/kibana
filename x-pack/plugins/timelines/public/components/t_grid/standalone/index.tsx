@@ -39,7 +39,6 @@ import { StatefulBody } from '../body';
 import { Footer, footerHeight } from '../footer';
 import { LastUpdatedAt } from '../..';
 import { SELECTOR_TIMELINE_GLOBAL_CONTAINER, UpdatedFlexItem, UpdatedFlexGroup } from '../styles';
-import * as i18n from '../translations';
 import { InspectButton, InspectButtonContainer } from '../../inspect';
 import { useFetchIndex } from '../../../container/source';
 import { AddToCaseAction } from '../../actions/timeline/cases/add_to_case_action';
@@ -109,9 +108,8 @@ export interface TGridStandaloneProps {
   trailingControlColumns: ControlColumnProps[];
   bulkActions?: BulkActionsProp;
   data?: DataPublicPluginStart;
-  unit: (total: number) => React.ReactNode;
+  unit?: (total: number) => React.ReactNode;
 }
-const basicUnit = (n: number) => i18n.UNIT(n);
 
 const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
   afterCaseSelection,
@@ -139,7 +137,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
   leadingControlColumns,
   trailingControlColumns,
   data,
-  unit = basicUnit,
+  unit,
 }) => {
   const dispatch = useDispatch();
   const columnsHeader = isEmpty(columns) ? defaultHeaders : columns;
