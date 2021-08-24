@@ -323,33 +323,31 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
                 />
               )}
               {totalCountMinusDeleted > 0 && (
-                <>
-                  <StatefulBody
-                    hasAlertsCrud={hasAlertsCrud}
-                    activePage={pageInfo.activePage}
-                    browserFields={browserFields}
-                    filterQuery={filterQuery}
-                    data={nonDeletedEvents}
-                    defaultCellActions={defaultCellActions}
-                    id={id}
-                    isEventViewer={true}
-                    itemsPerPageOptions={itemsPerPageOptions}
-                    loadPage={loadPage}
-                    onRuleChange={onRuleChange}
-                    pageSize={itemsPerPage}
-                    renderCellValue={renderCellValue}
-                    rowRenderers={rowRenderers}
-                    tabType={TimelineTabs.query}
-                    tableView={tableView}
-                    totalItems={totalCountMinusDeleted}
-                    unit={unit}
-                    filterStatus={filterStatus}
-                    leadingControlColumns={leadingControlColumns}
-                    trailingControlColumns={trailingControlColumns}
-                    refetch={refetch}
-                    indexNames={indexNames}
-                  />
-                </>
+                <StatefulBody
+                  hasAlertsCrud={hasAlertsCrud}
+                  activePage={pageInfo.activePage}
+                  browserFields={browserFields}
+                  filterQuery={filterQuery}
+                  data={nonDeletedEvents}
+                  defaultCellActions={defaultCellActions}
+                  id={id}
+                  isEventViewer={true}
+                  itemsPerPageOptions={itemsPerPageOptions}
+                  loadPage={loadPage}
+                  onRuleChange={onRuleChange}
+                  pageSize={itemsPerPage}
+                  renderCellValue={renderCellValue}
+                  rowRenderers={rowRenderers}
+                  tabType={TimelineTabs.query}
+                  tableView={tableView}
+                  totalItems={totalCountMinusDeleted}
+                  unit={unit}
+                  filterStatus={filterStatus}
+                  leadingControlColumns={leadingControlColumns}
+                  trailingControlColumns={trailingControlColumns}
+                  refetch={refetch}
+                  indexNames={indexNames}
+                />
               )}
             </EventsContainerLoading>
           </>

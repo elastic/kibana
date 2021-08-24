@@ -4,15 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiLoadingContent } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { isEmpty } from 'lodash/fp';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, useRef } from 'react';
 import styled from 'styled-components';
 import { useDispatch, useSelector } from 'react-redux';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { Direction, EntityType } from '../../../../common/search_strategy';
 import type { CoreStart } from '../../../../../../../src/core/public';
 import { TGridCellAction, TimelineTabs } from '../../../../common/types/timeline';
+
 import type {
   CellValueElementProps,
   ColumnHeaderOptions,
@@ -36,7 +38,6 @@ import { tGridActions, tGridSelectors } from '../../../store/t_grid';
 import type { State } from '../../../store/t_grid';
 import { useTimelineEvents } from '../../../container';
 import { StatefulBody } from '../body';
-import { Footer, footerHeight } from '../footer';
 import { LastUpdatedAt } from '../..';
 import { SELECTOR_TIMELINE_GLOBAL_CONTAINER, UpdatedFlexItem, UpdatedFlexGroup } from '../styles';
 import { InspectButton, InspectButtonContainer } from '../../inspect';
@@ -299,9 +300,17 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const isFirstUpdate = useRef(true);
+  useEffect(() => {
+    if (isFirstUpdate.current && !loading) {
+      isFirstUpdate.current = false;
+    }
+  }, [loading]);
+
   return (
     <InspectButtonContainer data-test-subj="events-viewer-panel">
       <AlertsTableWrapper>
+        {isFirstUpdate.current && <EuiLoadingContent data-test-subj="loading-alerts-panel" />}
         {canQueryTimeline ? (
           <>
             <EventsContainerLoading
@@ -317,47 +326,57 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
                 </UpdatedFlexItem>
               </UpdatedFlexGroup>
 
-              <FullWidthFlexGroup direction="row" $visible={!graphEventId} gutterSize="none">
-                <ScrollableFlexItem grow={1}>
-                  <StatefulBody
-                    activePage={pageInfo.activePage}
-                    browserFields={browserFields}
-                    data={nonDeletedEvents}
-                    defaultCellActions={defaultCellActions}
-                    filterQuery={filterQuery}
-                    id={STANDALONE_ID}
-                    indexNames={indexNames}
-                    isEventViewer={true}
-                    itemsPerPageOptions={itemsPerPageOptionsStore}
-                    leadingControlColumns={leadingControlColumns}
-                    loadPage={loadPage}
-                    refetch={refetch}
-                    renderCellValue={renderCellValue}
-                    rowRenderers={rowRenderers}
-                    onRuleChange={onRuleChange}
-                    pageSize={pageInfo.querySize}
-                    tabType={TimelineTabs.query}
-                    tableView="gridView"
-                    totalItems={totalCountMinusDeleted}
-                    unit={unit}
-                    filterStatus={filterStatus}
-                    trailingControlColumns={trailingControlColumns}
-                  />
-                  <Footer
-                    activePage={pageInfo.activePage}
-                    data-test-subj="events-viewer-footer"
-                    height={footerHeight}
-                    id={STANDALONE_ID}
-                    isLive={false}
-                    isLoading={loading}
-                    itemsCount={nonDeletedEvents.length}
-                    itemsPerPage={itemsPerPageStore}
-                    itemsPerPageOptions={itemsPerPageOptionsStore}
-                    onChangePage={loadPage}
-                    totalCount={totalCountMinusDeleted}
-                  />
-                </ScrollableFlexItem>
-              </FullWidthFlexGroup>
+              {totalCountMinusDeleted === 0 && loading === false && (
+                <EuiEmptyPrompt
+                  title={
+                    <h2>
+                      <FormattedMessage
+                        id="xpack.timelines.tGrid.noResultsMatchSearchCriteriaTitle"
+                        defaultMessage="No results match your search criteria"
+                      />
+                    </h2>
+                  }
+                  titleSize="s"
+                  body={
+                    <p>
+                      <FormattedMessage
+                        id="xpack.timelines.tGrid.noResultsMatchSearchCriteriaDescription"
+                        defaultMessage="Try searching over a longer period of time or modifying your search."
+                      />
+                    </p>
+                  }
+                />
+              )}
+              {totalCountMinusDeleted > 0 && (
+                <FullWidthFlexGroup direction="row" $visible={!graphEventId} gutterSize="none">
+                  <ScrollableFlexItem grow={1}>
+                    <StatefulBody
+                      activePage={pageInfo.activePage}
+                      browserFields={browserFields}
+                      data={nonDeletedEvents}
+                      defaultCellActions={defaultCellActions}
+                      filterQuery={filterQuery}
+                      id={STANDALONE_ID}
+                      indexNames={indexNames}
+                      isEventViewer={true}
+                      itemsPerPageOptions={itemsPerPageOptionsStore}
+                      leadingControlColumns={leadingControlColumns}
+                      loadPage={loadPage}
+                      refetch={refetch}
+                      renderCellValue={renderCellValue}
+                      rowRenderers={rowRenderers}
+                      onRuleChange={onRuleChange}
+                      pageSize={itemsPerPageStore}
+                      tabType={TimelineTabs.query}
+                      tableView="gridView"
+                      totalItems={totalCountMinusDeleted}
+                      unit={unit}
+                      filterStatus={filterStatus}
+                      trailingControlColumns={trailingControlColumns}
+                    />
+                  </ScrollableFlexItem>
+                </FullWidthFlexGroup>
+              )}
             </EventsContainerLoading>
           </>
         ) : null}
