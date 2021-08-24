@@ -681,6 +681,10 @@ export class SavedObjectsRepository {
       { ignore: [404] }
     );
 
+    if (isNotFoundFromUnsupportedServer({ statusCode, headers })) {
+      throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError(type, id);
+    }
+
     const deleted = body.result === 'deleted';
     if (deleted) {
       return {};
@@ -689,15 +693,8 @@ export class SavedObjectsRepository {
     const deleteDocNotFound = body.result === 'not_found';
     // @ts-expect-error @elastic/elasticsearch doesn't declare error on DeleteResponse
     const deleteIndexNotFound = body.error && body.error.type === 'index_not_found_exception';
-    const esServerSupported = isSupportedEsServer(headers);
     if (deleteDocNotFound || deleteIndexNotFound) {
-      if (esServerSupported) {
-        // see "404s from missing index" above
-        throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
-      } else {
-        // throw if we can't verify the response is from Elasticsearch
-        throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError(type, id);
-      }
+      throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
 
     throw new Error(
@@ -1068,7 +1065,7 @@ export class SavedObjectsRepository {
     );
     const indexNotFound = statusCode === 404;
     // check if we have the elasticsearch header when index is not found and if we do, ensure it is Elasticsearch
-    if (!isFoundGetResponse(body) && !isSupportedEsServer(headers)) {
+    if (indexNotFound && !isSupportedEsServer(headers)) {
       throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError(type, id);
     }
     if (
@@ -1314,15 +1311,6 @@ export class SavedObjectsRepository {
         },
         _source_includes: ['namespace', 'namespaces', 'originId'],
         require_alias: true,
-      })
-      .then((res) => {
-        const indexNotFound = res.statusCode === 404;
-        const esServerSupported = isSupportedEsServer(res.headers);
-        // check if we have the elasticsearch header when index is not found and if we do, ensure it is Elasticsearch
-        if (indexNotFound && !esServerSupported) {
-          throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError(type, id);
-        }
-        return res;
       })
       .catch((err) => {
         if (SavedObjectsErrorHelpers.isEsUnavailableError(err)) {
