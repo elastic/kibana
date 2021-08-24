@@ -12,7 +12,7 @@ or all indices that contain your data.
 [[index-patterns-read-only-access]]
 === Required permissions
 
-* Access to *Index Patterns* requires the <<xpack-kibana-role-management, {kib} privilege>>
+* Access to *Index Patterns* requires the <<xpack-security-authorization, {kib} privilege>>
 `Index Pattern Management`.
 
 * To create an index pattern, you must have the <<xpack-kibana-role-management,{es} privilege>>
