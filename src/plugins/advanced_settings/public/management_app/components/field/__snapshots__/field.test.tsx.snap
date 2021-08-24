@@ -1326,7 +1326,12 @@ exports[`Field for image setting should render as read only if saving is disable
       disabled={true}
       display="large"
       fullWidth={true}
-      initialPromptText="Select or drag and drop a file"
+      initialPromptText={
+        <EuiI18n
+          default="Select or drag and drop a file"
+          token="euiFilePicker.promptText"
+        />
+      }
       onChange={[Function]}
     />
   </EuiFormRow>
@@ -1472,7 +1477,12 @@ exports[`Field for image setting should render custom setting icon if it is cust
       disabled={false}
       display="large"
       fullWidth={true}
-      initialPromptText="Select or drag and drop a file"
+      initialPromptText={
+        <EuiI18n
+          default="Select or drag and drop a file"
+          token="euiFilePicker.promptText"
+        />
+      }
       onChange={[Function]}
     />
   </EuiFormRow>
@@ -1526,7 +1536,12 @@ exports[`Field for image setting should render default value if there is no user
       disabled={false}
       display="large"
       fullWidth={true}
-      initialPromptText="Select or drag and drop a file"
+      initialPromptText={
+        <EuiI18n
+          default="Select or drag and drop a file"
+          token="euiFilePicker.promptText"
+        />
+      }
       onChange={[Function]}
     />
   </EuiFormRow>
@@ -1597,7 +1612,12 @@ exports[`Field for image setting should render unsaved value if there are unsave
       disabled={false}
       display="large"
       fullWidth={true}
-      initialPromptText="Select or drag and drop a file"
+      initialPromptText={
+        <EuiI18n
+          default="Select or drag and drop a file"
+          token="euiFilePicker.promptText"
+        />
+      }
       onChange={[Function]}
     />
     <EuiScreenReaderOnly>

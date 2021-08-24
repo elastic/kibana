@@ -205,7 +205,7 @@ exports[`TrustedAppsGrid renders correctly when failed loading data for the seco
             >
               <button
                 aria-label="Previous page"
-                class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
+                class="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
                 data-test-subj="pagination-button-previous"
                 disabled=""
                 type="button"
@@ -3432,7 +3432,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
             >
               <button
                 aria-label="Previous page"
-                class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
+                class="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
                 data-test-subj="pagination-button-previous"
                 disabled=""
                 type="button"
@@ -6702,7 +6702,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
             >
               <button
                 aria-label="Previous page"
-                class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
+                class="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
                 data-test-subj="pagination-button-previous"
                 disabled=""
                 type="button"
