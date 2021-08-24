@@ -1,0 +1,599 @@
+{
+  "id": "mapsLegacy",
+  "client": {
+    "classes": [
+      {
+        "parentPluginId": "mapsLegacy",
+        "id": "def-public.KibanaMapLayer",
+        "type": "Class",
+        "tags": [],
+        "label": "KibanaMapLayer",
+        "description": [],
+        "path": "src/plugins/maps_legacy/public/map/kibana_map_layer.d.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "mapsLegacy",
+            "id": "def-public.KibanaMapLayer.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/plugins/maps_legacy/public/map/kibana_map_layer.d.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "mapsLegacy",
+            "id": "def-public.KibanaMapLayer.getBounds",
+            "type": "Function",
+            "tags": [],
+            "label": "getBounds",
+            "description": [],
+            "signature": [
+              "() => Promise<unknown>"
+            ],
+            "path": "src/plugins/maps_legacy/public/map/kibana_map_layer.d.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "mapsLegacy",
+            "id": "def-public.KibanaMapLayer.addToLeafletMap",
+            "type": "Function",
+            "tags": [],
+            "label": "addToLeafletMap",
+            "description": [],
+            "signature": [
+              "(leafletMap: unknown) => void"
+            ],
+            "path": "src/plugins/maps_legacy/public/map/kibana_map_layer.d.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "mapsLegacy",
+                "id": "def-public.KibanaMapLayer.addToLeafletMap.$1",
+                "type": "Unknown",
+                "tags": [],
+                "label": "leafletMap",
+                "description": [],
+                "signature": [
+                  "unknown"
+                ],
+                "path": "src/plugins/maps_legacy/public/map/kibana_map_layer.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "mapsLegacy",
+            "id": "def-public.KibanaMapLayer.removeFromLeafletMap",
+            "type": "Function",
+            "tags": [],
+            "label": "removeFromLeafletMap",
+            "description": [],
+            "signature": [
+              "(leafletMap: unknown) => void"
+            ],
+            "path": "src/plugins/maps_legacy/public/map/kibana_map_layer.d.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "mapsLegacy",
+                "id": "def-public.KibanaMapLayer.removeFromLeafletMap.$1",
+                "type": "Unknown",
+                "tags": [],
+                "label": "leafletMap",
+                "description": [],
+                "signature": [
+                  "unknown"
+                ],
+                "path": "src/plugins/maps_legacy/public/map/kibana_map_layer.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "mapsLegacy",
+            "id": "def-public.KibanaMapLayer.appendLegendContents",
+            "type": "Function",
+            "tags": [],
+            "label": "appendLegendContents",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/plugins/maps_legacy/public/map/kibana_map_layer.d.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "mapsLegacy",
+            "id": "def-public.KibanaMapLayer.updateExtent",
+            "type": "Function",
+            "tags": [],
+            "label": "updateExtent",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/plugins/maps_legacy/public/map/kibana_map_layer.d.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "mapsLegacy",
+            "id": "def-public.KibanaMapLayer.movePointer",
+            "type": "Function",
+            "tags": [],
+            "label": "movePointer",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/plugins/maps_legacy/public/map/kibana_map_layer.d.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "mapsLegacy",
+            "id": "def-public.KibanaMapLayer.getAttributions",
+            "type": "Function",
+            "tags": [],
+            "label": "getAttributions",
+            "description": [],
+            "signature": [
+              "() => unknown"
+            ],
+            "path": "src/plugins/maps_legacy/public/map/kibana_map_layer.d.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [
+      {
+        "parentPluginId": "mapsLegacy",
+        "id": "def-public.lazyLoadMapsLegacyModules",
+        "type": "Function",
+        "tags": [],
+        "label": "lazyLoadMapsLegacyModules",
+        "description": [],
+        "signature": [
+          "() => Promise<LazyLoadedMapsLegacyModules>"
+        ],
+        "path": "src/plugins/maps_legacy/public/lazy_load_bundle/index.ts",
+        "deprecated": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "mapsLegacy",
+        "id": "def-public.LegacyMapDeprecationMessage",
+        "type": "Function",
+        "tags": [],
+        "label": "LegacyMapDeprecationMessage",
+        "description": [],
+        "signature": [
+          "(props: Props) => JSX.Element"
+        ],
+        "path": "src/plugins/maps_legacy/public/components/legacy_map_deprecation_message.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "mapsLegacy",
+            "id": "def-public.LegacyMapDeprecationMessage.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "Props"
+            ],
+            "path": "src/plugins/maps_legacy/public/components/legacy_map_deprecation_message.tsx",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "mapsLegacy",
+        "id": "def-public.mapTooltipProvider",
+        "type": "Function",
+        "tags": [],
+        "label": "mapTooltipProvider",
+        "description": [],
+        "signature": [
+          "(element: unknown, formatter: unknown) => () => unknown"
+        ],
+        "path": "src/plugins/maps_legacy/public/tooltip_provider.d.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "mapsLegacy",
+            "id": "def-public.mapTooltipProvider.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "element",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "src/plugins/maps_legacy/public/tooltip_provider.d.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "mapsLegacy",
+            "id": "def-public.mapTooltipProvider.$2",
+            "type": "Unknown",
+            "tags": [],
+            "label": "formatter",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "src/plugins/maps_legacy/public/tooltip_provider.d.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "mapsLegacy",
+        "id": "def-public.WmsOptions",
+        "type": "Function",
+        "tags": [],
+        "label": "WmsOptions",
+        "description": [],
+        "signature": [
+          "({ stateParams, setValue, tmsLayers }: Props<K>) => JSX.Element"
+        ],
+        "path": "src/plugins/maps_legacy/public/components/wms_options.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "mapsLegacy",
+            "id": "def-public.WmsOptions.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ stateParams, setValue, tmsLayers }",
+            "description": [],
+            "signature": [
+              "Props<K>"
+            ],
+            "path": "src/plugins/maps_legacy/public/components/wms_options.tsx",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "mapsLegacy",
+        "id": "def-public.WMSOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "WMSOptions",
+        "description": [],
+        "path": "src/plugins/maps_legacy/public/common/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "mapsLegacy",
+            "id": "def-public.WMSOptions.selectedTmsLayer",
+            "type": "Object",
+            "tags": [],
+            "label": "selectedTmsLayer",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "mapsEms",
+                "scope": "public",
+                "docId": "kibMapsEmsPluginApi",
+                "section": "def-public.TmsLayer",
+                "text": "TmsLayer"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/maps_legacy/public/common/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "mapsLegacy",
+            "id": "def-public.WMSOptions.enabled",
+            "type": "boolean",
+            "tags": [],
+            "label": "enabled",
+            "description": [],
+            "path": "src/plugins/maps_legacy/public/common/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "mapsLegacy",
+            "id": "def-public.WMSOptions.url",
+            "type": "string",
+            "tags": [],
+            "label": "url",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/maps_legacy/public/common/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "mapsLegacy",
+            "id": "def-public.WMSOptions.options",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              "{ version?: string | undefined; layers?: string | undefined; format: string; transparent: boolean; attribution?: string | undefined; styles?: string | undefined; }"
+            ],
+            "path": "src/plugins/maps_legacy/public/common/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "mapsLegacy",
+      "id": "def-public.MapsLegacyPluginSetup",
+      "type": "Type",
+      "tags": [],
+      "label": "MapsLegacyPluginSetup",
+      "description": [],
+      "signature": [
+        "{ getZoomPrecision: () => any; getPrecision: (val: string) => number; getBaseMapsVis: () => any; }"
+      ],
+      "path": "src/plugins/maps_legacy/public/index.ts",
+      "deprecated": false,
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "mapsLegacy",
+      "id": "def-public.MapsLegacyPluginStart",
+      "type": "Type",
+      "tags": [],
+      "label": "MapsLegacyPluginStart",
+      "description": [],
+      "signature": [
+        "void"
+      ],
+      "path": "src/plugins/maps_legacy/public/index.ts",
+      "deprecated": false,
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "server": {
+    "classes": [
+      {
+        "parentPluginId": "mapsLegacy",
+        "id": "def-server.MapsLegacyPlugin",
+        "type": "Class",
+        "tags": [],
+        "label": "MapsLegacyPlugin",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "mapsLegacy",
+            "scope": "server",
+            "docId": "kibMapsLegacyPluginApi",
+            "section": "def-server.MapsLegacyPlugin",
+            "text": "MapsLegacyPlugin"
+          },
+          " implements ",
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCorePluginApi",
+            "section": "def-server.Plugin",
+            "text": "Plugin"
+          },
+          "<",
+          {
+            "pluginId": "mapsLegacy",
+            "scope": "server",
+            "docId": "kibMapsLegacyPluginApi",
+            "section": "def-server.MapsLegacyPluginSetup",
+            "text": "MapsLegacyPluginSetup"
+          },
+          ", void, object, object>"
+        ],
+        "path": "src/plugins/maps_legacy/server/index.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "mapsLegacy",
+            "id": "def-server.MapsLegacyPlugin._initializerContext",
+            "type": "Object",
+            "tags": [],
+            "label": "_initializerContext",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCorePluginApi",
+                "section": "def-server.PluginInitializerContext",
+                "text": "PluginInitializerContext"
+              },
+              "<Readonly<{} & {}>>"
+            ],
+            "path": "src/plugins/maps_legacy/server/index.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "mapsLegacy",
+            "id": "def-server.MapsLegacyPlugin.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/plugins/maps_legacy/server/index.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "mapsLegacy",
+                "id": "def-server.MapsLegacyPlugin.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "initializerContext",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "core",
+                    "scope": "server",
+                    "docId": "kibCorePluginApi",
+                    "section": "def-server.PluginInitializerContext",
+                    "text": "PluginInitializerContext"
+                  },
+                  "<Readonly<{} & {}>>"
+                ],
+                "path": "src/plugins/maps_legacy/server/index.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "mapsLegacy",
+            "id": "def-server.MapsLegacyPlugin.setup",
+            "type": "Function",
+            "tags": [],
+            "label": "setup",
+            "description": [],
+            "signature": [
+              "(core: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCorePluginApi",
+                "section": "def-server.CoreSetup",
+                "text": "CoreSetup"
+              },
+              "<object, unknown>) => { config: Readonly<{} & {}>; }"
+            ],
+            "path": "src/plugins/maps_legacy/server/index.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "mapsLegacy",
+                "id": "def-server.MapsLegacyPlugin.setup.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "core",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "core",
+                    "scope": "server",
+                    "docId": "kibCorePluginApi",
+                    "section": "def-server.CoreSetup",
+                    "text": "CoreSetup"
+                  },
+                  "<object, unknown>"
+                ],
+                "path": "src/plugins/maps_legacy/server/index.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "mapsLegacy",
+            "id": "def-server.MapsLegacyPlugin.start",
+            "type": "Function",
+            "tags": [],
+            "label": "start",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/plugins/maps_legacy/server/index.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "mapsLegacy",
+        "id": "def-server.MapsLegacyPluginSetup",
+        "type": "Interface",
+        "tags": [],
+        "label": "MapsLegacyPluginSetup",
+        "description": [],
+        "path": "src/plugins/maps_legacy/server/index.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "mapsLegacy",
+            "id": "def-server.MapsLegacyPluginSetup.config",
+            "type": "Object",
+            "tags": [],
+            "label": "config",
+            "description": [],
+            "signature": [
+              "{}"
+            ],
+            "path": "src/plugins/maps_legacy/server/index.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

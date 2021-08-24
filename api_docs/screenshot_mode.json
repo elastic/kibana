@@ -225,7 +225,7 @@
           "tags": [],
           "label": "setScreenshotModeEnabled",
           "description": [
-            "\nSet the current environment to screenshot mode. Intended to run in a browser-environment."
+            "\nSet the current environment to screenshot mode. Intended to run in a browser-environment, before any other scripts\non the page have run to ensure that screenshot mode is detected as early as possible."
           ],
           "signature": [
             "() => void"
