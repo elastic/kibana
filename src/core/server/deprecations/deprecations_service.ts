@@ -192,16 +192,19 @@ export class DeprecationsService
       const deprecationsRegistry = deprecationsFactory.getRegistry(domainId);
       deprecationsRegistry.registerDeprecations({
         getDeprecations: () => {
-          return deprecationsContexts.map(({ message, correctiveActions, documentationUrl }) => {
-            return {
-              level: 'critical',
-              deprecationType: 'config',
-              message,
-              correctiveActions,
-              documentationUrl,
-              requireRestart: true,
-            };
-          });
+          return deprecationsContexts.map(
+            ({ title, message, correctiveActions, documentationUrl }) => {
+              return {
+                title: title || `${domainId} setting is deprecated`,
+                level: 'critical',
+                deprecationType: 'config',
+                message,
+                correctiveActions,
+                documentationUrl,
+                requireRestart: true,
+              };
+            }
+          );
         },
       });
     }

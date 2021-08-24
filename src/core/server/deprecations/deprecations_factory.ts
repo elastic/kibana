@@ -89,6 +89,7 @@ export class DeprecationsFactory {
           );
           return [
             {
+              title: `Failed to fetch deprecations for ${domainId}`,
               message: `Failed to get deprecations info for plugin "${domainId}".`,
               level: 'fetch_error',
               correctiveActions: {

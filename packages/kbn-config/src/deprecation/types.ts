@@ -19,6 +19,7 @@ export type AddConfigDeprecation = (details: DeprecatedConfigDetails) => void;
  * @public
  */
 export interface DeprecatedConfigDetails {
+  title?: string;
   /* The message to be displayed for the deprecation. */
   message: string;
   /* (optional) set false to prevent the config service from logging the deprecation message. */

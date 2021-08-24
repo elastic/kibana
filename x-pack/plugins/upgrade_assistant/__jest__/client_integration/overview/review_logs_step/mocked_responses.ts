@@ -42,6 +42,7 @@ export const esDeprecationsEmpty: ESUpgradeStatus = {
 
 export const kibanaDeprecations: DomainDeprecationDetails[] = [
   {
+    title: '??',
     correctiveActions: { manualSteps: ['test-step'] },
     domainId: 'xpack.spaces',
     level: 'critical',
@@ -49,6 +50,7 @@ export const kibanaDeprecations: DomainDeprecationDetails[] = [
       'Disabling the Spaces plugin (xpack.spaces.enabled) will not be supported in the next major version (8.0)',
   },
   {
+    title: '??',
     correctiveActions: { manualSteps: ['test-step'] },
     domainId: 'xpack.spaces',
     level: 'warning',

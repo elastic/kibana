@@ -19,6 +19,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
 
   const CorePluginDeprecationsPluginDeprecations: DomainDeprecationDetails[] = [
     {
+      title: '',
       level: 'critical',
       message:
         '"corePluginDeprecations.oldProperty" is deprecated and has been replaced by "corePluginDeprecations.newProperty"',
@@ -32,6 +33,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       requireRestart: true,
     },
     {
+      title: '',
       level: 'critical',
       message: 'corePluginDeprecations.noLongerUsed is deprecated and is no longer used',
       correctiveActions: {
@@ -44,6 +46,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       requireRestart: true,
     },
     {
+      title: '',
       level: 'critical',
       message:
         'Kibana plugin functional tests will no longer allow corePluginDeprecations.secret config to be set to anything except 42.',
@@ -58,6 +61,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       requireRestart: true,
     },
     {
+      title: '',
       message: 'CorePluginDeprecationsPlugin is a deprecated feature for testing.',
       documentationUrl: 'test-url',
       level: 'warning',
@@ -68,6 +72,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       domainId: 'corePluginDeprecations',
     },
     {
+      title: '',
       message: 'SavedObject test-deprecations-plugin is still being used.',
       documentationUrl: 'another-test-url',
       level: 'critical',
@@ -128,6 +133,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
           const resolveResult = await browser.executeAsync<ResolveDeprecationResponse>((cb) => {
             return window._coreProvider.start.core.deprecations
               .resolveDeprecation({
+                title: '',
                 message: 'CorePluginDeprecationsPlugin is a deprecated feature for testing.',
                 documentationUrl: 'test-url',
                 level: 'warning',
@@ -149,6 +155,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
           const resolveResult = await browser.executeAsync<ResolveDeprecationResponse>((cb) => {
             return window._coreProvider.start.core.deprecations
               .resolveDeprecation({
+                title: '',
                 message: 'CorePluginDeprecationsPlugin is a deprecated feature for testing.',
                 documentationUrl: 'test-url',
                 level: 'warning',
@@ -177,6 +184,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
           const resolveResult = await browser.executeAsync<ResolveDeprecationResponse>((cb) => {
             return window._coreProvider.start.core.deprecations
               .resolveDeprecation({
+                title: '',
                 message: 'CorePluginDeprecationsPlugin is a deprecated feature for testing.',
                 documentationUrl: 'test-url',
                 level: 'warning',
@@ -215,6 +223,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
             (keyId, cb) => {
               return window._coreProvider.start.core.deprecations
                 .resolveDeprecation({
+                  title: '',
                   message: 'CorePluginDeprecationsPlugin is a deprecated feature for testing.',
                   documentationUrl: 'test-url',
                   level: 'warning',

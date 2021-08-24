@@ -43,6 +43,7 @@ export const createScriptedFieldsDeprecationsConfig: (
 
       return [
         {
+          title: 'Detected scripted fields',
           message: `You have ${indexPatternsWithScriptedFields.length} index patterns (${titlesPreview}...) that use scripted fields. Scripted fields are deprecated and will be removed in future. Use runtime fields instead.`,
           documentationUrl:
             'https://www.elastic.co/guide/en/elasticsearch/reference/7.x/runtime.html', // TODO: documentation service is not available serverside https://github.com/elastic/kibana/issues/95389

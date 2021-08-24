@@ -16,7 +16,14 @@ export interface DomainDeprecationDetails extends DeprecationsDetails {
 }
 
 export interface DeprecationsDetails {
-  /* The message to be displayed for the deprecation. */
+  /**
+   * The title of the deprecation.
+   * Recommended title length less than 80 characters.
+   * Example:
+   * - `core.someConfig` setting is deprecated.
+   */
+  title: string;
+  /* The description to be displayed for the deprecation. */
   message: string;
   /**
    * levels:
