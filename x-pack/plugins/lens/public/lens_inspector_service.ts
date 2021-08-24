@@ -12,13 +12,12 @@ import type {
 
 import { createDefaultInspectorAdapters } from '../../../../src/plugins/expressions/public';
 
-export const getLensInspectorService = (inspector: InspectorStartContract) =>
-  new (class InspectorService {
-    public readonly adapters: Adapters = createDefaultInspectorAdapters();
-
-    public inspect = () => {
-      inspector.open(this.adapters);
-    };
-  })();
+export const getLensInspectorService = (inspector: InspectorStartContract) => {
+  const adapters: Adapters = createDefaultInspectorAdapters();
+  return {
+    adapters,
+    inspect: () => inspector.open(adapters),
+  };
+};
 
 export type LensInspector = ReturnType<typeof getLensInspectorService>;

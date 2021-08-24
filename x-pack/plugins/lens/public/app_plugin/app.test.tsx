@@ -144,7 +144,7 @@ describe('Lens App', () => {
       Array [
         Array [
           Object {
-            "lensInspector": InspectorService {
+            "lensInspector": Object {
               "adapters": Object {
                 "expression": ExpressionsInspectorAdapter {
                   "_ast": Object {},
@@ -176,7 +176,7 @@ describe('Lens App', () => {
         ],
         Array [
           Object {
-            "lensInspector": InspectorService {
+            "lensInspector": Object {
               "adapters": Object {
                 "expression": ExpressionsInspectorAdapter {
                   "_ast": Object {},
@@ -827,6 +827,37 @@ describe('Lens App', () => {
         },
       });
       expect(getButton(instance).disableButton).toEqual(false);
+    });
+  });
+
+  describe('inspector', () => {
+    function getButton(inst: ReactWrapper): TopNavMenuData {
+      return (inst
+        .find('[data-test-subj="lnsApp_topNav"]')
+        .prop('config') as TopNavMenuData[]).find(
+        (button) => button.testId === 'lnsApp_inspectButton'
+      )!;
+    }
+
+    async function runInspect(inst: ReactWrapper) {
+      await getButton(inst).run(inst.getDOMNode());
+      await inst.update();
+    }
+
+    it('inspector button should be available', async () => {
+      const { instance } = await mountWith({ preloadedState: { isSaveable: true } });
+      const button = getButton(instance);
+
+      expect(button.disableButton).toEqual(false);
+    });
+
+    it('should open inspect panel', async () => {
+      const services = makeDefaultServices(sessionIdSubject);
+      const { instance } = await mountWith({ services, preloadedState: { isSaveable: true } });
+
+      await runInspect(instance);
+
+      expect(services.inspector.open).toHaveBeenCalledTimes(1);
     });
   });
 
