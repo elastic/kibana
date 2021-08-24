@@ -22,6 +22,7 @@ describe('useHoverActionItems', () => {
     defaultFocusedButtonRef: null,
     field: 'signal.rule.name',
     handleHoverActionClicked: jest.fn(),
+    hideTopN: false,
     isObjectArray: true,
     ownFocus: false,
     showTopN: false,
@@ -110,6 +111,23 @@ describe('useHoverActionItems', () => {
       expect(result.current.overflowActionItems[2].props.items[3].props['data-test-subj']).toEqual(
         'hover-actions-copy-button'
       );
+    });
+  });
+
+  test('it should hide the Top N action when hideTopN is true', async () => {
+    await act(async () => {
+      const { result, waitForNextUpdate } = renderHook(() => {
+        const testProps = {
+          ...defaultProps,
+          hideTopN: true, // <-- hide the Top N action
+        };
+        return useHoverActionItems(testProps);
+      });
+      await waitForNextUpdate();
+
+      result.current.allActionItems.forEach((item) => {
+        expect(item.props['data-test-subj']).not.toEqual('hover-actions-show-top-n');
+      });
     });
   });
 });
