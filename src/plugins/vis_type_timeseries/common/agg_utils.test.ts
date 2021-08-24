@@ -12,7 +12,7 @@ import {
   getAggByPredicate,
   getAggsByPredicate,
   getAggsByType,
-} from './agg_utis';
+} from './agg_utils';
 import { METRIC_TYPES } from '../../data/common';
 import { TSVB_METRIC_TYPES } from './enums';
 import type { Metric } from './types';

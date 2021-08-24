@@ -8,7 +8,7 @@
 
 import { includes, startsWith } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { getMetricLabel } from './agg_utis';
+import { getMetricLabel } from './agg_utils';
 import { extractFieldLabel } from './fields_utils';
 import { METRIC_TYPES } from '../../data/common';
 import { TSVB_METRIC_TYPES } from './enums';
