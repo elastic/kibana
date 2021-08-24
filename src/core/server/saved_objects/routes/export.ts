@@ -38,8 +38,10 @@ interface ExportRawOptions {
   hasReference?: { id: string; type: string } | Array<{ id: string; type: string }>;
   objects?: ObjectIdentifier[];
   search?: string;
+  namespaces?: string[];
   includeReferencesDeep: boolean;
   excludeExportDetails: boolean;
+  includeNamespaces: boolean;
 }
 
 interface ExportOptions {
@@ -50,23 +52,28 @@ interface ExportOptions {
   namespaces?: string[];
   includeReferencesDeep: boolean;
   excludeExportDetails: boolean;
+  includeNamespaces: boolean;
 }
 
 const cleanOptions = ({
   type,
   objects,
   search,
+  namespaces,
   hasReference,
   excludeExportDetails,
   includeReferencesDeep,
+  includeNamespaces,
 }: ExportRawOptions): ExportOptions => {
   return {
     types: typeof type === 'string' ? [type] : type,
     search,
     objects,
+    namespaces,
     hasReference: hasReference && !Array.isArray(hasReference) ? [hasReference] : hasReference,
     excludeExportDetails,
     includeReferencesDeep,
+    includeNamespaces,
   };
 };
 
@@ -83,6 +90,7 @@ const validateOptions = (
     excludeExportDetails,
     hasReference,
     includeReferencesDeep,
+    includeNamespaces,
     search,
     namespaces,
   }: ExportOptions,
@@ -118,6 +126,7 @@ const validateOptions = (
       objects: objects!,
       excludeExportDetails,
       includeReferencesDeep,
+      includeNamespaces,
       request,
     };
   } else {
@@ -132,6 +141,7 @@ const validateOptions = (
       namespaces,
       excludeExportDetails,
       includeReferencesDeep,
+      includeNamespaces,
       request,
     };
   }
@@ -169,13 +179,13 @@ export const registerExportRoute = (
           ),
           search: schema.maybe(schema.string()),
           namespaces: schema.maybe(schema.arrayOf(schema.string())),
+          includeNamespaces: schema.boolean({ defaultValue: true }),
           includeReferencesDeep: schema.boolean({ defaultValue: false }),
           excludeExportDetails: schema.boolean({ defaultValue: false }),
         }),
       },
     },
     catchAndReturnBoomErrors(async (context, req, res) => {
-      // TODO: use namespaces
       const cleaned = cleanOptions(req.body);
       const { typeRegistry, getExporter, getClient } = context.core.savedObjects;
       const supportedTypes = typeRegistry.getImportableAndExportableTypes().map((t) => t.name);
