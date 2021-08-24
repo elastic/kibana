@@ -297,6 +297,7 @@ export class JobsList extends Component {
               refresh={this.props.refreshJobs}
             />
           ),
+          'data-test-subj': 'mlJobListColumnSpaces',
         });
       }
       // Remove actions if Ml not enabled in current space

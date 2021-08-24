@@ -6,7 +6,8 @@
  */
 
 import { mockKibanaSemverVersion } from '../../../common/constants';
-import { OverviewTestBed, setupOverviewPage, setupEnvironment } from '../helpers';
+import { setupEnvironment } from '../helpers';
+import { OverviewTestBed, setupOverviewPage } from './overview.helpers';
 
 describe('Overview Page', () => {
   let testBed: OverviewTestBed;
