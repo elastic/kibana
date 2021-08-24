@@ -5,9 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { savedObjectsPointInTimeFinderMock } from './point_in_time_finder.mock';
-import { ISavedObjectsRepository } from './repository';
+import type { ISavedObjectsRepository } from './repository';
 
 const create = () => {
   const mock: jest.Mocked<ISavedObjectsRepository> = {

@@ -5,9 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import type { CspConfigType } from './config';
+import { config as cspConfig } from './config';
 import { CspConfig } from './csp_config';
-import { config as cspConfig, CspConfigType } from './config';
 
 // CSP rules aren't strictly additive, so any change can potentially expand or
 // restrict the policy in a way we consider a breaking change. For that reason,

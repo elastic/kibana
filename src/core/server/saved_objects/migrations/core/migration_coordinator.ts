@@ -24,8 +24,8 @@
  */
 
 import _ from 'lodash';
-import { KibanaMigratorStatus } from '../kibana';
-import { SavedObjectsMigrationLogger } from './migration_logger';
+import type { KibanaMigratorStatus } from '../kibana/kibana_migrator';
+import type { SavedObjectsMigrationLogger } from './migration_logger';
 
 const DEFAULT_POLL_INTERVAL = 15000;
 

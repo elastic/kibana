@@ -5,17 +5,16 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import React, { ReactChild, useState, useLayoutEffect } from 'react';
-import ReactDOM from 'react-dom';
-import { History } from 'history';
+import { EuiEmptyPrompt, EuiPage, EuiPageBody, EuiPageContent } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n/react';
-
-import { EuiEmptyPrompt, EuiPage, EuiPageBody, EuiPageContent } from '@elastic/eui';
+import type { History } from 'history';
+import type { ReactChild } from 'react';
+import React, { useLayoutEffect, useState } from 'react';
+import ReactDOM from 'react-dom';
+import type { AppMountParameters } from '../../application/types';
+import type { IBasePath } from '../../http/types';
 import { UrlOverflowUi } from './url_overflow_ui';
-import { IBasePath } from '../../http';
-import { AppMountParameters } from '../../application';
 
 interface Props {
   title?: string;

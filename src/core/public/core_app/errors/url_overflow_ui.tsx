@@ -6,12 +6,10 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-
-import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiText } from '@elastic/eui';
-
-import { IBasePath } from '../../http';
+import { FormattedMessage } from '@kbn/i18n/react';
+import React from 'react';
+import type { IBasePath } from '../../http/types';
 import { IS_IE } from './url_overflow';
 
 export const UrlOverflowUi: React.FC<{ basePath: IBasePath }> = ({ basePath }) => {

@@ -5,9 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { TypeOf, schema } from '@kbn/config-schema';
-import { IExternalUrlPolicy } from '.';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
+import type { IExternalUrlPolicy } from './external_url_config';
 
 /**
  * @internal

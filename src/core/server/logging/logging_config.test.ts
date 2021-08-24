@@ -5,8 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { LoggingConfig, config } from './logging_config';
+import { config, LoggingConfig } from './logging_config';
 
 test('`schema` creates correct schema with defaults.', () => {
   expect(config.schema.validate({})).toMatchInlineSnapshot(

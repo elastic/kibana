@@ -5,9 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { InjectedMetadataService, InjectedMetadataSetup } from './injected_metadata_service';
+import type { InjectedMetadataSetup } from './injected_metadata_service';
+import { InjectedMetadataService } from './injected_metadata_service';
 
 const createSetupContractMock = () => {
   const setupContract: jest.Mocked<InjectedMetadataSetup> = {

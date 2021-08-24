@@ -5,8 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { IRouter } from '../../http';
+import type { IRouter } from '../../http/router/router';
 import { registerTranslationsRoute } from './translations';
 
 export const registerRoutes = ({ router, locale }: { router: IRouter; locale: string }) => {

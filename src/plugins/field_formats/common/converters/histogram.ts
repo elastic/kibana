@@ -5,11 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { i18n } from '@kbn/i18n';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
+import { i18n } from '@kbn/i18n';
 import { FieldFormat } from '../field_format';
-import { TextContextTypeConvert, FIELD_FORMAT_IDS } from '../types';
+import type { TextContextTypeConvert } from '../types';
+import { FIELD_FORMAT_IDS } from '../types';
 import { BytesFormat } from './bytes';
 import { NumberFormat } from './number';
 import { PercentFormat } from './percent';

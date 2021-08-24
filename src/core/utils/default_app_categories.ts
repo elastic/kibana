@@ -5,9 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { i18n } from '@kbn/i18n';
-import { AppCategory } from '../types';
+import type { AppCategory } from '../types/app_category';
 
 /** @internal */
 export const DEFAULT_APP_CATEGORIES: Record<string, AppCategory> = Object.freeze({

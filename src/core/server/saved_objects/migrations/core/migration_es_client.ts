@@ -5,14 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import type { TransportRequestOptions } from '@elastic/elasticsearch/lib/Transport';
-import { get } from 'lodash';
 import { set } from '@elastic/safer-lodash-set';
-
-import { ElasticsearchClient } from '../../../elasticsearch';
+import type { Logger } from '@kbn/logging';
+import { get } from 'lodash';
 import { migrationRetryCallCluster } from '../../../elasticsearch/client/retry_call_cluster';
-import { Logger } from '../../../logging';
+import type { ElasticsearchClient } from '../../../elasticsearch/client/types';
 
 const methods = [
   'bulk',

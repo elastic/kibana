@@ -5,10 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { createIndexMap } from './build_index_map';
 import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
-import { SavedObjectsType } from '../../types';
+import type { SavedObjectsType } from '../../types';
+import { createIndexMap } from './build_index_map';
 
 const createRegistry = (...types: Array<Partial<SavedObjectsType>>) => {
   const registry = new SavedObjectTypeRegistry();

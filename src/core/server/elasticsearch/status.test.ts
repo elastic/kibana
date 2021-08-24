@@ -5,14 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import { of, Subject } from 'rxjs';
 import { take } from 'rxjs/operators';
-import { Subject, of } from 'rxjs';
-
-import { calculateStatus$ } from './status';
-import { ServiceStatusLevels, ServiceStatus } from '../status';
 import { ServiceStatusLevelSnapshotSerializer } from '../status/test_utils';
-import { NodesVersionCompatibility } from './version_check/ensure_es_version';
+import type { ServiceStatus } from '../status/types';
+import { ServiceStatusLevels } from '../status/types';
+import { calculateStatus$ } from './status';
+import type { NodesVersionCompatibility } from './version_check/ensure_es_version';
 
 expect.addSnapshotSerializer(ServiceStatusLevelSnapshotSerializer);
 

@@ -5,13 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { Env } from '@kbn/config';
 import { REPO_ROOT } from '@kbn/dev-utils';
 import { getEnvOptions } from '../../config/mocks';
-import { startServers, stopServers } from './lib';
 import { docExistsSuite } from './doc_exists';
 import { docMissingSuite } from './doc_missing';
+import { startServers, stopServers } from './lib/servers';
 
 const kibanaVersion = Env.createDefault(REPO_ROOT, getEnvOptions()).packageInfo.version;
 const savedObjectIndex = `.kibana_${kibanaVersion}_001`;

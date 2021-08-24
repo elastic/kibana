@@ -5,8 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { isConfirmAction, getLeaveAction } from './application_leave';
+import { getLeaveAction, isConfirmAction } from './application_leave';
 import { AppLeaveActionType } from './types';
 
 describe('isConfirmAction', () => {

@@ -5,10 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { LogLevel, Appender } from '@kbn/logging';
-import { LoggingConfig } from './logging_config';
+import type { Appender } from '@kbn/logging';
+import { LogLevel } from '@kbn/logging';
 import { BaseLogger } from './logger';
+import { LoggingConfig } from './logging_config';
 
 const context = LoggingConfig.getLoggerContext(['context', 'parent', 'child']);
 let appenderMocks: Appender[];

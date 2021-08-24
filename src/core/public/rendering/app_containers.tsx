@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { Observable } from 'rxjs';
-import useObservable from 'react-use/lib/useObservable';
 import classNames from 'classnames';
-import { APP_WRAPPER_CLASS } from '../../utils';
+import React from 'react';
+import useObservable from 'react-use/lib/useObservable';
+import { Observable } from 'rxjs';
+import { APP_WRAPPER_CLASS } from '../../utils/app_wrapper_class';
 
 export const AppWrapper: React.FunctionComponent<{
   chromeVisible$: Observable<boolean>;

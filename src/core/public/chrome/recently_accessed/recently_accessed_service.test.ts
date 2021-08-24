@@ -5,11 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import { Subject } from 'rxjs';
+import { bufferCount, takeUntil } from 'rxjs/operators';
 import { httpServiceMock } from '../../http/http_service.mock';
 import { RecentlyAccessedService } from './recently_accessed_service';
-import { Subject } from 'rxjs';
-import { takeUntil, bufferCount } from 'rxjs/operators';
 
 // Maybe this should be moved to our global jest polyfills?
 class LocalStorageMock implements Storage {

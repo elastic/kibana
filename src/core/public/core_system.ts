@@ -5,31 +5,32 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { CoreId } from '../server';
-import { PackageInfo, EnvironmentMode } from '../server/types';
-import { CoreSetup, CoreStart } from '.';
-import { ChromeService } from './chrome';
-import { FatalErrorsService, FatalErrorsSetup } from './fatal_errors';
-import { HttpService } from './http';
-import { I18nService } from './i18n';
-import {
+import type { EnvironmentMode, PackageInfo } from '@kbn/config';
+import type { CoreSetup, CoreStart } from '.';
+import type { CoreId } from '../server/core_context';
+import { ApplicationService } from './application/application_service';
+import type { InternalApplicationSetup, InternalApplicationStart } from './application/types';
+import { ChromeService } from './chrome/chrome_service';
+import { CoreApp } from './core_app/core_app';
+import { DeprecationsService } from './deprecations/deprecations_service';
+import { DocLinksService } from './doc_links/doc_links_service';
+import type { FatalErrorsSetup } from './fatal_errors/fatal_errors_service';
+import { FatalErrorsService } from './fatal_errors/fatal_errors_service';
+import { HttpService } from './http/http_service';
+import { I18nService } from './i18n/i18n_service';
+import type {
   InjectedMetadataParams,
-  InjectedMetadataService,
   InjectedMetadataSetup,
   InjectedMetadataStart,
-} from './injected_metadata';
-import { NotificationsService } from './notifications';
-import { OverlayService } from './overlays';
-import { PluginsService } from './plugins';
-import { UiSettingsService } from './ui_settings';
-import { ApplicationService } from './application';
-import { DocLinksService } from './doc_links';
-import { RenderingService } from './rendering';
-import { SavedObjectsService } from './saved_objects';
-import { IntegrationsService } from './integrations';
-import { DeprecationsService } from './deprecations';
-import { CoreApp } from './core_app';
-import type { InternalApplicationSetup, InternalApplicationStart } from './application/types';
+} from './injected_metadata/injected_metadata_service';
+import { InjectedMetadataService } from './injected_metadata/injected_metadata_service';
+import { IntegrationsService } from './integrations/integrations_service';
+import { NotificationsService } from './notifications/notifications_service';
+import { OverlayService } from './overlays/overlay_service';
+import { PluginsService } from './plugins/plugins_service';
+import { RenderingService } from './rendering/rendering_service';
+import { SavedObjectsService } from './saved_objects/saved_objects_service';
+import { UiSettingsService } from './ui_settings/ui_settings_service';
 
 interface Params {
   rootDomElement: HTMLElement;

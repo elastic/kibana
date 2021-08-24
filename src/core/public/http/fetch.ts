@@ -5,24 +5,22 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { omitBy } from 'lodash';
-import { format } from 'url';
 import { BehaviorSubject } from 'rxjs';
-
-import {
-  IBasePath,
-  HttpInterceptor,
-  HttpHandler,
-  HttpFetchOptions,
-  HttpResponse,
-  HttpFetchOptionsWithPath,
-} from './types';
+import { format } from 'url';
+import { ExecutionContextContainer } from '../execution_context/execution_context_container';
 import { HttpFetchError } from './http_fetch_error';
 import { HttpInterceptController } from './http_intercept_controller';
-import { interceptRequest, interceptResponse } from './intercept';
 import { HttpInterceptHaltError } from './http_intercept_halt_error';
-import { ExecutionContextContainer } from '../execution_context';
+import { interceptRequest, interceptResponse } from './intercept';
+import type {
+  HttpFetchOptions,
+  HttpFetchOptionsWithPath,
+  HttpHandler,
+  HttpInterceptor,
+  HttpResponse,
+  IBasePath,
+} from './types';
 
 interface Params {
   basePath: IBasePath;

@@ -5,11 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { mockCreateWriteStream } from './file_appender.test.mocks';
-
-import { LogRecord, LogLevel } from '@kbn/logging';
+import type { LogRecord } from '@kbn/logging';
+import { LogLevel } from '@kbn/logging';
 import { FileAppender } from './file_appender';
+import { mockCreateWriteStream } from './file_appender.test.mocks';
 
 const tickMs = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 

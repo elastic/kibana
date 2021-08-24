@@ -5,21 +5,20 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { BehaviorSubject, Observable, combineLatest, of } from 'rxjs';
+import { BehaviorSubject, combineLatest, Observable, of } from 'rxjs';
 import {
-  map,
-  distinctUntilChanged,
-  switchMap,
   debounceTime,
-  timeoutWith,
+  distinctUntilChanged,
+  map,
   startWith,
+  switchMap,
+  timeoutWith,
 } from 'rxjs/operators';
 import { isDeepStrictEqual } from 'util';
-
-import { PluginName } from '../plugins';
-import { ServiceStatus, CoreStatus, ServiceStatusLevels } from './types';
+import type { PluginName } from '../plugins/types';
 import { getSummaryStatus } from './get_summary_status';
+import type { CoreStatus, ServiceStatus } from './types';
+import { ServiceStatusLevels } from './types';
 
 const STATUS_TIMEOUT_MS = 30 * 1000; // 30 seconds
 

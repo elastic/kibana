@@ -5,9 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { Socket } from 'net';
-import { DetailedPeerCertificate, TLSSocket } from 'tls';
+import type { DetailedPeerCertificate } from 'tls';
+import { TLSSocket } from 'tls';
 import { KibanaSocket } from './socket';
 
 describe('KibanaSocket', () => {

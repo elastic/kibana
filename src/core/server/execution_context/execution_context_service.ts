@@ -5,19 +5,15 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import type { Logger } from '@kbn/logging';
 import { AsyncLocalStorage } from 'async_hooks';
-import type { Subscription } from 'rxjs';
-
-import type { CoreService, KibanaExecutionContext } from '../../types';
+import { Subscription } from 'rxjs';
+import type { CoreService } from '../../types/core_service';
+import type { KibanaExecutionContext } from '../../types/execution_context';
 import type { CoreContext } from '../core_context';
-import type { Logger } from '../logging';
 import type { ExecutionContextConfigType } from './execution_context_config';
-
-import {
-  ExecutionContextContainer,
-  IExecutionContextContainer,
-  getParentContextFrom,
-} from './execution_context_container';
+import type { IExecutionContextContainer } from './execution_context_container';
+import { ExecutionContextContainer, getParentContextFrom } from './execution_context_container';
 
 /**
  * @internal

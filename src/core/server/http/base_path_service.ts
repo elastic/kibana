@@ -5,10 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { modifyUrl } from '@kbn/std';
-
-import { ensureRawRequest, KibanaRequest, LegacyRequest } from './router';
+import type { LegacyRequest } from './router/request';
+import { ensureRawRequest, KibanaRequest } from './router/request';
 
 /**
  * Access or manipulate the Kibana base path

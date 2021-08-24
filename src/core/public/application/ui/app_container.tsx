@@ -5,24 +5,17 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import './app_container.scss';
-
-import React, {
-  Fragment,
-  FunctionComponent,
-  useLayoutEffect,
-  useRef,
-  useState,
-  MutableRefObject,
-} from 'react';
 import { EuiLoadingElastic } from '@elastic/eui';
-
 import { i18n } from '@kbn/i18n';
+import type { FunctionComponent, MutableRefObject } from 'react';
+import React, { Fragment, useLayoutEffect, useRef, useState } from 'react';
+import { APP_WRAPPER_CLASS } from '../../../utils/app_wrapper_class';
 import type { MountPoint } from '../../types';
-import { AppLeaveHandler, AppStatus, AppUnmount, Mounter } from '../types';
-import { AppNotFound } from './app_not_found_screen';
 import { ScopedHistory } from '../scoped_history';
-import { APP_WRAPPER_CLASS } from '../../../utils';
+import type { AppLeaveHandler, AppUnmount, Mounter } from '../types';
+import { AppStatus } from '../types';
+import './app_container.scss';
+import { AppNotFound } from './app_not_found_screen';
 
 interface Props {
   /** Path application is mounted on without the global basePath */

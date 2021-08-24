@@ -5,15 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { UiSettingsParams } from '../../../types';
+import type { UiSettingsParams } from '../../../types/ui_settings';
 import { getAccessibilitySettings } from './accessibility';
 import { getDateFormatSettings } from './date_formats';
 import { getMiscUiSettings } from './misc';
 import { getNavigationSettings } from './navigation';
 import { getNotificationsSettings } from './notifications';
-import { getThemeSettings } from './theme';
 import { getStateSettings } from './state';
+import { getThemeSettings } from './theme';
 
 interface GetCoreSettingsOptions {
   isDist?: boolean;

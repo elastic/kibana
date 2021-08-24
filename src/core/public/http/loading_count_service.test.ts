@@ -5,10 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { Observable, throwError, of, Subject } from 'rxjs';
+import { Observable, of, Subject, throwError } from 'rxjs';
 import { toArray } from 'rxjs/operators';
-
 import { fatalErrorsServiceMock } from '../fatal_errors/fatal_errors_service.mock';
 import { LoadingCountService } from './loading_count_service';
 

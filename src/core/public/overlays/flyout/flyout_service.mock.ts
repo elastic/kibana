@@ -5,9 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { FlyoutService, OverlayFlyoutStart } from './flyout_service';
+import type { OverlayFlyoutStart } from './flyout_service';
+import { FlyoutService } from './flyout_service';
 
 const createStartContractMock = () => {
   const startContract: jest.Mocked<OverlayFlyoutStart> = {

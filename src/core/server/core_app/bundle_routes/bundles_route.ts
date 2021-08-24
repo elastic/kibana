@@ -5,9 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { schema } from '@kbn/config-schema';
-import { IRouter } from '../../http';
+import type { IRouter } from '../../http/router/router';
 import { createDynamicAssetHandler } from './dynamic_asset_response';
 import { FileHashCache } from './file_hash_cache';
 

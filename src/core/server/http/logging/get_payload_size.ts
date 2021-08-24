@@ -5,13 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { isPlainObject } from 'lodash';
-import { ReadStream } from 'fs';
-import { Zlib } from 'zlib';
 import { isBoom } from '@hapi/boom';
 import type { Request } from '@hapi/hapi';
-import { Logger } from '../../logging';
+import type { Logger } from '@kbn/logging';
+import { ReadStream } from 'fs';
+import { isPlainObject } from 'lodash';
+import type { Zlib } from 'zlib';
 
 type Response = Request['response'];
 

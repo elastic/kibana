@@ -5,17 +5,16 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { basename, dirname } from 'path';
 import { schema } from '@kbn/config-schema';
-import { RollingStrategy } from '../strategy';
+import { basename, dirname } from 'path';
 import { RollingFileContext } from '../../rolling_file_context';
+import type { RollingStrategy } from '../strategy';
 import {
-  shouldSkipRollout,
-  getOrderedRolledFiles,
   deleteFiles,
+  getOrderedRolledFiles,
   rollCurrentFile,
   rollPreviousFilesInOrder,
+  shouldSkipRollout,
 } from './rolling_tasks';
 
 export interface NumericRollingStrategyConfig {

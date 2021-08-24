@@ -5,11 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import type { PublicMethodsOf } from '@kbn/utility-types';
-
-import { ContextService, ContextSetup, InternalContextPreboot } from './context_service';
 import { contextMock } from './container/context.mock';
+import type { ContextSetup, InternalContextPreboot } from './context_service';
+import { ContextService } from './context_service';
 
 const createPrebootContractMock = (mockContext = {}) => {
   const prebootContract: jest.Mocked<InternalContextPreboot> = {

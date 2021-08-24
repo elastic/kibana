@@ -5,13 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { ElasticsearchClient } from '../../../../';
-import { InternalCoreStart } from '../../../../internal_types';
 import * as kbnTestServer from '../../../../../test_helpers/kbn_server';
+import type { ElasticsearchClient } from '../../../../elasticsearch/client/types';
+import type { InternalCoreStart } from '../../../../internal_types';
 import { Root } from '../../../../root';
-import { isWriteBlockException } from '../es_errors';
 import { createIndex } from '../create_index';
+import { isWriteBlockException } from '../es_errors';
 import { setWriteBlock } from '../set_write_block';
 
 const { startES } = kbnTestServer.createTestServers({

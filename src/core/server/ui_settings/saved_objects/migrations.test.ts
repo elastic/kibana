@@ -5,8 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { SavedObjectUnsanitizedDoc } from 'kibana/server';
+import type { SavedObjectUnsanitizedDoc } from '../../saved_objects/serialization/types';
 import { migrations } from './migrations';
 
 describe('ui_settings 7.9.0 migrations', () => {

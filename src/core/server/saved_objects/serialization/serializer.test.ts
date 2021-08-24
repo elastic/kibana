@@ -7,11 +7,11 @@
  */
 
 import _ from 'lodash';
-import { SavedObjectsSerializer } from './serializer';
-import { SavedObjectsRawDoc } from './types';
+import { LEGACY_URL_ALIAS_TYPE } from '../object_types/constants';
 import { typeRegistryMock } from '../saved_objects_type_registry.mock';
-import { encodeVersion } from '../version';
-import { LEGACY_URL_ALIAS_TYPE } from '../object_types';
+import { encodeVersion } from '../version/encode_version';
+import { SavedObjectsSerializer } from './serializer';
+import type { SavedObjectsRawDoc } from './types';
 
 let typeRegistry = typeRegistryMock.create();
 typeRegistry.isNamespaceAgnostic.mockReturnValue(true);

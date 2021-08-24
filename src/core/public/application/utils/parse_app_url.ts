@@ -5,11 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { getUrlOrigin } from '@kbn/std';
 import { resolve } from 'url';
-import { IBasePath } from '../../http';
-import { App, ParsedAppUrl } from '../types';
+import type { IBasePath } from '../../http/types';
+import type { App, ParsedAppUrl } from '../types';
 
 /**
  * Parse given URL and return the associated app id and path if any app matches, or undefined if none do.

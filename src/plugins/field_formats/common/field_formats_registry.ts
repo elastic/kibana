@@ -5,25 +5,24 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-// eslint-disable-next-line max-classes-per-file
-import { forOwn, isFunction, memoize, identity } from 'lodash';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
-
-import {
-  FieldFormatsGetConfigFn,
+import { forOwn, identity, isFunction, memoize } from 'lodash';
+import { baseFormatters } from './constants/base_formatters';
+import { FORMATS_UI_SETTINGS } from './constants/ui_settings';
+import { FieldFormatNotFoundError } from './errors';
+import { FieldFormat } from './field_format';
+import type {
   FieldFormatConfig,
-  FIELD_FORMAT_IDS,
-  FieldFormatInstanceType,
   FieldFormatId,
+  FieldFormatInstanceType,
+  FieldFormatsGetConfigFn,
+  FormatFactory,
   IFieldFormatMetaParams,
   SerializedFieldFormat,
-  FormatFactory,
 } from './types';
-import { baseFormatters } from './constants/base_formatters';
-import { FieldFormat } from './field_format';
-import { FORMATS_UI_SETTINGS } from '../common/constants/ui_settings';
-import { FieldFormatNotFoundError } from './errors';
+import { FIELD_FORMAT_IDS } from './types';
+
+// eslint-disable-next-line max-classes-per-file
 
 export class FieldFormatsRegistry {
   protected fieldFormats: Map<FieldFormatId, FieldFormatInstanceType> = new Map();

@@ -5,15 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import type { PublicMethodsOf } from '@kbn/utility-types';
-
-import {
-  LoggingService,
-  LoggingServiceSetup,
-  InternalLoggingServiceSetup,
+import type {
   InternalLoggingServicePreboot,
+  InternalLoggingServiceSetup,
+  LoggingServiceSetup,
 } from './logging_service';
+import { LoggingService } from './logging_service';
 
 const createInternalPrebootMock = (): jest.Mocked<InternalLoggingServicePreboot> => ({
   configure: jest.fn(),

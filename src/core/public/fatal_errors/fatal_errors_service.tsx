@@ -10,11 +10,11 @@ import React from 'react';
 import { render } from 'react-dom';
 import * as Rx from 'rxjs';
 import { first, tap } from 'rxjs/operators';
-
-import { I18nStart } from '../i18n';
-import { InjectedMetadataSetup } from '../injected_metadata';
+import type { I18nStart } from '../i18n/i18n_service';
+import type { InjectedMetadataSetup } from '../injected_metadata/injected_metadata_service';
 import { FatalErrorsScreen } from './fatal_errors_screen';
-import { FatalErrorInfo, getErrorInfo } from './get_error_info';
+import type { FatalErrorInfo } from './get_error_info';
+import { getErrorInfo } from './get_error_info';
 
 interface Deps {
   i18n: I18nStart;

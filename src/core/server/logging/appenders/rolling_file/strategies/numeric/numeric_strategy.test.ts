@@ -5,18 +5,18 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { join } from 'path';
+import { rollingFileAppenderMocks } from '../../mocks';
+import type { NumericRollingStrategyConfig } from './numeric_strategy';
+import { NumericRollingStrategy } from './numeric_strategy';
 import {
-  resetAllMock,
-  shouldSkipRolloutMock,
   deleteFilesMock,
   getOrderedRolledFilesMock,
+  resetAllMock,
   rollCurrentFileMock,
   rollPreviousFilesInOrderMock,
+  shouldSkipRolloutMock,
 } from './numeric_strategy.test.mocks';
-import { rollingFileAppenderMocks } from '../../mocks';
-import { NumericRollingStrategy, NumericRollingStrategyConfig } from './numeric_strategy';
 
 const logFileFolder = 'log-file-folder';
 const logFileBaseName = 'kibana.log';

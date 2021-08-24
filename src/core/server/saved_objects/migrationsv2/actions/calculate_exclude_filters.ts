@@ -5,14 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { estypes } from '@elastic/elasticsearch';
 import { withTimeout } from '@kbn/std';
 import * as Either from 'fp-ts/lib/Either';
 import * as TaskEither from 'fp-ts/lib/TaskEither';
-import { RetryableEsClientError } from '.';
-import { ElasticsearchClient } from '../../../elasticsearch';
-import { SavedObjectTypeExcludeFromUpgradeFilterHook } from '../../types';
+import type { ElasticsearchClient } from '../../../elasticsearch/client/types';
+import type { SavedObjectTypeExcludeFromUpgradeFilterHook } from '../../types';
+import type { RetryableEsClientError } from './catch_retryable_es_client_errors';
 import { catchRetryableEsClientErrors } from './catch_retryable_es_client_errors';
 
 export interface CalculateExcludeFiltersParams {

@@ -5,18 +5,15 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import { EuiButton, EuiCallOut, EuiLoadingSpinner } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Fragment } from 'react';
 import ReactDOM from 'react-dom';
-import { filter } from 'rxjs/operators';
 import { Subscription } from 'rxjs';
-
-import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiCallOut, EuiButton, EuiLoadingSpinner } from '@elastic/eui';
-
-import { I18nStart } from '../../i18n';
-import { IUiSettingsClient } from '../../ui_settings';
-import { OverlayBannersStart } from './banners_service';
+import { filter } from 'rxjs/operators';
+import type { I18nStart } from '../../i18n/i18n_service';
+import type { IUiSettingsClient } from '../../ui_settings/types';
+import type { OverlayBannersStart } from './banners_service';
 
 interface StartDeps {
   banners: OverlayBannersStart;

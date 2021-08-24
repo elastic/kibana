@@ -5,16 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import type { Logger } from '@kbn/logging';
 import { omit } from 'lodash';
-
-import {
-  IUiSettingsClient,
-  UiSettingsParams,
+import type {
   PublicUiSettingsParams,
+  UiSettingsParams,
   UserProvidedValues,
-} from './types';
-import { Logger } from '../logging';
+} from '../../types/ui_settings';
+import type { IUiSettingsClient } from './types';
 
 export interface BaseUiSettingsDefaultsClientOptions {
   overrides?: Record<string, any>;

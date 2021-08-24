@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import * as Either from 'fp-ts/Either';
 import { errors as EsErrors } from '@elastic/elasticsearch';
+import * as Either from 'fp-ts/Either';
 import { elasticsearchClientMock } from '../../../elasticsearch/client/mocks';
-import { catchRetryableEsClientErrors } from './catch_retryable_es_client_errors';
 import { bulkOverwriteTransformedDocuments } from './bulk_overwrite_transformed_documents';
+import { catchRetryableEsClientErrors } from './catch_retryable_es_client_errors';
 
 jest.mock('./catch_retryable_es_client_errors');
 

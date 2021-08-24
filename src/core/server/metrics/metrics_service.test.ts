@@ -7,14 +7,13 @@
  */
 
 import moment from 'moment';
-
+import { take } from 'rxjs/operators';
 import { configServiceMock } from '../config/mocks';
-import { mockOpsCollector } from './metrics_service.test.mocks';
-import { MetricsService } from './metrics_service';
 import { mockCoreContext } from '../core_context.mock';
 import { httpServiceMock } from '../http/http_service.mock';
 import { loggingSystemMock } from '../logging/logging_system.mock';
-import { take } from 'rxjs/operators';
+import { MetricsService } from './metrics_service';
+import { mockOpsCollector } from './metrics_service.test.mocks';
 
 const testInterval = 100;
 

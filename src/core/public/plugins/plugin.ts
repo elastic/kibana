@@ -5,14 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import { isPromise } from '@kbn/std';
 import { Subject } from 'rxjs';
 import { first } from 'rxjs/operators';
-import { isPromise } from '@kbn/std';
-import { DiscoveredPlugin, PluginOpaqueId } from '../../server';
-import { PluginInitializerContext } from './plugin_context';
+import type { CoreSetup, CoreStart } from '..';
+import type { DiscoveredPlugin, PluginOpaqueId } from '../../server/plugins/types';
+import type { PluginInitializerContext } from './plugin_context';
 import { read } from './plugin_reader';
-import { CoreStart, CoreSetup } from '..';
 
 /**
  * The interface that should be returned by a `PluginInitializer`.

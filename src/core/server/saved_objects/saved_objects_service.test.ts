@@ -5,27 +5,25 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import { Env } from '@kbn/config';
+import { ByteSizeValue } from '@kbn/config-schema';
+import { BehaviorSubject } from 'rxjs';
+import { configServiceMock } from '../config/mocks';
+import { mockCoreContext } from '../core_context.mock';
+import { coreUsageDataServiceMock } from '../core_usage_data/core_usage_data_service.mock';
+import { elasticsearchServiceMock } from '../elasticsearch/elasticsearch_service.mock';
+import type { NodesVersionCompatibility } from '../elasticsearch/version_check/ensure_es_version';
+import { httpServerMock } from '../http/http_server.mocks';
+import { httpServiceMock } from '../http/http_service.mock';
+import { registerCoreObjectTypes } from './object_types/registration';
+import { SavedObjectsService } from './saved_objects_service';
 import {
-  migratorInstanceMock,
   clientProviderInstanceMock,
+  migratorInstanceMock,
   typeRegistryInstanceMock,
 } from './saved_objects_service.test.mocks';
-import { BehaviorSubject } from 'rxjs';
-import { ByteSizeValue } from '@kbn/config-schema';
-
-import { SavedObjectsService } from './saved_objects_service';
-import { mockCoreContext } from '../core_context.mock';
-import { Env } from '../config';
-import { configServiceMock } from '../mocks';
-import { elasticsearchServiceMock } from '../elasticsearch/elasticsearch_service.mock';
-import { coreUsageDataServiceMock } from '../core_usage_data/core_usage_data_service.mock';
-import { httpServiceMock } from '../http/http_service.mock';
-import { httpServerMock } from '../http/http_server.mocks';
-import { SavedObjectsClientFactoryProvider } from './service/lib';
-import { NodesVersionCompatibility } from '../elasticsearch/version_check/ensure_es_version';
 import { SavedObjectsRepository } from './service/lib/repository';
-import { registerCoreObjectTypes } from './object_types';
+import type { SavedObjectsClientFactoryProvider } from './service/lib/scoped_client_provider';
 
 jest.mock('./service/lib/repository');
 jest.mock('./object_types');

@@ -5,13 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { mockReadFile } from './plugin_manifest_parser.test.mocks';
-
-import { PluginDiscoveryErrorType } from './plugin_discovery_error';
-
 import { resolve } from 'path';
+import { PluginDiscoveryErrorType } from './plugin_discovery_error';
 import { parseManifest } from './plugin_manifest_parser';
+import { mockReadFile } from './plugin_manifest_parser.test.mocks';
 
 const pluginPath = resolve('path', 'existent-dir');
 const pluginManifestPath = resolve(pluginPath, 'kibana.json');

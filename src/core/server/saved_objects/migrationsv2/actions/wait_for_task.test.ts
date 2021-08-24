@@ -6,9 +6,10 @@
  * Side Public License, v 1.
  */
 import { errors as EsErrors } from '@elastic/elasticsearch';
-import { waitForTask } from './wait_for_task';
 import { elasticsearchClientMock } from '../../../elasticsearch/client/mocks';
 import { catchRetryableEsClientErrors } from './catch_retryable_es_client_errors';
+import { waitForTask } from './wait_for_task';
+
 jest.mock('./catch_retryable_es_client_errors');
 
 describe('waitForTask', () => {

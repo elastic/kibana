@@ -7,7 +7,7 @@
  */
 
 import * as Either from 'fp-ts/Either';
-import { RetryableEsClientError } from '../actions';
+import type { RetryableEsClientError } from '../actions/catch_retryable_es_client_errors';
 
 export type ExcludeRetryableEsError<Response> = Exclude<
   | Exclude<

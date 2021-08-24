@@ -5,28 +5,33 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import type {
-  ISavedObjectsRepository,
-  ISavedObjectsPointInTimeFinder,
-  SavedObjectsCreatePointInTimeFinderOptions,
-  SavedObjectsCreatePointInTimeFinderDependencies,
-  SavedObjectsCollectMultiNamespaceReferencesObject,
-  SavedObjectsCollectMultiNamespaceReferencesOptions,
-  SavedObjectsCollectMultiNamespaceReferencesResponse,
-  SavedObjectsUpdateObjectsSpacesObject,
-  SavedObjectsUpdateObjectsSpacesOptions,
-} from './lib';
-import {
   SavedObject,
   SavedObjectError,
   SavedObjectReference,
   SavedObjectsMigrationVersion,
-  SavedObjectsBaseOptions,
+} from '../../../types/saved_objects';
+import type {
   MutatingOperationRefreshSetting,
+  SavedObjectsBaseOptions,
   SavedObjectsFindOptions,
 } from '../types';
+import type {
+  SavedObjectsCollectMultiNamespaceReferencesObject,
+  SavedObjectsCollectMultiNamespaceReferencesOptions,
+  SavedObjectsCollectMultiNamespaceReferencesResponse,
+} from './lib/collect_multi_namespace_references';
 import { SavedObjectsErrorHelpers } from './lib/errors';
+import type {
+  ISavedObjectsPointInTimeFinder,
+  SavedObjectsCreatePointInTimeFinderDependencies,
+  SavedObjectsCreatePointInTimeFinderOptions,
+} from './lib/point_in_time_finder';
+import type { ISavedObjectsRepository } from './lib/repository';
+import type {
+  SavedObjectsUpdateObjectsSpacesObject,
+  SavedObjectsUpdateObjectsSpacesOptions,
+} from './lib/update_objects_spaces';
 
 /**
  *

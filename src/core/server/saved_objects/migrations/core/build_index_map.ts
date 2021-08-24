@@ -5,9 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { SavedObjectsTypeMappingDefinitions } from '../../mappings';
-import { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
+import type { SavedObjectsTypeMappingDefinitions } from '../../mappings/types';
+import type { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 
 export interface CreateIndexMapOptions {
   kibanaIndexName: string;

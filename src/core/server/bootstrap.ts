@@ -6,10 +6,11 @@
  * Side Public License, v 1.
  */
 
+import type { CliArgs } from '@kbn/config';
+import { Env, RawConfigService } from '@kbn/config';
 import chalk from 'chalk';
-import { CliArgs, Env, RawConfigService } from './config';
-import { Root } from './root';
 import { CriticalError } from './errors';
+import { Root } from './root';
 
 interface BootstrapArgs {
   configs: string[];

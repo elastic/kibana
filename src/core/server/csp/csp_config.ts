@@ -5,8 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { config, CspConfigType } from './config';
+import type { CspConfigType } from './config';
+import { config } from './config';
 import { CspDirectives } from './csp_directives';
 
 const DEFAULT_CONFIG = Object.freeze(config.schema.validate({}));

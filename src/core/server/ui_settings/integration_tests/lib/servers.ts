@@ -6,19 +6,18 @@
  * Side Public License, v 1.
  */
 
-import type supertest from 'supertest';
-import type { SavedObjectsClientContract, IUiSettingsClient } from 'src/core/server';
 import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
-
-import {
-  createTestServers,
+import type supertest from 'supertest';
+import type {
+  HttpMethod,
   TestElasticsearchUtils,
   TestKibanaUtils,
   TestUtils,
-  HttpMethod,
-  getSupertest,
 } from '../../../../test_helpers/kbn_server';
+import { createTestServers, getSupertest } from '../../../../test_helpers/kbn_server';
 import { httpServerMock } from '../../../http/http_server.mocks';
+import type { SavedObjectsClientContract } from '../../../saved_objects/types';
+import type { IUiSettingsClient } from '../../types';
 
 let servers: TestUtils;
 let esServer: TestElasticsearchUtils;

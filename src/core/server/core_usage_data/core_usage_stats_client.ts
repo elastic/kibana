@@ -5,17 +5,16 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { CORE_USAGE_STATS_TYPE, CORE_USAGE_STATS_ID } from './constants';
-import { CoreUsageStats } from './types';
-import { DEFAULT_NAMESPACE_STRING } from '../saved_objects/service/lib/utils';
-import {
-  ISavedObjectsRepository,
+import type { IBasePath } from '../http/base_path_service';
+import { KibanaRequest } from '../http/router/request';
+import type {
   SavedObjectsImportOptions,
   SavedObjectsResolveImportErrorsOptions,
-  KibanaRequest,
-  IBasePath,
-} from '..';
+} from '../saved_objects/import/types';
+import type { ISavedObjectsRepository } from '../saved_objects/service/lib/repository';
+import { DEFAULT_NAMESPACE_STRING } from '../saved_objects/service/lib/utils';
+import { CORE_USAGE_STATS_ID, CORE_USAGE_STATS_TYPE } from './constants';
+import type { CoreUsageStats } from './types';
 
 /** @internal */
 export interface BaseIncrementOptions {

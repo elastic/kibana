@@ -5,8 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { ISavedObjectsImporter } from './saved_objects_importer';
+import type { ISavedObjectsImporter } from './saved_objects_importer';
 
 const createImporterMock = () => {
   const mock: jest.Mocked<ISavedObjectsImporter> = {

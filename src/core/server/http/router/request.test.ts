@@ -5,16 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import type { RouteOptions } from '@hapi/hapi';
+import { schema } from '@kbn/config-schema';
+import { httpServerMock } from '../http_server.mocks';
+import { KibanaRequest } from './request';
 
 jest.mock('uuid', () => ({
   v4: jest.fn().mockReturnValue('xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'),
 }));
-
-import { RouteOptions } from '@hapi/hapi';
-import { KibanaRequest } from './request';
-import { httpServerMock } from '../http_server.mocks';
-import { schema } from '@kbn/config-schema';
-
 describe('KibanaRequest', () => {
   describe('id property', () => {
     it('uses the request.app.requestId property if present', () => {

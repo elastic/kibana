@@ -5,11 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { styleServiceMock, momentServiceMock } from './integrations_service.test.mocks';
-
-import { IntegrationsService } from './integrations_service';
 import { uiSettingsServiceMock } from '../ui_settings/ui_settings_service.mock';
+import { IntegrationsService } from './integrations_service';
+import { momentServiceMock, styleServiceMock } from './integrations_service.test.mocks';
 
 describe('IntegrationsService', () => {
   test('it wires up styles and moment', async () => {

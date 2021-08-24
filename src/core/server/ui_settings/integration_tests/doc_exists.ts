@@ -5,8 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { getServices, chance } from './lib';
+import { chance } from './lib/chance';
+import { getServices } from './lib/servers';
 
 export const docExistsSuite = (savedObjectsIndex: string) => () => {
   async function setup(options: { initialSettings?: Record<string, any> } = {}) {

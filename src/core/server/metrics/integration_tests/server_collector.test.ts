@@ -5,15 +5,15 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { BehaviorSubject, Subject } from 'rxjs';
-import { take, filter } from 'rxjs/operators';
-import supertest from 'supertest';
 import { Server as HapiServer } from '@hapi/hapi';
-import { createHttpServer } from '../../http/test_utils';
-import { HttpService, IRouter } from '../../http';
+import { BehaviorSubject, Subject } from 'rxjs';
+import { filter, take } from 'rxjs/operators';
+import supertest from 'supertest';
 import { contextServiceMock } from '../../context/context_service.mock';
 import { executionContextServiceMock } from '../../execution_context/execution_context_service.mock';
+import { HttpService } from '../../http/http_service';
+import type { IRouter } from '../../http/router/router';
+import { createHttpServer } from '../../http/test_utils';
 import { ServerMetricsCollector } from '../collectors/server';
 
 const requestWaitDelay = 25;

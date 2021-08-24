@@ -8,13 +8,10 @@
 
 import pMap from 'p-map';
 import { v4 as uuidv4 } from 'uuid';
-import {
-  SavedObject,
-  SavedObjectsClientContract,
-  SavedObjectsImportFailure,
-  SavedObjectsImportRetry,
-} from '../../types';
-import { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
+import type { SavedObject } from '../../../../types/saved_objects';
+import type { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
+import type { SavedObjectsClientContract } from '../../types';
+import type { SavedObjectsImportFailure, SavedObjectsImportRetry } from '../types';
 
 interface CheckOriginConflictsParams {
   objects: Array<SavedObject<{ title?: string }>>;

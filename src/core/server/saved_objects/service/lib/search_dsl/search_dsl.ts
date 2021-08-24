@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
+import { estypes } from '@elastic/elasticsearch';
 import Boom from '@hapi/boom';
-
-import type { estypes } from '@elastic/elasticsearch';
-import { IndexMapping } from '../../../mappings';
-import { SavedObjectsPitParams } from '../../../types';
-import { getQueryParams, HasReferenceQueryParams, SearchOperator } from './query_params';
+import type { IndexMapping } from '../../../mappings/types';
+import type { ISavedObjectTypeRegistry } from '../../../saved_objects_type_registry';
+import type { SavedObjectsPitParams } from '../../../types';
 import { getPitParams } from './pit_params';
+import type { HasReferenceQueryParams, SearchOperator } from './query_params';
+import { getQueryParams } from './query_params';
 import { getSortingParams } from './sorting_params';
-import { ISavedObjectTypeRegistry } from '../../../saved_objects_type_registry';
 
 type KueryNode = any;
 

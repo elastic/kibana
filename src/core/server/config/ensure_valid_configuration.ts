@@ -5,8 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { ConfigService, ConfigValidateParameters } from '@kbn/config';
+import type { ConfigValidateParameters } from '@kbn/config';
+import { ConfigService } from '@kbn/config';
 import { CriticalError } from '../errors';
 
 const ignoredPaths = ['dev.', 'elastic.apm.'];

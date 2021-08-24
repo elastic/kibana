@@ -5,17 +5,18 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { Buffer } from 'buffer';
-import { stringify } from 'querystring';
-import { ApiError, Client, RequestEvent, errors, Transport } from '@elastic/elasticsearch';
+import type { ApiError, RequestEvent } from '@elastic/elasticsearch';
+import { Client, Transport, errors } from '@elastic/elasticsearch';
 import type {
   RequestBody,
-  TransportRequestParams,
   TransportRequestOptions,
+  TransportRequestParams,
 } from '@elastic/elasticsearch/lib/Transport';
-import { Logger } from '../../logging';
-import { parseClientOptions, ElasticsearchClientConfig } from './client_config';
+import type { Logger } from '@kbn/logging';
+import { Buffer } from 'buffer';
+import { stringify } from 'querystring';
+import type { ElasticsearchClientConfig } from './client_config';
+import { parseClientOptions } from './client_config';
 
 const noop = () => undefined;
 

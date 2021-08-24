@@ -5,11 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { savedObjectsClientMock } from '../../../mocks';
+import type { SavedObject } from '../../../../types/saved_objects';
+import { SavedObjectsErrorHelpers } from '../../service/lib/errors';
+import { savedObjectsClientMock } from '../../service/saved_objects_client.mock';
+import type { SavedObjectsClientContract } from '../../types';
+import type { SavedObjectsImportFailure } from '../types';
 import { createSavedObjects } from './create_saved_objects';
-import { SavedObjectsClientContract, SavedObject, SavedObjectsImportFailure } from '../../types';
-import { SavedObjectsErrorHelpers } from '../../service';
 import { extractErrors } from './extract_errors';
 
 type CreateSavedObjectsParams = Parameters<typeof createSavedObjects>[0];

@@ -5,28 +5,21 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { Request, ResponseObject, ResponseToolkit } from '@hapi/hapi';
 import Boom from '@hapi/boom';
-
+import type { Request, ResponseObject, ResponseToolkit } from '@hapi/hapi';
 import { isConfigSchema } from '@kbn/config-schema';
-import { Logger } from '../../logging';
-import {
-  isUnauthorizedError as isElasticsearchUnauthorizedError,
-  UnauthorizedError as EsNotAuthorizedError,
-} from '../../elasticsearch/client/errors';
-import { KibanaRequest } from './request';
-import {
-  KibanaResponseFactory,
-  kibanaResponseFactory,
-  IKibanaResponse,
-  ErrorHttpResponseOptions,
-} from './response';
-import { RouteConfig, RouteConfigOptions, RouteMethod, validBodyOutput } from './route';
-import { HapiResponseAdapter } from './response_adapter';
-import { RequestHandlerContext } from '../../../server';
+import type { Logger } from '@kbn/logging';
+import type { RequestHandlerContext } from '../..';
+import type { UnauthorizedError as EsNotAuthorizedError } from '../../elasticsearch/client/errors';
+import { isUnauthorizedError as isElasticsearchUnauthorizedError } from '../../elasticsearch/client/errors';
 import { wrapErrors } from './error_wrapper';
-import { RouteValidator } from './validator';
+import { KibanaRequest } from './request';
+import type { ErrorHttpResponseOptions, IKibanaResponse, KibanaResponseFactory } from './response';
+import { kibanaResponseFactory } from './response';
+import { HapiResponseAdapter } from './response_adapter';
+import type { RouteConfig, RouteConfigOptions, RouteMethod } from './route';
+import { validBodyOutput } from './route';
+import { RouteValidator } from './validator/validator';
 
 /** @internal */
 export interface RouterRoute {

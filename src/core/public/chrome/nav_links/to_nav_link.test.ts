@@ -5,16 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import {
-  PublicAppInfo,
-  AppNavLinkStatus,
-  AppStatus,
-  PublicAppDeepLinkInfo,
-} from '../../application';
+import type { PublicAppDeepLinkInfo, PublicAppInfo } from '../../application/types';
+import { AppNavLinkStatus, AppStatus } from '../../application/types';
+import { httpServiceMock } from '../../http/http_service.mock';
 import { toNavLink } from './to_nav_link';
-
-import { httpServiceMock } from '../../mocks';
 
 const app = (props: Partial<PublicAppInfo> = {}): PublicAppInfo => ({
   id: 'some-id',

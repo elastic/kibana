@@ -5,14 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { EuiGlobalToastList, EuiGlobalToastListToast as EuiToast } from '@elastic/eui';
+import type { EuiGlobalToastListToast as EuiToast } from '@elastic/eui';
+import { EuiGlobalToastList } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 import * as Rx from 'rxjs';
-import { i18n } from '@kbn/i18n';
-
-import { MountWrapper } from '../../utils';
-import { Toast } from './toasts_api';
+import { MountWrapper } from '../../utils/mount';
+import type { Toast } from './toasts_api';
 
 interface Props {
   toasts$: Rx.Observable<Toast[]>;

@@ -5,22 +5,21 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { BehaviorSubject } from 'rxjs';
 import { schema } from '@kbn/config-schema';
-
+import { BehaviorSubject } from 'rxjs';
+import { mockCoreContext } from '../core_context.mock';
+import { httpServiceMock } from '../http/http_service.mock';
+import { savedObjectsServiceMock } from '../saved_objects/saved_objects_service.mock';
+import { savedObjectsClientMock } from '../saved_objects/service/saved_objects_client.mock';
+import { uiSettingsType } from './saved_objects/ui_settings';
+import { UiSettingsDefaultsClient } from './ui_settings_defaults_client';
+import type { SetupDeps } from './ui_settings_service';
+import { UiSettingsService } from './ui_settings_service';
 import {
+  getCoreSettingsMock,
   MockUiSettingsClientConstructor,
   MockUiSettingsDefaultsClientConstructor,
-  getCoreSettingsMock,
 } from './ui_settings_service.test.mock';
-import { UiSettingsService, SetupDeps } from './ui_settings_service';
-import { httpServiceMock } from '../http/http_service.mock';
-import { savedObjectsClientMock } from '../mocks';
-import { savedObjectsServiceMock } from '../saved_objects/saved_objects_service.mock';
-import { mockCoreContext } from '../core_context.mock';
-import { uiSettingsType } from './saved_objects';
-import { UiSettingsDefaultsClient } from './ui_settings_defaults_client';
 
 const overrides = {
   overrideBaz: 'baz',

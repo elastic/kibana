@@ -5,16 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { createMemoryHistory, History } from 'history';
-
+import type { History } from 'history';
+import { createMemoryHistory } from 'history';
 import { BasePath } from '../../http/base_path';
+import type { IBasePath } from '../../http/types';
 import { notificationServiceMock } from '../../notifications/notifications_service.mock';
+import type { IToasts } from '../../notifications/toasts/toasts_api';
+import type { IUiSettingsClient } from '../../ui_settings/types';
 import { uiSettingsServiceMock } from '../../ui_settings/ui_settings_service.mock';
-import { IBasePath } from '../../http';
-import { IToasts } from '../../notifications';
-import { IUiSettingsClient } from '../../ui_settings';
-
 import { setupUrlOverflowDetection, URL_MAX_LENGTH, URL_WARNING_LENGTH } from './url_overflow';
 
 const longUrl = '/' + 'a'.repeat(URL_MAX_LENGTH);

@@ -5,10 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import type { DomainDeprecationDetails } from '../../server/deprecations/types';
 import { httpServiceMock } from '../http/http_service.mock';
 import { DeprecationsClient } from './deprecations_client';
-import type { DomainDeprecationDetails } from '../../server/types';
 
 describe('DeprecationsClient', () => {
   const http = httpServiceMock.createSetupContract();

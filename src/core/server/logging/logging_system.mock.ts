@@ -5,12 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import type { LoggerFactory } from '@kbn/logging';
+import type { MockedLogger } from '@kbn/logging/mocks';
+import { loggerMock } from '@kbn/logging/mocks';
+import type { ILoggingSystem } from './logging_system';
 
 // Test helpers to simplify mocking logs and collecting all their outputs
-import { LoggerFactory } from '@kbn/logging';
-import { ILoggingSystem } from './logging_system';
-import { loggerMock, MockedLogger } from './logger.mock';
-
 const createLoggingSystemMock = () => {
   const mockLog = loggerMock.create();
 

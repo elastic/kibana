@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
+import type { UnwrapPromise } from '@kbn/utility-types';
 import supertest from 'supertest';
-import { UnwrapPromise } from '@kbn/utility-types';
-import { registerUpdateRoute } from '../update';
-import { savedObjectsClientMock } from '../../../../../core/server/mocks';
-import { CoreUsageStatsClient } from '../../../core_usage_data';
-import { coreUsageStatsClientMock } from '../../../core_usage_data/core_usage_stats_client.mock';
 import { coreUsageDataServiceMock } from '../../../core_usage_data/core_usage_data_service.mock';
+import { CoreUsageStatsClient } from '../../../core_usage_data/core_usage_stats_client';
+import { coreUsageStatsClientMock } from '../../../core_usage_data/core_usage_stats_client.mock';
+import { savedObjectsClientMock } from '../../service/saved_objects_client.mock';
 import { setupServer } from '../test_utils';
+import { registerUpdateRoute } from '../update';
 
 type SetupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
 

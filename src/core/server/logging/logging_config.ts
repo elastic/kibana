@@ -5,10 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { schema, TypeOf } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 import { legacyLoggingConfigSchema } from '@kbn/legacy-logging';
-import { AppenderConfigType, Appenders } from './appenders/appenders';
+import type { AppenderConfigType } from './appenders/appenders';
+import { Appenders } from './appenders/appenders';
 
 // We need this helper for the types to be correct
 // (otherwise it assumes an array of A|B instead of a tuple [A,B])

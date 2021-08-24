@@ -6,9 +6,6 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import ReactDOM from 'react-dom';
-
 import {
   EuiButton,
   EuiCallOut,
@@ -17,11 +14,13 @@ import {
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
+  EuiSpacer,
 } from '@elastic/eui';
-import { EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { OverlayStart } from 'kibana/public';
-import { I18nStart } from '../../i18n';
+import React from 'react';
+import ReactDOM from 'react-dom';
+import type { I18nStart } from '../../i18n/i18n_service';
+import type { OverlayStart } from '../../overlays/overlay_service';
 
 interface ErrorToastProps {
   title: string;

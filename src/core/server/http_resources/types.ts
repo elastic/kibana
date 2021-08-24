@@ -5,17 +5,15 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import type { RequestHandlerContext } from 'src/core/server';
+import type { RequestHandlerContext } from '..';
+import type { ResponseHeaders } from '../http/router/headers';
 import type {
-  IRouter,
-  RouteConfig,
-  IKibanaResponse,
-  ResponseHeaders,
   HttpResponseOptions,
+  IKibanaResponse,
   KibanaResponseFactory,
-  RequestHandler,
-} from '../http';
+} from '../http/router/response';
+import type { RouteConfig } from '../http/router/route';
+import type { IRouter, RequestHandler } from '../http/router/router';
 
 /**
  * Allows to configure HTTP response parameters

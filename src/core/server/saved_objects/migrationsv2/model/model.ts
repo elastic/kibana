@@ -6,23 +6,15 @@
  * Side Public License, v 1.
  */
 
+import { estypes } from '@elastic/elasticsearch';
 import * as Either from 'fp-ts/lib/Either';
 import * as Option from 'fp-ts/lib/Option';
-
-import { estypes } from '@elastic/elasticsearch';
-import { AliasAction, isLeftTypeof } from '../actions';
-import { AllActionStates, MigrationLog, State } from '../types';
-import type { ResponseType } from '../next';
 import { disableUnknownTypeMappingFields } from '../../migrations/core/migration_context';
-import {
-  createInitialProgress,
-  incrementProcessedProgress,
-  logProgress,
-  setProgressTotal,
-} from './progress';
-import { delayRetryState, resetRetryState } from './retry_state';
+import { isLeftTypeof } from '../actions';
+import type { AliasAction } from '../actions/update_aliases';
+import type { ResponseType } from '../next';
+import type { AllActionStates, MigrationLog, State } from '../types';
 import { extractTransformFailuresReason, extractUnknownDocFailureReason } from './extract_errors';
-import type { ExcludeRetryableEsError } from './types';
 import {
   getAliases,
   indexBelongsToLaterVersion,
@@ -31,6 +23,14 @@ import {
   throwBadControlState,
   throwBadResponse,
 } from './helpers';
+import {
+  createInitialProgress,
+  incrementProcessedProgress,
+  logProgress,
+  setProgressTotal,
+} from './progress';
+import { delayRetryState, resetRetryState } from './retry_state';
+import type { ExcludeRetryableEsError } from './types';
 
 export const model = (currentState: State, resW: ResponseType<AllActionStates>): State => {
   // The action response `resW` is weakly typed, the type includes all action

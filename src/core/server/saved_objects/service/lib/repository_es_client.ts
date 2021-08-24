@@ -5,11 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import type { TransportRequestOptions } from '@elastic/elasticsearch/lib/Transport';
-
-import { ElasticsearchClient } from '../../../elasticsearch/';
 import { retryCallCluster } from '../../../elasticsearch/client/retry_call_cluster';
+import type { ElasticsearchClient } from '../../../elasticsearch/client/types';
 import { decorateEsError } from './decorate_es_error';
 
 const methods = [

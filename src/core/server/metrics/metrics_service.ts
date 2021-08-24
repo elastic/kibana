@@ -5,17 +5,17 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import type { Logger } from '@kbn/logging';
 import { ReplaySubject } from 'rxjs';
 import { first } from 'rxjs/operators';
-import { CoreService } from '../../types';
-import { CoreContext } from '../core_context';
-import { Logger } from '../logging';
-import { InternalHttpServiceSetup } from '../http';
-import { InternalMetricsServiceSetup, InternalMetricsServiceStart, OpsMetrics } from './types';
+import type { CoreService } from '../../types/core_service';
+import type { CoreContext } from '../core_context';
+import type { InternalHttpServiceSetup } from '../http/types';
+import { getEcsOpsMetricsLog } from './logging/get_ops_metrics_log';
+import type { OpsConfigType } from './ops_config';
+import { opsConfig } from './ops_config';
 import { OpsMetricsCollector } from './ops_metrics_collector';
-import { opsConfig, OpsConfigType } from './ops_config';
-import { getEcsOpsMetricsLog } from './logging';
+import type { InternalMetricsServiceSetup, InternalMetricsServiceStart, OpsMetrics } from './types';
 
 interface MetricsServiceSetupDeps {
   http: InternalHttpServiceSetup;

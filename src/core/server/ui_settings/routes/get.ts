@@ -5,9 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { IRouter } from '../../http';
-import { SavedObjectsErrorHelpers } from '../../saved_objects';
+import type { IRouter } from '../../http/router/router';
+import { SavedObjectsErrorHelpers } from '../../saved_objects/service/lib/errors';
 
 export function registerGetRoute(router: IRouter) {
   router.get(

@@ -5,22 +5,21 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { join } from 'path';
 import {
+  deleteFiles,
+  getOrderedRolledFiles,
+  rollCurrentFile,
+  rollPreviousFilesInOrder,
+  shouldSkipRollout,
+} from './rolling_tasks';
+import {
   accessMock,
+  clearAllMocks,
   readdirMock,
   renameMock,
   unlinkMock,
-  clearAllMocks,
 } from './rolling_tasks.test.mocks';
-import {
-  shouldSkipRollout,
-  rollCurrentFile,
-  rollPreviousFilesInOrder,
-  deleteFiles,
-  getOrderedRolledFiles,
-} from './rolling_tasks';
 
 describe('NumericRollingStrategy tasks', () => {
   afterEach(() => {

@@ -5,13 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { generateFileHashMock, getFileCacheKeyMock } from './file_hash.test.mocks';
-
-import { resolve } from 'path';
 import { Stats } from 'fs';
+import { resolve } from 'path';
 import { getFileHash } from './file_hash';
-import { IFileHashCache } from './file_hash_cache';
+import { generateFileHashMock, getFileCacheKeyMock } from './file_hash.test.mocks';
+import type { IFileHashCache } from './file_hash_cache';
 
 const mockedCache = (): jest.Mocked<IFileHashCache> => ({
   del: jest.fn(),

@@ -5,14 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import {
-  AppLeaveActionFactory,
-  AppLeaveActionType,
+import type {
   AppLeaveAction,
+  AppLeaveActionFactory,
   AppLeaveConfirmAction,
   AppLeaveHandler,
 } from './types';
+import { AppLeaveActionType } from './types';
 
 const appLeaveActionFactory: AppLeaveActionFactory = {
   confirm(text: string, title?: string, callback?: () => void) {

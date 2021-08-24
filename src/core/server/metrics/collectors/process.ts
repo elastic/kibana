@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import v8 from 'v8';
 import { Bench } from '@hapi/hoek';
-import { OpsProcessMetrics, MetricsCollector } from './types';
+import v8 from 'v8';
+import type { MetricsCollector, OpsProcessMetrics } from './types';
 
 export class ProcessMetricsCollector implements MetricsCollector<OpsProcessMetrics> {
   public async collect(): Promise<OpsProcessMetrics> {

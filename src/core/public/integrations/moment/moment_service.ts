@@ -8,10 +8,9 @@
 
 import moment from 'moment-timezone';
 import { merge, Subscription } from 'rxjs';
-
 import { tap } from 'rxjs/operators';
-import { IUiSettingsClient } from '../../ui_settings';
-import { CoreService } from '../../../types';
+import type { CoreService } from '../../../types/core_service';
+import type { IUiSettingsClient } from '../../ui_settings/types';
 
 interface StartDeps {
   uiSettings: IUiSettingsClient;

@@ -5,12 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { validateRetries } from './validate_retries';
-import { SavedObjectsImportRetry } from '../types';
 import { SavedObjectsImportError } from '../errors';
-
+import type { SavedObjectsImportRetry } from '../types';
 import { getNonUniqueEntries } from './get_non_unique_entries';
+import { validateRetries } from './validate_retries';
+
 jest.mock('./get_non_unique_entries');
 const mockGetNonUniqueEntries = getNonUniqueEntries as jest.MockedFunction<
   typeof getNonUniqueEntries

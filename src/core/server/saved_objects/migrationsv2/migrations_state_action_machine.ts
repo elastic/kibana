@@ -5,15 +5,15 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { errors as EsErrors } from '@elastic/elasticsearch';
+import type { Logger, LogMeta } from '@kbn/logging';
 import * as Option from 'fp-ts/lib/Option';
-import { Logger, LogMeta } from '../../logging';
-import type { ElasticsearchClient } from '../../elasticsearch';
-import { getErrorMessage, getRequestDebugMeta } from '../../elasticsearch';
-import { Model, Next, stateActionMachine } from './state_action_machine';
+import { getErrorMessage, getRequestDebugMeta } from '../../elasticsearch/client/configure_client';
+import type { ElasticsearchClient } from '../../elasticsearch/client/types';
 import { cleanup } from './migrations_state_machine_cleanup';
-import { State } from './types';
+import type { Model, Next } from './state_action_machine';
+import { stateActionMachine } from './state_action_machine';
+import type { State } from './types';
 
 interface StateLogMeta extends LogMeta {
   kibana: {

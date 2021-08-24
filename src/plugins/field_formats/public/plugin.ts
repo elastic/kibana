@@ -5,12 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { CoreSetup, Plugin } from '../../../core/public';
-import { FieldFormatsRegistry, FORMATS_UI_SETTINGS } from '../common';
-import { baseFormattersPublic } from './lib';
-import { FormatFactory } from '../common/types';
+import type { CoreSetup } from '../../../core/public';
+import type { Plugin } from '../../../core/public/plugins/plugin';
+import { FORMATS_UI_SETTINGS } from '../common/constants/ui_settings';
+import { FieldFormatsRegistry } from '../common/field_formats_registry';
+import type { FormatFactory } from '../common/types';
 import './index.scss';
+import { baseFormattersPublic } from './lib/constants';
 
 export class FieldFormatsPlugin implements Plugin<FieldFormatsSetup, FieldFormatsStart> {
   private readonly fieldFormatsRegistry: FieldFormatsRegistry = new FieldFormatsRegistry();

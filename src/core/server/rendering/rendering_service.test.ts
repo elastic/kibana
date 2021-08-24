@@ -5,26 +5,23 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import {
-  registerBootstrapRouteMock,
-  bootstrapRendererMock,
-  getSettingValueMock,
-  getStylesheetPathsMock,
-} from './rendering_service.test.mocks';
-
 import { load } from 'cheerio';
-
 import { httpServerMock } from '../http/http_server.mocks';
 import { mockRouter } from '../http/router/router.mock';
 import { uiSettingsServiceMock } from '../ui_settings/ui_settings_service.mock';
+import { RenderingService } from './rendering_service';
 import {
-  mockRenderingServiceParams,
+  bootstrapRendererMock,
+  getSettingValueMock,
+  getStylesheetPathsMock,
+  registerBootstrapRouteMock,
+} from './rendering_service.test.mocks';
+import type { InternalRenderingServicePreboot, InternalRenderingServiceSetup } from './types';
+import {
   mockRenderingPrebootDeps,
+  mockRenderingServiceParams,
   mockRenderingSetupDeps,
 } from './__mocks__/params';
-import { InternalRenderingServicePreboot, InternalRenderingServiceSetup } from './types';
-import { RenderingService } from './rendering_service';
 
 const INJECTED_METADATA = {
   version: expect.any(String),

@@ -5,9 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { TransformErrorObjects } from '../../migrations/core';
-import { CheckForUnknownDocsFoundDoc } from '../actions';
+import type { TransformErrorObjects } from '../../migrations/core/migrate_raw_docs';
+import type { CheckForUnknownDocsFoundDoc } from '../actions/check_for_unknown_docs';
 
 /**
  * Constructs migration failure message strings from corrupt document ids and document transformation errors

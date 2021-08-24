@@ -5,17 +5,18 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import React, { FunctionComponent, useMemo } from 'react';
-import { Route, RouteComponentProps, Router, Switch } from 'react-router-dom';
-import { History } from 'history';
-import { Observable } from 'rxjs';
+import type { History } from 'history';
+import type { FunctionComponent } from 'react';
+import React, { useMemo } from 'react';
+import type { RouteComponentProps } from 'react-router-dom';
+import { Route, Router, Switch } from 'react-router-dom';
 import useObservable from 'react-use/lib/useObservable';
-
+import { Observable } from 'rxjs';
 import type { MountPoint } from '../../types';
-import { AppLeaveHandler, AppStatus, Mounter } from '../types';
-import { AppContainer } from './app_container';
 import { ScopedHistory } from '../scoped_history';
+import type { AppLeaveHandler, Mounter } from '../types';
+import { AppStatus } from '../types';
+import { AppContainer } from './app_container';
 
 interface Props {
   mounters: Map<string, Mounter>;

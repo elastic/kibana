@@ -5,24 +5,23 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import type { ConfigPath } from '@kbn/config';
+import { ConfigService, Env } from '@kbn/config';
+import { REPO_ROOT } from '@kbn/dev-utils';
+import { join } from 'path';
+import { BehaviorSubject, from } from 'rxjs';
+import { getEnvOptions, rawConfigServiceMock } from '../../config/mocks';
+import { environmentServiceMock } from '../../environment/environment_service.mock';
+import { loggingSystemMock } from '../../logging/logging_system.mock';
+import { coreMock } from '../../mocks';
+import { PluginWrapper } from '../plugin';
+import { config } from '../plugins_config';
+import { PluginsService } from '../plugins_service';
+import type { AsyncPlugin } from '../types';
+import { PluginType } from '../types';
+import { mockDiscover, mockPackage } from './plugins_service.test.mocks';
 
 // must be before mocks imports to avoid conflicting with `REPO_ROOT` accessor.
-import { REPO_ROOT } from '@kbn/dev-utils';
-import { mockPackage, mockDiscover } from './plugins_service.test.mocks';
-
-import { join } from 'path';
-
-import { PluginsService } from '../plugins_service';
-import { ConfigPath, ConfigService, Env } from '../../config';
-import { getEnvOptions, rawConfigServiceMock } from '../../config/mocks';
-import { BehaviorSubject, from } from 'rxjs';
-import { config } from '../plugins_config';
-import { loggingSystemMock } from '../../logging/logging_system.mock';
-import { environmentServiceMock } from '../../environment/environment_service.mock';
-import { coreMock } from '../../mocks';
-import { AsyncPlugin, PluginType } from '../types';
-import { PluginWrapper } from '../plugin';
-
 describe('PluginsService', () => {
   const logger = loggingSystemMock.create();
   const environmentPreboot = environmentServiceMock.createPrebootContract();

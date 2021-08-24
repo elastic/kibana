@@ -5,12 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { EuiGlobalToastList } from '@elastic/eui';
 import { shallow } from 'enzyme';
 import React from 'react';
 import * as Rx from 'rxjs';
-
 import { GlobalToastList } from './global_toast_list';
 
 function render(props: Partial<GlobalToastList['props']> = {}) {

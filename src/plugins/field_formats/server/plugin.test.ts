@@ -5,9 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { DateFormat } from './lib/converters/date_server';
 import { coreMock } from '../../../core/server/mocks';
+import { DateFormat } from './lib/converters/date_server';
 import { FieldFormatsPlugin } from './plugin';
 
 describe('FieldFormats registry server plugin', () => {

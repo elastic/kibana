@@ -8,45 +8,47 @@
 
 import * as Either from 'fp-ts/lib/Either';
 import * as Option from 'fp-ts/lib/Option';
+import type { TransformErrorObjects } from '../../migrations/core/migrate_raw_docs';
+import { TransformSavedObjectDocumentError } from '../../migrations/core/transform_saved_object_document_error';
+import type { SavedObjectsRawDoc } from '../../serialization/types';
+import type { RetryableEsClientError } from '../actions/catch_retryable_es_client_errors';
+import type { AliasAction } from '../actions/update_aliases';
+import type { ResponseType } from '../next';
 import type {
+  BaseState,
+  CalculateExcludeFiltersState,
+  CheckUnknownDocumentsState,
+  CloneTempToSource,
+  CreateNewTargetState,
+  CreateReindexTempState,
   FatalState,
-  State,
-  LegacySetWriteBlockState,
-  SetSourceWriteBlockState,
   LegacyCreateReindexTargetState,
+  LegacyDeleteState,
   LegacyReindexState,
   LegacyReindexWaitForTaskState,
-  LegacyDeleteState,
-  ReindexSourceToTempOpenPit,
-  ReindexSourceToTempRead,
-  ReindexSourceToTempClosePit,
-  ReindexSourceToTempIndex,
-  RefreshTarget,
-  UpdateTargetMappingsState,
-  UpdateTargetMappingsWaitForTaskState,
+  LegacySetWriteBlockState,
+  MarkVersionIndexReady,
+  MarkVersionIndexReadyConflict,
+  OutdatedDocumentsSearchClosePit,
   OutdatedDocumentsSearchOpenPit,
   OutdatedDocumentsSearchRead,
-  OutdatedDocumentsSearchClosePit,
   OutdatedDocumentsTransform,
-  MarkVersionIndexReady,
-  BaseState,
-  CreateReindexTempState,
-  MarkVersionIndexReadyConflict,
-  CreateNewTargetState,
-  CloneTempToSource,
-  SetTempWriteBlock,
-  WaitForYellowSourceState,
-  TransformedDocumentsBulkIndex,
+  RefreshTarget,
+  ReindexSourceToTempClosePit,
+  ReindexSourceToTempIndex,
   ReindexSourceToTempIndexBulk,
-  CheckUnknownDocumentsState,
-  CalculateExcludeFiltersState,
+  ReindexSourceToTempOpenPit,
+  ReindexSourceToTempRead,
+  SetSourceWriteBlockState,
+  SetTempWriteBlock,
+  State,
+  TransformedDocumentsBulkIndex,
+  UpdateTargetMappingsState,
+  UpdateTargetMappingsWaitForTaskState,
+  WaitForYellowSourceState,
 } from '../types';
-import { SavedObjectsRawDoc } from '../../serialization';
-import { TransformErrorObjects, TransformSavedObjectDocumentError } from '../../migrations/core';
-import { AliasAction, RetryableEsClientError } from '../actions';
-import { ResponseType } from '../next';
-import { createInitialProgress } from './progress';
 import { model } from './model';
+import { createInitialProgress } from './progress';
 
 describe('migrations v2 model', () => {
   const baseState: BaseState = {

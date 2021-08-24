@@ -5,40 +5,35 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { Observable, Subscription, combineLatest } from 'rxjs';
-import { first, map } from 'rxjs/operators';
+import { Env } from '@kbn/config';
+import type { Logger } from '@kbn/logging';
 import { pick } from '@kbn/std';
-
-import type { RequestHandlerContext } from 'src/core/server';
-import type { InternalExecutionContextSetup } from '../execution_context';
-import { CoreService } from '../../types';
-import { Logger } from '../logging';
-import { ContextSetup, InternalContextPreboot } from '../context';
-import { Env } from '../config';
-import { CoreContext } from '../core_context';
-import { PluginOpaqueId } from '../plugins';
-import { CspConfigType, config as cspConfig } from '../csp';
-
-import { Router } from './router';
-import { HttpConfig, HttpConfigType, config as httpConfig } from './http_config';
-import { HttpServer } from './http_server';
+import { combineLatest, Observable, Subscription } from 'rxjs';
+import { first, map } from 'rxjs/operators';
+import type { RequestHandlerContext } from '..';
+import type { CoreService } from '../../types/core_service';
+import type { ContextSetup, InternalContextPreboot } from '../context/context_service';
+import type { CoreContext } from '../core_context';
+import type { CspConfigType } from '../csp/config';
+import { config as cspConfig } from '../csp/config';
+import type { InternalExecutionContextSetup } from '../execution_context/execution_context_service';
+import type { ExternalUrlConfigType } from '../external_url/config';
+import { config as externalUrlConfig } from '../external_url/config';
+import { ExternalUrlConfig } from '../external_url/external_url_config';
+import type { PluginOpaqueId } from '../plugins/types';
 import { HttpsRedirectServer } from './https_redirect_server';
-
-import {
-  RequestHandlerContextContainer,
-  RequestHandlerContextProvider,
+import type { HttpConfigType } from './http_config';
+import { config as httpConfig, HttpConfig } from './http_config';
+import { HttpServer } from './http_server';
+import { registerCoreHandlers } from './lifecycle_handlers';
+import { Router } from './router/router';
+import type {
   InternalHttpServicePreboot,
   InternalHttpServiceSetup,
   InternalHttpServiceStart,
+  RequestHandlerContextContainer,
+  RequestHandlerContextProvider,
 } from './types';
-
-import { registerCoreHandlers } from './lifecycle_handlers';
-import {
-  ExternalUrlConfigType,
-  config as externalUrlConfig,
-  ExternalUrlConfig,
-} from '../external_url';
 
 interface PrebootDeps {
   context: InternalContextPreboot;

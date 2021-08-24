@@ -5,8 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { PluginName } from '..';
+import type { PluginName } from '../plugins/types';
 
 /** @internal */
 export interface InternalPrebootServicePreboot {

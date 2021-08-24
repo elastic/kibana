@@ -6,15 +6,13 @@
  * Side Public License, v 1.
  */
 
+import { estypes } from '@elastic/elasticsearch';
 import * as Either from 'fp-ts/lib/Either';
 import * as TaskEither from 'fp-ts/lib/TaskEither';
-import type { estypes } from '@elastic/elasticsearch';
-import { ElasticsearchClient } from '../../../elasticsearch';
-import type { SavedObjectsRawDoc } from '../../serialization';
-import {
-  catchRetryableEsClientErrors,
-  RetryableEsClientError,
-} from './catch_retryable_es_client_errors';
+import type { ElasticsearchClient } from '../../../elasticsearch/client/types';
+import type { SavedObjectsRawDoc } from '../../serialization/types';
+import type { RetryableEsClientError } from './catch_retryable_es_client_errors';
+import { catchRetryableEsClientErrors } from './catch_retryable_es_client_errors';
 import { pitKeepAlive } from './open_pit';
 
 /** @internal */

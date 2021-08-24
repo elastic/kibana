@@ -5,25 +5,21 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { BehaviorSubject } from 'rxjs';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-
-import {
-  elasticsearchClientMock,
-  ClusterClientMock,
-  CustomClusterClientMock,
-} from './client/mocks';
-import { ElasticsearchClientConfig } from './client';
+import { BehaviorSubject } from 'rxjs';
+import type { ServiceStatus } from '../status/types';
+import { ServiceStatusLevels } from '../status/types';
+import type { ElasticsearchClientConfig } from './client/client_config';
+import type { ClusterClientMock, CustomClusterClientMock } from './client/mocks';
+import { elasticsearchClientMock } from './client/mocks';
 import { ElasticsearchConfig } from './elasticsearch_config';
 import { ElasticsearchService } from './elasticsearch_service';
-import {
-  InternalElasticsearchServiceSetup,
-  ElasticsearchStatusMeta,
+import type {
   ElasticsearchServicePreboot,
+  ElasticsearchStatusMeta,
+  InternalElasticsearchServiceSetup,
 } from './types';
-import { NodesVersionCompatibility } from './version_check/ensure_es_version';
-import { ServiceStatus, ServiceStatusLevels } from '../status';
+import type { NodesVersionCompatibility } from './version_check/ensure_es_version';
 
 type MockedElasticSearchServicePreboot = jest.Mocked<ElasticsearchServicePreboot>;
 

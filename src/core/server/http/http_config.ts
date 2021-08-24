@@ -5,19 +5,22 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { ByteSizeValue, schema, TypeOf } from '@kbn/config-schema';
-import { IHttpConfig, SslConfig, sslSchema } from '@kbn/server-http-tools';
+import type { TypeOf } from '@kbn/config-schema';
+import { ByteSizeValue, schema } from '@kbn/config-schema';
+import type { IHttpConfig } from '@kbn/server-http-tools';
+import { SslConfig, sslSchema } from '@kbn/server-http-tools';
+import type { Duration } from 'moment';
 import { hostname } from 'os';
 import url from 'url';
-
-import type { Duration } from 'moment';
-import { ServiceConfigDescriptor } from '../internal_types';
-import { CspConfigType, CspConfig, ICspConfig } from '../csp';
-import { ExternalUrlConfig, IExternalUrlConfig } from '../external_url';
+import type { CspConfigType } from '../csp/config';
+import type { ICspConfig } from '../csp/csp_config';
+import { CspConfig } from '../csp/csp_config';
+import type { IExternalUrlConfig } from '../external_url/external_url_config';
+import { ExternalUrlConfig } from '../external_url/external_url_config';
+import type { ServiceConfigDescriptor } from '../internal_types';
 import {
-  securityResponseHeadersSchema,
   parseRawSecurityResponseHeadersConfig,
+  securityResponseHeadersSchema,
 } from './security_response_headers_config';
 
 const validBasePathRegex = /^\/.*[^\/]$/;

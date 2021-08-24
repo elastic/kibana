@@ -5,11 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { momentMock } from './moment_service.test.mocks';
-import { MomentService } from './moment_service';
-import { uiSettingsServiceMock } from '../../ui_settings/ui_settings_service.mock';
 import { BehaviorSubject } from 'rxjs';
+import { uiSettingsServiceMock } from '../../ui_settings/ui_settings_service.mock';
+import { MomentService } from './moment_service';
+import { momentMock } from './moment_service.test.mocks';
 
 describe('MomentService', () => {
   let service: MomentService;

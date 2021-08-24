@@ -5,45 +5,44 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import type { UnwrapPromise } from '@kbn/utility-types';
+import type { ElasticsearchClient } from '../../elasticsearch/client/types';
+import * as Actions from './actions';
 import type {
   AllActionStates,
-  ReindexSourceToTempOpenPit,
-  ReindexSourceToTempRead,
-  ReindexSourceToTempClosePit,
-  ReindexSourceToTempIndex,
-  MarkVersionIndexReady,
+  CalculateExcludeFiltersState,
+  CheckUnknownDocumentsState,
+  CloneTempToSource,
+  CreateNewTargetState,
+  CreateReindexTempState,
   InitState,
   LegacyCreateReindexTargetState,
   LegacyDeleteState,
   LegacyReindexState,
   LegacyReindexWaitForTaskState,
   LegacySetWriteBlockState,
-  OutdatedDocumentsTransform,
-  SetSourceWriteBlockState,
-  State,
-  UpdateTargetMappingsState,
-  UpdateTargetMappingsWaitForTaskState,
-  CreateReindexTempState,
+  MarkVersionIndexReady,
   MarkVersionIndexReadyConflict,
-  CreateNewTargetState,
-  CloneTempToSource,
-  SetTempWriteBlock,
-  WaitForYellowSourceState,
-  TransformRawDocs,
-  TransformedDocumentsBulkIndex,
-  ReindexSourceToTempIndexBulk,
+  OutdatedDocumentsRefresh,
+  OutdatedDocumentsSearchClosePit,
   OutdatedDocumentsSearchOpenPit,
   OutdatedDocumentsSearchRead,
-  OutdatedDocumentsSearchClosePit,
+  OutdatedDocumentsTransform,
   RefreshTarget,
-  OutdatedDocumentsRefresh,
-  CheckUnknownDocumentsState,
-  CalculateExcludeFiltersState,
+  ReindexSourceToTempClosePit,
+  ReindexSourceToTempIndex,
+  ReindexSourceToTempIndexBulk,
+  ReindexSourceToTempOpenPit,
+  ReindexSourceToTempRead,
+  SetSourceWriteBlockState,
+  SetTempWriteBlock,
+  State,
+  TransformedDocumentsBulkIndex,
+  TransformRawDocs,
+  UpdateTargetMappingsState,
+  UpdateTargetMappingsWaitForTaskState,
+  WaitForYellowSourceState,
 } from './types';
-import * as Actions from './actions';
-import { ElasticsearchClient } from '../../elasticsearch';
 
 type ActionMap = ReturnType<typeof nextActionMap>;
 

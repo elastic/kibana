@@ -5,10 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { schema } from '@kbn/config-schema';
-import { IRouter } from '../../http';
-import { CoreUsageDataSetup } from '../../core_usage_data';
+import type { CoreUsageDataSetup } from '../../core_usage_data/types';
+import type { IRouter } from '../../http/router/router';
 import type { SavedObjectsUpdateOptions } from '../service/saved_objects_client';
 import { catchAndReturnBoomErrors } from './utils';
 

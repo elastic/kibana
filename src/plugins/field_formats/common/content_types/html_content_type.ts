@@ -5,10 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { escape, isFunction } from 'lodash';
-import { IFieldFormat, HtmlContextTypeConvert, FieldFormatsContentType } from '../types';
-import { asPrettyString, getHighlightHtml } from '../utils';
+import type { FieldFormatsContentType, HtmlContextTypeConvert, IFieldFormat } from '../types';
+import { asPrettyString } from '../utils/as_pretty_string';
+import { getHighlightHtml } from '../utils/highlight/highlight_html';
 
 export const HTML_CONTEXT_TYPE: FieldFormatsContentType = 'html';
 

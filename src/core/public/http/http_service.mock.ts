@@ -5,13 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { HttpService } from './http_service';
-import { HttpSetup } from './types';
 import { BehaviorSubject } from 'rxjs';
 import { BasePath } from './base_path';
 import { basePathMock } from './base_path.mock';
+import { HttpService } from './http_service';
+import type { HttpSetup } from './types';
 
 export type HttpSetupMock = jest.Mocked<HttpSetup> & {
   basePath: BasePath;

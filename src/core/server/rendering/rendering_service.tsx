@@ -6,26 +6,26 @@
  * Side Public License, v 1.
  */
 
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { take } from 'rxjs/operators';
-import { i18n } from '@kbn/i18n';
-
-import { UiPlugins } from '../plugins';
-import { CoreContext } from '../core_context';
-import { Template } from './views';
-import {
-  IRenderOptions,
-  RenderingPrebootDeps,
-  RenderingSetupDeps,
+import type { CoreContext } from '../core_context';
+import { KibanaRequest } from '../http/router/request';
+import type { UiPlugins } from '../plugins/plugins_service';
+import type { IUiSettingsClient } from '../ui_settings/types';
+import { bootstrapRendererFactory } from './bootstrap/bootstrap_renderer';
+import { registerBootstrapRoute } from './bootstrap/register_bootstrap_route';
+import { getSettingValue, getStylesheetPaths } from './render_utils';
+import type {
   InternalRenderingServicePreboot,
   InternalRenderingServiceSetup,
+  IRenderOptions,
   RenderingMetadata,
+  RenderingPrebootDeps,
+  RenderingSetupDeps,
 } from './types';
-import { registerBootstrapRoute, bootstrapRendererFactory } from './bootstrap';
-import { getSettingValue, getStylesheetPaths } from './render_utils';
-import { KibanaRequest } from '../http';
-import { IUiSettingsClient } from '../ui_settings';
+import { Template } from './views/template';
 
 type RenderOptions = (RenderingPrebootDeps & { status?: never }) | RenderingSetupDeps;
 

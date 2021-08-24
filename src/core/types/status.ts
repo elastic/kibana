@@ -5,13 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import type { OpsMetrics } from '../server/metrics/types';
 import type {
   CoreStatus as CoreStatusFromServer,
   ServiceStatus as ServiceStatusFromServer,
   ServiceStatusLevel as ServiceStatusLevelFromServer,
-  OpsMetrics,
-} from '../server';
+} from '../server/status/types';
 
 /**
  * We need this type to convert the object `ServiceStatusLevel` to a union of the possible strings.

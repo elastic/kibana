@@ -5,8 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { coreMock } from '../../../../src/core/public/mocks';
+import { coreMock } from '../../../core/public/mocks';
 import { DateFormat } from './lib/converters/date';
 import { FieldFormatsPlugin } from './plugin';
 

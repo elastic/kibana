@@ -5,8 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { SavedObjectsType } from '../saved_objects';
+import type { SavedObjectsType } from '../saved_objects/types';
 import { CORE_USAGE_STATS_TYPE } from './constants';
 import { migrateTo7141 } from './migrations';
 

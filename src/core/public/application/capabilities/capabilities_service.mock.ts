@@ -5,10 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { deepFreeze } from '@kbn/std';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { CapabilitiesService, CapabilitiesStart } from './capabilities_service';
+import type { CapabilitiesStart } from './capabilities_service';
+import { CapabilitiesService } from './capabilities_service';
 
 const createStartContractMock = (): jest.Mocked<CapabilitiesStart> => ({
   capabilities: deepFreeze({

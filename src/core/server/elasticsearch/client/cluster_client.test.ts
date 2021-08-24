@@ -5,15 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { configureClientMock } from './cluster_client.test.mocks';
-import { loggingSystemMock } from '../../logging/logging_system.mock';
+import type { GetAuthHeaders } from '../../http/auth_headers_storage';
 import { httpServerMock } from '../../http/http_server.mocks';
-import { GetAuthHeaders } from '../../http';
-import { elasticsearchClientMock } from './mocks';
-import { ClusterClient } from './cluster_client';
-import { ElasticsearchClientConfig } from './client_config';
+import { loggingSystemMock } from '../../logging/logging_system.mock';
 import { DEFAULT_HEADERS } from '../default_headers';
+import type { ElasticsearchClientConfig } from './client_config';
+import { ClusterClient } from './cluster_client';
+import { configureClientMock } from './cluster_client.test.mocks';
+import { elasticsearchClientMock } from './mocks';
 
 const createConfig = (
   parts: Partial<ElasticsearchClientConfig> = {}

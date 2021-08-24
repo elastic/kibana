@@ -5,10 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { SavedObject } from '../../server';
+import type { SavedObject } from '../../types/saved_objects';
+import type { SavedObjectsClientContract } from './saved_objects_client';
 import { SimpleSavedObject } from './simple_saved_object';
-import { SavedObjectsClientContract } from './saved_objects_client';
 
 describe('SimpleSavedObject', () => {
   let client: SavedObjectsClientContract;

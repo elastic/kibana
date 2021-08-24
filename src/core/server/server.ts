@@ -6,59 +6,64 @@
  * Side Public License, v 1.
  */
 
-import apm from 'elastic-apm-node';
+import type { RawConfigurationProvider } from '@kbn/config';
+import { ConfigService, Env } from '@kbn/config';
+import type { Logger, LoggerFactory } from '@kbn/logging';
 import { config as pathConfig } from '@kbn/utils';
-import {
-  ConfigService,
-  Env,
-  RawConfigurationProvider,
-  coreDeprecationProvider,
-  ensureValidConfiguration,
-} from './config';
-import { CoreApp } from './core_app';
-import { I18nService } from './i18n';
-import { ElasticsearchService } from './elasticsearch';
-import { HttpService } from './http';
-import { HttpResourcesService } from './http_resources';
-import { RenderingService } from './rendering';
-import { LegacyService } from './legacy';
-import { Logger, LoggerFactory, LoggingService, ILoggingSystem } from './logging';
-import { UiSettingsService } from './ui_settings';
-import { PluginsService, config as pluginsConfig } from './plugins';
-import { SavedObjectsService, SavedObjectsServiceStart } from './saved_objects';
-import { MetricsService, opsConfig } from './metrics';
-import { CapabilitiesService } from './capabilities';
-import { EnvironmentService, config as pidConfig } from './environment';
-// do not try to shorten the import to `./status`, it will break server test mocking
-import { StatusService } from './status/status_service';
-import { ExecutionContextService } from './execution_context';
-
-import { config as cspConfig } from './csp';
-import { config as elasticsearchConfig } from './elasticsearch';
-import { config as httpConfig } from './http';
-import { config as loggingConfig } from './logging';
-import { config as kibanaConfig } from './kibana_config';
-import { savedObjectsConfig, savedObjectsMigrationConfig } from './saved_objects';
-import { config as uiSettingsConfig } from './ui_settings';
-import { config as statusConfig } from './status';
-import { config as i18nConfig } from './i18n';
-import { ContextService } from './context';
-import { RequestHandlerContext } from '.';
-import {
+import apm from 'elastic-apm-node';
+import type { RequestHandlerContext } from '.';
+import { CapabilitiesService } from './capabilities/capabilities_service';
+import { coreDeprecationProvider } from './config/deprecation/core_deprecations';
+import { ensureValidConfiguration } from './config/ensure_valid_configuration';
+import { ContextService } from './context/context_service';
+import { CoreApp } from './core_app/core_app';
+import { CoreRouteHandlerContext } from './core_route_handler_context';
+import { CoreUsageDataService } from './core_usage_data/core_usage_data_service';
+import { config as cspConfig } from './csp/config';
+import { DeprecationsService } from './deprecations/deprecations_service';
+import { config as elasticsearchConfig } from './elasticsearch/elasticsearch_config';
+import { ElasticsearchService } from './elasticsearch/elasticsearch_service';
+import { EnvironmentService } from './environment/environment_service';
+import { config as pidConfig } from './environment/pid_config';
+import { config as executionContextConfig } from './execution_context/execution_context_config';
+import { ExecutionContextService } from './execution_context/execution_context_service';
+import { config as externalUrlConfig } from './external_url/config';
+import { config as httpConfig } from './http/http_config';
+import { HttpService } from './http/http_service';
+import { HttpResourcesService } from './http_resources/http_resources_service';
+import { config as i18nConfig } from './i18n/i18n_config';
+import { I18nService } from './i18n/i18n_service';
+import type {
   InternalCorePreboot,
   InternalCoreSetup,
   InternalCoreStart,
   ServiceConfigDescriptor,
 } from './internal_types';
-import { CoreUsageDataService } from './core_usage_data';
-import { DeprecationsService } from './deprecations';
-import { CoreRouteHandlerContext } from './core_route_handler_context';
-import { config as externalUrlConfig } from './external_url';
-import { config as executionContextConfig } from './execution_context';
+import { config as kibanaConfig } from './kibana_config';
+import { LegacyService } from './legacy/legacy_service';
+import { config as loggingConfig } from './logging/logging_config';
+import { LoggingService } from './logging/logging_service';
+import type { ILoggingSystem } from './logging/logging_system';
+import { MetricsService } from './metrics/metrics_service';
+import { opsConfig } from './metrics/ops_config';
+import { config as pluginsConfig } from './plugins/plugins_config';
+import type { DiscoveredPlugins } from './plugins/plugins_service';
+import { PluginsService } from './plugins/plugins_service';
+import { PrebootService } from './preboot/preboot_service';
 import { PrebootCoreRouteHandlerContext } from './preboot_core_route_handler_context';
-import { PrebootService } from './preboot';
-import { DiscoveredPlugins } from './plugins';
+import { RenderingService } from './rendering/rendering_service';
+import {
+  savedObjectsConfig,
+  savedObjectsMigrationConfig,
+} from './saved_objects/saved_objects_config';
+import type { SavedObjectsServiceStart } from './saved_objects/saved_objects_service';
+import { SavedObjectsService } from './saved_objects/saved_objects_service';
+import { config as statusConfig } from './status/status_config';
+import { StatusService } from './status/status_service';
+import { config as uiSettingsConfig } from './ui_settings/ui_settings_config';
+import { UiSettingsService } from './ui_settings/ui_settings_service';
 
+// do not try to shorten the import to `./status`, it will break server test mocking
 const coreId = Symbol('core');
 const rootConfigPath = '';
 

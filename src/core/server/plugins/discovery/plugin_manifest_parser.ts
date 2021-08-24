@@ -5,16 +5,17 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import type { PackageInfo } from '@kbn/config';
+import { isConfigPath } from '@kbn/config';
 import { readFile, stat } from 'fs';
+import { snakeCase } from 'lodash';
 import { resolve } from 'path';
 import { coerce } from 'semver';
 import { promisify } from 'util';
-import { snakeCase } from 'lodash';
-import { isConfigPath, PackageInfo } from '../../config';
-import { PluginManifest, PluginType } from '../types';
-import { PluginDiscoveryError } from './plugin_discovery_error';
+import type { PluginManifest } from '../types';
+import { PluginType } from '../types';
 import { isCamelCase } from './is_camel_case';
+import { PluginDiscoveryError } from './plugin_discovery_error';
 
 const fsReadFileAsync = promisify(readFile);
 const fsStatAsync = promisify(stat);

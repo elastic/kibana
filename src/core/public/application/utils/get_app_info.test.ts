@@ -5,9 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { of } from 'rxjs';
-import { App, AppDeepLink, AppNavLinkStatus, AppStatus } from '../types';
+import type { App, AppDeepLink } from '../types';
+import { AppNavLinkStatus, AppStatus } from '../types';
 import { getAppInfo } from './get_app_info';
 
 describe('getAppInfo', () => {

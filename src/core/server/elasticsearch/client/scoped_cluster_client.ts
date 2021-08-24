@@ -5,8 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { ElasticsearchClient } from './types';
+import type { ElasticsearchClient } from './types';
 
 /**
  * Serves the same purpose as the normal {@link IClusterClient | cluster client} but exposes

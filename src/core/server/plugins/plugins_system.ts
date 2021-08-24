@@ -5,22 +5,22 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { withTimeout, isPromise } from '@kbn/std';
-import { CoreContext } from '../core_context';
-import { Logger } from '../logging';
+import type { Logger } from '@kbn/logging';
+import { isPromise, withTimeout } from '@kbn/std';
+import type { CoreContext } from '../core_context';
 import { PluginWrapper } from './plugin';
-import { DiscoveredPlugin, PluginDependencies, PluginName, PluginType } from './types';
+import type {
+  PluginsServicePrebootSetupDeps,
+  PluginsServiceSetupDeps,
+  PluginsServiceStartDeps,
+} from './plugins_service';
 import {
   createPluginPrebootSetupContext,
   createPluginSetupContext,
   createPluginStartContext,
 } from './plugin_context';
-import {
-  PluginsServicePrebootSetupDeps,
-  PluginsServiceSetupDeps,
-  PluginsServiceStartDeps,
-} from './plugins_service';
+import type { DiscoveredPlugin, PluginDependencies, PluginName } from './types';
+import { PluginType } from './types';
 
 const Sec = 1000;
 

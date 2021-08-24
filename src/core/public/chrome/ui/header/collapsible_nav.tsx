@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import './collapsible_nav.scss';
+import type { EuiCollapsibleNavProps } from '@elastic/eui';
 import {
   EuiCollapsibleNav,
   EuiCollapsibleNavGroup,
@@ -15,19 +15,20 @@ import {
   EuiListGroup,
   EuiListGroupItem,
   EuiShowFor,
-  EuiCollapsibleNavProps,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { groupBy, sortBy } from 'lodash';
 import React, { Fragment, useRef } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import * as Rx from 'rxjs';
-import { ChromeNavLink, ChromeRecentlyAccessedHistoryItem } from '../..';
-import { AppCategory } from '../../../../types';
-import { InternalApplicationStart } from '../../../application/types';
-import { HttpStart } from '../../../http';
-import { OnIsLockedUpdate } from './';
+import type { AppCategory } from '../../../../types/app_category';
+import type { InternalApplicationStart } from '../../../application/types';
+import type { HttpStart } from '../../../http/types';
+import type { ChromeNavLink } from '../../nav_links/nav_link';
+import type { ChromeRecentlyAccessedHistoryItem } from '../../recently_accessed/recently_accessed_service';
+import './collapsible_nav.scss';
 import { createEuiListItem, createRecentNavLink, isModifiedOrPrevented } from './nav_link';
+import type { OnIsLockedUpdate } from './types';
 
 function getAllCategories(allCategorizedLinks: Record<string, ChromeNavLink[]>) {
   const allCategories = {} as Record<string, AppCategory | undefined>;

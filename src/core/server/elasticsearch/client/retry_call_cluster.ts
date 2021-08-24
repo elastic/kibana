@@ -5,10 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { defer, throwError, iif, timer } from 'rxjs';
+import type { Logger } from '@kbn/logging';
+import { defer, iif, throwError, timer } from 'rxjs';
 import { concatMap, retryWhen } from 'rxjs/operators';
-import { Logger } from '../../logging';
 
 const retryResponseStatuses = [
   503, // ServiceUnavailable

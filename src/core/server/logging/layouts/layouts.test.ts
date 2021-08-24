@@ -5,7 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { JsonLayout } from './json_layout';
 import { Layouts } from './layouts';
 import { PatternLayout } from './pattern_layout';

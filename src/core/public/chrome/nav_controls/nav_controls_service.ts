@@ -5,11 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { sortBy } from 'lodash';
-import { BehaviorSubject, ReplaySubject, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, ReplaySubject } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
-import { MountPoint } from '../../types';
+import type { MountPoint } from '../../types';
 
 /** @public */
 export interface ChromeNavControl {

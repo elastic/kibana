@@ -7,8 +7,8 @@
  */
 
 import numeral from '@elastic/numeral';
-import { LogMeta } from '@kbn/logging';
-import { OpsMetrics } from '..';
+import type { LogMeta } from '@kbn/logging';
+import type { OpsMetrics } from '../types';
 
 /**
  * Converts ops metrics into ECS-compliant `LogMeta` for logging

@@ -5,10 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { assertNever } from '@kbn/std';
-import { RewritePolicy } from './policy';
-import { MetaRewritePolicy, MetaRewritePolicyConfig, metaRewritePolicyConfigSchema } from './meta';
+import type { MetaRewritePolicyConfig } from './meta/meta_policy';
+import { MetaRewritePolicy, metaRewritePolicyConfigSchema } from './meta/meta_policy';
+import type { RewritePolicy } from './policy';
 
 export type { RewritePolicy };
 

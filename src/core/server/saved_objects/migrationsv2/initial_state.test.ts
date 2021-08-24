@@ -7,7 +7,7 @@
  */
 
 import * as Option from 'fp-ts/Option';
-import { SavedObjectsMigrationConfigType } from '../saved_objects_config';
+import type { SavedObjectsMigrationConfigType } from '../saved_objects_config';
 import { SavedObjectTypeRegistry } from '../saved_objects_type_registry';
 import { createInitialState } from './initial_state';
 

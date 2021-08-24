@@ -5,13 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { migrationRetryCallClusterMock } from './migration_es_client.test.mock';
-
-import { createMigrationEsClient, MigrationEsClient } from './migration_es_client';
+import { loggerMock } from '@kbn/logging/mocks';
 import { elasticsearchClientMock } from '../../../elasticsearch/client/mocks';
-import { loggerMock } from '../../../logging/logger.mock';
 import { SavedObjectsErrorHelpers } from '../../service/lib/errors';
+import type { MigrationEsClient } from './migration_es_client';
+import { createMigrationEsClient } from './migration_es_client';
+import { migrationRetryCallClusterMock } from './migration_es_client.test.mock';
 
 describe('MigrationEsClient', () => {
   let client: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;

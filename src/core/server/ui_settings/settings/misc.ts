@@ -5,10 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
-import { UiSettingsParams } from '../types';
+import { i18n } from '@kbn/i18n';
+import type { UiSettingsParams } from '../../../types/ui_settings';
 
 export const getMiscUiSettings = (): Record<string, UiSettingsParams> => {
   return {

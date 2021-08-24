@@ -5,17 +5,16 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { registerBundleRoutesMock } from './core_app.test.mocks';
-
+import type { RequestHandlerContext } from '..';
 import { mockCoreContext } from '../core_context.mock';
-import { coreMock, httpServerMock } from '../mocks';
-import { httpResourcesMock } from '../http_resources/http_resources_service.mock';
-import type { UiPlugins } from '../plugins';
-import { PluginType } from '../plugins';
-import { CoreApp } from './core_app';
+import { httpServerMock } from '../http/http_server.mocks';
 import { mockRouter } from '../http/router/router.mock';
-import { RequestHandlerContext } from 'kibana/server';
+import { httpResourcesMock } from '../http_resources/http_resources_service.mock';
+import { coreMock } from '../mocks';
+import type { UiPlugins } from '../plugins/plugins_service';
+import { PluginType } from '../plugins/types';
+import { CoreApp } from './core_app';
+import { registerBundleRoutesMock } from './core_app.test.mocks';
 
 const emptyPlugins = (): UiPlugins => ({
   internal: new Map(),

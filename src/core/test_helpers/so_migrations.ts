@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import type { SavedObjectsType } from '../server/saved_objects/types';
+import type { SavedObject } from '../types/saved_objects';
 import * as kbnTestServer from './kbn_server';
-import { SavedObject } from '../types';
-import { SavedObjectsType } from '../server';
 
 type ExportOptions = { type: string } | { objects: Array<{ id: string; type: string }> };
 

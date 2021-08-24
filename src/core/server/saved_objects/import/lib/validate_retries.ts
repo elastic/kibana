@@ -5,10 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { SavedObjectsImportRetry } from '../types';
-import { getNonUniqueEntries } from './get_non_unique_entries';
 import { SavedObjectsImportError } from '../errors';
+import type { SavedObjectsImportRetry } from '../types';
+import { getNonUniqueEntries } from './get_non_unique_entries';
 
 export const validateRetries = (retries: SavedObjectsImportRetry[]) => {
   const nonUniqueRetryObjects = getNonUniqueEntries(retries);

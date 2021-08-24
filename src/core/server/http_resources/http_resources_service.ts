@@ -5,32 +5,28 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { RequestHandlerContext } from 'src/core/server';
-
-import { CoreContext } from '../core_context';
-import {
-  IRouter,
-  RouteConfig,
-  InternalHttpServiceSetup,
-  KibanaRequest,
-  KibanaResponseFactory,
-  InternalHttpServicePreboot,
-} from '../http';
-
-import { Logger } from '../logging';
-import { InternalRenderingServicePreboot, InternalRenderingServiceSetup } from '../rendering';
-import { CoreService } from '../../types';
-
-import {
-  InternalHttpResourcesSetup,
+import type { Logger } from '@kbn/logging';
+import type { RequestHandlerContext } from '..';
+import type { CoreService } from '../../types/core_service';
+import type { CoreContext } from '../core_context';
+import { KibanaRequest } from '../http/router/request';
+import type { KibanaResponseFactory } from '../http/router/response';
+import type { RouteConfig } from '../http/router/route';
+import type { IRouter } from '../http/router/router';
+import type { InternalHttpServicePreboot, InternalHttpServiceSetup } from '../http/types';
+import type {
+  InternalRenderingServicePreboot,
+  InternalRenderingServiceSetup,
+} from '../rendering/types';
+import { getApmConfig } from './get_apm_config';
+import type {
   HttpResources,
-  HttpResourcesResponseOptions,
   HttpResourcesRenderOptions,
   HttpResourcesRequestHandler,
+  HttpResourcesResponseOptions,
   HttpResourcesServiceToolkit,
+  InternalHttpResourcesSetup,
 } from './types';
-import { getApmConfig } from './get_apm_config';
 
 export interface PrebootDeps {
   http: InternalHttpServicePreboot;

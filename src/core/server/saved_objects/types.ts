@@ -5,43 +5,39 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import type { estypes } from '@elastic/elasticsearch';
+import { estypes } from '@elastic/elasticsearch';
+import type { SavedObject } from '../../types/saved_objects';
+import type { ElasticsearchClient } from '../elasticsearch/client/types';
+import type { SavedObjectsExportTransform } from './export/types';
+import type { SavedObjectsImportHook } from './import/types';
+import type { SavedObjectsTypeMappingDefinition } from './mappings/types';
+import type { SavedObjectMigrationMap } from './migrations/types';
 import { SavedObjectsClient } from './service/saved_objects_client';
-import { SavedObjectsTypeMappingDefinition } from './mappings';
-import { SavedObjectMigrationMap } from './migrations';
-import { SavedObjectsExportTransform } from './export';
-import { SavedObjectsImportHook } from './import/types';
 
 export type {
-  SavedObjectsImportResponse,
-  SavedObjectsImportSuccess,
-  SavedObjectsImportConflictError,
-  SavedObjectsImportAmbiguousConflictError,
-  SavedObjectsImportUnsupportedTypeError,
-  SavedObjectsImportMissingReferencesError,
-  SavedObjectsImportUnknownError,
-  SavedObjectsImportFailure,
-  SavedObjectsImportRetry,
-  SavedObjectsImportActionRequiredWarning,
-  SavedObjectsImportSimpleWarning,
-  SavedObjectsImportWarning,
-} from './import/types';
-
-import { SavedObject } from '../../types';
-import { ElasticsearchClient } from '../elasticsearch';
-
-type KueryNode = any;
-
-export type {
-  SavedObjectAttributes,
-  SavedObjectAttribute,
-  SavedObjectAttributeSingle,
   SavedObject,
+  SavedObjectAttribute,
+  SavedObjectAttributes,
+  SavedObjectAttributeSingle,
   SavedObjectError,
   SavedObjectReference,
   SavedObjectsMigrationVersion,
 } from '../../types';
+export type {
+  SavedObjectsImportActionRequiredWarning,
+  SavedObjectsImportAmbiguousConflictError,
+  SavedObjectsImportConflictError,
+  SavedObjectsImportFailure,
+  SavedObjectsImportMissingReferencesError,
+  SavedObjectsImportResponse,
+  SavedObjectsImportRetry,
+  SavedObjectsImportSimpleWarning,
+  SavedObjectsImportSuccess,
+  SavedObjectsImportUnknownError,
+  SavedObjectsImportUnsupportedTypeError,
+  SavedObjectsImportWarning,
+} from './import/types';
+type KueryNode = any;
 
 /**
  * Meta information about the SavedObjectService's status. Available to plugins via {@link CoreSetup.status}.

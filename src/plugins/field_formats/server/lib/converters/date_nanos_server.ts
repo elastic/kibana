@@ -5,7 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { memoize } from 'lodash';
 import moment from 'moment-timezone';
 import {
@@ -13,7 +12,7 @@ import {
   DateNanosFormat,
   formatWithNanos,
 } from '../../../common/converters/date_nanos_shared';
-import { TextContextTypeConvert } from '../../../common/types';
+import type { TextContextTypeConvert } from '../../../common/types';
 
 class DateNanosFormatServer extends DateNanosFormat {
   textConvert: TextContextTypeConvert = (val) => {

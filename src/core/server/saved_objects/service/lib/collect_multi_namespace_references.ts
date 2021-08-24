@@ -7,11 +7,13 @@
  */
 
 import * as esKuery from '@kbn/es-query';
-import { isNotFoundFromUnsupportedServer } from '../../../elasticsearch';
-import { LegacyUrlAlias, LEGACY_URL_ALIAS_TYPE } from '../../object_types';
+import type { SavedObject } from '../../../../types/saved_objects';
+import { isNotFoundFromUnsupportedServer } from '../../../elasticsearch/supported_server_response_check';
+import { LEGACY_URL_ALIAS_TYPE } from '../../object_types/constants';
+import type { LegacyUrlAlias } from '../../object_types/types';
 import type { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
-import type { SavedObjectsSerializer } from '../../serialization';
-import type { SavedObject, SavedObjectsBaseOptions } from '../../types';
+import { SavedObjectsSerializer } from '../../serialization/serializer';
+import type { SavedObjectsBaseOptions } from '../../types';
 import { SavedObjectsErrorHelpers } from './errors';
 import { getRootFields } from './included_fields';
 import { getSavedObjectFromSource, rawDocExistsInNamespace } from './internal_utils';

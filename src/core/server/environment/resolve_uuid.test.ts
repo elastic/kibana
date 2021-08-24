@@ -5,13 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import type { PathConfigType } from '@kbn/utils';
 import { join } from 'path';
-import { PathConfigType } from '@kbn/utils';
+import type { HttpConfigType } from '../http/http_config';
 import { loggingSystemMock } from '../logging/logging_system.mock';
 import { readFile, writeFile } from './fs';
 import { resolveInstanceUuid, UUID_7_6_0_BUG } from './resolve_uuid';
-import { HttpConfigType } from '../http';
 
 jest.mock('uuid', () => ({
   v4: () => 'NEW_UUID',

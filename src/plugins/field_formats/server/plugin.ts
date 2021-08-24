@@ -5,18 +5,16 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { has } from 'lodash';
-import {
-  PluginInitializerContext,
-  CoreSetup,
-  CoreStart,
-  Plugin,
-  IUiSettingsClient,
-} from '../../../core/server';
-import { FieldFormatsStart, FieldFormatsSetup } from './types';
-import { DateFormat, DateNanosFormat } from './lib/converters';
-import { baseFormatters, FieldFormatInstanceType, FieldFormatsRegistry } from '../common';
+import type { CoreSetup, CoreStart } from '../../../core/server';
+import type { Plugin, PluginInitializerContext } from '../../../core/server/plugins/types';
+import type { IUiSettingsClient } from '../../../core/server/ui_settings/types';
+import { baseFormatters } from '../common/constants/base_formatters';
+import { FieldFormatsRegistry } from '../common/field_formats_registry';
+import type { FieldFormatInstanceType } from '../common/types';
+import { DateNanosFormat } from './lib/converters/date_nanos_server';
+import { DateFormat } from './lib/converters/date_server';
+import type { FieldFormatsSetup, FieldFormatsStart } from './types';
 import { getUiSettings } from './ui_settings';
 
 export class FieldFormatsPlugin implements Plugin<FieldFormatsSetup, FieldFormatsStart> {

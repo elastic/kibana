@@ -5,17 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import type { estypes } from '@elastic/elasticsearch';
+import { estypes } from '@elastic/elasticsearch';
 import intersection from 'lodash/intersection';
-
+import type { SavedObjectError } from '../../../../types/saved_objects';
+import { isNotFoundFromUnsupportedServer } from '../../../elasticsearch/supported_server_response_check';
 import type { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
-import type { SavedObjectsRawDocSource, SavedObjectsSerializer } from '../../serialization';
-import type {
-  MutatingOperationRefreshSetting,
-  SavedObjectError,
-  SavedObjectsBaseOptions,
-} from '../../types';
+import { SavedObjectsSerializer } from '../../serialization/serializer';
+import type { SavedObjectsRawDocSource } from '../../serialization/types';
+import type { MutatingOperationRefreshSetting, SavedObjectsBaseOptions } from '../../types';
 import type { DecoratedError } from './errors';
 import { SavedObjectsErrorHelpers } from './errors';
 import {
@@ -25,7 +22,6 @@ import {
 } from './internal_utils';
 import { DEFAULT_REFRESH_SETTING } from './repository';
 import type { RepositoryEsClient } from './repository_es_client';
-import { isNotFoundFromUnsupportedServer } from '../../../elasticsearch';
 
 /**
  * An object that should have its spaces updated.

@@ -5,12 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { DeprecationsRegistry } from './deprecations_registry';
-import type { GetDeprecationsContext } from './types';
 import { elasticsearchClientMock } from '../elasticsearch/client/mocks';
 import { savedObjectsClientMock } from '../saved_objects/service/saved_objects_client.mock';
+import { DeprecationsRegistry } from './deprecations_registry';
+import type { GetDeprecationsContext } from './types';
+
 type DeprecationsRegistryContract = PublicMethodsOf<DeprecationsRegistry>;
 
 const createDeprecationsRegistryMock = () => {

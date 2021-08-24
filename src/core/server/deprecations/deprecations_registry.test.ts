@@ -7,8 +7,8 @@
  */
 
 /* eslint-disable dot-notation */
-import type { RegisterDeprecationsConfig, GetDeprecationsContext } from './types';
 import { DeprecationsRegistry } from './deprecations_registry';
+import type { GetDeprecationsContext, RegisterDeprecationsConfig } from './types';
 
 describe('DeprecationsRegistry', () => {
   describe('registerDeprecations', () => {

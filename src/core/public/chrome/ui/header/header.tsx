@@ -5,7 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import {
   EuiFlexGroup,
   EuiHeader,
@@ -22,31 +21,29 @@ import classnames from 'classnames';
 import React, { createRef, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { Observable } from 'rxjs';
-import { LoadingIndicator } from '../';
-import {
+import type { InternalApplicationStart } from '../../../application/types';
+import type { HttpStart } from '../../../http/types';
+import type { ChromeNavControl } from '../../nav_controls/nav_controls_service';
+import type { ChromeNavLink } from '../../nav_links/nav_link';
+import type { ChromeRecentlyAccessedHistoryItem } from '../../recently_accessed/recently_accessed_service';
+import type {
   ChromeBadge,
   ChromeBreadcrumb,
-  ChromeNavControl,
-  ChromeNavLink,
-  ChromeRecentlyAccessedHistoryItem,
-} from '../..';
-import { InternalApplicationStart } from '../../../application/types';
-import { HttpStart } from '../../../http';
-import {
   ChromeBreadcrumbsAppendExtension,
   ChromeHelpExtension,
   ChromeUserBanner,
 } from '../../types';
-import { OnIsLockedUpdate } from './';
+import { LoadingIndicator } from '../loading_indicator';
 import { CollapsibleNav } from './collapsible_nav';
+import { HeaderActionMenu } from './header_action_menu';
 import { HeaderBadge } from './header_badge';
 import { HeaderBreadcrumbs } from './header_breadcrumbs';
+import { HeaderExtension } from './header_extension';
 import { HeaderHelpMenu } from './header_help_menu';
 import { HeaderLogo } from './header_logo';
 import { HeaderNavControls } from './header_nav_controls';
-import { HeaderActionMenu } from './header_action_menu';
-import { HeaderExtension } from './header_extension';
 import { HeaderTopBanner } from './header_top_banner';
+import type { OnIsLockedUpdate } from './types';
 
 export interface HeaderProps {
   kibanaVersion: string;

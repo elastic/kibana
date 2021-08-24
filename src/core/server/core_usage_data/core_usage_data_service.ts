@@ -5,39 +5,41 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { Subject, Observable } from 'rxjs';
-import { takeUntil, first } from 'rxjs/operators';
-import { get } from 'lodash';
-import { hasConfigPathIntersection, ChangedDeprecatedPaths } from '@kbn/config';
-
-import { CoreService } from 'src/core/types';
-import { Logger, SavedObjectsServiceStart, SavedObjectTypeRegistry } from 'src/core/server';
-import {
+import type {
   AggregationsFiltersAggregate,
   AggregationsFiltersBucketItem,
   SearchTotalHits,
 } from '@elastic/elasticsearch/api/types';
-import { CoreContext } from '../core_context';
-import { ElasticsearchConfigType } from '../elasticsearch/elasticsearch_config';
-import { HttpConfigType, InternalHttpServiceSetup } from '../http';
-import { LoggingConfigType } from '../logging';
-import { SavedObjectsConfigType } from '../saved_objects/saved_objects_config';
+import type { ChangedDeprecatedPaths } from '@kbn/config';
+import { hasConfigPathIntersection } from '@kbn/config';
+import type { Logger } from '@kbn/logging';
+import { get } from 'lodash';
+import { Observable, Subject } from 'rxjs';
+import { first, takeUntil } from 'rxjs/operators';
+import type { CoreService } from '../../types/core_service';
+import type { CoreContext } from '../core_context';
+import type { ElasticsearchConfigType } from '../elasticsearch/elasticsearch_config';
+import type { ElasticsearchServiceStart } from '../elasticsearch/types';
+import type { HttpConfigType } from '../http/http_config';
+import type { InternalHttpServiceSetup } from '../http/types';
+import type { KibanaConfigType } from '../kibana_config';
+import type { LoggingConfigType } from '../logging/logging_config';
+import type { MetricsServiceSetup, OpsMetrics } from '../metrics/types';
+import { LEGACY_URL_ALIAS_TYPE } from '../saved_objects/object_types/constants';
+import type { SavedObjectsConfigType } from '../saved_objects/saved_objects_config';
+import type { SavedObjectsServiceStart } from '../saved_objects/saved_objects_service';
+import { SavedObjectTypeRegistry } from '../saved_objects/saved_objects_type_registry';
+import { CORE_USAGE_STATS_TYPE } from './constants';
+import { coreUsageStatsType } from './core_usage_stats';
+import { CoreUsageStatsClient } from './core_usage_stats_client';
+import { isConfigured } from './is_configured';
 import type {
+  ConfigUsageData,
   CoreServicesUsageData,
   CoreUsageData,
-  CoreUsageDataStart,
   CoreUsageDataSetup,
-  ConfigUsageData,
+  CoreUsageDataStart,
 } from './types';
-import { isConfigured } from './is_configured';
-import { ElasticsearchServiceStart } from '../elasticsearch';
-import { KibanaConfigType } from '../kibana_config';
-import { coreUsageStatsType } from './core_usage_stats';
-import { LEGACY_URL_ALIAS_TYPE } from '../saved_objects/object_types';
-import { CORE_USAGE_STATS_TYPE } from './constants';
-import { CoreUsageStatsClient } from './core_usage_stats_client';
-import { MetricsServiceSetup, OpsMetrics } from '..';
 
 export type ExposedConfigsToUsage = Map<string, Record<string, boolean>>;
 

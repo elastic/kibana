@@ -8,12 +8,11 @@
 
 // @ts-expect-error
 import fetchMock from 'fetch-mock/es5/client';
-import { loadingServiceMock } from './http_service.test.mocks';
-
+import { Observable } from 'rxjs';
 import { fatalErrorsServiceMock } from '../fatal_errors/fatal_errors_service.mock';
 import { injectedMetadataServiceMock } from '../injected_metadata/injected_metadata_service.mock';
 import { HttpService } from './http_service';
-import { Observable } from 'rxjs';
+import { loadingServiceMock } from './http_service.test.mocks';
 
 describe('interceptors', () => {
   afterEach(() => fetchMock.restore());

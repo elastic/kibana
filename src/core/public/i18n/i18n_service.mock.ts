@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-
-import { I18nService, I18nStart } from './i18n_service';
+import React from 'react';
+import type { I18nStart } from './i18n_service';
+import { I18nService } from './i18n_service';
 
 const PassThroughComponent = ({ children }: { children: React.ReactNode }) => children;
 

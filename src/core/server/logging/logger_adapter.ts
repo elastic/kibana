@@ -5,8 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { LogRecord, Logger, LogMeta } from '@kbn/logging';
+import type { Logger, LogMeta, LogRecord } from '@kbn/logging';
 
 /** @internal */
 export class LoggerAdapter implements Logger {

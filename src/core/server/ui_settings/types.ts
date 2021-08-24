@@ -5,13 +5,17 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { SavedObjectsClientContract } from '../saved_objects/types';
-import { UiSettingsParams, UserProvidedValues, PublicUiSettingsParams } from '../../types';
+import type {
+  PublicUiSettingsParams,
+  UiSettingsParams,
+  UserProvidedValues,
+} from '../../types/ui_settings';
+import type { SavedObjectsClientContract } from '../saved_objects/types';
 
 export type {
-  UiSettingsParams,
-  PublicUiSettingsParams,
   DeprecationSettings,
+  PublicUiSettingsParams,
+  UiSettingsParams,
   UiSettingsType,
   UserProvidedValues,
 } from '../../types';

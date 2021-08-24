@@ -7,12 +7,11 @@
  */
 
 import * as esKuery from '@kbn/es-query';
-type KueryNode = any;
-
-import { ALL_NAMESPACES_STRING, DEFAULT_NAMESPACE_STRING } from '../utils';
 import { SavedObjectTypeRegistry } from '../../../saved_objects_type_registry';
-import { getQueryParams, getClauseForReference } from './query_params';
+import { ALL_NAMESPACES_STRING, DEFAULT_NAMESPACE_STRING } from '../utils';
+import { getClauseForReference, getQueryParams } from './query_params';
 
+type KueryNode = any;
 const registerTypes = (registry: SavedObjectTypeRegistry) => {
   registry.registerType({
     name: 'pending',

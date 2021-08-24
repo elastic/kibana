@@ -5,8 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { DiscoveredPlugin } from '../../server';
+import type { DiscoveredPlugin } from '../../server/plugins/types';
 import { InjectedMetadataService } from './injected_metadata_service';
 
 describe('setup.getKibanaBuildNumber()', () => {

@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import Path from 'path';
 import Fs from 'fs';
-import Util from 'util';
 import JSON5 from 'json5';
+import Path from 'path';
+import Util from 'util';
 import * as kbnTestServer from '../../../../test_helpers/kbn_server';
-import type { Root } from '../../../root';
+import { Root } from '../../../root';
 
 const logFilePath = Path.join(__dirname, 'cleanup_test.log');
 

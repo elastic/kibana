@@ -5,9 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { AuthHeadersStorage } from './auth_headers_storage';
 import { httpServerMock } from './http_server.mocks';
+
 describe('AuthHeadersStorage', () => {
   describe('stores authorization headers', () => {
     it('retrieves a copy of headers associated with Kibana request', () => {

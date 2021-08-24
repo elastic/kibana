@@ -5,13 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { mockReactDomRender, mockReactDomUnmount } from './toasts_service.test.mocks';
-
-import { ToastsService } from './toasts_service';
-import { ToastsApi } from './toasts_api';
 import { overlayServiceMock } from '../../overlays/overlay_service.mock';
 import { uiSettingsServiceMock } from '../../ui_settings/ui_settings_service.mock';
+import { ToastsApi } from './toasts_api';
+import { ToastsService } from './toasts_service';
+import { mockReactDomRender, mockReactDomUnmount } from './toasts_service.test.mocks';
 
 const mockI18n: any = {
   Context: function I18nContext() {

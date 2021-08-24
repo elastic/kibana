@@ -5,9 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { BytesFormat } from './bytes';
 import { FORMATS_UI_SETTINGS } from '../constants/ui_settings';
+import { BytesFormat } from './bytes';
 
 describe('BytesFormat', () => {
   const config: Record<string, any> = {};

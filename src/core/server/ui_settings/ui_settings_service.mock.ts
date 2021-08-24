@@ -5,15 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import {
-  IUiSettingsClient,
+import type {
+  InternalUiSettingsServicePreboot,
   InternalUiSettingsServiceSetup,
   InternalUiSettingsServiceStart,
-  InternalUiSettingsServicePreboot,
+  IUiSettingsClient,
 } from './types';
-import type { UiSettingsService } from './ui_settings_service';
+import { UiSettingsService } from './ui_settings_service';
 
 const createClientMock = () => {
   const mocked: jest.Mocked<IUiSettingsClient> = {

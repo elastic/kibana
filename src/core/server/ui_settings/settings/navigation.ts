@@ -5,11 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import { isRelativeUrl } from '@kbn/std';
-import { UiSettingsParams } from '../../../types';
+import type { UiSettingsParams } from '../../../types/ui_settings';
 
 export const getNavigationSettings = (): Record<string, UiSettingsParams> => {
   return {

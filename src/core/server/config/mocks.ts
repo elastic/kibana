@@ -5,21 +5,19 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import type {
-  getEnvOptions as getEnvOptionsTyped,
-  rawConfigServiceMock as rawConfigServiceMockTyped,
-  configServiceMock as configServiceMockTyped,
-  configMock as configMockTyped,
-} from '@kbn/config/target_types/mocks';
-
 import {
+  configMock as configMockNonTyped,
+  configServiceMock as configServiceMockNonTyped,
   getEnvOptions as getEnvOptionsNonTyped,
   rawConfigServiceMock as rawConfigServiceMockNonTyped,
-  configServiceMock as configServiceMockNonTyped,
-  configMock as configMockNonTyped,
-  // @ts-expect-error
+  //@ts-expect-error
 } from '@kbn/config/target_node/mocks';
+import {
+  configMock as configMockTyped,
+  configServiceMock as configServiceMockTyped,
+  getEnvOptions as getEnvOptionsTyped,
+  rawConfigServiceMock as rawConfigServiceMockTyped,
+} from '@kbn/config/target_types/mocks';
 
 const getEnvOptions: typeof getEnvOptionsTyped = getEnvOptionsNonTyped;
 const rawConfigServiceMock: typeof rawConfigServiceMockTyped = rawConfigServiceMockNonTyped;

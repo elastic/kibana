@@ -5,12 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { retryCallClusterMock } from './repository_es_client.test.mock';
-
-import { createRepositoryEsClient, RepositoryEsClient } from './repository_es_client';
 import { elasticsearchClientMock } from '../../../elasticsearch/client/mocks';
 import { SavedObjectsErrorHelpers } from './errors';
+import type { RepositoryEsClient } from './repository_es_client';
+import { createRepositoryEsClient } from './repository_es_client';
+import { retryCallClusterMock } from './repository_es_client.test.mock';
 
 describe('RepositoryEsClient', () => {
   let client: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;

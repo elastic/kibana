@@ -5,13 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { OnPostAuthHandler } from './lifecycle/on_post_auth';
-import { OnPreResponseHandler } from './lifecycle/on_pre_response';
+import { Env } from '@kbn/config';
 import { HttpConfig } from './http_config';
-import { isSafeMethod } from './router';
-import { Env } from '../config';
-import { LifecycleRegistrar } from './http_server';
+import type { LifecycleRegistrar } from './http_server';
+import type { OnPostAuthHandler } from './lifecycle/on_post_auth';
+import type { OnPreResponseHandler } from './lifecycle/on_pre_response';
+import { isSafeMethod } from './router/route';
 
 const VERSION_HEADER = 'kbn-version';
 const XSRF_HEADER = 'kbn-xsrf';

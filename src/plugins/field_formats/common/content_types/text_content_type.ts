@@ -5,10 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { isFunction } from 'lodash';
-import { IFieldFormat, TextContextTypeConvert, FieldFormatsContentType } from '../types';
-import { asPrettyString } from '../utils';
+import type { FieldFormatsContentType, IFieldFormat, TextContextTypeConvert } from '../types';
+import { asPrettyString } from '../utils/as_pretty_string';
 
 export const TEXT_CONTEXT_TYPE: FieldFormatsContentType = 'text';
 

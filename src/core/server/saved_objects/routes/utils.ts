@@ -5,22 +5,19 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { Readable } from 'stream';
-import {
-  RequestHandlerWrapper,
-  SavedObject,
-  SavedObjectsExportResultDetails,
-} from 'src/core/server';
-import {
-  createSplitStream,
-  createMapStream,
-  createFilterStream,
-  createPromiseFromStreams,
-  createListStream,
-  createConcatStream,
-} from '@kbn/utils';
 import Boom from '@hapi/boom';
+import {
+  createConcatStream,
+  createFilterStream,
+  createListStream,
+  createMapStream,
+  createPromiseFromStreams,
+  createSplitStream,
+} from '@kbn/utils';
+import { Readable } from 'stream';
+import type { SavedObject } from '../../../types/saved_objects';
+import type { RequestHandlerWrapper } from '../../http/router/router';
+import type { SavedObjectsExportResultDetails } from '../export/types';
 
 export async function createSavedObjectsStreamFromNdJson(ndJsonStream: Readable) {
   const savedObjects = await createPromiseFromStreams([

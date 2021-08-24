@@ -5,13 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type {
-  EnvironmentService,
   InternalEnvironmentServicePreboot,
   InternalEnvironmentServiceSetup,
 } from './environment_service';
+import { EnvironmentService } from './environment_service';
 
 const createPrebootContractMock = () => {
   const prebootContract: jest.Mocked<InternalEnvironmentServicePreboot> = {

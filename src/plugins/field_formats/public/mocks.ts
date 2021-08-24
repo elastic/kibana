@@ -5,12 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { CoreSetup } from 'src/core/public';
-import { baseFormattersPublic } from './lib/constants';
-import { FieldFormatsRegistry } from '../common';
-import type { FieldFormatsStart, FieldFormatsSetup } from '.';
+import type { CoreSetup } from '../../../core/public';
+import { FieldFormatsRegistry } from '../common/field_formats_registry';
 import { fieldFormatsMock } from '../common/mocks';
+import { baseFormattersPublic } from './lib/constants';
+import type { FieldFormatsSetup, FieldFormatsStart } from './plugin';
 
 export const getFieldFormatsRegistry = (core: CoreSetup) => {
   const fieldFormatsRegistry = new FieldFormatsRegistry();

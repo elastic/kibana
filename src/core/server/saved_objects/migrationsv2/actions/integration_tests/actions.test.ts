@@ -5,44 +5,44 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { ElasticsearchClient } from '../../../../';
-import { InternalCoreStart } from '../../../../internal_types';
-import * as kbnTestServer from '../../../../../test_helpers/kbn_server';
-import { Root } from '../../../../root';
-import { SavedObjectsRawDoc } from '../../../serialization';
-import {
-  bulkOverwriteTransformedDocuments,
-  cloneIndex,
-  closePit,
-  createIndex,
-  fetchIndices,
-  openPit,
-  OpenPitResponse,
-  reindex,
-  readWithPit,
-  ReadWithPit,
-  searchForOutdatedDocuments,
-  SearchResponse,
-  setWriteBlock,
-  updateAliases,
-  waitForReindexTask,
-  ReindexResponse,
-  waitForPickupUpdatedMappingsTask,
-  pickupUpdatedMappings,
-  UpdateByQueryResponse,
-  updateAndPickupMappings,
-  UpdateAndPickupMappingsResponse,
-  verifyReindex,
-  removeWriteBlock,
-  transformDocs,
-  waitForIndexStatusYellow,
-} from '../../actions';
+import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 import * as Either from 'fp-ts/lib/Either';
 import * as Option from 'fp-ts/lib/Option';
-import { ResponseError } from '@elastic/elasticsearch/lib/errors';
-import { DocumentsTransformFailed, DocumentsTransformSuccess } from '../../../migrations/core';
-import { TaskEither } from 'fp-ts/lib/TaskEither';
+import type { TaskEither } from 'fp-ts/lib/TaskEither';
+import * as kbnTestServer from '../../../../../test_helpers/kbn_server';
+import type { ElasticsearchClient } from '../../../../elasticsearch/client/types';
+import type { InternalCoreStart } from '../../../../internal_types';
+import { Root } from '../../../../root';
+import type {
+  DocumentsTransformFailed,
+  DocumentsTransformSuccess,
+} from '../../../migrations/core/migrate_raw_docs';
+import type { SavedObjectsRawDoc } from '../../../serialization/types';
+import { bulkOverwriteTransformedDocuments } from '../bulk_overwrite_transformed_documents';
+import { cloneIndex } from '../clone_index';
+import { closePit } from '../close_pit';
+import { createIndex } from '../create_index';
+import { fetchIndices } from '../fetch_indices';
+import type { OpenPitResponse } from '../open_pit';
+import { openPit } from '../open_pit';
+import type { UpdateByQueryResponse } from '../pickup_updated_mappings';
+import { pickupUpdatedMappings } from '../pickup_updated_mappings';
+import type { ReadWithPit } from '../read_with_pit';
+import { readWithPit } from '../read_with_pit';
+import type { ReindexResponse } from '../reindex';
+import { reindex } from '../reindex';
+import { removeWriteBlock } from '../remove_write_block';
+import type { SearchResponse } from '../search_for_outdated_documents';
+import { searchForOutdatedDocuments } from '../search_for_outdated_documents';
+import { setWriteBlock } from '../set_write_block';
+import { transformDocs } from '../transform_docs';
+import { updateAliases } from '../update_aliases';
+import type { UpdateAndPickupMappingsResponse } from '../update_and_pickup_mappings';
+import { updateAndPickupMappings } from '../update_and_pickup_mappings';
+import { verifyReindex } from '../verify_reindex';
+import { waitForIndexStatusYellow } from '../wait_for_index_status_yellow';
+import { waitForPickupUpdatedMappingsTask } from '../wait_for_pickup_updated_mappings_task';
+import { waitForReindexTask } from '../wait_for_reindex_task';
 
 const { startES } = kbnTestServer.createTestServers({
   adjustTimeout: (t: number) => jest.setTimeout(t),

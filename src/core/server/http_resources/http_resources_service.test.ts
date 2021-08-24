@@ -5,19 +5,18 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { getApmConfigMock } from './http_resources_service.test.mocks';
-
-import { IRouter, RouteConfig } from '../http';
-
-import { coreMock } from '../mocks';
 import { mockCoreContext } from '../core_context.mock';
-import { httpServiceMock } from '../http/http_service.mock';
 import { httpServerMock } from '../http/http_server.mocks';
+import { httpServiceMock } from '../http/http_service.mock';
+import type { RouteConfig } from '../http/router/route';
+import type { IRouter } from '../http/router/router';
+import { coreMock } from '../mocks';
 import { renderingMock } from '../rendering/rendering_service.mock';
-import { HttpResourcesService, PrebootDeps, SetupDeps } from './http_resources_service';
+import type { PrebootDeps, SetupDeps } from './http_resources_service';
+import { HttpResourcesService } from './http_resources_service';
 import { httpResourcesMock } from './http_resources_service.mock';
-import { HttpResources } from 'kibana/server';
+import { getApmConfigMock } from './http_resources_service.test.mocks';
+import type { HttpResources } from './types';
 
 const coreContext = mockCoreContext.create();
 

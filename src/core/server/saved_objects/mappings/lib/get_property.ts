@@ -5,9 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { toPath } from 'lodash';
-import { SavedObjectsFieldMapping, IndexMapping } from '../types';
+import type { IndexMapping, SavedObjectsFieldMapping } from '../types';
 
 function getPropertyMappingFromObjectMapping(
   mapping: IndexMapping | SavedObjectsFieldMapping,

@@ -5,8 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { IContextContainer } from './context';
+import type { IContextContainer } from './context';
 
 export type ContextContainerMock = jest.Mocked<IContextContainer>;
 

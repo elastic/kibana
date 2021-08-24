@@ -5,9 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import type { FieldFormatsGetConfigFn } from '../../../common/types';
 import { DateNanosFormat } from './date_nanos_server';
-import { FieldFormatsGetConfigFn } from '../../../common';
 
 describe('Date Nanos Format: Server side edition', () => {
   let convert: Function;

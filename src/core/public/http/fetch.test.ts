@@ -11,10 +11,9 @@ import fetchMock from 'fetch-mock/es5/client';
 import { readFileSync } from 'fs';
 import { join } from 'path';
 import { first } from 'rxjs/operators';
-
-import { Fetch } from './fetch';
 import { BasePath } from './base_path';
-import { HttpResponse, HttpFetchOptionsWithPath } from './types';
+import { Fetch } from './fetch';
+import type { HttpFetchOptionsWithPath, HttpResponse } from './types';
 
 function delay<T>(duration: number) {
   return new Promise<T>((r) => setTimeout(r, duration));

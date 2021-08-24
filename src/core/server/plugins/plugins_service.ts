@@ -6,29 +6,30 @@
  * Side Public License, v 1.
  */
 
+import type { IConfigService } from '@kbn/config';
+import type { Logger } from '@kbn/logging';
+import { getFlattenedObject, pick } from '@kbn/std';
 import Path from 'path';
 import { Observable } from 'rxjs';
 import { concatMap, filter, first, map, tap, toArray } from 'rxjs/operators';
-import { getFlattenedObject, pick } from '@kbn/std';
-
-import { CoreService } from '../../types';
-import { CoreContext } from '../core_context';
-import { Logger } from '../logging';
-import { discover, PluginDiscoveryError, PluginDiscoveryErrorType } from './discovery';
+import type { CoreService } from '../../types/core_service';
+import type { CoreContext } from '../core_context';
+import type { InternalEnvironmentServicePreboot } from '../environment/environment_service';
+import type { InternalCorePreboot, InternalCoreSetup, InternalCoreStart } from '../internal_types';
+import { discover } from './discovery/plugins_discovery';
+import { PluginDiscoveryError, PluginDiscoveryErrorType } from './discovery/plugin_discovery_error';
 import { PluginWrapper } from './plugin';
-import {
+import type { PluginsConfigType } from './plugins_config';
+import { PluginsConfig } from './plugins_config';
+import { PluginsSystem } from './plugins_system';
+import type {
   DiscoveredPlugin,
   InternalPluginInfo,
   PluginConfigDescriptor,
   PluginDependencies,
   PluginName,
-  PluginType,
 } from './types';
-import { PluginsConfig, PluginsConfigType } from './plugins_config';
-import { PluginsSystem } from './plugins_system';
-import { InternalCorePreboot, InternalCoreSetup, InternalCoreStart } from '../internal_types';
-import { IConfigService } from '../config';
-import { InternalEnvironmentServicePreboot } from '../environment';
+import { PluginType } from './types';
 
 /** @internal */
 export type DiscoveredPlugins = {

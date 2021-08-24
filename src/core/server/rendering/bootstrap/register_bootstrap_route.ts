@@ -5,8 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { IRouter } from '../../http';
+import type { IRouter } from '../../http/router/router';
 import type { BootstrapRenderer } from './bootstrap_renderer';
 
 export const registerBootstrapRoute = ({

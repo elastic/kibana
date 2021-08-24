@@ -5,7 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { PriorityCollection } from './priority_collection';
 
 test(`1, 2, 3`, () => {

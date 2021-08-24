@@ -5,11 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import React, { useEffect, useRef, useState } from 'react';
 import { Observable } from 'rxjs';
-
-import { OverlayBanner } from './banners_service';
+import type { OverlayBanner } from './banners_service';
 
 interface Props {
   banners$: Observable<OverlayBanner[]>;

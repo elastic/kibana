@@ -5,12 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { MockElasticsearchClient } from './core_service.test.mocks';
-import { elasticsearchClientMock } from '../../elasticsearch/client/mocks';
 import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 import * as kbnTestServer from '../../../test_helpers/kbn_server';
-import { InternalElasticsearchServiceStart } from '../../elasticsearch';
+import { elasticsearchClientMock } from '../../elasticsearch/client/mocks';
+import type { InternalElasticsearchServiceStart } from '../../elasticsearch/types';
+import { MockElasticsearchClient } from './core_service.test.mocks';
 
 const cookieOptions = {
   name: 'sid',

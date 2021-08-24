@@ -5,15 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import type { RecursiveReadonly } from '@kbn/utility-types';
+import type { History } from 'history';
 import { Observable } from 'rxjs';
-import { History } from 'history';
-import { RecursiveReadonly } from '@kbn/utility-types';
-
-import { MountPoint } from '../types';
-import { Capabilities } from './capabilities';
-import { PluginOpaqueId } from '../plugins';
-import { AppCategory } from '../../types';
+import type { PluginOpaqueId } from '../../server/plugins/types';
+import type { AppCategory } from '../../types/app_category';
+import type { Capabilities } from '../../types/capabilities';
+import type { MountPoint } from '../types';
 import { ScopedHistory } from './scoped_history';
 
 /**

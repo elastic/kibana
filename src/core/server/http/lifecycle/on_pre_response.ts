@@ -5,17 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import {
-  Lifecycle,
-  Request,
-  ResponseObject,
-  ResponseToolkit as HapiResponseToolkit,
-} from '@hapi/hapi';
 import Boom from '@hapi/boom';
-import { Logger } from '../../logging';
-
-import { HapiResponseAdapter, KibanaRequest, ResponseHeaders } from '../router';
+import type { Request, ResponseObject, ResponseToolkit as HapiResponseToolkit } from '@hapi/hapi';
+import { Lifecycle } from '@hapi/hapi';
+import type { Logger } from '@kbn/logging';
+import type { ResponseHeaders } from '../router/headers';
+import { KibanaRequest } from '../router/request';
+import { HapiResponseAdapter } from '../router/response_adapter';
 
 enum ResultType {
   render = 'render',
