@@ -28,6 +28,7 @@ type RenderFunctionProp = (
 interface Props {
   dataProvider: DataProvider;
   disabled?: boolean;
+  hideTopN: boolean;
   isDraggable?: boolean;
   inline?: boolean;
   render: RenderFunctionProp;
@@ -38,6 +39,7 @@ interface Props {
 
 export const useHoverActions = ({
   dataProvider,
+  hideTopN,
   isDraggable,
   onFilterAdded,
   render,
@@ -101,6 +103,7 @@ export const useHoverActions = ({
         dataProvider={dataProvider}
         draggableId={isDraggable ? getDraggableId(dataProvider.id) : undefined}
         field={dataProvider.queryMatch.field}
+        hideTopN={hideTopN}
         isObjectArray={false}
         goGetTimelineId={setGoGetTimelineId}
         onFilterAdded={onFilterAdded}
@@ -120,6 +123,7 @@ export const useHoverActions = ({
     closeTopN,
     dataProvider,
     handleClosePopOverTrigger,
+    hideTopN,
     hoverActionsOwnFocus,
     isDraggable,
     onFilterAdded,

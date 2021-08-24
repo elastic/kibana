@@ -161,7 +161,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await PageObjects.header.waitUntilLoadingHasFinished();
         }
         // remove the second column
-        await PageObjects.discover.clickFieldListItemAdd(extraColumns[1]);
+        await PageObjects.discover.clickFieldListItemRemove(extraColumns[1]);
         await PageObjects.header.waitUntilLoadingHasFinished();
         // test that the second column is no longer there
         const header = await dataGrid.getHeaderFields();

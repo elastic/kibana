@@ -10,12 +10,11 @@ import expect from '@kbn/expect';
 
 import { RangeFilterManager } from './range_filter_manager';
 import {
-  RangeFilter,
-  RangeFilterMeta,
   IndexPattern,
   FilterManager as QueryFilterManager,
   IndexPatternsContract,
 } from '../../../../data/public';
+import { RangeFilter, RangeFilterMeta } from '@kbn/es-query';
 
 describe('RangeFilterManager', function () {
   const controlId = 'control1';
@@ -53,7 +52,7 @@ describe('RangeFilterManager', function () {
     });
 
     test('should create range filter from slider value', function () {
-      const newFilter = filterManager.createFilter({ min: 1, max: 3 });
+      const newFilter = filterManager.createFilter({ min: 1, max: 3 }) as RangeFilter;
       expect(newFilter).to.have.property('meta');
       expect(newFilter.meta.index).to.be(indexPatternId);
       expect(newFilter.meta.controlledBy).to.be(controlId);
