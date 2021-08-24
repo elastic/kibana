@@ -7,7 +7,6 @@
  */
 
 import { PluginInitializerContext, CoreStart, CoreSetup } from 'kibana/public';
-import { ConfigSchema } from '../config';
 import { injectHeaderStyle } from './utils/inject_header_style';
 
 export class KibanaLegacyPlugin {
@@ -35,11 +34,6 @@ export class KibanaLegacyPlugin {
         const { initAngularBootstrap } = await import('./angular_bootstrap');
         initAngularBootstrap();
       },
-      /**
-       * @deprecated
-       * Just exported for wiring up with dashboard mode, should not be used.
-       */
-      config: this.initializerContext.config.get(),
     };
   }
 }

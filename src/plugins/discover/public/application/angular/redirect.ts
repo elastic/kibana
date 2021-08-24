@@ -17,10 +17,7 @@ getAngularModule().config(($routeProvider: any) => {
       getUrlTracker().restorePreviousUrl();
       $rootScope.$applyAsync(() => {
         const { urlForwarding } = getServices();
-        const { navigated } = urlForwarding.navigateToLegacyKibanaUrl(path);
-        if (!navigated) {
-          urlForwarding.navigateToDefaultApp();
-        }
+        urlForwarding.navigateToLegacyKibanaUrl(path);
       });
       // prevent angular from completing the navigation
       return new Promise(() => {});

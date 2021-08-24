@@ -134,26 +134,8 @@ export class HomePublicPlugin
     };
   }
 
-  public start(
-    { application: { capabilities, currentAppId$ }, http }: CoreStart,
-    { urlForwarding }: HomePluginStartDependencies
-  ) {
+  public start({ application: { capabilities } }: CoreStart) {
     this.featuresCatalogueRegistry.start({ capabilities });
-
-    // If the home app is the initial location when loading Kibana...
-    if (
-      window.location.pathname === http.basePath.prepend(HOME_APP_BASE_PATH) &&
-      window.location.hash === ''
-    ) {
-      // ...wait for the app to mount initially and then...
-      currentAppId$.pipe(first()).subscribe((appId) => {
-        if (appId === 'home') {
-          // ...navigate to default app set by `kibana.defaultAppId`.
-          // This doesn't do anything as along as the default settings are kept.
-          urlForwarding.navigateToDefaultApp({ overwriteHash: false });
-        }
-      });
-    }
 
     return { featureCatalogue: this.featuresCatalogueRegistry };
   }

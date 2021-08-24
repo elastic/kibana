@@ -9,7 +9,6 @@
 import { CoreStart, CoreSetup } from 'kibana/public';
 import { KibanaLegacyStart } from 'src/plugins/kibana_legacy/public';
 import { Subscription } from 'rxjs';
-import { navigateToDefaultApp } from './navigate_to_default_app';
 import { createLegacyUrlForwardApp } from './forward_app';
 import { navigateToLegacyKibanaUrl } from './forward_app/navigate_to_legacy_kibana_url';
 
@@ -79,22 +78,6 @@ export class UrlForwardingPlugin {
       this.currentAppId = currentAppId;
     });
     return {
-      /**
-       * Navigates to the app defined as kibana.defaultAppId.
-       * This takes redirects into account and uses the right mechanism to navigate.
-       */
-      navigateToDefaultApp: (
-        { overwriteHash }: { overwriteHash: boolean } = { overwriteHash: true }
-      ) => {
-        navigateToDefaultApp(
-          kibanaLegacy.config.defaultAppId,
-          this.forwardDefinitions,
-          application,
-          basePath,
-          this.currentAppId,
-          overwriteHash
-        );
-      },
       /**
        * Resolves the provided hash using the registered forwards and navigates to the target app.
        * If a navigation happened, `{ navigated: true }` will be returned.

@@ -23,11 +23,6 @@ export const createLegacyUrlForwardApp = (
   async mount(params: AppMountParameters) {
     const hash = params.history.location.hash.substr(1);
 
-    if (!hash) {
-      const [, , kibanaLegacyStart] = await core.getStartServices();
-      kibanaLegacyStart.navigateToDefaultApp();
-    }
-
     const [
       {
         application,
@@ -35,12 +30,7 @@ export const createLegacyUrlForwardApp = (
       },
     ] = await core.getStartServices();
 
-    const result = await navigateToLegacyKibanaUrl(hash, forwards, basePath, application);
-
-    if (!result.navigated) {
-      const [, , kibanaLegacyStart] = await core.getStartServices();
-      kibanaLegacyStart.navigateToDefaultApp();
-    }
+    navigateToLegacyKibanaUrl(hash, forwards, basePath, application);
 
     return () => {};
   },

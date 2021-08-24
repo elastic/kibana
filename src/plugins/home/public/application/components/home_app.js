@@ -16,15 +16,6 @@ import { HashRouter as Router, Switch, Route } from 'react-router-dom';
 import { getTutorial } from '../load_tutorials';
 import { replaceTemplateStrings } from './tutorial/replace_template_strings';
 import { getServices } from '../kibana_services';
-import useMount from 'react-use/lib/useMount';
-
-const RedirectToDefaultApp = () => {
-  useMount(() => {
-    const { urlForwarding } = getServices();
-    urlForwarding.navigateToDefaultApp();
-  });
-  return null;
-};
 
 export function HomeApp({ directories, solutions }) {
   const {
@@ -78,7 +69,6 @@ export function HomeApp({ directories, solutions }) {
               http={http}
             />
           </Route>
-          <Route path="*" exact={true} component={RedirectToDefaultApp} />
         </Switch>
       </Router>
     </I18nProvider>
