@@ -788,7 +788,7 @@
     "multimatch": "^4.0.0",
     "mutation-observer": "^1.0.3",
     "ncp": "^2.0.0",
-    "node-sass": "^4.14.1",
+    "node-sass": "^6.0.1",
     "null-loader": "^3.0.0",
     "nyc": "^15.0.1",
     "oboe": "^2.1.4",
