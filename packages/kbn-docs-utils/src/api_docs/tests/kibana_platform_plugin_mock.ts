@@ -18,6 +18,9 @@ export function getKibanaPlatformPlugin(id: string, dir?: string): KibanaPlatfor
       server: true,
       kibanaVersion: '1',
       version: '1',
+      owner: {
+        name: 'Kibana Core',
+      },
       serviceFolders: [],
       requiredPlugins: [],
       requiredBundles: [],
