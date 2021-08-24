@@ -44,7 +44,7 @@ export const Console = memo<ConsoleProps>(({ prompt }) => {
       // FIXME:PT Most of these can just be static functions of sub-components so that nearly no logic lives here
 
       if (command.name === 'help') {
-        // FIXME:PT This should just be a list of `CommandDefintions` that the console supports by default
+        // FIXME:PT This should just be a list of `CommandDefinition` that the console supports by default
 
         let helpOutput: ReactNode;
 
@@ -72,6 +72,12 @@ export const Console = memo<ConsoleProps>(({ prompt }) => {
           ];
         });
 
+        return;
+      }
+
+      if (command.name === 'clear') {
+        // FIXME:PT This should just be a list of `CommandDefinition` that the console supports by default
+        setHistoryItems([]);
         return;
       }
 
