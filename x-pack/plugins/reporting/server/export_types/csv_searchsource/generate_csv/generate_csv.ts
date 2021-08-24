@@ -66,6 +66,7 @@ function isPlainStringArray(
 export class CsvGenerator {
   private _columns?: string[];
   private _formatters?: Record<string, FieldFormat>;
+  private includeFrozen: boolean;
   private csvContainsFormulas = false;
   private maxSizeReached = false;
   private csvRowCount = 0;
@@ -93,6 +94,7 @@ export class CsvGenerator {
         index: index.title,
         scroll: scrollSettings.duration,
         size: scrollSettings.size,
+        ignore_throttled: !this.includeFrozen,
       },
     };
     const results = (
