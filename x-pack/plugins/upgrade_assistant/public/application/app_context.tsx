@@ -15,6 +15,7 @@ import {
 } from 'src/core/public';
 import { SharePluginSetup } from 'src/plugins/share/public';
 import { ApiService } from './lib/api';
+import { AppServicesContext } from '../types';
 import { BreadcrumbService } from './lib/breadcrumbs';
 
 export interface KibanaVersionContext {
@@ -34,6 +35,7 @@ export interface ContextValue {
   getUrlForApp: CoreStart['application']['getUrlForApp'];
   deprecations: DeprecationsServiceStart;
   share: SharePluginSetup;
+  services: AppServicesContext;
 }
 
 export const AppContext = createContext<ContextValue>({} as any);
