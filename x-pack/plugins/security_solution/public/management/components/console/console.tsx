@@ -6,13 +6,15 @@
  */
 
 import React, { memo, ReactNode, useCallback, useEffect, useRef, useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiTextColor } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
 import styled from 'styled-components';
 import { OutputHistory } from './components/output_history';
 import { CommandInput, CommandInputProps } from './components/command_input';
 import { EuiThemeProvider } from '../../../../../../../src/plugins/kibana_react/common';
 import { useConsoleService } from './components/console_provider';
 import { HistoryItemComponent, HistoryItem } from './components/history_item';
+import { HelpOutput } from './components/help_output';
+import { UnknownCommand } from './components/unknow_comand';
 
 // FIXME:PT implement dark mode for the console
 
@@ -42,6 +44,8 @@ export const Console = memo<ConsoleProps>(({ prompt }) => {
       // FIXME:PT Most of these can just be static functions of sub-components so that nearly no logic lives here
 
       if (command.name === 'help') {
+        // FIXME:PT This should just be a list of `CommandDefintions` that the console supports by default
+
         let helpOutput: ReactNode;
 
         if (consoleService.getHelp) {
@@ -60,7 +64,12 @@ export const Console = memo<ConsoleProps>(({ prompt }) => {
         }
 
         setHistoryItems((prevState) => {
-          return [...prevState, <HistoryItem>{helpOutput}</HistoryItem>];
+          return [
+            ...prevState,
+            <HistoryItem>
+              <HelpOutput>{helpOutput}</HelpOutput>
+            </HistoryItem>,
+          ];
         });
 
         return;
@@ -75,11 +84,13 @@ export const Console = memo<ConsoleProps>(({ prompt }) => {
           return [
             ...prevState,
             <HistoryItem>
-              <EuiTextColor color="danger">{`unknown command: ${command.input}`}</EuiTextColor>
+              <UnknownCommand input={command.input} />
             </HistoryItem>,
           ];
         });
       }
+
+      // TODO: execute the command
     },
     [consoleService]
   );
