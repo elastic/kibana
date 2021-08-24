@@ -37,10 +37,6 @@ const plugins = [
   [
     require.resolve('@babel/plugin-transform-runtime'),
     {
-      corejs: {
-        version: 3,
-        proposals: true,
-      },
       version: '^7.12.18',
     },
   ],

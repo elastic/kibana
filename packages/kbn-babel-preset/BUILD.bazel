@@ -35,7 +35,6 @@ DEPS = [
   "@npm//@babel/preset-react",
   "@npm//@babel/preset-typescript",
   "@npm//@babel/runtime",
-  "@npm//@babel/runtime-corejs3",
   "@npm//@emotion/babel-preset-css-prop",
   "@npm//babel-plugin-add-module-exports",
   "@npm//babel-plugin-styled-components",
