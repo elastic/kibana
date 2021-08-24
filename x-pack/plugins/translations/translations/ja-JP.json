@@ -4166,7 +4166,7 @@
     "visTypeTimeseries.advancedSettings.maxBucketsText": "TSVBヒストグラム密度に影響します。「histogram:maxBars」よりも大きく設定する必要があります。",
     "visTypeTimeseries.advancedSettings.maxBucketsTitle": "TSVBバケット制限",
     "visTypeTimeseries.aggUtils.averageLabel": "平均",
-    "visTypeTimeseries.aggUtils.calculationLabel": "計算",
+    "visTypeTimeseries.aggUtils.bucketScriptLabel": "バケットスクリプト",
     "visTypeTimeseries.aggUtils.cardinalityLabel": "基数",
     "visTypeTimeseries.aggUtils.countLabel": "カウント",
     "visTypeTimeseries.aggUtils.cumulativeSumLabel": "累積和",

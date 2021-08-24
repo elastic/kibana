@@ -4185,7 +4185,7 @@
     "visTypeTimeseries.advancedSettings.maxBucketsText": "影响 TSVB 直方图密度。必须设置为高于“histogram:maxBars”。",
     "visTypeTimeseries.advancedSettings.maxBucketsTitle": "TSVB 存储桶限制",
     "visTypeTimeseries.aggUtils.averageLabel": "平均值",
-    "visTypeTimeseries.aggUtils.calculationLabel": "计算",
+    "visTypeTimeseries.aggUtils.bucketScriptLabel": "存储桶脚本",
     "visTypeTimeseries.aggUtils.cardinalityLabel": "基数",
     "visTypeTimeseries.aggUtils.countLabel": "计数",
     "visTypeTimeseries.aggUtils.cumulativeSumLabel": "累计和",
