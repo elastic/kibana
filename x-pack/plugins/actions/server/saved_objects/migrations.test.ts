@@ -7,10 +7,11 @@
 
 import uuid from 'uuid';
 import { getMigrations } from './migrations';
-import { RawAction } from '../types';
+import { ActionTaskParams, RawAction } from '../types';
 import { SavedObjectUnsanitizedDoc } from 'kibana/server';
 import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/mocks';
 import { migrationMocks } from 'src/core/server/mocks';
+import { omit } from 'lodash';
 
 const context = migrationMocks.createContext();
 const encryptedSavedObjectsSetup = encryptedSavedObjectsMock.createSetup();
@@ -114,6 +115,28 @@ describe('successful migrations', () => {
         attributes: {
           ...action.attributes,
           isMissingSecrets: false,
+        },
+      });
+    });
+  });
+
+  describe('8.0.0', () => {
+    test('resolveSavedObjectIdsInActionTaskParams', () => {
+      const migration800 = getMigrations(encryptedSavedObjectsSetup)['8.0.0'];
+      const action = getActionTaskParamsMockData({
+        relatedSavedObjects: {
+          id: '1234',
+          type: 'action',
+          typeId: 'test',
+          namespace: 'some-namespace',
+        },
+      });
+      const migratedAction = migration800(action, context);
+      expect(migratedAction).toEqual({
+        ...action,
+        attributes: {
+          ...omit(action.attributes, ['relatedSavedObjects']),
+          actionId: '12333',
         },
       });
     });
@@ -248,5 +271,20 @@ function getMockData(
     },
     id: uuid.v4(),
     type: 'action',
+  };
+}
+
+function getActionTaskParamsMockData(
+  overwrites: Record<string, unknown> = {}
+): SavedObjectUnsanitizedDoc<ActionTaskParams> {
+  return {
+    attributes: {
+      actionId: '1234',
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      params: `{ spaceId: 'user1', actionId: '1234' }` as any,
+      ...overwrites,
+    },
+    id: uuid.v4(),
+    type: 'action_task_params',
   };
 }
