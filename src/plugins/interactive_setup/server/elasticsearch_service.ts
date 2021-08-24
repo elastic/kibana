@@ -90,7 +90,7 @@ export interface EnrollResult {
   /**
    * PEM CA certificate for the Elasticsearch HTTP certificates.
    */
-  ca: string;
+  caCert: string;
   /**
    * Service account token for the "elastic/kibana" service account.
    */
@@ -207,9 +207,9 @@ export class ElasticsearchService {
         `Successfully enrolled with host "${host}", token name: ${enrollmentResponse.body.token.name}, CA certificate: ${enrollmentResponse.body.http_ca}`
       );
 
-      const enrollResult = {
+      const enrollResult: EnrollResult = {
         host,
-        ca: ElasticsearchService.createPemCertificate(enrollmentResponse.body.http_ca),
+        caCert: ElasticsearchService.createPemCertificate(enrollmentResponse.body.http_ca),
         serviceAccountToken: enrollmentResponse.body.token,
       };
 
@@ -217,7 +217,7 @@ export class ElasticsearchService {
       const authenticateClient = elasticsearch.createClient('authenticate', {
         hosts: [host],
         serviceAccountToken: enrollResult.serviceAccountToken.value,
-        ssl: { certificateAuthorities: [enrollResult.ca] },
+        ssl: { certificateAuthorities: [enrollResult.caCert] },
       });
 
       this.logger.debug(
@@ -250,6 +250,10 @@ export class ElasticsearchService {
     elasticsearch: ElasticsearchServicePreboot,
     { hosts, username, password, caCert }: AuthenticateParameters
   ): Promise<AuthenticateResult> {
+    if (caCert) {
+      caCert = ElasticsearchService.createPemCertificate(caCert);
+    }
+
     // We should iterate through all provided hosts until we find an accessible one.
     for (const host of hosts) {
       const client = elasticsearch.createClient('authenticate', {

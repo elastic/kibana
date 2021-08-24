@@ -29,6 +29,7 @@ import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import type { IHttpFetchError } from 'kibana/public';
 
 import type { Certificate } from '../common';
 import { TextTruncate } from './text_truncate';
@@ -136,6 +137,20 @@ export const ClusterConfigurationForm: FunctionComponent<ClusterConfigurationFor
 
   return (
     <EuiForm component="form" noValidate {...eventHandlers}>
+      {form.submitError && (
+        <>
+          <EuiCallOut
+            color="danger"
+            title={i18n.translate('interactiveSetup.enrollmentTokenForm.submitErrorTitle', {
+              defaultMessage: "Couldn't check address",
+            })}
+          >
+            {(form.submitError as IHttpFetchError).body?.message}
+          </EuiCallOut>
+          <EuiSpacer />
+        </>
+      )}
+
       <EuiFlexGroup responsive={false} alignItems="center" gutterSize="s">
         <EuiFlexItem grow={false} className="eui-textNoWrap">
           <FormattedMessage

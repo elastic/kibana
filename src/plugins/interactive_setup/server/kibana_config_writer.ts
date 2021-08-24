@@ -17,7 +17,7 @@ import { getDetailedErrorMessage } from './errors';
 
 export interface WriteConfigParameters {
   host: string;
-  ca?: string;
+  caCert?: string;
   username?: string;
   password?: string;
   serviceAccountToken?: { name: string; value: string };
@@ -56,10 +56,10 @@ export class KibanaConfigWriter {
   public async writeConfig(params: WriteConfigParameters) {
     const caPath = path.join(path.dirname(this.configPath), `ca_${Date.now()}.crt`);
 
-    if (params.ca) {
+    if (params.caCert) {
       this.logger.debug(`Writing CA certificate to ${caPath}.`);
       try {
-        await fs.writeFile(caPath, params.ca);
+        await fs.writeFile(caPath, params.caCert);
         this.logger.debug(`Successfully wrote CA certificate to ${caPath}.`);
       } catch (err) {
         this.logger.error(
@@ -81,7 +81,7 @@ export class KibanaConfigWriter {
       if (params.serviceAccountToken) {
         config['elasticsearch.serviceAccountToken'] = params.serviceAccountToken.value;
       }
-      if (params.ca) {
+      if (params.caCert) {
         config['elasticsearch.ssl.certificateAuthorities'] = [caPath];
       }
       await fs.appendFile(

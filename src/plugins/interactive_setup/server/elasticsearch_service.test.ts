@@ -406,7 +406,7 @@ some weird+ca/with
         await expect(
           setupContract.enroll({ apiKey: 'apiKey', hosts: ['host1', 'host2'] })
         ).resolves.toEqual({
-          ca: expectedCa,
+          caCert: expectedCa,
           host: 'host2',
           serviceAccountToken: {
             name: 'some-name',

@@ -74,7 +74,7 @@ describe('KibanaConfigWriter', () => {
 
       await expect(
         kibanaConfigWriter.writeConfig({
-          ca: 'ca-content',
+          caCert: 'ca-content',
           host: '',
           serviceAccountToken: { name: '', value: '' },
         })
@@ -90,7 +90,7 @@ describe('KibanaConfigWriter', () => {
 
       await expect(
         kibanaConfigWriter.writeConfig({
-          ca: 'ca-content',
+          caCert: 'ca-content',
           host: 'some-host',
           serviceAccountToken: { name: 'some-token', value: 'some-value' },
         })
@@ -103,7 +103,7 @@ describe('KibanaConfigWriter', () => {
         '/some/path/kibana.yml',
         `
 
-# This section was automatically generated during setup (service account token name is "some-token").
+# This section was automatically generated during setup.
 elasticsearch.hosts: [some-host]
 elasticsearch.serviceAccountToken: some-value
 elasticsearch.ssl.certificateAuthorities: [/some/path/ca_1234.crt]
@@ -115,7 +115,7 @@ elasticsearch.ssl.certificateAuthorities: [/some/path/ca_1234.crt]
     it('can successfully write CA certificate and elasticsearch config to the disk', async () => {
       await expect(
         kibanaConfigWriter.writeConfig({
-          ca: 'ca-content',
+          caCert: 'ca-content',
           host: 'some-host',
           serviceAccountToken: { name: 'some-token', value: 'some-value' },
         })
@@ -128,7 +128,7 @@ elasticsearch.ssl.certificateAuthorities: [/some/path/ca_1234.crt]
         '/some/path/kibana.yml',
         `
 
-# This section was automatically generated during setup (service account token name is "some-token").
+# This section was automatically generated during setup.
 elasticsearch.hosts: [some-host]
 elasticsearch.serviceAccountToken: some-value
 elasticsearch.ssl.certificateAuthorities: [/some/path/ca_1234.crt]

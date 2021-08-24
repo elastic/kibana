@@ -9,6 +9,7 @@
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -21,6 +22,7 @@ import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import type { IHttpFetchError } from 'kibana/public';
 
 import type { PingResult } from '../common';
 import type { ValidationErrors } from './use_form';
@@ -86,6 +88,20 @@ export const ClusterAddressForm: FunctionComponent<ClusterAddressFormProps> = ({
 
   return (
     <EuiForm component="form" noValidate {...eventHandlers}>
+      {form.submitError && (
+        <>
+          <EuiCallOut
+            color="danger"
+            title={i18n.translate('interactiveSetup.enrollmentTokenForm.submitErrorTitle', {
+              defaultMessage: "Couldn't check address",
+            })}
+          >
+            {(form.submitError as IHttpFetchError).body?.message}
+          </EuiCallOut>
+          <EuiSpacer />
+        </>
+      )}
+
       <EuiFormRow
         label={i18n.translate('interactiveSetup.clusterAddressForm.hostLabel', {
           defaultMessage: 'Address',
