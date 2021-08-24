@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { of } from 'rxjs';
 
-import type { SpacesApi, SpacesApiUi, SpacesApiUiComponent } from './api';
+import type { SpacesPluginStart } from './plugin';
+import type { SpacesApi } from './types';
+import type { SpacesApiUi, SpacesApiUiComponent } from './ui_api';
 
 const createApiMock = (): jest.Mocked<SpacesApi> => ({
   getActiveSpace$: jest.fn().mockReturnValue(of()),
@@ -24,6 +25,7 @@ const createApiUiMock = () => {
   const mock: SpacesApiUiMock = {
     components: createApiUiComponentsMock(),
     redirectLegacyUrl: jest.fn(),
+    useSpaces: jest.fn(),
   };
 
   return mock;
@@ -35,6 +37,7 @@ const createApiUiComponentsMock = () => {
   const mock: SpacesApiUiComponentMock = {
     getSpacesContextProvider: jest.fn(),
     getShareToSpaceFlyout: jest.fn(),
+    getCopyToSpaceFlyout: jest.fn(),
     getSpaceList: jest.fn(),
     getLegacyUrlConflict: jest.fn(),
     getSpaceAvatar: jest.fn(),
@@ -43,6 +46,8 @@ const createApiUiComponentsMock = () => {
   return mock;
 };
 
-export const spacesApiMock = {
-  create: createApiMock,
+const createStartContract = (): jest.Mocked<SpacesPluginStart> => createApiMock();
+
+export const spacesPluginMock = {
+  createStartContract,
 };

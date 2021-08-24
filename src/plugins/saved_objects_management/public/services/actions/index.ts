@@ -6,8 +6,5 @@
  * Side Public License, v 1.
  */
 
-module.exports = {
-  preset: '@kbn/test',
-  rootDir: '../../..',
-  roots: ['<rootDir>/src/plugins/spaces_oss'],
-};
+export { CopyToSpaceSavedObjectsManagementAction } from './copy_saved_objects_to_space_action';
+export { ShareToSpaceSavedObjectsManagementAction } from './share_saved_objects_to_space_action';

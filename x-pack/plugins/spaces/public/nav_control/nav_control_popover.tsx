@@ -11,8 +11,8 @@ import React, { Component, lazy, Suspense } from 'react';
 import type { Subscription } from 'rxjs';
 
 import type { ApplicationStart, Capabilities } from 'src/core/public';
-import type { Space } from 'src/plugins/spaces_oss/common';
 
+import type { Space } from '../../common';
 import { getSpaceAvatarComponent } from '../space_avatar';
 import type { SpacesManager } from '../spaces_manager';
 import { SpacesDescription } from './components/spaces_description';
