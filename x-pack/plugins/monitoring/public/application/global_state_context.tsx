@@ -21,7 +21,8 @@ interface State {
 export const GlobalStateContext = createContext({} as State);
 
 export const GlobalStateProvider = ({ query, toasts, children }: GlobalStateProviderProps) => {
-  const fakeRootScope: Partial<ng.IRootScopeService> = {
+  // TODO: remove fakeAngularRootScope and fakeAngularLocation when angular is removed
+  const fakeAngularRootScope: Partial<ng.IRootScopeService> = {
     $on: (
       name: string,
       listener: (event: ng.IAngularEvent, ...args: any[]) => any
@@ -39,7 +40,13 @@ export const GlobalStateProvider = ({ query, toasts, children }: GlobalStateProv
   };
 
   const localState: { [key: string]: unknown } = {};
-  const state = new GlobalState(query, toasts, fakeRootScope, fakeAngularLocation, localState);
+  const state = new GlobalState(
+    query,
+    toasts,
+    fakeAngularRootScope,
+    fakeAngularLocation,
+    localState
+  );
 
   const initialState: any = state.getState();
   for (const key in initialState) {

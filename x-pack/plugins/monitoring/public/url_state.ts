@@ -57,6 +57,7 @@ export interface MonitoringAppStateTransitions {
 const GLOBAL_STATE_KEY = '_g';
 const objectEquals = (objA: any, objB: any) => JSON.stringify(objA) === JSON.stringify(objB);
 
+// TODO: clean all angular references after angular is removed
 export class GlobalState {
   private readonly stateSyncRef: ISyncStateRef;
   private readonly stateContainer: StateContainer<
