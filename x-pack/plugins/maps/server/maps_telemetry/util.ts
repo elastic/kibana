@@ -110,10 +110,6 @@ export function getTelemetryLayerType(
     return TELEMETRY_LAYER_TYPE.KBN_TMS_RASTER;
   }
 
-  if (layerDescriptor.sourceDescriptor.type === SOURCE_TYPES.REGIONMAP_FILE) {
-    return TELEMETRY_LAYER_TYPE.KBN_REGION;
-  }
-
   if (layerDescriptor.sourceDescriptor.type === SOURCE_TYPES.EMS_XYZ) {
     return TELEMETRY_LAYER_TYPE.UX_TMS_RASTER;
   }
