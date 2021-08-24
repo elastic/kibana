@@ -88,6 +88,7 @@ export function FormRowSetting({ setting, value, onChange }: Props) {
         : [];
       return (
         <EuiComboBox
+          noSuggestions
           placeholder={i18n.translate(
             'xpack.apm.fleet_integration.settings.selectOrCreateOptions',
             { defaultMessage: 'Select or create options' }
