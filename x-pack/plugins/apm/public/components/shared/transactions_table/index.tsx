@@ -62,6 +62,8 @@ interface Props {
   environment: string;
   fixedHeight?: boolean;
   kuery: string;
+  start: string;
+  end: string;
 }
 
 export function TransactionsTable({
@@ -71,6 +73,8 @@ export function TransactionsTable({
   showAggregationAccurateCallout = false,
   environment,
   kuery,
+  start,
+  end,
 }: Props) {
   const [tableOptions, setTableOptions] = useState<{
     pageIndex: number;
@@ -88,13 +92,7 @@ export function TransactionsTable({
 
   const { transactionType, serviceName } = useApmServiceContext();
   const {
-    urlParams: {
-      start,
-      end,
-      latencyAggregationType,
-      comparisonType,
-      comparisonEnabled,
-    },
+    urlParams: { latencyAggregationType, comparisonType, comparisonEnabled },
   } = useUrlParams();
 
   const { comparisonStart, comparisonEnd } = getTimeRangeComparison({
