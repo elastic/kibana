@@ -94,6 +94,8 @@ interface Context {
     value: { [key: string]: boolean };
     set: React.Dispatch<React.SetStateAction<{ [key: string]: boolean }>>;
   };
+  /** List of fields detected in the Painless script */
+  fieldsInScript: string[];
 }
 
 const fieldPreviewContext = createContext<Context | undefined>(undefined);
@@ -157,6 +159,8 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
   const [from, setFrom] = useState<From>('cluster');
   /** Map of fields pinned to the top of the list */
   const [pinnedFields, setPinnedFields] = useState<{ [key: string]: boolean }>({});
+  /** Array of fields detected in the script (returned by the _execute API) */
+  const [fieldsInScript, setFieldsInScript] = useState<string[]>([]);
 
   const { documents, currentIdx } = clusterData;
   const currentDocument: EsDocument | undefined = useMemo(() => documents[currentIdx], [
@@ -317,7 +321,7 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
     [indexPattern, search]
   );
 
-  const setSingleFieldPreview = useCallback(
+  const updateSingleFieldPreview = useCallback(
     (fieldName: string, values: unknown[]) => {
       const [value] = values;
       const formattedValue = valueFormatter(value);
@@ -330,21 +334,25 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
     [valueFormatter]
   );
 
-  const setCompositeFieldPreview = useCallback(
-    (compositeName: string, compositeValues: Record<string, unknown[]>) => {
+  const updateCompositeFieldPreview = useCallback(
+    (compositeName: string | null, compositeValues: Record<string, unknown[]>) => {
       if (typeof compositeValues !== 'object') {
         return;
       }
+
+      const updatedFieldsInScript: string[] = [];
 
       const fields = Object.entries(compositeValues).map(([key, values]) => {
         // The Painless _execute API returns the composite field values under a map.
         // Each of the key is prefixed with "composite_field." (e.g. "composite_field.field1: ['value']")
         const { 1: fieldName } = key.split('composite_field.');
+        updatedFieldsInScript.push(fieldName);
+
         const [value] = values;
         const formattedValue = valueFormatter(value);
 
         return {
-          key: `${compositeName ?? '<undefined>'}.${fieldName}`,
+          key: `${compositeName ?? ''}.${fieldName}`,
           value,
           formattedValue,
         };
@@ -354,6 +362,8 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
         fields,
         error: null,
       });
+
+      setFieldsInScript(updatedFieldsInScript);
     },
     [valueFormatter]
   );
@@ -413,10 +423,10 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
       });
     } else {
       if (!Array.isArray(values)) {
-        setCompositeFieldPreview(params.name!, values);
+        updateCompositeFieldPreview(params.name, values);
         return;
       }
-      setSingleFieldPreview(params.name!, values);
+      updateSingleFieldPreview(params.name!, values);
     }
   }, [
     needToUpdatePreview,
@@ -425,8 +435,8 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
     currentDocId,
     getFieldPreview,
     notifications.toasts,
-    setSingleFieldPreview,
-    setCompositeFieldPreview,
+    updateSingleFieldPreview,
+    updateCompositeFieldPreview,
   ]);
 
   const goToNextDoc = useCallback(() => {
@@ -503,6 +513,7 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
         value: pinnedFields,
         set: setPinnedFields,
       },
+      fieldsInScript,
     }),
     [
       previewResponse,
@@ -522,6 +533,7 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
       from,
       reset,
       pinnedFields,
+      fieldsInScript,
     ]
   );
 
@@ -589,20 +601,23 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
     setPreviewResponse((prev) => {
       const { fields } = prev;
 
+      const updatedFields = fields.map((field) => {
+        let key: string = name ?? '';
+
+        if (type === 'composite') {
+          const { 1: fieldName } = field.key.split('.');
+          key = `${name ?? ''}.${fieldName}`;
+        }
+
+        return {
+          ...field,
+          key,
+        };
+      });
+
       return {
         ...prev,
-        // fields: [{ ...field, key: name ?? '', value: nextValue, formattedValue }],
-        fields: fields.map((field) => {
-          let key: string = name ?? '';
-          if (type === 'composite' && name !== null) {
-            const { 1: fieldName } = field.key.split('.');
-            key = `${name}.${fieldName}`;
-          }
-          return {
-            ...field,
-            key,
-          };
-        }),
+        fields: updatedFields,
       };
     });
   }, [name, type]);

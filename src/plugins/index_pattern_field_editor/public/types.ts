@@ -8,7 +8,12 @@
 
 import { FunctionComponent } from 'react';
 
-import { DataPublicPluginStart, RuntimeField, UsageCollectionStart } from './shared_imports';
+import {
+  DataPublicPluginStart,
+  RuntimeField,
+  UsageCollectionStart,
+  EnhancedRuntimeField,
+} from './shared_imports';
 import { OpenFieldEditorOptions } from './open_editor';
 import { OpenFieldDeleteModalOptions } from './open_delete_modal';
 import { FormatEditorServiceSetup, FormatEditorServiceStart } from './service';
@@ -38,11 +43,14 @@ export interface StartPlugins {
 
 export type InternalFieldType = 'concrete' | 'runtime';
 
-export interface Field extends RuntimeField {
+export interface Field extends EnhancedRuntimeField {
   name: string;
-  customLabel?: string;
-  popularity?: number;
-  format?: FieldFormatConfig;
+}
+
+export interface CompositeField extends RuntimeField {
+  type: 'composite';
+  name: string;
+  subFields: Record<string, EnhancedRuntimeField>;
 }
 
 export interface FieldFormatConfig {
