@@ -26,13 +26,7 @@
             "text": "PersistableStateService"
           },
           "<",
-          {
-            "pluginId": "kibanaUtils",
-            "scope": "common",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.Serializable",
-            "text": "Serializable"
-          },
+          "SerializableRecord",
           ">"
         ],
         "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
@@ -488,13 +482,7 @@
             "description": [],
             "signature": [
               "(filters: ",
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "common",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.Serializable",
-                "text": "Serializable"
-              },
+              "SerializableRecord",
               ", collector: unknown) => {}"
             ],
             "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
@@ -509,15 +497,7 @@
                 "label": "filters",
                 "description": [],
                 "signature": [
-                  "{ [key: string]: ",
-                  {
-                    "pluginId": "kibanaUtils",
-                    "scope": "common",
-                    "docId": "kibKibanaUtilsPluginApi",
-                    "section": "def-common.Serializable",
-                    "text": "Serializable"
-                  },
-                  "; }"
+                  "SerializableRecord"
                 ],
                 "path": "src/plugins/data/common/query/persistable_state.ts",
                 "deprecated": false
@@ -761,13 +741,9 @@
             "section": "def-common.TimeRange",
             "text": "TimeRange"
           },
-          " | undefined) => { bool: { must: ",
-          "DslQuery",
-          "[]; filter: ",
-          "Filter",
-          "[]; should: never[]; must_not: ",
-          "Filter",
-          "[]; }; }; } | { filterManager: ",
+          " | undefined) => { bool: ",
+          "BoolQuery",
+          "; }; } | { filterManager: ",
           {
             "pluginId": "data",
             "scope": "public",
@@ -876,13 +852,9 @@
                 "section": "def-common.TimeRange",
                 "text": "TimeRange"
               },
-              " | undefined) => { bool: { must: ",
-              "DslQuery",
-              "[]; filter: ",
-              "Filter",
-              "[]; should: never[]; must_not: ",
-              "Filter",
-              "[]; }; }; } | { filterManager: ",
+              " | undefined) => { bool: ",
+              "BoolQuery",
+              "; }; } | { filterManager: ",
               {
                 "pluginId": "data",
                 "scope": "public",
@@ -1418,13 +1390,9 @@
             "section": "def-common.TimeRange",
             "text": "TimeRange"
           },
-          " | undefined) => { bool: { must: ",
-          "DslQuery",
-          "[]; filter: ",
-          "Filter",
-          "[]; should: never[]; must_not: ",
-          "Filter",
-          "[]; }; }; } | { filterManager: ",
+          " | undefined) => { bool: ",
+          "BoolQuery",
+          "; }; } | { filterManager: ",
           {
             "pluginId": "data",
             "scope": "public",
@@ -1531,13 +1499,9 @@
                 "section": "def-common.TimeRange",
                 "text": "TimeRange"
               },
-              " | undefined) => { bool: { must: ",
-              "DslQuery",
-              "[]; filter: ",
-              "Filter",
-              "[]; should: never[]; must_not: ",
-              "Filter",
-              "[]; }; }; } | { filterManager: ",
+              " | undefined) => { bool: ",
+              "BoolQuery",
+              "; }; } | { filterManager: ",
               {
                 "pluginId": "data",
                 "scope": "public",
@@ -2037,27 +2001,6 @@
       },
       {
         "parentPluginId": "data",
-        "id": "def-public.InputTimeRange",
-        "type": "Type",
-        "tags": [],
-        "label": "InputTimeRange",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataQueryPluginApi",
-            "section": "def-common.TimeRange",
-            "text": "TimeRange"
-          },
-          " | { from: moment.Moment; to: moment.Moment; }"
-        ],
-        "path": "src/plugins/data/public/query/timefilter/types.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
         "id": "def-public.QueryStart",
         "type": "Type",
         "tags": [],
@@ -2120,13 +2063,9 @@
             "section": "def-common.TimeRange",
             "text": "TimeRange"
           },
-          " | undefined) => { bool: { must: ",
-          "DslQuery",
-          "[]; filter: ",
-          "Filter",
-          "[]; should: never[]; must_not: ",
-          "Filter",
-          "[]; }; }; }"
+          " | undefined) => { bool: ",
+          "BoolQuery",
+          "; }; }"
         ],
         "path": "src/plugins/data/public/query/query_service.ts",
         "deprecated": false,
@@ -2204,13 +2143,7 @@
             "text": "TimeRange"
           },
           "; setTime: (time: ",
-          {
-            "pluginId": "data",
-            "scope": "public",
-            "docId": "kibDataQueryPluginApi",
-            "section": "def-public.InputTimeRange",
-            "text": "InputTimeRange"
-          },
+          "InputTimeRange",
           ") => void; getRefreshInterval: () => ",
           {
             "pluginId": "data",
@@ -2245,6 +2178,10 @@
           },
           " | undefined) => ",
           "RangeFilter",
+          " | ",
+          "ScriptedRangeFilter",
+          " | ",
+          "MatchAllRangeFilter",
           " | undefined; getBounds: () => ",
           {
             "pluginId": "data",
@@ -2512,6 +2449,10 @@
           },
           ", options: { forceNow?: Date | undefined; fieldName?: string | undefined; } | undefined) => ",
           "RangeFilter",
+          " | ",
+          "ScriptedRangeFilter",
+          " | ",
+          "MatchAllRangeFilter",
           " | undefined"
         ],
         "path": "src/plugins/data/common/query/timefilter/get_time.ts",

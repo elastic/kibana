@@ -73,7 +73,6 @@ const AppRoot = React.memo(
                 end: '',
                 footerText: 'Events',
                 filters: [],
-                itemsPerPage: 50,
                 itemsPerPageOptions: [1, 2, 3],
                 loadingText: 'Loading events',
                 renderCellValue: () => <div data-test-subj="timeline-wrapper">test</div>,
