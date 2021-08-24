@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable import/no-extraneous-dependencies */
-
 import { filter } from 'lodash';
 import type { Node } from 'unist';
 import markdown from 'remark-parse';
