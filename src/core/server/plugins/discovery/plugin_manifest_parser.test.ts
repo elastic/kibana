@@ -65,7 +65,7 @@ test('return error when manifest content is not a valid JSON', async () => {
 
 test('return error when plugin id is missing', async () => {
   mockReadFile.mockImplementation((path, cb) => {
-    cb(null, Buffer.from(JSON.stringify({ version: 'some-version' })));
+    cb(null, Buffer.from(JSON.stringify({ version: 'some-version', owner: { name: 'foo' } })));
   });
 
   await expect(parseManifest(pluginPath, packageInfo)).rejects.toMatchObject({
@@ -77,7 +77,12 @@ test('return error when plugin id is missing', async () => {
 
 test('return error when plugin id includes `.` characters', async () => {
   mockReadFile.mockImplementation((path, cb) => {
-    cb(null, Buffer.from(JSON.stringify({ id: 'some.name', version: 'some-version' })));
+    cb(
+      null,
+      Buffer.from(
+        JSON.stringify({ id: 'some.name', version: 'some-version', owner: { name: 'foo' } })
+      )
+    );
   });
 
   await expect(parseManifest(pluginPath, packageInfo)).rejects.toMatchObject({
@@ -90,7 +95,12 @@ test('return error when plugin id includes `.` characters', async () => {
 test('return error when pluginId is not in camelCase format', async () => {
   expect.assertions(1);
   mockReadFile.mockImplementation((path, cb) => {
-    cb(null, Buffer.from(JSON.stringify({ id: 'some_name', version: 'kibana', server: true })));
+    cb(
+      null,
+      Buffer.from(
+        JSON.stringify({ id: 'some_name', version: 'kibana', server: true, owner: { name: 'foo' } })
+      )
+    );
   });
 
   await expect(parseManifest(pluginPath, packageInfo)).rejects.toMatchObject({
@@ -102,7 +112,7 @@ test('return error when pluginId is not in camelCase format', async () => {
 
 test('return error when plugin version is missing', async () => {
   mockReadFile.mockImplementation((path, cb) => {
-    cb(null, Buffer.from(JSON.stringify({ id: 'someId' })));
+    cb(null, Buffer.from(JSON.stringify({ id: 'someId', owner: { name: 'foo' } })));
   });
 
   await expect(parseManifest(pluginPath, packageInfo)).rejects.toMatchObject({
@@ -114,7 +124,10 @@ test('return error when plugin version is missing', async () => {
 
 test('return error when plugin expected Kibana version is lower than actual version', async () => {
   mockReadFile.mockImplementation((path, cb) => {
-    cb(null, Buffer.from(JSON.stringify({ id: 'someId', version: '6.4.2' })));
+    cb(
+      null,
+      Buffer.from(JSON.stringify({ id: 'someId', version: '6.4.2', owner: { name: 'foo' } }))
+    );
   });
 
   await expect(parseManifest(pluginPath, packageInfo)).rejects.toMatchObject({
@@ -128,7 +141,14 @@ test('return error when plugin expected Kibana version cannot be interpreted as 
   mockReadFile.mockImplementation((path, cb) => {
     cb(
       null,
-      Buffer.from(JSON.stringify({ id: 'someId', version: '1.0.0', kibanaVersion: 'non-sem-ver' }))
+      Buffer.from(
+        JSON.stringify({
+          id: 'someId',
+          version: '1.0.0',
+          kibanaVersion: 'non-sem-ver',
+          owner: { name: 'foo' },
+        })
+      )
     );
   });
 
@@ -141,7 +161,12 @@ test('return error when plugin expected Kibana version cannot be interpreted as 
 
 test('return error when plugin config path is not a string', async () => {
   mockReadFile.mockImplementation((path, cb) => {
-    cb(null, Buffer.from(JSON.stringify({ id: 'someId', version: '7.0.0', configPath: 2 })));
+    cb(
+      null,
+      Buffer.from(
+        JSON.stringify({ id: 'someId', version: '7.0.0', configPath: 2, owner: { name: 'foo' } })
+      )
+    );
   });
 
   await expect(parseManifest(pluginPath, packageInfo)).rejects.toMatchObject({
@@ -155,7 +180,14 @@ test('return error when plugin config path is an array that contains non-string 
   mockReadFile.mockImplementation((path, cb) => {
     cb(
       null,
-      Buffer.from(JSON.stringify({ id: 'someId', version: '7.0.0', configPath: ['config', 2] }))
+      Buffer.from(
+        JSON.stringify({
+          id: 'someId',
+          version: '7.0.0',
+          configPath: ['config', 2],
+          owner: { name: 'foo' },
+        })
+      )
     );
   });
 
@@ -168,7 +200,10 @@ test('return error when plugin config path is an array that contains non-string 
 
 test('return error when plugin expected Kibana version is higher than actual version', async () => {
   mockReadFile.mockImplementation((path, cb) => {
-    cb(null, Buffer.from(JSON.stringify({ id: 'someId', version: '7.0.1' })));
+    cb(
+      null,
+      Buffer.from(JSON.stringify({ id: 'someId', version: '7.0.1', owner: { name: 'foo' } }))
+    );
   });
 
   await expect(parseManifest(pluginPath, packageInfo)).rejects.toMatchObject({
@@ -180,7 +215,10 @@ test('return error when plugin expected Kibana version is higher than actual ver
 
 test('return error when both `server` and `ui` are set to `false` or missing', async () => {
   mockReadFile.mockImplementation((path, cb) => {
-    cb(null, Buffer.from(JSON.stringify({ id: 'someId', version: '7.0.0' })));
+    cb(
+      null,
+      Buffer.from(JSON.stringify({ id: 'someId', version: '7.0.0', owner: { name: 'foo' } }))
+    );
   });
 
   await expect(parseManifest(pluginPath, packageInfo)).rejects.toMatchObject({
@@ -192,7 +230,15 @@ test('return error when both `server` and `ui` are set to `false` or missing', a
   mockReadFile.mockImplementation((path, cb) => {
     cb(
       null,
-      Buffer.from(JSON.stringify({ id: 'someId', version: '7.0.0', server: false, ui: false }))
+      Buffer.from(
+        JSON.stringify({
+          id: 'someId',
+          version: '7.0.0',
+          server: false,
+          ui: false,
+          owner: { name: 'foo' },
+        })
+      )
     );
   });
 
@@ -214,6 +260,7 @@ test('return error when manifest contains unrecognized properties', async () => 
           server: true,
           unknownOne: 'one',
           unknownTwo: true,
+          owner: { name: 'foo' },
         })
       )
     );
@@ -237,6 +284,7 @@ test('returns error when manifest contains unrecognized `type`', async () => {
           kibanaVersion: '7.0.0',
           type: 'unknown',
           server: true,
+          owner: { name: 'foo' },
         })
       )
     );
@@ -252,7 +300,12 @@ test('returns error when manifest contains unrecognized `type`', async () => {
 describe('configPath', () => {
   test('falls back to plugin id if not specified', async () => {
     mockReadFile.mockImplementation((path, cb) => {
-      cb(null, Buffer.from(JSON.stringify({ id: 'plugin', version: '7.0.0', server: true })));
+      cb(
+        null,
+        Buffer.from(
+          JSON.stringify({ id: 'plugin', version: '7.0.0', server: true, owner: { name: 'foo' } })
+        )
+      );
     });
 
     const manifest = await parseManifest(pluginPath, packageInfo);
@@ -261,7 +314,12 @@ describe('configPath', () => {
 
   test('falls back to plugin id in snakeCase format', async () => {
     mockReadFile.mockImplementation((path, cb) => {
-      cb(null, Buffer.from(JSON.stringify({ id: 'someId', version: '7.0.0', server: true })));
+      cb(
+        null,
+        Buffer.from(
+          JSON.stringify({ id: 'someId', version: '7.0.0', server: true, owner: { name: 'foo' } })
+        )
+      );
     });
 
     const manifest = await parseManifest(pluginPath, packageInfo);
@@ -273,7 +331,13 @@ describe('configPath', () => {
       cb(
         null,
         Buffer.from(
-          JSON.stringify({ id: 'someId', configPath: 'somePath', version: '7.0.0', server: true })
+          JSON.stringify({
+            id: 'someId',
+            configPath: 'somePath',
+            version: '7.0.0',
+            server: true,
+            owner: { name: 'foo' },
+          })
         )
       );
     });
@@ -287,7 +351,13 @@ describe('configPath', () => {
       cb(
         null,
         Buffer.from(
-          JSON.stringify({ id: 'someId', configPath: ['somePath'], version: '7.0.0', server: true })
+          JSON.stringify({
+            id: 'someId',
+            configPath: ['somePath'],
+            version: '7.0.0',
+            server: true,
+            owner: { name: 'foo' },
+          })
         )
       );
     });
@@ -299,7 +369,12 @@ describe('configPath', () => {
 
 test('set defaults for all missing optional fields', async () => {
   mockReadFile.mockImplementation((path, cb) => {
-    cb(null, Buffer.from(JSON.stringify({ id: 'someId', version: '7.0.0', server: true })));
+    cb(
+      null,
+      Buffer.from(
+        JSON.stringify({ id: 'someId', version: '7.0.0', server: true, owner: { name: 'foo' } })
+      )
+    );
   });
 
   await expect(parseManifest(pluginPath, packageInfo)).resolves.toEqual({
@@ -313,6 +388,7 @@ test('set defaults for all missing optional fields', async () => {
     requiredBundles: [],
     server: true,
     ui: false,
+    owner: { name: 'foo' },
   });
 });
 
@@ -330,6 +406,7 @@ test('return all set optional fields as they are in manifest', async () => {
           requiredPlugins: ['some-required-plugin', 'some-required-plugin-2'],
           optionalPlugins: ['some-optional-plugin'],
           ui: true,
+          owner: { name: 'foo' },
         })
       )
     );
@@ -346,6 +423,7 @@ test('return all set optional fields as they are in manifest', async () => {
     requiredPlugins: ['some-required-plugin', 'some-required-plugin-2'],
     server: false,
     ui: true,
+    owner: { name: 'foo' },
   });
 });
 
@@ -361,6 +439,7 @@ test('return manifest when plugin expected Kibana version matches actual version
           kibanaVersion: '7.0.0-alpha2',
           requiredPlugins: ['some-required-plugin'],
           server: true,
+          owner: { name: 'foo' },
         })
       )
     );
@@ -377,6 +456,7 @@ test('return manifest when plugin expected Kibana version matches actual version
     requiredBundles: [],
     server: true,
     ui: false,
+    owner: { name: 'foo' },
   });
 });
 
@@ -392,6 +472,7 @@ test('return manifest when plugin expected Kibana version is `kibana`', async ()
           requiredPlugins: ['some-required-plugin'],
           server: true,
           ui: true,
+          owner: { name: 'foo' },
         })
       )
     );
@@ -408,5 +489,6 @@ test('return manifest when plugin expected Kibana version is `kibana`', async ()
     requiredBundles: [],
     server: true,
     ui: true,
+    owner: { name: 'foo' },
   });
 });
