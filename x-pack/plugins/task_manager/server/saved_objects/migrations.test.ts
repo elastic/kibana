@@ -81,6 +81,22 @@ describe('successful migrations', () => {
         },
       });
     });
+
+    test('skip transformation for defult space scenario', () => {
+      const migration800 = getMigrations()['8.0.0'];
+      const taskInstance = getMockData({
+        taskType: 'alerting:123456',
+        params: JSON.stringify({ spaceId: 'default', alertId: '123456' }),
+      });
+
+      expect(migration800(taskInstance, migrationContext)).toEqual({
+        ...taskInstance,
+        attributes: {
+          ...taskInstance.attributes,
+          params: '{"spaceId":"default","alertId":"123456"}',
+        },
+      });
+    });
   });
 });
 
