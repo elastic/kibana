@@ -6,7 +6,6 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { EuiText, EuiButton, EuiSpacer } from '@elastic/eui';
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
@@ -47,10 +46,9 @@ const SnapshotRestoreAppLink: React.FunctionComponent = () => {
 
   return (
     <EuiButton href={snapshotRestoreUrl} data-test-subj="snapshotRestoreLink">
-      <FormattedMessage
-        id="xpack.upgradeAssistant.overview.snapshotRestoreLink"
-        defaultMessage="Create snapshot"
-      />
+      {i18n.translate('xpack.upgradeAssistant.overview.snapshotRestoreLink', {
+        defaultMessage: 'Create snapshot',
+      })}
     </EuiButton>
   );
 };
