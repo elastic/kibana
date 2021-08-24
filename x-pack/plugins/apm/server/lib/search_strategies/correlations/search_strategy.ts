@@ -16,6 +16,7 @@ import {
 
 import type {
   SearchServiceParams,
+  SearchServiceRawResponse,
   SearchServiceValue,
 } from '../../../../common/search_strategies/correlations/types';
 
@@ -100,20 +101,22 @@ export const apmCorrelationsSearchStrategyProvider = (
 
       const took = Date.now() - started;
 
+      const rawResponse: SearchServiceRawResponse = {
+        ccsWarning,
+        log,
+        took,
+        values,
+        percentileThresholdValue,
+        overallHistogram,
+      };
+
       return of({
         id,
         loaded,
         total,
         isRunning,
         isPartial: isRunning,
-        rawResponse: {
-          ccsWarning,
-          log,
-          took,
-          values,
-          percentileThresholdValue,
-          overallHistogram,
-        },
+        rawResponse,
       });
     },
     cancel: async (id, options, deps) => {

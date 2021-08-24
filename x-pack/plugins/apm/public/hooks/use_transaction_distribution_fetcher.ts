@@ -14,31 +14,21 @@ import {
   isErrorResponse,
 } from '../../../../../src/plugins/data/public';
 import type {
-  HistogramItem,
   SearchServiceParams,
-  SearchServiceValue,
+  SearchServiceRawResponse,
 } from '../../common/search_strategies/correlations/types';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 import { ApmPluginStartDeps } from '../plugin';
-
-interface RawResponse {
-  percentileThresholdValue?: number;
-  took: number;
-  values: SearchServiceValue[];
-  overallHistogram: HistogramItem[];
-  log: string[];
-  ccsWarning: boolean;
-}
 
 interface TransactionDistributionFetcherState {
   error?: Error;
   isComplete: boolean;
   isRunning: boolean;
   loaded: number;
-  ccsWarning: RawResponse['ccsWarning'];
-  log: RawResponse['log'];
-  transactionDistribution?: RawResponse['overallHistogram'];
-  percentileThresholdValue?: RawResponse['percentileThresholdValue'];
+  ccsWarning: SearchServiceRawResponse['ccsWarning'];
+  log: SearchServiceRawResponse['log'];
+  transactionDistribution?: SearchServiceRawResponse['overallHistogram'];
+  percentileThresholdValue?: SearchServiceRawResponse['percentileThresholdValue'];
   timeTook?: number;
   total: number;
 }
@@ -63,7 +53,9 @@ export function useTransactionDistributionFetcher() {
   const abortCtrl = useRef(new AbortController());
   const searchSubscription$ = useRef<Subscription>();
 
-  function setResponse(response: IKibanaSearchResponse<RawResponse>) {
+  function setResponse(
+    response: IKibanaSearchResponse<SearchServiceRawResponse>
+  ) {
     setFetchState((prevState) => ({
       ...prevState,
       isRunning: response.isRunning || false,
@@ -112,12 +104,15 @@ export function useTransactionDistributionFetcher() {
 
     // Submit the search request using the `data.search` service.
     searchSubscription$.current = data.search
-      .search<IKibanaSearchRequest, IKibanaSearchResponse<RawResponse>>(req, {
+      .search<
+        IKibanaSearchRequest,
+        IKibanaSearchResponse<SearchServiceRawResponse>
+      >(req, {
         strategy: 'apmCorrelationsSearchStrategy',
         abortSignal: abortCtrl.current.signal,
       })
       .subscribe({
-        next: (res: IKibanaSearchResponse<RawResponse>) => {
+        next: (res: IKibanaSearchResponse<SearchServiceRawResponse>) => {
           setResponse(res);
           if (isCompleteResponse(res)) {
             searchSubscription$.current?.unsubscribe();

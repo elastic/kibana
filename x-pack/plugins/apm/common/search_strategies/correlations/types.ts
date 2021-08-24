@@ -52,3 +52,12 @@ export interface AsyncSearchProviderProgress {
   loadedFieldValuePairs: number;
   loadedHistograms: number;
 }
+
+export interface SearchServiceRawResponse {
+  ccsWarning: boolean;
+  log: string[];
+  overallHistogram?: HistogramItem[];
+  percentileThresholdValue?: number;
+  took: number;
+  values: SearchServiceValue[];
+}
