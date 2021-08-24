@@ -7,16 +7,24 @@
 
 import { getPrepackagedRules } from './get_prepackaged_rules';
 import { isEmpty } from 'lodash/fp';
-import { AddPrepackagedRulesSchemaDecoded } from '../../../../common/detection_engine/schemas/request/add_prepackaged_rules_schema';
 
 describe('get_existing_prepackaged_rules', () => {
-  test('should not throw any errors with the existing checked in pre-packaged rules', () => {
-    expect(() => getPrepackagedRules()).not.toThrow();
-  });
+  test.each([
+    ['Legacy', false],
+    ['RAC', true],
+  ])(
+    'should not throw any errors with the existing checked in pre-packaged rules - %s',
+    (_, isRuleRegistryEnabled) => {
+      expect(() => getPrepackagedRules(undefined, isRuleRegistryEnabled)).not.toThrow();
+    }
+  );
 
-  test('no rule should have the same rule_id as another rule_id', () => {
-    const prePackagedRules = getPrepackagedRules();
-    let existingRuleIds: AddPrepackagedRulesSchemaDecoded[] = [];
+  test.each([
+    ['Legacy', false],
+    ['RAC', true],
+  ])('no rule should have the same rule_id as another rule_id - %s', (_, isRuleRegistryEnabled) => {
+    const prePackagedRules = getPrepackagedRules(undefined, isRuleRegistryEnabled);
+    let existingRuleIds: Array<{ name: string; rule_id: string }> = [];
     prePackagedRules.forEach((rule) => {
       const foundDuplicate = existingRuleIds.reduce((accum, existingRule) => {
         if (existingRule.rule_id === rule.rule_id) {

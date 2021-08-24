@@ -45,13 +45,15 @@ export const getRulesCount = async ({
 export const getRules = async ({
   rulesClient,
   filter,
+  isRuleRegistryEnabled,
 }: {
   rulesClient: RulesClient;
   filter: string;
-}): Promise<RuleAlertType[]> => {
+  isRuleRegistryEnabled: boolean;
+}) => {
   const count = await getRulesCount({ rulesClient, filter });
   const rules = await findRules<RuleParams>({
-    isRuleRegistryEnabled: false, // TODO: support RAC
+    isRuleRegistryEnabled,
     rulesClient,
     filter,
     perPage: count,
@@ -73,22 +75,28 @@ export const getRules = async ({
 
 export const getNonPackagedRules = async ({
   rulesClient,
+  isRuleRegistryEnabled,
 }: {
   rulesClient: RulesClient;
+  isRuleRegistryEnabled: boolean;
 }): Promise<RuleAlertType[]> => {
   return getRules({
     rulesClient,
     filter: FILTER_NON_PREPACKED_RULES,
+    isRuleRegistryEnabled,
   });
 };
 
 export const getExistingPrepackagedRules = async ({
   rulesClient,
+  isRuleRegistryEnabled,
 }: {
   rulesClient: RulesClient;
+  isRuleRegistryEnabled: boolean;
 }): Promise<RuleAlertType[]> => {
   return getRules({
     rulesClient,
     filter: FILTER_PREPACKED_RULES,
+    isRuleRegistryEnabled,
   });
 };

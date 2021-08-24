@@ -32,7 +32,7 @@ describe('getExportAll', () => {
     result.data = [alert];
     rulesClient.find.mockResolvedValue(result);
 
-    const exports = await getExportAll(rulesClient);
+    const exports = await getExportAll(rulesClient, false); // TODO: support RAC
     const rulesJson = JSON.parse(exports.rulesNdjson);
     const detailsJson = JSON.parse(exports.exportDetails);
     expect(rulesJson).toEqual({
@@ -94,7 +94,7 @@ describe('getExportAll', () => {
 
     rulesClient.find.mockResolvedValue(findResult);
 
-    const exports = await getExportAll(rulesClient);
+    const exports = await getExportAll(rulesClient, false); // TODO: support RAC
     expect(exports).toEqual({
       rulesNdjson: '',
       exportDetails: '{"exported_count":0,"missing_rules":[],"missing_rules_count":0}\n',

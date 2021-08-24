@@ -12,12 +12,13 @@ import { transformAlertsToRules } from '../routes/rules/utils';
 import { transformDataToNdjson } from '../../../utils/read_stream/create_stream_from_ndjson';
 
 export const getExportAll = async (
-  rulesClient: RulesClient
+  rulesClient: RulesClient,
+  isRuleRegistryEnabled: boolean
 ): Promise<{
   rulesNdjson: string;
   exportDetails: string;
 }> => {
-  const ruleAlertTypes = await getNonPackagedRules({ rulesClient });
+  const ruleAlertTypes = await getNonPackagedRules({ rulesClient, isRuleRegistryEnabled });
   const rules = transformAlertsToRules(ruleAlertTypes);
   const rulesNdjson = transformDataToNdjson(rules);
   const exportDetails = getExportDetailsNdjson(rules);

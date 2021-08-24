@@ -11,7 +11,10 @@ import {
   PrePackagedRulesAndTimelinesStatusSchema,
   prePackagedRulesAndTimelinesStatusSchema,
 } from '../../../../../common/detection_engine/schemas/response/prepackaged_rules_status_schema';
-import type { SecuritySolutionPluginRouter } from '../../../../types';
+import type {
+  SecuritySolutionPluginRouter,
+  SecuritySolutionRequestHandlerContext,
+} from '../../../../types';
 import { DETECTION_ENGINE_PREPACKAGED_URL } from '../../../../../common/constants';
 import { buildSiemResponse } from '../utils';
 
@@ -28,12 +31,115 @@ import {
   checkTimelinesStatus,
   checkTimelineStatusRt,
 } from '../../../timeline/utils/check_timelines_status';
+import { IRuleDataClient } from '../../../../../../rule_registry/server';
+import {
+  AddPrepackagedRulesSchema,
+  AddPrepackagedRulesSchemaDecoded,
+} from '../../../../../common/detection_engine/schemas/request';
+import { KibanaRequest, KibanaResponseFactory } from '../../../../../../../../src/core/server';
+import { RuleAlertType, RuleAlertTypeRAC } from '../../rules/types';
 
 export const getPrepackagedRulesStatusRoute = (
   router: SecuritySolutionPluginRouter,
   config: ConfigType,
-  security: SetupPlugins['security']
+  security: SetupPlugins['security'],
+  ruleDataClient?: IRuleDataClient | null
 ) => {
+  const isRuleRegistryEnabled = ruleDataClient != null;
+  const handleRequestFactory = <
+    TSchema extends AddPrepackagedRulesSchema,
+    TSchemaDecoded extends AddPrepackagedRulesSchemaDecoded,
+    TAlertType extends RuleAlertType
+  >() => async (
+    context: SecuritySolutionRequestHandlerContext,
+    request: KibanaRequest<unknown, unknown, unknown, 'get'>,
+    response: KibanaResponseFactory
+  ) => {
+    const savedObjectsClient = context.core.savedObjects.client;
+    const siemResponse = buildSiemResponse(response);
+    const rulesClient = context.alerting?.getRulesClient();
+    const ruleAssetsClient = ruleAssetSavedObjectsClientFactory(savedObjectsClient);
+
+    if (!rulesClient) {
+      return siemResponse.error({ statusCode: 404 });
+    }
+
+    try {
+      const latestPrepackagedRules = (await getLatestPrepackagedRules<TSchema>(
+        ruleAssetsClient,
+        config.prebuiltRulesFromFileSystem,
+        config.prebuiltRulesFromSavedObjects,
+        isRuleRegistryEnabled
+      )) as TSchemaDecoded[];
+      const customRules = await findRules({
+        isRuleRegistryEnabled,
+        rulesClient,
+        perPage: 1,
+        page: 1,
+        sortField: 'enabled',
+        sortOrder: 'desc',
+        filter: 'alert.attributes.tags:"__internal_immutable:false"',
+        fields: undefined,
+      });
+      const frameworkRequest = await buildFrameworkRequest(context, security, request);
+      const prepackagedRules = (await getExistingPrepackagedRules({
+        rulesClient,
+        isRuleRegistryEnabled,
+      })) as TAlertType[];
+
+      const rulesToInstall = getRulesToInstall<TSchemaDecoded, TAlertType>(
+        latestPrepackagedRules,
+        prepackagedRules
+      );
+      const rulesToUpdate = getRulesToUpdate<TSchemaDecoded, TAlertType>(
+        latestPrepackagedRules,
+        prepackagedRules
+      );
+      const prepackagedTimelineStatus = await checkTimelinesStatus(frameworkRequest);
+      const [validatedprepackagedTimelineStatus] = validate(
+        prepackagedTimelineStatus,
+        checkTimelineStatusRt
+      );
+
+      const prepackagedRulesStatus: PrePackagedRulesAndTimelinesStatusSchema = {
+        rules_custom_installed: customRules.total,
+        rules_installed: prepackagedRules.length,
+        rules_not_installed: rulesToInstall.length,
+        rules_not_updated: rulesToUpdate.length,
+        timelines_installed: validatedprepackagedTimelineStatus?.prepackagedTimelines.length ?? 0,
+        timelines_not_installed: validatedprepackagedTimelineStatus?.timelinesToInstall.length ?? 0,
+        timelines_not_updated: validatedprepackagedTimelineStatus?.timelinesToUpdate.length ?? 0,
+      };
+      const [validated, errors] = validate(
+        prepackagedRulesStatus,
+        prePackagedRulesAndTimelinesStatusSchema
+      );
+      if (errors != null) {
+        return siemResponse.error({ statusCode: 500, body: errors });
+      } else {
+        return response.ok({ body: validated ?? {} });
+      }
+    } catch (err) {
+      const error = transformError(err);
+      return siemResponse.error({
+        body: error.message,
+        statusCode: error.statusCode,
+      });
+    }
+  };
+
+  const handler = isRuleRegistryEnabled
+    ? handleRequestFactory<
+        AddPrepackagedRulesSchema,
+        AddPrepackagedRulesSchemaDecoded,
+        RuleAlertTypeRAC
+      >()
+    : handleRequestFactory<
+        AddPrepackagedRulesSchema,
+        AddPrepackagedRulesSchemaDecoded,
+        RuleAlertType
+      >();
+
   router.get(
     {
       path: `${DETECTION_ENGINE_PREPACKAGED_URL}/_status`,
@@ -42,69 +148,6 @@ export const getPrepackagedRulesStatusRoute = (
         tags: ['access:securitySolution'],
       },
     },
-    async (context, request, response) => {
-      const savedObjectsClient = context.core.savedObjects.client;
-      const siemResponse = buildSiemResponse(response);
-      const rulesClient = context.alerting?.getRulesClient();
-      const ruleAssetsClient = ruleAssetSavedObjectsClientFactory(savedObjectsClient);
-
-      if (!rulesClient) {
-        return siemResponse.error({ statusCode: 404 });
-      }
-
-      try {
-        const latestPrepackagedRules = await getLatestPrepackagedRules(
-          ruleAssetsClient,
-          config.prebuiltRulesFromFileSystem,
-          config.prebuiltRulesFromSavedObjects
-        );
-        const customRules = await findRules({
-          isRuleRegistryEnabled: false, // TODO: support RAC
-          rulesClient,
-          perPage: 1,
-          page: 1,
-          sortField: 'enabled',
-          sortOrder: 'desc',
-          filter: 'alert.attributes.tags:"__internal_immutable:false"',
-          fields: undefined,
-        });
-        const frameworkRequest = await buildFrameworkRequest(context, security, request);
-        const prepackagedRules = await getExistingPrepackagedRules({ rulesClient });
-
-        const rulesToInstall = getRulesToInstall(latestPrepackagedRules, prepackagedRules);
-        const rulesToUpdate = getRulesToUpdate(latestPrepackagedRules, prepackagedRules);
-        const prepackagedTimelineStatus = await checkTimelinesStatus(frameworkRequest);
-        const [validatedprepackagedTimelineStatus] = validate(
-          prepackagedTimelineStatus,
-          checkTimelineStatusRt
-        );
-
-        const prepackagedRulesStatus: PrePackagedRulesAndTimelinesStatusSchema = {
-          rules_custom_installed: customRules.total,
-          rules_installed: prepackagedRules.length,
-          rules_not_installed: rulesToInstall.length,
-          rules_not_updated: rulesToUpdate.length,
-          timelines_installed: validatedprepackagedTimelineStatus?.prepackagedTimelines.length ?? 0,
-          timelines_not_installed:
-            validatedprepackagedTimelineStatus?.timelinesToInstall.length ?? 0,
-          timelines_not_updated: validatedprepackagedTimelineStatus?.timelinesToUpdate.length ?? 0,
-        };
-        const [validated, errors] = validate(
-          prepackagedRulesStatus,
-          prePackagedRulesAndTimelinesStatusSchema
-        );
-        if (errors != null) {
-          return siemResponse.error({ statusCode: 500, body: errors });
-        } else {
-          return response.ok({ body: validated ?? {} });
-        }
-      } catch (err) {
-        const error = transformError(err);
-        return siemResponse.error({
-          body: error.message,
-          statusCode: error.statusCode,
-        });
-      }
-    }
+    handler
   );
 };

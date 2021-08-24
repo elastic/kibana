@@ -65,7 +65,7 @@ export const exportRulesRoute = (router: SecuritySolutionPluginRouter, config: C
         const exported =
           request.body?.objects != null
             ? await getExportByObjectIds(rulesClient, request.body.objects)
-            : await getExportAll(rulesClient);
+            : await getExportAll(rulesClient, false); // TODO: support RAC
 
         const responseBody = request.query.exclude_export_details
           ? exported.rulesNdjson

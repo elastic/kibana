@@ -157,7 +157,7 @@ export const createRulesRoute = (
     }
   };
 
-  const factory = isRuleRegistryEnabled
+  const handler = isRuleRegistryEnabled
     ? handleRequestFactory<RACCreateRulesSchema>()
     : handleRequestFactory<CreateRulesSchema>();
   const schema = isRuleRegistryEnabled ? racCreateRulesSchema : createRulesSchema;
@@ -172,6 +172,6 @@ export const createRulesRoute = (
         tags: ['access:securitySolution'],
       },
     },
-    factory
+    handler
   );
 };

@@ -5,13 +5,9 @@
  * 2.0.
  */
 
-import {
-  AddPrepackagedRulesSchema,
-  AddPrepackagedRulesSchemaDecoded,
-} from './add_prepackaged_rules_schema';
 import { DEFAULT_MAX_SIGNALS } from '../../../constants';
 
-export const getAddPrepackagedRulesSchemaMock = (): AddPrepackagedRulesSchema => ({
+export const getAddPrepackagedRulesSchemaMock = (isRuleRegistryEnabled: boolean) => ({
   description: 'some description',
   name: 'Query with a rule id',
   query: 'user.name: root or user.name: admin',
@@ -21,6 +17,7 @@ export const getAddPrepackagedRulesSchemaMock = (): AddPrepackagedRulesSchema =>
   language: 'kuery',
   rule_id: 'rule-1',
   version: 1,
+  ...(isRuleRegistryEnabled ? { namespace: 'default' } : {}),
 });
 
 export const getAddPrepackagedRulesSchemaDecodedMock = (isRuleRegistryEnabled: boolean) => ({
@@ -30,7 +27,7 @@ export const getAddPrepackagedRulesSchemaDecodedMock = (isRuleRegistryEnabled: b
   query: 'user.name: root or user.name: admin',
   severity: 'high',
   severity_mapping: [],
-  type: isRuleRegistryEnabled ? 'siem.query' : 'query',
+  type: 'query',
   risk_score: 55,
   risk_score_mapping: [],
   language: 'kuery',
@@ -51,7 +48,7 @@ export const getAddPrepackagedRulesSchemaDecodedMock = (isRuleRegistryEnabled: b
   ...(isRuleRegistryEnabled ? { namespace: 'default' } : {}),
 });
 
-export const getAddPrepackagedThreatMatchRulesSchemaMock = (): AddPrepackagedRulesSchema => ({
+export const getAddPrepackagedThreatMatchRulesSchemaMock = (isRuleRegistryEnabled: boolean) => ({
   description: 'some description',
   name: 'Query with a rule id',
   query: 'user.name: root or user.name: admin',
@@ -92,9 +89,12 @@ export const getAddPrepackagedThreatMatchRulesSchemaMock = (): AddPrepackagedRul
       },
     },
   ],
+  ...(isRuleRegistryEnabled ? { namespace: 'default' } : {}),
 });
 
-export const getAddPrepackagedThreatMatchRulesSchemaDecodedMock = (): AddPrepackagedRulesSchemaDecoded => ({
+export const getAddPrepackagedThreatMatchRulesSchemaDecodedMock = (
+  isRuleRegistryEnabled: boolean
+) => ({
   author: [],
   description: 'some description',
   name: 'Query with a rule id',
@@ -150,4 +150,5 @@ export const getAddPrepackagedThreatMatchRulesSchemaDecodedMock = (): AddPrepack
       },
     },
   ],
+  ...(isRuleRegistryEnabled ? { namespace: 'default' } : {}),
 });

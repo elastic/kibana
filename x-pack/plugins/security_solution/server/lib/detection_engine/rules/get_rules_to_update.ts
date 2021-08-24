@@ -15,10 +15,13 @@ import { RuleAlertType } from './types';
  * @param rulesFromFileSystem The rules on the file system to check against installed
  * @param installedRules The installed rules
  */
-export const getRulesToUpdate = (
-  rulesFromFileSystem: AddPrepackagedRulesSchemaDecoded[],
-  installedRules: RuleAlertType[]
-): AddPrepackagedRulesSchemaDecoded[] => {
+export const getRulesToUpdate = <
+  TSchemaDecoded extends AddPrepackagedRulesSchemaDecoded,
+  TAlertType extends RuleAlertType
+>(
+  rulesFromFileSystem: TSchemaDecoded[],
+  installedRules: TAlertType[]
+) => {
   return rulesFromFileSystem
     .filter((ruleFromFileSystem) => filterInstalledRules(ruleFromFileSystem, installedRules))
     .map((ruleFromFileSystem) => mergeExceptionLists(ruleFromFileSystem, installedRules));

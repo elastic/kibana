@@ -8,10 +8,13 @@
 import { AddPrepackagedRulesSchemaDecoded } from '../../../../common/detection_engine/schemas/request/add_prepackaged_rules_schema';
 import { RuleAlertType } from './types';
 
-export const getRulesToInstall = (
-  rulesFromFileSystem: AddPrepackagedRulesSchemaDecoded[],
-  installedRules: RuleAlertType[]
-): AddPrepackagedRulesSchemaDecoded[] => {
+export const getRulesToInstall = <
+  TSchemaDecoded extends AddPrepackagedRulesSchemaDecoded,
+  TAlertType extends RuleAlertType
+>(
+  rulesFromFileSystem: TSchemaDecoded[],
+  installedRules: TAlertType[]
+) => {
   return rulesFromFileSystem.filter(
     (rule) => !installedRules.some((installedRule) => installedRule.params.ruleId === rule.rule_id)
   );

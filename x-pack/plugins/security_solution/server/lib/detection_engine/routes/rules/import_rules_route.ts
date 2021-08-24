@@ -45,6 +45,7 @@ import { createRulesStreamFromNdJson } from '../../rules/create_rules_stream_fro
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import { HapiReadableStream } from '../../rules/types';
 import { PartialFilter } from '../../types';
+import { IRuleDataClient } from '../../../../../../rule_registry/server';
 
 type PromiseFromStreams = ImportRulesSchemaDecoded | Error;
 
@@ -53,8 +54,10 @@ const CHUNK_PARSED_OBJECT_SIZE = 50;
 export const importRulesRoute = (
   router: SecuritySolutionPluginRouter,
   config: ConfigType,
-  ml: SetupPlugins['ml']
+  ml: SetupPlugins['ml'],
+  ruleDataClient?: IRuleDataClient | null
 ) => {
+  const isRuleRegistryEnabled = ruleDataClient != null;
   router.post(
     {
       path: `${DETECTION_ENGINE_RULES_URL}/_import`,
@@ -311,6 +314,7 @@ export const importRulesRoute = (
                       anomalyThreshold,
                       machineLearningJobId,
                       actions: undefined,
+                      isRuleRegistryEnabled,
                     });
                     resolve({ rule_id: ruleId, status_code: 200 });
                   } else if (rule != null) {

@@ -14,6 +14,8 @@ import {
   addPrepackagedRulesSchema,
   AddPrepackagedRulesSchema,
   AddPrepackagedRulesSchemaDecoded,
+  RACAddPrepackagedRulesSchema,
+  racAddPrepackagedRulesSchema,
 } from '../../../../common/detection_engine/schemas/request/add_prepackaged_rules_schema';
 
 // TODO: convert rules files to TS and add explicit type definitions
@@ -28,14 +30,18 @@ import { ConfigType } from '../../../config';
  * that they are adding incorrect schema rules. Also this will auto-flush in all the default
  * aspects such as default interval of 5 minutes, default arrays, etc...
  */
-export const validateAllPrepackagedRules = (
-  rules: AddPrepackagedRulesSchema[]
-): AddPrepackagedRulesSchemaDecoded[] => {
+export const validateAllPrepackagedRules = <TSchema extends AddPrepackagedRulesSchema>(
+  rules: TSchema[],
+  isRuleRegistryEnabled: boolean
+) => {
   return rules.map((rule) => {
-    const decoded = addPrepackagedRulesSchema.decode(rule);
+    const _schema = isRuleRegistryEnabled
+      ? racAddPrepackagedRulesSchema
+      : addPrepackagedRulesSchema;
+    const decoded = _schema.decode(rule);
     const checked = exactCheck(rule, decoded);
 
-    const onLeft = (errors: t.Errors): AddPrepackagedRulesSchemaDecoded => {
+    const onLeft = (errors: t.Errors) => {
       const ruleName = rule.name ? rule.name : '(rule name unknown)';
       const ruleId = rule.rule_id ? rule.rule_id : '(rule rule_id unknown)';
       throw new BadRequestError(
@@ -48,8 +54,11 @@ export const validateAllPrepackagedRules = (
       );
     };
 
-    const onRight = (schema: AddPrepackagedRulesSchema): AddPrepackagedRulesSchemaDecoded => {
-      return schema as AddPrepackagedRulesSchemaDecoded;
+    const onRight = (schema: unknown) => {
+      if (racAddPrepackagedRulesSchema.is(schema)) {
+        return schema as RACAddPrepackagedRulesSchema;
+      }
+      return schema as AddPrepackagedRulesSchema;
     };
     return pipe(checked, fold(onLeft, onRight));
   });
@@ -96,20 +105,24 @@ export const getFleetInstalledRules = async (
   return validateAllRuleSavedObjects(fleetRules);
 };
 
-export const getPrepackagedRules = (
+export const getPrepackagedRules = <TSchema extends AddPrepackagedRulesSchema>(
   // @ts-expect-error mock data is too loosely typed
-  rules: AddPrepackagedRulesSchema[] = rawRules
-): AddPrepackagedRulesSchemaDecoded[] => {
-  return validateAllPrepackagedRules(rules);
+  rules: TSchema[] = rawRules,
+  isRuleRegistryEnabled: boolean
+) => {
+  return validateAllPrepackagedRules(rules, isRuleRegistryEnabled);
 };
 
-export const getLatestPrepackagedRules = async (
+export const getLatestPrepackagedRules = async <TSchema extends AddPrepackagedRulesSchema>(
   client: RuleAssetSavedObjectsClient,
   prebuiltRulesFromFileSystem: ConfigType['prebuiltRulesFromFileSystem'],
-  prebuiltRulesFromSavedObjects: ConfigType['prebuiltRulesFromSavedObjects']
-): Promise<AddPrepackagedRulesSchemaDecoded[]> => {
+  prebuiltRulesFromSavedObjects: ConfigType['prebuiltRulesFromSavedObjects'],
+  isRuleRegistryEnabled: boolean
+) => {
   // build a map of the most recent version of each rule
-  const prepackaged = prebuiltRulesFromFileSystem ? getPrepackagedRules() : [];
+  const prepackaged = prebuiltRulesFromFileSystem
+    ? getPrepackagedRules<TSchema>(undefined, isRuleRegistryEnabled)
+    : [];
   const ruleMap = new Map(prepackaged.map((r) => [r.rule_id, r]));
 
   // check the rules installed via fleet and create/update if the version is newer

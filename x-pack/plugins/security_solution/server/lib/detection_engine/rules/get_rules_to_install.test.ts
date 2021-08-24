@@ -9,6 +9,7 @@ import { getRulesToInstall } from './get_rules_to_install';
 import { getAlertMock } from '../routes/__mocks__/request_responses';
 import { getAddPrepackagedRulesSchemaDecodedMock } from '../../../../common/detection_engine/schemas/request/add_prepackaged_rules_schema.mock';
 import { getQueryRuleParams } from '../schemas/rule_schemas.mock';
+import { AddPrepackagedRulesSchemaDecoded } from '../../../../common/detection_engine/schemas/request';
 
 describe('get_rules_to_install', () => {
   test('should return empty array if both rule sets are empty', () => {
@@ -17,7 +18,9 @@ describe('get_rules_to_install', () => {
   });
 
   test('should return empty array if the two rule ids match', () => {
-    const ruleFromFileSystem = getAddPrepackagedRulesSchemaDecodedMock();
+    const ruleFromFileSystem = getAddPrepackagedRulesSchemaDecodedMock(
+      false
+    ) as AddPrepackagedRulesSchemaDecoded;
     ruleFromFileSystem.rule_id = 'rule-1';
 
     const installedRule = getAlertMock(getQueryRuleParams(false));
@@ -27,7 +30,9 @@ describe('get_rules_to_install', () => {
   });
 
   test('should return the rule to install if the id of the two rules do not match', () => {
-    const ruleFromFileSystem = getAddPrepackagedRulesSchemaDecodedMock();
+    const ruleFromFileSystem = getAddPrepackagedRulesSchemaDecodedMock(
+      false
+    ) as AddPrepackagedRulesSchemaDecoded;
     ruleFromFileSystem.rule_id = 'rule-1';
 
     const installedRule = getAlertMock(getQueryRuleParams(false));
@@ -37,10 +42,14 @@ describe('get_rules_to_install', () => {
   });
 
   test('should return two rules to install if both the ids of the two rules do not match', () => {
-    const ruleFromFileSystem1 = getAddPrepackagedRulesSchemaDecodedMock();
+    const ruleFromFileSystem1 = getAddPrepackagedRulesSchemaDecodedMock(
+      false
+    ) as AddPrepackagedRulesSchemaDecoded;
     ruleFromFileSystem1.rule_id = 'rule-1';
 
-    const ruleFromFileSystem2 = getAddPrepackagedRulesSchemaDecodedMock();
+    const ruleFromFileSystem2 = getAddPrepackagedRulesSchemaDecodedMock(
+      false
+    ) as AddPrepackagedRulesSchemaDecoded;
     ruleFromFileSystem2.rule_id = 'rule-2';
 
     const installedRule = getAlertMock(getQueryRuleParams(false));
@@ -50,13 +59,19 @@ describe('get_rules_to_install', () => {
   });
 
   test('should return two rules of three to install if both the ids of the two rules do not match but the third does', () => {
-    const ruleFromFileSystem1 = getAddPrepackagedRulesSchemaDecodedMock();
+    const ruleFromFileSystem1 = getAddPrepackagedRulesSchemaDecodedMock(
+      false
+    ) as AddPrepackagedRulesSchemaDecoded;
     ruleFromFileSystem1.rule_id = 'rule-1';
 
-    const ruleFromFileSystem2 = getAddPrepackagedRulesSchemaDecodedMock();
+    const ruleFromFileSystem2 = getAddPrepackagedRulesSchemaDecodedMock(
+      false
+    ) as AddPrepackagedRulesSchemaDecoded;
     ruleFromFileSystem2.rule_id = 'rule-2';
 
-    const ruleFromFileSystem3 = getAddPrepackagedRulesSchemaDecodedMock();
+    const ruleFromFileSystem3 = getAddPrepackagedRulesSchemaDecodedMock(
+      false
+    ) as AddPrepackagedRulesSchemaDecoded;
     ruleFromFileSystem3.rule_id = 'rule-3';
 
     const installedRule = getAlertMock(getQueryRuleParams(false));
