@@ -21,7 +21,7 @@ export class UpgradeAssistantUIPlugin
 {
   constructor(private ctx: PluginInitializerContext) {}
 
-  setup(coreSetup: CoreSetup<StartDependencies>, { management, cloud }: SetupDependencies) {
+  setup(coreSetup: CoreSetup<StartDependencies>, { management, cloud, share }: SetupDependencies) {
     const {
       readonly,
       ui: { enabled: isUpgradeAssistantUiEnabled },
@@ -56,14 +56,15 @@ export class UpgradeAssistantUIPlugin
 
           docTitle.change(pluginName);
 
-          const { mountManagementSection } = await import('./application/mount_management_section');
-          const unmountAppCallback = await mountManagementSection(
-            coreSetup,
-            params,
-            kibanaVersionInfo,
-            readonly,
-            services
-          );
+        const { mountManagementSection } = await import('./application/mount_management_section');
+        const unmountAppCallback = await mountManagementSection(
+          coreSetup,
+          params,
+          kibanaVersionInfo,
+          readonly,
+          share,
+          services
+        );
 
           return () => {
             docTitle.reset();
