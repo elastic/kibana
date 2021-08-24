@@ -27,8 +27,10 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { ShareToSpaceSavedObjectsManagementColumn } from '../../../services/columns';
 import { SavedObjectWithMetadata } from '../../../../common';
 import { getSavedObjectLabel } from '../../../lib';
+import { useTableContext } from '../../table_context';
 
 export interface DeleteConfirmModalProps {
   isDeleting: boolean;
@@ -37,27 +39,42 @@ export interface DeleteConfirmModalProps {
   selectedObjects: SavedObjectWithMetadata[];
 }
 
+interface DeleteObjectModel {
+  type: string;
+  title: string;
+  id: string;
+  icon: string;
+  namespaces: string[];
+  isShared: boolean;
+}
+
 export const DeleteConfirmModal: FC<DeleteConfirmModalProps> = ({
   isDeleting,
   onConfirm,
   onCancel,
   selectedObjects,
 }) => {
+  const { spacesApi } = useTableContext();
+
   const undeletableObjects = useMemo(() => {
     return selectedObjects.filter((obj) => obj.meta.hiddenType);
   }, [selectedObjects]);
-  const deletableObjects = useMemo(() => {
+  const deletableObjects: DeleteObjectModel[] = useMemo(() => {
     return selectedObjects
       .filter((obj) => !obj.meta.hiddenType)
       .map(({ type, id, meta, namespaces = [] }) => {
         const { title = '', icon = 'apps' } = meta;
         const isShared = namespaces.length > 1 || namespaces.includes('*');
-        return { type, id, icon, title, isShared };
+        return { type, id, icon, title, namespaces, isShared };
       });
   }, [selectedObjects]);
   const sharedObjectsCount = useMemo(() => {
     return deletableObjects.filter((obj) => obj.isShared).length;
   }, [deletableObjects]);
+
+  const spacesColumn = useMemo(() => {
+    return spacesApi ? new ShareToSpaceSavedObjectsManagementColumn(spacesApi.ui) : undefined;
+  }, [spacesApi]);
 
   if (isDeleting) {
     return (
@@ -133,7 +150,7 @@ export const DeleteConfirmModal: FC<DeleteConfirmModalProps> = ({
           />
         </p>
         <EuiSpacer size="m" />
-        <EuiInMemoryTable
+        <EuiInMemoryTable<DeleteObjectModel>
           items={deletableObjects}
           columns={[
             {
@@ -156,7 +173,7 @@ export const DeleteConfirmModal: FC<DeleteConfirmModalProps> = ({
                 { defaultMessage: 'Id' }
               ),
             },
-            // TODO: add namespace column
+            ...(spacesColumn ? [spacesColumn.euiColumn] : []),
             {
               field: 'title',
               name: i18n.translate(

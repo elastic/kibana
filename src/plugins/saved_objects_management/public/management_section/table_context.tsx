@@ -12,6 +12,7 @@ import { SpacesInfo, getSpaceInfo } from '../lib';
 
 interface TableContext {
   spacesInfo?: SpacesInfo;
+  spacesApi?: SpacesApi;
 }
 
 const tableContext = createContext<TableContext>({});
@@ -37,8 +38,9 @@ export const TableContextProvider: FC<{ spacesApi?: SpacesApi }> = ({ children, 
   const context = useMemo(() => {
     return {
       spacesInfo,
+      spacesApi,
     };
-  }, [spacesInfo]);
+  }, [spacesInfo, spacesApi]);
 
   return <tableContext.Provider value={context}>{children}</tableContext.Provider>;
 };
