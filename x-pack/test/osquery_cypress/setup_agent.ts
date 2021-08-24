@@ -23,9 +23,8 @@ export class AgentManager {
   private directoryPath: string;
   private params: AgentManagerParams;
   private log: ToolingLog;
-  private agentProcess: ChildProcess;
+  private agentProcess?: ChildProcess;
   private requestOptions: AxiosRequestConfig;
-  public policyId: string;
   constructor(directoryPath: string, params: AgentManagerParams, log: ToolingLog) {
     // TODO: check if the file exists
     this.directoryPath = directoryPath;
@@ -69,7 +68,6 @@ export class AgentManager {
       this.requestOptions
     );
     const policy = apiKeys.list[1];
-    this.policyId = policy.policy_id as string;
 
     this.log.info('Enrolling the agent');
     const args = [
@@ -106,16 +104,18 @@ export class AgentManager {
         throw new Error('Agent timed out while coming online');
       }
     }
+    return { policyId: policy.policy_id as string };
   }
 
   public cleanup() {
     this.log.info('Cleaning up the agent process');
     if (this.agentProcess) {
       this.agentProcess.kill(9);
+
+      this.agentProcess.on('close', () => {
+        this.log.info('Agent process closed');
+      });
     }
     unlinkSync(resolve('.', 'elastic-agent.yml'));
-    this.agentProcess.on('close', () => {
-      this.log.info('Agent process closed');
-    });
   }
 }

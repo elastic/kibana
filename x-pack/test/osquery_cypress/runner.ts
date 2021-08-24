@@ -58,10 +58,9 @@ async function setupRunner(
     log
   );
   await fleetManager.setup();
-  await agentManager.setup();
+  const { policyId } = await agentManager.setup();
 
   await setupUserPermissions(config);
-  const policyId = agentManager.policyId;
   async function cleanup() {
     fleetManager.cleanup();
     agentManager.cleanup();

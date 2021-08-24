@@ -16,6 +16,8 @@ const archMap: { [key: string]: string } = {
   x64: 'x86_64',
 };
 
+type ArtifactName = 'elastic-agent' | 'fleet-server';
+
 async function getArtifact(
   artifact: string,
   urlExtractor: (data: AxiosResponse<any>, filename: string) => string,
@@ -32,7 +34,7 @@ async function getArtifact(
   const url = urlExtractor(agents.data, filename);
   if (!url) {
     log.error(`Could not find url for ${artifact}:  ${url}`);
-    return;
+    throw new Error(`Unable to fetch ${artifact}`);
   }
   log.info(`Fetching ${filename} from ${url}`);
   const agent = await axios(url as string, { responseType: 'arraybuffer' });
@@ -41,7 +43,16 @@ async function getArtifact(
   return resolve(filename);
 }
 
-const fetchers = {
+// There has to be a better way to represent partial function application
+type ArtifactFetcher = (
+  log: Parameters<typeof getArtifact>[2],
+  version: Parameters<typeof getArtifact>[3]
+) => ReturnType<typeof getArtifact>;
+type ArtifactFetchers = {
+  [artifactName in ArtifactName]: ArtifactFetcher;
+};
+
+const fetchers: ArtifactFetchers = {
   'elastic-agent': getArtifact.bind(null, 'elastic-agent', (data, filename) =>
     get(data, ['build', 'projects', 'beats', 'packages', filename, 'url'])
   ),
@@ -50,13 +61,13 @@ const fetchers = {
   ),
 };
 
-export interface FetchArtifactsParams {
-  'elastic-agent': string;
-  'fleet-server': string;
-}
+export type FetchArtifactsParams = {
+  [artifactName in ArtifactName]?: string;
+};
 
+type ArtifactPaths = FetchArtifactsParams;
 export class ArtifactManager {
-  private artifacts: { [artifactName: string]: string };
+  private artifacts: ArtifactPaths;
   private versions: FetchArtifactsParams;
   private log: ToolingLog;
 
@@ -69,18 +80,29 @@ export class ArtifactManager {
   public fetchArtifacts = async () => {
     this.log.info('Fetching artifacts');
     await Promise.all(
-      Object.keys(this.versions).map(async (artifactName) => {
-        this.artifacts[artifactName] = await fetchers[artifactName](
-          this.log,
-          this.versions[artifactName]
-        );
+      Object.keys(this.versions).map(async (name: string) => {
+        const artifactName = name as ArtifactName;
+        const version = this.versions[artifactName];
+        if (!version) {
+          this.log.warning(`No version is specified for ${artifactName}, skipping`);
+          return;
+        }
+        const fetcher = fetchers[artifactName];
+        if (!fetcher) {
+          this.log.warning(`No fetcher is defined for ${artifactName}, skipping`);
+        }
+
+        this.artifacts[artifactName] = await fetcher(this.log, version);
       })
     );
   };
 
   public getArtifactDirectory(artifactName: string) {
-    const file = this.artifacts[artifactName];
+    const file = this.artifacts[artifactName as ArtifactName];
     // this will break if the tarball name diverges from the directory that gets untarred
+    if (!file) {
+      throw new Error(`Unknown artifact ${artifactName}, unable to retreive directory`);
+    }
     return file.replace('.tar.gz', '');
   }
 
@@ -88,7 +110,12 @@ export class ArtifactManager {
     this.log.info('Cleaning up artifacts');
     if (this.artifacts) {
       for (const artifactName of Object.keys(this.artifacts)) {
-        unlinkSync(this.artifacts[artifactName]);
+        const file = this.artifacts[artifactName as ArtifactName];
+        if (!file) {
+          this.log.info(`Unknown artifact ${artifactName} encountered during cleanup, skipping`);
+          continue;
+        }
+        unlinkSync(file);
         rmdirSync(this.getArtifactDirectory(artifactName), { recursive: true });
       }
     }

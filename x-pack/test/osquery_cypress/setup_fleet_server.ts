@@ -18,7 +18,7 @@ interface ElasticsearchConfig {
 
 export class FleetManager {
   private directoryPath: string;
-  private fleetProcess: ChildProcess;
+  private fleetProcess?: ChildProcess;
   private esConfig: ElasticsearchConfig;
   private log: ToolingLog;
   constructor(directoryPath: string, esConfig: ElasticsearchConfig, log: ToolingLog) {
@@ -26,7 +26,6 @@ export class FleetManager {
     this.esConfig = esConfig;
     this.directoryPath = directoryPath;
     this.log = log;
-    this.fleetProcess = null;
   }
   public async setup(): Promise<void> {
     this.log.info('Setting fleet up');
@@ -50,6 +49,10 @@ export class FleetManager {
     this.log.info('Removing old fleet config');
     if (this.fleetProcess) {
       this.fleetProcess.kill(9);
+
+      this.fleetProcess.on('close', () => {
+        this.log.info('Fleet server process closed');
+      });
     }
     unlinkSync(resolve('.', 'fleet-server.yml'));
   }
