@@ -15,7 +15,7 @@ or all indices that contain your data.
 * Access to *Index Patterns* requires the <<xpack-security-authorization, {kib} privilege>>
 `Index Pattern Management`.
 
-* To create an index pattern, you must have the <<xpack-kibana-role-management,{es} privilege>>
+* To create an index pattern, you must have the <<xpack-security-authorization,{es} privilege>>
 `view_index_metadata`.
 
 * If a read-only indicator appears in {kib}, you have insufficient privileges
