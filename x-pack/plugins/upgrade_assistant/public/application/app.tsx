@@ -11,7 +11,7 @@ import { I18nStart, ScopedHistory } from 'src/core/public';
 import { ApplicationStart } from 'kibana/public';
 import { GlobalFlyout } from '../shared_imports';
 
-import { KibanaContextProvider, APP_WRAPPER_CLASS } from '../shared_imports';
+import { APP_WRAPPER_CLASS } from '../shared_imports';
 import { AppServicesContext } from '../types';
 import { AppContextProvider, ContextValue, useAppContext } from './app_context';
 import { ComingSoonPrompt } from './components/coming_soon_prompt';
@@ -54,23 +54,15 @@ export const AppWithRouter = ({ history }: { history: ScopedHistory }) => {
   );
 };
 
-export const RootComponent = ({
-  i18n,
-  history,
-  services,
-  application,
-  ...contextValue
-}: AppDependencies) => {
+export const RootComponent = ({ i18n, history, application, ...contextValue }: AppDependencies) => {
   return (
     <RedirectAppLinks application={application} className={APP_WRAPPER_CLASS}>
       <i18n.Context>
-        <KibanaContextProvider services={services}>
-          <AppContextProvider value={contextValue}>
-            <GlobalFlyoutProvider>
-              <AppWithRouter history={history} />
-            </GlobalFlyoutProvider>
-          </AppContextProvider>
-        </KibanaContextProvider>
+        <AppContextProvider value={contextValue}>
+          <GlobalFlyoutProvider>
+            <AppWithRouter history={history} />
+          </GlobalFlyoutProvider>
+        </AppContextProvider>
       </i18n.Context>
     </RedirectAppLinks>
   );

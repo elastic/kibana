@@ -11,7 +11,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiLink, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiPanel, EuiText } from '@elastic/eui';
 
 import { useAppContext } from '../../../app_context';
-import { useKibana, DataPublicPluginStart } from '../../../../shared_imports';
+import { DataPublicPluginStart, useKibana } from '../../../../shared_imports';
 import {
   DEPRECATION_LOGS_INDEX_PATTERN,
   DEPRECATION_LOGS_SOURCE_ID,

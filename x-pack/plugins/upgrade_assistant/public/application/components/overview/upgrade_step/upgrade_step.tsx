@@ -18,7 +18,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 import type { DocLinksStart } from 'src/core/public';
-import { useKibana } from '../../../../shared_imports';
+import { useAppContext } from '../../../app_context';
 
 const i18nTexts = {
   upgradeStepTitle: (nextMajor: number) =>
@@ -49,7 +49,7 @@ const i18nTexts = {
 };
 
 const UpgradeStep = ({ docLinks }: { docLinks: DocLinksStart }) => {
-  const { cloud } = useKibana().services;
+  const { cloud } = useAppContext().services;
   const isCloudEnabled: boolean = Boolean(cloud?.isCloudEnabled);
   let callToAction;
 

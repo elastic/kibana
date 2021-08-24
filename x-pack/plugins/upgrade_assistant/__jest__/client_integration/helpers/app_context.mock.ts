@@ -17,6 +17,28 @@ import { HttpSetup } from 'src/core/public';
 import { mockKibanaSemverVersion } from '../../../common/constants';
 import { apiService } from '../../../public/application/lib/api';
 import { breadcrumbService } from '../../../public/application/lib/breadcrumbs';
+import { dataPluginMock } from '../../../../../../src/plugins/data/public/mocks';
+import { discoverPluginMock } from '../../../../../../src/plugins/discover/public/mocks';
+
+const discoverMock = discoverPluginMock.createStartContract();
+
+const servicesMock = {
+  data: dataPluginMock.createStartContract(),
+  application: applicationServiceMock.createStartContract(),
+  discover: {
+    ...discoverMock,
+    locator: {
+      ...discoverMock.locator,
+      getLocation: jest.fn(() =>
+        Promise.resolve({
+          app: '/discover',
+          path: 'logs',
+          state: {},
+        })
+      ),
+    },
+  },
+};
 
 // We'll mock these values to avoid testing the locators themselves.
 const idToUrlMap = {
@@ -47,4 +69,5 @@ export const getAppContextMock = (mockHttpClient: HttpSetup) => ({
   getUrlForApp: applicationServiceMock.createStartContract().getUrlForApp,
   deprecations: deprecationsServiceMock.createStartContract(),
   share: shareMock,
+  services: servicesMock,
 });
