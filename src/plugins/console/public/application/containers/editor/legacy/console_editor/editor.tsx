@@ -97,6 +97,8 @@ function EditorUI({ initialTextValue }: EditorProps) {
     };
 
     const loadBufferFromRemote = (url: string) => {
+      const coreEditor = editor.getCoreEditor();
+
       if (/^https?:\/\//.test(url)) {
         const loadFrom: Record<string, any> = {
           url,
@@ -112,7 +114,6 @@ function EditorUI({ initialTextValue }: EditorProps) {
 
         // Fire and forget.
         $.ajax(loadFrom).done(async (data) => {
-          const coreEditor = editor.getCoreEditor();
           await editor.update(data, true);
           editor.moveToNextRequestEdge(false);
           coreEditor.clearSelection();
@@ -124,7 +125,6 @@ function EditorUI({ initialTextValue }: EditorProps) {
       // If we have a data URI instead of HTTP, LZ-decode it.
       if (/^data:/.test(url)) {
         const data = decompressFromEncodedURIComponent(url.replace(/^data:text\/plain,/, '')) ?? '';
-        const coreEditor = editor.getCoreEditor();
         editor.update(data, true);
         editor.moveToNextRequestEdge(false);
         coreEditor.clearSelection();

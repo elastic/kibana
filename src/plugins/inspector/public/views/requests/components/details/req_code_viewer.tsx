@@ -6,12 +6,18 @@
  * Side Public License, v 1.
  */
 
+// Since we're not using `RedirectAppLinks`, we need to use `navigateToUrl` when
+// handling the click of the Open in Dev Tools link. We want to have both an
+// `onClick` handler and an `href` attribute so it will work on click without a
+// page reload, and on right-click to open in new tab.
+/* eslint-disable @elastic/eui/href-or-on-click */
+
 import { EuiButtonEmpty, EuiCopy, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { XJsonLang } from '@kbn/monaco';
 import { compressToEncodedURIComponent } from 'lz-string';
-import React from 'react';
-import { CodeEditor } from '../../../../../../kibana_react/public';
+import React, { MouseEvent, useCallback } from 'react';
+import { CodeEditor, useKibana } from '../../../../../../kibana_react/public';
 
 interface RequestCodeViewerProps {
   indexPattern?: string;
@@ -30,9 +36,23 @@ const openInDevToolsLabel = i18n.translate('inspector.requests.openInDevToolsLab
  * @internal
  */
 export const RequestCodeViewer = ({ indexPattern, json }: RequestCodeViewerProps) => {
+  const { services } = useKibana();
+  const prepend = services.http?.basePath?.prepend;
+  const navigateToUrl = services.application?.navigateToUrl;
+
   const devToolsDataUri = compressToEncodedURIComponent(`GET ${indexPattern}/_search\n${json}`);
-  // TODO: get basepath
-  const devToolsUrl = `/kbn/app/dev_tools#/console?load_from=data:text/plain,${devToolsDataUri}`;
+
+  const devToolsUrl = `/app/dev_tools#/console?load_from=data:text/plain,${devToolsDataUri}`;
+
+  const handleDevToolsLinkClick = useCallback(
+    (event: MouseEvent<HTMLAnchorElement>) => {
+      event.preventDefault();
+      if (navigateToUrl && prepend) {
+        navigateToUrl(prepend(devToolsUrl));
+      }
+    },
+    [devToolsUrl, navigateToUrl, prepend]
+  );
 
   return (
     <EuiFlexGroup
@@ -45,17 +65,6 @@ export const RequestCodeViewer = ({ indexPattern, json }: RequestCodeViewerProps
       <EuiFlexItem grow={false}>
         <EuiSpacer size="s" />
         <div className="eui-textRight">
-          {indexPattern && (
-            <EuiButtonEmpty
-              size="xs"
-              flush="right"
-              iconType="wrench"
-              href={devToolsUrl}
-              data-test-subj="inspectorRequestOpenInDevToolsButton"
-            >
-              {openInDevToolsLabel}
-            </EuiButtonEmpty>
-          )}
           <EuiCopy textToCopy={json}>
             {(copy) => (
               <EuiButtonEmpty
@@ -69,6 +78,18 @@ export const RequestCodeViewer = ({ indexPattern, json }: RequestCodeViewerProps
               </EuiButtonEmpty>
             )}
           </EuiCopy>
+          {indexPattern && prepend && (
+            <EuiButtonEmpty
+              size="xs"
+              flush="right"
+              iconType="wrench"
+              href={prepend(devToolsUrl)}
+              onClick={handleDevToolsLinkClick}
+              data-test-subj="inspectorRequestOpenInDevToolsButton"
+            >
+              {openInDevToolsLabel}
+            </EuiButtonEmpty>
+          )}
         </div>
       </EuiFlexItem>
       <EuiFlexItem grow={true}>
