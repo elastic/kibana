@@ -141,7 +141,7 @@ export const ClusterConfigurationForm: FunctionComponent<ClusterConfigurationFor
         <>
           <EuiCallOut
             color="danger"
-            title={i18n.translate('interactiveSetup.enrollmentTokenForm.submitErrorTitle', {
+            title={i18n.translate('interactiveSetup.clusterConfigurationForm.submitErrorTitle', {
               defaultMessage: "Couldn't check address",
             })}
           >

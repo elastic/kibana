@@ -92,7 +92,7 @@ export const ClusterAddressForm: FunctionComponent<ClusterAddressFormProps> = ({
         <>
           <EuiCallOut
             color="danger"
-            title={i18n.translate('interactiveSetup.enrollmentTokenForm.submitErrorTitle', {
+            title={i18n.translate('interactiveSetup.clusterAddressForm.submitErrorTitle', {
               defaultMessage: "Couldn't check address",
             })}
           >
@@ -136,7 +136,7 @@ export const ClusterAddressForm: FunctionComponent<ClusterAddressFormProps> = ({
             fill
           >
             <FormattedMessage
-              id="interactiveSetup.clusterAddressForm.validateButton"
+              id="interactiveSetup.clusterAddressForm.submitButton"
               defaultMessage="{isSubmitting, select, true{Checking address…} other{Check address}}"
               values={{ isSubmitting: form.isSubmitting }}
             />
