@@ -6,6 +6,7 @@
  */
 import { useRef } from 'react';
 import { renderHook, act } from '@testing-library/react-hooks';
+import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
 import { useHoverActionItems, UseHoverActionItemsProps } from './use_hover_action_items';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { DataProvider } from '../../../../common/types/timeline';
@@ -20,7 +21,7 @@ describe('useHoverActionItems', () => {
   const defaultProps: UseHoverActionItemsProps = ({
     dataProvider: [{} as DataProvider],
     defaultFocusedButtonRef: null,
-    field: 'signal.rule.name',
+    field: ALERT_RULE_NAME,
     handleHoverActionClicked: jest.fn(),
     hideTopN: false,
     isObjectArray: false,
@@ -96,7 +97,7 @@ describe('useHoverActionItems', () => {
         'hover-actions-filter-out'
       );
       expect(result.current.overflowActionItems[2].props['data-test-subj']).toEqual(
-        'more-actions-signal.rule.name'
+        `more-actions-${ALERT_RULE_NAME}`
       );
       expect(result.current.overflowActionItems[2].props.items[0].props['data-test-subj']).toEqual(
         'hover-actions-toggle-column'

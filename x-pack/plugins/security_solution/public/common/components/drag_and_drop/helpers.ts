@@ -178,6 +178,7 @@ export const allowTopN = ({
     'numeric',
     'string',
   ].includes(fieldType);
+  console.log('FIELDS: ', browserField, fieldName, hideTopN); // eslint-disable-line
 
   // TODO: remove this explicit allowlist when the ECS documentation includes alerts
   const isAllowlistedNonBrowserField = ([
