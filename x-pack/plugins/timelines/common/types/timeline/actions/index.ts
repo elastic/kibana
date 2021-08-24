@@ -39,6 +39,7 @@ export interface ActionProps {
   tabType?: TimelineTabs;
   timelineId: string;
   toggleShowNotes?: () => void;
+  width?: number;
 }
 
 export type SetEventsLoading = (params: { eventIds: string[]; isLoading: boolean }) => void;
