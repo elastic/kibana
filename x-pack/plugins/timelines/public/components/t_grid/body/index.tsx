@@ -105,7 +105,7 @@ interface OwnProps {
   hasAlertsCrud?: boolean;
 }
 
-const basicUnit = (n: number) => i18n.UNIT(n);
+const defaultUnit = (n: number) => i18n.ALERTS_UNIT(n);
 const NUM_OF_ICON_IN_TIMELINE_ROW = 2;
 
 export const hasAdditionalActions = (id: TimelineId): boolean =>
@@ -273,7 +273,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     totalItems,
     totalPages,
     trailingControlColumns = EMPTY_CONTROL_COLUMNS,
-    unit = basicUnit,
+    unit = defaultUnit,
     hasAlertsCrud,
   }) => {
     const dispatch = useDispatch();
@@ -596,10 +596,17 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
         const rowData = rowIndex < data.length ? data[rowIndex].data : null;
         const header = columnHeaders.find((h) => h.id === columnId);
         const eventId = rowIndex < data.length ? data[rowIndex]._id : null;
+        const defaultStyles = useMemo(
+          () => ({
+            overflow: 'hidden',
+          }),
+          []
+        );
+        setCellProps({ style: { ...defaultStyles } });
 
         useEffect(() => {
-          addBuildingBlockStyle(data[rowIndex].ecs, theme, setCellProps);
-        }, [rowIndex, setCellProps]);
+          addBuildingBlockStyle(data[rowIndex].ecs, theme, setCellProps, defaultStyles);
+        }, [rowIndex, setCellProps, defaultStyles]);
 
         if (rowData == null || header == null || eventId == null) {
           return null;

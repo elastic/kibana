@@ -12,10 +12,10 @@ import {
   SavedObjectsUpdateResponse,
   SavedObjectsFindOptions,
   SavedObjectsFindResult,
-} from '../../../../../../../src/core/server';
-import { ruleStatusSavedObjectType } from '../rules/saved_object_mappings';
-import { IRuleStatusSOAttributes } from '../rules/types';
-import { buildChunkedOrFilter } from './utils';
+} from '../../../../../../../../src/core/server';
+import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
+import { IRuleStatusSOAttributes } from '../../rules/types';
+import { buildChunkedOrFilter } from '../../signals/utils';
 
 export interface RuleStatusSavedObjectsClient {
   find: (
