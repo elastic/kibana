@@ -209,7 +209,7 @@ export const ClusterConfigurationForm: FunctionComponent<ClusterConfigurationFor
             title={i18n.translate(
               'interactiveSetup.clusterConfigurationForm.insecureClusterTitle',
               {
-                defaultMessage: 'Your cluster is not secure.',
+                defaultMessage: 'This cluster is not secure.',
               }
             )}
           >
@@ -220,7 +220,7 @@ export const ClusterConfigurationForm: FunctionComponent<ClusterConfigurationFor
               />
             </p>
             <p>
-              <EuiLink>
+              <EuiLink color="warning">
                 <FormattedMessage
                   id="interactiveSetup.clusterConfigurationForm.insecureClusterLink"
                   defaultMessage="Learn how to enable security features."
@@ -277,22 +277,14 @@ export const ClusterConfigurationForm: FunctionComponent<ClusterConfigurationFor
             type="submit"
             isLoading={form.isSubmitting}
             isDisabled={form.isSubmitted && form.isInvalid}
-            color={authRequired ? 'primary' : 'warning'}
+            color="primary"
             fill
           >
-            {authRequired ? (
-              <FormattedMessage
-                id="interactiveSetup.clusterConfigurationForm.submitButton"
-                defaultMessage="{isSubmitting, select, true{Connecting to cluster…} other{Connect to cluster}}"
-                values={{ isSubmitting: form.isSubmitting }}
-              />
-            ) : (
-              <FormattedMessage
-                id="interactiveSetup.clusterConfigurationForm.submitWarningButton"
-                defaultMessage="{isSubmitting, select, true{Connecting to cluster…} other{Connect anyways}}"
-                values={{ isSubmitting: form.isSubmitting }}
-              />
-            )}
+            <FormattedMessage
+              id="interactiveSetup.clusterConfigurationForm.submitButton"
+              defaultMessage="{isSubmitting, select, true{Connecting to cluster…} other{Connect to cluster}}"
+              values={{ isSubmitting: form.isSubmitting }}
+            />
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>

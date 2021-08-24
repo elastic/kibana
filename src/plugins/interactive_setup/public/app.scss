@@ -3,6 +3,7 @@
 }
 
 .interactiveSetup__header {
+  position: relative;
   z-index: 10;
   padding: $euiSizeXL;
 }
@@ -15,8 +16,10 @@
 }
 
 .interactiveSetup__content {
+  position: relative;
   z-index: 10;
   margin: auto;
+  margin-bottom: $euiSizeXL;
   max-width: map-get($euiBreakpoints, 's') - $euiSizeXL;
   padding-left: $euiSizeXL;
   padding-right: $euiSizeXL;

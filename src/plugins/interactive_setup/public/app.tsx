@@ -28,22 +28,20 @@ export const App: FunctionComponent = () => {
 
   return (
     <div className="interactiveSetup">
-      <header className="interactiveSetup__header">
-        <div className="interactiveSetup__content eui-textCenter">
-          <EuiSpacer size="xxl" />
-          <span className="interactiveSetup__logo">
-            <EuiIcon type="logoElastic" size="xxl" />
-          </span>
-          <EuiTitle size="m">
-            <h1>
-              <FormattedMessage
-                id="interactiveSetup.app.pageTitle"
-                defaultMessage="Configure Elastic to get started"
-              />
-            </h1>
-          </EuiTitle>
-          <EuiSpacer size="xl" />
-        </div>
+      <header className="interactiveSetup__header eui-textCenter">
+        <EuiSpacer size="xxl" />
+        <span className="interactiveSetup__logo">
+          <EuiIcon type="logoElastic" size="xxl" />
+        </span>
+        <EuiTitle size="m">
+          <h1>
+            <FormattedMessage
+              id="interactiveSetup.app.pageTitle"
+              defaultMessage="Configure Elastic to get started"
+            />
+          </h1>
+        </EuiTitle>
+        <EuiSpacer size="xl" />
       </header>
       <div className="interactiveSetup__content">
         <EuiPanel paddingSize="l">
