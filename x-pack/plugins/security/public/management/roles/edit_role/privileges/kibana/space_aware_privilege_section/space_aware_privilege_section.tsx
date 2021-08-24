@@ -20,9 +20,8 @@ import React, { Component, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import type { Capabilities } from 'src/core/public';
-import type { SpacesApiUi } from 'src/plugins/spaces_oss/public';
 
-import type { Space } from '../../../../../../../../spaces/public';
+import type { Space, SpacesApiUi } from '../../../../../../../../spaces/public';
 import type { Role } from '../../../../../../../common/model';
 import { isRoleReserved } from '../../../../../../../common/model';
 import type { KibanaPrivileges } from '../../../../model';

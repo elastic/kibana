@@ -36,6 +36,7 @@ exports[`draggables rendering it renders the default DefaultDraggable 1`] = `
       },
     }
   }
+  hideTopN={false}
   isDraggable={true}
   render={[Function]}
 />
