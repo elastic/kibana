@@ -85,6 +85,9 @@ describe('@elastic/eui i18n tokens', () => {
           .replace(/\s{2,}/g, ' ')
           .trim();
 
+        // Skip defStrings that are functions
+        if (normalizedDefString.match(/^\(.*?\).*?=>/)) return;
+
         expect(i18nTranslateCall[1].defaultMessage).toBe(normalizedDefString);
       });
 
