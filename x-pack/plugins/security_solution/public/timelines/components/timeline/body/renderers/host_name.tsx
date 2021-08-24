@@ -8,7 +8,7 @@
 import React, { useCallback, useContext, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { isString } from 'lodash/fp';
-import { LinkAnchor } from '../../../../../common/components/links';
+import { HostDetailsLink } from '../../../../../common/components/links';
 import {
   TimelineId,
   TimelineTabs,
@@ -19,10 +19,7 @@ import { getEmptyTagValue } from '../../../../../common/components/empty_value';
 import { TruncatableText } from '../../../../../common/components/truncatable_text';
 import { activeTimeline } from '../../../../containers/active_timeline_context';
 import { timelineActions } from '../../../../store/timeline';
-import { APP_ID, SecurityPageName } from '../../../../../../common/constants';
-import { useFormatUrl, getHostDetailsUrl } from '../../../../../common/components/link_to';
 import { StatefulEventContext2 } from '../../../../../../../timelines/public';
-import { useKibana } from '../../../../../common/lib/kibana';
 
 interface Props {
   contextId: string;
@@ -40,12 +37,8 @@ const HostNameComponent: React.FC<Props> = ({
   value,
 }) => {
   const dispatch = useDispatch();
-  const { navigateToApp } = useKibana().services.application;
-
   const eventContext = useContext(StatefulEventContext2);
   const hostName = `${value}`;
-
-  const { formatUrl, search } = useFormatUrl(SecurityPageName.hosts);
   const isInTimelineContext =
     hostName && eventContext?.enableHostDetailsFlyout && eventContext?.timelineID;
   const openHostDetailsSidePanel = useCallback(
@@ -76,30 +69,17 @@ const HostNameComponent: React.FC<Props> = ({
     [dispatch, eventContext, isInTimelineContext, hostName]
   );
 
-  const goToHostDetails = useCallback(
-    (ev) => {
-      ev.preventDefault();
-      navigateToApp(APP_ID, {
-        deepLinkId: SecurityPageName.hosts,
-        path: getHostDetailsUrl(encodeURIComponent(hostName), search),
-      });
-    },
-    [hostName, navigateToApp, search]
-  );
-
   const content = useMemo(
     () => (
-      <LinkAnchor
-        href={formatUrl(getHostDetailsUrl(encodeURIComponent(hostName), search))}
-        data-test-subj="host-details-button"
-        // The below is explicitly defined this way as the onClick takes precedence when it and the href are both defined
-        // When this component is used outside of timeline (i.e. in the flyout) we would still like it to link to the Host Details page
-        onClick={isInTimelineContext ? openHostDetailsSidePanel : goToHostDetails}
+      <HostDetailsLink
+        hostName={hostName}
+        isButton={false}
+        onClick={isInTimelineContext ? openHostDetailsSidePanel : undefined}
       >
         <TruncatableText data-test-subj="draggable-truncatable-content">{hostName}</TruncatableText>
-      </LinkAnchor>
+      </HostDetailsLink>
     ),
-    [formatUrl, goToHostDetails, hostName, isInTimelineContext, openHostDetailsSidePanel, search]
+    [hostName, isInTimelineContext, openHostDetailsSidePanel]
   );
 
   return isString(value) && hostName.length > 0 ? (
