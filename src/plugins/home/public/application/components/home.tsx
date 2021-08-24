@@ -10,7 +10,6 @@ import React, { Component } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
-import type { IndexPatternsContract } from 'src/plugins/data/public';
 import type { TelemetryPluginStart } from 'src/plugins/telemetry/public';
 import { KibanaPageTemplate, OverviewPageFooter } from '../../../../kibana_react/public';
 import { HOME_APP_BASE_PATH } from '../../../common/constants';
@@ -31,7 +30,7 @@ export interface HomeProps {
   localStorage: Storage;
   urlBasePath: string;
   telemetry: TelemetryPluginStart;
-  indexPatternService: IndexPatternsContract;
+  hasUserIndexPattern: () => Promise<boolean>;
 }
 
 interface State {
@@ -41,7 +40,7 @@ interface State {
 }
 
 export class Home extends Component<HomeProps, State> {
-  private _isMounted?: boolean;
+  private _isMounted = false;
 
   constructor(props: HomeProps) {
     super(props);
@@ -65,14 +64,14 @@ export class Home extends Component<HomeProps, State> {
     };
   }
 
-  componentWillUnmount() {
+  public componentWillUnmount() {
     this._isMounted = false;
 
     const body = document.querySelector('body')!;
     body.classList.remove('isHomPage');
   }
 
-  componentDidMount() {
+  public componentDidMount() {
     this._isMounted = true;
     this.fetchIsNewKibanaInstance();
 
@@ -80,7 +79,7 @@ export class Home extends Component<HomeProps, State> {
     getServices().chrome.setBreadcrumbs([{ text: homeTitle }]);
   }
 
-  fetchIsNewKibanaInstance = async () => {
+  private async fetchIsNewKibanaInstance() {
     try {
       // Set a max-time on this query so we don't hang the page too long...
       // Worst case, we don't show the welcome screen when we should.
@@ -90,7 +89,7 @@ export class Home extends Component<HomeProps, State> {
         }
       }, 500);
 
-      const hasUserIndexPattern = await this.props.indexPatternService.hasUserIndexPattern();
+      const hasUserIndexPattern = await this.props.hasUserIndexPattern();
 
       this.endLoading({ isNewKibanaInstance: !hasUserIndexPattern });
     } catch (err) {
@@ -98,31 +97,33 @@ export class Home extends Component<HomeProps, State> {
       // some UI niceties.
       this.endLoading();
     }
-  };
+  }
 
-  endLoading = (state = {}) => {
+  private endLoading(state = {}) {
     if (this._isMounted) {
       this.setState({
         ...state,
         isLoading: false,
       });
     }
-  };
+  }
 
-  skipWelcome = () => {
+  public skipWelcome() {
     this.props.localStorage.setItem(KEY_ENABLE_WELCOME, 'false');
     if (this._isMounted) this.setState({ isWelcomeEnabled: false });
-  };
+  }
 
-  findDirectoryById = (id: string) =>
-    this.props.directories.find((directory) => directory.id === id);
+  private findDirectoryById(id: string) {
+    return this.props.directories.find((directory) => directory.id === id);
+  }
 
-  getFeaturesByCategory = (category: FeatureCatalogueCategory) =>
-    this.props.directories
+  getFeaturesByCategory(category: FeatureCatalogueCategory) {
+    return this.props.directories
       .filter((directory) => directory.showOnHomePage && directory.category === category)
       .sort((directoryA, directoryB) => (directoryA.order ?? -1) - (directoryB.order ?? -1));
+  }
 
-  renderNormal() {
+  private renderNormal() {
     const { addBasePath, solutions } = this.props;
     const { application, trackUiMetric } = getServices();
     const isDarkMode = getServices().uiSettings?.get('theme:darkMode') || false;
@@ -169,11 +170,11 @@ export class Home extends Component<HomeProps, State> {
 
   // For now, loading is just an empty page, as we'll show something
   // in 250ms, no matter what, and a blank page prevents an odd flicker effect.
-  renderLoading() {
+  private renderLoading() {
     return '';
   }
 
-  renderWelcome() {
+  private renderWelcome() {
     return (
       <Welcome
         onSkip={this.skipWelcome}
@@ -183,7 +184,7 @@ export class Home extends Component<HomeProps, State> {
     );
   }
 
-  render() {
+  public render() {
     const { isLoading, isWelcomeEnabled, isNewKibanaInstance } = this.state;
 
     if (isWelcomeEnabled) {

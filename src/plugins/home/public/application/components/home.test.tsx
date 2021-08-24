@@ -13,7 +13,6 @@ import { Home } from './home';
 
 import { FeatureCatalogueCategory } from '../../services';
 import { telemetryPluginMock } from '../../../../telemetry/public/mocks';
-import { dataPluginMock } from '../../../../data/public/mocks';
 
 jest.mock('../kibana_services', () => ({
   getServices: () => ({
@@ -52,7 +51,7 @@ describe('home', () => {
       addBasePath(url) {
         return `base_path/${url}`;
       },
-      indexPatternService: dataPluginMock.createStartContract().indexPatterns,
+      hasUserIndexPattern: jest.fn(async () => true),
     };
   });
 
@@ -178,9 +177,8 @@ describe('home', () => {
     test('should show the welcome screen if enabled, and there are no index patterns defined', async () => {
       defaultProps.localStorage.getItem = jest.fn(() => 'true');
 
-      const indexPatternService = dataPluginMock.createStartContract().indexPatterns;
-      indexPatternService.hasUserIndexPattern = jest.fn(async () => false);
-      const component = await renderHome({ indexPatternService });
+      const hasUserIndexPattern = jest.fn(async () => false);
+      const component = await renderHome({ hasUserIndexPattern });
 
       expect(defaultProps.localStorage.getItem).toHaveBeenCalledTimes(1);
 
@@ -190,9 +188,8 @@ describe('home', () => {
     test('stores skip welcome setting if skipped', async () => {
       defaultProps.localStorage.getItem = jest.fn(() => 'true');
 
-      const indexPatternService = dataPluginMock.createStartContract().indexPatterns;
-      indexPatternService.hasUserIndexPattern = jest.fn(async () => false);
-      const component = await renderHome({ indexPatternService });
+      const hasUserIndexPattern = jest.fn(async () => false);
+      const component = await renderHome({ hasUserIndexPattern });
 
       component.instance().skipWelcome();
       component.update();
@@ -205,9 +202,8 @@ describe('home', () => {
     test('should show the normal home page if loading fails', async () => {
       defaultProps.localStorage.getItem = jest.fn(() => 'true');
 
-      const indexPatternService = dataPluginMock.createStartContract().indexPatterns;
-      indexPatternService.hasUserIndexPattern = jest.fn(() => Promise.reject('Doh!'));
-      const component = await renderHome({ indexPatternService });
+      const hasUserIndexPattern = jest.fn(() => Promise.reject('Doh!'));
+      const component = await renderHome({ hasUserIndexPattern });
 
       expect(component).toMatchSnapshot();
     });
@@ -223,9 +219,8 @@ describe('home', () => {
 
   describe('isNewKibanaInstance', () => {
     test('should set isNewKibanaInstance to true when there are no index patterns', async () => {
-      const indexPatternService = dataPluginMock.createStartContract().indexPatterns;
-      indexPatternService.hasUserIndexPattern = jest.fn(async () => false);
-      const component = await renderHome({ indexPatternService });
+      const hasUserIndexPattern = jest.fn(async () => false);
+      const component = await renderHome({ hasUserIndexPattern });
 
       expect(component.state().isNewKibanaInstance).toBe(true);
 
@@ -233,9 +228,8 @@ describe('home', () => {
     });
 
     test('should set isNewKibanaInstance to false when there are index patterns', async () => {
-      const indexPatternService = dataPluginMock.createStartContract().indexPatterns;
-      indexPatternService.hasUserIndexPattern = jest.fn(async () => true);
-      const component = await renderHome({ indexPatternService });
+      const hasUserIndexPattern = jest.fn(async () => true);
+      const component = await renderHome({ hasUserIndexPattern });
 
       expect(component.state().isNewKibanaInstance).toBe(false);
 
@@ -243,11 +237,10 @@ describe('home', () => {
     });
 
     test('should safely handle exceptions', async () => {
-      const indexPatternService = dataPluginMock.createStartContract().indexPatterns;
-      indexPatternService.hasUserIndexPattern = jest.fn(() => {
+      const hasUserIndexPattern = jest.fn(() => {
         throw new Error('simulated find error');
       });
-      const component = await renderHome({ indexPatternService });
+      const component = await renderHome({ hasUserIndexPattern });
 
       expect(component.state().isNewKibanaInstance).toBe(false);
 
