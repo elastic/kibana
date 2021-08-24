@@ -14,7 +14,7 @@ import { ISavedObjectTypeRegistry } from '../saved_objects_type_registry';
 import type { SavedObjectsExportTransform } from './types';
 import { applyExportTransforms } from './apply_export_transforms';
 
-interface CollectExportedObjectOptions {
+export interface CollectExportedObjectOptions {
   savedObjectsClient: SavedObjectsClientContract;
   objects: SavedObject[];
   /** flag to also include all related saved objects in the export stream. */
@@ -29,7 +29,7 @@ interface CollectExportedObjectOptions {
   logger: Logger;
 }
 
-interface CollectExportedObjectResult {
+export interface CollectExportedObjectResult {
   objects: SavedObject[];
   excludedObjects: ExcludedObject[];
   missingRefs: CollectedReference[];
@@ -38,10 +38,19 @@ interface CollectExportedObjectResult {
 interface ExcludedObject {
   id: string;
   type: string;
+  namespaces?: string[];
   reason: ExclusionReason;
 }
 
+interface ObjectMetaFields {
+  id: string;
+  type: string;
+  namespaces?: string[];
+}
+
 export type ExclusionReason = 'predicate_error' | 'excluded';
+
+type KeyBuilder = (obj: ObjectMetaFields) => string;
 
 export const collectExportedObjects = async ({
   objects,
@@ -59,6 +68,8 @@ export const collectExportedObjects = async ({
   const collectedMissingRefs: CollectedReference[] = [];
   const collectedNonExportableObjects: ExcludedObject[] = [];
   const alreadyProcessed: Set<string> = new Set();
+
+  const objKey: KeyBuilder = (obj: ObjectMetaFields) => getObjKey(obj, typeRegistry);
 
   let currentObjects = objects;
   do {
@@ -85,7 +96,8 @@ export const collectExportedObjects = async ({
     // last, evict additional objects that are not exportable
     const { included: exportableInitialObjects, excluded: additionalObjects } = splitByKeys(
       transformedObjects,
-      untransformedExportableInitialObjects.map((obj) => objKey(obj))
+      untransformedExportableInitialObjects.map((obj) => objKey(obj)),
+      objKey
     );
     const {
       exportable: exportableAdditionalObjects,
@@ -97,12 +109,13 @@ export const collectExportedObjects = async ({
 
     // if `includeReferences` is true, recurse on exportable objects' references.
     if (includeReferences) {
-      const references = collectReferences(allExportableObjects, alreadyProcessed);
+      const references = collectReferences(allExportableObjects, alreadyProcessed, objKey);
       if (references.length) {
         const { objects: fetchedObjects, missingRefs } = await fetchReferences({
           references,
           namespace,
           client: savedObjectsClient,
+          typeRegistry,
         });
         collectedMissingRefs.push(...missingRefs);
         currentObjects = fetchedObjects;
@@ -121,25 +134,40 @@ export const collectExportedObjects = async ({
   };
 };
 
-const objKey = (obj: { type: string; id: string }) => `${obj.type}:${obj.id}`;
+const getObjKey = (
+  obj: { type: string; id: string; namespaces?: string[] },
+  typeRegistry: ISavedObjectTypeRegistry
+) => {
+  const namespaceType = typeRegistry.getType(obj.type)!.namespaceType;
+  if (namespaceType === 'single') {
+    return `${obj.namespaces![0]}:${obj.type}:${obj.id}`;
+  }
+  return `${obj.type}:${obj.id}`;
+};
 
 type ObjectKey = string;
 
 interface CollectedReference {
   id: string;
   type: string;
+  namespaces?: string[];
 }
 
 const collectReferences = (
   objects: SavedObject[],
-  alreadyProcessed: Set<ObjectKey>
+  alreadyProcessed: Set<ObjectKey>,
+  objKey: KeyBuilder
 ): CollectedReference[] => {
   const references: Map<string, CollectedReference> = new Map();
   objects.forEach((obj) => {
     obj.references?.forEach((ref) => {
-      const refKey = objKey(ref);
+      // we're assuming that the references lives in the same space(s) as the outward object.
+      // for single-NS types, it should necessarily be true unless in case of missing refs.
+      // for multi-NS types, it should too, except in rare edge cases (such as manually unsharing a referenced object
+      // from some of the spaces the outbound objects referencing it are, which we'll consider as missing refs for now).
+      const refKey = objKey({ ...ref, namespaces: obj.namespaces });
       if (!alreadyProcessed.has(refKey)) {
-        references.set(refKey, { type: ref.type, id: ref.id });
+        references.set(refKey, { type: ref.type, id: ref.id, namespaces: obj.namespaces });
       }
     });
   });
@@ -154,12 +182,15 @@ interface FetchReferencesResult {
 const fetchReferences = async ({
   references,
   client,
+  typeRegistry,
   namespace,
 }: {
   references: CollectedReference[];
   client: SavedObjectsClientContract;
+  typeRegistry: ISavedObjectTypeRegistry;
   namespace?: string;
 }): Promise<FetchReferencesResult> => {
+  // TODO when `bulkGet` supports specifying namespaces:
   const { saved_objects: savedObjects } = await client.bulkGet(references, { namespace });
   return {
     objects: savedObjects.filter((obj) => !obj.error),
@@ -168,6 +199,29 @@ const fetchReferences = async ({
       .map((obj) => ({ type: obj.type, id: obj.id })),
   };
 };
+
+/*
+const getTargetSpace = (
+  reference: CollectedReference,
+  typeRegistry: ISavedObjectTypeRegistry,
+  defaultNamespace?: string
+) => {
+  // TODO
+
+  if (objNsType === 'single') {
+    targetSpace = obj.namespaces![0];
+  } else if (objNsType !== 'agnostic') {
+    if (
+      obj.namespaces!.includes('*') ||
+      (currentNamespace && obj.namespaces!.includes(currentNamespace))
+    ) {
+      targetSpace = currentNamespace;
+    } else {
+      targetSpace = obj.namespaces![0];
+    }
+  }
+};
+*/
 
 const buildTransforms = (typeRegistry: ISavedObjectTypeRegistry) =>
   typeRegistry.getAllTypes().reduce((transformMap, type) => {
@@ -210,6 +264,7 @@ const splitByExportability = (
         nonExportableObjects.push({
           id: obj.id,
           type: obj.type,
+          namespaces: obj.namespaces,
           reason: 'excluded',
         });
       }
@@ -233,7 +288,7 @@ const splitByExportability = (
   };
 };
 
-const splitByKeys = (objects: SavedObject[], keys: ObjectKey[]) => {
+const splitByKeys = (objects: SavedObject[], keys: ObjectKey[], objKey: KeyBuilder) => {
   const included: SavedObject[] = [];
   const excluded: SavedObject[] = [];
   objects.forEach((obj) => {

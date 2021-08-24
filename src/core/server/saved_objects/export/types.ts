@@ -84,6 +84,8 @@ export interface SavedObjectsExportExcludedObject {
   id: string;
   /** type of the excluded object */
   type: string;
+  /** the namespace(s) of the excluded object, when not agnostic */
+  namespaces?: string[];
   /** optional cause of the exclusion */
   reason?: string;
 }
