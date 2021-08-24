@@ -18,11 +18,12 @@ export function calculateHealthStatus(
 ): HealthStatus {
   const now = Date.now();
 
-  // if "hot" health stats are any more stale than monitored_stats_required_freshness (pollInterval +1s buffer by default)
-  // consider the system unhealthy
-  const requiredHotStatsFreshness: number = config.monitored_stats_required_freshness;
+  // if "hot" health stats are any more stale than monitored_stats_required_freshness
+  // times a multiplier, consider the system unhealthy
+  const requiredHotStatsFreshness: number = config.monitored_stats_required_freshness * 3;
 
-  // if "cold" health stats are any more stale than the configured refresh (+ a buffer), consider the system unhealthy
+  // if "cold" health stats are any more stale than the configured refresh
+  // times a multiplier, consider the system unhealthy
   const requiredColdStatsFreshness: number = config.monitored_aggregated_stats_refresh_rate * 1.5;
 
   if (hasStatus(summarizedStats.stats, HealthStatus.Error)) {

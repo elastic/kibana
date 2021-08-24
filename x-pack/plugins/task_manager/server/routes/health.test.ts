@@ -270,7 +270,7 @@ describe('healthRoute', () => {
 
     stats$.next(
       mockHealthStats({
-        last_update: new Date(Date.now() - 1500).toISOString(),
+        last_update: new Date(Date.now() - 3001).toISOString(),
       })
     );
 
@@ -408,7 +408,7 @@ describe('healthRoute', () => {
     await sleep(0);
 
     // eslint-disable-next-line @typescript-eslint/naming-convention
-    const last_successful_poll = new Date(Date.now() - 2000).toISOString();
+    const last_successful_poll = new Date(Date.now() - 3001).toISOString();
     stats$.next(
       mockHealthStats({
         stats: {
