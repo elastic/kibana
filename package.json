@@ -93,6 +93,7 @@
     "yarn": "^1.21.1"
   },
   "dependencies": {
+    "@babel/runtime": "^7.12.5",
     "@elastic/apm-rum": "^5.8.0",
     "@elastic/apm-rum-react": "^1.2.11",
     "@elastic/charts": "34.1.1",
@@ -440,7 +441,6 @@
     "@babel/preset-react": "^7.12.10",
     "@babel/preset-typescript": "^7.12.7",
     "@babel/register": "^7.12.10",
-    "@babel/runtime": "^7.12.5",
     "@babel/traverse": "^7.12.12",
     "@babel/types": "^7.12.12",
     "@bazel/ibazel": "^0.15.10",
