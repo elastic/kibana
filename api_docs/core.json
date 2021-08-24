@@ -14406,11 +14406,9 @@
             "type": "Object",
             "tags": [],
             "label": "owner",
-            "description": [
-              "\nTODO: make required once all internal plugins have this specified."
-            ],
+            "description": [],
             "signature": [
-              "{ readonly name: string; readonly githubTeam?: string | undefined; } | undefined"
+              "{ readonly name: string; readonly githubTeam?: string | undefined; }"
             ],
             "path": "src/core/server/plugins/types.ts",
             "deprecated": false

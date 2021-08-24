@@ -20120,61 +20120,6 @@
       },
       {
         "parentPluginId": "data",
-        "id": "def-common.MsearchRequestBody",
-        "type": "Interface",
-        "tags": [],
-        "label": "MsearchRequestBody",
-        "description": [],
-        "path": "src/plugins/data/common/search/search_source/legacy/types.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "data",
-            "id": "def-common.MsearchRequestBody.searches",
-            "type": "Array",
-            "tags": [],
-            "label": "searches",
-            "description": [],
-            "signature": [
-              "MsearchRequest[]"
-            ],
-            "path": "src/plugins/data/common/search/search_source/legacy/types.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
-        "id": "def-common.MsearchResponse",
-        "type": "Interface",
-        "tags": [],
-        "label": "MsearchResponse",
-        "description": [],
-        "path": "src/plugins/data/common/search/search_source/legacy/types.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "data",
-            "id": "def-common.MsearchResponse.body",
-            "type": "Object",
-            "tags": [],
-            "label": "body",
-            "description": [],
-            "signature": [
-              "ApiResponse",
-              "<{ responses: ",
-              "SearchResponse",
-              "<any>[]; }, unknown>"
-            ],
-            "path": "src/plugins/data/common/search/search_source/legacy/types.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
         "id": "def-common.NumericalRange",
         "type": "Interface",
         "tags": [],
@@ -25946,7 +25891,7 @@
               "FilterStateStore",
               "; } | undefined; meta: ",
               "FilterMeta",
-              "; query?: any; type: \"kibana_filter\"; }"
+              "; query?: Record<string, any> | undefined; type: \"kibana_filter\"; }"
             ],
             "path": "src/plugins/data/common/search/expressions/exists_filter.ts",
             "deprecated": false,
@@ -29273,7 +29218,7 @@
               "FilterStateStore",
               "; } | undefined; meta: ",
               "FilterMeta",
-              "; query?: any; type: \"kibana_filter\"; }"
+              "; query?: Record<string, any> | undefined; type: \"kibana_filter\"; }"
             ],
             "path": "src/plugins/data/common/search/expressions/phrase_filter.ts",
             "deprecated": false,
@@ -29769,7 +29714,7 @@
               "FilterStateStore",
               "; } | undefined; meta: ",
               "FilterMeta",
-              "; query?: any; type: \"kibana_filter\"; }"
+              "; query?: Record<string, any> | undefined; type: \"kibana_filter\"; }"
             ],
             "path": "src/plugins/data/common/search/expressions/range_filter.ts",
             "deprecated": false,

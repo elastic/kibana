@@ -2731,6 +2731,10 @@
               },
               " | undefined) => ",
               "RangeFilter",
+              " | ",
+              "ScriptedRangeFilter",
+              " | ",
+              "MatchAllRangeFilter",
               " | undefined; getBounds: () => ",
               {
                 "pluginId": "data",

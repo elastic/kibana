@@ -7113,6 +7113,10 @@
           },
           ", options: { forceNow?: Date | undefined; fieldName?: string | undefined; } | undefined) => ",
           "RangeFilter",
+          " | ",
+          "ScriptedRangeFilter",
+          " | ",
+          "MatchAllRangeFilter",
           " | undefined"
         ],
         "path": "src/plugins/data/common/query/timefilter/get_time.ts",
@@ -14301,8 +14305,11 @@
         "label": "CustomFilter",
         "description": [],
         "signature": [
-          "Filter",
-          " & { query: any; }"
+          "{ $state?: { store: ",
+          "FilterStateStore",
+          "; } | undefined; meta: ",
+          "FilterMeta",
+          "; query?: Record<string, any> | undefined; }"
         ],
         "path": "src/plugins/data/common/es_query/index.ts",
         "deprecated": true,
@@ -14485,18 +14492,6 @@
           {
             "plugin": "observability",
             "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/utils.ts"
-          },
-          {
-            "plugin": "observability",
-            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/lens_attributes.ts"
-          },
-          {
-            "plugin": "observability",
-            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/lens_attributes.ts"
-          },
-          {
-            "plugin": "observability",
-            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/lens_attributes.ts"
           }
         ],
         "initialIsOpen": false
@@ -14658,7 +14653,7 @@
           "FilterStateStore",
           "; } | undefined; meta: ",
           "FilterMeta",
-          "; query?: any; }"
+          "; query?: Record<string, any> | undefined; }"
         ],
         "path": "src/plugins/data/common/es_query/index.ts",
         "deprecated": true,
@@ -14914,18 +14909,6 @@
           },
           {
             "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/persistence/filter_references.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/persistence/filter_references.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/persistence/filter_references.ts"
-          },
-          {
-            "plugin": "lens",
             "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx"
           },
           {
@@ -15329,26 +15312,6 @@
             "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_context_menu_action.ts"
           },
           {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/server/saved_objects/move_filters_to_query.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/server/saved_objects/move_filters_to_query.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/server/saved_objects/move_filters_to_query.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/server/saved_objects/move_filters_to_query.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/server/saved_objects/move_filters_to_query.ts"
-          },
-          {
             "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/common/types/timeline/store.ts"
           },
@@ -15603,14 +15566,6 @@
           {
             "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/public/timelines/store/timeline/helpers.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/store/timeline/epic.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/store/timeline/epic.ts"
           },
           {
             "plugin": "securitySolution",
@@ -15871,14 +15826,6 @@
           {
             "plugin": "urlDrilldown",
             "path": "x-pack/plugins/drilldowns/url_drilldown/public/lib/test/data.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/target/types/public/persistence/filter_references.d.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/target/types/public/persistence/filter_references.d.ts"
           },
           {
             "plugin": "lens",
@@ -16261,34 +16208,6 @@
             "path": "src/plugins/input_control_vis/public/control/filter_manager/filter_manager.test.ts"
           },
           {
-            "plugin": "inputControlVis",
-            "path": "src/plugins/input_control_vis/public/control/filter_manager/phrase_filter_manager.test.ts"
-          },
-          {
-            "plugin": "inputControlVis",
-            "path": "src/plugins/input_control_vis/public/control/filter_manager/phrase_filter_manager.test.ts"
-          },
-          {
-            "plugin": "inputControlVis",
-            "path": "src/plugins/input_control_vis/public/control/filter_manager/phrase_filter_manager.test.ts"
-          },
-          {
-            "plugin": "inputControlVis",
-            "path": "src/plugins/input_control_vis/public/control/filter_manager/phrase_filter_manager.test.ts"
-          },
-          {
-            "plugin": "inputControlVis",
-            "path": "src/plugins/input_control_vis/public/control/filter_manager/phrase_filter_manager.test.ts"
-          },
-          {
-            "plugin": "inputControlVis",
-            "path": "src/plugins/input_control_vis/public/control/filter_manager/phrase_filter_manager.test.ts"
-          },
-          {
-            "plugin": "inputControlVis",
-            "path": "src/plugins/input_control_vis/public/control/filter_manager/phrase_filter_manager.test.ts"
-          },
-          {
             "plugin": "visualize",
             "path": "src/plugins/visualize/target/types/public/application/types.d.ts"
           },
@@ -16303,18 +16222,6 @@
           {
             "plugin": "visualize",
             "path": "src/plugins/visualize/target/types/public/application/types.d.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/target/types/server/saved_objects/move_filters_to_query.d.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/target/types/server/saved_objects/move_filters_to_query.d.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/target/types/server/saved_objects/move_filters_to_query.d.ts"
           },
           {
             "plugin": "presentationUtil",
@@ -16327,6 +16234,10 @@
           {
             "plugin": "presentationUtil",
             "path": "src/plugins/presentation_util/public/components/input_controls/embeddable/types.ts"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/plugins/discover/target/types/public/application/angular/context/api/context.d.ts"
           },
           {
             "plugin": "discover",
@@ -16351,14 +16262,6 @@
           {
             "plugin": "discover",
             "path": "src/plugins/discover/public/application/embeddable/saved_search_embeddable.tsx"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/common/types.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/common/types.ts"
           },
           {
             "plugin": "maps",
@@ -16482,18 +16385,6 @@
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/lib/detection_engine/signals/threat_mapping/build_threat_mapping_filter.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/lib/detection_engine/signals/threat_mapping/build_threat_mapping_filter.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/lib/detection_engine/signals/threat_mapping/build_threat_mapping_filter.ts"
-          },
-          {
-            "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/server/lib/detection_engine/signals/threshold/get_threshold_bucket_filters.ts"
           },
           {
@@ -16511,14 +16402,6 @@
           {
             "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/server/lib/detection_engine/signals/threat_mapping/build_threat_mapping_filter.mock.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/target/types/server/lib/detection_engine/signals/threat_mapping/build_threat_mapping_filter.d.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/target/types/server/lib/detection_engine/signals/threat_mapping/build_threat_mapping_filter.d.ts"
           },
           {
             "plugin": "securitySolution",
@@ -17552,21 +17435,14 @@
           "Filter",
           " & { meta: ",
           "MatchAllFilterMeta",
-          "; match_all: any; }"
+          "; match_all: ",
+          "QueryDslMatchAllQuery",
+          "; }"
         ],
         "path": "src/plugins/data/common/es_query/index.ts",
         "deprecated": true,
         "removeBy": "8.1",
-        "references": [
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/store/timeline/epic.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/store/timeline/epic.ts"
-          }
-        ],
+        "references": [],
         "initialIsOpen": false
       },
       {
@@ -17598,45 +17474,16 @@
           "Filter",
           " & { meta: ",
           "PhraseFilterMeta",
-          "; script?: { script: { source?: string | undefined; lang?: \"painless\" | \"expression\" | \"mustache\" | \"java\" | undefined; params: { [key: string]: PhraseFilterValue; }; }; } | undefined; }"
+          "; query: { match_phrase?: Record<string, string | ",
+          "QueryDslMatchPhraseQuery",
+          "> | undefined; match?: Record<string, string | number | boolean | ",
+          "QueryDslMatchQuery",
+          "> | undefined; }; }"
         ],
         "path": "src/plugins/data/common/es_query/index.ts",
         "deprecated": true,
         "removeBy": "8.1",
-        "references": [
-          {
-            "plugin": "inputControlVis",
-            "path": "src/plugins/input_control_vis/public/control/filter_manager/phrase_filter_manager.ts"
-          },
-          {
-            "plugin": "inputControlVis",
-            "path": "src/plugins/input_control_vis/public/control/filter_manager/phrase_filter_manager.ts"
-          },
-          {
-            "plugin": "inputControlVis",
-            "path": "src/plugins/input_control_vis/public/control/filter_manager/phrase_filter_manager.ts"
-          },
-          {
-            "plugin": "inputControlVis",
-            "path": "src/plugins/input_control_vis/public/control/filter_manager/phrase_filter_manager.ts"
-          },
-          {
-            "plugin": "inputControlVis",
-            "path": "src/plugins/input_control_vis/public/control/filter_manager/phrase_filter_manager.ts"
-          },
-          {
-            "plugin": "inputControlVis",
-            "path": "src/plugins/input_control_vis/public/control/filter_manager/phrase_filter_manager.ts"
-          },
-          {
-            "plugin": "inputControlVis",
-            "path": "src/plugins/input_control_vis/public/control/create_search_source.ts"
-          },
-          {
-            "plugin": "inputControlVis",
-            "path": "src/plugins/input_control_vis/public/control/create_search_source.ts"
-          }
-        ],
+        "references": [],
         "initialIsOpen": false
       },
       {
@@ -17652,6 +17499,8 @@
           "Filter",
           " & { meta: ",
           "PhrasesFilterMeta",
+          "; query: ",
+          "QueryDslQueryContainer",
           "; }"
         ],
         "path": "src/plugins/data/common/es_query/index.ts",
@@ -17685,13 +17534,11 @@
         "description": [],
         "signature": [
           "Filter",
-          " & ",
-          "EsRangeFilter",
           " & { meta: ",
           "RangeFilterMeta",
-          "; script?: { script: { params: any; lang: ",
-          "ScriptLanguage",
-          "; source: string; }; } | undefined; match_all?: any; }"
+          "; range: { [key: string]: ",
+          "RangeFilterParams",
+          "; }; }"
         ],
         "path": "src/plugins/data/common/es_query/index.ts",
         "deprecated": true,
@@ -17704,34 +17551,6 @@
           {
             "plugin": "discoverEnhanced",
             "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_chart_action.test.ts"
-          },
-          {
-            "plugin": "inputControlVis",
-            "path": "src/plugins/input_control_vis/public/control/filter_manager/range_filter_manager.ts"
-          },
-          {
-            "plugin": "inputControlVis",
-            "path": "src/plugins/input_control_vis/public/control/filter_manager/range_filter_manager.ts"
-          },
-          {
-            "plugin": "inputControlVis",
-            "path": "src/plugins/input_control_vis/public/control/filter_manager/range_filter_manager.test.ts"
-          },
-          {
-            "plugin": "inputControlVis",
-            "path": "src/plugins/input_control_vis/public/control/filter_manager/range_filter_manager.test.ts"
-          },
-          {
-            "plugin": "inputControlVis",
-            "path": "src/plugins/input_control_vis/public/control/filter_manager/range_filter_manager.test.ts"
-          },
-          {
-            "plugin": "inputControlVis",
-            "path": "src/plugins/input_control_vis/public/control/filter_manager/range_filter_manager.test.ts"
-          },
-          {
-            "plugin": "inputControlVis",
-            "path": "src/plugins/input_control_vis/public/control/filter_manager/range_filter_manager.test.ts"
           }
         ],
         "initialIsOpen": false
@@ -17754,20 +17573,7 @@
         "path": "src/plugins/data/common/es_query/index.ts",
         "deprecated": true,
         "removeBy": "8.1",
-        "references": [
-          {
-            "plugin": "inputControlVis",
-            "path": "src/plugins/input_control_vis/public/control/filter_manager/range_filter_manager.test.ts"
-          },
-          {
-            "plugin": "inputControlVis",
-            "path": "src/plugins/input_control_vis/public/control/filter_manager/range_filter_manager.test.ts"
-          },
-          {
-            "plugin": "inputControlVis",
-            "path": "src/plugins/input_control_vis/public/control/filter_manager/range_filter_manager.test.ts"
-          }
-        ],
+        "references": [],
         "initialIsOpen": false
       },
       {
@@ -17786,18 +17592,6 @@
         "deprecated": true,
         "removeBy": "8.1",
         "references": [
-          {
-            "plugin": "inputControlVis",
-            "path": "src/plugins/input_control_vis/public/control/filter_manager/range_filter_manager.ts"
-          },
-          {
-            "plugin": "inputControlVis",
-            "path": "src/plugins/input_control_vis/public/control/filter_manager/range_filter_manager.ts"
-          },
-          {
-            "plugin": "inputControlVis",
-            "path": "src/plugins/input_control_vis/public/control/filter_manager/range_filter_manager.ts"
-          },
           {
             "plugin": "visTypeTimelion",
             "path": "src/plugins/vis_type_timelion/public/components/timelion_vis_component.tsx"
@@ -18279,10 +18073,6 @@
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/store/timeline/epic.ts"
-          },
-          {
-            "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/public/detections/components/rules/description_step/helpers.tsx"
           },
           {
@@ -18364,38 +18154,6 @@
           {
             "plugin": "dashboard",
             "path": "src/plugins/dashboard/public/url_generator.test.ts"
-          },
-          {
-            "plugin": "inputControlVis",
-            "path": "src/plugins/input_control_vis/public/control/filter_manager/range_filter_manager.ts"
-          },
-          {
-            "plugin": "inputControlVis",
-            "path": "src/plugins/input_control_vis/public/control/filter_manager/range_filter_manager.ts"
-          },
-          {
-            "plugin": "inputControlVis",
-            "path": "src/plugins/input_control_vis/public/control/filter_manager/phrase_filter_manager.ts"
-          },
-          {
-            "plugin": "inputControlVis",
-            "path": "src/plugins/input_control_vis/public/control/filter_manager/phrase_filter_manager.ts"
-          },
-          {
-            "plugin": "inputControlVis",
-            "path": "src/plugins/input_control_vis/public/control/filter_manager/phrase_filter_manager.ts"
-          },
-          {
-            "plugin": "inputControlVis",
-            "path": "src/plugins/input_control_vis/public/control/filter_manager/phrase_filter_manager.ts"
-          },
-          {
-            "plugin": "inputControlVis",
-            "path": "src/plugins/input_control_vis/public/control/filter_manager/phrase_filter_manager.ts"
-          },
-          {
-            "plugin": "inputControlVis",
-            "path": "src/plugins/input_control_vis/public/control/filter_manager/phrase_filter_manager.ts"
           },
           {
             "plugin": "visualize",
@@ -18599,7 +18357,9 @@
             "signature": [
               "(field: ",
               "IndexPatternFieldBase",
-              ", params: string[], indexPattern: ",
+              ", params: ",
+              "PhraseFilterValue",
+              "[], indexPattern: ",
               "IndexPatternBase",
               ") => ",
               "PhrasesFilter"
@@ -18629,7 +18389,8 @@
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "string[]"
+                  "PhraseFilterValue",
+                  "[]"
                 ],
                 "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/phrases_filter.d.ts",
                 "deprecated": false
@@ -18706,10 +18467,14 @@
             "signature": [
               "(field: ",
               "IndexPatternFieldBase",
-              ", value: PhraseFilterValue, indexPattern: ",
+              ", value: ",
+              "PhraseFilterValue",
+              ", indexPattern: ",
               "IndexPatternBase",
               ") => ",
-              "PhraseFilter"
+              "PhraseFilter",
+              " | ",
+              "ScriptedPhraseFilter"
             ],
             "path": "src/plugins/data/public/deprecated.ts",
             "deprecated": false,
@@ -18764,7 +18529,7 @@
             "label": "buildQueryFilter",
             "description": [],
             "signature": [
-              "(query: any, index: string, alias: string) => ",
+              "(query: (Record<string, any> & { query_string?: { query: string; } | undefined; }) | undefined, index: string, alias: string) => ",
               "QueryStringFilter"
             ],
             "path": "src/plugins/data/public/deprecated.ts",
@@ -18774,12 +18539,12 @@
               {
                 "parentPluginId": "data",
                 "id": "def-public.query",
-                "type": "Any",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "query",
                 "description": [],
                 "signature": [
-                  "any"
+                  "(Record<string, any> & { query_string?: { query: string; } | undefined; }) | undefined"
                 ],
                 "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/query_string_filter.d.ts",
                 "deprecated": false
@@ -18821,7 +18586,11 @@
               ", indexPattern: ",
               "IndexPatternBase",
               ", formattedValue?: string | undefined) => ",
-              "RangeFilter"
+              "RangeFilter",
+              " | ",
+              "ScriptedRangeFilter",
+              " | ",
+              "MatchAllRangeFilter"
             ],
             "path": "src/plugins/data/public/deprecated.ts",
             "deprecated": false,
@@ -18890,17 +18659,7 @@
             "description": [],
             "signature": [
               "(filter: ",
-              "RangeFilter",
-              " | ",
-              "ExistsFilter",
-              " | ",
-              "PhraseFilter",
-              " | ",
-              "PhrasesFilter",
-              " | ",
-              "MatchAllFilter",
-              " | ",
-              "MissingFilter",
+              "Filter",
               ") => filter is ",
               "PhraseFilter"
             ],
@@ -18911,22 +18670,16 @@
               {
                 "parentPluginId": "data",
                 "id": "def-public.filter",
-                "type": "CompoundType",
+                "type": "Object",
                 "tags": [],
                 "label": "filter",
                 "description": [],
                 "signature": [
-                  "RangeFilter",
-                  " | ",
-                  "ExistsFilter",
-                  " | ",
-                  "PhraseFilter",
-                  " | ",
-                  "PhrasesFilter",
-                  " | ",
-                  "MatchAllFilter",
-                  " | ",
-                  "MissingFilter"
+                  "{ $state?: { store: ",
+                  "FilterStateStore",
+                  "; } | undefined; meta: ",
+                  "FilterMeta",
+                  "; query?: Record<string, any> | undefined; }"
                 ],
                 "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/phrase_filter.d.ts",
                 "deprecated": false
@@ -18942,17 +18695,7 @@
             "description": [],
             "signature": [
               "(filter: ",
-              "RangeFilter",
-              " | ",
-              "ExistsFilter",
-              " | ",
-              "PhraseFilter",
-              " | ",
-              "PhrasesFilter",
-              " | ",
-              "MatchAllFilter",
-              " | ",
-              "MissingFilter",
+              "Filter",
               ") => filter is ",
               "ExistsFilter"
             ],
@@ -18963,22 +18706,16 @@
               {
                 "parentPluginId": "data",
                 "id": "def-public.filter",
-                "type": "CompoundType",
+                "type": "Object",
                 "tags": [],
                 "label": "filter",
                 "description": [],
                 "signature": [
-                  "RangeFilter",
-                  " | ",
-                  "ExistsFilter",
-                  " | ",
-                  "PhraseFilter",
-                  " | ",
-                  "PhrasesFilter",
-                  " | ",
-                  "MatchAllFilter",
-                  " | ",
-                  "MissingFilter"
+                  "{ $state?: { store: ",
+                  "FilterStateStore",
+                  "; } | undefined; meta: ",
+                  "FilterMeta",
+                  "; query?: Record<string, any> | undefined; }"
                 ],
                 "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/exists_filter.d.ts",
                 "deprecated": false
@@ -18994,17 +18731,7 @@
             "description": [],
             "signature": [
               "(filter: ",
-              "RangeFilter",
-              " | ",
-              "ExistsFilter",
-              " | ",
-              "PhraseFilter",
-              " | ",
-              "PhrasesFilter",
-              " | ",
-              "MatchAllFilter",
-              " | ",
-              "MissingFilter",
+              "Filter",
               ") => filter is ",
               "PhrasesFilter"
             ],
@@ -19015,22 +18742,16 @@
               {
                 "parentPluginId": "data",
                 "id": "def-public.filter",
-                "type": "CompoundType",
+                "type": "Object",
                 "tags": [],
                 "label": "filter",
                 "description": [],
                 "signature": [
-                  "RangeFilter",
-                  " | ",
-                  "ExistsFilter",
-                  " | ",
-                  "PhraseFilter",
-                  " | ",
-                  "PhrasesFilter",
-                  " | ",
-                  "MatchAllFilter",
-                  " | ",
-                  "MissingFilter"
+                  "{ $state?: { store: ",
+                  "FilterStateStore",
+                  "; } | undefined; meta: ",
+                  "FilterMeta",
+                  "; query?: Record<string, any> | undefined; }"
                 ],
                 "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/phrases_filter.d.ts",
                 "deprecated": false
@@ -19046,17 +18767,7 @@
             "description": [],
             "signature": [
               "(filter?: ",
-              "RangeFilter",
-              " | ",
-              "ExistsFilter",
-              " | ",
-              "PhraseFilter",
-              " | ",
-              "PhrasesFilter",
-              " | ",
-              "MatchAllFilter",
-              " | ",
-              "MissingFilter",
+              "Filter",
               " | undefined) => filter is ",
               "RangeFilter"
             ],
@@ -19067,22 +18778,12 @@
               {
                 "parentPluginId": "data",
                 "id": "def-public.filter",
-                "type": "CompoundType",
+                "type": "Object",
                 "tags": [],
                 "label": "filter",
                 "description": [],
                 "signature": [
-                  "RangeFilter",
-                  " | ",
-                  "ExistsFilter",
-                  " | ",
-                  "PhraseFilter",
-                  " | ",
-                  "PhrasesFilter",
-                  " | ",
-                  "MatchAllFilter",
-                  " | ",
-                  "MissingFilter",
+                  "Filter",
                   " | undefined"
                 ],
                 "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/range_filter.d.ts",
@@ -19099,17 +18800,7 @@
             "description": [],
             "signature": [
               "(filter: ",
-              "RangeFilter",
-              " | ",
-              "ExistsFilter",
-              " | ",
-              "PhraseFilter",
-              " | ",
-              "PhrasesFilter",
-              " | ",
-              "MatchAllFilter",
-              " | ",
-              "MissingFilter",
+              "Filter",
               ") => filter is ",
               "MatchAllFilter"
             ],
@@ -19120,22 +18811,16 @@
               {
                 "parentPluginId": "data",
                 "id": "def-public.filter",
-                "type": "CompoundType",
+                "type": "Object",
                 "tags": [],
                 "label": "filter",
                 "description": [],
                 "signature": [
-                  "RangeFilter",
-                  " | ",
-                  "ExistsFilter",
-                  " | ",
-                  "PhraseFilter",
-                  " | ",
-                  "PhrasesFilter",
-                  " | ",
-                  "MatchAllFilter",
-                  " | ",
-                  "MissingFilter"
+                  "{ $state?: { store: ",
+                  "FilterStateStore",
+                  "; } | undefined; meta: ",
+                  "FilterMeta",
+                  "; query?: Record<string, any> | undefined; }"
                 ],
                 "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/match_all_filter.d.ts",
                 "deprecated": false
@@ -19151,17 +18836,7 @@
             "description": [],
             "signature": [
               "(filter: ",
-              "RangeFilter",
-              " | ",
-              "ExistsFilter",
-              " | ",
-              "PhraseFilter",
-              " | ",
-              "PhrasesFilter",
-              " | ",
-              "MatchAllFilter",
-              " | ",
-              "MissingFilter",
+              "Filter",
               ") => filter is ",
               "MissingFilter"
             ],
@@ -19172,22 +18847,16 @@
               {
                 "parentPluginId": "data",
                 "id": "def-public.filter",
-                "type": "CompoundType",
+                "type": "Object",
                 "tags": [],
                 "label": "filter",
                 "description": [],
                 "signature": [
-                  "RangeFilter",
-                  " | ",
-                  "ExistsFilter",
-                  " | ",
-                  "PhraseFilter",
-                  " | ",
-                  "PhrasesFilter",
-                  " | ",
-                  "MatchAllFilter",
-                  " | ",
-                  "MissingFilter"
+                  "{ $state?: { store: ",
+                  "FilterStateStore",
+                  "; } | undefined; meta: ",
+                  "FilterMeta",
+                  "; query?: Record<string, any> | undefined; }"
                 ],
                 "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/missing_filter.d.ts",
                 "deprecated": false
@@ -19203,17 +18872,7 @@
             "description": [],
             "signature": [
               "(filter: ",
-              "RangeFilter",
-              " | ",
-              "ExistsFilter",
-              " | ",
-              "PhraseFilter",
-              " | ",
-              "PhrasesFilter",
-              " | ",
-              "MatchAllFilter",
-              " | ",
-              "MissingFilter",
+              "Filter",
               ") => filter is ",
               "QueryStringFilter"
             ],
@@ -19224,22 +18883,16 @@
               {
                 "parentPluginId": "data",
                 "id": "def-public.filter",
-                "type": "CompoundType",
+                "type": "Object",
                 "tags": [],
                 "label": "filter",
                 "description": [],
                 "signature": [
-                  "RangeFilter",
-                  " | ",
-                  "ExistsFilter",
-                  " | ",
-                  "PhraseFilter",
-                  " | ",
-                  "PhrasesFilter",
-                  " | ",
-                  "MatchAllFilter",
-                  " | ",
-                  "MissingFilter"
+                  "{ $state?: { store: ",
+                  "FilterStateStore",
+                  "; } | undefined; meta: ",
+                  "FilterMeta",
+                  "; query?: Record<string, any> | undefined; }"
                 ],
                 "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/query_string_filter.d.ts",
                 "deprecated": false
@@ -19274,7 +18927,7 @@
                   "FilterStateStore",
                   "; } | undefined; meta: ",
                   "FilterMeta",
-                  "; query?: any; }"
+                  "; query?: Record<string, any> | undefined; }"
                 ],
                 "path": "node_modules/@kbn/es-query/target_types/filters/helpers/meta_filter.d.ts",
                 "deprecated": false
@@ -19291,9 +18944,9 @@
             "signature": [
               "(filter: ",
               "Filter",
-              ") => { meta: { negate: boolean; alias: string | null; disabled: boolean; controlledBy?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; $state?: { store: ",
+              ") => { meta: { negate: boolean; alias?: string | null | undefined; disabled?: boolean | undefined; controlledBy?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; $state?: { store: ",
               "FilterStateStore",
-              "; } | undefined; query?: any; }"
+              "; } | undefined; query?: Record<string, any> | undefined; }"
             ],
             "path": "src/plugins/data/public/deprecated.ts",
             "deprecated": false,
@@ -19311,7 +18964,7 @@
                   "FilterStateStore",
                   "; } | undefined; meta: ",
                   "FilterMeta",
-                  "; query?: any; }"
+                  "; query?: Record<string, any> | undefined; }"
                 ],
                 "path": "node_modules/@kbn/es-query/target_types/filters/helpers/meta_filter.d.ts",
                 "deprecated": false
@@ -19347,7 +19000,7 @@
                   "FilterStateStore",
                   "; } | undefined; meta: ",
                   "FilterMeta",
-                  "; query?: any; }"
+                  "; query?: Record<string, any> | undefined; }"
                 ],
                 "path": "node_modules/@kbn/es-query/target_types/filters/helpers/meta_filter.d.ts",
                 "deprecated": false
@@ -19381,7 +19034,11 @@
                   "Filter",
                   " & { meta: ",
                   "PhraseFilterMeta",
-                  "; script?: { script: { source?: string | undefined; lang?: \"painless\" | \"expression\" | \"mustache\" | \"java\" | undefined; params: { [key: string]: PhraseFilterValue; }; }; } | undefined; }"
+                  "; query: { match_phrase?: Record<string, string | ",
+                  "QueryDslMatchPhraseQuery",
+                  "> | undefined; match?: Record<string, string | number | boolean | ",
+                  "QueryDslMatchQuery",
+                  "> | undefined; }; }"
                 ],
                 "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/phrase_filter.d.ts",
                 "deprecated": false
@@ -19398,7 +19055,10 @@
             "signature": [
               "(filter: ",
               "PhraseFilter",
-              ") => PhraseFilterValue"
+              " | ",
+              "ScriptedPhraseFilter",
+              ") => ",
+              "PhraseFilterValue"
             ],
             "path": "src/plugins/data/public/deprecated.ts",
             "deprecated": false,
@@ -19412,10 +19072,9 @@
                 "label": "filter",
                 "description": [],
                 "signature": [
-                  "Filter",
-                  " & { meta: ",
-                  "PhraseFilterMeta",
-                  "; script?: { script: { source?: string | undefined; lang?: \"painless\" | \"expression\" | \"mustache\" | \"java\" | undefined; params: { [key: string]: PhraseFilterValue; }; }; } | undefined; }"
+                  "PhraseFilter",
+                  " | ",
+                  "ScriptedPhraseFilter"
                 ],
                 "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/phrase_filter.d.ts",
                 "deprecated": false
@@ -19458,7 +19117,7 @@
                   "FilterStateStore",
                   "; } | undefined; meta: ",
                   "FilterMeta",
-                  "; query?: any; }"
+                  "; query?: Record<string, any> | undefined; }"
                 ],
                 "path": "src/plugins/data/public/query/filter_manager/lib/get_display_value.ts",
                 "deprecated": false
@@ -19820,6 +19479,10 @@
                   },
                   " | undefined) => ",
                   "RangeFilter",
+                  " | ",
+                  "ScriptedRangeFilter",
+                  " | ",
+                  "MatchAllRangeFilter",
                   " | undefined; getBounds: () => ",
                   {
                     "pluginId": "data",
@@ -19882,13 +19545,11 @@
                 "description": [],
                 "signature": [
                   "Filter",
-                  " & ",
-                  "EsRangeFilter",
                   " & { meta: ",
                   "RangeFilterMeta",
-                  "; script?: { script: { params: any; lang: ",
-                  "ScriptLanguage",
-                  "; source: string; }; } | undefined; match_all?: any; }"
+                  "; range: { [key: string]: ",
+                  "RangeFilterParams",
+                  "; }; }"
                 ],
                 "path": "src/plugins/data/public/query/timefilter/lib/change_time_filter.ts",
                 "deprecated": false
@@ -19927,13 +19588,11 @@
                 "description": [],
                 "signature": [
                   "Filter",
-                  " & ",
-                  "EsRangeFilter",
                   " & { meta: ",
                   "RangeFilterMeta",
-                  "; script?: { script: { params: any; lang: ",
-                  "ScriptLanguage",
-                  "; source: string; }; } | undefined; match_all?: any; }"
+                  "; range: { [key: string]: ",
+                  "RangeFilterParams",
+                  "; }; }"
                 ],
                 "path": "src/plugins/data/public/query/timefilter/lib/change_time_filter.ts",
                 "deprecated": false
@@ -22220,7 +21879,7 @@
         "label": "UI_SETTINGS",
         "description": [],
         "signature": [
-          "{ readonly META_FIELDS: \"metaFields\"; readonly DOC_HIGHLIGHT: \"doc_table:highlight\"; readonly QUERY_STRING_OPTIONS: \"query:queryString:options\"; readonly QUERY_ALLOW_LEADING_WILDCARDS: \"query:allowLeadingWildcards\"; readonly SEARCH_QUERY_LANGUAGE: \"search:queryLanguage\"; readonly SORT_OPTIONS: \"sort:options\"; readonly COURIER_IGNORE_FILTER_IF_FIELD_NOT_IN_INDEX: \"courier:ignoreFilterIfFieldNotInIndex\"; readonly COURIER_SET_REQUEST_PREFERENCE: \"courier:setRequestPreference\"; readonly COURIER_CUSTOM_REQUEST_PREFERENCE: \"courier:customRequestPreference\"; readonly COURIER_MAX_CONCURRENT_SHARD_REQUESTS: \"courier:maxConcurrentShardRequests\"; readonly COURIER_BATCH_SEARCHES: \"courier:batchSearches\"; readonly SEARCH_INCLUDE_FROZEN: \"search:includeFrozen\"; readonly SEARCH_TIMEOUT: \"search:timeout\"; readonly HISTOGRAM_BAR_TARGET: \"histogram:barTarget\"; readonly HISTOGRAM_MAX_BARS: \"histogram:maxBars\"; readonly HISTORY_LIMIT: \"history:limit\"; readonly TIMEPICKER_REFRESH_INTERVAL_DEFAULTS: \"timepicker:refreshIntervalDefaults\"; readonly TIMEPICKER_QUICK_RANGES: \"timepicker:quickRanges\"; readonly TIMEPICKER_TIME_DEFAULTS: \"timepicker:timeDefaults\"; readonly INDEXPATTERN_PLACEHOLDER: \"indexPattern:placeholder\"; readonly FILTERS_PINNED_BY_DEFAULT: \"filters:pinnedByDefault\"; readonly FILTERS_EDITOR_SUGGEST_VALUES: \"filterEditor:suggestValues\"; readonly AUTOCOMPLETE_USE_TIMERANGE: \"autocomplete:useTimeRange\"; readonly AUTOCOMPLETE_VALUE_SUGGESTION_METHOD: \"autocomplete:valueSuggestionMethod\"; }"
+          "{ readonly META_FIELDS: \"metaFields\"; readonly DOC_HIGHLIGHT: \"doc_table:highlight\"; readonly QUERY_STRING_OPTIONS: \"query:queryString:options\"; readonly QUERY_ALLOW_LEADING_WILDCARDS: \"query:allowLeadingWildcards\"; readonly SEARCH_QUERY_LANGUAGE: \"search:queryLanguage\"; readonly SORT_OPTIONS: \"sort:options\"; readonly COURIER_IGNORE_FILTER_IF_FIELD_NOT_IN_INDEX: \"courier:ignoreFilterIfFieldNotInIndex\"; readonly COURIER_SET_REQUEST_PREFERENCE: \"courier:setRequestPreference\"; readonly COURIER_CUSTOM_REQUEST_PREFERENCE: \"courier:customRequestPreference\"; readonly COURIER_MAX_CONCURRENT_SHARD_REQUESTS: \"courier:maxConcurrentShardRequests\"; readonly SEARCH_INCLUDE_FROZEN: \"search:includeFrozen\"; readonly SEARCH_TIMEOUT: \"search:timeout\"; readonly HISTOGRAM_BAR_TARGET: \"histogram:barTarget\"; readonly HISTOGRAM_MAX_BARS: \"histogram:maxBars\"; readonly HISTORY_LIMIT: \"history:limit\"; readonly TIMEPICKER_REFRESH_INTERVAL_DEFAULTS: \"timepicker:refreshIntervalDefaults\"; readonly TIMEPICKER_QUICK_RANGES: \"timepicker:quickRanges\"; readonly TIMEPICKER_TIME_DEFAULTS: \"timepicker:timeDefaults\"; readonly INDEXPATTERN_PLACEHOLDER: \"indexPattern:placeholder\"; readonly FILTERS_PINNED_BY_DEFAULT: \"filters:pinnedByDefault\"; readonly FILTERS_EDITOR_SUGGEST_VALUES: \"filterEditor:suggestValues\"; readonly AUTOCOMPLETE_USE_TIMERANGE: \"autocomplete:useTimeRange\"; readonly AUTOCOMPLETE_VALUE_SUGGESTION_METHOD: \"autocomplete:valueSuggestionMethod\"; }"
         ],
         "path": "src/plugins/data/common/constants.ts",
         "deprecated": false,
@@ -27530,6 +27189,10 @@
           },
           ", options: { forceNow?: Date | undefined; fieldName?: string | undefined; } | undefined) => ",
           "RangeFilter",
+          " | ",
+          "ScriptedRangeFilter",
+          " | ",
+          "MatchAllRangeFilter",
           " | undefined"
         ],
         "path": "src/plugins/data/common/query/timefilter/get_time.ts",
@@ -29250,7 +28913,7 @@
           "FilterStateStore",
           "; } | undefined; meta: ",
           "FilterMeta",
-          "; query?: any; }"
+          "; query?: Record<string, any> | undefined; }"
         ],
         "path": "src/plugins/data/common/es_query/index.ts",
         "deprecated": true,
@@ -29506,18 +29169,6 @@
           },
           {
             "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/persistence/filter_references.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/persistence/filter_references.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/persistence/filter_references.ts"
-          },
-          {
-            "plugin": "lens",
             "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx"
           },
           {
@@ -29921,26 +29572,6 @@
             "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_context_menu_action.ts"
           },
           {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/server/saved_objects/move_filters_to_query.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/server/saved_objects/move_filters_to_query.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/server/saved_objects/move_filters_to_query.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/server/saved_objects/move_filters_to_query.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/server/saved_objects/move_filters_to_query.ts"
-          },
-          {
             "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/common/types/timeline/store.ts"
           },
@@ -30195,14 +29826,6 @@
           {
             "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/public/timelines/store/timeline/helpers.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/store/timeline/epic.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/store/timeline/epic.ts"
           },
           {
             "plugin": "securitySolution",
@@ -30463,14 +30086,6 @@
           {
             "plugin": "urlDrilldown",
             "path": "x-pack/plugins/drilldowns/url_drilldown/public/lib/test/data.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/target/types/public/persistence/filter_references.d.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/target/types/public/persistence/filter_references.d.ts"
           },
           {
             "plugin": "lens",
@@ -30853,34 +30468,6 @@
             "path": "src/plugins/input_control_vis/public/control/filter_manager/filter_manager.test.ts"
           },
           {
-            "plugin": "inputControlVis",
-            "path": "src/plugins/input_control_vis/public/control/filter_manager/phrase_filter_manager.test.ts"
-          },
-          {
-            "plugin": "inputControlVis",
-            "path": "src/plugins/input_control_vis/public/control/filter_manager/phrase_filter_manager.test.ts"
-          },
-          {
-            "plugin": "inputControlVis",
-            "path": "src/plugins/input_control_vis/public/control/filter_manager/phrase_filter_manager.test.ts"
-          },
-          {
-            "plugin": "inputControlVis",
-            "path": "src/plugins/input_control_vis/public/control/filter_manager/phrase_filter_manager.test.ts"
-          },
-          {
-            "plugin": "inputControlVis",
-            "path": "src/plugins/input_control_vis/public/control/filter_manager/phrase_filter_manager.test.ts"
-          },
-          {
-            "plugin": "inputControlVis",
-            "path": "src/plugins/input_control_vis/public/control/filter_manager/phrase_filter_manager.test.ts"
-          },
-          {
-            "plugin": "inputControlVis",
-            "path": "src/plugins/input_control_vis/public/control/filter_manager/phrase_filter_manager.test.ts"
-          },
-          {
             "plugin": "visualize",
             "path": "src/plugins/visualize/target/types/public/application/types.d.ts"
           },
@@ -30895,18 +30482,6 @@
           {
             "plugin": "visualize",
             "path": "src/plugins/visualize/target/types/public/application/types.d.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/target/types/server/saved_objects/move_filters_to_query.d.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/target/types/server/saved_objects/move_filters_to_query.d.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/target/types/server/saved_objects/move_filters_to_query.d.ts"
           },
           {
             "plugin": "presentationUtil",
@@ -30919,6 +30494,10 @@
           {
             "plugin": "presentationUtil",
             "path": "src/plugins/presentation_util/public/components/input_controls/embeddable/types.ts"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/plugins/discover/target/types/public/application/angular/context/api/context.d.ts"
           },
           {
             "plugin": "discover",
@@ -30943,14 +30522,6 @@
           {
             "plugin": "discover",
             "path": "src/plugins/discover/public/application/embeddable/saved_search_embeddable.tsx"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/common/types.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/common/types.ts"
           },
           {
             "plugin": "maps",
@@ -31074,18 +30645,6 @@
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/lib/detection_engine/signals/threat_mapping/build_threat_mapping_filter.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/lib/detection_engine/signals/threat_mapping/build_threat_mapping_filter.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/lib/detection_engine/signals/threat_mapping/build_threat_mapping_filter.ts"
-          },
-          {
-            "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/server/lib/detection_engine/signals/threshold/get_threshold_bucket_filters.ts"
           },
           {
@@ -31103,14 +30662,6 @@
           {
             "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/server/lib/detection_engine/signals/threat_mapping/build_threat_mapping_filter.mock.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/target/types/server/lib/detection_engine/signals/threat_mapping/build_threat_mapping_filter.d.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/target/types/server/lib/detection_engine/signals/threat_mapping/build_threat_mapping_filter.d.ts"
           },
           {
             "plugin": "securitySolution",
@@ -31538,7 +31089,7 @@
             "label": "buildQueryFilter",
             "description": [],
             "signature": [
-              "(query: any, index: string, alias: string) => ",
+              "(query: (Record<string, any> & { query_string?: { query: string; } | undefined; }) | undefined, index: string, alias: string) => ",
               "QueryStringFilter"
             ],
             "path": "src/plugins/data/server/deprecated.ts",
@@ -31548,12 +31099,12 @@
               {
                 "parentPluginId": "data",
                 "id": "def-server.query",
-                "type": "Any",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "query",
                 "description": [],
                 "signature": [
-                  "any"
+                  "(Record<string, any> & { query_string?: { query: string; } | undefined; }) | undefined"
                 ],
                 "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/query_string_filter.d.ts",
                 "deprecated": false
@@ -31588,7 +31139,9 @@
             "label": "buildCustomFilter",
             "description": [],
             "signature": [
-              "(indexPatternString: string, queryDsl: any, disabled: boolean, negate: boolean, alias: string | null, store: ",
+              "(indexPatternString: string, queryDsl: ",
+              "QueryDslQueryContainer",
+              ", disabled: boolean, negate: boolean, alias: string | null, store: ",
               "FilterStateStore",
               ") => ",
               "Filter"
@@ -31610,12 +31163,12 @@
               {
                 "parentPluginId": "data",
                 "id": "def-server.queryDsl",
-                "type": "Any",
+                "type": "Object",
                 "tags": [],
                 "label": "queryDsl",
                 "description": [],
                 "signature": [
-                  "any"
+                  "QueryDslQueryContainer"
                 ],
                 "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/custom_filter.d.ts",
                 "deprecated": false
@@ -31769,7 +31322,9 @@
               "IndexPatternFieldBase",
               ", type: ",
               "FILTERS",
-              ", negate: boolean, disabled: boolean, params: any, alias: string | null, store?: ",
+              ", negate: boolean, disabled: boolean, params: ",
+              "Serializable",
+              ", alias: string | null, store?: ",
               "FilterStateStore",
               " | undefined) => ",
               "Filter"
@@ -31840,12 +31395,16 @@
               {
                 "parentPluginId": "data",
                 "id": "def-server.params",
-                "type": "Any",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "any"
+                  "string | number | boolean | ",
+                  "SerializableRecord",
+                  " | ",
+                  "SerializableArray",
+                  " | null | undefined"
                 ],
                 "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/build_filters.d.ts",
                 "deprecated": false
@@ -31889,10 +31448,14 @@
             "signature": [
               "(field: ",
               "IndexPatternFieldBase",
-              ", value: PhraseFilterValue, indexPattern: ",
+              ", value: ",
+              "PhraseFilterValue",
+              ", indexPattern: ",
               "IndexPatternBase",
               ") => ",
-              "PhraseFilter"
+              "PhraseFilter",
+              " | ",
+              "ScriptedPhraseFilter"
             ],
             "path": "src/plugins/data/server/deprecated.ts",
             "deprecated": false,
@@ -31949,7 +31512,9 @@
             "signature": [
               "(field: ",
               "IndexPatternFieldBase",
-              ", params: string[], indexPattern: ",
+              ", params: ",
+              "PhraseFilterValue",
+              "[], indexPattern: ",
               "IndexPatternBase",
               ") => ",
               "PhrasesFilter"
@@ -31979,7 +31544,8 @@
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "string[]"
+                  "PhraseFilterValue",
+                  "[]"
                 ],
                 "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/phrases_filter.d.ts",
                 "deprecated": false
@@ -32014,7 +31580,11 @@
               ", indexPattern: ",
               "IndexPatternBase",
               ", formattedValue?: string | undefined) => ",
-              "RangeFilter"
+              "RangeFilter",
+              " | ",
+              "ScriptedRangeFilter",
+              " | ",
+              "MatchAllRangeFilter"
             ],
             "path": "src/plugins/data/server/deprecated.ts",
             "deprecated": false,
@@ -32102,7 +31672,7 @@
                   "FilterStateStore",
                   "; } | undefined; meta: ",
                   "FilterMeta",
-                  "; query?: any; }"
+                  "; query?: Record<string, any> | undefined; }"
                 ],
                 "path": "node_modules/@kbn/es-query/target_types/filters/helpers/meta_filter.d.ts",
                 "deprecated": false
@@ -32700,7 +32270,7 @@
         "label": "UI_SETTINGS",
         "description": [],
         "signature": [
-          "{ readonly META_FIELDS: \"metaFields\"; readonly DOC_HIGHLIGHT: \"doc_table:highlight\"; readonly QUERY_STRING_OPTIONS: \"query:queryString:options\"; readonly QUERY_ALLOW_LEADING_WILDCARDS: \"query:allowLeadingWildcards\"; readonly SEARCH_QUERY_LANGUAGE: \"search:queryLanguage\"; readonly SORT_OPTIONS: \"sort:options\"; readonly COURIER_IGNORE_FILTER_IF_FIELD_NOT_IN_INDEX: \"courier:ignoreFilterIfFieldNotInIndex\"; readonly COURIER_SET_REQUEST_PREFERENCE: \"courier:setRequestPreference\"; readonly COURIER_CUSTOM_REQUEST_PREFERENCE: \"courier:customRequestPreference\"; readonly COURIER_MAX_CONCURRENT_SHARD_REQUESTS: \"courier:maxConcurrentShardRequests\"; readonly COURIER_BATCH_SEARCHES: \"courier:batchSearches\"; readonly SEARCH_INCLUDE_FROZEN: \"search:includeFrozen\"; readonly SEARCH_TIMEOUT: \"search:timeout\"; readonly HISTOGRAM_BAR_TARGET: \"histogram:barTarget\"; readonly HISTOGRAM_MAX_BARS: \"histogram:maxBars\"; readonly HISTORY_LIMIT: \"history:limit\"; readonly TIMEPICKER_REFRESH_INTERVAL_DEFAULTS: \"timepicker:refreshIntervalDefaults\"; readonly TIMEPICKER_QUICK_RANGES: \"timepicker:quickRanges\"; readonly TIMEPICKER_TIME_DEFAULTS: \"timepicker:timeDefaults\"; readonly INDEXPATTERN_PLACEHOLDER: \"indexPattern:placeholder\"; readonly FILTERS_PINNED_BY_DEFAULT: \"filters:pinnedByDefault\"; readonly FILTERS_EDITOR_SUGGEST_VALUES: \"filterEditor:suggestValues\"; readonly AUTOCOMPLETE_USE_TIMERANGE: \"autocomplete:useTimeRange\"; readonly AUTOCOMPLETE_VALUE_SUGGESTION_METHOD: \"autocomplete:valueSuggestionMethod\"; }"
+          "{ readonly META_FIELDS: \"metaFields\"; readonly DOC_HIGHLIGHT: \"doc_table:highlight\"; readonly QUERY_STRING_OPTIONS: \"query:queryString:options\"; readonly QUERY_ALLOW_LEADING_WILDCARDS: \"query:allowLeadingWildcards\"; readonly SEARCH_QUERY_LANGUAGE: \"search:queryLanguage\"; readonly SORT_OPTIONS: \"sort:options\"; readonly COURIER_IGNORE_FILTER_IF_FIELD_NOT_IN_INDEX: \"courier:ignoreFilterIfFieldNotInIndex\"; readonly COURIER_SET_REQUEST_PREFERENCE: \"courier:setRequestPreference\"; readonly COURIER_CUSTOM_REQUEST_PREFERENCE: \"courier:customRequestPreference\"; readonly COURIER_MAX_CONCURRENT_SHARD_REQUESTS: \"courier:maxConcurrentShardRequests\"; readonly SEARCH_INCLUDE_FROZEN: \"search:includeFrozen\"; readonly SEARCH_TIMEOUT: \"search:timeout\"; readonly HISTOGRAM_BAR_TARGET: \"histogram:barTarget\"; readonly HISTOGRAM_MAX_BARS: \"histogram:maxBars\"; readonly HISTORY_LIMIT: \"history:limit\"; readonly TIMEPICKER_REFRESH_INTERVAL_DEFAULTS: \"timepicker:refreshIntervalDefaults\"; readonly TIMEPICKER_QUICK_RANGES: \"timepicker:quickRanges\"; readonly TIMEPICKER_TIME_DEFAULTS: \"timepicker:timeDefaults\"; readonly INDEXPATTERN_PLACEHOLDER: \"indexPattern:placeholder\"; readonly FILTERS_PINNED_BY_DEFAULT: \"filters:pinnedByDefault\"; readonly FILTERS_EDITOR_SUGGEST_VALUES: \"filterEditor:suggestValues\"; readonly AUTOCOMPLETE_USE_TIMERANGE: \"autocomplete:useTimeRange\"; readonly AUTOCOMPLETE_VALUE_SUGGESTION_METHOD: \"autocomplete:valueSuggestionMethod\"; }"
         ],
         "path": "src/plugins/data/common/constants.ts",
         "deprecated": false,
@@ -32948,7 +32518,9 @@
         "label": "buildCustomFilter",
         "description": [],
         "signature": [
-          "(indexPatternString: string, queryDsl: any, disabled: boolean, negate: boolean, alias: string | null, store: ",
+          "(indexPatternString: string, queryDsl: ",
+          "QueryDslQueryContainer",
+          ", disabled: boolean, negate: boolean, alias: string | null, store: ",
           "FilterStateStore",
           ") => ",
           "Filter"
@@ -32972,12 +32544,12 @@
           {
             "parentPluginId": "data",
             "id": "def-common.queryDsl",
-            "type": "Any",
+            "type": "Object",
             "tags": [],
             "label": "queryDsl",
             "description": [],
             "signature": [
-              "any"
+              "QueryDslQueryContainer"
             ],
             "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/custom_filter.d.ts",
             "deprecated": false
@@ -33239,7 +32811,9 @@
           "IndexPatternFieldBase",
           ", type: ",
           "FILTERS",
-          ", negate: boolean, disabled: boolean, params: any, alias: string | null, store?: ",
+          ", negate: boolean, disabled: boolean, params: ",
+          "Serializable",
+          ", alias: string | null, store?: ",
           "FilterStateStore",
           " | undefined) => ",
           "Filter"
@@ -33312,12 +32886,16 @@
           {
             "parentPluginId": "data",
             "id": "def-common.params",
-            "type": "Any",
+            "type": "CompoundType",
             "tags": [],
             "label": "params",
             "description": [],
             "signature": [
-              "any"
+              "string | number | boolean | ",
+              "SerializableRecord",
+              " | ",
+              "SerializableArray",
+              " | null | undefined"
             ],
             "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/build_filters.d.ts",
             "deprecated": false
@@ -33364,10 +32942,14 @@
         "signature": [
           "(field: ",
           "IndexPatternFieldBase",
-          ", value: PhraseFilterValue, indexPattern: ",
+          ", value: ",
+          "PhraseFilterValue",
+          ", indexPattern: ",
           "IndexPatternBase",
           ") => ",
-          "PhraseFilter"
+          "PhraseFilter",
+          " | ",
+          "ScriptedPhraseFilter"
         ],
         "path": "src/plugins/data/common/es_query/index.ts",
         "deprecated": true,
@@ -33429,7 +33011,9 @@
         "signature": [
           "(field: ",
           "IndexPatternFieldBase",
-          ", params: string[], indexPattern: ",
+          ", params: ",
+          "PhraseFilterValue",
+          "[], indexPattern: ",
           "IndexPatternBase",
           ") => ",
           "PhrasesFilter"
@@ -33461,7 +33045,8 @@
             "label": "params",
             "description": [],
             "signature": [
-              "string[]"
+              "PhraseFilterValue",
+              "[]"
             ],
             "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/phrases_filter.d.ts",
             "deprecated": false
@@ -33492,7 +33077,7 @@
         "label": "buildQueryFilter",
         "description": [],
         "signature": [
-          "(query: any, index: string, alias: string) => ",
+          "(query: (Record<string, any> & { query_string?: { query: string; } | undefined; }) | undefined, index: string, alias: string) => ",
           "QueryStringFilter"
         ],
         "path": "src/plugins/data/common/es_query/index.ts",
@@ -33504,12 +33089,12 @@
           {
             "parentPluginId": "data",
             "id": "def-common.query",
-            "type": "Any",
+            "type": "CompoundType",
             "tags": [],
             "label": "query",
             "description": [],
             "signature": [
-              "any"
+              "(Record<string, any> & { query_string?: { query: string; } | undefined; }) | undefined"
             ],
             "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/query_string_filter.d.ts",
             "deprecated": false
@@ -33621,7 +33206,11 @@
           ", indexPattern: ",
           "IndexPatternBase",
           ", formattedValue?: string | undefined) => ",
-          "RangeFilter"
+          "RangeFilter",
+          " | ",
+          "ScriptedRangeFilter",
+          " | ",
+          "MatchAllRangeFilter"
         ],
         "path": "src/plugins/data/common/es_query/index.ts",
         "deprecated": true,
@@ -34115,7 +33704,7 @@
               "FilterStateStore",
               "; } | undefined; meta: ",
               "FilterMeta",
-              "; query?: any; }"
+              "; query?: Record<string, any> | undefined; }"
             ],
             "path": "node_modules/@kbn/es-query/target_types/filters/helpers/meta_filter.d.ts",
             "deprecated": false
@@ -34156,7 +33745,7 @@
               "FilterStateStore",
               "; } | undefined; meta: ",
               "FilterMeta",
-              "; query?: any; }"
+              "; query?: Record<string, any> | undefined; }"
             ],
             "path": "node_modules/@kbn/es-query/target_types/filters/helpers/meta_filter.d.ts",
             "deprecated": false
@@ -34363,7 +33952,11 @@
               "Filter",
               " & { meta: ",
               "PhraseFilterMeta",
-              "; script?: { script: { source?: string | undefined; lang?: \"painless\" | \"expression\" | \"mustache\" | \"java\" | undefined; params: { [key: string]: PhraseFilterValue; }; }; } | undefined; }"
+              "; query: { match_phrase?: Record<string, string | ",
+              "QueryDslMatchPhraseQuery",
+              "> | undefined; match?: Record<string, string | number | boolean | ",
+              "QueryDslMatchQuery",
+              "> | undefined; }; }"
             ],
             "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/phrase_filter.d.ts",
             "deprecated": false
@@ -34383,7 +33976,10 @@
         "signature": [
           "(filter: ",
           "PhraseFilter",
-          ") => PhraseFilterValue"
+          " | ",
+          "ScriptedPhraseFilter",
+          ") => ",
+          "PhraseFilterValue"
         ],
         "path": "src/plugins/data/common/es_query/index.ts",
         "deprecated": true,
@@ -34399,10 +33995,9 @@
             "label": "filter",
             "description": [],
             "signature": [
-              "Filter",
-              " & { meta: ",
-              "PhraseFilterMeta",
-              "; script?: { script: { source?: string | undefined; lang?: \"painless\" | \"expression\" | \"mustache\" | \"java\" | undefined; params: { [key: string]: PhraseFilterValue; }; }; } | undefined; }"
+              "PhraseFilter",
+              " | ",
+              "ScriptedPhraseFilter"
             ],
             "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/phrase_filter.d.ts",
             "deprecated": false
@@ -34421,17 +34016,7 @@
         "description": [],
         "signature": [
           "(filter: ",
-          "RangeFilter",
-          " | ",
-          "ExistsFilter",
-          " | ",
-          "PhraseFilter",
-          " | ",
-          "PhrasesFilter",
-          " | ",
-          "MatchAllFilter",
-          " | ",
-          "MissingFilter",
+          "Filter",
           ") => filter is ",
           "ExistsFilter"
         ],
@@ -34444,22 +34029,16 @@
           {
             "parentPluginId": "data",
             "id": "def-common.filter",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "filter",
             "description": [],
             "signature": [
-              "RangeFilter",
-              " | ",
-              "ExistsFilter",
-              " | ",
-              "PhraseFilter",
-              " | ",
-              "PhrasesFilter",
-              " | ",
-              "MatchAllFilter",
-              " | ",
-              "MissingFilter"
+              "{ $state?: { store: ",
+              "FilterStateStore",
+              "; } | undefined; meta: ",
+              "FilterMeta",
+              "; query?: Record<string, any> | undefined; }"
             ],
             "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/exists_filter.d.ts",
             "deprecated": false
@@ -34534,7 +34113,7 @@
               "FilterStateStore",
               "; } | undefined; meta: ",
               "FilterMeta",
-              "; query?: any; }"
+              "; query?: Record<string, any> | undefined; }"
             ],
             "path": "node_modules/@kbn/es-query/target_types/filters/helpers/meta_filter.d.ts",
             "deprecated": false
@@ -34574,7 +34153,7 @@
               "FilterStateStore",
               "; } | undefined; meta: ",
               "FilterMeta",
-              "; query?: any; }"
+              "; query?: Record<string, any> | undefined; }"
             ],
             "path": "node_modules/@kbn/es-query/target_types/filters/helpers/meta_filter.d.ts",
             "deprecated": false
@@ -34638,17 +34217,7 @@
         "description": [],
         "signature": [
           "(filter: ",
-          "RangeFilter",
-          " | ",
-          "ExistsFilter",
-          " | ",
-          "PhraseFilter",
-          " | ",
-          "PhrasesFilter",
-          " | ",
-          "MatchAllFilter",
-          " | ",
-          "MissingFilter",
+          "Filter",
           ") => filter is ",
           "MatchAllFilter"
         ],
@@ -34661,22 +34230,16 @@
           {
             "parentPluginId": "data",
             "id": "def-common.filter",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "filter",
             "description": [],
             "signature": [
-              "RangeFilter",
-              " | ",
-              "ExistsFilter",
-              " | ",
-              "PhraseFilter",
-              " | ",
-              "PhrasesFilter",
-              " | ",
-              "MatchAllFilter",
-              " | ",
-              "MissingFilter"
+              "{ $state?: { store: ",
+              "FilterStateStore",
+              "; } | undefined; meta: ",
+              "FilterMeta",
+              "; query?: Record<string, any> | undefined; }"
             ],
             "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/match_all_filter.d.ts",
             "deprecated": false
@@ -34695,17 +34258,7 @@
         "description": [],
         "signature": [
           "(filter: ",
-          "RangeFilter",
-          " | ",
-          "ExistsFilter",
-          " | ",
-          "PhraseFilter",
-          " | ",
-          "PhrasesFilter",
-          " | ",
-          "MatchAllFilter",
-          " | ",
-          "MissingFilter",
+          "Filter",
           ") => filter is ",
           "MissingFilter"
         ],
@@ -34718,22 +34271,16 @@
           {
             "parentPluginId": "data",
             "id": "def-common.filter",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "filter",
             "description": [],
             "signature": [
-              "RangeFilter",
-              " | ",
-              "ExistsFilter",
-              " | ",
-              "PhraseFilter",
-              " | ",
-              "PhrasesFilter",
-              " | ",
-              "MatchAllFilter",
-              " | ",
-              "MissingFilter"
+              "{ $state?: { store: ",
+              "FilterStateStore",
+              "; } | undefined; meta: ",
+              "FilterMeta",
+              "; query?: Record<string, any> | undefined; }"
             ],
             "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/missing_filter.d.ts",
             "deprecated": false
@@ -34752,17 +34299,7 @@
         "description": [],
         "signature": [
           "(filter: ",
-          "RangeFilter",
-          " | ",
-          "ExistsFilter",
-          " | ",
-          "PhraseFilter",
-          " | ",
-          "PhrasesFilter",
-          " | ",
-          "MatchAllFilter",
-          " | ",
-          "MissingFilter",
+          "Filter",
           ") => filter is ",
           "PhraseFilter"
         ],
@@ -34775,22 +34312,16 @@
           {
             "parentPluginId": "data",
             "id": "def-common.filter",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "filter",
             "description": [],
             "signature": [
-              "RangeFilter",
-              " | ",
-              "ExistsFilter",
-              " | ",
-              "PhraseFilter",
-              " | ",
-              "PhrasesFilter",
-              " | ",
-              "MatchAllFilter",
-              " | ",
-              "MissingFilter"
+              "{ $state?: { store: ",
+              "FilterStateStore",
+              "; } | undefined; meta: ",
+              "FilterMeta",
+              "; query?: Record<string, any> | undefined; }"
             ],
             "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/phrase_filter.d.ts",
             "deprecated": false
@@ -34809,17 +34340,7 @@
         "description": [],
         "signature": [
           "(filter: ",
-          "RangeFilter",
-          " | ",
-          "ExistsFilter",
-          " | ",
-          "PhraseFilter",
-          " | ",
-          "PhrasesFilter",
-          " | ",
-          "MatchAllFilter",
-          " | ",
-          "MissingFilter",
+          "Filter",
           ") => filter is ",
           "PhrasesFilter"
         ],
@@ -34832,22 +34353,16 @@
           {
             "parentPluginId": "data",
             "id": "def-common.filter",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "filter",
             "description": [],
             "signature": [
-              "RangeFilter",
-              " | ",
-              "ExistsFilter",
-              " | ",
-              "PhraseFilter",
-              " | ",
-              "PhrasesFilter",
-              " | ",
-              "MatchAllFilter",
-              " | ",
-              "MissingFilter"
+              "{ $state?: { store: ",
+              "FilterStateStore",
+              "; } | undefined; meta: ",
+              "FilterMeta",
+              "; query?: Record<string, any> | undefined; }"
             ],
             "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/phrases_filter.d.ts",
             "deprecated": false
@@ -34866,17 +34381,7 @@
         "description": [],
         "signature": [
           "(filter: ",
-          "RangeFilter",
-          " | ",
-          "ExistsFilter",
-          " | ",
-          "PhraseFilter",
-          " | ",
-          "PhrasesFilter",
-          " | ",
-          "MatchAllFilter",
-          " | ",
-          "MissingFilter",
+          "Filter",
           ") => filter is ",
           "QueryStringFilter"
         ],
@@ -34889,22 +34394,16 @@
           {
             "parentPluginId": "data",
             "id": "def-common.filter",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "filter",
             "description": [],
             "signature": [
-              "RangeFilter",
-              " | ",
-              "ExistsFilter",
-              " | ",
-              "PhraseFilter",
-              " | ",
-              "PhrasesFilter",
-              " | ",
-              "MatchAllFilter",
-              " | ",
-              "MissingFilter"
+              "{ $state?: { store: ",
+              "FilterStateStore",
+              "; } | undefined; meta: ",
+              "FilterMeta",
+              "; query?: Record<string, any> | undefined; }"
             ],
             "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/query_string_filter.d.ts",
             "deprecated": false
@@ -34923,17 +34422,7 @@
         "description": [],
         "signature": [
           "(filter?: ",
-          "RangeFilter",
-          " | ",
-          "ExistsFilter",
-          " | ",
-          "PhraseFilter",
-          " | ",
-          "PhrasesFilter",
-          " | ",
-          "MatchAllFilter",
-          " | ",
-          "MissingFilter",
+          "Filter",
           " | undefined) => filter is ",
           "RangeFilter"
         ],
@@ -34946,22 +34435,12 @@
           {
             "parentPluginId": "data",
             "id": "def-common.filter",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "filter",
             "description": [],
             "signature": [
-              "RangeFilter",
-              " | ",
-              "ExistsFilter",
-              " | ",
-              "PhraseFilter",
-              " | ",
-              "PhrasesFilter",
-              " | ",
-              "MatchAllFilter",
-              " | ",
-              "MissingFilter",
+              "Filter",
               " | undefined"
             ],
             "path": "node_modules/@kbn/es-query/target_types/filters/build_filters/range_filter.d.ts",
@@ -35094,7 +34573,7 @@
               "FilterStateStore",
               "; } | undefined; meta: ",
               "FilterMeta",
-              "; query?: any; }"
+              "; query?: Record<string, any> | undefined; }"
             ],
             "path": "node_modules/@kbn/es-query/target_types/filters/helpers/meta_filter.d.ts",
             "deprecated": false
@@ -35291,9 +34770,9 @@
         "signature": [
           "(filter: ",
           "Filter",
-          ") => { meta: { disabled: boolean; alias: string | null; negate: boolean; controlledBy?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; $state?: { store: ",
+          ") => { meta: { disabled: boolean; alias?: string | null | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; $state?: { store: ",
           "FilterStateStore",
-          "; } | undefined; query?: any; }"
+          "; } | undefined; query?: Record<string, any> | undefined; }"
         ],
         "path": "src/plugins/data/common/es_query/index.ts",
         "deprecated": true,
@@ -35313,7 +34792,7 @@
               "FilterStateStore",
               "; } | undefined; meta: ",
               "FilterMeta",
-              "; query?: any; }"
+              "; query?: Record<string, any> | undefined; }"
             ],
             "path": "node_modules/@kbn/es-query/target_types/filters/helpers/meta_filter.d.ts",
             "deprecated": false
@@ -35333,9 +34812,9 @@
         "signature": [
           "(filter: ",
           "Filter",
-          ") => { meta: { negate: boolean; alias: string | null; disabled: boolean; controlledBy?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; $state?: { store: ",
+          ") => { meta: { negate: boolean; alias?: string | null | undefined; disabled?: boolean | undefined; controlledBy?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; $state?: { store: ",
           "FilterStateStore",
-          "; } | undefined; query?: any; }"
+          "; } | undefined; query?: Record<string, any> | undefined; }"
         ],
         "path": "src/plugins/data/common/es_query/index.ts",
         "deprecated": true,
@@ -35355,7 +34834,7 @@
               "FilterStateStore",
               "; } | undefined; meta: ",
               "FilterMeta",
-              "; query?: any; }"
+              "; query?: Record<string, any> | undefined; }"
             ],
             "path": "node_modules/@kbn/es-query/target_types/filters/helpers/meta_filter.d.ts",
             "deprecated": false
@@ -35375,7 +34854,9 @@
         "signature": [
           "(filters: ",
           "Filter",
-          "[], comparatorOptions?: any) => ",
+          "[], comparatorOptions?: ",
+          "FilterCompareOptions",
+          " | undefined) => ",
           "Filter",
           "[]"
         ],
@@ -35402,12 +34883,13 @@
           {
             "parentPluginId": "data",
             "id": "def-common.comparatorOptions",
-            "type": "Any",
+            "type": "Object",
             "tags": [],
             "label": "comparatorOptions",
             "description": [],
             "signature": [
-              "any"
+              "FilterCompareOptions",
+              " | undefined"
             ],
             "path": "node_modules/@kbn/es-query/target_types/filters/helpers/uniq_filters.d.ts",
             "deprecated": false
@@ -35749,7 +35231,7 @@
         "tags": [],
         "label": "FilterStateStore",
         "description": [
-          "\nAn enum to denote whether a filter is specific to an application's context or whether it should be applied globally."
+          "\n  Filter,\nAn enum to denote whether a filter is specific to an application's context or whether it should be applied globally."
         ],
         "signature": [
           "FilterStateStore"
@@ -35812,8 +35294,11 @@
         "label": "CustomFilter",
         "description": [],
         "signature": [
-          "Filter",
-          " & { query: any; }"
+          "{ $state?: { store: ",
+          "FilterStateStore",
+          "; } | undefined; meta: ",
+          "FilterMeta",
+          "; query?: Record<string, any> | undefined; }"
         ],
         "path": "src/plugins/data/common/es_query/index.ts",
         "deprecated": true,
@@ -35891,18 +35376,6 @@
           {
             "plugin": "observability",
             "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/utils.ts"
-          },
-          {
-            "plugin": "observability",
-            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/lens_attributes.ts"
-          },
-          {
-            "plugin": "observability",
-            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/lens_attributes.ts"
-          },
-          {
-            "plugin": "observability",
-            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/lens_attributes.ts"
           }
         ],
         "initialIsOpen": false
@@ -35921,7 +35394,7 @@
           "FilterStateStore",
           "; } | undefined; meta: ",
           "FilterMeta",
-          "; query?: any; }"
+          "; query?: Record<string, any> | undefined; }"
         ],
         "path": "src/plugins/data/common/es_query/index.ts",
         "deprecated": true,
@@ -36177,18 +35650,6 @@
           },
           {
             "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/persistence/filter_references.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/persistence/filter_references.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/persistence/filter_references.ts"
-          },
-          {
-            "plugin": "lens",
             "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx"
           },
           {
@@ -36592,26 +36053,6 @@
             "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_context_menu_action.ts"
           },
           {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/server/saved_objects/move_filters_to_query.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/server/saved_objects/move_filters_to_query.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/server/saved_objects/move_filters_to_query.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/server/saved_objects/move_filters_to_query.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/server/saved_objects/move_filters_to_query.ts"
-          },
-          {
             "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/common/types/timeline/store.ts"
           },
@@ -36866,14 +36307,6 @@
           {
             "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/public/timelines/store/timeline/helpers.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/store/timeline/epic.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/store/timeline/epic.ts"
           },
           {
             "plugin": "securitySolution",
@@ -37134,14 +36567,6 @@
           {
             "plugin": "urlDrilldown",
             "path": "x-pack/plugins/drilldowns/url_drilldown/public/lib/test/data.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/target/types/public/persistence/filter_references.d.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/target/types/public/persistence/filter_references.d.ts"
           },
           {
             "plugin": "lens",
@@ -37524,34 +36949,6 @@
             "path": "src/plugins/input_control_vis/public/control/filter_manager/filter_manager.test.ts"
           },
           {
-            "plugin": "inputControlVis",
-            "path": "src/plugins/input_control_vis/public/control/filter_manager/phrase_filter_manager.test.ts"
-          },
-          {
-            "plugin": "inputControlVis",
-            "path": "src/plugins/input_control_vis/public/control/filter_manager/phrase_filter_manager.test.ts"
-          },
-          {
-            "plugin": "inputControlVis",
-            "path": "src/plugins/input_control_vis/public/control/filter_manager/phrase_filter_manager.test.ts"
-          },
-          {
-            "plugin": "inputControlVis",
-            "path": "src/plugins/input_control_vis/public/control/filter_manager/phrase_filter_manager.test.ts"
-          },
-          {
-            "plugin": "inputControlVis",
-            "path": "src/plugins/input_control_vis/public/control/filter_manager/phrase_filter_manager.test.ts"
-          },
-          {
-            "plugin": "inputControlVis",
-            "path": "src/plugins/input_control_vis/public/control/filter_manager/phrase_filter_manager.test.ts"
-          },
-          {
-            "plugin": "inputControlVis",
-            "path": "src/plugins/input_control_vis/public/control/filter_manager/phrase_filter_manager.test.ts"
-          },
-          {
             "plugin": "visualize",
             "path": "src/plugins/visualize/target/types/public/application/types.d.ts"
           },
@@ -37566,18 +36963,6 @@
           {
             "plugin": "visualize",
             "path": "src/plugins/visualize/target/types/public/application/types.d.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/target/types/server/saved_objects/move_filters_to_query.d.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/target/types/server/saved_objects/move_filters_to_query.d.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/target/types/server/saved_objects/move_filters_to_query.d.ts"
           },
           {
             "plugin": "presentationUtil",
@@ -37590,6 +36975,10 @@
           {
             "plugin": "presentationUtil",
             "path": "src/plugins/presentation_util/public/components/input_controls/embeddable/types.ts"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/plugins/discover/target/types/public/application/angular/context/api/context.d.ts"
           },
           {
             "plugin": "discover",
@@ -37614,14 +37003,6 @@
           {
             "plugin": "discover",
             "path": "src/plugins/discover/public/application/embeddable/saved_search_embeddable.tsx"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/common/types.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/common/types.ts"
           },
           {
             "plugin": "maps",
@@ -37745,18 +37126,6 @@
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/lib/detection_engine/signals/threat_mapping/build_threat_mapping_filter.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/lib/detection_engine/signals/threat_mapping/build_threat_mapping_filter.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/lib/detection_engine/signals/threat_mapping/build_threat_mapping_filter.ts"
-          },
-          {
-            "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/server/lib/detection_engine/signals/threshold/get_threshold_bucket_filters.ts"
           },
           {
@@ -37774,14 +37143,6 @@
           {
             "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/server/lib/detection_engine/signals/threat_mapping/build_threat_mapping_filter.mock.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/target/types/server/lib/detection_engine/signals/threat_mapping/build_threat_mapping_filter.d.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/target/types/server/lib/detection_engine/signals/threat_mapping/build_threat_mapping_filter.d.ts"
           },
           {
             "plugin": "securitySolution",
@@ -37872,21 +37233,12 @@
         "label": "FilterMeta",
         "description": [],
         "signature": [
-          "{ alias: string | null; disabled: boolean; negate: boolean; controlledBy?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }"
+          "{ alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }"
         ],
         "path": "src/plugins/data/common/es_query/index.ts",
         "deprecated": true,
         "removeBy": "8.1",
-        "references": [
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/common/types.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/common/types.ts"
-          }
-        ],
+        "references": [],
         "initialIsOpen": false
       },
       {
@@ -38218,21 +37570,14 @@
           "Filter",
           " & { meta: ",
           "MatchAllFilterMeta",
-          "; match_all: any; }"
+          "; match_all: ",
+          "QueryDslMatchAllQuery",
+          "; }"
         ],
         "path": "src/plugins/data/common/es_query/index.ts",
         "deprecated": true,
         "removeBy": "8.1",
-        "references": [
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/store/timeline/epic.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/store/timeline/epic.ts"
-          }
-        ],
+        "references": [],
         "initialIsOpen": false
       },
       {
@@ -38269,45 +37614,16 @@
           "Filter",
           " & { meta: ",
           "PhraseFilterMeta",
-          "; script?: { script: { source?: string | undefined; lang?: \"painless\" | \"expression\" | \"mustache\" | \"java\" | undefined; params: { [key: string]: PhraseFilterValue; }; }; } | undefined; }"
+          "; query: { match_phrase?: Record<string, string | ",
+          "QueryDslMatchPhraseQuery",
+          "> | undefined; match?: Record<string, string | number | boolean | ",
+          "QueryDslMatchQuery",
+          "> | undefined; }; }"
         ],
         "path": "src/plugins/data/common/es_query/index.ts",
         "deprecated": true,
         "removeBy": "8.1",
-        "references": [
-          {
-            "plugin": "inputControlVis",
-            "path": "src/plugins/input_control_vis/public/control/filter_manager/phrase_filter_manager.ts"
-          },
-          {
-            "plugin": "inputControlVis",
-            "path": "src/plugins/input_control_vis/public/control/filter_manager/phrase_filter_manager.ts"
-          },
-          {
-            "plugin": "inputControlVis",
-            "path": "src/plugins/input_control_vis/public/control/filter_manager/phrase_filter_manager.ts"
-          },
-          {
-            "plugin": "inputControlVis",
-            "path": "src/plugins/input_control_vis/public/control/filter_manager/phrase_filter_manager.ts"
-          },
-          {
-            "plugin": "inputControlVis",
-            "path": "src/plugins/input_control_vis/public/control/filter_manager/phrase_filter_manager.ts"
-          },
-          {
-            "plugin": "inputControlVis",
-            "path": "src/plugins/input_control_vis/public/control/filter_manager/phrase_filter_manager.ts"
-          },
-          {
-            "plugin": "inputControlVis",
-            "path": "src/plugins/input_control_vis/public/control/create_search_source.ts"
-          },
-          {
-            "plugin": "inputControlVis",
-            "path": "src/plugins/input_control_vis/public/control/create_search_source.ts"
-          }
-        ],
+        "references": [],
         "initialIsOpen": false
       },
       {
@@ -38323,6 +37639,8 @@
           "Filter",
           " & { meta: ",
           "PhrasesFilterMeta",
+          "; query: ",
+          "QueryDslQueryContainer",
           "; }"
         ],
         "path": "src/plugins/data/common/es_query/index.ts",
@@ -38356,13 +37674,11 @@
         "description": [],
         "signature": [
           "Filter",
-          " & ",
-          "EsRangeFilter",
           " & { meta: ",
           "RangeFilterMeta",
-          "; script?: { script: { params: any; lang: ",
-          "ScriptLanguage",
-          "; source: string; }; } | undefined; match_all?: any; }"
+          "; range: { [key: string]: ",
+          "RangeFilterParams",
+          "; }; }"
         ],
         "path": "src/plugins/data/common/es_query/index.ts",
         "deprecated": true,
@@ -38375,34 +37691,6 @@
           {
             "plugin": "discoverEnhanced",
             "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_chart_action.test.ts"
-          },
-          {
-            "plugin": "inputControlVis",
-            "path": "src/plugins/input_control_vis/public/control/filter_manager/range_filter_manager.ts"
-          },
-          {
-            "plugin": "inputControlVis",
-            "path": "src/plugins/input_control_vis/public/control/filter_manager/range_filter_manager.ts"
-          },
-          {
-            "plugin": "inputControlVis",
-            "path": "src/plugins/input_control_vis/public/control/filter_manager/range_filter_manager.test.ts"
-          },
-          {
-            "plugin": "inputControlVis",
-            "path": "src/plugins/input_control_vis/public/control/filter_manager/range_filter_manager.test.ts"
-          },
-          {
-            "plugin": "inputControlVis",
-            "path": "src/plugins/input_control_vis/public/control/filter_manager/range_filter_manager.test.ts"
-          },
-          {
-            "plugin": "inputControlVis",
-            "path": "src/plugins/input_control_vis/public/control/filter_manager/range_filter_manager.test.ts"
-          },
-          {
-            "plugin": "inputControlVis",
-            "path": "src/plugins/input_control_vis/public/control/filter_manager/range_filter_manager.test.ts"
           }
         ],
         "initialIsOpen": false
@@ -38425,20 +37713,7 @@
         "path": "src/plugins/data/common/es_query/index.ts",
         "deprecated": true,
         "removeBy": "8.1",
-        "references": [
-          {
-            "plugin": "inputControlVis",
-            "path": "src/plugins/input_control_vis/public/control/filter_manager/range_filter_manager.test.ts"
-          },
-          {
-            "plugin": "inputControlVis",
-            "path": "src/plugins/input_control_vis/public/control/filter_manager/range_filter_manager.test.ts"
-          },
-          {
-            "plugin": "inputControlVis",
-            "path": "src/plugins/input_control_vis/public/control/filter_manager/range_filter_manager.test.ts"
-          }
-        ],
+        "references": [],
         "initialIsOpen": false
       },
       {
@@ -38457,18 +37732,6 @@
         "deprecated": true,
         "removeBy": "8.1",
         "references": [
-          {
-            "plugin": "inputControlVis",
-            "path": "src/plugins/input_control_vis/public/control/filter_manager/range_filter_manager.ts"
-          },
-          {
-            "plugin": "inputControlVis",
-            "path": "src/plugins/input_control_vis/public/control/filter_manager/range_filter_manager.ts"
-          },
-          {
-            "plugin": "inputControlVis",
-            "path": "src/plugins/input_control_vis/public/control/filter_manager/range_filter_manager.ts"
-          },
           {
             "plugin": "visTypeTimelion",
             "path": "src/plugins/vis_type_timelion/public/components/timelion_vis_component.tsx"
@@ -38870,7 +38133,7 @@
         "label": "UI_SETTINGS",
         "description": [],
         "signature": [
-          "{ readonly META_FIELDS: \"metaFields\"; readonly DOC_HIGHLIGHT: \"doc_table:highlight\"; readonly QUERY_STRING_OPTIONS: \"query:queryString:options\"; readonly QUERY_ALLOW_LEADING_WILDCARDS: \"query:allowLeadingWildcards\"; readonly SEARCH_QUERY_LANGUAGE: \"search:queryLanguage\"; readonly SORT_OPTIONS: \"sort:options\"; readonly COURIER_IGNORE_FILTER_IF_FIELD_NOT_IN_INDEX: \"courier:ignoreFilterIfFieldNotInIndex\"; readonly COURIER_SET_REQUEST_PREFERENCE: \"courier:setRequestPreference\"; readonly COURIER_CUSTOM_REQUEST_PREFERENCE: \"courier:customRequestPreference\"; readonly COURIER_MAX_CONCURRENT_SHARD_REQUESTS: \"courier:maxConcurrentShardRequests\"; readonly COURIER_BATCH_SEARCHES: \"courier:batchSearches\"; readonly SEARCH_INCLUDE_FROZEN: \"search:includeFrozen\"; readonly SEARCH_TIMEOUT: \"search:timeout\"; readonly HISTOGRAM_BAR_TARGET: \"histogram:barTarget\"; readonly HISTOGRAM_MAX_BARS: \"histogram:maxBars\"; readonly HISTORY_LIMIT: \"history:limit\"; readonly TIMEPICKER_REFRESH_INTERVAL_DEFAULTS: \"timepicker:refreshIntervalDefaults\"; readonly TIMEPICKER_QUICK_RANGES: \"timepicker:quickRanges\"; readonly TIMEPICKER_TIME_DEFAULTS: \"timepicker:timeDefaults\"; readonly INDEXPATTERN_PLACEHOLDER: \"indexPattern:placeholder\"; readonly FILTERS_PINNED_BY_DEFAULT: \"filters:pinnedByDefault\"; readonly FILTERS_EDITOR_SUGGEST_VALUES: \"filterEditor:suggestValues\"; readonly AUTOCOMPLETE_USE_TIMERANGE: \"autocomplete:useTimeRange\"; readonly AUTOCOMPLETE_VALUE_SUGGESTION_METHOD: \"autocomplete:valueSuggestionMethod\"; }"
+          "{ readonly META_FIELDS: \"metaFields\"; readonly DOC_HIGHLIGHT: \"doc_table:highlight\"; readonly QUERY_STRING_OPTIONS: \"query:queryString:options\"; readonly QUERY_ALLOW_LEADING_WILDCARDS: \"query:allowLeadingWildcards\"; readonly SEARCH_QUERY_LANGUAGE: \"search:queryLanguage\"; readonly SORT_OPTIONS: \"sort:options\"; readonly COURIER_IGNORE_FILTER_IF_FIELD_NOT_IN_INDEX: \"courier:ignoreFilterIfFieldNotInIndex\"; readonly COURIER_SET_REQUEST_PREFERENCE: \"courier:setRequestPreference\"; readonly COURIER_CUSTOM_REQUEST_PREFERENCE: \"courier:customRequestPreference\"; readonly COURIER_MAX_CONCURRENT_SHARD_REQUESTS: \"courier:maxConcurrentShardRequests\"; readonly SEARCH_INCLUDE_FROZEN: \"search:includeFrozen\"; readonly SEARCH_TIMEOUT: \"search:timeout\"; readonly HISTOGRAM_BAR_TARGET: \"histogram:barTarget\"; readonly HISTOGRAM_MAX_BARS: \"histogram:maxBars\"; readonly HISTORY_LIMIT: \"history:limit\"; readonly TIMEPICKER_REFRESH_INTERVAL_DEFAULTS: \"timepicker:refreshIntervalDefaults\"; readonly TIMEPICKER_QUICK_RANGES: \"timepicker:quickRanges\"; readonly TIMEPICKER_TIME_DEFAULTS: \"timepicker:timeDefaults\"; readonly INDEXPATTERN_PLACEHOLDER: \"indexPattern:placeholder\"; readonly FILTERS_PINNED_BY_DEFAULT: \"filters:pinnedByDefault\"; readonly FILTERS_EDITOR_SUGGEST_VALUES: \"filterEditor:suggestValues\"; readonly AUTOCOMPLETE_USE_TIMERANGE: \"autocomplete:useTimeRange\"; readonly AUTOCOMPLETE_VALUE_SUGGESTION_METHOD: \"autocomplete:valueSuggestionMethod\"; }"
         ],
         "path": "src/plugins/data/common/constants.ts",
         "deprecated": false,

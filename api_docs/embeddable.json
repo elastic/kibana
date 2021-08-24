@@ -2270,6 +2270,16 @@
           },
           {
             "parentPluginId": "embeddable",
+            "id": "def-public.Embeddable.destroyed",
+            "type": "boolean",
+            "tags": [],
+            "label": "destroyed",
+            "description": [],
+            "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "embeddable",
             "id": "def-public.Embeddable.Unnamed",
             "type": "Function",
             "tags": [],

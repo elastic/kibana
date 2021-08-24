@@ -2178,6 +2178,10 @@
           },
           " | undefined) => ",
           "RangeFilter",
+          " | ",
+          "ScriptedRangeFilter",
+          " | ",
+          "MatchAllRangeFilter",
           " | undefined; getBounds: () => ",
           {
             "pluginId": "data",
@@ -2445,6 +2449,10 @@
           },
           ", options: { forceNow?: Date | undefined; fieldName?: string | undefined; } | undefined) => ",
           "RangeFilter",
+          " | ",
+          "ScriptedRangeFilter",
+          " | ",
+          "MatchAllRangeFilter",
           " | undefined"
         ],
         "path": "src/plugins/data/common/query/timefilter/get_time.ts",
