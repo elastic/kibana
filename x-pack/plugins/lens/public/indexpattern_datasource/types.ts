@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import { IFieldType } from 'src/plugins/data/common';
-import { IndexPatternColumn, IncompleteColumn } from './operations';
-import { IndexPatternAggRestrictions } from '../../../../../src/plugins/data/public';
-import { DragDropIdentifier } from '../drag_drop/providers';
+import type { IndexPatternColumn, IncompleteColumn } from './operations';
+import type {
+  IndexPatternField as BaseIndexPatternField,
+  IndexPatternAggRestrictions,
+} from '../../../../../src/plugins/data/public';
+import type { DragDropIdentifier } from '../drag_drop/providers';
 
 export {
   FieldBasedIndexPatternColumn,
@@ -57,7 +59,7 @@ export interface IndexPattern {
   hasRestrictions: boolean;
 }
 
-export type IndexPatternField = IFieldType & {
+export type IndexPatternField = BaseIndexPatternField & {
   displayName: string;
   aggregationRestrictions?: Partial<IndexPatternAggRestrictions>;
   meta?: boolean;

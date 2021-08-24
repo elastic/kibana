@@ -23,8 +23,8 @@ import { createMemoryHistory } from 'history';
 import {
   esFilters,
   FilterManager,
-  IFieldType,
   IndexPattern,
+  IndexPatternField,
   Query,
 } from '../../../../../src/plugins/data/public';
 import { TopNavMenuData } from '../../../../../src/plugins/navigation/public';
@@ -155,7 +155,7 @@ describe('Lens App', () => {
   it('updates global filters with store state', async () => {
     const services = makeDefaultServices(sessionIdSubject);
     const indexPattern = ({ id: 'index1' } as unknown) as IndexPattern;
-    const pinnedField = ({ name: 'pinnedField' } as unknown) as IFieldType;
+    const pinnedField = ({ name: 'pinnedField' } as unknown) as IndexPatternField;
     const pinnedFilter = esFilters.buildExistsFilter(pinnedField, indexPattern);
     services.data.query.filterManager.getFilters = jest.fn().mockImplementation(() => {
       return [];
@@ -653,8 +653,8 @@ describe('Lens App', () => {
 
       it('saves app filters and does not save pinned filters', async () => {
         const indexPattern = ({ id: 'index1' } as unknown) as IndexPattern;
-        const field = ({ name: 'myfield' } as unknown) as IFieldType;
-        const pinnedField = ({ name: 'pinnedField' } as unknown) as IFieldType;
+        const field = ({ name: 'myfield' } as unknown) as IndexPatternField;
+        const pinnedField = ({ name: 'pinnedField' } as unknown) as IndexPatternField;
         const unpinned = esFilters.buildExistsFilter(field, indexPattern);
         const pinned = esFilters.buildExistsFilter(pinnedField, indexPattern);
         await act(async () => {
@@ -835,7 +835,7 @@ describe('Lens App', () => {
     it('updates the filters when the user changes them', async () => {
       const { instance, services, lensStore } = await mountWith({});
       const indexPattern = ({ id: 'index1' } as unknown) as IndexPattern;
-      const field = ({ name: 'myfield' } as unknown) as IFieldType;
+      const field = ({ name: 'myfield' } as unknown) as IndexPatternField;
       expect(lensStore.getState()).toEqual({
         lens: expect.objectContaining({
           filters: [],
@@ -890,7 +890,7 @@ describe('Lens App', () => {
         }),
       });
       const indexPattern = ({ id: 'index1' } as unknown) as IndexPattern;
-      const field = ({ name: 'myfield' } as unknown) as IFieldType;
+      const field = ({ name: 'myfield' } as unknown) as IndexPatternField;
       act(() =>
         services.data.query.filterManager.setFilters([
           esFilters.buildExistsFilter(field, indexPattern),
@@ -1025,8 +1025,8 @@ describe('Lens App', () => {
         })
       );
       const indexPattern = ({ id: 'index1' } as unknown) as IndexPattern;
-      const field = ({ name: 'myfield' } as unknown) as IFieldType;
-      const pinnedField = ({ name: 'pinnedField' } as unknown) as IFieldType;
+      const field = ({ name: 'myfield' } as unknown) as IndexPatternField;
+      const pinnedField = ({ name: 'pinnedField' } as unknown) as IndexPatternField;
       const unpinned = esFilters.buildExistsFilter(field, indexPattern);
       const pinned = esFilters.buildExistsFilter(pinnedField, indexPattern);
       FilterManager.setFiltersStore([pinned], esFilters.FilterStateStore.GLOBAL_STATE);
@@ -1082,8 +1082,8 @@ describe('Lens App', () => {
         })
       );
       const indexPattern = ({ id: 'index1' } as unknown) as IndexPattern;
-      const field = ({ name: 'myfield' } as unknown) as IFieldType;
-      const pinnedField = ({ name: 'pinnedField' } as unknown) as IFieldType;
+      const field = ({ name: 'myfield' } as unknown) as IndexPatternField;
+      const pinnedField = ({ name: 'pinnedField' } as unknown) as IndexPatternField;
       const unpinned = esFilters.buildExistsFilter(field, indexPattern);
       const pinned = esFilters.buildExistsFilter(pinnedField, indexPattern);
       FilterManager.setFiltersStore([pinned], esFilters.FilterStateStore.GLOBAL_STATE);
