@@ -227,10 +227,6 @@ so they can properly protect the data within their clusters.
 generating deep links to other apps, and creating short URLs.
 
 
-|{kib-repo}blob/{branch}/src/plugins/spaces_oss/README.md[spacesOss]
-|Bridge plugin for consumption of the Spaces feature from OSS plugins.
-
-
 |{kib-repo}blob/{branch}/src/plugins/telemetry/README.md[telemetry]
 |Telemetry allows Kibana features to have usage tracked in the wild. The general term "telemetry" refers to multiple things:
 
@@ -619,8 +615,7 @@ As a developer you can reuse and extend built-in alerts and actions UI functiona
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/upgrade_assistant/README.md[upgradeAssistant]
-|Upgrade Assistant helps users prepare their Stack for being upgraded to the next major. Its primary
-purposes are to:
+|Upgrade Assistant helps users prepare their Stack for being upgraded to the next major. It will only be enabled on the last minor before the next major release. This is controlled via the config: xpack.upgrade_assistant.readonly (#101296).
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/uptime/README.md[uptime]
