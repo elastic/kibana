@@ -159,7 +159,7 @@ export default function ({ getService }: FtrProviderContext) {
     {
       suiteSuffix: 'with a file with a missing new line char at the end',
       filePath: path.join(__dirname, 'files_to_import', 'missing_end_of_file_newline.csv'),
-      indexName: 'user-import_2',
+      indexName: 'user-import_3',
       createIndexPattern: false,
       fieldTypeFilters: [],
       fieldNameFilters: [],

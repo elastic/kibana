@@ -298,7 +298,7 @@ export function MachineLearningCommonUIProvider({
       }
       return null;
     },
-    
+
     async changeToSpace(spaceId: string) {
       await PageObjects.spaceSelector.openSpacesNav();
       await PageObjects.spaceSelector.goToSpecificSpace(spaceId);

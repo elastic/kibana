@@ -139,7 +139,7 @@ export function MachineLearningDataVisualizerFileBasedProvider(
       );
       expect(docCount).to.eql(
         count,
-        `Expected Documents ingested name to be '${count}' (got '${docCount}')`
+        `Expected Documents ingested count to be '${count}' (got '${docCount}')`
       );
     },
 
