@@ -8,25 +8,41 @@
 import React from 'react';
 import { storiesOf } from '@storybook/react';
 import { Demo, dashboardFactory, urlFactory } from './test_data';
+import { ActionFactory, BaseActionFactoryContext } from '../../dynamic_actions';
+import { SerializableRecord } from '@kbn/utility-types';
+
+const dashboard = dashboardFactory as unknown as ActionFactory<
+  SerializableRecord,
+  object,
+  BaseActionFactoryContext
+>;
+
+const url = urlFactory as unknown as ActionFactory<
+  SerializableRecord,
+  object,
+  BaseActionFactoryContext
+>;
 
 storiesOf('components/ActionWizard', module)
-  .add('default', () => <Demo actionFactories={[dashboardFactory, urlFactory]} />)
+  .add('default', () => (
+    <Demo actionFactories={[dashboard, url]} />
+  )
   .add('Only one factory is available', () => (
     // to make sure layout doesn't break
-    <Demo actionFactories={[dashboardFactory]} />
+    <Demo actionFactories={[dashboard]} />
   ))
   .add('Long list of action factories', () => (
     // to make sure layout doesn't break
     <Demo
       actionFactories={[
-        dashboardFactory,
-        urlFactory,
-        dashboardFactory,
-        urlFactory,
-        dashboardFactory,
-        urlFactory,
-        dashboardFactory,
-        urlFactory,
+        dashboard,
+        url,
+        dashboard,
+        url,
+        dashboard,
+        url,
+        dashboard,
+        url,
       ]}
     />
   ));
