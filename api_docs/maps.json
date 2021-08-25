@@ -70,6 +70,16 @@
           },
           {
             "parentPluginId": "maps",
+            "id": "def-public.MapEmbeddable.deferEmbeddableLoad",
+            "type": "boolean",
+            "tags": [],
+            "label": "deferEmbeddableLoad",
+            "description": [],
+            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "maps",
             "id": "def-public.MapEmbeddable.Unnamed",
             "type": "Function",
             "tags": [],
@@ -320,6 +330,66 @@
                 "description": [],
                 "signature": [
                   "EventHandlers"
+                ],
+                "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "maps",
+            "id": "def-public.MapEmbeddable.setOnInitialRenderComplete",
+            "type": "Function",
+            "tags": [],
+            "label": "setOnInitialRenderComplete",
+            "description": [],
+            "signature": [
+              "(onInitialRenderComplete?: (() => void) | undefined) => void"
+            ],
+            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "maps",
+                "id": "def-public.MapEmbeddable.setOnInitialRenderComplete.$1",
+                "type": "Function",
+                "tags": [],
+                "label": "onInitialRenderComplete",
+                "description": [],
+                "signature": [
+                  "(() => void) | undefined"
+                ],
+                "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "maps",
+            "id": "def-public.MapEmbeddable.setIsSharable",
+            "type": "Function",
+            "tags": [],
+            "label": "setIsSharable",
+            "description": [],
+            "signature": [
+              "(isSharable: boolean) => void"
+            ],
+            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "maps",
+                "id": "def-public.MapEmbeddable.setIsSharable.$1",
+                "type": "boolean",
+                "tags": [],
+                "label": "isSharable",
+                "description": [],
+                "signature": [
+                  "boolean"
                 ],
                 "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
                 "deprecated": false,
@@ -2061,6 +2131,17 @@
       },
       {
         "parentPluginId": "maps",
+        "id": "def-common.CHECK_IS_DRAWING_INDEX",
+        "type": "string",
+        "tags": [],
+        "label": "CHECK_IS_DRAWING_INDEX",
+        "description": [],
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maps",
         "id": "def-common.COUNT_PROP_LABEL",
         "type": "string",
         "tags": [],
@@ -2588,20 +2669,6 @@
       },
       {
         "parentPluginId": "maps",
-        "id": "def-common.INDEX_META_DATA_CREATED_BY",
-        "type": "string",
-        "tags": [],
-        "label": "INDEX_META_DATA_CREATED_BY",
-        "description": [],
-        "signature": [
-          "\"maps-drawing-data-ingest\""
-        ],
-        "path": "x-pack/plugins/maps/common/constants.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "maps",
         "id": "def-common.INDEX_SETTINGS_API_PATH",
         "type": "string",
         "tags": [],
@@ -2797,6 +2864,20 @@
         "tags": [],
         "label": "MAPS_APP_PATH",
         "description": [],
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maps",
+        "id": "def-common.MAPS_NEW_VECTOR_LAYER_META_CREATED_BY",
+        "type": "string",
+        "tags": [],
+        "label": "MAPS_NEW_VECTOR_LAYER_META_CREATED_BY",
+        "description": [],
+        "signature": [
+          "\"maps-new-vector-layer\""
+        ],
         "path": "x-pack/plugins/maps/common/constants.ts",
         "deprecated": false,
         "initialIsOpen": false

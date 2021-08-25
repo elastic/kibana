@@ -6,7 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import { SAVED_OBJECTS_MANAGEMENT_FEATURE_ID } from '../../../../../common/constants';
+import { SECURITY_FEATURE_ID } from '../../../../../common/constants';
 import { Privilege } from '../../../containers/detection_engine/alerts/types';
 import { useUserData } from '../../user_info';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
@@ -40,18 +40,14 @@ export interface MissingPrivileges {
 }
 
 export const useMissingPrivileges = (): MissingPrivileges => {
-  const { detectionEnginePrivileges, listPrivileges } = useUserPrivileges();
+  const { listPrivileges } = useUserPrivileges();
   const [{ canUserCRUD }] = useUserData();
 
   return useMemo<MissingPrivileges>(() => {
     const featurePrivileges: MissingFeaturePrivileges[] = [];
     const indexPrivileges: MissingIndexPrivileges[] = [];
 
-    if (
-      canUserCRUD == null ||
-      listPrivileges.result == null ||
-      detectionEnginePrivileges.result == null
-    ) {
+    if (canUserCRUD == null || listPrivileges.result == null) {
       /**
        * Do not check privileges till we get all the data. That helps to reduce
        * subsequent layout shift while loading and skip unneeded re-renders.
@@ -63,7 +59,7 @@ export const useMissingPrivileges = (): MissingPrivileges => {
     }
 
     if (canUserCRUD === false) {
-      featurePrivileges.push([SAVED_OBJECTS_MANAGEMENT_FEATURE_ID, ['all']]);
+      featurePrivileges.push([SECURITY_FEATURE_ID, ['all']]);
     }
 
     const missingItemsPrivileges = getMissingIndexPrivileges(listPrivileges.result.listItems.index);
@@ -76,16 +72,9 @@ export const useMissingPrivileges = (): MissingPrivileges => {
       indexPrivileges.push(missingListsPrivileges);
     }
 
-    const missingDetectionPrivileges = getMissingIndexPrivileges(
-      detectionEnginePrivileges.result.index
-    );
-    if (missingDetectionPrivileges) {
-      indexPrivileges.push(missingDetectionPrivileges);
-    }
-
     return {
       featurePrivileges,
       indexPrivileges,
     };
-  }, [canUserCRUD, listPrivileges, detectionEnginePrivileges]);
+  }, [canUserCRUD, listPrivileges]);
 };

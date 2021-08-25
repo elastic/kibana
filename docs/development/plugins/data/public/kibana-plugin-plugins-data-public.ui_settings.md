@@ -18,7 +18,6 @@ UI_SETTINGS: {
     readonly COURIER_SET_REQUEST_PREFERENCE: "courier:setRequestPreference";
     readonly COURIER_CUSTOM_REQUEST_PREFERENCE: "courier:customRequestPreference";
     readonly COURIER_MAX_CONCURRENT_SHARD_REQUESTS: "courier:maxConcurrentShardRequests";
-    readonly COURIER_BATCH_SEARCHES: "courier:batchSearches";
     readonly SEARCH_INCLUDE_FROZEN: "search:includeFrozen";
     readonly SEARCH_TIMEOUT: "search:timeout";
     readonly HISTOGRAM_BAR_TARGET: "histogram:barTarget";

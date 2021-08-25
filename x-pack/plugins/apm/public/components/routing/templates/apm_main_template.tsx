@@ -9,7 +9,7 @@ import { EuiPageHeaderProps, EuiPageTemplateProps } from '@elastic/eui';
 import React from 'react';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { ApmPluginStartDeps } from '../../../plugin';
-import { EnvironmentFilter } from '../../shared/EnvironmentFilter';
+import { ApmEnvironmentFilter } from '../../shared/EnvironmentFilter';
 
 /*
  * This template contains:
@@ -39,7 +39,7 @@ export function ApmMainTemplate({
     <ObservabilityPageTemplate
       pageHeader={{
         pageTitle,
-        rightSideItems: [<EnvironmentFilter />],
+        rightSideItems: [<ApmEnvironmentFilter />],
         ...pageHeader,
       }}
       {...pageTemplateProps}
