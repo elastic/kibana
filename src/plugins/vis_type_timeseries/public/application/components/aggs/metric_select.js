@@ -15,7 +15,7 @@ import { calculateSiblings } from '../lib/calculate_siblings';
 import { calculateLabel } from '../../../../common/calculate_label';
 import { basicAggs } from '../../../../common/basic_aggs';
 import { toPercentileNumber } from '../../../../common/to_percentile_number';
-import { METRIC_TYPES } from '../../../../common/enums';
+import { TSVB_METRIC_TYPES } from '../../../../common/enums';
 
 function createTypeFilter(restrict, exclude = []) {
   return (metric) => {
@@ -73,7 +73,7 @@ export function MetricSelect(props) {
       const label = calculateLabel(row, calculatedMetrics, fields, false);
 
       switch (row.type) {
-        case METRIC_TYPES.PERCENTILE_RANK:
+        case TSVB_METRIC_TYPES.PERCENTILE_RANK:
           (row.values || []).forEach((p) => {
             const value = toPercentileNumber(p);
 
@@ -83,7 +83,7 @@ export function MetricSelect(props) {
             });
           });
 
-        case METRIC_TYPES.PERCENTILE:
+        case TSVB_METRIC_TYPES.PERCENTILE:
           (row.percentiles || []).forEach((p) => {
             if (p.value) {
               const value = toPercentileNumber(p.value);

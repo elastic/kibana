@@ -16,6 +16,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const uptimeService = getService('uptime');
 
+  const getSyntheticsPolicy = (agentFullPolicy: FullAgentPolicy) =>
+    agentFullPolicy.inputs.find((input) => input.meta?.package?.name === 'synthetics');
+
   const generatePolicy = ({
     agentFullPolicy,
     version,
@@ -32,7 +35,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     data_stream: {
       namespace: 'default',
     },
-    id: agentFullPolicy.inputs[0].id,
+    id: getSyntheticsPolicy(agentFullPolicy)?.id,
     meta: {
       package: {
         name: 'synthetics',
@@ -47,7 +50,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           dataset: monitorType,
           type: 'synthetics',
         },
-        id: `${agentFullPolicy.inputs[0]?.streams?.[0]?.id}`,
+        id: `${getSyntheticsPolicy(agentFullPolicy)?.streams?.[0]?.id}`,
         name,
         type: monitorType,
         processors: [
@@ -92,8 +95,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       host,
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/109260
-    describe.skip('displays custom UI', () => {
+    describe('displays custom UI', () => {
       before(async () => {
         const version = await uptimeService.syntheticsPackage.getSyntheticsPackageVersion();
         await uptimePage.syntheticsIntegration.navigateToPackagePage(version!);
@@ -111,12 +113,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/109329
-    describe.skip('create new policy', () => {
+    describe('create new policy', () => {
       let version: string;
-      before(async () => {
-        await uptimeService.syntheticsPackage.deletePolicyByName('system-1');
-      });
 
       beforeEach(async () => {
         version = (await uptimeService.syntheticsPackage.getSyntheticsPackageVersion())!;
@@ -143,7 +141,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           agentPolicyId
         );
 
-        expect(agentFullPolicy.inputs).to.eql([
+        expect(getSyntheticsPolicy(agentFullPolicy)).to.eql(
           generatePolicy({
             agentFullPolicy,
             version,
@@ -160,8 +158,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
               tags: [config.tags],
               'check.request.method': 'GET',
             },
-          }),
-        ]);
+          })
+        );
       });
 
       it('allows enabling tls with defaults', async () => {
@@ -181,7 +179,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           agentPolicyId
         );
 
-        expect(agentFullPolicy.inputs).to.eql([
+        expect(
+          agentFullPolicy.inputs.find((input) => input.meta?.package?.name === 'synthetics')
+        ).to.eql(
           generatePolicy({
             agentFullPolicy,
             version,
@@ -200,8 +200,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
               'service.name': config.apmServiceName,
               tags: [config.tags],
             },
-          }),
-        ]);
+          })
+        );
       });
 
       it('allows configuring tls', async () => {
@@ -228,7 +228,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           agentPolicyId
         );
 
-        expect(agentFullPolicy.inputs).to.eql([
+        expect(getSyntheticsPolicy(agentFullPolicy)).to.eql(
           generatePolicy({
             agentFullPolicy,
             version,
@@ -251,8 +251,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
               'service.name': config.apmServiceName,
               tags: [config.tags],
             },
-          }),
-        ]);
+          })
+        );
       });
 
       it('allows configuring http advanced options', async () => {
@@ -295,7 +295,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           agentPolicyId
         );
 
-        expect(agentFullPolicy.inputs).to.eql([
+        expect(getSyntheticsPolicy(agentFullPolicy)).to.eql(
           generatePolicy({
             agentFullPolicy,
             version,
@@ -324,8 +324,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
               'service.name': config.apmServiceName,
               tags: [config.tags],
             },
-          }),
-        ]);
+          })
+        );
       });
 
       it('allows saving tcp monitor when user enters a valid integration name and host+port', async () => {
@@ -344,7 +344,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           agentPolicyId
         );
 
-        expect(agentFullPolicy.inputs).to.eql([
+        expect(getSyntheticsPolicy(agentFullPolicy)).to.eql(
           generatePolicy({
             agentFullPolicy,
             version,
@@ -358,8 +358,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
               tags: [config.tags],
               'service.name': config.apmServiceName,
             },
-          }),
-        ]);
+          })
+        );
       });
 
       it('allows configuring tcp advanced options', async () => {
@@ -385,7 +385,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           agentPolicyId
         );
 
-        expect(agentFullPolicy.inputs).to.eql([
+        expect(getSyntheticsPolicy(agentFullPolicy)).to.eql(
           generatePolicy({
             agentFullPolicy,
             version,
@@ -402,8 +402,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
               'service.name': config.apmServiceName,
               tags: [config.tags],
             },
-          }),
-        ]);
+          })
+        );
       });
 
       it('allows saving icmp monitor when user enters a valid integration name and host', async () => {
@@ -422,7 +422,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           agentPolicyId
         );
 
-        expect(agentFullPolicy.inputs).to.eql([
+        expect(getSyntheticsPolicy(agentFullPolicy)).to.eql(
           generatePolicy({
             agentFullPolicy,
             version,
@@ -436,8 +436,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
               'service.name': config.apmServiceName,
               tags: [config.tags],
             },
-          }),
-        ]);
+          })
+        );
       });
     });
   });

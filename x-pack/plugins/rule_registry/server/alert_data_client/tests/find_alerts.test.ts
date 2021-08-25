@@ -18,6 +18,8 @@ import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mo
 import { alertingAuthorizationMock } from '../../../../alerting/server/authorization/alerting_authorization.mock';
 import { AuditLogger } from '../../../../security/server';
 import { AlertingAuthorizationEntity } from '../../../../alerting/server';
+import { ruleDataPluginServiceMock } from '../../rule_data_plugin_service/rule_data_plugin_service.mock';
+import { RuleDataPluginService } from '../../rule_data_plugin_service';
 
 const alertingAuthMock = alertingAuthorizationMock.create();
 const esClientMock = elasticsearchClientMock.createElasticsearchClient();
@@ -30,6 +32,7 @@ const alertsClientParams: jest.Mocked<ConstructorOptions> = {
   authorization: alertingAuthMock,
   esClient: esClientMock,
   auditLogger,
+  ruleDataService: (ruleDataPluginServiceMock.create() as unknown) as RuleDataPluginService,
 };
 
 const DEFAULT_SPACE = 'test_default_space_id';
@@ -90,7 +93,7 @@ describe('find()', () => {
               {
                 found: true,
                 _type: 'alert',
-                _index: '.alerts-observability-apm',
+                _index: '.alerts-observability.apm.alerts',
                 _id: 'NoxgpHkBqbdrfX07MqXV',
                 _version: 1,
                 _seq_no: 362,
@@ -110,7 +113,7 @@ describe('find()', () => {
     );
     const result = await alertsClient.find({
       query: { match: { [ALERT_WORKFLOW_STATUS]: 'open' } },
-      index: '.alerts-observability-apm',
+      index: '.alerts-observability.apm.alerts',
     });
     expect(result).toMatchInlineSnapshot(`
       Object {
@@ -124,7 +127,7 @@ describe('find()', () => {
           "hits": Array [
             Object {
               "_id": "NoxgpHkBqbdrfX07MqXV",
-              "_index": ".alerts-observability-apm",
+              "_index": ".alerts-observability.apm.alerts",
               "_primary_term": 2,
               "_seq_no": 362,
               "_source": Object {
@@ -194,7 +197,7 @@ describe('find()', () => {
             "track_total_hits": undefined,
           },
           "ignore_unavailable": true,
-          "index": ".alerts-observability-apm",
+          "index": ".alerts-observability.apm.alerts",
           "seq_no_primary_term": true,
         },
       ]
@@ -221,7 +224,7 @@ describe('find()', () => {
               {
                 found: true,
                 _type: 'alert',
-                _index: '.alerts-observability-apm',
+                _index: '.alerts-observability.apm.alerts',
                 _id: 'NoxgpHkBqbdrfX07MqXV',
                 _version: 1,
                 _seq_no: 362,
@@ -241,7 +244,7 @@ describe('find()', () => {
     );
     await alertsClient.find({
       query: { match: { [ALERT_WORKFLOW_STATUS]: 'open' } },
-      index: '.alerts-observability-apm',
+      index: '.alerts-observability.apm.alerts',
     });
 
     expect(auditLogger.log).toHaveBeenCalledWith({
@@ -252,7 +255,7 @@ describe('find()', () => {
   });
 
   test('audit error access if user is unauthorized for given alert', async () => {
-    const indexName = '.alerts-observability-apm';
+    const indexName = '.alerts-observability.apm.alerts';
     const fakeAlertId = 'myfakeid1';
     // fakeRuleTypeId will cause authz to fail
     const fakeRuleTypeId = 'fake.rule';
@@ -296,7 +299,7 @@ describe('find()', () => {
     await expect(
       alertsClient.find({
         query: { match: { [ALERT_WORKFLOW_STATUS]: 'open' } },
-        index: '.alerts-observability-apm',
+        index: '.alerts-observability.apm.alerts',
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`
             "Unable to retrieve alert details for alert with id of \\"undefined\\" or with query \\"[object Object]\\" and operation find 
@@ -326,7 +329,7 @@ describe('find()', () => {
     await expect(
       alertsClient.find({
         query: { match: { [ALERT_WORKFLOW_STATUS]: 'open' } },
-        index: '.alerts-observability-apm',
+        index: '.alerts-observability.apm.alerts',
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`
             "Unable to retrieve alert details for alert with id of \\"undefined\\" or with query \\"[object Object]\\" and operation find 
@@ -354,7 +357,7 @@ describe('find()', () => {
                 {
                   found: true,
                   _type: 'alert',
-                  _index: '.alerts-observability-apm',
+                  _index: '.alerts-observability.apm.alerts',
                   _id: 'NoxgpHkBqbdrfX07MqXV',
                   _version: 1,
                   _seq_no: 362,
@@ -378,7 +381,7 @@ describe('find()', () => {
       const alertsClient = new AlertsClient(alertsClientParams);
       const result = await alertsClient.find({
         query: { match: { [ALERT_WORKFLOW_STATUS]: 'open' } },
-        index: '.alerts-observability-apm',
+        index: '.alerts-observability.apm.alerts',
       });
 
       expect(result).toMatchInlineSnapshot(`
@@ -393,7 +396,7 @@ describe('find()', () => {
             "hits": Array [
               Object {
                 "_id": "NoxgpHkBqbdrfX07MqXV",
-                "_index": ".alerts-observability-apm",
+                "_index": ".alerts-observability.apm.alerts",
                 "_primary_term": 2,
                 "_seq_no": 362,
                 "_source": Object {

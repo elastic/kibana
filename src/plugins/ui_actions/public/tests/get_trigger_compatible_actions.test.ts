@@ -10,6 +10,7 @@ import { uiActionsPluginMock } from '../mocks';
 import { createHelloWorldAction } from '../tests/test_samples';
 import { Action, createAction } from '../actions';
 import { Trigger } from '../triggers';
+import { OverlayStart } from 'kibana/public';
 
 let action: Action<{ name: string }>;
 let uiActions: ReturnType<typeof uiActionsPluginMock.createPlugin>;
@@ -31,14 +32,14 @@ beforeEach(() => {
 
 test('can register action', async () => {
   const { setup } = uiActions;
-  const helloWorldAction = createHelloWorldAction({} as any);
+  const helloWorldAction = createHelloWorldAction(({} as unknown) as OverlayStart);
 
   setup.registerAction(helloWorldAction);
 });
 
 test('getTriggerCompatibleActions returns attached actions', async () => {
   const { setup, doStart } = uiActions;
-  const helloWorldAction = createHelloWorldAction({} as any);
+  const helloWorldAction = createHelloWorldAction(({} as unknown) as OverlayStart);
 
   setup.registerAction(helloWorldAction);
 

@@ -12,7 +12,6 @@ import { SignalSourceHit } from './types';
 export interface BuildReasonMessageArgs {
   rule: RulesSchema;
   mergedDoc?: SignalSourceHit;
-  timestamp: string;
 }
 
 export type BuildReasonMessage = (args: BuildReasonMessageArgs) => string;
@@ -23,11 +22,7 @@ export type BuildReasonMessage = (args: BuildReasonMessageArgs) => string;
  * to more easily allow for this in the future.
  * @export buildCommonReasonMessage - is only exported for testing purposes, and only used internally here.
  */
-export const buildCommonReasonMessage = ({
-  rule,
-  mergedDoc,
-  timestamp,
-}: BuildReasonMessageArgs) => {
+export const buildCommonReasonMessage = ({ rule, mergedDoc }: BuildReasonMessageArgs) => {
   if (!rule) {
     // This should never happen, but in case, better to not show a malformed string
     return '';
@@ -44,13 +39,12 @@ export const buildCommonReasonMessage = ({
 
   return i18n.translate('xpack.securitySolution.detectionEngine.signals.alertReasonDescription', {
     defaultMessage:
-      'Alert {alertName} created at {timestamp} with a {alertSeverity} severity and risk score of {alertRiskScore}{userName, select, null {} other {{whitespace}by {userName}} }{hostName, select, null {} other {{whitespace}on {hostName}} }.',
+      'Alert {alertName} created with a {alertSeverity} severity and risk score of {alertRiskScore}{userName, select, null {} other {{whitespace}by {userName}} }{hostName, select, null {} other {{whitespace}on {hostName}} }.',
     values: {
       alertName: rule.name,
       alertSeverity: rule.severity,
       alertRiskScore: rule.risk_score,
       hostName: isFieldEmpty(hostName) ? 'null' : hostName,
-      timestamp,
       userName: isFieldEmpty(userName) ? 'null' : userName,
       whitespace: ' ', // there isn't support for the unicode /u0020 for whitespace, and leading spaces are deleted, so to prevent double-whitespace explicitly passing the space in.
     },
