@@ -676,10 +676,6 @@ export class AlertsClient {
       const toReturn = validAuthorizedFeatures.flatMap((feature) => {
         const indices = this.ruleDataService.findIndicesByFeature(feature, Dataset.alerts);
         if (feature === 'siem') {
-          // TODO: Remove space id from the index name and make sure the app works well.
-          // We should not include space id into the index name, because a
-          // namespace goes into the index name, and it's user-defined in general.
-          // The user can set a custom namespace per rule instance which could be != space id.
           return indices.map((i) => `${i.baseName}-${this.spaceId}`);
         } else {
           return indices.map((i) => i.baseName);
