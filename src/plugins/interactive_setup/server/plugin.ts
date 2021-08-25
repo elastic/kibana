@@ -93,9 +93,7 @@ export class InteractiveSetupPlugin implements PrebootPlugin {
             'Starting interactive setup mode since Kibana cannot to connect to Elasticsearch at http://localhost:9200.'
           );
           const serverInfo = core.http.getServerInfo();
-          const url = `${serverInfo.protocol}://${serverInfo.hostname}:${serverInfo.port}/?code=${
-            this.#verificationCode.code
-          }`;
+          const url = `${serverInfo.protocol}://${serverInfo.hostname}:${serverInfo.port}`;
           this.#logger.info(`
 
 ${chalk.whiteBright.bold(`${chalk.cyanBright('i')} Kibana has not been configured.`)}
