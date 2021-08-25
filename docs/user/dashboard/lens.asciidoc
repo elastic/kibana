@@ -36,19 +36,19 @@ If you're unsure about the visualization type you want to use, or how you want t
 
 If you already know the visualization type you want to use, and how you want to display the data, use the following process:
 
-*Choose the visualization type.* 
+Choose the visualization type. 
 
 . Before you drag fields to the workspace, open the *Chart type* dropdown, then select the visualization type.  
 
 . To view more visualizations that *Lens* automatically created for the fields, click *Suggestions*. If one of the *Suggestions* meets your visualization needs, click *Save and return* to add it to the dashboard.
 
-*Choose the data you want to visualize.* 
+Choose the data you want to visualize.
 
 . Drag the fields directly to the layer pane. *Lens* automatically selects the aggregation function.
 
-. If you want to learn more about the data a field contains, click *i* next to the field.
+. If you want to learn more about the data a field contains, click the field.
 
-*Edit and delete.*
+Edit and delete.
 
 . To change the aggregation *Quick function* and display options, click the field in the layer pane. 
 
@@ -145,12 +145,13 @@ Filter ratio example:: To filter a document set, use `kql=''`, then compare to o
 count(kql='response.status_code > 400') / count()
 ```
 +
-Week over week example:: To get the value for each grouping from the previous week, use `shift='1w'`. Do not use time shift formulas with the *Top values* function.
+Week over week example:: To get the value for each grouping from the previous week, use `shift='1w'`.
 +
 ```
 percentile(system.network.in.bytes, percentile=99) /
 percentile(system.network.in.bytes, percentile=99, shift='1w')
 ```
+You are unable to combine different time shifts, such as `count(shift="1w") - count()` and `count(shift="1w") - count(shift="1m")`, with the *Top values* function.
 +
 Percent of total example:: To convert each grouping into a percent of the total, formulas calculate `overall_sum` for all groupings:
 +
