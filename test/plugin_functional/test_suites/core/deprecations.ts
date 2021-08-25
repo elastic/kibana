@@ -19,7 +19,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
 
   const CorePluginDeprecationsPluginDeprecations: DomainDeprecationDetails[] = [
     {
-      title: '',
+      title: '"corePluginDeprecations.oldProperty" setting is deprecated.',
       level: 'critical',
       message:
         '"corePluginDeprecations.oldProperty" is deprecated and has been replaced by "corePluginDeprecations.newProperty"',
@@ -33,7 +33,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       requireRestart: true,
     },
     {
-      title: '',
+      title: '"corePluginDeprecations.noLongerUsed" setting is deprecated.',
       level: 'critical',
       message: 'corePluginDeprecations.noLongerUsed is deprecated and is no longer used',
       correctiveActions: {
@@ -46,7 +46,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       requireRestart: true,
     },
     {
-      title: '',
+      title: 'corePluginDeprecations has a deprecated setting',
       level: 'critical',
       message:
         'Kibana plugin functional tests will no longer allow corePluginDeprecations.secret config to be set to anything except 42.',
@@ -61,7 +61,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       requireRestart: true,
     },
     {
-      title: '',
+      title: 'CorePluginDeprecationsPlugin plugin is deprecated',
       message: 'CorePluginDeprecationsPlugin is a deprecated feature for testing.',
       documentationUrl: 'test-url',
       level: 'warning',
@@ -72,7 +72,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       domainId: 'corePluginDeprecations',
     },
     {
-      title: '',
+      title: 'Detected saved objects in test-deprecations-plugin',
       message: 'SavedObject test-deprecations-plugin is still being used.',
       documentationUrl: 'another-test-url',
       level: 'critical',
@@ -133,7 +133,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
           const resolveResult = await browser.executeAsync<ResolveDeprecationResponse>((cb) => {
             return window._coreProvider.start.core.deprecations
               .resolveDeprecation({
-                title: '',
+                title: 'CorePluginDeprecationsPlugin plugin is deprecated',
                 message: 'CorePluginDeprecationsPlugin is a deprecated feature for testing.',
                 documentationUrl: 'test-url',
                 level: 'warning',
@@ -155,7 +155,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
           const resolveResult = await browser.executeAsync<ResolveDeprecationResponse>((cb) => {
             return window._coreProvider.start.core.deprecations
               .resolveDeprecation({
-                title: '',
+                title: 'CorePluginDeprecationsPlugin plugin is deprecated',
                 message: 'CorePluginDeprecationsPlugin is a deprecated feature for testing.',
                 documentationUrl: 'test-url',
                 level: 'warning',
@@ -184,7 +184,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
           const resolveResult = await browser.executeAsync<ResolveDeprecationResponse>((cb) => {
             return window._coreProvider.start.core.deprecations
               .resolveDeprecation({
-                title: '',
+                title: 'CorePluginDeprecationsPlugin plugin is deprecated',
                 message: 'CorePluginDeprecationsPlugin is a deprecated feature for testing.',
                 documentationUrl: 'test-url',
                 level: 'warning',
@@ -223,7 +223,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
             (keyId, cb) => {
               return window._coreProvider.start.core.deprecations
                 .resolveDeprecation({
-                  title: '',
+                  title: 'CorePluginDeprecationsPlugin plugin is deprecated',
                   message: 'CorePluginDeprecationsPlugin is a deprecated feature for testing.',
                   documentationUrl: 'test-url',
                   level: 'warning',

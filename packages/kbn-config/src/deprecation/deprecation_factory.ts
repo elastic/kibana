@@ -33,7 +33,7 @@ const _rename = (
   const newValue = get(config, fullNewPath);
   if (newValue === undefined) {
     addDeprecation({
-      title: `"${fullOldPath}" setting is deprecated.`,
+      title: `"${fullOldPath}" setting is deprecated`,
       message: `"${fullOldPath}" is deprecated and has been replaced by "${fullNewPath}"`,
       correctiveActions: {
         manualSteps: [
@@ -48,7 +48,7 @@ const _rename = (
     };
   } else {
     addDeprecation({
-      title: `"${fullOldPath}" setting is deprecated.`,
+      title: `"${fullOldPath}" setting is deprecated`,
       message: `"${fullOldPath}" is deprecated and has been replaced by "${fullNewPath}". However both key are present, ignoring "${fullOldPath}"`,
       correctiveActions: {
         manualSteps: [

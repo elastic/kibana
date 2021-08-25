@@ -25,20 +25,20 @@ export const getDeprecationsInfo = async (
   const { body: users } = await esClient.asCurrentUser.security.getUser();
 
   const reportingUsers = Object.entries(users)
-    .filter(([username, user]) => user.roles.includes(deprecatedRole))
+    .filter(([, user]) => user.roles.includes(deprecatedRole))
     .map(([, user]) => user.username);
+
   const numReportingUsers = reportingUsers.length;
 
   if (numReportingUsers > 0) {
-    const usernames = reportingUsers.join('", "');
     deprecations.push({
       title: i18n.translate('xpack.reporting.deprecations.reportingRoleTitle', {
-        defaultMessage: `The deprecated "${deprecatedRole}" role has been found for ${numReportingUsers} user(s): "${usernames}"`,
-        values: { deprecatedRole, numReportingUsers, usernames },
+        defaultMessage: 'Found deprecated reporting roles',
       }),
       message: i18n.translate('xpack.reporting.deprecations.reportingRoleMessage', {
-        defaultMessage: `The deprecated "${deprecatedRole}" role has been found for ${numReportingUsers} user(s): "${usernames}"`,
-        values: { deprecatedRole, numReportingUsers, usernames },
+        defaultMessage:
+          'The deprecated "{deprecatedRole}" role has been found for {numReportingUsers} user(s): "{usernames}"',
+        values: { deprecatedRole, numReportingUsers, usernames: reportingUsers.join('", "') },
       }),
       documentationUrl: 'https://www.elastic.co/guide/en/kibana/current/secure-reporting.html',
       level: 'critical',
@@ -47,7 +47,7 @@ export const getDeprecationsInfo = async (
           ...(usingDeprecatedConfig
             ? [
                 i18n.translate('xpack.reporting.deprecations.reportingRole.manualStepOneMessage', {
-                  defaultMessage: `Set "${upgradableConfig}" in kibana.yml`,
+                  defaultMessage: 'Set "{upgradableConfig}" in kibana.yml',
                   values: { upgradableConfig },
                 }),
               ]
@@ -56,7 +56,8 @@ export const getDeprecationsInfo = async (
             defaultMessage: `Create one or more custom roles that provide Kibana application privileges to reporting features in **Management > Security > Roles**.`,
           }),
           i18n.translate('xpack.reporting.deprecations.reportingRole.manualStepThreeMessage', {
-            defaultMessage: `Assign the custom role(s) as desired, and remove the "${deprecatedRole}" role from the user(s).`,
+            defaultMessage:
+              'Assign the custom role(s) as desired, and remove the "{deprecatedRole}" role from the user(s).',
             values: { deprecatedRole },
           }),
         ],

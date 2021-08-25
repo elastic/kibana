@@ -11,6 +11,6 @@ import { PluginFunctionalProviderContext } from '../../services';
 export default function ({ loadTestFile }: PluginFunctionalProviderContext) {
   describe('core', function () {
     loadTestFile(require.resolve('./deprecations'));
-    loadTestFile(require.resolve('./route'));
+    // loadTestFile(require.resolve('./route'));
   });
 }

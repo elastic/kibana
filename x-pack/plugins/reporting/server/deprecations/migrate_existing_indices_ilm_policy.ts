@@ -31,7 +31,7 @@ export const getDeprecationsInfo = async (
     return [
       {
         title: i18n.translate('xpack.reporting.deprecations.migrateIndexIlmPolicyActionTitle', {
-          defaultMessage: 'Detected reporting indices with deprecated policy.',
+          defaultMessage: 'Found reporting indices with deprecated policy.',
         }),
         level: 'warning',
         message: i18n.translate('xpack.reporting.deprecations.migrateIndexIlmPolicyActionMessage', {
