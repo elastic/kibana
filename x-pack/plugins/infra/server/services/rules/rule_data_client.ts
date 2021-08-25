@@ -31,12 +31,8 @@ export const createRuleDataClient = ({
     componentTemplates: [
       {
         name: 'mappings',
-        version: 0,
         mappings: {},
       },
     ],
-    indexTemplate: {
-      version: 0,
-    },
   });
 };

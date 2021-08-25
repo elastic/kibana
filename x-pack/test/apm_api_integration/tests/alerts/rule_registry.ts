@@ -14,6 +14,7 @@ import {
   ALERT_STATUS,
   ALERT_UUID,
   EVENT_KIND,
+  VERSION,
 } from '@kbn/rule-data-utils';
 import { merge, omit } from 'lodash';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
@@ -376,7 +377,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           any
         >;
 
-        const exclude = ['@timestamp', ALERT_START, ALERT_UUID, ALERT_RULE_UUID];
+        const exclude = ['@timestamp', ALERT_START, ALERT_UUID, ALERT_RULE_UUID, VERSION];
 
         const toCompare = omit(alertEvent, exclude);
 
