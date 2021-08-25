@@ -72,7 +72,6 @@ export function AlertsPage({ routeParams }: AlertsPageProps) {
           registrationContexts: [
             'observability.apm',
             'observability.logs',
-            'observability.infrastructure',
             'observability.metrics',
             'observability.uptime',
           ],

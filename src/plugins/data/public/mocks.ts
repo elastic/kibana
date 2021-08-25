@@ -32,7 +32,6 @@ const createSetupContract = (): Setup => {
   return {
     autocomplete: autocompleteSetupMock,
     search: searchServiceMock.createSetupContract(),
-    fieldFormats: fieldFormatsServiceMock.createSetupContract(),
     query: querySetupMock,
   };
 };

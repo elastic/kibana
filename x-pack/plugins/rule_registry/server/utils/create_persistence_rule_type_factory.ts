@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ALERT_ID } from '@kbn/rule-data-utils';
+import { ALERT_ID, VERSION } from '@kbn/rule-data-utils';
 import { CreatePersistenceRuleTypeFactory } from './persistence_types';
 
 export const createPersistenceRuleTypeFactory: CreatePersistenceRuleTypeFactory = ({
@@ -28,8 +28,9 @@ export const createPersistenceRuleTypeFactory: CreatePersistenceRuleTypeFactory 
                 body: alerts.flatMap((event) => [
                   { index: {} },
                   {
-                    [ALERT_ID]: event.id,
                     ...event.fields,
+                    [ALERT_ID]: event.id,
+                    [VERSION]: ruleDataClient.kibanaVersion,
                   },
                 ]),
                 refresh,
