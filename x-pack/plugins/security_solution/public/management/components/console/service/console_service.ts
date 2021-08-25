@@ -7,6 +7,8 @@
 
 import { ReactNode } from 'react';
 
+// FIXME:PT Maybe create an abstract class based on service interface
+
 export interface CommandDefinition {
   name: string;
   about: string;
@@ -20,10 +22,19 @@ export interface CommandDefinition {
   };
 }
 
+/**
+ * A command to be executed (as entered by the user)
+ */
+export interface Command {
+  input: string;
+  args: Record<string, { value: string }>;
+  commandDefinition: CommandDefinition;
+}
+
 export interface ConsoleServiceInterface {
   getCommandList(): CommandDefinition[];
 
-  executeCommand(): Promise<{ result: unknown }>;
+  executeCommand(command: Command): Promise<{ result: ReactNode }>;
 
   /**
    * If defined, then the `help` builtin command will display this output instead of the default one

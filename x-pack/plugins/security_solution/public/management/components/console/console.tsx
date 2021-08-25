@@ -15,6 +15,7 @@ import { useConsoleService } from './components/console_provider';
 import { HistoryItemComponent, HistoryItem } from './components/history_item';
 import { HelpOutput } from './components/help_output';
 import { UnknownCommand } from './components/unknow_comand';
+import { CommandExecutionOutput } from './components/command_execution_output';
 
 // FIXME:PT implement dark mode for the console
 
@@ -40,10 +41,14 @@ export const Console = memo<ConsoleProps>(({ prompt }) => {
   const consoleWindowRef = useRef<HTMLDivElement | null>(null);
 
   const handleOnExecute = useCallback<CommandInputProps['onExecute']>(
-    (command) => {
+    (commandInput) => {
       // FIXME:PT Most of these can just be static functions of sub-components so that nearly no logic lives here
 
-      if (command.name === 'help') {
+      if (commandInput.name === '') {
+        return;
+      }
+
+      if (commandInput.name === 'help') {
         // FIXME:PT This should just be a list of `CommandDefinition` that the console supports by default
 
         let helpOutput: ReactNode;
@@ -75,7 +80,7 @@ export const Console = memo<ConsoleProps>(({ prompt }) => {
         return;
       }
 
-      if (command.name === 'clear') {
+      if (commandInput.name === 'clear') {
         // FIXME:PT This should just be a list of `CommandDefinition` that the console supports by default
         setHistoryItems([]);
         return;
@@ -83,20 +88,36 @@ export const Console = memo<ConsoleProps>(({ prompt }) => {
 
       const commandDefinition = consoleService
         .getCommandList()
-        .find((definition) => definition.name === command.name);
+        .find((definition) => definition.name === commandInput.name);
 
       if (!commandDefinition) {
         setHistoryItems((prevState) => {
           return [
             ...prevState,
             <HistoryItem>
-              <UnknownCommand input={command.input} />
+              <UnknownCommand input={commandInput.input} />
             </HistoryItem>,
           ];
         });
+        return;
       }
 
-      // TODO: execute the command
+      // FIXME:PT implement command input validation
+
+      setHistoryItems((prevState) => {
+        return [
+          ...prevState,
+          <HistoryItem>
+            <CommandExecutionOutput
+              command={{
+                input: commandInput.input,
+                args: {}, // FIXME: implement AST for command
+                commandDefinition,
+              }}
+            />
+          </HistoryItem>,
+        ];
+      });
     },
     [consoleService]
   );

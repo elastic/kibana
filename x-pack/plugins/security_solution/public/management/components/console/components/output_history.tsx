@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import React, { memo, PropsWithChildren } from 'react';
+import React, { memo } from 'react';
 import { CommonProps, EuiFlexGroup } from '@elastic/eui';
+import { HistoryItemComponent } from './history_item';
 
-// const OutputHistoryContainer = styled(EuiFlexGroup)`
-//   height: 100%;
-// `;
-
-export type OutputHistoryProps = CommonProps & PropsWithChildren<{}>;
+export type OutputHistoryProps = CommonProps & {
+  children: HistoryItemComponent | HistoryItemComponent[];
+};
 
 export const OutputHistory = memo<OutputHistoryProps>(({ children, className }) => {
   return (

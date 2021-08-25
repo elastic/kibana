@@ -14,7 +14,8 @@ export interface UnknownCommand {
 export const UnknownCommand = memo<UnknownCommand>(({ input }) => {
   return (
     <EuiCallOut color="danger">
-      {`Unknown command: ${input}`}
+      {`Unknown command: `}
+      <code>{input}</code>
       <EuiText size="xs">
         {'For a list of available command, enter: '}
         <code>{'help'}</code>

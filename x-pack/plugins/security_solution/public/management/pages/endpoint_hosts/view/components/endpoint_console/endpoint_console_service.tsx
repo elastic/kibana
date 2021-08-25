@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { ConsoleServiceInterface, CommandDefinition } from '../../../../../components/console';
+import React, { ReactNode } from 'react';
+
+import {
+  ConsoleServiceInterface,
+  CommandDefinition,
+  Command,
+} from '../../../../../components/console';
 
 export class EndpointConsoleService implements ConsoleServiceInterface {
   getCommandList(): CommandDefinition[] {
@@ -23,10 +29,11 @@ export class EndpointConsoleService implements ConsoleServiceInterface {
     ];
   }
 
-  async executeCommand(): Promise<{ result: unknown }> {
-    await new Promise((r) => setTimeout(r, 2000));
+  async executeCommand(command: Command): Promise<{ result: ReactNode }> {
+    await new Promise((r) => setTimeout(r, 4000));
+
     return {
-      result: 'command executed successful',
+      result: <div>{'command executed successful'}</div>,
     };
   }
 }
