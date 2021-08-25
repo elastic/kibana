@@ -45,6 +45,8 @@ describe('Row formatter', () => {
 
   const indexPattern = createIndexPattern();
 
+  const fieldsToShow = indexPattern.fields.getAll().map((fld) => fld.name);
+
   // Realistic response with alphabetical insertion order
   const formatHitReturnValue = {
     also: 'with \\&quot;quotes\\&quot; or &#39;single qoutes&#39;',
@@ -69,7 +71,7 @@ describe('Row formatter', () => {
   });
 
   it('formats document properly', () => {
-    expect(formatRow(hit, indexPattern)).toMatchInlineSnapshot(`
+    expect(formatRow(hit, indexPattern, fieldsToShow)).toMatchInlineSnapshot(`
       <TemplateComponent
         defPairs={
           Array [
@@ -113,7 +115,7 @@ describe('Row formatter', () => {
         get: () => 1,
       },
     } as unknown) as DiscoverServices);
-    expect(formatRow(hit, indexPattern)).toMatchInlineSnapshot(`
+    expect(formatRow(hit, indexPattern, [])).toMatchInlineSnapshot(`
       <TemplateComponent
         defPairs={
           Array [
@@ -128,7 +130,8 @@ describe('Row formatter', () => {
   });
 
   it('formats document with highlighted fields first', () => {
-    expect(formatRow({ ...hit, highlight: { number: '42' } }, indexPattern)).toMatchInlineSnapshot(`
+    expect(formatRow({ ...hit, highlight: { number: '42' } }, indexPattern, fieldsToShow))
+      .toMatchInlineSnapshot(`
       <TemplateComponent
         defPairs={
           Array [
