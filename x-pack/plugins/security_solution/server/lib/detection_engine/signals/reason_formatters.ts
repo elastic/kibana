@@ -14,6 +14,10 @@ export interface BuildReasonMessageArgs {
   mergedDoc?: SignalSourceHit;
 }
 
+export interface BuildReasonMessageUtilArgs extends BuildReasonMessageArgs {
+  type?: 'eql' | 'ml' | 'query' | 'threatMatch' | 'threshold';
+}
+
 export type BuildReasonMessage = (args: BuildReasonMessageArgs) => string;
 
 /**
@@ -22,46 +26,79 @@ export type BuildReasonMessage = (args: BuildReasonMessageArgs) => string;
  * to more easily allow for this in the future.
  * @export buildCommonReasonMessage - is only exported for testing purposes, and only used internally here.
  */
-export const buildCommonReasonMessage = ({ rule, mergedDoc }: BuildReasonMessageArgs) => {
+export const buildReasonMessageUtil = ({ rule, mergedDoc }: BuildReasonMessageUtilArgs) => {
   if (!rule) {
     // This should never happen, but in case, better to not show a malformed string
     return '';
   }
+  let eventCategory;
+  let fileName;
   let hostName;
+  let processName;
+  let processParentName;
+  let sourceAddress;
+  let sourcePort;
+  let destinationAddress;
+  let destinationPort;
   let userName;
   if (mergedDoc?.fields) {
-    hostName = mergedDoc.fields['host.name'] != null ? mergedDoc.fields['host.name'] : hostName;
-    userName = mergedDoc.fields['user.name'] != null ? mergedDoc.fields['user.name'] : userName;
+    destinationAddress = mergedDoc.fields['destination.address'] ?? null;
+    destinationPort = mergedDoc.fields['destination.port'] ?? null;
+    eventCategory = mergedDoc.fields['event.category'] ?? null;
+    fileName = mergedDoc.fields['file.name'] ?? null;
+    hostName = mergedDoc.fields['host.name'] ?? null;
+    processName = mergedDoc.fields['process.name'] ?? null;
+    processParentName = mergedDoc.fields['process.parent.name'] ?? null;
+    sourceAddress = mergedDoc.fields['source.address'] ?? null;
+    sourcePort = mergedDoc.fields['source.port'] ?? null;
+    userName = mergedDoc.fields['user.name'] ?? null;
   }
 
-  const isFieldEmpty = (field: string | string[] | undefined | null) =>
-    !field || !field.length || (field.length === 1 && field[0] === '-');
+  const getFieldTemplateValue = (field: string | string[] | undefined | null): string => {
+    if (!field || !field.length || (field.length === 1 && field[0] === '-')) return 'null';
+    return Array.isArray(field) ? field.join(', ') : field;
+  };
 
   return i18n.translate('xpack.securitySolution.detectionEngine.signals.alertReasonDescription', {
-    defaultMessage:
-      'Alert {alertName} created with a {alertSeverity} severity and risk score of {alertRiskScore}{userName, select, null {} other {{whitespace}by {userName}} }{hostName, select, null {} other {{whitespace}on {hostName}} }.',
+    defaultMessage: `{eventCategory} event with
+      {processName, select, null {} other {{whitespace}process {processName},} }
+      {processParentName, select, null {} other {{whitespace}parent process {processParentName},} }
+      {fileName, select, null {} other {{whitespace}file {fileName},} }
+      {sourceAddress, select, null {} other {{whitespace}source {sourceAddress}:{sourcePort},} }
+      {destinationAddress, select, null {} other {{whitespace}destination {destinationAddress}:{destinationPort},}}
+      {userName, select, null {} other {{whitespace}by {userName}} }
+      {hostName, select, null {} other {{whitespace}on {hostName}} }
+      created {alertSeverity} alert {alertName}.`,
     values: {
       alertName: rule.name,
       alertSeverity: rule.severity,
       alertRiskScore: rule.risk_score,
-      hostName: isFieldEmpty(hostName) ? 'null' : hostName,
-      userName: isFieldEmpty(userName) ? 'null' : userName,
+      destinationAddress: getFieldTemplateValue(destinationAddress),
+      destinationPort: getFieldTemplateValue(destinationPort),
+      eventCategory: getFieldTemplateValue(eventCategory),
+      fileName: getFieldTemplateValue(fileName),
+      hostName: getFieldTemplateValue(hostName),
+      processName: getFieldTemplateValue(processName),
+      processParentName: getFieldTemplateValue(processParentName),
+      sourceAddress: getFieldTemplateValue(sourceAddress),
+      sourcePort: getFieldTemplateValue(sourcePort),
+      userName: getFieldTemplateValue(userName),
       whitespace: ' ', // there isn't support for the unicode /u0020 for whitespace, and leading spaces are deleted, so to prevent double-whitespace explicitly passing the space in.
     },
   });
 };
 
 export const buildReasonMessageForEqlAlert = (args: BuildReasonMessageArgs) =>
-  buildCommonReasonMessage({ ...args });
+  buildReasonMessageUtil({ ...args, type: 'eql' });
 
 export const buildReasonMessageForMlAlert = (args: BuildReasonMessageArgs) =>
-  buildCommonReasonMessage({ ...args });
+  buildReasonMessageUtil({ ...args, type: 'ml' });
 
 export const buildReasonMessageForQueryAlert = (args: BuildReasonMessageArgs) =>
-  buildCommonReasonMessage({ ...args });
+  buildReasonMessageUtil({ ...args, type: 'query' });
 
 export const buildReasonMessageForThreatMatchAlert = (args: BuildReasonMessageArgs) =>
-  buildCommonReasonMessage({ ...args });
+  buildReasonMessageUtil({ ...args, type: 'threatMatch' });
 
 export const buildReasonMessageForThresholdAlert = (args: BuildReasonMessageArgs) =>
-  buildCommonReasonMessage({ ...args });
+  buildReasonMessageUtil({ ...args, type: 'threshold' });

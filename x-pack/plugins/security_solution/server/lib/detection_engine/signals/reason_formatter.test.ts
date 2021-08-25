@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { buildCommonReasonMessage } from './reason_formatters';
+import { buildReasonMessageUtil } from './reason_formatters';
 import { RulesSchema } from '../../../../common/detection_engine/schemas/response/rules_schema';
 import { SignalSourceHit } from './types';
 
@@ -29,10 +29,10 @@ describe('reason_formatter', () => {
     };
   });
 
-  describe('buildCommonReasonMessage', () => {
+  describe('buildReasonMessageUtil', () => {
     describe('when rule and mergedDoc are provided', () => {
       it('should return the full reason message', () => {
-        expect(buildCommonReasonMessage({ rule, mergedDoc })).toEqual(
+        expect(buildReasonMessageUtil({ rule, mergedDoc })).toEqual(
           'Alert What is in a name created with a medium severity and risk score of 9000 by ferris bueller on party host.'
         );
       });
@@ -46,7 +46,7 @@ describe('reason_formatter', () => {
             'host.name': ['-'],
           },
         };
-        expect(buildCommonReasonMessage({ rule, mergedDoc: updatedMergedDoc })).toEqual(
+        expect(buildReasonMessageUtil({ rule, mergedDoc: updatedMergedDoc })).toEqual(
           'Alert What is in a name created with a medium severity and risk score of 9000 by ferris bueller.'
         );
       });
@@ -60,14 +60,14 @@ describe('reason_formatter', () => {
             'user.name': ['-'],
           },
         };
-        expect(buildCommonReasonMessage({ rule, mergedDoc: updatedMergedDoc })).toEqual(
+        expect(buildReasonMessageUtil({ rule, mergedDoc: updatedMergedDoc })).toEqual(
           'Alert What is in a name created with a medium severity and risk score of 9000 on party host.'
         );
       });
     });
     describe('when only rule is provided', () => {
       it('should return the reason message without host name or user name', () => {
-        expect(buildCommonReasonMessage({ rule })).toEqual(
+        expect(buildReasonMessageUtil({ rule })).toEqual(
           'Alert What is in a name created with a medium severity and risk score of 9000.'
         );
       });
