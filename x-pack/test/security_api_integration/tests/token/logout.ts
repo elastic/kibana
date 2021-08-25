@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import request from 'request';
+import { parse as parseCookie } from 'tough-cookie';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -15,7 +15,7 @@ export default function ({ getService }: FtrProviderContext) {
     const cookie = (response.headers['set-cookie'] || []).find((header) =>
       header.startsWith('sid=')
     );
-    return cookie ? request.cookie(cookie) : undefined;
+    return cookie ? parseCookie(cookie) : undefined;
   }
 
   async function createSessionCookie() {
