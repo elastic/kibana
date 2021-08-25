@@ -422,7 +422,7 @@ describe('endpoint list middleware', () => {
       dispatchUserChangedUrlToEndpointList({ search: `?${search.split('?').pop()}` });
     };
 
-    it('loads the endpoint details when the url is changed', async () => {
+    it('triggers the endpoint details related actions when the url is changed', async () => {
       dispatchUserChangedUrl();
 
       // Note: these are left intenationally in sequence
