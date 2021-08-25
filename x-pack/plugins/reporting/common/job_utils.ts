@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import { isObject } from 'lodash';
-
 // TODO: Remove this code once everyone is using the new PDF format, then we can also remove the legacy
 // export type entirely
 export const isJobV2Params = ({ sharingData }: { sharingData: Record<string, unknown> }): boolean =>
-  Array.isArray(sharingData.locatorParams) || isObject(sharingData.locatorParams);
+  sharingData.locatorParams != null;
