@@ -15,11 +15,11 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { FormRowOnChange } from './settings_form';
-import { SettingDefinition } from './typings';
+import { FormRowOnChange } from './';
+import { SettingsRow } from '../typings';
 
 interface Props {
-  setting: SettingDefinition;
+  row: SettingsRow;
   value?: any;
   onChange: FormRowOnChange;
 }
@@ -33,17 +33,15 @@ const DISABLED_LABEL = i18n.translate(
   { defaultMessage: 'Disabled' }
 );
 
-export function FormRowSetting({ setting, value, onChange }: Props) {
-  switch (setting.type) {
+export function FormRowSetting({ row, value, onChange }: Props) {
+  switch (row.type) {
     case 'boolean': {
       return (
         <EuiSwitch
-          label={
-            setting.placeholder || (value ? ENABLED_LABEL : DISABLED_LABEL)
-          }
+          label={row.placeholder || (value ? ENABLED_LABEL : DISABLED_LABEL)}
           checked={value}
           onChange={(e) => {
-            onChange(setting.key, e.target.checked);
+            onChange(row.key, e.target.checked);
           }}
         />
       );
@@ -52,11 +50,11 @@ export function FormRowSetting({ setting, value, onChange }: Props) {
     case 'text': {
       return (
         <EuiFieldText
-          readOnly={setting.readOnly}
+          readOnly={row.readOnly}
           value={value}
-          prepend={setting.readOnly ? <EuiIcon type="lock" /> : undefined}
+          prepend={row.readOnly ? <EuiIcon type="lock" /> : undefined}
           onChange={(e) => {
-            onChange(setting.key, e.target.value);
+            onChange(row.key, e.target.value);
           }}
         />
       );
@@ -66,7 +64,7 @@ export function FormRowSetting({ setting, value, onChange }: Props) {
         <EuiTextArea
           value={value}
           onChange={(e) => {
-            onChange(setting.key, e.target.value);
+            onChange(row.key, e.target.value);
           }}
         />
       );
@@ -77,7 +75,7 @@ export function FormRowSetting({ setting, value, onChange }: Props) {
         <EuiFieldNumber
           value={value}
           onChange={(e) => {
-            onChange(setting.key, e.target.value);
+            onChange(row.key, e.target.value);
           }}
         />
       );
@@ -88,6 +86,7 @@ export function FormRowSetting({ setting, value, onChange }: Props) {
         : [];
       return (
         <EuiComboBox
+          noSuggestions
           placeholder={i18n.translate(
             'xpack.apm.fleet_integration.settings.selectOrCreateOptions',
             { defaultMessage: 'Select or create options' }
@@ -96,18 +95,18 @@ export function FormRowSetting({ setting, value, onChange }: Props) {
           selectedOptions={comboOptions}
           onChange={(option) => {
             onChange(
-              setting.key,
+              row.key,
               option.map(({ label }) => label)
             );
           }}
           onCreateOption={(newOption) => {
-            onChange(setting.key, [...value, newOption]);
+            onChange(row.key, [...value, newOption]);
           }}
           isClearable={true}
         />
       );
     }
     default:
-      throw new Error(`Unknown type "${setting.type}"`);
+      throw new Error(`Unknown type "${row.type}"`);
   }
 }

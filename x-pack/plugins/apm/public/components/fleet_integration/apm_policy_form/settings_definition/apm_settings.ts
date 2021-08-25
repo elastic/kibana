@@ -5,26 +5,16 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import React, { useMemo } from 'react';
 import { getDurationRt } from '../../../../../common/agent_configuration/runtime_types/duration_rt';
 import { getIntegerRt } from '../../../../../common/agent_configuration/runtime_types/integer_rt';
-import { OnFormChangeFn, PackagePolicyVars } from '../typings';
-import { SettingsForm } from './settings_form';
-import { SettingDefinition } from './typings';
-import {
-  isSettingsFormValid,
-  mergeNewVars,
-  OPTIONAL_LABEL,
-  REQUIRED_LABEL,
-} from './utils';
+import { OPTIONAL_LABEL, REQUIRED_LABEL } from '../settings_form/utils';
+import { SettingsRow } from '../typings';
 
-interface Props {
-  vars: PackagePolicyVars;
-  onChange: OnFormChangeFn;
+export function getApmSettings({
+  isCloudPolicy,
+}: {
   isCloudPolicy: boolean;
-}
-
-function getApmSettings(isCloudPolicy: boolean): SettingDefinition[] {
+}): SettingsRow[] {
   return [
     {
       type: 'text',
@@ -63,33 +53,7 @@ function getApmSettings(isCloudPolicy: boolean): SettingDefinition[] {
       required: true,
     },
     {
-      type: 'text',
-      key: 'secret_token',
-      readOnly: isCloudPolicy,
-      labelAppend: OPTIONAL_LABEL,
-      label: i18n.translate(
-        'xpack.apm.fleet_integration.settings.apm.secretTokenLabel',
-        { defaultMessage: 'Secret token' }
-      ),
-    },
-    {
-      type: 'boolean',
-      key: 'api_key_enabled',
-      labelAppend: OPTIONAL_LABEL,
-      placeholder: i18n.translate(
-        'xpack.apm.fleet_integration.settings.apm.apiKeyAuthenticationPlaceholder',
-        { defaultMessage: 'API key for agent authentication' }
-      ),
-      helpText: i18n.translate(
-        'xpack.apm.fleet_integration.settings.apm.apiKeyAuthenticationHelpText',
-        {
-          defaultMessage:
-            'Enable API Key auth between APM Server and APM Agents.',
-        }
-      ),
-    },
-    {
-      type: 'advanced_settings',
+      type: 'advanced_setting',
       settings: [
         {
           key: 'max_header_bytes',
@@ -176,7 +140,11 @@ function getApmSettings(isCloudPolicy: boolean): SettingDefinition[] {
             'xpack.apm.fleet_integration.settings.apm.maxConnectionsLabel',
             { defaultMessage: 'Simultaneously accepted connections' }
           ),
-          validation: getIntegerRt({ min: 1 }),
+          helpText: i18n.translate(
+            'xpack.apm.fleet_integration.settings.apm.maxConnectionsHelpText',
+            { defaultMessage: '0 for unlimited' }
+          ),
+          validation: getIntegerRt({ min: 0 }),
         },
         {
           key: 'response_headers',
@@ -201,34 +169,6 @@ function getApmSettings(isCloudPolicy: boolean): SettingDefinition[] {
                 'Set limits on request headers sizes and timing configurations.',
             }
           ),
-        },
-        {
-          key: 'api_key_limit',
-          type: 'integer',
-          labelAppend: OPTIONAL_LABEL,
-          label: i18n.translate(
-            'xpack.apm.fleet_integration.settings.apm.apiKeyLimitLabel',
-            { defaultMessage: 'Number of keys' }
-          ),
-          helpText: i18n.translate(
-            'xpack.apm.fleet_integration.settings.apm.apiKeyLimitHelpText',
-            { defaultMessage: 'Might be used for security policy compliance.' }
-          ),
-          rowTitle: i18n.translate(
-            'xpack.apm.fleet_integration.settings.apm.apiKeyLimitTitle',
-            {
-              defaultMessage:
-                'Maximum number of API keys of Agent authentication',
-            }
-          ),
-          rowDescription: i18n.translate(
-            'xpack.apm.fleet_integration.settings.apm.apiKeyLimitDescription',
-            {
-              defaultMessage:
-                'Restrict number of unique API keys per minute, used for auth between aPM Agents and Server.',
-            }
-          ),
-          validation: getIntegerRt({ min: 1 }),
         },
         {
           key: 'capture_personal_data',
@@ -278,29 +218,4 @@ function getApmSettings(isCloudPolicy: boolean): SettingDefinition[] {
       ],
     },
   ];
-}
-
-export function APMSettingsForm({ vars, onChange, isCloudPolicy }: Props) {
-  const apmSettings = useMemo(() => {
-    return getApmSettings(isCloudPolicy);
-  }, [isCloudPolicy]);
-
-  return (
-    <SettingsForm
-      title={i18n.translate(
-        'xpack.apm.fleet_integration.settings.apm.settings.title',
-        { defaultMessage: 'General' }
-      )}
-      subtitle={i18n.translate(
-        'xpack.apm.fleet_integration.settings.apm.settings.subtitle',
-        { defaultMessage: 'Settings for the APM integration.' }
-      )}
-      settings={apmSettings}
-      vars={vars}
-      onChange={(key, value) => {
-        const newVars = mergeNewVars(vars, key, value);
-        onChange(newVars, isSettingsFormValid(apmSettings, newVars));
-      }}
-    />
-  );
 }
