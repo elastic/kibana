@@ -1,0 +1,9 @@
+{
+  "indices.disk_usage": {
+    "url_params": {
+      "wait_for_active_shards": 1,
+      "master_timeout": "30s",
+      "timeout": "30s"
+    }
+  }
+}

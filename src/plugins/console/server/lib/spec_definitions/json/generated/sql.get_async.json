@@ -1,0 +1,17 @@
+{
+  "sql.get_async": {
+    "url_params": {
+      "delimiter": "",
+      "format": "",
+      "keep_alive": "",
+      "wait_for_completion_timeout": ""
+    },
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_sql/async/{id}"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/get-async-sql-search-api.html"
+  }
+}

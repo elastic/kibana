@@ -5,8 +5,8 @@
  * 2.0.
  */
 import { getDurationRt } from '../../../../../common/agent_configuration/runtime_types/duration_rt';
-import { PackagePolicyVars } from '../typings';
-import { SettingDefinition } from './typings';
+import { getIntegerRt } from '../../../../../common/agent_configuration/runtime_types/integer_rt';
+import { PackagePolicyVars, SettingsRow } from '../typings';
 import {
   mergeNewVars,
   isSettingsFormValid,
@@ -16,7 +16,7 @@ import {
 describe('settings utils', () => {
   describe('validateSettingValue', () => {
     it('returns invalid when setting is required and value is empty', () => {
-      const setting: SettingDefinition = {
+      const setting: SettingsRow = {
         key: 'foo',
         type: 'text',
         required: true,
@@ -27,17 +27,17 @@ describe('settings utils', () => {
       });
     });
     it('returns valid when setting is NOT required and value is empty', () => {
-      const setting: SettingDefinition = {
+      const setting: SettingsRow = {
         key: 'foo',
         type: 'text',
       };
       expect(validateSettingValue(setting, undefined)).toEqual({
         isValid: true,
-        message: '',
+        message: 'Required field',
       });
     });
     it('returns valid when setting does not have a validation property', () => {
-      const setting: SettingDefinition = {
+      const setting: SettingsRow = {
         key: 'foo',
         type: 'text',
       };
@@ -46,8 +46,8 @@ describe('settings utils', () => {
         message: '',
       });
     });
-    it('returns valid after validating value', () => {
-      const setting: SettingDefinition = {
+    it('returns valid after validating duration value', () => {
+      const setting: SettingsRow = {
         key: 'foo',
         type: 'text',
         validation: getDurationRt({ min: '1ms' }),
@@ -57,8 +57,8 @@ describe('settings utils', () => {
         message: 'No errors!',
       });
     });
-    it('returns invalid after validating value', () => {
-      const setting: SettingDefinition = {
+    it('returns invalid after validating duration value', () => {
+      const setting: SettingsRow = {
         key: 'foo',
         type: 'text',
         validation: getDurationRt({ min: '1ms' }),
@@ -68,9 +68,43 @@ describe('settings utils', () => {
         message: 'Must be greater than 1ms',
       });
     });
+    it('returns valid after validating integer value', () => {
+      const setting: SettingsRow = {
+        key: 'foo',
+        type: 'text',
+        validation: getIntegerRt({ min: 1 }),
+      };
+      expect(validateSettingValue(setting, 1)).toEqual({
+        isValid: true,
+        message: 'No errors!',
+      });
+    });
+    it('returns invalid after validating integer value', () => {
+      const setting: SettingsRow = {
+        key: 'foo',
+        type: 'text',
+        validation: getIntegerRt({ min: 1 }),
+      };
+      expect(validateSettingValue(setting, 0)).toEqual({
+        isValid: false,
+        message: 'Must be greater than 1',
+      });
+    });
+
+    it('returns valid when required and value is empty', () => {
+      const setting: SettingsRow = {
+        key: 'foo',
+        type: 'text',
+        required: true,
+      };
+      expect(validateSettingValue(setting, '')).toEqual({
+        isValid: false,
+        message: 'Required field',
+      });
+    });
   });
   describe('isSettingsFormValid', () => {
-    const settings: SettingDefinition[] = [
+    const settings: SettingsRow[] = [
       { key: 'foo', type: 'text', required: true },
       {
         key: 'bar',
@@ -79,7 +113,7 @@ describe('settings utils', () => {
       },
       { key: 'baz', type: 'text', validation: getDurationRt({ min: '1ms' }) },
       {
-        type: 'advanced_settings',
+        type: 'advanced_setting',
         settings: [
           {
             type: 'text',
