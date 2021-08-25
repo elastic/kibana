@@ -73,7 +73,7 @@ export const ForLastExpression = ({
           )}`}
           isActive={alertDurationPopoverOpen}
           onClick={() => {
-            setAlertDurationPopoverOpen(true);
+            setAlertDurationPopoverOpen(!alertDurationPopoverOpen);
           }}
           display={display === 'inline' ? 'inline' : 'columns'}
           isInvalid={!timeWindowSize}

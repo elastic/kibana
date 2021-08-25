@@ -283,7 +283,7 @@ export const Overview: React.FC = () => {
   const documentPermissions = (
     <>
       <EuiSpacer />
-      <EuiTitle size="s">
+      <EuiTitle size="xs">
         <h4>{DOCUMENT_PERMISSIONS_TITLE}</h4>
       </EuiTitle>
       <EuiSpacer size="m" />
@@ -305,7 +305,7 @@ export const Overview: React.FC = () => {
   const documentPermissionsDisabled = (
     <>
       <EuiSpacer />
-      <EuiTitle size="s">
+      <EuiTitle size="xs">
         <h4>{DOCUMENT_PERMISSIONS_TITLE}</h4>
       </EuiTitle>
       <EuiSpacer size="m" />
@@ -316,7 +316,7 @@ export const Overview: React.FC = () => {
               <EuiIcon size="l" type="iInCircle" color="subdued" />
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiText size="m">
+              <EuiText size="s">
                 <strong>{DOCUMENT_PERMISSIONS_DISABLED_TEXT}</strong>
               </EuiText>
               <EuiText size="s">

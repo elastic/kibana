@@ -5,14 +5,19 @@
  * 2.0.
  */
 
+import { useApmParams } from '../../hooks/use_apm_params';
 import { useFetcher } from '../../hooks/use_fetcher';
-import { useUrlParams } from '../url_params_context/use_url_params';
+import { useTimeRange } from '../../hooks/use_time_range';
 
 const INITIAL_DATA = { transactionTypes: [] };
 
 export function useServiceTransactionTypesFetcher(serviceName?: string) {
-  const { urlParams } = useUrlParams();
-  const { start, end } = urlParams;
+  const {
+    query: { rangeFrom, rangeTo },
+  } = useApmParams('/services/:serviceName');
+
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
+
   const { data = INITIAL_DATA } = useFetcher(
     (callApmApi) => {
       if (serviceName && start && end) {

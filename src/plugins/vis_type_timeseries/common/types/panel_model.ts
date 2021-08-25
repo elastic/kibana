@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { Query } from '../../../data/common';
-import { PANEL_TYPES, TOOLTIP_MODES } from '../enums';
+import { METRIC_TYPES, Query } from '../../../data/common';
+import { PANEL_TYPES, TOOLTIP_MODES, TSVB_METRIC_TYPES } from '../enums';
 import { IndexPatternValue, Annotation } from './index';
 import { ColorRules, BackgroundColorRules, BarColorRules, GaugeColorRules } from './color_rules';
 
@@ -26,6 +26,8 @@ interface Percentile {
   percentile?: string;
   color?: string;
 }
+
+export type MetricType = METRIC_TYPES | TSVB_METRIC_TYPES;
 
 export interface Metric {
   field?: string;
@@ -50,7 +52,7 @@ export interface Metric {
   variables?: MetricVariable[];
   numberOfSignificantValueDigits?: number;
   percentiles?: Percentile[];
-  type: string;
+  type: MetricType;
   value?: string;
   values?: string[];
   colors?: string[];

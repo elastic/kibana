@@ -19,10 +19,10 @@ import {
   toNumber,
   toString,
 } from './helpers';
-import { IUrlParams } from './types';
+import { UrlParams } from './types';
 
 type TimeUrlParams = Pick<
-  IUrlParams,
+  UrlParams,
   'start' | 'end' | 'rangeFrom' | 'rangeTo' | 'exactStart' | 'exactEnd'
 >;
 
