@@ -179,7 +179,7 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
     try {
       namespaces = await this.getSearchableSpaces(options.namespaces);
     } catch (err) {
-      if (Boom.isBoom(err) && err.output.payload.statusCode === 401) {
+      if (Boom.isBoom(err) && err.output.payload.statusCode === 403) {
         // return empty response, since the user is unauthorized in any space, but we don't return forbidden errors for `find` operations
         return SavedObjectsUtils.createEmptyFindResponse<T, A>(options);
       }
@@ -222,7 +222,15 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
     let availableSpaces: string[] | undefined;
     const getAvailableSpaces = async () => {
       if (!availableSpaces) {
-        availableSpaces = await this.getSearchableSpaces([ALL_SPACES_ID]);
+        try {
+          availableSpaces = await this.getSearchableSpaces([ALL_SPACES_ID]);
+        } catch (err) {
+          if (Boom.isBoom(err) && err.output.payload.statusCode === 403) {
+            availableSpaces = []; // the user doesn't have access to any spaces
+          } else {
+            throw err;
+          }
+        }
       }
       return availableSpaces;
     };
@@ -405,7 +413,7 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
     try {
       namespaces = await this.getSearchableSpaces(options.namespaces);
     } catch (err) {
-      if (Boom.isBoom(err) && err.output.payload.statusCode === 401) {
+      if (Boom.isBoom(err) && err.output.payload.statusCode === 403) {
         // throw bad request since the user is unauthorized in any space
         throw SavedObjectsErrorHelpers.createBadRequestError();
       }

@@ -189,6 +189,28 @@ const ERROR_NAMESPACE_SPECIFIED = 'Spaces currently determines the namespaces';
         );
         expect(spacesClient.getAll).toHaveBeenCalledTimes(1);
       });
+
+      test(`replaces object namespaces '*' with an empty array when the user doesn't have access to any spaces`, async () => {
+        const { client, baseClient, spacesClient } = createSpacesSavedObjectsClient();
+        spacesClient.getAll.mockRejectedValue(Boom.forbidden());
+
+        const objects = [
+          { type: 'foo', id: '1', namespaces: ['*'] },
+          { type: 'bar', id: '2', namespaces: ['*', 'this-is-ignored'] },
+          { type: 'baz', id: '3', namespaces: ['another-space'] },
+        ];
+        await client.bulkGet(objects);
+
+        expect(baseClient.bulkGet).toHaveBeenCalledWith(
+          [
+            { type: 'foo', id: '1', namespaces: [] },
+            { type: 'bar', id: '2', namespaces: [] },
+            { type: 'baz', id: '3', namespaces: ['another-space'] }, // even if another space doesn't exist, it can be specified explicitly
+          ],
+          { namespace: currentSpace.expectedNamespace }
+        );
+        expect(spacesClient.getAll).toHaveBeenCalledTimes(1);
+      });
     });
 
     describe('#find', () => {
@@ -207,7 +229,7 @@ const ERROR_NAMESPACE_SPECIFIED = 'Spaces currently determines the namespaces';
 
       test(`returns empty result if user is unauthorized in any space`, async () => {
         const { client, baseClient, spacesClient } = createSpacesSavedObjectsClient();
-        spacesClient.getAll.mockRejectedValue(Boom.unauthorized());
+        spacesClient.getAll.mockRejectedValue(Boom.forbidden());
 
         const options = Object.freeze({ type: 'foo', namespaces: ['some-ns'] });
         const actualReturnValue = await client.find(options);
@@ -560,7 +582,7 @@ const ERROR_NAMESPACE_SPECIFIED = 'Spaces currently determines the namespaces';
 
       test(`throws error if if user is unauthorized in any space`, async () => {
         const { client, baseClient, spacesClient } = createSpacesSavedObjectsClient();
-        spacesClient.getAll.mockRejectedValue(Boom.unauthorized());
+        spacesClient.getAll.mockRejectedValue(Boom.forbidden());
 
         await expect(
           client.openPointInTimeForType('foo', { namespaces: ['bar'] })
