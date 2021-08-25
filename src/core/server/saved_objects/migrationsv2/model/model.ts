@@ -490,7 +490,11 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
 
     if (Either.isRight(res)) {
       if (stateP.corruptDocumentIds.length === 0 && stateP.transformErrors.length === 0) {
-        const batches = createBatches(res.right.processedDocs, stateP.batchSizeBytes);
+        const batches = createBatches(
+          res.right.processedDocs,
+          stateP.tempIndex,
+          stateP.batchSizeBytes
+        );
         if (Either.isRight(batches)) {
           return {
             ...stateP,
@@ -503,7 +507,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           return {
             ...stateP,
             controlState: 'FATAL',
-            reason: `The document with _id "${batches.left.document._id}" is ${batches.left.docSizeBytes} bytes which exceeds the configured maximum batch size of ${batches.left.batchSizeBytes} bytes. To proceed, please increase the migrations.batchSizeBytes Kibana configuration option and ensure that the Elasticsearch http.max_content_length configuration option is set to an equal or larger value.`,
+            reason: `The document with _id "${batches.left.document._id}" is ${batches.left.docSizeBytes} bytes which equals or exceeds the configured maximum batch size of ${batches.left.batchSizeBytes} bytes. To proceed, please increase the migrations.batchSizeBytes Kibana configuration option and ensure that the Elasticsearch http.max_content_length configuration option is set to a larger value.`,
           };
         }
       } else {
@@ -696,7 +700,11 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       // we haven't seen corrupt documents or any transformation errors thus far in the migration
       // index the migrated docs
       if (stateP.corruptDocumentIds.length === 0 && stateP.transformErrors.length === 0) {
-        const batches = createBatches(res.right.processedDocs, 1e8);
+        const batches = createBatches(
+          res.right.processedDocs,
+          stateP.targetIndex,
+          stateP.batchSizeBytes
+        );
         if (Either.isRight(batches)) {
           return {
             ...stateP,
@@ -710,7 +718,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           return {
             ...stateP,
             controlState: 'FATAL',
-            reason: `The document with _id "${batches.left.document._id}" is ${batches.left.docSizeBytes} bytes which exceeds the configured maximum batch size of ${batches.left.batchSizeBytes} bytes. To proceed, please increase the migrations.batchSizeBytes Kibana configuration option and ensure that the Elasticsearch http.max_content_length configuration option is set to an equal or larger value.`,
+            reason: `The document with _id "${batches.left.document._id}" is ${batches.left.docSizeBytes} bytes which equals or exceeds the configured maximum batch size of ${batches.left.batchSizeBytes} bytes. To proceed, please increase the migrations.batchSizeBytes Kibana configuration option and ensure that the Elasticsearch http.max_content_length configuration option is set to a larger value.`,
           };
         }
       } else {

@@ -331,7 +331,7 @@ export interface TransformedDocumentsBulkIndex extends PostInitState {
    * Write the up-to-date transformed documents to the target index
    */
   readonly controlState: 'TRANSFORMED_DOCUMENTS_BULK_INDEX';
-  readonly transformedDocBatches: [SavedObjectsRawDoc[]];
+  readonly transformedDocBatches: SavedObjectsRawDoc[][];
   readonly currentBatch: number;
   readonly lastHitSortValue: number[] | undefined;
   readonly hasTransformedDocs: boolean;

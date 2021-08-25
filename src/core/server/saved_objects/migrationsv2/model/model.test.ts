@@ -1066,6 +1066,8 @@ describe('migrations v2 model', () => {
         });
         const newState = model(state, res) as ReindexSourceToTempIndexBulk;
         expect(newState.controlState).toEqual('REINDEX_SOURCE_TO_TEMP_INDEX_BULK');
+        expect(newState.currentBatch).toEqual(0);
+        expect(newState.transformedDocBatches).toEqual([processedDocs]);
         expect(newState.progress.processed).toBe(0); // Result of `(undefined ?? 0) + corruptDocumentsId.length`
       });
 
@@ -1443,6 +1445,7 @@ describe('migrations v2 model', () => {
           ) as TransformedDocumentsBulkIndex;
           expect(newState.controlState).toEqual('TRANSFORMED_DOCUMENTS_BULK_INDEX');
           expect(newState.transformedDocBatches).toEqual([processedDocs]);
+          expect(newState.currentBatch).toEqual(0);
           expect(newState.retryCount).toEqual(0);
           expect(newState.retryDelay).toEqual(0);
           expect(newState.progress.processed).toBe(outdatedDocuments.length);
@@ -1527,12 +1530,24 @@ describe('migrations v2 model', () => {
     describe('TRANSFORMED_DOCUMENTS_BULK_INDEX', () => {
       const transformedDocBatches = [
         [
+          // batch 0
           {
             _id: 'a:b',
             _source: { type: 'a', a: { name: 'HOI!' }, migrationVersion: {}, references: [] },
           },
+          {
+            _id: 'a:c',
+            _source: { type: 'a', a: { name: 'HOI!' }, migrationVersion: {}, references: [] },
+          },
         ],
-      ] as [SavedObjectsRawDoc[]];
+        [
+          // batch 1
+          {
+            _id: 'a:d',
+            _source: { type: 'a', a: { name: 'HOI!' }, migrationVersion: {}, references: [] },
+          },
+        ],
+      ] as SavedObjectsRawDoc[][];
       const transformedDocumentsBulkIndexState: TransformedDocumentsBulkIndex = {
         ...baseState,
         controlState: 'TRANSFORMED_DOCUMENTS_BULK_INDEX',
@@ -1546,6 +1561,29 @@ describe('migrations v2 model', () => {
         hasTransformedDocs: false,
         progress: createInitialProgress(),
       };
+
+      test('TRANSFORMED_DOCUMENTS_BULK_INDEX -> TRANSFORMED_DOCUMENTS_BULK_INDEX and increments currentBatch if more batches are left', () => {
+        const res: ResponseType<'TRANSFORMED_DOCUMENTS_BULK_INDEX'> = Either.right(
+          'bulk_index_succeeded'
+        );
+        const newState = model(
+          transformedDocumentsBulkIndexState,
+          res
+        ) as TransformedDocumentsBulkIndex;
+        expect(newState.controlState).toEqual('TRANSFORMED_DOCUMENTS_BULK_INDEX');
+        expect(newState.currentBatch).toEqual(1);
+      });
+
+      test('TRANSFORMED_DOCUMENTS_BULK_INDEX -> OUTDATED_DOCUMENTS_SEARCH_READ if all batches were written', () => {
+        const res: ResponseType<'TRANSFORMED_DOCUMENTS_BULK_INDEX'> = Either.right(
+          'bulk_index_succeeded'
+        );
+        const newState = model(
+          { ...transformedDocumentsBulkIndexState, ...{ currentBatch: 1 } },
+          res
+        );
+        expect(newState.controlState).toEqual('OUTDATED_DOCUMENTS_SEARCH_READ');
+      });
 
       test('TRANSFORMED_DOCUMENTS_BULK_INDEX throws if action returns left index_not_found_exception', () => {
         const res: ResponseType<'TRANSFORMED_DOCUMENTS_BULK_INDEX'> = Either.left({
