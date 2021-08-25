@@ -275,7 +275,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const topNLabel = await visualBuilder.getTopNLabel();
         const topNCount = await visualBuilder.getTopNCount();
 
-        expect(topNLabel).to.be('Sum of Sq. of bytes');
+        expect(topNLabel).to.be('Sum of Squares of bytes');
         expect(topNCount).to.be('630,170,001,503');
       });
 

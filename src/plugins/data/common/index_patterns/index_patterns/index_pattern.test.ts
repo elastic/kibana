@@ -11,14 +11,14 @@ import { map, last } from 'lodash';
 import { IndexPattern } from './index_pattern';
 
 import { DuplicateField } from '../../../../kibana_utils/common';
-// @ts-expect-error
-import mockLogStashFields from './fixtures/logstash_fields';
-import { stubbedSavedObjectIndexPattern } from './fixtures/stubbed_saved_object_index_pattern';
+
 import { IndexPatternField } from '../fields';
 
 import { fieldFormatsMock } from '../../../../field_formats/common/mocks';
 import { FieldFormat } from '../../../../field_formats/common';
 import { RuntimeField } from '../types';
+import { stubLogstashFields } from '../field.stub';
+import { stubbedSavedObjectIndexPattern } from '../index_pattern.stub';
 
 class MockFieldFormatter {}
 
@@ -55,7 +55,7 @@ function create(id: string) {
       type,
       version,
       timeFieldName,
-      fields: { ...fields, runtime_field: runtimeField },
+      fields: { ...JSON.parse(fields), runtime_field: runtimeField },
       title,
       runtimeFieldMap,
     },
@@ -101,7 +101,7 @@ describe('IndexPattern', () => {
 
   describe('getScriptedFields', () => {
     test('should return all scripted fields', () => {
-      const scriptedNames = mockLogStashFields()
+      const scriptedNames = stubLogstashFields
         .filter((item: IndexPatternField) => item.scripted === true)
         .map((item: IndexPatternField) => item.name);
       const respNames = map(indexPattern.getScriptedFields(), 'name');
@@ -151,7 +151,7 @@ describe('IndexPattern', () => {
 
   describe('getNonScriptedFields', () => {
     test('should return all non-scripted fields', () => {
-      const notScriptedNames = mockLogStashFields()
+      const notScriptedNames = stubLogstashFields
         .filter((item: IndexPatternField) => item.scripted === false)
         .map((item: IndexPatternField) => item.name);
       notScriptedNames.push('runtime_field');
