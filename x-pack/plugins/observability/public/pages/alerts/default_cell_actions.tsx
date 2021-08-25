@@ -19,6 +19,20 @@ export const FILTER_FOR_VALUE = i18n.translate('xpack.observability.hoverActions
   defaultMessage: 'Filter for value',
 });
 
+/**
+ * rowIndex is bigger than `data.length` for pages with page numbers bigger than one.
+ * For that reason, we must calculate `rowIndex % itemsPerPage`.
+ *
+ * Ex:
+ * Given `rowIndex` is `13` and `itemsPerPage` is `10`.
+ * It means that the `activePage` is `2` and the `pageRowIndex` is `3`
+ *
+ * **Warning**:
+ * Be careful with array out of bounds. `pageRowIndex` can be bigger or equal to `data.length`
+ *  in the scenario where the user changes the event status (Open, Acknowledged, Closed).
+ */
+export const getPageRowIndex = (rowIndex: number, itemsPerPage: number) => rowIndex % itemsPerPage;
+
 /** a hook to eliminate the verbose boilerplate required to use common services */
 const useKibanaServices = () => {
   const { timelines } = useKibana<{ timelines: TimelinesUIStart }>().services;
@@ -35,11 +49,15 @@ const useKibanaServices = () => {
 
 /** actions common to all cells (e.g. copy to clipboard) */
 const commonCellActions: TGridCellAction[] = [
-  ({ data }: { data: TimelineNonEcsData[][] }) => ({ rowIndex, columnId, Component }) => {
+  ({ data, pageSize }: { data: TimelineNonEcsData[][]; pageSize: number }) => ({
+    rowIndex,
+    columnId,
+    Component,
+  }) => {
     const { timelines } = useKibanaServices();
 
     const value = getMappedNonEcsValue({
-      data: data[rowIndex],
+      data: data[getPageRowIndex(rowIndex, pageSize)],
       fieldName: columnId,
     });
 
@@ -60,9 +78,13 @@ const commonCellActions: TGridCellAction[] = [
 
 /** actions for adding filters to the search bar */
 const buildFilterCellActions = (addToQuery: (value: string) => void): TGridCellAction[] => [
-  ({ data }: { data: TimelineNonEcsData[][] }) => ({ rowIndex, columnId, Component }) => {
+  ({ data, pageSize }: { data: TimelineNonEcsData[][]; pageSize: number }) => ({
+    rowIndex,
+    columnId,
+    Component,
+  }) => {
     const value = getMappedNonEcsValue({
-      data: data[rowIndex],
+      data: data[getPageRowIndex(rowIndex, pageSize)],
       fieldName: columnId,
     });
 
