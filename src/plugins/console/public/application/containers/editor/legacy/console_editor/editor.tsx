@@ -122,7 +122,8 @@ function EditorUI({ initialTextValue }: EditorProps) {
         });
       }
 
-      // If we have a data URI instead of HTTP, LZ-decode it.
+      // If we have a data URI instead of HTTP, LZ-decode it. This enables
+      // opening requests in Console from anywhere in Kibana.
       if (/^data:/.test(url)) {
         const data = decompressFromEncodedURIComponent(url.replace(/^data:text\/plain,/, '')) ?? '';
         editor.update(data, true);
