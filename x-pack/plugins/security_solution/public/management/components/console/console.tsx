@@ -16,6 +16,8 @@ import { HistoryItemComponent, HistoryItem } from './components/history_item';
 import { HelpOutput } from './components/help_output';
 import { UnknownCommand } from './components/unknow_comand';
 import { CommandExecutionOutput } from './components/command_execution_output';
+import { parseCommandInput } from './service/parsed_command_input';
+import { BadArgument } from './components/bad_argument';
 
 // FIXME:PT implement dark mode for the console
 
@@ -44,11 +46,18 @@ export const Console = memo<ConsoleProps>(({ prompt }) => {
     (commandInput) => {
       // FIXME:PT Most of these can just be static functions of sub-components so that nearly no logic lives here
 
-      if (commandInput.name === '') {
+      const parsedInput = parseCommandInput(commandInput.input);
+
+      if (parsedInput.name === '') {
         return;
       }
 
-      if (commandInput.name === 'help') {
+      // FIXME:PT create list of default console commands and allow user to override them
+      //      should include things like:
+      //        - clear
+      //        - help
+      //        - exit
+      if (parsedInput.name === 'help') {
         // FIXME:PT This should just be a list of `CommandDefinition` that the console supports by default
 
         let helpOutput: ReactNode;
@@ -72,7 +81,7 @@ export const Console = memo<ConsoleProps>(({ prompt }) => {
           return [
             ...prevState,
             <HistoryItem>
-              <HelpOutput input={commandInput.input}>{helpOutput}</HelpOutput>
+              <HelpOutput input={parsedInput.input}>{helpOutput}</HelpOutput>
             </HistoryItem>,
           ];
         });
@@ -80,7 +89,7 @@ export const Console = memo<ConsoleProps>(({ prompt }) => {
         return;
       }
 
-      if (commandInput.name === 'clear') {
+      if (parsedInput.name === 'clear') {
         // FIXME:PT This should just be a list of `CommandDefinition` that the console supports by default
         setHistoryItems([]);
         return;
@@ -88,21 +97,75 @@ export const Console = memo<ConsoleProps>(({ prompt }) => {
 
       const commandDefinition = consoleService
         .getCommandList()
-        .find((definition) => definition.name === commandInput.name);
+        .find((definition) => definition.name === parsedInput.name);
 
       if (!commandDefinition) {
         setHistoryItems((prevState) => {
           return [
             ...prevState,
             <HistoryItem>
-              <UnknownCommand input={commandInput.input} />
+              <UnknownCommand input={parsedInput.input} />
             </HistoryItem>,
           ];
         });
         return;
       }
 
-      // FIXME:PT implement command input validation
+      // If args were entered, then validate them
+      if (parsedInput.hasArgs()) {
+        if (!commandDefinition.args) {
+          setHistoryItems((prevState) => {
+            return [
+              ...prevState,
+              <HistoryItem>
+                <BadArgument parsedInput={parsedInput} commandDefinition={commandDefinition}>
+                  {'command does not support any arguments'}
+                </BadArgument>
+              </HistoryItem>,
+            ];
+          });
+
+          return;
+        }
+
+        // unknown arguments?
+        if (parsedInput.unknownArgs && parsedInput.unknownArgs.length) {
+          setHistoryItems((prevState) => {
+            return [
+              ...prevState,
+              <HistoryItem>
+                <BadArgument parsedInput={parsedInput} commandDefinition={commandDefinition}>
+                  {`unknown argument(s): ${parsedInput.unknownArgs.join(', ')}`}
+                </BadArgument>
+              </HistoryItem>,
+            ];
+          });
+
+          return;
+        }
+
+        // unsupported arguments
+        for (const argName in Object.keys(parsedInput.args)) {
+          if (!commandDefinition.args[argName]) {
+            setHistoryItems((prevState) => {
+              return [
+                ...prevState,
+                <HistoryItem>
+                  <BadArgument parsedInput={parsedInput} commandDefinition={commandDefinition}>
+                    {`unsupported argument: ${argName}`}
+                  </BadArgument>
+                </HistoryItem>,
+              ];
+            });
+
+            return;
+          }
+
+          // FIXME:PT implement validation of required arguments
+
+          // FIXME:PT Implement calling validator
+        }
+      }
 
       setHistoryItems((prevState) => {
         return [
@@ -110,8 +173,8 @@ export const Console = memo<ConsoleProps>(({ prompt }) => {
           <HistoryItem>
             <CommandExecutionOutput
               command={{
-                input: commandInput.input,
-                args: {}, // FIXME: implement AST for command
+                input: parsedInput.input,
+                args: parsedInput,
                 commandDefinition,
               }}
             />

@@ -57,12 +57,24 @@ export class EndpointConsoleService implements ConsoleServiceInterface {
       {
         name: 'isolate',
         about: 'Isolate the host',
-        args: undefined,
+        args: {
+          comment: {
+            required: false,
+            allowMultiples: false,
+            about: 'A comment to go along with the action',
+          },
+        },
       },
       {
         name: 'release',
         about: 'Release a host from its network isolation state',
-        args: undefined,
+        args: {
+          comment: {
+            required: false,
+            allowMultiples: false,
+            about: 'A comment to go along with the action',
+          },
+        },
       },
       {
         name: 'run-script',

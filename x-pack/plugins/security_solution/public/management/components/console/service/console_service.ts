@@ -6,6 +6,7 @@
  */
 
 import { ReactNode } from 'react';
+import { ParsedCommandInput } from './parsed_command_input';
 
 // FIXME:PT Maybe create an abstract class based on service interface
 
@@ -16,10 +17,12 @@ export interface CommandDefinition {
   args?: {
     [longName: string]: {
       required: boolean;
+      allowMultiples: boolean;
       about: string;
-      validator?: () => Promise<boolean>;
+      /** should return `true` if valid or a string with the error message */
+      validate?: () => true | string;
       // Selector: Idea is that the schema can plugin in a rich component for the user to select something (ex. a file)
-      selector?: () => Promise<unknown>;
+      selector?: () => unknown;
     };
   };
 }
@@ -29,7 +32,7 @@ export interface CommandDefinition {
  */
 export interface Command {
   input: string;
-  args: Record<string, { value: string }>;
+  args: ParsedCommandInput;
   commandDefinition: CommandDefinition;
 }
 
