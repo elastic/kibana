@@ -8,6 +8,10 @@
 import { getSearchAggregatedTransactions } from '.';
 import { SearchAggregatedTransactionSetting } from '../../../../common/aggregated_transactions';
 import { Setup, SetupTimeRange } from '../setup_request';
+import { kqlQuery, rangeQuery } from '../../../../../observability/server';
+import { ProcessorEvent } from '../../../../common/processor_event';
+import { TRANSACTION_DURATION } from '../../../../common/elasticsearch_fieldnames';
+import { APMEventClient } from '../create_es_client/create_apm_event_client';
 
 export async function getFallbackToTransactions({
   setup: { config, start, end, apmEventClient },
@@ -32,5 +36,52 @@ export async function getFallbackToTransactions({
     apmEventClient,
     kuery,
   });
-  return !searchesAggregatedTransactions;
+
+  if (!searchesAggregatedTransactions) {
+    // if no aggregrated transactions, check if any transactions at all
+    return await getHasTransactions({
+      start,
+      end,
+      apmEventClient,
+      kuery,
+    });
+  }
+
+  return false;
+}
+
+async function getHasTransactions({
+  start,
+  end,
+  apmEventClient,
+  kuery,
+}: {
+  start?: number;
+  end?: number;
+  apmEventClient: APMEventClient;
+  kuery: string;
+}) {
+  const response = await apmEventClient.search('get_has_transactions', {
+    apm: {
+      events: [ProcessorEvent.transaction, ProcessorEvent.span],
+    },
+    body: {
+      query: {
+        bool: {
+          filter: [
+            { exists: { field: TRANSACTION_DURATION } },
+            ...(start && end ? rangeQuery(start, end) : []),
+            ...kqlQuery(kuery),
+          ],
+        },
+      },
+    },
+    terminateAfter: 1,
+  });
+
+  if (response.hits.total.value > 0) {
+    return true;
+  }
+
+  return false;
 }
