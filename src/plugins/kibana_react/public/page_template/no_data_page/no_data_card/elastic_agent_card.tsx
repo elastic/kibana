@@ -53,8 +53,7 @@ export const ElasticAgentCard: FunctionComponent<ElasticAgentCardProps> = ({
       href={href ?? addBasePath('/app/integrations/browse')}
       title={title || defaultCTAtitle}
       description={i18n.translate('kibana-react.noDataPage.elasticAgentCard.description', {
-        defaultMessage: `The Elastic Agent provides a simple, unified way to
-        collect data from your machines.`,
+        defaultMessage: `Use Elastic Agent for a simple, unified way to collect data from your machines.`,
       })}
       image={addBasePath(`${basePathUrl}elastic_agent_card.svg`)}
       betaBadgeLabel={recommended ? NO_DATA_RECOMMENDED : undefined}

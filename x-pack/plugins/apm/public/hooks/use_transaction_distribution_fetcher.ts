@@ -43,9 +43,7 @@ interface TransactionDistributionFetcherState {
   total: number;
 }
 
-export function useTransactionDistributionFetcher(
-  params: Omit<SearchServiceParams, 'analyzeCorrelations'>
-) {
+export function useTransactionDistributionFetcher() {
   const {
     services: { data },
   } = useKibana<ApmPluginStartDeps>();
@@ -88,7 +86,9 @@ export function useTransactionDistributionFetcher(
     }));
   }
 
-  const startFetch = () => {
+  const startFetch = (
+    params: Omit<SearchServiceParams, 'analyzeCorrelations'>
+  ) => {
     setFetchState((prevState) => ({
       ...prevState,
       error: undefined,

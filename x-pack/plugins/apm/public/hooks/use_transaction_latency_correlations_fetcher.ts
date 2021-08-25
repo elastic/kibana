@@ -44,9 +44,7 @@ interface TransactionLatencyCorrelationsFetcherState {
   total: number;
 }
 
-export const useTransactionLatencyCorrelationsFetcher = (
-  params: Omit<SearchServiceParams, 'analyzeCorrelations'>
-) => {
+export const useTransactionLatencyCorrelationsFetcher = () => {
   const {
     services: { data },
   } = useKibana<ApmPluginStartDeps>();
@@ -90,7 +88,9 @@ export const useTransactionLatencyCorrelationsFetcher = (
     }));
   }
 
-  const startFetch = () => {
+  const startFetch = (
+    params: Omit<SearchServiceParams, 'analyzeCorrelations'>
+  ) => {
     setFetchState((prevState) => ({
       ...prevState,
       error: undefined,

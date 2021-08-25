@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
 import { omit } from 'lodash';
 import { useHistory } from 'react-router-dom';
@@ -81,6 +81,16 @@ export function TransactionDetailsTabs() {
     });
   };
 
+  // When filtering in either the latency correlations or failed transactions correlations tab,
+  // scroll to the top of the page and switch to the 'Trace samples' tab to trigger a refresh.
+  const traceSamplesTabKey = traceSamplesTab.key;
+  const onFilter = useCallback(() => {
+    // Scroll to the top of the page
+    window.scrollTo(0, 0);
+    // Switch back to the 'trace samples' tab
+    setCurrentTab(traceSamplesTabKey);
+  }, [traceSamplesTabKey]);
+
   useEffect(() => {
     const selectedSample = traceSamples.find(
       (sample) =>
@@ -125,10 +135,11 @@ export function TransactionDetailsTabs() {
         <EuiPanel hasBorder={true}>
           <TabContent
             {...{
-              selectSampleFromChartSelection,
               clearChartSelection,
+              onFilter,
               sampleRangeFrom,
               sampleRangeTo,
+              selectSampleFromChartSelection,
               traceSamples,
             }}
           />

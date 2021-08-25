@@ -20,8 +20,10 @@ export type ElasticBeatsCardProps = NoDataPageActions & {
 export const ElasticBeatsCard: FunctionComponent<ElasticBeatsCardProps> = ({
   recommended,
   href,
+  title,
   button,
-  solution,
+  href,
+  solution, // unused for now
   ...cardRest
 }) => {
   const {
@@ -31,31 +33,26 @@ export const ElasticBeatsCard: FunctionComponent<ElasticBeatsCardProps> = ({
   const basePathUrl = '/plugins/kibanaReact/assets/';
   const IS_DARK_THEME = uiSettings.get('theme:darkMode');
 
+  const defaultCTAtitle = i18n.translate('kibana-react.noDataPage.elasticBeatsCard.title', {
+    defaultMessage: 'Add data',
+  });
+
   const footer =
     typeof button !== 'string' && typeof button !== 'undefined' ? (
       button
     ) : (
       // The href and/or onClick are attached to the whole Card, so the button is just for show.
       // Do not add the behavior here too or else it will propogate through
-      <EuiButton fill>
-        {button ||
-          i18n.translate('kibana-react.noDataPage.elasticBeatsCard.buttonLabel', {
-            defaultMessage: 'Install Beats for {solution}',
-            values: { solution },
-          })}
-      </EuiButton>
+      <EuiButton fill>{button || title || defaultCTAtitle}</EuiButton>
     );
 
   return (
     <EuiCard
       paddingSize="l"
       href={href ?? addBasePath('/app/home#/tutorial_directory')}
-      title={i18n.translate('kibana-react.noDataPage.elasticBeatsCard.title', {
-        defaultMessage: 'Add data with Beats',
-      })}
+      title={title || defaultCTAtitle}
       description={i18n.translate('kibana-react.noDataPage.elasticBeatsCard.description', {
-        defaultMessage: `
-            Beats send data from hundreds or thousands of machines and systems to Logstash or Elasticsearch.`,
+        defaultMessage: `Use Beats to add data from various systems to Elasticsearch.`,
       })}
       image={addBasePath(
         `${basePathUrl}elastic_beats_card_${IS_DARK_THEME ? 'dark' : 'light'}.svg`

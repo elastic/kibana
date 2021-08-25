@@ -16,6 +16,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 
+import styled from 'styled-components';
 import { stopPropagationAndPreventDefault } from '../../../../common';
 import { TooltipWithKeyboardShortcut } from '../../tooltip_with_keyboard_shortcut';
 import { getAdditionalScreenReaderOnlyContext } from '../utils';
@@ -33,6 +34,10 @@ export interface OverflowButtonProps extends HoverActionComponentProps {
   items: JSX.Element[];
   isOverflowPopoverOpen: boolean;
 }
+
+const StyledEuiContextMenuPanel = styled(EuiContextMenuPanel)`
+  visibility: inherit;
+`;
 
 const OverflowButton: React.FC<OverflowButtonProps> = React.memo(
   ({
@@ -91,9 +96,10 @@ const OverflowButton: React.FC<OverflowButtonProps> = React.memo(
           isOpen={isOverflowPopoverOpen}
           closePopover={closePopOver}
           panelPaddingSize="none"
+          panelClassName="withHoverActions__popover"
           anchorPosition="downLeft"
         >
-          <EuiContextMenuPanel items={items} />
+          <StyledEuiContextMenuPanel items={items} />
         </EuiPopover>
       ),
       [

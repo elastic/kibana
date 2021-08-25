@@ -29,6 +29,19 @@ import { getJoinAggKey } from '../../../common/get_agg_key';
 
 const defaultDynamicProperties = getDefaultDynamicProperties();
 
+export interface CreateRegionMapLayerDescriptorParams {
+  label: string;
+  emsLayerId?: string;
+  leftFieldName?: string;
+  termsFieldName?: string;
+  termsSize?: number;
+  colorSchema: string;
+  indexPatternId?: string;
+  indexPatternTitle?: string;
+  metricAgg: string;
+  metricFieldName?: string;
+}
+
 export function createAggDescriptor(metricAgg: string, metricFieldName?: string): AggDescriptor {
   const aggTypeKey = Object.keys(AGG_TYPE).find((key) => {
     return AGG_TYPE[key as keyof typeof AGG_TYPE] === metricAgg;
@@ -55,18 +68,7 @@ export function createRegionMapLayerDescriptor({
   indexPatternTitle,
   metricAgg,
   metricFieldName,
-}: {
-  label: string;
-  emsLayerId?: string;
-  leftFieldName?: string;
-  termsFieldName?: string;
-  termsSize?: number;
-  colorSchema: string;
-  indexPatternId?: string;
-  indexPatternTitle?: string;
-  metricAgg: string;
-  metricFieldName?: string;
-}): LayerDescriptor | null {
+}: CreateRegionMapLayerDescriptorParams): LayerDescriptor | null {
   if (!indexPatternId || !emsLayerId || !leftFieldName || !termsFieldName) {
     return null;
   }

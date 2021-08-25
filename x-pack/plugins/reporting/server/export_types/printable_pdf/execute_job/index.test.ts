@@ -7,8 +7,8 @@
 
 jest.mock('../lib/generate_pdf', () => ({ generatePdfObservableFactory: jest.fn() }));
 
-import { Writable } from 'stream';
 import * as Rx from 'rxjs';
+import { Writable } from 'stream';
 import { ReportingCore } from '../../../';
 import { CancellationToken } from '../../../../common';
 import { cryptoFactory, LevelLogger } from '../../../lib';
@@ -95,7 +95,7 @@ test(`returns content_type of application/pdf`, async () => {
 
   const { content_type: contentType } = await runTask(
     'pdfJobId',
-    getBasePayload({ relativeUrls: [], headers: encryptedHeaders }),
+    getBasePayload({ objects: [], headers: encryptedHeaders }),
     cancellationToken,
     stream
   );
@@ -111,7 +111,7 @@ test(`returns content of generatePdf getBuffer base64 encoded`, async () => {
   const encryptedHeaders = await encryptHeaders({});
   await runTask(
     'pdfJobId',
-    getBasePayload({ relativeUrls: [], headers: encryptedHeaders }),
+    getBasePayload({ objects: [], headers: encryptedHeaders }),
     cancellationToken,
     stream
   );

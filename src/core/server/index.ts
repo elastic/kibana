@@ -31,7 +31,6 @@
 import { Type } from '@kbn/config-schema';
 import {
   ElasticsearchServiceSetup,
-  ILegacyScopedClusterClient,
   configSchema as elasticsearchConfigSchema,
   ElasticsearchServiceStart,
   IScopedClusterClient,
@@ -117,20 +116,11 @@ export type { ICspConfig } from './csp';
 
 export { ElasticsearchConfig } from './elasticsearch';
 export type {
-  LegacyClusterClient,
-  ILegacyClusterClient,
-  ILegacyCustomClusterClient,
-  LegacyScopedClusterClient,
-  ILegacyScopedClusterClient,
-  LegacyElasticsearchClientConfig,
-  LegacyElasticsearchError,
-  LegacyElasticsearchErrorHelpers,
   ElasticsearchServicePreboot,
   ElasticsearchServiceSetup,
   ElasticsearchServiceStart,
   ElasticsearchStatusMeta,
   NodesVersionCompatibility,
-  LegacyAPICaller,
   FakeRequest,
   ScopeableRequest,
   ElasticsearchClient,
@@ -147,17 +137,6 @@ export type {
   ElasticsearchConfigPreboot,
 } from './elasticsearch';
 
-export type {
-  LegacyCallAPIOptions,
-  AssistantAPIClientParams,
-  MIGRATION_ASSISTANCE_INDEX_ACTION,
-  MIGRATION_DEPRECATION_LEVEL,
-  AssistanceAPIResponse,
-  DeprecationAPIClientParams,
-  DeprecationInfo,
-  IndexSettingsDeprecationInfo,
-  DeprecationAPIResponse,
-} from './elasticsearch/legacy/api_types';
 export type { IExternalUrlConfig, IExternalUrlPolicy } from './external_url';
 export type {
   AuthenticationHandler,
@@ -193,7 +172,6 @@ export type {
   IKibanaResponse,
   LifecycleResponseFactory,
   KnownHeaders,
-  LegacyRequest,
   OnPreAuthHandler,
   OnPreAuthToolkit,
   OnPreRoutingHandler,
@@ -444,8 +422,6 @@ export type { CoreUsageDataStart } from './core_usage_data';
  *      all the registered types.
  *    - {@link IScopedClusterClient | elasticsearch.client} - Elasticsearch
  *      data client which uses the credentials of the incoming request
- *    - {@link LegacyScopedClusterClient | elasticsearch.legacy.client} - The legacy Elasticsearch
- *      data client which uses the credentials of the incoming request
  *    - {@link IUiSettingsClient | uiSettings.client} - uiSettings client
  *      which uses the credentials of the incoming request
  *
@@ -462,12 +438,6 @@ export interface RequestHandlerContext {
     };
     elasticsearch: {
       client: IScopedClusterClient;
-      legacy: {
-        /*
-         * @deprecated Use {@link IScopedClusterClient}.
-         */
-        client: ILegacyScopedClusterClient;
-      };
     };
     uiSettings: {
       client: IUiSettingsClient;

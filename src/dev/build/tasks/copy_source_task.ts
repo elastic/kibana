@@ -20,7 +20,7 @@ export const CopySource: Task = {
         'src/**',
         '!src/**/*.{test,test.mocks,mock}.{js,ts,tsx}',
         '!src/**/mocks.ts', // special file who imports .mock files
-        '!src/**/{target,__tests__,__snapshots__,__mocks__,integration_tests}/**',
+        '!src/**/{target,__tests__,__snapshots__,__mocks__,integration_tests,__fixtures__}/**',
         '!src/core/server/core_app/assets/favicons/favicon.distribution.png',
         '!src/core/server/core_app/assets/favicons/favicon.distribution.svg',
         '!src/test_utils/**',

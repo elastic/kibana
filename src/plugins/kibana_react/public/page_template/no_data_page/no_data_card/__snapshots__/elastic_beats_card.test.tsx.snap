@@ -2,8 +2,7 @@
 
 exports[`ElasticBeatsCard props button 1`] = `
 <EuiCard
-  description="
-            Beats send data from hundreds or thousands of machines and systems to Logstash or Elasticsearch."
+  description="Use Beats to add data from various systems to Elasticsearch."
   footer={
     <EuiButton
       fill={true}
@@ -14,14 +13,13 @@ exports[`ElasticBeatsCard props button 1`] = `
   href="/app/home#/tutorial_directory"
   image="/plugins/kibanaReact/assets/elastic_beats_card_light.svg"
   paddingSize="l"
-  title="Add data with Beats"
+  title="Add data"
 />
 `;
 
 exports[`ElasticBeatsCard props href 1`] = `
 <EuiCard
-  description="
-            Beats send data from hundreds or thousands of machines and systems to Logstash or Elasticsearch."
+  description="Use Beats to add data from various systems to Elasticsearch."
   footer={
     <EuiButton
       fill={true}
@@ -32,43 +30,41 @@ exports[`ElasticBeatsCard props href 1`] = `
   href="#"
   image="/plugins/kibanaReact/assets/elastic_beats_card_light.svg"
   paddingSize="l"
-  title="Add data with Beats"
+  title="Add data"
 />
 `;
 
 exports[`ElasticBeatsCard props recommended 1`] = `
 <EuiCard
   betaBadgeLabel="Recommended"
-  description="
-            Beats send data from hundreds or thousands of machines and systems to Logstash or Elasticsearch."
+  description="Use Beats to add data from various systems to Elasticsearch."
   footer={
     <EuiButton
       fill={true}
     >
-      Install Beats for Solution
+      Add data
     </EuiButton>
   }
   href="/app/home#/tutorial_directory"
   image="/plugins/kibanaReact/assets/elastic_beats_card_light.svg"
   paddingSize="l"
-  title="Add data with Beats"
+  title="Add data"
 />
 `;
 
 exports[`ElasticBeatsCard renders 1`] = `
 <EuiCard
-  description="
-            Beats send data from hundreds or thousands of machines and systems to Logstash or Elasticsearch."
+  description="Use Beats to add data from various systems to Elasticsearch."
   footer={
     <EuiButton
       fill={true}
     >
-      Install Beats for Solution
+      Add data
     </EuiButton>
   }
   href="/app/home#/tutorial_directory"
   image="/plugins/kibanaReact/assets/elastic_beats_card_light.svg"
   paddingSize="l"
-  title="Add data with Beats"
+  title="Add data"
 />
 `;

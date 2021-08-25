@@ -18,6 +18,7 @@ export interface EmbeddableEditorState
 |  --- | --- | --- |
 |  [embeddableId](./kibana-plugin-plugins-embeddable-public.embeddableeditorstate.embeddableid.md) | <code>string</code> |  |
 |  [originatingApp](./kibana-plugin-plugins-embeddable-public.embeddableeditorstate.originatingapp.md) | <code>string</code> |  |
+|  [originatingPath](./kibana-plugin-plugins-embeddable-public.embeddableeditorstate.originatingpath.md) | <code>string</code> |  |
 |  [searchSessionId](./kibana-plugin-plugins-embeddable-public.embeddableeditorstate.searchsessionid.md) | <code>string</code> | Pass current search session id when navigating to an editor, Editors could use it continue previous search session |
 |  [valueInput](./kibana-plugin-plugins-embeddable-public.embeddableeditorstate.valueinput.md) | <code>EmbeddableInput</code> |  |
 

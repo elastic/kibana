@@ -15,21 +15,17 @@ type NoDataCard = EuiCardProps & NoDataPageActions;
 
 export const NoDataCard: FunctionComponent<NoDataPageActions> = ({
   recommended,
+  title,
   button,
   ...cardRest
 }) => {
   const footer =
-    typeof button !== 'string' ? (
-      button
-    ) : (
-      // The href and/or onClick are attached to the whole Card, so the button is just for show.
-      // Do not add the behavior here too or else it will propogate through
-      <EuiButton fill>{button}</EuiButton>
-    );
+    typeof button !== 'string' ? button : <EuiButton fill>{button || title}</EuiButton>;
 
   return (
     <EuiCard
       paddingSize="l"
+      title={title}
       betaBadgeLabel={recommended ? NO_DATA_RECOMMENDED : undefined}
       footer={footer}
       {...(cardRest as any)}

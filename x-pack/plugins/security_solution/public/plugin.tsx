@@ -33,6 +33,7 @@ import {
 import { Storage } from '../../../../src/plugins/kibana_utils/public';
 import { initTelemetry } from './common/lib/telemetry';
 import { KibanaServices } from './common/lib/kibana/services';
+import { BASE_RAC_ALERTS_API_PATH } from '../../rule_registry/common/constants';
 
 import {
   APP_ID,
@@ -40,9 +41,8 @@ import {
   APP_OVERVIEW_PATH,
   APP_PATH,
   DEFAULT_INDEX_KEY,
-  DETECTION_ENGINE_INDEX_URL,
-  DEFAULT_ALERTS_INDEX,
   APP_ICON_SOLUTION,
+  SERVER_APP_ID,
 } from '../common/constants';
 
 import { getDeepLinks, updateGlobalNavigation } from './app/deep_links';
@@ -354,15 +354,14 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
       let signal: { name: string | null } = { name: null };
       try {
-        // TODO: Once we are past experimental phase this code should be removed
-        // TODO: This currently prevents TGrid from refreshing
-        if (this.experimentalFeatures.ruleRegistryEnabled) {
-          signal = { name: DEFAULT_ALERTS_INDEX };
-        } else {
-          signal = await coreStart.http.fetch(DETECTION_ENGINE_INDEX_URL, {
+        const { index_name: indexName } = await coreStart.http.fetch(
+          `${BASE_RAC_ALERTS_API_PATH}/index`,
+          {
             method: 'GET',
-          });
-        }
+            query: { features: SERVER_APP_ID },
+          }
+        );
+        signal = { name: indexName[0] };
       } catch {
         signal = { name: null };
       }

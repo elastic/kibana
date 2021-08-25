@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getServiceAgentName } from './get_service_agent_name';
+import { getServiceAgent } from './get_service_agent';
 import { getServiceTransactionTypes } from './get_service_transaction_types';
 import { getServicesItems } from './get_services/get_services_items';
 import { getLegacyDataStatus } from './get_services/get_legacy_data_status';
@@ -25,7 +25,7 @@ describe('services queries', () => {
 
   it('fetches the service agent name', async () => {
     mock = await inspectSearchParams((setup) =>
-      getServiceAgentName({
+      getServiceAgent({
         serviceName: 'foo',
         setup,
         searchAggregatedTransactions: false,
