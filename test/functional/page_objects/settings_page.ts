@@ -46,9 +46,8 @@ export class SettingsPageObject extends FtrService {
     const currentUrl = await this.browser.getCurrentUrl();
     if (!currentUrl.endsWith('indexPatterns')) {
       await this.testSubjects.click('indexPatterns');
+      await this.header.waitUntilLoadingHasFinished();
     }
-
-    await this.header.waitUntilLoadingHasFinished();
   }
 
   async getAdvancedSettings(propertyName: string) {
@@ -143,17 +142,36 @@ export class SettingsPageObject extends FtrService {
     return this.testSubjects.find('createIndexPatternNameInput');
   }
 
-  async getTimeFieldNameField() {
+  async waitForTimefieldEnabled() {
     const wrapperElement = await this.testSubjects.find('timestampField');
-    return wrapperElement.findByTestSubject('comboBoxSearchInput');
+    let timefieldComboxBox;
+    await this.retry.waitFor('wait for timefield comboBox to be enabled', async () => {
+      timefieldComboxBox = wrapperElement.findByTestSubject('comboBoxSearchInput');
+      const isEnabled = await (await timefieldComboxBox).isEnabled();
+      return isEnabled;
+    });
+    return timefieldComboxBox;
   }
 
   async selectTimeFieldOption(selection: string) {
-    // open dropdown
-    const timefield = await this.getTimeFieldNameField();
-    await timefield.click();
-    await this.browser.pressKeys(selection);
-    await this.browser.pressKeys(this.browser.keys.TAB);
+    // The problem here is that the timefield is enabled as soon as the first index query returns a timefield
+    // but as more characters are typed, the selection list keeps getting refreshed.
+    await this.waitForTimefieldEnabled();
+    const comboBoxInput = await this.testSubjects.find('comboBoxInput');
+    await this.retry.waitFor('wait for timefield to stop loading', async () => {
+      return !(await comboBoxInput.getAttribute('class')).includes('isLoading');
+    });
+    await this.common.sleep(500);
+    await this.retry.waitFor('timefield to be selected', async () => {
+      // open dropdown and click timefield selection
+      await this.testSubjects.click('comboBoxToggleListButton');
+      await this.common.sleep(500);
+      await (await this.find.displayedByCssSelector(`[title="${selection}"]`, 100)).click();
+      this.log.debug('We found and clicked on the timefield');
+      const selectedValue = await this.testSubjects.getVisibleText('comboBoxInput');
+      this.log.debug(`comboBoxInput: ${selectedValue}`);
+      return (selectedValue == selection);
+    });
   }
 
   async getTimeFieldOption(selection: string) {
@@ -161,7 +179,13 @@ export class SettingsPageObject extends FtrService {
   }
 
   async getSaveIndexPatternButton() {
-    return await this.testSubjects.find('saveIndexPatternButton');
+    let saveButton 
+    await this.retry.waitFor('save index pattern button to be enabled', async () => {
+      saveButton = await this.testSubjects.find('saveIndexPatternButton');
+      const isEnabled = await saveButton.isEnabled();
+      return isEnabled;
+    });
+    return saveButton;
   }
 
   async getCreateButton() {
@@ -305,7 +329,13 @@ export class SettingsPageObject extends FtrService {
   }
 
   async hasIndexPattern(name: string) {
-    return await this.find.existsByLinkText(name);
+    const indexPatternTable = await this.testSubjects.find('indexPatternTable')
+    const indexPatternTableInnerHtml = await indexPatternTable.getAttribute('innerHTML');
+    if (indexPatternTableInnerHtml.includes(name)) {
+      return await this.find.existsByLinkText(name);
+    } else {
+      return false;
+    }
   }
 
   async clickIndexPatternByName(name: string) {
@@ -349,37 +379,37 @@ export class SettingsPageObject extends FtrService {
     isStandardIndexPattern = true
   ) {
     await this.retry.try(async () => {
-      await this.header.waitUntilLoadingHasFinished();
       await this.clickKibanaIndexPatterns();
-      const exists = await this.hasIndexPattern(indexPatternName);
-
-      if (exists) {
-        await this.clickIndexPatternByName(indexPatternName);
-        return;
-      }
-
-      await this.header.waitUntilLoadingHasFinished();
-      const flyOut = await this.testSubjects.exists('createAnyway');
-      if (flyOut) {
-        await this.testSubjects.click('createAnyway');
+      const body = await this.find.byCssSelector('body');
+      const bodyClass = await body.getAttribute('class');
+      // this could be the createIndexPatternButtonFlyout or the createAnyway flyout
+      if (bodyClass.includes('Flyout')) {
+        const bodyInnerHtml = await body.getAttribute('innerHTML');
+        if (bodyInnerHtml.includes('emptyIndexPatternPrompt')) {
+          await this.testSubjects.click('createIndexPatternButtonFlyout');
+        } else {
+          await this.testSubjects.click('createAnyway');
+        }
       } else {
-        await this.clickAddNewIndexPatternButton();
+        // there are existing index patterns.  See if the one we're creating already exists
+        const exists = await this.hasIndexPattern(indexPatternName);
+        if (exists) {
+          await this.clickIndexPatternByName(indexPatternName);
+          return;
+        } else {
+          await this.testSubjects.click('createIndexPatternButton');
+        }
       }
-      await this.header.waitUntilLoadingHasFinished();
+
       if (!isStandardIndexPattern) {
         await this.selectRollupIndexPatternType();
       }
-      await this.retry.try(async () => {
-        await this.setIndexPatternField(indexPatternName);
-      });
-
-      await this.common.sleep(2000);
+      await this.setIndexPatternField(indexPatternName);
       if (timefield) {
         await this.selectTimeFieldOption(timefield);
       }
       await (await this.getSaveIndexPatternButton()).click();
     });
-    await this.header.waitUntilLoadingHasFinished();
     await this.retry.try(async () => {
       const currentUrl = await this.browser.getCurrentUrl();
       this.log.info('currentUrl', currentUrl);
@@ -403,8 +433,8 @@ export class SettingsPageObject extends FtrService {
     await this.common.scrollKibanaBodyTop();
 
     // if flyout is open
-    const flyoutView = await this.testSubjects.exists('createIndexPatternButtonFlyout');
-    if (flyoutView) {
+    const bodyClass = await (await this.find.byCssSelector('body')).getAttribute('class');
+    if (bodyClass.includes('Flyout')) {
       await this.testSubjects.click('createIndexPatternButtonFlyout');
       return;
     }
@@ -412,10 +442,6 @@ export class SettingsPageObject extends FtrService {
     const tableView = await this.testSubjects.exists('createIndexPatternButton');
     if (tableView) {
       await this.testSubjects.click('createIndexPatternButton');
-    }
-    const flyoutView2 = await this.testSubjects.exists('createIndexPatternButtonFlyout');
-    if (flyoutView2) {
-      await this.testSubjects.click('createIndexPatternButtonFlyout');
     }
   }
 
@@ -434,31 +460,32 @@ export class SettingsPageObject extends FtrService {
   }
 
   async setIndexPatternField(indexPatternName = 'logstash-*') {
-    this.log.debug(`setIndexPatternField(${indexPatternName})`);
-    const field = await this.getIndexPatternField();
-    await field.clearValue();
-    if (
-      indexPatternName.charAt(0) === '*' &&
-      indexPatternName.charAt(indexPatternName.length - 1) === '*'
-    ) {
-      // this is a special case when the index pattern name starts with '*'
-      // like '*:makelogs-*' where the UI will not append *
+    await this.retry.try(async () => {
+      this.log.debug(`setIndexPatternField(${indexPatternName})`);
+      const field = await this.getIndexPatternField();
+      await field.clearValue();
       await field.type(indexPatternName, { charByChar: true });
-    } else if (indexPatternName.charAt(indexPatternName.length - 1) === '*') {
-      // the common case where the UI will append '*' automatically so we won't type it
-      const tempName = indexPatternName.slice(0, -1);
-      await field.type(tempName, { charByChar: true });
-    } else {
-      // case where we don't want the * appended so we'll remove it if it was added
-      await field.type(indexPatternName, { charByChar: true });
-      const tempName = await field.getAttribute('value');
-      if (tempName.length > indexPatternName.length) {
+      let currentName = await field.getAttribute('value');
+      this.log.debug(`setIndexPatternField set to ${currentName}`);
+      if (currentName == indexPatternName) {
+        this.log.debug('------- index pattern name matches, return');
+        return;
+      } else if (currentName.length == (indexPatternName.length + 1)) {
+        this.log.debug('------- index pattern name is +1 long, remove one char');
+        // there's probably an extra '*' on the end we don't want
         await field.type(this.browser.keys.DELETE, { charByChar: true });
+      } else if (currentName.length == (indexPatternName.length - 1)) {
+        this.log.debug('------- index pattern name is -1 short, add *');
+        // we may be missing the final '*' in some cases
+        await field.type('*', { charByChar: true });
       }
-    }
-    const currentName = await field.getAttribute('value');
-    this.log.debug(`setIndexPatternField set to ${currentName}`);
-    expect(currentName).to.eql(indexPatternName);
+      if (currentName == indexPatternName) {
+        return;
+      }
+      currentName = await field.getAttribute('value');
+      this.log.debug(`setIndexPatternField set to ${currentName}`);
+      expect(currentName).to.eql(indexPatternName);
+    });
   }
 
   async getCreateIndexPatternGoToStep2Button() {
@@ -478,6 +505,8 @@ export class SettingsPageObject extends FtrService {
     await this.retry.try(async () => {
       this.log.debug('acceptConfirmation');
       await this.testSubjects.click('confirmModalConfirmButton');
+      // we need to wait until it's gone from the table
+      await this.header.waitUntilLoadingHasFinished();
     });
     await this.retry.try(async () => {
       const currentUrl = await this.browser.getCurrentUrl();
@@ -608,7 +637,7 @@ export class SettingsPageObject extends FtrService {
     this.retry.waitFor('monaco editor is ready', async () => !!(await getMonacoTextArea()));
     const monacoTextArea = await getMonacoTextArea();
     await monacoTextArea.focus();
-    this.browser.pressKeys(script);
+    await this.browser.pressKeys(script);
   }
 
   async changeFieldScript(script: string) {
@@ -618,8 +647,8 @@ export class SettingsPageObject extends FtrService {
     this.retry.waitFor('monaco editor is ready', async () => !!(await getMonacoTextArea()));
     const monacoTextArea = await getMonacoTextArea();
     await monacoTextArea.focus();
-    this.browser.pressKeys(this.browser.keys.DELETE.repeat(30));
-    this.browser.pressKeys(script);
+    await this.browser.pressKeys(this.browser.keys.DELETE.repeat(30));
+    await this.browser.pressKeys(script);
   }
 
   async clickAddScriptedField() {
