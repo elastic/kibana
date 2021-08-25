@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, useCallback, FC } from 'react';
+import React, { useState, FC, useEffect } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 
 import { useKibana } from '../../shared_imports';
@@ -47,6 +47,8 @@ export const EmptyPrompts: FC<Props> = ({ allSources, onCancel, children, loadSo
   } = useKibana<IndexPatternEditorContext>();
 
   const [remoteClustersExist, setRemoteClustersExist] = useState<boolean>(false);
+  const [hasCheckedRemoteClusters, setHasCheckedRemoteClusters] = useState<boolean>(false);
+
   const [goToForm, setGoToForm] = useState<boolean>(false);
 
   const hasDataIndices = allSources.some(isUserDataIndex);
@@ -54,9 +56,10 @@ export const EmptyPrompts: FC<Props> = ({ allSources, onCancel, children, loadSo
     indexPatternService.hasUserIndexPattern().catch(() => true)
   );
 
-  useCallback(() => {
-    let isMounted = true;
-    if (!hasDataIndices)
+  useEffect(() => {
+    if (!hasDataIndices && !hasCheckedRemoteClusters) {
+      setHasCheckedRemoteClusters(true);
+
       getIndices({
         http,
         isRollupIndex: () => false,
@@ -64,14 +67,10 @@ export const EmptyPrompts: FC<Props> = ({ allSources, onCancel, children, loadSo
         showAllIndices: false,
         searchClient,
       }).then((dataSources) => {
-        if (isMounted) {
-          setRemoteClustersExist(!!dataSources.filter(removeAliases).length);
-        }
+        setRemoteClustersExist(!!dataSources.filter(removeAliases).length);
       });
-    return () => {
-      isMounted = false;
-    };
-  }, [http, hasDataIndices, searchClient]);
+    }
+  }, [http, hasDataIndices, searchClient, hasCheckedRemoteClusters]);
 
   if (hasUserIndexPattern.loading) return null; // return null to prevent UI flickering while loading
 
