@@ -10,7 +10,6 @@ import { History } from 'history';
 import { useParams } from 'react-router-dom';
 import type { SavedObject as SavedObjectDeprecated } from 'src/plugins/saved_objects/public';
 import { IndexPatternAttributes, SavedObject } from 'src/plugins/data/common';
-import { EuiFlexGroup, EuiLoadingSpinner, EuiFlexItem } from '@elastic/eui';
 import { DiscoverServices } from '../../../build_services';
 import { SavedSearch } from '../../../saved_searches';
 import { getState } from './services/discover_state';
@@ -19,6 +18,7 @@ import { DiscoverMainApp } from './discover_main_app';
 import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../../helpers/breadcrumbs';
 import { redirectWhenMissing } from '../../../../../kibana_utils/public';
 import { getUrlTracker } from '../../../kibana_services';
+import { LoadingIndicator } from '../../components/common/loading_indicator';
 
 const DiscoverMainAppMemoized = memo(DiscoverMainApp);
 
@@ -125,18 +125,14 @@ export function DiscoverMainRoute({ services, history }: DiscoverMainProps) {
 
   useEffect(() => {
     chrome.setBreadcrumbs(
-      savedSearch && savedSearch.title ? getSavedSearchBreadcrumbs(savedSearch.title) : getRootBreadcrumbs()
+      savedSearch && savedSearch.title
+        ? getSavedSearchBreadcrumbs(savedSearch.title)
+        : getRootBreadcrumbs()
     );
   }, [chrome, savedSearch]);
 
   if (!indexPattern || !savedSearch) {
-    return (
-      <EuiFlexGroup justifyContent="spaceAround" alignItems="center">
-        <EuiFlexItem grow={false}>
-          <EuiLoadingSpinner size="l" />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
+    return <LoadingIndicator />;
   }
 
   return (
