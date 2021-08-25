@@ -7,7 +7,7 @@
     "name": "Stack Management",
     "githubTeam": "kibana-stack-management"
   },
-  "requiredPlugins": ["licensing", "management", "features"],
+  "requiredPlugins": ["licensing", "management", "features", "share"],
   "optionalPlugins": ["usageCollection", "security", "cloud", "home"],
   "configPath": ["xpack", "snapshot_restore"],
   "requiredBundles": ["esUiShared", "kibanaReact", "home"]
