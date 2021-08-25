@@ -7,11 +7,12 @@
  */
 
 import uuid from 'uuid';
+import { METRIC_TYPES } from '../../../../../data/common';
 import type { Metric } from '../../../../common/types';
 
 export const newMetricAggFn = (): Metric => {
   return {
     id: uuid.v1(),
-    type: 'count',
+    type: METRIC_TYPES.COUNT,
   };
 };
