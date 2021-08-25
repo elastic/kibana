@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
+import { EuiContextMenuItem } from '@elastic/eui';
 import { get } from 'lodash/fp';
 import {
   setActiveTabTimeline,
@@ -44,9 +45,12 @@ export const useInvestigateInResolverContextItem = ({
   return isDisabled
     ? []
     : [
-        {
-          name: ACTION_INVESTIGATE_IN_RESOLVER,
-          onClick: handleClick,
-        },
+        <EuiContextMenuItem
+          key="investigate-in-resolver-action-item"
+          data-test-subj="investigate-in-resolver-action-item"
+          onClick={handleClick}
+        >
+          {ACTION_INVESTIGATE_IN_RESOLVER}
+        </EuiContextMenuItem>,
       ];
 };

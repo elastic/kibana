@@ -6,12 +6,13 @@
  */
 
 import { Either, isLeft, left, right } from 'fp-ts/lib/Either';
+import { ValidFeatureId } from '@kbn/rule-data-utils';
 
 import { ElasticsearchClient, Logger } from 'kibana/server';
 
 import { IRuleDataClient, RuleDataClient, WaitResult } from '../rule_data_client';
 import { IndexInfo } from './index_info';
-import { IndexOptions } from './index_options';
+import { Dataset, IndexOptions } from './index_options';
 import { ResourceInstaller } from './resource_installer';
 import { joinWithDash } from './utils';
 
@@ -26,11 +27,16 @@ interface ConstructorOptions {
  * A service for creating and using Elasticsearch indices for alerts-as-data.
  */
 export class RuleDataPluginService {
+  private readonly indicesByBaseName: Map<string, IndexInfo>;
+  private readonly indicesByFeatureId: Map<string, IndexInfo[]>;
   private readonly resourceInstaller: ResourceInstaller;
   private installCommonResources: Promise<Either<Error, 'ok'>>;
   private isInitialized: boolean;
 
   constructor(private readonly options: ConstructorOptions) {
+    this.indicesByBaseName = new Map();
+    this.indicesByFeatureId = new Map();
+
     this.resourceInstaller = new ResourceInstaller({
       getResourceName: (name) => this.getResourceName(name),
       getClusterClient: options.getClusterClient,
@@ -105,6 +111,10 @@ export class RuleDataPluginService {
       indexOptions,
     });
 
+    const indicesAssociatedWithFeature = this.indicesByFeatureId.get(indexOptions.feature) ?? [];
+    this.indicesByFeatureId.set(indexOptions.feature, [...indicesAssociatedWithFeature, indexInfo]);
+    this.indicesByBaseName.set(indexInfo.baseName, indexInfo);
+
     const waitUntilClusterClientAvailable = async (): Promise<WaitResult> => {
       try {
         const clusterClient = await this.options.getClusterClient();
@@ -147,5 +157,22 @@ export class RuleDataPluginService {
       waitUntilReadyForReading,
       waitUntilReadyForWriting,
     });
+  }
+
+  /**
+   * Looks up the index information associated with the given registration context and dataset.
+   */
+  public findIndexByName(registrationContext: string, dataset: Dataset): IndexInfo | null {
+    const baseName = this.getResourceName(`${registrationContext}.${dataset}`);
+    return this.indicesByBaseName.get(baseName) ?? null;
+  }
+
+  /**
+   * Looks up the index information associated with the given Kibana "feature".
+   * Note: features are used in RBAC.
+   */
+  public findIndicesByFeature(featureId: ValidFeatureId, dataset?: Dataset): IndexInfo[] {
+    const foundIndices = this.indicesByFeatureId.get(featureId) ?? [];
+    return dataset ? foundIndices.filter((i) => i.indexOptions.dataset === dataset) : foundIndices;
   }
 }

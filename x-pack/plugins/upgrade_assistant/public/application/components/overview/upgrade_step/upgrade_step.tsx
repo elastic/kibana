@@ -28,7 +28,7 @@ const i18nTexts = {
     }),
   upgradeStepDescription: i18n.translate('xpack.upgradeAssistant.overview.upgradeStepDescription', {
     defaultMessage:
-      "Once you've resolved all critical issues and verified that your applications are ready, you can upgrade the Elastic Stack.",
+      "Once you've resolved all critical issues and verified that your applications are ready, you can upgrade the Elastic Stack. Be sure to back up your data again before upgrading.",
   }),
   upgradeStepDescriptionForCloud: i18n.translate(
     'xpack.upgradeAssistant.overview.upgradeStepDescriptionForCloud',
