@@ -228,6 +228,9 @@
             },
             "xpack_ml_anomaly_detection_alert": {
               "type": "long"
+            },
+            "xpack_ml_anomaly_detection_jobs_health": {
+              "type": "long"
             }
           }
         },
@@ -306,6 +309,9 @@
               "type": "long"
             },
             "xpack_ml_anomaly_detection_alert": {
+              "type": "long"
+            },
+            "xpack_ml_anomaly_detection_jobs_health": {
               "type": "long"
             }
           }
