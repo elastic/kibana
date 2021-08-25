@@ -69,15 +69,14 @@ describe('404s from proxies', () => {
     });
     esServer = await startES();
 
-    const esUrl = new URL(esServer.hosts[0]);
-    // For the proxy, use a port number that is 100 higher than the one that the actual ES instance is using
+    const { hostname: esHostname, port: esPort } = new URL(esServer.hosts[0]);
 
     // inspired by https://github.com/elastic/kibana/pull/88919
     const proxyPort = process.env.TEST_PROXY_SERVER_PORT
       ? parseInt(process.env.TEST_PROXY_SERVER_PORT, 10)
       : 5698;
-    // Setup custom hapi hapiServer with h2o2 plugin for proxying
 
+    // Setup custom hapi hapiServer with h2o2 plugin for proxying
     hapiServer = Hapi.server({
       port: proxyPort,
     });
@@ -85,24 +84,26 @@ describe('404s from proxies', () => {
     await hapiServer.register(h2o2);
     // register specific routes to modify the response and a catch-all to relay the request/response as-is
 
-    declareGetRoute(hapiServer, esUrl.hostname, esUrl.port);
-    declareDeleteRoute(hapiServer, esUrl.hostname, esUrl.port);
-    declarePostUpdateRoute(hapiServer, esUrl.hostname, esUrl.port);
+    declareGetRoute(hapiServer, esHostname, esPort);
+    declareDeleteRoute(hapiServer, esHostname, esPort);
+    declarePostUpdateRoute(hapiServer, esHostname, esPort);
 
-    declareGetSearchRoute(hapiServer, esUrl.hostname, esUrl.port);
-    declarePostSearchRoute(hapiServer, esUrl.hostname, esUrl.port);
-    declarePostBulkRoute(hapiServer, esUrl.hostname, esUrl.port);
-    declarePostMgetRoute(hapiServer, esUrl.hostname, esUrl.port);
-    declarePostPitRoute(hapiServer, esUrl.hostname, esUrl.port);
-    declarePostUpdateByQueryRoute(hapiServer, esUrl.hostname, esUrl.port);
+    declareGetSearchRoute(hapiServer, esHostname, esPort);
+    declarePostSearchRoute(hapiServer, esHostname, esPort);
+    declarePostBulkRoute(hapiServer, esHostname, esPort);
+    declarePostMgetRoute(hapiServer, esHostname, esPort);
+    declarePostPitRoute(hapiServer, esHostname, esPort);
+    declarePostUpdateByQueryRoute(hapiServer, esHostname, esPort);
 
-    declarePassthroughRoute(hapiServer, esUrl.hostname, esUrl.port);
+    declarePassthroughRoute(hapiServer, esHostname, esPort);
 
     await hapiServer.start();
 
     // Setup kibana configured to use proxy as ES backend
     root = kbnTestServer.createRootWithCorePlugins({
-      elasticsearch: { hosts: [`http://${esUrl.hostname}:${proxyPort}`] },
+      elasticsearch: {
+        hosts: [`http://${esHostname}:${proxyPort}`],
+      },
       migrations: {
         skip: false,
       },
@@ -159,11 +160,13 @@ describe('404s from proxies', () => {
         customErr = err;
       }
       expect(customErr?.output?.statusCode).toBe(404);
-      expect(customErr.output.payload.message).toBe('Saved object [my_other_type/123] not found');
+      expect(customErr?.output?.payload?.message).toBe(
+        'Saved object [my_other_type/123] not found'
+      );
     });
 
     it('returns a document if it exists and if the proxy passes through the product header', async () => {
-      const myOtherTypeDoc = await repository.get('my_other_type', `${myOtherType.id}`); // document exists and proxy passes the response through unmodified
+      const myOtherTypeDoc = await repository.get('my_other_type', `${myOtherType.id}`);
       expect(myOtherTypeDoc.type).toBe('my_other_type');
     });
 
@@ -200,14 +203,11 @@ describe('404s from proxies', () => {
           references: [],
         },
       ];
-      if (getProxyInterrupt() === null) {
-        const bulkResponse = await repository.bulkCreate(bulkObjects, {
-          namespace: 'default',
-          overwrite: true,
-        });
-        expect(bulkResponse.saved_objects.length).toEqual(2);
-      }
-      expect(true); // force test exit.
+      const bulkResponse = await repository.bulkCreate(bulkObjects, {
+        namespace: 'default',
+        overwrite: true,
+      });
+      expect(bulkResponse.saved_objects.length).toEqual(2);
     });
 
     it('returns matches from `find` when the proxy passes through the response and product header', async () => {
@@ -268,6 +268,7 @@ describe('404s from proxies', () => {
       expect(checkConflictsResult.errors[0].error.error).toStrictEqual('Conflict');
     });
 
+    // this test must come last, it deletes all saved objects in the default space
     it('handles `deleteByNamespace` requests when the proxy passes through the product header', async () => {
       const deleteByNamespaceResult = await repository.deleteByNamespace('default');
       expect(Object.keys(deleteByNamespaceResult)).toEqual(
@@ -322,7 +323,7 @@ describe('404s from proxies', () => {
       );
     });
     beforeEach(() => {
-      setProxyInterrupt(null);
+      setProxyInterrupt(null); // switch to non-proxied handler
     });
 
     it('returns an EsUnavailable error if the document exists but the proxy cannot find the es node (mimics allocator changes)', async () => {

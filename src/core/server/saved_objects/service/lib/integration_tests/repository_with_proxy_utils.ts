@@ -7,19 +7,7 @@
  */
 import Hapi from '@hapi/hapi';
 import { IncomingMessage } from 'http';
-import { Env } from '@kbn/config';
-import { REPO_ROOT } from '@kbn/dev-utils';
-import type { getEnvOptions as getEnvOptionsTyped } from '@kbn/config/target_types/mocks';
-import {
-  getEnvOptions as getEnvOptionsNonTyped,
-  // @ts-expect-error
-} from '@kbn/config/target_node/mocks';
-
-// Inspired by src/core/server/ui_settings/integration_tests/index.test.ts
-// we need the current kibana version to target the specific .kibana_<version> index for routes that need the active kibana index
-const getEnvOptions: typeof getEnvOptionsTyped = getEnvOptionsNonTyped;
-const kibanaVersion = Env.createDefault(REPO_ROOT, getEnvOptions()).packageInfo.version;
-const kbnIndex = `.kibana_${kibanaVersion}`;
+import { kibanaPackageJson as pkg } from '@kbn/utils';
 
 // proxy setup
 const defaultProxyOptions = (hostname: string, port: number | string) => ({
@@ -34,6 +22,7 @@ let proxyInterrupt: string | null | undefined = null;
 export const setProxyInterrupt = (testArg: string | null) => (proxyInterrupt = testArg);
 export const getProxyInterrupt = () => proxyInterrupt;
 
+// passes the req/response directly as is
 const relayHandler = (h: Hapi.ResponseToolkit, hostname: string, port: number | string) => {
   return h.proxy({ ...defaultProxyOptions(hostname, port) });
 };
@@ -45,12 +34,17 @@ const proxyResponseHandler = (h: Hapi.ResponseToolkit, hostname: string, port: n
     onResponse: async (err, res, request, h, settings, ttl) => proxyOnResponseHandler(res, h),
   });
 };
+
+// mimics a 404 'unexpected' response from the proxy
 const proxyOnResponseHandler = async (res: IncomingMessage, h: Hapi.ResponseToolkit) => {
   return h
     .response(res)
     .header('x-elastic-product', 'somethingitshouldnotbe', { override: true })
     .code(404);
 };
+
+const kbnIndex = `.kibana_${pkg.version}`;
+
 // GET /.kibana_8.0.0/_doc/{type*} route (repository.get calls)
 export const declareGetRoute = (hapiServer: Hapi.Server, hostname: string, port: string | number) =>
   hapiServer.route({
@@ -58,7 +52,6 @@ export const declareGetRoute = (hapiServer: Hapi.Server, hostname: string, port:
     path: `/${kbnIndex}/_doc/{type*}`,
     options: {
       handler: (req, h) => {
-        // mimics a 404 'unexpected' response from the proxy for specific docs
         if (req.params.type === 'my_type:myTypeId1' || req.params.type === 'my_type:myType_123') {
           return proxyResponseHandler(h, hostname, port);
         } else {
@@ -82,7 +75,6 @@ export const declareDeleteRoute = (
         parse: false,
       },
       handler: (req, h) => {
-        // mimic a not found from proxy
         if (req.params._id === 'my_type:myTypeId1') {
           return proxyResponseHandler(h, hostname, port);
         } else {
@@ -174,7 +166,6 @@ export const declarePostSearchRoute = (
       },
       handler: (req, h) => {
         if (proxyInterrupt === 'find') {
-          // TODO: improve on this
           return proxyResponseHandler(h, hostname, port);
         } else {
           return relayHandler(h, hostname, port);
@@ -190,14 +181,13 @@ export const declarePostUpdateRoute = (
 ) =>
   hapiServer.route({
     method: 'POST',
-    path: `/${kbnIndex}/_update/{_id*}`, // I only want to match on part of a param
+    path: `/${kbnIndex}/_update/{_id*}`,
     options: {
       payload: {
         output: 'data',
         parse: false,
       },
       handler: (req, h) => {
-        // mimics a 404 'unexpected' response from the proxy
         if (req.params._id === 'my_type:myTypeToUpdate') {
           return proxyResponseHandler(h, hostname, port);
         } else {
@@ -221,7 +211,6 @@ export const declarePostPitRoute = (
         parse: false,
       },
       handler: (req, h) => {
-        // mimics a 404 'unexpected' response from the proxy
         if (proxyInterrupt === 'openPit') {
           return proxyResponseHandler(h, hostname, port);
         } else {
@@ -245,7 +234,6 @@ export const declarePostUpdateByQueryRoute = (
         parse: false,
       },
       handler: (req, h) => {
-        // mimics a 404 'unexpected' response from the proxy
         if (proxyInterrupt === 'deleteByNamespace') {
           return proxyResponseHandler(h, hostname, port);
         } else {
