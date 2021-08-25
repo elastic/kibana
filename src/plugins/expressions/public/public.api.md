@@ -634,7 +634,7 @@ export class ExpressionsService implements PersistableStateService<ExpressionAst
 // Warning: (ae-missing-release-tag) "ExpressionsServiceSetup" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public
-export type ExpressionsServiceSetup = Pick<ExpressionsService, 'getFunction' | 'getFunctions' | 'getRenderer' | 'getRenderers' | 'getType' | 'getTypes' | 'registerFunction' | 'registerRenderer' | 'registerType' | 'run' | 'fork'>;
+export type ExpressionsServiceSetup = Pick<ExpressionsService, 'getFunction' | 'getFunctions' | 'getRenderer' | 'getRenderers' | 'getType' | 'getTypes' | 'registerFunction' | 'registerRenderer' | 'registerType' | 'run' | 'fork' | 'extract' | 'inject'>;
 
 // Warning: (ae-missing-release-tag) "ExpressionsServiceStart" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //

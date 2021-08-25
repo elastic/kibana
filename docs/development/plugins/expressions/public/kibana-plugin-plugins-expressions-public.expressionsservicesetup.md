@@ -9,5 +9,5 @@ The public contract that `ExpressionsService` provides to other plugins in Kiban
 <b>Signature:</b>
 
 ```typescript
-export declare type ExpressionsServiceSetup = Pick<ExpressionsService, 'getFunction' | 'getFunctions' | 'getRenderer' | 'getRenderers' | 'getType' | 'getTypes' | 'registerFunction' | 'registerRenderer' | 'registerType' | 'run' | 'fork'>;
+export declare type ExpressionsServiceSetup = Pick<ExpressionsService, 'getFunction' | 'getFunctions' | 'getRenderer' | 'getRenderers' | 'getType' | 'getTypes' | 'registerFunction' | 'registerRenderer' | 'registerType' | 'run' | 'fork' | 'extract' | 'inject'>;
 ```
