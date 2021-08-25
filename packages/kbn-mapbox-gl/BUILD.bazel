@@ -36,7 +36,7 @@ RUNTIME_DEPS = [
 TYPES_DEPS = [
   "@npm//@mapbox/mapbox-gl-rtl-text",
   "@npm//file-loader",
-  "@npm//@types/maplibre-gl",
+  "@npm//maplibre-gl",
 ]
 
 jsts_transpiler(
