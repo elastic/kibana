@@ -61,7 +61,7 @@ export class ConsoleUIPlugin implements Plugin<void, void, AppSetupUIPluginDepen
       },
     });
 
-    share.url.locators.create({
+    const locator = share.url.locators.create({
       id: 'CONSOLE_APP_LOCATOR',
       getLocation: async ({ loadFrom }: { loadFrom?: string }) => {
         return {
@@ -71,6 +71,8 @@ export class ConsoleUIPlugin implements Plugin<void, void, AppSetupUIPluginDepen
         };
       },
     });
+
+    return { locator };
   }
 
   public start() {}
