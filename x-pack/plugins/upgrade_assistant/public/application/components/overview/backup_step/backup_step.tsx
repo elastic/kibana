@@ -18,7 +18,7 @@ const i18nTexts = {
   }),
 
   backupStepDescription: i18n.translate('xpack.upgradeAssistant.overview.backupStepDescription', {
-    defaultMessage: 'Back up your data before addressing any deprecation issues.',
+    defaultMessage: 'Back up your data before addressing any deprecation warnings.',
   }),
 };
 
