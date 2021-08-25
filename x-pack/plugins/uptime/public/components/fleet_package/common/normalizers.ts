@@ -23,19 +23,19 @@ export type CommonNormalizerMap = Record<keyof ICommonFields | ConfigKeys.NAME, 
 export const cronToSecondsNormalizer = (value: string) =>
   value ? value.slice(0, value.length - 1) : null;
 
-export const jsonToArrayOrObjectNormalizer = (value: string) => (value ? JSON.parse(value) : null);
+export const jsonToJavascriptNormalizer = (value: string) => (value ? JSON.parse(value) : null);
 
 export function getNormalizer<Fields>(key: string, defaultValues: Fields): Normalizer {
   return (fields: NewPackagePolicyInput['vars']) =>
     fields?.[key]?.value ?? defaultValues[key as keyof Fields];
 }
 
-export function getJsonToArrayOrObjectNormalizer<Fields>(
+export function getJsonToJavascriptNormalizer<Fields>(
   key: string,
   defaultValues: Fields
 ): Normalizer {
   return (fields: NewPackagePolicyInput['vars']) =>
-    jsonToArrayOrObjectNormalizer(fields?.[key]?.value) ?? defaultValues[key as keyof Fields];
+    jsonToJavascriptNormalizer(fields?.[key]?.value) ?? defaultValues[key as keyof Fields];
 }
 
 export function getCronNormalizer<Fields>(key: string, defaultValues: Fields): Normalizer {
@@ -47,8 +47,8 @@ export const getCommonNormalizer = (key: ConfigKeys) => {
   return getNormalizer(key, commonDefaultValues);
 };
 
-export const getCommonJsonToArrayOrObjectNormalizer = (key: ConfigKeys) => {
-  return getJsonToArrayOrObjectNormalizer(key, commonDefaultValues);
+export const getCommonjsonToJavascriptNormalizer = (key: ConfigKeys) => {
+  return getJsonToJavascriptNormalizer(key, commonDefaultValues);
 };
 
 export const getCommonCronToSecondsNormalizer = (key: ConfigKeys) => {
@@ -74,6 +74,6 @@ export const commonNormalizers: CommonNormalizerMap = {
     }
   },
   [ConfigKeys.APM_SERVICE_NAME]: getCommonNormalizer(ConfigKeys.APM_SERVICE_NAME),
-  [ConfigKeys.TAGS]: getCommonJsonToArrayOrObjectNormalizer(ConfigKeys.TAGS),
+  [ConfigKeys.TAGS]: getCommonjsonToJavascriptNormalizer(ConfigKeys.TAGS),
   [ConfigKeys.TIMEOUT]: getCommonCronToSecondsNormalizer(ConfigKeys.TIMEOUT),
 };

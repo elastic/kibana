@@ -655,7 +655,9 @@ describe('useBarChartsHooks', () => {
         config[ConfigKeys.SOURCE_ZIP_PASSWORD]
       );
       expect(vars?.[ConfigKeys.SOURCE_ZIP_URL].value).toEqual(config[ConfigKeys.SOURCE_ZIP_URL]);
-      expect(vars?.[ConfigKeys.SOURCE_INLINE].value).toEqual(config[ConfigKeys.SOURCE_INLINE]);
+      expect(vars?.[ConfigKeys.SOURCE_INLINE].value).toEqual(
+        JSON.stringify(config[ConfigKeys.SOURCE_INLINE])
+      );
       expect(vars?.[ConfigKeys.SOURCE_ZIP_PASSWORD].value).toEqual(
         config[ConfigKeys.SOURCE_ZIP_PASSWORD]
       );
