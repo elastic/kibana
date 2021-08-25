@@ -15,4 +15,5 @@ export enum ROLES {
   soc_manager = 'soc_manager',
   platform_engineer = 'platform_engineer',
   detections_admin = 'detections_admin',
+  minimal_all = 'minimal_all',
 }

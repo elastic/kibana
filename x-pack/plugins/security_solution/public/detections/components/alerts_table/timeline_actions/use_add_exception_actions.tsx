@@ -34,33 +34,43 @@ export const useExceptionActions = ({
   const disabledAddEndpointException = !canUserCRUD || !hasIndexWrite || !isEndpointAlert;
   const disabledAddException = !canUserCRUD || !hasIndexWrite;
 
-  const exceptionActionItems = useMemo(
-    () => [
-      <EuiContextMenuItem
-        key="add-endpoint-exception-menu-item"
-        data-test-subj="add-endpoint-exception-menu-item"
-        disabled={disabledAddEndpointException}
-        onClick={handleEndpointExceptionModal}
-      >
-        {ACTION_ADD_ENDPOINT_EXCEPTION}
-      </EuiContextMenuItem>,
+  const exceptionActionItems = useMemo(() => {
+    let items: JSX.Element[] = [];
 
-      <EuiContextMenuItem
-        key="add-exception-menu-item"
-        data-test-subj="add-exception-menu-item"
-        disabled={disabledAddException}
-        onClick={handleDetectionExceptionModal}
-      >
-        {ACTION_ADD_EXCEPTION}
-      </EuiContextMenuItem>,
-    ],
-    [
-      disabledAddEndpointException,
-      disabledAddException,
-      handleDetectionExceptionModal,
-      handleEndpointExceptionModal,
-    ]
-  );
+    if (!disabledAddException) {
+      items = [
+        ...items,
+        <EuiContextMenuItem
+          key="add-endpoint-exception-menu-item"
+          data-test-subj="add-endpoint-exception-menu-item"
+          disabled={disabledAddEndpointException}
+          onClick={handleEndpointExceptionModal}
+        >
+          {ACTION_ADD_ENDPOINT_EXCEPTION}
+        </EuiContextMenuItem>,
+      ];
+    }
+
+    if (!disabledAddEndpointException) {
+      items = [
+        ...items,
+        <EuiContextMenuItem
+          key="add-exception-menu-item"
+          data-test-subj="add-exception-menu-item"
+          disabled={disabledAddException}
+          onClick={handleDetectionExceptionModal}
+        >
+          {ACTION_ADD_EXCEPTION}
+        </EuiContextMenuItem>,
+      ];
+    }
+    return items;
+  }, [
+    disabledAddEndpointException,
+    disabledAddException,
+    handleDetectionExceptionModal,
+    handleEndpointExceptionModal,
+  ]);
 
   return { exceptionActionItems };
 };

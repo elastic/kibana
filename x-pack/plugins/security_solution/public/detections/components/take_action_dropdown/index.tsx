@@ -236,6 +236,7 @@ export const TakeActionDropdown = React.memo(
           panelPaddingSize="none"
           anchorPosition="downLeft"
           repositionOnScroll
+          data-test-subj="alert-details-take-action-button"
         >
           <EuiContextMenuPanel size="s" items={items} />
         </EuiPopover>
