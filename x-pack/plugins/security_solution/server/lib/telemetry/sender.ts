@@ -7,7 +7,6 @@
 
 import { cloneDeep } from 'lodash';
 import axios from 'axios';
-import { SavedObjectsClientContract } from 'kibana/server';
 import { URL } from 'url';
 import { CoreStart, Logger } from 'src/core/server';
 import { TelemetryPluginStart, TelemetryPluginSetup } from 'src/plugins/telemetry/server';
@@ -17,17 +16,13 @@ import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '../../../../task_manager/server';
-import {
-  TelemetryQuerier
-} from './queries'
-import {
-  processEvents
-} from './filters'
+import { TelemetryReceiver } from './receiver';
+import { processEvents } from './filters';
 import { DiagnosticTask, EndpointTask, ExceptionListsTask } from './tasks';
 import { EndpointAppContextService } from '../../endpoint/endpoint_app_context_services';
 import { ExceptionListClient } from '../../../../lists/server';
 import { createUsageCounterLabel } from './helpers';
-import { TelemetryEvent } from './types'
+import { TelemetryEvent } from './types';
 
 const usageLabelPrefix: string[] = ['security_telemetry', 'sender'];
 
@@ -40,7 +35,7 @@ export class TelemetryEventsSender {
   private telemetrySetup?: TelemetryPluginSetup;
   private intervalId?: NodeJS.Timeout;
   private isSending = false;
-  private querier: TelemetryQuerier | undefined;
+  private receiver: TelemetryReceiver | undefined;
   private queue: TelemetryEvent[] = [];
   private isOptedIn?: boolean = true; // Assume true until the first check
 
@@ -69,19 +64,12 @@ export class TelemetryEventsSender {
   }
 
   public start(
-    core?: CoreStart,
     telemetryStart?: TelemetryPluginStart,
     taskManager?: TaskManagerStartContract,
-    endpointContextService?: EndpointAppContextService,
-    exceptionListClient?: ExceptionListClient
+    receiver?: TelemetryReceiver
   ) {
     this.telemetryStart = telemetryStart;
-    const esClient = core?.elasticsearch.client.asInternalUser;
-    const agentService = endpointContextService?.getAgentService();
-    const agentPolicyService = endpointContextService?.getAgentPolicyService();
-    const savedObjectsClient = (core?.savedObjects.createInternalRepository() as unknown) as SavedObjectsClientContract;
-    this.querier = new TelemetryQuerier(esClient, agentService, agentPolicyService, savedObjectsClient, exceptionListClient)
-
+    this.receiver = receiver;
 
     if (taskManager && this.diagnosticTask && this.endpointTask && this.exceptionListsTask) {
       this.logger.debug(`starting security telemetry tasks`);
@@ -102,7 +90,6 @@ export class TelemetryEventsSender {
       clearInterval(this.intervalId);
     }
   }
-
 
   public queueTelemetryEvents(events: TelemetryEvent[]) {
     const qlength = this.queue.length;
@@ -135,8 +122,6 @@ export class TelemetryEventsSender {
     }
   }
 
-
-
   public async isTelemetryOptedIn() {
     this.isOptedIn = await this.telemetryStart?.getIsOptedIn();
     return this.isOptedIn === true;
@@ -164,8 +149,8 @@ export class TelemetryEventsSender {
 
       const [telemetryUrl, clusterInfo, licenseInfo] = await Promise.all([
         this.fetchTelemetryUrl('alerts-endpoint'),
-        this.querier?.fetchClusterInfo(),
-        this.querier?.fetchLicenseInfo(),
+        this.receiver?.fetchClusterInfo(),
+        this.receiver?.fetchLicenseInfo(),
       ]);
 
       this.logger.debug(`Telemetry URL: ${telemetryUrl}`);
@@ -175,7 +160,7 @@ export class TelemetryEventsSender {
 
       const toSend: TelemetryEvent[] = cloneDeep(this.queue).map((event) => ({
         ...event,
-        ...(licenseInfo ? { license: this.querier?.copyLicenseFields(licenseInfo) } : {}),
+        ...(licenseInfo ? { license: this.receiver?.copyLicenseFields(licenseInfo) } : {}),
         cluster_uuid: clusterInfo?.cluster_uuid,
         cluster_name: clusterInfo?.cluster_name,
       }));
@@ -208,8 +193,8 @@ export class TelemetryEventsSender {
     try {
       const [telemetryUrl, clusterInfo, licenseInfo] = await Promise.all([
         this.fetchTelemetryUrl(channel),
-        this.querier?.fetchClusterInfo(),
-        this.querier?.fetchLicenseInfo(),
+        this.receiver?.fetchClusterInfo(),
+        this.receiver?.fetchLicenseInfo(),
       ]);
 
       this.logger.debug(`Telemetry URL: ${telemetryUrl}`);
@@ -237,8 +222,6 @@ export class TelemetryEventsSender {
     }
     return getV3UrlFromV2(telemetryUrl.toString(), channel);
   }
-
-
 
   private async sendEvents(
     events: unknown[],

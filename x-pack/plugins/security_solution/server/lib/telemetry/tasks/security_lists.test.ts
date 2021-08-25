@@ -10,7 +10,11 @@ import { TaskStatus } from '../../../../../task_manager/server';
 import { taskManagerMock } from '../../../../../task_manager/server/mocks';
 
 import { TelemetryExceptionListsTask, TelemetrySecuityListsTaskConstants } from './security_lists';
-import { createMockTelemetryEventsSender, MockExceptionListsTask } from './mocks';
+import {
+  createMockTelemetryEventsSender,
+  MockExceptionListsTask,
+  createMockTelemetryReceiver,
+} from './mocks';
 
 describe('test exception list telemetry task functionality', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
@@ -23,7 +27,8 @@ describe('test exception list telemetry task functionality', () => {
     const telemetryTrustedAppsTask = new TelemetryExceptionListsTask(
       logger,
       taskManagerMock.createSetup(),
-      createMockTelemetryEventsSender(true)
+      createMockTelemetryEventsSender(true),
+      createMockTelemetryReceiver()
     );
 
     expect(telemetryTrustedAppsTask).toBeInstanceOf(TelemetryExceptionListsTask);
@@ -31,7 +36,12 @@ describe('test exception list telemetry task functionality', () => {
 
   test('the exception list task should be registered', () => {
     const mockTaskManager = taskManagerMock.createSetup();
-    new TelemetryExceptionListsTask(logger, mockTaskManager, createMockTelemetryEventsSender(true));
+    new TelemetryExceptionListsTask(
+      logger,
+      mockTaskManager,
+      createMockTelemetryEventsSender(true),
+      createMockTelemetryReceiver()
+    );
 
     expect(mockTaskManager.registerTaskDefinitions).toHaveBeenCalled();
   });
@@ -41,7 +51,8 @@ describe('test exception list telemetry task functionality', () => {
     const telemetryTrustedAppsTask = new TelemetryExceptionListsTask(
       logger,
       mockTaskManagerSetup,
-      createMockTelemetryEventsSender(true)
+      createMockTelemetryEventsSender(true),
+      createMockTelemetryReceiver()
     );
 
     const mockTaskManagerStart = taskManagerMock.createStart();
@@ -52,7 +63,8 @@ describe('test exception list telemetry task functionality', () => {
   test('the exception list task should not query elastic if telemetry is not opted in', async () => {
     const mockSender = createMockTelemetryEventsSender(false);
     const mockTaskManager = taskManagerMock.createSetup();
-    new MockExceptionListsTask(logger, mockTaskManager, mockSender);
+    const mockReceiver = createMockTelemetryReceiver();
+    new MockExceptionListsTask(logger, mockTaskManager, mockSender, mockReceiver);
 
     const mockTaskInstance = {
       id: TelemetrySecuityListsTaskConstants.TYPE,
@@ -79,10 +91,12 @@ describe('test exception list telemetry task functionality', () => {
   test('the exception list task should query elastic if telemetry opted in', async () => {
     const mockSender = createMockTelemetryEventsSender(true);
     const mockTaskManager = taskManagerMock.createSetup();
+    const mockReceiver = createMockTelemetryReceiver();
     const telemetryTrustedAppsTask = new MockExceptionListsTask(
       logger,
       mockTaskManager,
-      mockSender
+      mockSender,
+      mockReceiver
     );
 
     const mockTaskInstance = {
