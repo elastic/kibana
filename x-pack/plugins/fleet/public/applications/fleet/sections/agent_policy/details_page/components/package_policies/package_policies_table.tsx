@@ -78,7 +78,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
         const hasUpgrade =
           !!updatableIntegrationRecord &&
           updatableIntegrationRecord.policiesToUpgrade.some(
-            ({ id }) => id === packagePolicy.policy_id
+            ({ pkgPolicyId }) => pkgPolicyId === packagePolicy.id
           );
 
         return {
