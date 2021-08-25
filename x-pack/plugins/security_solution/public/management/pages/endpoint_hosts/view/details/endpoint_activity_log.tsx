@@ -116,6 +116,7 @@ export const EndpointActivityLog = memo(
                   <>
                     <EuiSpacer size="m" />
                     <EuiCallOut
+                      data-test-subj="activityLogNoDataCallout"
                       size="s"
                       title={i18.ACTIVITY_LOG.LogEntry.dateRangeMessage}
                       iconType="alert"

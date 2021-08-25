@@ -949,6 +949,32 @@ describe('when on the endpoint list page', () => {
         const logEntries = await renderResult.queryAllByTestId('timelineEntry');
         expect(logEntries.length).toEqual(2);
       });
+
+      it('should display a callout message if no log data', async () => {
+        const userChangedUrlChecker = middlewareSpy.waitForAction('userChangedUrl');
+        reactTestingLibrary.act(() => {
+          history.push(
+            `${MANAGEMENT_PATH}/endpoints?page_index=0&page_size=10&selected_endpoint=1&show=activity_log`
+          );
+        });
+        const changedUrlAction = await userChangedUrlChecker;
+        expect(changedUrlAction.payload.search).toEqual(
+          '?page_index=0&page_size=10&selected_endpoint=1&show=activity_log'
+        );
+        await middlewareSpy.waitForAction('endpointDetailsActivityLogChanged');
+        reactTestingLibrary.act(() => {
+          dispatchEndpointDetailsActivityLogChanged('success', {
+            page: 1,
+            pageSize: 50,
+            startDate: 'now-1d',
+            endDate: 'now',
+            data: [],
+          });
+        });
+
+        const activityLogCallout = await renderResult.findByTestId('activityLogNoDataCallout');
+        expect(activityLogCallout).not.toBeNull();
+      });
     });
 
     describe('when showing host Policy Response panel', () => {
