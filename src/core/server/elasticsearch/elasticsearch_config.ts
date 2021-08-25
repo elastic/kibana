@@ -222,7 +222,13 @@ export const config: ServiceConfigDescriptor<ElasticsearchConfigType> = {
  */
 export class ElasticsearchConfig {
   /**
-   * Skip the valid connection check during startup.
+   * Skip the valid connection check during startup. The connection check allows
+   * Kibana to ensure that the Elasticsearch connection is valid before allowing
+   * any other services to be set up.
+   *
+   * @remarks
+   * You should disable this check at your own risk: Other services in Kibana
+   * may fail if this step is not completed.
    */
   public readonly skipStartupConnectionCheck: boolean;
   /**
