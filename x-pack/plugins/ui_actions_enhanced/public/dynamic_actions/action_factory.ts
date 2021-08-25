@@ -122,7 +122,10 @@ export class ActionFactory<
       });
   }
 
-  public telemetry(state: SerializedEvent, telemetryData: Record<string, any>) {
+  public telemetry(
+    state: SerializedEvent,
+    telemetryData: Record<string, string | number | boolean>
+  ) {
     return this.def.telemetry ? this.def.telemetry(state, telemetryData) : telemetryData;
   }
 
