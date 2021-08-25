@@ -659,8 +659,6 @@ export interface DataPublicPluginSetup {
     //
     // (undocumented)
     autocomplete: AutocompleteSetup;
-    // @deprecated (undocumented)
-    fieldFormats: FieldFormatsSetup;
     // (undocumented)
     query: QuerySetup;
     // (undocumented)
