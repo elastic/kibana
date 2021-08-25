@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import request, { Cookie } from 'request';
+import { parse as parseCookie, Cookie } from 'tough-cookie';
 import { delay } from 'bluebird';
 import expect from '@kbn/expect';
 import { adminTestUser } from '@kbn/test';
@@ -38,7 +38,7 @@ export default function ({ getService }: FtrProviderContext) {
     expect(apiResponse.body.authentication_provider).to.eql(provider);
 
     return Array.isArray(apiResponse.headers['set-cookie'])
-      ? request.cookie(apiResponse.headers['set-cookie'][0])!
+      ? parseCookie(apiResponse.headers['set-cookie'][0])!
       : undefined;
   }
 
@@ -59,7 +59,7 @@ export default function ({ getService }: FtrProviderContext) {
     const authenticationResponse = await supertest
       .post('/api/security/saml/callback')
       .set('kbn-xsrf', 'xxx')
-      .set('Cookie', request.cookie(handshakeResponse.headers['set-cookie'][0])!.cookieString())
+      .set('Cookie', parseCookie(handshakeResponse.headers['set-cookie'][0])!.cookieString())
       .send({
         SAMLResponse: await getSAMLResponse({
           destination: `http://localhost:${kibanaServerConfig.port}/api/security/saml/callback`,
@@ -69,7 +69,7 @@ export default function ({ getService }: FtrProviderContext) {
       })
       .expect(302);
 
-    const cookie = request.cookie(authenticationResponse.headers['set-cookie'][0])!;
+    const cookie = parseCookie(authenticationResponse.headers['set-cookie'][0])!;
     await checkSessionCookie(cookie, 'a@b.c', { type: 'saml', name: providerName });
     return cookie;
   }
@@ -94,7 +94,7 @@ export default function ({ getService }: FtrProviderContext) {
         })
         .expect(200);
 
-      const sessionCookie = request.cookie(response.headers['set-cookie'][0])!;
+      const sessionCookie = parseCookie(response.headers['set-cookie'][0])!;
       await checkSessionCookie(sessionCookie, basicUsername, { type: 'basic', name: 'basic1' });
       expect(await getNumberOfSessionDocuments()).to.be(1);
 
@@ -136,7 +136,7 @@ export default function ({ getService }: FtrProviderContext) {
         })
         .expect(200);
 
-      const basicSessionCookie = request.cookie(response.headers['set-cookie'][0])!;
+      const basicSessionCookie = parseCookie(response.headers['set-cookie'][0])!;
       await checkSessionCookie(basicSessionCookie, basicUsername, {
         type: 'basic',
         name: 'basic1',
@@ -186,7 +186,7 @@ export default function ({ getService }: FtrProviderContext) {
         })
         .expect(200);
 
-      let sessionCookie = request.cookie(response.headers['set-cookie'][0])!;
+      let sessionCookie = parseCookie(response.headers['set-cookie'][0])!;
       await checkSessionCookie(sessionCookie, basicUsername, { type: 'basic', name: 'basic1' });
       expect(await getNumberOfSessionDocuments()).to.be(1);
 
