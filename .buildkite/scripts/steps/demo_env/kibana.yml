@@ -1,0 +1,37 @@
+apiVersion: kibana.k8s.elastic.co/v1
+kind: Kibana
+metadata:
+  name: $DEPLOYMENT_NAME
+  namespace: $DEPLOYMENT_NAME
+spec:
+  version: $DEPLOYMENT_VERSION
+  image: $KIBANA_IMAGE
+  count: 1
+  elasticsearchRef:
+    name: $DEPLOYMENT_NAME
+  http:
+    tls:
+      selfSignedCertificate:
+        disabled: true
+  config:
+    xpack.security.authc.providers:
+      basic.basic1:
+        order: 0
+      anonymous.anonymous1:
+        order: 1
+        credentials: 'elasticsearch_anonymous_user'
+    server.publicBaseUrl: 'https://$DEPLOYMENT_NAME.demo.kibana.dev'
+  podTemplate:
+    spec:
+      containers:
+        - name: kibana
+          env:
+            - name: NODE_OPTIONS
+              value: '--max-old-space-size=2048'
+          resources:
+            requests:
+              memory: 1Gi
+              cpu: 0.5
+            limits:
+              memory: 2.5Gi
+              cpu: 2
