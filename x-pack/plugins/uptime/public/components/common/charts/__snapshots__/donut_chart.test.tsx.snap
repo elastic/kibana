@@ -194,6 +194,44 @@ exports[`DonutChart component passes correct props without errors for valid prop
               "visible": true,
             },
           },
+          "goal": Object {
+            "majorCenterLabel": Object {
+              "fill": "black",
+              "fontFamily": "sans-serif",
+              "fontStyle": "normal",
+            },
+            "majorLabel": Object {
+              "fill": "black",
+              "fontFamily": "sans-serif",
+              "fontStyle": "normal",
+            },
+            "maxFontSize": 64,
+            "minFontSize": 8,
+            "minorCenterLabel": Object {
+              "fill": "black",
+              "fontFamily": "sans-serif",
+              "fontStyle": "normal",
+            },
+            "minorLabel": Object {
+              "fill": "black",
+              "fontFamily": "sans-serif",
+              "fontStyle": "normal",
+            },
+            "progressLine": Object {
+              "stroke": "black",
+            },
+            "targetLine": Object {
+              "stroke": "black",
+            },
+            "tickLabel": Object {
+              "fill": "black",
+              "fontFamily": "sans-serif",
+              "fontStyle": "normal",
+            },
+            "tickLine": Object {
+              "stroke": "darkgrey",
+            },
+          },
           "legend": Object {
             "horizontalHeight": 64,
             "labelOptions": Object {
