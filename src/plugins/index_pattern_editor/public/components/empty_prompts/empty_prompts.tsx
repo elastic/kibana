@@ -38,6 +38,9 @@ export function isUserDataIndex(source: MatchedItem) {
   if (source.name === FLEET_ASSETS_TO_IGNORE.METRICS_DATA_STREAM_TO_IGNORE) return false;
   if (source.name === FLEET_ASSETS_TO_IGNORE.METRICS_ENDPOINT_INDEX_TO_IGNORE) return false;
 
+  // filter out empty sources created by apm server
+  if (source.name.startsWith('apm-')) return false;
+
   return true;
 }
 
