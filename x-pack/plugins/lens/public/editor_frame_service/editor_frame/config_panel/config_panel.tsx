@@ -178,7 +178,7 @@ export function LayerPanels(
               ) === 'clear'
             }
             onEmptyDimensionAdd={(columnId, { groupId }) => {
-              addMaybeDefaultThreshold({
+              addInitialValueIfAvailable({
                 ...props,
                 visualization,
                 activeDatasourceId: activeDatasourceId!,
@@ -255,7 +255,7 @@ export function LayerPanels(
                 }),
             })
           );
-          addMaybeDefaultThreshold({
+          addInitialValueIfAvailable({
             ...props,
             activeDatasourceId: activeDatasourceId!,
             visualization,
@@ -270,7 +270,7 @@ export function LayerPanels(
   );
 }
 
-function addMaybeDefaultThreshold({
+function addInitialValueIfAvailable({
   activeVisualization,
   visualization,
   framePublicAPI,
@@ -298,6 +298,7 @@ function addMaybeDefaultThreshold({
   const layerInfo = activeVisualization
     .getSupportedLayers(visualization.state, framePublicAPI)
     .find(({ type }) => type === layerType);
+
   if (layerInfo?.initialDimensions && datasourceMap[activeDatasourceId]?.initializeDimension) {
     const info = groupId
       ? layerInfo.initialDimensions.find(({ groupId: id }) => id === groupId)

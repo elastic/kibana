@@ -921,4 +921,33 @@ describe('LayerPanel', () => {
       expect(updateVisualization).toHaveBeenCalledTimes(1);
     });
   });
+
+  describe('add a new dimension', () => {
+    it('should call onEmptyDimensionAdd callback on new dimension creation', async () => {
+      mockVisualization.getConfiguration.mockReturnValue({
+        groups: [
+          {
+            groupLabel: 'A',
+            groupId: 'a',
+            accessors: [],
+            filterOperations: () => true,
+            supportsMoreColumns: true,
+            dataTestSubj: 'lnsGroup',
+          },
+        ],
+      });
+      const props = getDefaultProps();
+      const { instance } = await mountWithProvider(<LayerPanel {...props} />);
+
+      act(() => {
+        instance.find('[data-test-subj="lns-empty-dimension"]').first().simulate('click');
+      });
+      instance.update();
+
+      expect(props.onEmptyDimensionAdd).toHaveBeenCalledWith(
+        'newid',
+        expect.objectContaining({ groupId: 'a' })
+      );
+    });
+  });
 });
