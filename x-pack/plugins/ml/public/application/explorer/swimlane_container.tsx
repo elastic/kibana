@@ -47,7 +47,6 @@ import { useUiSettings } from '../contexts/kibana';
 import {
   Y_AXIS_LABEL_WIDTH,
   Y_AXIS_LABEL_PADDING,
-  Y_AXIS_LABEL_FONT_COLOR,
   X_AXIS_RIGHT_OVERFLOW,
 } from './swimlane_annotation_container';
 import { AnnotationsTable } from '../../../common/types/annotations';
