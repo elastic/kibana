@@ -938,8 +938,6 @@ export function overridePackageInputs(
     }),
   ];
 
-  let errors: any[] = [];
-
   for (const override of inputsOverride) {
     let originalInput = inputs.find((i) => i.type === override.type);
 
@@ -995,20 +993,22 @@ export function overridePackageInputs(
       }))
       .filter(({ message }) => !!message);
 
-    errors = [...errors, ...responseFormattedValidationErrors];
-  }
+    if (responseFormattedValidationErrors.length) {
+      if (dryRun) {
+        return { ...resultingPackagePolicy, errors: responseFormattedValidationErrors };
+      }
 
-  if (errors.length) {
-    if (dryRun) {
-      return { ...resultingPackagePolicy, errors };
+      throw new IngestManagerError(
+        i18n.translate('xpack.fleet.packagePolicyInvalidError', {
+          defaultMessage: 'Package policy is invalid: {errors}',
+          values: {
+            errors: responseFormattedValidationErrors
+              .map(({ key, message }) => `${key}: ${message}`)
+              .join('\n'),
+          },
+        })
+      );
     }
-
-    throw new IngestManagerError(
-      i18n.translate('xpack.fleet.packagePolicyInvalidError', {
-        defaultMessage: 'Package policy is invalid: {errors}',
-        values: { errors: errors.map(({ key, message }) => `${key}: ${message}`).join('\n') },
-      })
-    );
   }
 
   return resultingPackagePolicy;
