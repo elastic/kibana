@@ -6,21 +6,22 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { ChromeStart, NotificationsStart } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { partition } from 'lodash';
+
+import type { ChromeStart, NotificationsStart, SavedObjectReference } from 'kibana/public';
 import { SaveModal } from './save_modal';
-import { LensAppProps, LensAppServices } from './types';
+import type { LensAppProps, LensAppServices } from './types';
 import type { SaveProps } from './app';
 import { Document, injectFilterReferences } from '../persistence';
-import { LensByReferenceInput, LensEmbeddableInput } from '../embeddable';
-import { LensAttributeService } from '../lens_attribute_service';
+import type { LensByReferenceInput, LensEmbeddableInput } from '../embeddable';
+import type { LensAttributeService } from '../lens_attribute_service';
 import { DataPublicPluginStart, esFilters } from '../../../../../src/plugins/data/public';
 import { APP_ID, getFullPath, LENS_EMBEDDABLE_TYPE } from '../../common';
 import { trackUiEvent } from '../lens_ui_telemetry';
 import { checkForDuplicateTitle } from '../../../../../src/plugins/saved_objects/public';
-import { LensAppState } from '../state_management';
+import type { LensAppState } from '../state_management';
 
 type ExtraProps = Pick<LensAppProps, 'initialInput'> &
   Partial<Pick<LensAppProps, 'redirectToOrigin' | 'redirectTo' | 'onAppLeave'>>;
@@ -181,6 +182,27 @@ const redirectToDashboard = ({
   });
 };
 
+const getDocToSave = (
+  lastKnownDoc: Document,
+  saveProps: SaveProps,
+  references: SavedObjectReference[]
+) => {
+  const docToSave = {
+    ...getLastKnownDocWithoutPinnedFilters(lastKnownDoc)!,
+    references,
+  };
+
+  if (saveProps.newDescription !== undefined) {
+    docToSave.description = saveProps.newDescription;
+  }
+
+  if (saveProps.newTitle !== undefined) {
+    docToSave.title = saveProps.newTitle;
+  }
+
+  return docToSave;
+};
+
 export const runSaveLensVisualization = async (
   props: {
     lastKnownDoc?: Document;
@@ -192,10 +214,6 @@ export const runSaveLensVisualization = async (
   saveProps: SaveProps,
   options: { saveToLibrary: boolean }
 ): Promise<Partial<LensAppState> | undefined> => {
-  if (!props.lastKnownDoc) {
-    return;
-  }
-
   const {
     chrome,
     initialInput,
@@ -216,28 +234,29 @@ export const runSaveLensVisualization = async (
     dashboardFeatureFlag,
   } = props;
 
-  const tagsIds =
-    persistedDoc && savedObjectsTagging
-      ? savedObjectsTagging.ui.getTagIdsFromReferences(persistedDoc.references)
-      : [];
+  if (!lastKnownDoc) {
+    return;
+  }
+
   if (usageCollection) {
     usageCollection.reportUiCounter(originatingApp || 'visualize', METRIC_TYPE.CLICK, 'lens:save');
   }
 
   let references = lastKnownDoc.references;
+
   if (savedObjectsTagging) {
+    const tagsIds =
+      persistedDoc && savedObjectsTagging
+        ? savedObjectsTagging.ui.getTagIdsFromReferences(persistedDoc.references)
+        : [];
+
     references = savedObjectsTagging.ui.updateTagsReferences(
       references,
       saveProps.newTags || tagsIds
     );
   }
 
-  const docToSave = {
-    ...getLastKnownDocWithoutPinnedFilters(lastKnownDoc)!,
-    description: saveProps.newDescription,
-    title: saveProps.newTitle,
-    references,
-  };
+  const docToSave = getDocToSave(lastKnownDoc, saveProps, references);
 
   // Required to serialize filters in by value mode until
   // https://github.com/elastic/kibana/issues/77588 is fixed

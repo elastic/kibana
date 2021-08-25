@@ -5,6 +5,7 @@
  * 2.0.
  */
 import Boom from '@hapi/boom';
+import { estypes } from '@elastic/elasticsearch';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { Filter, buildEsQuery, EsQueryConfig } from '@kbn/es-query';
 import { decodeVersion, encodeHitVersion } from '@kbn/securitysolution-es-utils';
@@ -35,7 +36,7 @@ import { Logger, ElasticsearchClient, EcsEventOutcome } from '../../../../../src
 import { alertAuditEvent, operationAlertAuditActionMap } from './audit_events';
 import { AuditLogger } from '../../../security/server';
 import {
-  ALERT_STATUS,
+  ALERT_WORKFLOW_STATUS,
   ALERT_RULE_CONSUMER,
   ALERT_RULE_TYPE_ID,
   SPACE_IDS,
@@ -50,16 +51,19 @@ const mapConsumerToIndexName: typeof mapConsumerToIndexNameTyped = mapConsumerTo
 // TODO: Fix typings https://github.com/elastic/kibana/issues/101776
 type NonNullableProps<Obj extends {}, Props extends keyof Obj> = Omit<Obj, Props> &
   { [K in Props]-?: NonNullable<Obj[K]> };
-type AlertType = NonNullableProps<
+type AlertType = { _index: string; _id: string } & NonNullableProps<
   ParsedTechnicalFields,
   typeof ALERT_RULE_TYPE_ID | typeof ALERT_RULE_CONSUMER | typeof SPACE_IDS
 >;
 
-const isValidAlert = (source?: ParsedTechnicalFields): source is AlertType => {
+const isValidAlert = (source?: estypes.SearchHit<ParsedTechnicalFields>): source is AlertType => {
   return (
-    source?.[ALERT_RULE_TYPE_ID] != null &&
-    source?.[ALERT_RULE_CONSUMER] != null &&
-    source?.[SPACE_IDS] != null
+    (source?._source?.[ALERT_RULE_TYPE_ID] != null &&
+      source?._source?.[ALERT_RULE_CONSUMER] != null &&
+      source?._source?.[SPACE_IDS] != null) ||
+    (source?.fields?.[ALERT_RULE_TYPE_ID][0] != null &&
+      source?.fields?.[ALERT_RULE_CONSUMER][0] != null &&
+      source?.fields?.[SPACE_IDS][0] != null)
   );
 };
 export interface ConstructorOptions {
@@ -80,7 +84,7 @@ export interface BulkUpdateOptions<Params extends AlertTypeParams> {
   ids: string[] | undefined | null;
   status: STATUS_VALUES;
   index: string;
-  query: string | undefined | null;
+  query: object | string | undefined | null;
 }
 
 interface GetAlertParams {
@@ -89,11 +93,15 @@ interface GetAlertParams {
 }
 
 interface SingleSearchAfterAndAudit {
-  id: string | null | undefined;
-  query: string | null | undefined;
+  id?: string | null | undefined;
+  query?: string | object | undefined;
+  aggs?: object | undefined;
   index?: string;
+  _source?: string[] | undefined;
+  track_total_hits?: boolean | undefined;
+  size?: number | undefined;
   operation: WriteOperations.Update | ReadOperations.Find | ReadOperations.Get;
-  lastSortIds: Array<string | number> | undefined;
+  lastSortIds?: Array<string | number> | undefined;
 }
 
 /**
@@ -124,6 +132,15 @@ export class AlertsClient {
     return {
       outcome: operation === WriteOperations.Update ? 'unknown' : 'success',
     };
+  }
+
+  private getAlertStatusFieldUpdate(
+    source: ParsedTechnicalFields | undefined,
+    status: STATUS_VALUES
+  ) {
+    return source?.[ALERT_WORKFLOW_STATUS] == null
+      ? { signal: { status } }
+      : { [ALERT_WORKFLOW_STATUS]: status };
   }
 
   /**
@@ -203,6 +220,10 @@ export class AlertsClient {
   private async singleSearchAfterAndAudit({
     id,
     query,
+    aggs,
+    _source,
+    track_total_hits: trackTotalHits,
+    size,
     index,
     operation,
     lastSortIds = [],
@@ -218,7 +239,12 @@ export class AlertsClient {
       const config = getEsQueryConfig();
 
       let queryBody = {
+        fields: [ALERT_RULE_TYPE_ID, ALERT_RULE_CONSUMER, ALERT_WORKFLOW_STATUS, SPACE_IDS],
         query: await this.buildEsQueryWithAuthz(query, id, alertSpaceId, operation, config),
+        aggs,
+        _source,
+        track_total_hits: trackTotalHits,
+        size,
         sort: [
           {
             '@timestamp': {
@@ -245,23 +271,25 @@ export class AlertsClient {
         seq_no_primary_term: true,
       });
 
-      if (!result?.body.hits.hits.every((hit) => isValidAlert(hit._source))) {
+      if (!result?.body.hits.hits.every((hit) => isValidAlert(hit))) {
         const errorMessage = `Invalid alert found with id of "${id}" or with query "${query}" and operation ${operation}`;
         this.logger.error(errorMessage);
         throw Boom.badData(errorMessage);
       }
 
-      await this.ensureAllAuthorized(result.body.hits.hits, operation);
+      if (result?.body?.hits?.hits != null && result?.body.hits.hits.length > 0) {
+        await this.ensureAllAuthorized(result.body.hits.hits, operation);
 
-      result?.body.hits.hits.map((item) =>
-        this.auditLogger?.log(
-          alertAuditEvent({
-            action: operationAlertAuditActionMap[operation],
-            id: item._id,
-            ...this.getOutcome(operation),
-          })
-        )
-      );
+        result?.body.hits.hits.map((item) =>
+          this.auditLogger?.log(
+            alertAuditEvent({
+              action: operationAlertAuditActionMap[operation],
+              id: item._id,
+              ...this.getOutcome(operation),
+            })
+          )
+        );
+      }
 
       return result.body;
     } catch (error) {
@@ -307,19 +335,25 @@ export class AlertsClient {
         );
       }
 
-      const bulkUpdateRequest = mgetRes.body.docs.flatMap((item) => [
-        {
-          update: {
-            _index: item._index,
-            _id: item._id,
+      const bulkUpdateRequest = mgetRes.body.docs.flatMap((item) => {
+        const fieldToUpdate = this.getAlertStatusFieldUpdate(item?._source, status);
+        return [
+          {
+            update: {
+              _index: item._index,
+              _id: item._id,
+            },
           },
-        },
-        {
-          doc: { [ALERT_STATUS]: status },
-        },
-      ]);
+          {
+            doc: {
+              ...fieldToUpdate,
+            },
+          },
+        ];
+      });
 
       const bulkUpdateResponse = await this.esClient.bulk({
+        refresh: 'wait_for',
         body: bulkUpdateRequest,
       });
       return bulkUpdateResponse;
@@ -330,7 +364,7 @@ export class AlertsClient {
   }
 
   private async buildEsQueryWithAuthz(
-    query: string | null | undefined,
+    query: object | string | null | undefined,
     id: string | null | undefined,
     alertSpaceId: string,
     operation: WriteOperations.Update | ReadOperations.Get | ReadOperations.Find,
@@ -345,15 +379,33 @@ export class AlertsClient {
         },
         operation
       );
-      return buildEsQuery(
+      let esQuery;
+      if (id != null) {
+        esQuery = { query: `_id:${id}`, language: 'kuery' };
+      } else if (typeof query === 'string') {
+        esQuery = { query, language: 'kuery' };
+      } else if (query != null && typeof query === 'object') {
+        esQuery = [];
+      }
+      const builtQuery = buildEsQuery(
         undefined,
-        { query: query == null ? `_id:${id}` : query, language: 'kuery' },
+        esQuery == null ? { query: ``, language: 'kuery' } : esQuery,
         [
           (authzFilter as unknown) as Filter,
           ({ term: { [SPACE_IDS]: alertSpaceId } } as unknown) as Filter,
         ],
         config
       );
+      if (query != null && typeof query === 'object') {
+        return {
+          ...builtQuery,
+          bool: {
+            ...builtQuery.bool,
+            must: [...builtQuery.bool.must, query],
+          },
+        };
+      }
+      return builtQuery;
     } catch (exc) {
       this.logger.error(exc);
       throw Boom.expectationFailed(
@@ -373,7 +425,7 @@ export class AlertsClient {
     operation,
   }: {
     index: string;
-    query: string;
+    query: object | string;
     operation: WriteOperations.Update | ReadOperations.Find | ReadOperations.Get;
   }) {
     let lastSortIds;
@@ -436,10 +488,8 @@ export class AlertsClient {
       // first search for the alert by id, then use the alert info to check if user has access to it
       const alert = await this.singleSearchAfterAndAudit({
         id,
-        query: null,
         index,
         operation: ReadOperations.Get,
-        lastSortIds: undefined,
       });
 
       if (alert == null || alert.hits.hits.length === 0) {
@@ -465,10 +515,8 @@ export class AlertsClient {
     try {
       const alert = await this.singleSearchAfterAndAudit({
         id,
-        query: null,
         index,
         operation: WriteOperations.Update,
-        lastSortIds: undefined,
       });
 
       if (alert == null || alert.hits.hits.length === 0) {
@@ -476,14 +524,17 @@ export class AlertsClient {
         this.logger.error(errorMessage);
         throw Boom.notFound(errorMessage);
       }
-
+      const fieldToUpdate = this.getAlertStatusFieldUpdate(
+        alert?.hits.hits[0]._source,
+        status as STATUS_VALUES
+      );
       const { body: response } = await this.esClient.update<ParsedTechnicalFields>({
         ...decodeVersion(_version),
         id,
         index,
         body: {
           doc: {
-            [ALERT_STATUS]: status,
+            ...fieldToUpdate,
           },
         },
         refresh: 'wait_for',
@@ -524,7 +575,7 @@ export class AlertsClient {
         });
 
         if (!fetchAndAuditResponse?.auditedAlerts) {
-          throw Boom.unauthorized('Failed to audit alerts');
+          throw Boom.forbidden('Failed to audit alerts');
         }
 
         // executes updateByQuery with query + authorization filter
@@ -535,11 +586,11 @@ export class AlertsClient {
           refresh: true,
           body: {
             script: {
-              source: `if (ctx._source['${ALERT_STATUS}'] != null) {
-                ctx._source['${ALERT_STATUS}'] = '${status}'
+              source: `if (ctx._source['${ALERT_WORKFLOW_STATUS}'] != null) {
+                ctx._source['${ALERT_WORKFLOW_STATUS}'] = '${status}'
               }
-              if (ctx._source['signal.status'] != null) {
-                ctx._source['signal.status'] = '${status}'
+              if (ctx._source.signal != null && ctx._source.signal.status != null) {
+                ctx._source.signal.status = '${status}'
               }`,
               lang: 'painless',
             } as InlineScript,
@@ -557,8 +608,50 @@ export class AlertsClient {
     }
   }
 
+  public async find<Params extends AlertTypeParams = never>({
+    query,
+    aggs,
+    _source,
+    track_total_hits: trackTotalHits,
+    size,
+    index,
+  }: {
+    query?: object | undefined;
+    aggs?: object | undefined;
+    index: string | undefined;
+    track_total_hits?: boolean | undefined;
+    _source?: string[] | undefined;
+    size?: number | undefined;
+  }) {
+    try {
+      // first search for the alert by id, then use the alert info to check if user has access to it
+      const alertsSearchResponse = await this.singleSearchAfterAndAudit({
+        query,
+        aggs,
+        _source,
+        track_total_hits: trackTotalHits,
+        size,
+        index,
+        operation: ReadOperations.Find,
+      });
+
+      if (alertsSearchResponse == null) {
+        const errorMessage = `Unable to retrieve alert details for alert with query and operation ${ReadOperations.Find}`;
+        this.logger.error(errorMessage);
+        throw Boom.notFound(errorMessage);
+      }
+
+      return alertsSearchResponse;
+    } catch (error) {
+      this.logger.error(`find threw an error: ${error}`);
+      throw error;
+    }
+  }
+
   public async getAuthorizedAlertsIndices(featureIds: string[]): Promise<string[] | undefined> {
     try {
+      // ATTENTION FUTURE DEVELOPER when you are a super user the augmentedRuleTypes.authorizedRuleTypes will
+      // return all of the features that you can access and does not care about your featureIds
       const augmentedRuleTypes = await this.authorization.getAugmentedRuleTypesWithAuthorization(
         featureIds,
         [ReadOperations.Find, ReadOperations.Get, WriteOperations.Update],
@@ -574,8 +667,12 @@ export class AlertsClient {
       }
 
       const toReturn = Array.from(authorizedFeatures).flatMap((feature) => {
-        if (isValidFeatureId(feature)) {
-          return mapConsumerToIndexName[feature];
+        if (featureIds.includes(feature) && isValidFeatureId(feature)) {
+          if (feature === 'siem') {
+            return `${mapConsumerToIndexName[feature]}-${this.spaceId}`;
+          } else {
+            return `${mapConsumerToIndexName[feature]}`;
+          }
         }
         return [];
       });

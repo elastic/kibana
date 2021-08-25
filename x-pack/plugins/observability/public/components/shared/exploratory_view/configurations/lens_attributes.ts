@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { capitalize } from 'lodash';
+import { ExistsFilter, isExistsFilter } from '@kbn/es-query';
 import {
   CountIndexPatternColumn,
   DateHistogramIndexPatternColumn,
@@ -28,7 +29,7 @@ import {
   CardinalityIndexPatternColumn,
 } from '../../../../../../lens/public';
 import { urlFiltersToKueryString } from '../utils/stringify_kueries';
-import { ExistsFilter, IndexPattern } from '../../../../../../../../src/plugins/data/common';
+import { IndexPattern } from '../../../../../../../../src/plugins/data/common';
 import {
   FILTER_RECORDS,
   USE_BREAK_DOWN_COLUMN,
@@ -495,7 +496,7 @@ export class LensAttributes {
       if (qFilter.query?.bool?.should) {
         const values: string[] = [];
         let fieldName = '';
-        qFilter.query?.bool.should.forEach((ft: PersistableFilter['query']['match_phrase']) => {
+        qFilter.query?.bool.should.forEach((ft: any) => {
           if (ft.match_phrase) {
             fieldName = Object.keys(ft.match_phrase)[0];
             values.push(ft.match_phrase[fieldName]);
@@ -512,8 +513,8 @@ export class LensAttributes {
       }
       const existFilter = filter as ExistsFilter;
 
-      if (existFilter.exists) {
-        const fieldName = existFilter.exists.field;
+      if (isExistsFilter(existFilter)) {
+        const fieldName = existFilter.exists?.field;
         const kql = `${fieldName} : *`;
         if (baseFilters.length > 0) {
           baseFilters += ` and ${kql}`;

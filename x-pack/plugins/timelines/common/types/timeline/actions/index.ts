@@ -32,6 +32,8 @@ export interface ActionProps {
   isEventPinned?: boolean;
   isEventViewer?: boolean;
   rowIndex: number;
+  setEventsLoading: SetEventsLoading;
+  setEventsDeleted: SetEventsDeleted;
   refetch?: () => void;
   onRuleChange?: () => void;
   showNotes?: boolean;
@@ -40,6 +42,25 @@ export interface ActionProps {
   toggleShowNotes?: () => void;
 }
 
+export type SetEventsLoading = (params: { eventIds: string[]; isLoading: boolean }) => void;
+export type SetEventsDeleted = (params: { eventIds: string[]; isDeleted: boolean }) => void;
+export type OnUpdateAlertStatusSuccess = (
+  updated: number,
+  conflicts: number,
+  status: AlertStatus
+) => void;
+export type OnUpdateAlertStatusError = (status: AlertStatus, error: Error) => void;
+
+export interface StatusBulkActionsProps {
+  eventIds: string[];
+  currentStatus?: AlertStatus;
+  query?: string;
+  indexName: string;
+  setEventsLoading: SetEventsLoading;
+  setEventsDeleted: SetEventsDeleted;
+  onUpdateSuccess?: OnUpdateAlertStatusSuccess;
+  onUpdateFailure?: OnUpdateAlertStatusError;
+}
 export interface HeaderActionProps {
   width: number;
   browserFields: BrowserFields;
@@ -90,14 +111,19 @@ export type ControlColumnProps = Omit<
   keyof AdditionalControlColumnProps
 > &
   Partial<AdditionalControlColumnProps>;
-
-export type OnAlertStatusActionSuccess = (status: AlertStatus) => void;
-export type OnAlertStatusActionFailure = (status: AlertStatus, error: string) => void;
 export interface BulkActionsObjectProp {
   alertStatusActions?: boolean;
-  onAlertStatusActionSuccess?: OnAlertStatusActionSuccess;
-  onAlertStatusActionFailure?: OnAlertStatusActionFailure;
+  onAlertStatusActionSuccess?: OnUpdateAlertStatusSuccess;
+  onAlertStatusActionFailure?: OnUpdateAlertStatusError;
 }
 export type BulkActionsProp = boolean | BulkActionsObjectProp;
 
-export type AlertStatus = 'open' | 'closed' | 'in-progress';
+export type AlertWorkflowStatus = 'open' | 'closed' | 'acknowledged';
+
+/**
+ * @deprecated
+ * TODO: remove when `acknowledged` migrations are finished
+ */
+export type InProgressStatus = 'in-progress';
+
+export type AlertStatus = AlertWorkflowStatus | InProgressStatus;

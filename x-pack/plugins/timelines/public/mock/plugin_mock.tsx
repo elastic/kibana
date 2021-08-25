@@ -28,4 +28,8 @@ export const createTGridMocks = () => ({
   getUseAddToTimeline: () => useAddToTimeline,
   getUseAddToTimelineSensor: () => useAddToTimelineSensor,
   getUseDraggableKeyboardWrapper: () => useDraggableKeyboardWrapper,
+  // eslint-disable-next-line react/display-name
+  getAddToExistingCaseButton: () => <div data-test-subj="add-to-existing-case" />,
+  // eslint-disable-next-line react/display-name
+  getAddToNewCaseButton: () => <div data-test-subj="add-to-new-case" />,
 });

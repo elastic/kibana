@@ -99,7 +99,8 @@ const allFailureResultChanges: CrawlerDomainValidationResultChange = {
     message: i18n.translate(
       'xpack.enterpriseSearch.appSearch.crawler.addDomainForm.contentVerificationFalureMessage',
       {
-        defaultMessage: 'Unable to verify content because the "Network Connectivity" check failed.',
+        defaultMessage:
+          'Unable to verify content because the "Indexing Restrictions" check failed.',
       }
     ),
   },
