@@ -63,6 +63,7 @@ describe('getSource', () => {
           ...documentSourceDescriptor,
           applyGlobalQuery: false,
           applyGlobalTime: false,
+          applyForceRefresh: false,
         }),
         layerDescriptor: BlendedVectorLayer.createDescriptor(
           {
@@ -95,7 +96,7 @@ describe('getSource', () => {
         indexPatternId: 'myIndexPattern',
         applyGlobalQuery: false,
         applyGlobalTime: false,
-        applyForceRefresh: true,
+        applyForceRefresh: false,
       } as AbstractESSourceDescriptor);
     });
   });

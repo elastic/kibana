@@ -60,6 +60,7 @@ function getClusterSource(documentSource: IESSource, documentStyle: IVectorStyle
   });
   clusterSourceDescriptor.applyGlobalQuery = documentSource.getApplyGlobalQuery();
   clusterSourceDescriptor.applyGlobalTime = documentSource.getApplyGlobalTime();
+  clusterSourceDescriptor.applyForceRefresh = documentSource.getApplyForceRefresh();
   clusterSourceDescriptor.metrics = [
     {
       type: AGG_TYPE.COUNT,

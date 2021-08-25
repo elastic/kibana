@@ -110,7 +110,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
     return this._descriptor.applyGlobalTime;
   }
 
-  getRespondToForceRefresh(): boolean {
+  getApplyForceRefresh(): boolean {
     return this._descriptor.applyForceRefresh;
   }
 

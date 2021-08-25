@@ -60,7 +60,7 @@ export interface ISource {
   getFieldNames(): string[];
   getApplyGlobalQuery(): boolean;
   getApplyGlobalTime(): boolean;
-  getRespondToForceRefresh(): boolean;
+  getApplyForceRefresh(): boolean;
   getIndexPatternIds(): string[];
   getQueryableIndexPatternIds(): string[];
   getGeoGridPrecision(zoom: number): number;
@@ -144,7 +144,7 @@ export class AbstractSource implements ISource {
     return false;
   }
 
-  getRespondToForceRefresh(): boolean {
+  getApplyForceRefresh(): boolean {
     return false;
   }
 
