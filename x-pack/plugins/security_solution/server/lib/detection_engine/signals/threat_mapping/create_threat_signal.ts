@@ -43,7 +43,7 @@ export const createThreatSignal = async ({
     threatList: currentThreatList,
   });
 
-  if (threatFilter.query.bool.should.length === 0) {
+  if (!threatFilter.query || threatFilter.query?.bool.should.length === 0) {
     // empty threat list and we do not want to return everything as being
     // a hit so opt to return the existing result.
     logger.debug(
@@ -64,7 +64,7 @@ export const createThreatSignal = async ({
 
     logger.debug(
       buildRuleMessage(
-        `${threatFilter.query.bool.should.length} indicator items are being checked for existence of matches`
+        `${threatFilter.query?.bool.should.length} indicator items are being checked for existence of matches`
       )
     );
 
@@ -93,7 +93,7 @@ export const createThreatSignal = async ({
     logger.debug(
       buildRuleMessage(
         `${
-          threatFilter.query.bool.should.length
+          threatFilter.query?.bool.should.length
         } items have completed match checks and the total times to search were ${
           result.searchAfterTimes.length !== 0 ? result.searchAfterTimes : '(unknown) '
         }ms`

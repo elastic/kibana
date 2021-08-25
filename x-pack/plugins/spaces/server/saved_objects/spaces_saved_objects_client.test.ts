@@ -533,27 +533,94 @@ const ERROR_NAMESPACE_SPECIFIED = 'Spaces currently determines the namespaces';
     });
 
     describe('#openPointInTimeForType', () => {
-      test(`throws error if options.namespace is specified`, async () => {
-        const { client } = createSpacesSavedObjectsClient();
+      test(`throws error if if user is unauthorized in this space`, async () => {
+        const { client, baseClient, spacesService } = createSpacesSavedObjectsClient();
+        const spacesClient = spacesClientMock.create();
+        spacesClient.getAll.mockResolvedValue([]);
+        spacesService.createSpacesClient.mockReturnValue(spacesClient);
 
-        await expect(client.openPointInTimeForType('foo', { namespace: 'bar' })).rejects.toThrow(
-          ERROR_NAMESPACE_SPECIFIED
-        );
+        await expect(
+          client.openPointInTimeForType('foo', { namespaces: ['bar'] })
+        ).rejects.toThrowError('Bad Request');
+
+        expect(baseClient.openPointInTimeForType).not.toHaveBeenCalled();
       });
 
-      test(`supplements options with the current namespace`, async () => {
+      test(`throws error if if user is unauthorized in any space`, async () => {
+        const { client, baseClient, spacesService } = createSpacesSavedObjectsClient();
+        const spacesClient = spacesClientMock.create();
+        spacesClient.getAll.mockRejectedValue(Boom.unauthorized());
+        spacesService.createSpacesClient.mockReturnValue(spacesClient);
+
+        await expect(
+          client.openPointInTimeForType('foo', { namespaces: ['bar'] })
+        ).rejects.toThrowError('Bad Request');
+
+        expect(baseClient.openPointInTimeForType).not.toHaveBeenCalled();
+      });
+
+      test(`filters options.namespaces based on authorization`, async () => {
+        const { client, baseClient, spacesService } = createSpacesSavedObjectsClient();
+        const expectedReturnValue = { id: 'abc123' };
+        baseClient.openPointInTimeForType.mockReturnValue(Promise.resolve(expectedReturnValue));
+
+        const spacesClient = spacesService.createSpacesClient(
+          null as any
+        ) as jest.Mocked<SpacesClient>;
+        spacesClient.getAll.mockImplementation(() =>
+          Promise.resolve([
+            { id: 'ns-1', name: '', disabledFeatures: [] },
+            { id: 'ns-2', name: '', disabledFeatures: [] },
+          ])
+        );
+
+        const options = Object.freeze({ namespaces: ['ns-1', 'ns-3'] });
+        const actualReturnValue = await client.openPointInTimeForType(['foo', 'bar'], options);
+
+        expect(actualReturnValue).toBe(expectedReturnValue);
+        expect(baseClient.openPointInTimeForType).toHaveBeenCalledWith(['foo', 'bar'], {
+          namespaces: ['ns-1'],
+        });
+        expect(spacesClient.getAll).toHaveBeenCalledWith({ purpose: 'findSavedObjects' });
+      });
+
+      test(`translates options.namespaces: ['*']`, async () => {
+        const { client, baseClient, spacesService } = createSpacesSavedObjectsClient();
+        const expectedReturnValue = { id: 'abc123' };
+        baseClient.openPointInTimeForType.mockReturnValue(Promise.resolve(expectedReturnValue));
+
+        const spacesClient = spacesService.createSpacesClient(
+          null as any
+        ) as jest.Mocked<SpacesClient>;
+        spacesClient.getAll.mockImplementation(() =>
+          Promise.resolve([
+            { id: 'ns-1', name: '', disabledFeatures: [] },
+            { id: 'ns-2', name: '', disabledFeatures: [] },
+          ])
+        );
+
+        const options = Object.freeze({ namespaces: ['*'] });
+        const actualReturnValue = await client.openPointInTimeForType(['foo', 'bar'], options);
+
+        expect(actualReturnValue).toBe(expectedReturnValue);
+        expect(baseClient.openPointInTimeForType).toHaveBeenCalledWith(['foo', 'bar'], {
+          namespaces: ['ns-1', 'ns-2'],
+        });
+        expect(spacesClient.getAll).toHaveBeenCalledWith({ purpose: 'findSavedObjects' });
+      });
+
+      test(`supplements options with the current namespace if unspecified`, async () => {
         const { client, baseClient } = createSpacesSavedObjectsClient();
         const expectedReturnValue = { id: 'abc123' };
         baseClient.openPointInTimeForType.mockReturnValue(Promise.resolve(expectedReturnValue));
 
-        const options = Object.freeze({ foo: 'bar' });
-        // @ts-expect-error
+        const options = Object.freeze({ keepAlive: '2m' });
         const actualReturnValue = await client.openPointInTimeForType('foo', options);
 
         expect(actualReturnValue).toBe(expectedReturnValue);
         expect(baseClient.openPointInTimeForType).toHaveBeenCalledWith('foo', {
-          foo: 'bar',
-          namespace: currentSpace.expectedNamespace,
+          keepAlive: '2m',
+          namespaces: [currentSpace.expectedNamespace ?? DEFAULT_SPACE_ID],
         });
       });
     });
