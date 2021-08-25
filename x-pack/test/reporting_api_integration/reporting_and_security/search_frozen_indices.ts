@@ -64,9 +64,6 @@ export default function ({ getService }: FtrProviderContext) {
     it('Search includes frozen indices based on Advanced Setting', async () => {
       await kibanaServer.uiSettings.update({ 'csv:quoteValues': true });
 
-      // setup: settings and clear data from previous testing
-      await esSupertest.delete('/test2,test2,test3');
-
       // setup: add multiple indices of test data
       await Promise.all([
         esSupertest

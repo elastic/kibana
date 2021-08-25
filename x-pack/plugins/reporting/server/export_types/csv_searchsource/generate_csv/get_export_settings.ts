@@ -59,7 +59,7 @@ export const getExportSettings = async (
     }
   }
 
-  // Separator, QuoteValues
+  // Advanced Settings that affect search export + CSV
   const [includeFrozen, separator, quoteValues] = await Promise.all([
     client.get(UI_SETTINGS_SEARCH_INCLUDE_FROZEN),
     client.get(UI_SETTINGS_CSV_SEPARATOR),
