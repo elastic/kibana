@@ -34,7 +34,6 @@ import { OsqueryManagerPackagePolicyInputStream } from '../../common/types';
 import { ScheduledQueryErrorsTable } from './scheduled_query_errors_table';
 import { useScheduledQueryGroupQueryLastResults } from './use_scheduled_query_group_query_last_results';
 import { useScheduledQueryGroupQueryErrors } from './use_scheduled_query_group_query_errors';
-import { PreferenceFormattedDate } from '../components/preference_formatted_date';
 
 const VIEW_IN_DISCOVER = i18n.translate(
   'xpack.osquery.scheduledQueryGroup.queriesTable.viewDiscoverResultsActionAriaLabel',
@@ -420,11 +419,7 @@ const ScheduledQueryLastResults: React.FC<ScheduledQueryLastResultsProps> = ({
     <EuiFlexGroup gutterSize="s" alignItems="center">
       <EuiFlexItem grow={4}>
         {lastResultsData.first_event_ingested_time?.value ? (
-          <EuiToolTip
-            content={
-              <PreferenceFormattedDate value={lastResultsData.first_event_ingested_time?.value} />
-            }
-          >
+          <EuiToolTip content={lastResultsData.first_event_ingested_time?.value}>
             <>{moment(lastResultsData.first_event_ingested_time?.value).fromNow()}</>
           </EuiToolTip>
         ) : (
