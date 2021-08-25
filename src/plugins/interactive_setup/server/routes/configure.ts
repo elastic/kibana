@@ -27,29 +27,34 @@ export function defineConfigureRoute({
       validate: {
         query: schema.object({
           code: schema.maybe(schema.string()),
-            }),
+        }),
         body: schema.object({
           host: schema.uri({ scheme: ['http', 'https'] }),
-            username: schema.maybe(
-              schema.string({
+          username: schema.maybe(
+            schema.string({
               validate: (value: string) => {
-                  if (value === 'elastic') {
-                    return (
-                      'value of "elastic" is forbidden. This is a superuser account that can obfuscate ' +
-                      'privilege-related issues. You should use the "kibana_system" user instead.'
-                    );
-                  }
-                },
-              })
-            ),
-            password: schema.maybe(schema.string()),
+                if (value === 'elastic') {
+                  return (
+                    'value of "elastic" is forbidden. This is a superuser account that can obfuscate ' +
+                    'privilege-related issues. You should use the "kibana_system" user instead.'
+                  );
+                }
+              },
+            })
+          ),
+          password: schema.conditional(
+            schema.siblingRef('username'),
+            schema.string(),
+            schema.string(),
+            schema.never()
+          ),
           caCert: schema.conditional(
-            schema.siblingRef('hosts'),
+            schema.siblingRef('host'),
             schema.uri({ scheme: 'https' }),
             schema.string(),
             schema.never()
           ),
-          }),
+        }),
       },
       options: { authRequired: false },
     },
