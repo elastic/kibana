@@ -10,6 +10,7 @@ import { EuiLoadingChart } from '@elastic/eui';
 import { useConsoleService } from './console_provider';
 import { Command } from '../service/console_service';
 import { CommandExecutionFailure } from './command_execution_failure';
+import { UserCommandInput } from './user_command_input';
 
 export interface CommandExecutionOutputProps {
   command: Command;
@@ -33,7 +34,7 @@ export const CommandExecutionOutput = memo<CommandExecutionOutputProps>(({ comma
 
   return (
     <div>
-      <code>{command.input}</code>
+      <UserCommandInput input={command.input} />
       {isRunning && (
         <>
           <EuiLoadingChart size="m" mono style={{ marginLeft: '0.5em' }} />

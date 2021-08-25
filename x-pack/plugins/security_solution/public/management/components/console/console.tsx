@@ -72,7 +72,7 @@ export const Console = memo<ConsoleProps>(({ prompt }) => {
           return [
             ...prevState,
             <HistoryItem>
-              <HelpOutput>{helpOutput}</HelpOutput>
+              <HelpOutput input={commandInput.input}>{helpOutput}</HelpOutput>
             </HistoryItem>,
           ];
         });

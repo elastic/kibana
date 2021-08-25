@@ -7,9 +7,17 @@
 
 import React, { memo, PropsWithChildren } from 'react';
 import { EuiCallOut } from '@elastic/eui';
+import { UserCommandInput } from './user_command_input';
 
-export type HelpOutputProps = PropsWithChildren<{}>;
-export const HelpOutput = memo<HelpOutputProps>(({ children }) => {
-  return <EuiCallOut color="primary">{children}</EuiCallOut>;
+export type HelpOutputProps = PropsWithChildren<{ input: string }>;
+export const HelpOutput = memo<HelpOutputProps>(({ input, children }) => {
+  return (
+    <div>
+      <div>
+        <UserCommandInput input={input} />
+      </div>
+      <EuiCallOut color="primary">{children}</EuiCallOut>
+    </div>
+  );
 });
 HelpOutput.displayName = 'HelpOutput';
