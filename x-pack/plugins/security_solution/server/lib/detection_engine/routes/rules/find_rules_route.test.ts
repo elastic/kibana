@@ -17,7 +17,6 @@ import {
 } from '../__mocks__/request_responses';
 import { findRulesRoute } from './find_rules_route';
 
-jest.mock('../../signals/rule_status_service');
 describe('find_rules', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();

@@ -30,11 +30,11 @@ export function getExactDate(rawDate: string) {
 }
 
 export function getDateRange({
-  state,
+  state = {},
   rangeFrom,
   rangeTo,
 }: {
-  state: IUrlParams;
+  state?: IUrlParams;
   rangeFrom?: string;
   rangeTo?: string;
 }) {
