@@ -59,6 +59,7 @@ export interface CaseViewComponentProps {
    * **NOTE**: Do not hold on to the `.current` object, as it could become stale
    */
   refreshRef?: MutableRefObject<CaseViewRefreshPropInterface>;
+  hideSyncAlerts?: boolean;
 }
 
 export interface CaseViewProps extends CaseViewComponentProps {
@@ -101,6 +102,7 @@ export const CaseComponent = React.memo<CaseComponentProps>(
     useFetchAlertData,
     userCanCrud,
     refreshRef,
+    hideSyncAlerts = false,
   }) => {
     const [initLoadingData, setInitLoadingData] = useState(true);
     const init = useRef(true);
@@ -389,7 +391,7 @@ export const CaseComponent = React.memo<CaseComponentProps>(
               caseData={caseData}
               currentExternalIncident={currentExternalIncident}
               userCanCrud={userCanCrud}
-              disableAlerting={ruleDetailsNavigation == null}
+              disableAlerting={ruleDetailsNavigation == null || hideSyncAlerts}
               isLoading={isLoading && (updateKey === 'status' || updateKey === 'settings')}
               onRefresh={handleRefresh}
               onUpdateField={onUpdateField}
@@ -509,6 +511,7 @@ export const CaseView = React.memo(
     useFetchAlertData,
     userCanCrud,
     refreshRef,
+    hideSyncAlerts,
   }: CaseViewProps) => {
     const { data, isLoading, isError, fetchCase, updateCase } = useGetCase(caseId, subCaseId);
     if (isError) {
@@ -548,6 +551,7 @@ export const CaseView = React.memo(
               useFetchAlertData={useFetchAlertData}
               userCanCrud={userCanCrud}
               refreshRef={refreshRef}
+              hideSyncAlerts={hideSyncAlerts}
             />
           </OwnerProvider>
         </CasesTimelineIntegrationProvider>
