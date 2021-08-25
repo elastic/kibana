@@ -406,6 +406,7 @@ const alertsDefaultDataStream = {
 export class EndpointDocGenerator extends BaseDataGenerator {
   commonInfo: HostInfo;
   sequence: number = 0;
+
   /**
    * The EndpointDocGenerator parameters
    *
@@ -523,6 +524,7 @@ export class EndpointDocGenerator extends BaseDataGenerator {
       data_stream: metadataDataStream,
     };
   }
+
   /**
    * Creates a malware alert from the simulated host represented by this EndpointDocGenerator
    * @param ts - Timestamp to put in the event
@@ -744,6 +746,7 @@ export class EndpointDocGenerator extends BaseDataGenerator {
     }
     return newAlert;
   }
+
   /**
    * Creates an alert from the simulated host represented by this EndpointDocGenerator
    * @param ts - Timestamp to put in the event
@@ -896,6 +899,7 @@ export class EndpointDocGenerator extends BaseDataGenerator {
     };
     return newAlert;
   }
+
   /**
    * Returns the default DLLs used in alerts
    */
@@ -1833,6 +1837,62 @@ export class EndpointDocGenerator extends BaseDataGenerator {
                     name: 'endpointpe-model',
                     sha256: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
                   },
+                  {
+                    sha256: '72adef6ff20f5de3ea68f921a4a268b02220634b9d0a376dba965edd67f4865d',
+                    name: 'diagnostic-configuration-v1',
+                  },
+                  {
+                    sha256: '39fecb66f9337eb33f5c0359f51ad37761ff13e4a7c4be390e03d2c227ac7cf6',
+                    name: 'diagnostic-endpointelf-v1-blocklist',
+                  },
+                  {
+                    sha256: 'e3eb12da99e044ecc7d50cea407bf17f33c546e5309aa7ee661234baed2b7750',
+                    name: 'diagnostic-endpointelf-v1-exceptionlist',
+                  },
+                  {
+                    sha256: '885020b5bb99b3b875f51678efae67874bae37bfcc0036ad86bd2f7cbf767824',
+                    name: 'diagnostic-endpointelf-v1-model',
+                  },
+                  {
+                    sha256: '4e15c040bbb92f7c93f06cd218225de3a760d84a4ac5b9ad0db0436b89a5642e',
+                    name: 'diagnostic-malware-signature-v1-linux',
+                  },
+                  {
+                    sha256: 'a87fc42543167eb0b69c33232009e0954f4b6cc298b928cf5b660a55edafca19',
+                    name: 'diagnostic-rules-linux-v1',
+                  },
+                  {
+                    sha256: '0d4754c43a899fb1e8389d36e95c87b1ed852661fc007041d41b45929a3b34f4',
+                    name: 'endpointelf-v1-blocklist',
+                  },
+                  {
+                    sha256: 'eb9689f4e89f0b8b88f6fde235f1d5d9329c3056a21e6f451e36f23604ff8394',
+                    name: 'endpointelf-v1-exceptionlist',
+                  },
+                  {
+                    sha256: 'ae9943982909af94f2bef6f2418b103935ac731db362dd74de9bfe4b490c61cf',
+                    name: 'endpointelf-v1-model',
+                  },
+                  {
+                    sha256: '4f91518da209eea573d18a3e6c8d767c0668a2df1b600ac5d88d23fc103b1929',
+                    name: 'global-configuration-v1',
+                  },
+                  {
+                    sha256: '0b861efd368264bf9a1107c12f481ab6d3984a2d4ce4eb7a3e677eaa59ed3ba8',
+                    name: 'global-exceptionlist-linux',
+                  },
+                  {
+                    sha256: '9365c603590018c969300dfaec7f8758443f03b0e07a29087cfa19dd78298593',
+                    name: 'global-trustlist-linux-v1',
+                  },
+                  {
+                    sha256: '09bb3f9c736b9f9c71b0a32a08ddd9e51fa073f032ce463047e48adb2fe8a485',
+                    name: 'production-malware-signature-v1-linux',
+                  },
+                  {
+                    sha256: '87a0362ca4436dd4ea11def8ba10319c4c16210ff51d797a05af7afabb74c749',
+                    name: 'production-rules-linux-v1',
+                  },
                 ],
               },
               user: {
@@ -1841,6 +1901,18 @@ export class EndpointDocGenerator extends BaseDataGenerator {
                   {
                     name: 'user-model',
                     sha256: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
+                  },
+                  {
+                    sha256: 'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+                    name: 'endpoint-eventfilterlist-linux-v1',
+                  },
+                  {
+                    sha256: 'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+                    name: 'endpoint-exceptionlist-linux-v1',
+                  },
+                  {
+                    sha256: 'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+                    name: 'endpoint-trustlist-linux-v1',
                   },
                 ],
               },
