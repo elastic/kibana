@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { cloneDeep } from 'lodash';
 import { POLICY_ELASTIC_AGENT_ON_CLOUD } from '../../../common/fleet';
 import { APMPluginSetupDependencies } from '../../types';
 import { APM_PACKAGE_NAME } from './get_cloud_apm_package_policy';
@@ -48,7 +47,7 @@ function preprocessLegacyFields({
 }: {
   apmServerSchema: Record<string, any>;
 }) {
-  const copyOfApmServerSchema = cloneDeep(apmServerSchema);
+  const copyOfApmServerSchema = { ...apmServerSchema };
   [
     {
       key: 'apm-server.auth.anonymous.rate_limit.event_limit',
