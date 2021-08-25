@@ -362,6 +362,7 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
               }
             </h1>
           }
+          actions={this.renderCreateButton()}
         />
       );
     }
