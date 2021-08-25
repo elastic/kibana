@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { FC, MouseEvent } from 'react';
+import React, { FC, MouseEvent, useEffect, useState } from 'react';
 import {
   EuiButtonEmpty,
   EuiFlexGroup,
@@ -32,9 +32,18 @@ interface Props {
 }
 
 export const ManageData: FC<Props> = ({ addBasePath, application, features }) => {
-  if (features.length) {
-    const { trackUiMetric } = getServices();
+  const { share, trackUiMetric } = getServices();
 
+  const [consoleHref, setConsoleHref] = useState<string | undefined>(undefined);
+  useEffect(() => {
+    async function getHref() {
+      const url = await share.url.locators.get('CONSOLE_APP_LOCATOR')?.getUrl({});
+      setConsoleHref(url);
+    }
+    getHref();
+  }, [share]);
+
+  if (features.length) {
     const {
       management: isManagementEnabled,
       dev_tools: isDevToolsEnabled,
@@ -67,7 +76,7 @@ export const ManageData: FC<Props> = ({ addBasePath, application, features }) =>
                           className="kbnOverviewPageHeader__actionButton"
                           flush="both"
                           iconType="wrench"
-                          href={addBasePath('/app/dev_tools#/console')}
+                          href={consoleHref}
                         >
                           <FormattedMessage
                             id="home.manageData.devToolsButtonLabel"

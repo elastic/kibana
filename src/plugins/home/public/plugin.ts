@@ -35,6 +35,7 @@ import { UsageCollectionSetup } from '../../usage_collection/public';
 import { UrlForwardingSetup, UrlForwardingStart } from '../../url_forwarding/public';
 import { AppNavLinkStatus } from '../../../core/public';
 import { PLUGIN_ID, HOME_APP_BASE_PATH } from '../common/constants';
+import { SharePluginSetup } from '../../share/public';
 
 export interface HomePluginStartDependencies {
   data: DataPublicPluginStart;
@@ -43,6 +44,7 @@ export interface HomePluginStartDependencies {
 }
 
 export interface HomePluginSetupDependencies {
+  share: SharePluginSetup;
   usageCollection?: UsageCollectionSetup;
   urlForwarding: UrlForwardingSetup;
 }
@@ -64,7 +66,7 @@ export class HomePublicPlugin
 
   public setup(
     core: CoreSetup<HomePluginStartDependencies>,
-    { urlForwarding, usageCollection }: HomePluginSetupDependencies
+    { share, urlForwarding, usageCollection }: HomePluginSetupDependencies
   ): HomePublicPluginSetup {
     core.application.register({
       id: PLUGIN_ID,
@@ -79,6 +81,7 @@ export class HomePublicPlugin
           { telemetry, data, urlForwarding: urlForwardingStart },
         ] = await core.getStartServices();
         setServices({
+          share,
           trackUiMetric,
           kibanaVersion: this.initializerContext.env.packageInfo.version,
           http: coreStart.http,

@@ -15,7 +15,7 @@ import { AppSetupUIPluginDependencies } from './types';
 export class ConsoleUIPlugin implements Plugin<void, void, AppSetupUIPluginDependencies> {
   public setup(
     { notifications, getStartServices, http }: CoreSetup,
-    { devTools, home, usageCollection }: AppSetupUIPluginDependencies
+    { devTools, home, share, usageCollection }: AppSetupUIPluginDependencies
   ) {
     if (home) {
       home.featureCatalogue.register({
@@ -58,6 +58,17 @@ export class ConsoleUIPlugin implements Plugin<void, void, AppSetupUIPluginDepen
           usageCollection,
           element,
         });
+      },
+    });
+
+    share.url.locators.create({
+      id: 'CONSOLE_APP_LOCATOR',
+      getLocation: async ({ loadFrom }: { loadFrom?: string }) => {
+        return {
+          app: 'dev_tools',
+          path: `#/console${loadFrom ? `?load_from=${loadFrom}` : ''}`,
+          state: { loadFrom },
+        };
       },
     });
   }

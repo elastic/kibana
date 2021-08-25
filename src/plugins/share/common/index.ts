@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { LocatorDefinition, LocatorPublic, useLocatorUrl } from './url_service';
+export { ILocatorClient, LocatorDefinition, LocatorPublic, useLocatorUrl } from './url_service';
