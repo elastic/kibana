@@ -5,8 +5,15 @@
  * 2.0.
  */
 
+import { ROLES } from '../../../common/test';
 import { getNewRule } from '../../objects/rule';
-import { ALERTS_COUNT, SELECTED_ALERTS, TAKE_ACTION_POPOVER_BTN } from '../../screens/alerts';
+import {
+  ALERTS_COUNT,
+  ALERT_CHECKBOX,
+  SELECTED_ALERTS,
+  TAKE_ACTION_POPOVER_BTN,
+  TIMELINE_CONTEXT_MENU_BTN,
+} from '../../screens/alerts';
 
 import {
   closeAlerts,
@@ -14,27 +21,20 @@ import {
   goToOpenedAlerts,
   openFirstAlert,
   selectNumberOfAlerts,
-  waitForAlertsPanelToBeLoaded,
   waitForAlerts,
-  waitForAlertsIndexToBeCreated,
+  loadAlertsTableWithAlerts,
 } from '../../tasks/alerts';
-import { createCustomRuleActivated } from '../../tasks/api_calls/rules';
 import { cleanKibana } from '../../tasks/common';
 import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
-import { loginAndWaitForPage } from '../../tasks/login';
+import { login, waitForPageWithoutDateRange } from '../../tasks/login';
 import { refreshPage } from '../../tasks/security_header';
-
 import { ALERTS_URL } from '../../urls/navigation';
 
 describe('Opening alerts', () => {
   beforeEach(() => {
     cleanKibana();
-    loginAndWaitForPage(ALERTS_URL);
-    waitForAlertsPanelToBeLoaded();
-    waitForAlertsIndexToBeCreated();
-    createCustomRuleActivated(getNewRule());
-    refreshPage();
-    waitForAlertsToPopulate(500);
+    loadAlertsTableWithAlerts(getNewRule());
+
     selectNumberOfAlerts(5);
 
     cy.get(SELECTED_ALERTS).should('have.text', `Selected 5 alerts`);
@@ -42,11 +42,39 @@ describe('Opening alerts', () => {
     closeAlerts();
     waitForAlerts();
     refreshPage();
+    waitForAlertsToPopulate();
+  });
+
+  afterEach(() => {
+    cleanKibana();
+  });
+
+  context('read only user', () => {
+    beforeEach(() => {
+      login(ROLES.reader);
+      waitForPageWithoutDateRange(ALERTS_URL, ROLES.reader);
+    });
+
+    it('Does not show user option to select an alert to open', () => {
+      goToClosedAlerts();
+
+      // should not see checkboxes. Bulk action options only show when alerts
+      // have been selected, hence this check here
+      cy.get(ALERT_CHECKBOX).should('not.exist');
+    });
+
+    it('Does not show user option to mark alerts as acknowledged', () => {
+      goToClosedAlerts();
+
+      // Read only user is read for cases AND alerts, leaving no actions
+      // for user to take from table. If this test is failing, it's likely
+      // a new action has been added and either not put behind privileges
+      // logic or is an action that a read only user can take
+      cy.get(TIMELINE_CONTEXT_MENU_BTN).should('not.exist');
+    });
   });
 
   it('Open one alert when more than one closed alerts are selected', () => {
-    waitForAlertsToPopulate();
-
     cy.get(ALERTS_COUNT)
       .invoke('text')
       .then((numberOfOpenedAlertsText) => {

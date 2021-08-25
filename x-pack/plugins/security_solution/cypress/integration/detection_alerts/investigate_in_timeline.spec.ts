@@ -8,28 +8,17 @@
 import { getNewRule } from '../../objects/rule';
 import { PROVIDER_BADGE } from '../../screens/timeline';
 
-import {
-  investigateFirstAlertInTimeline,
-  waitForAlertsIndexToBeCreated,
-  waitForAlertsPanelToBeLoaded,
-} from '../../tasks/alerts';
-import { createCustomRuleActivated } from '../../tasks/api_calls/rules';
+import { investigateFirstAlertInTimeline, loadAlertsTableWithAlerts } from '../../tasks/alerts';
 import { cleanKibana } from '../../tasks/common';
-import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
-import { loginAndWaitForPage } from '../../tasks/login';
-import { refreshPage } from '../../tasks/security_header';
 
-import { ALERTS_URL } from '../../urls/navigation';
-
-describe('Alerts timeline', () => {
+describe('Alerts investigate in timeline', () => {
   beforeEach(() => {
     cleanKibana();
-    loginAndWaitForPage(ALERTS_URL);
-    waitForAlertsPanelToBeLoaded();
-    waitForAlertsIndexToBeCreated();
-    createCustomRuleActivated(getNewRule());
-    refreshPage();
-    waitForAlertsToPopulate(500);
+    loadAlertsTableWithAlerts(getNewRule(), 100);
+  });
+
+  afterEach(() => {
+    cleanKibana();
   });
 
   it('Investigate alert in default timeline', () => {

@@ -5,36 +5,58 @@
  * 2.0.
  */
 
+import { ROLES } from '../../../common/test';
+import {
+  ALERTS_COUNT,
+  ALERT_CHECKBOX,
+  TAKE_ACTION_POPOVER_BTN,
+  TIMELINE_CONTEXT_MENU_BTN,
+} from '../../screens/alerts';
 import { getNewRule } from '../../objects/rule';
-import { ALERTS_COUNT, TAKE_ACTION_POPOVER_BTN } from '../../screens/alerts';
-
 import {
   selectNumberOfAlerts,
-  waitForAlertsPanelToBeLoaded,
   waitForAlerts,
   waitForAlertsToBeLoaded,
   markAcknowledgedFirstAlert,
   goToAcknowledgedAlerts,
-  waitForAlertsIndexToBeCreated,
+  loadAlertsTableWithAlerts,
   goToOpenedAlerts,
 } from '../../tasks/alerts';
-import { createCustomRuleActivated } from '../../tasks/api_calls/rules';
 import { cleanKibana } from '../../tasks/common';
-import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
-import { loginAndWaitForPage } from '../../tasks/login';
 import { refreshPage } from '../../tasks/security_header';
-
 import { ALERTS_URL } from '../../urls/navigation';
+import { login, postRoleAndUser, waitForPageWithoutDateRange } from '../../tasks/login';
 
-describe.skip('Marking alerts as acknowledged', () => {
+describe('Marking alerts as acknowledged', () => {
   beforeEach(() => {
     cleanKibana();
-    loginAndWaitForPage(ALERTS_URL);
-    waitForAlertsPanelToBeLoaded();
-    waitForAlertsIndexToBeCreated();
-    createCustomRuleActivated(getNewRule());
-    refreshPage();
-    waitForAlertsToPopulate(500);
+    postRoleAndUser(ROLES.reader);
+    loadAlertsTableWithAlerts(getNewRule(), 100);
+  });
+
+  afterEach(() => {
+    cleanKibana();
+  });
+
+  context('read only user', () => {
+    beforeEach(() => {
+      login(ROLES.reader);
+      waitForPageWithoutDateRange(ALERTS_URL, ROLES.reader);
+    });
+
+    it('Does not show user option to select an alert', () => {
+      // should not see checkboxes. Bulk action options only show when alerts
+      // have been selected, hence this check here
+      cy.get(ALERT_CHECKBOX).should('not.exist');
+    });
+
+    it('Does not show user option to mark alerts as acknowledged', () => {
+      // Read only user is read for cases AND alerts, leaving no actions
+      // for user to take from table. If this test is failing, it's likely
+      // a new action has been added and either not put behind privileges
+      // logic or is an action that a read only user can take
+      cy.get(TIMELINE_CONTEXT_MENU_BTN).should('not.exist');
+    });
   });
 
   it('Mark one alert as acknowledged when more than one open alerts are selected', () => {
@@ -51,9 +73,8 @@ describe.skip('Marking alerts as acknowledged', () => {
 
         markAcknowledgedFirstAlert();
         refreshPage();
-        waitForAlertsToBeLoaded();
+        waitForAlertsToBeLoaded(1);
         goToOpenedAlerts();
-        waitForAlertsToBeLoaded();
         const expectedNumberOfAlerts = +numberOfAlerts - numberOfAlertsToBeMarkedAcknowledged;
         cy.get(ALERTS_COUNT).should('have.text', `${expectedNumberOfAlerts} alerts`);
 

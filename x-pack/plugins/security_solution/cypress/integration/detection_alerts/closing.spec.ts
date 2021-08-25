@@ -5,41 +5,72 @@
  * 2.0.
  */
 
+import { ROLES } from '../../../common/test';
 import { getNewRule } from '../../objects/rule';
-import { ALERTS_COUNT, SELECTED_ALERTS, TAKE_ACTION_POPOVER_BTN } from '../../screens/alerts';
+import {
+  ALERTS_COUNT,
+  ALERT_CHECKBOX,
+  SELECTED_ALERTS,
+  TAKE_ACTION_POPOVER_BTN,
+  TIMELINE_CONTEXT_MENU_BTN,
+} from '../../screens/alerts';
 
 import {
   closeFirstAlert,
   closeAlerts,
   goToClosedAlerts,
-  goToOpenedAlerts,
-  openAlerts,
   selectNumberOfAlerts,
-  waitForAlertsPanelToBeLoaded,
   waitForAlerts,
+  waitForAlertsPanelToBeLoaded,
   waitForAlertsIndexToBeCreated,
 } from '../../tasks/alerts';
-import { createCustomRuleActivated, deleteCustomRule } from '../../tasks/api_calls/rules';
+import { createCustomRuleActivated } from '../../tasks/api_calls/rules';
 import { cleanKibana } from '../../tasks/common';
 import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
-import { loginAndWaitForPage } from '../../tasks/login';
-import { refreshPage } from '../../tasks/security_header';
-
+import {
+  login,
+  loginAndWaitForPageWithoutDateRange,
+  waitForPageWithoutDateRange,
+} from '../../tasks/login';
 import { ALERTS_URL } from '../../urls/navigation';
 
 describe('Closing alerts', () => {
   beforeEach(() => {
     cleanKibana();
-    loginAndWaitForPage(ALERTS_URL);
+    loginAndWaitForPageWithoutDateRange(ALERTS_URL, ROLES.platform_engineer);
     waitForAlertsPanelToBeLoaded();
     waitForAlertsIndexToBeCreated();
     createCustomRuleActivated(getNewRule(), '1', '100m', 100);
-    refreshPage();
+    loginAndWaitForPageWithoutDateRange(ALERTS_URL, ROLES.platform_engineer);
     waitForAlertsToPopulate(100);
-    deleteCustomRule();
   });
 
-  it('Closes and opens alerts', () => {
+  afterEach(() => {
+    cleanKibana();
+  });
+
+  context('read only user', () => {
+    beforeEach(() => {
+      login(ROLES.reader);
+      waitForPageWithoutDateRange(ALERTS_URL, ROLES.reader);
+    });
+
+    it('Does not show user option to select an alert to close', () => {
+      // should not see checkboxes. Bulk action options only show when alerts
+      // have been selected, hence this check here
+      cy.get(ALERT_CHECKBOX).should('not.exist');
+    });
+
+    it('Does not show user option to mark alerts as acknowledged', () => {
+      // Read only user is read for cases AND alerts, leaving no actions
+      // for user to take from table. If this test is failing, it's likely
+      // a new action has been added and either not put behind privileges
+      // logic or is an action that a read only user can take
+      cy.get(TIMELINE_CONTEXT_MENU_BTN).should('not.exist');
+    });
+  });
+
+  it('Closes alerts', () => {
     const numberOfAlertsToBeClosed = 3;
     cy.get(ALERTS_COUNT)
       .invoke('text')
@@ -61,28 +92,6 @@ describe('Closing alerts', () => {
         waitForAlerts();
 
         cy.get(ALERTS_COUNT).should('have.text', `${numberOfAlertsToBeClosed} alerts`);
-
-        const numberOfAlertsToBeOpened = 1;
-        selectNumberOfAlerts(numberOfAlertsToBeOpened);
-
-        cy.get(SELECTED_ALERTS).should('have.text', `Selected ${numberOfAlertsToBeOpened} alert`);
-
-        openAlerts();
-        waitForAlerts();
-
-        const expectedNumberOfClosedAlertsAfterOpened = 2;
-        cy.get(ALERTS_COUNT).should(
-          'have.text',
-          `${expectedNumberOfClosedAlertsAfterOpened} alerts`
-        );
-
-        goToOpenedAlerts();
-        waitForAlerts();
-
-        const expectedNumberOfOpenedAlerts =
-          +numberOfAlerts - expectedNumberOfClosedAlertsAfterOpened;
-
-        cy.get(ALERTS_COUNT).should('have.text', `${expectedNumberOfOpenedAlerts} alerts`);
       });
   });
 

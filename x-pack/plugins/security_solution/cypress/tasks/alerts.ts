@@ -34,10 +34,21 @@ import {
   ENRICHMENT_QUERY_START_INPUT,
   THREAT_INTEL_TAB,
 } from '../screens/alerts_details';
+import { ALERTS_URL } from '../urls/navigation';
+import { waitForAlertsToPopulate } from './create_new_rule';
+import { createCustomRuleActivated } from './api_calls/rules';
+import { loginAndWaitForPageWithoutDateRange } from './login';
+import { ROLES } from '../../common/test';
+import { CustomRule } from '../objects/rule';
 
 export const addExceptionFromFirstAlert = () => {
-  cy.get(TIMELINE_CONTEXT_MENU_BTN).first().click();
-  cy.get(ADD_EXCEPTION_BTN).click();
+  cy.get(TIMELINE_CONTEXT_MENU_BTN)
+    .first()
+    .pipe(($el) => $el.trigger('click'))
+    .should('be.visible');
+  cy.get(ADD_EXCEPTION_BTN)
+    .pipe(($el) => $el.trigger('click'))
+    .should('be.visible');
 };
 
 export const closeFirstAlert = () => {
@@ -169,7 +180,15 @@ export const waitForAlertsPanelToBeLoaded = () => {
   cy.get(LOADING_ALERTS_PANEL).should('not.exist');
 };
 
-export const waitForAlertsToBeLoaded = () => {
-  const expectedNumberOfDisplayedAlerts = 25;
-  cy.get(SELECT_EVENT_CHECKBOX).should('have.length', expectedNumberOfDisplayedAlerts);
+export const waitForAlertsToBeLoaded = (numberOfAlerts = 25) => {
+  cy.get(SELECT_EVENT_CHECKBOX).should('have.length.at.least', numberOfAlerts);
+};
+
+export const loadAlertsTableWithAlerts = (newRuleArgs: CustomRule, alertsToWaitFor = 500) => {
+  loginAndWaitForPageWithoutDateRange(ALERTS_URL, ROLES.platform_engineer);
+  waitForAlertsPanelToBeLoaded();
+  waitForAlertsIndexToBeCreated();
+  createCustomRuleActivated(newRuleArgs);
+  loginAndWaitForPageWithoutDateRange(ALERTS_URL, ROLES.platform_engineer);
+  waitForAlertsToPopulate(alertsToWaitFor);
 };

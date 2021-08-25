@@ -5,6 +5,11 @@
  * 2.0.
  */
 
+export const ADD_EXCEPTION_ACTION_BTN = '[data-test-subj="add-exception-menu-item"]';
+
+export const ADD_ENDPOINT_EXCEPTION_ACTION_BTN =
+  '[data-test-subj="add-endpoint-exception-menu-item"]';
+
 export const ALERT_FLYOUT = '[data-test-subj="timeline:details-panel:flyout"]';
 
 export const CELL_TEXT = '.euiText';
@@ -18,6 +23,8 @@ export const ENRICHMENT_QUERY_START_INPUT = '.start-picker';
 export const ENRICHMENT_QUERY_END_INPUT = '.end-picker';
 
 export const INDICATOR_MATCH_ENRICHMENT_SECTION = '[data-test-subj="threat-match-detected"]';
+
+export const INVESTIGATE_IN_TIMELINE_BTN = '[data-test-subj="investigate-in-timeline-action-item"]';
 
 export const INVESTIGATION_TIME_ENRICHMENT_SECTION =
   '[data-test-subj="enriched-with-threat-intel"]';
@@ -35,6 +42,8 @@ export const TABLE_CELL = '.euiTableRowCell';
 export const TABLE_TAB = '[data-test-subj="tableTab"]';
 
 export const TABLE_ROWS = '.euiTableRow';
+
+export const TAKE_ACTION_BTN = '[data-test-subj="alert-details-take-action-button"] button';
 
 export const THREAT_CONTENT = '[data-test-subj^=draggable-content-]';
 

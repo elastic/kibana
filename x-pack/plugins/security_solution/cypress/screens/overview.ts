@@ -155,3 +155,7 @@ export const OVERVIEW_CTI_LINKS_INFO_INNER_PANEL = '[data-test-subj="cti-inner-p
 export const OVERVIEW_CTI_VIEW_DASHBOARD_BUTTON = '[data-test-subj="cti-view-dashboard-button"]';
 export const OVERVIEW_CTI_TOTAL_EVENT_COUNT = `${OVERVIEW_CTI_LINKS} [data-test-subj="header-panel-subtitle"]`;
 export const OVERVIEW_CTI_ENABLE_MODULE_BUTTON = '[data-test-subj="cti-enable-module-button"]';
+
+export const ALERTS_HISTOGRAM_PANEL = '[data-test-subj="alerts-histogram-panel"]';
+
+export const EXTERNAL_ALERTS_HISTOGRAM_PANEL = '[data-test-subj="alertsByCategoryOverviewPanel"]';
