@@ -6,6 +6,7 @@
  */
 
 import {
+  ALERT_RULE_CONSUMER,
   ALERT_RULE_FROM,
   ALERT_RULE_NAME,
   ALERT_RULE_TO,
@@ -71,6 +72,7 @@ export const CTI_ROW_RENDERER_FIELDS = [
 ];
 
 export const TIMELINE_EVENTS_FIELDS = [
+  ALERT_RULE_CONSUMER,
   '@timestamp',
   ALERT_GROUP_ID,
   ALERT_ORIGINAL_TIME,

@@ -326,7 +326,7 @@
                 "id": "def-server.AlertingAuthorization.Unnamed.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n    ruleTypeRegistry,\n    request,\n    authorization,\n    features,\n    auditLogger,\n    getSpace,\n    getSpaceId,\n    exemptConsumerIds,\n  }",
+                "label": "{\n    ruleTypeRegistry,\n    request,\n    authorization,\n    features,\n    auditLogger,\n    getSpace,\n    getSpaceId,\n  }",
                 "description": [],
                 "signature": [
                   "ConstructorOptions"
@@ -547,6 +547,114 @@
                 "description": [],
                 "signature": [
                   "AlertingAuthorizationFilterOpts"
+                ],
+                "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-server.AlertingAuthorization.getAuthorizationFilter",
+            "type": "Function",
+            "tags": [],
+            "label": "getAuthorizationFilter",
+            "description": [],
+            "signature": [
+              "(authorizationEntity: ",
+              {
+                "pluginId": "alerting",
+                "scope": "server",
+                "docId": "kibAlertingPluginApi",
+                "section": "def-server.AlertingAuthorizationEntity",
+                "text": "AlertingAuthorizationEntity"
+              },
+              ", filterOpts: ",
+              "AlertingAuthorizationFilterOpts",
+              ", operation: ",
+              {
+                "pluginId": "alerting",
+                "scope": "server",
+                "docId": "kibAlertingPluginApi",
+                "section": "def-server.ReadOperations",
+                "text": "ReadOperations"
+              },
+              " | ",
+              {
+                "pluginId": "alerting",
+                "scope": "server",
+                "docId": "kibAlertingPluginApi",
+                "section": "def-server.WriteOperations",
+                "text": "WriteOperations"
+              },
+              ") => Promise<{ filter?: ",
+              "KueryNode",
+              " | ",
+              "JsonObject",
+              " | undefined; ensureRuleTypeIsAuthorized: (ruleTypeId: string, consumer: string, auth: string) => void; logSuccessfulAuthorization: () => void; }>"
+            ],
+            "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "alerting",
+                "id": "def-server.AlertingAuthorization.getAuthorizationFilter.$1",
+                "type": "Enum",
+                "tags": [],
+                "label": "authorizationEntity",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "alerting",
+                    "scope": "server",
+                    "docId": "kibAlertingPluginApi",
+                    "section": "def-server.AlertingAuthorizationEntity",
+                    "text": "AlertingAuthorizationEntity"
+                  }
+                ],
+                "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "alerting",
+                "id": "def-server.AlertingAuthorization.getAuthorizationFilter.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "filterOpts",
+                "description": [],
+                "signature": [
+                  "AlertingAuthorizationFilterOpts"
+                ],
+                "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "alerting",
+                "id": "def-server.AlertingAuthorization.getAuthorizationFilter.$3",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "operation",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "alerting",
+                    "scope": "server",
+                    "docId": "kibAlertingPluginApi",
+                    "section": "def-server.ReadOperations",
+                    "text": "ReadOperations"
+                  },
+                  " | ",
+                  {
+                    "pluginId": "alerting",
+                    "scope": "server",
+                    "docId": "kibAlertingPluginApi",
+                    "section": "def-server.WriteOperations",
+                    "text": "WriteOperations"
+                  }
                 ],
                 "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
                 "deprecated": false,
@@ -1616,7 +1724,7 @@
                 "section": "def-server.RulesClient",
                 "text": "RulesClient"
               },
-              ", \"get\" | \"delete\" | \"create\" | \"find\" | \"update\" | \"aggregate\" | \"enable\" | \"disable\" | \"muteAll\" | \"getAlertState\" | \"getAlertInstanceSummary\" | \"updateApiKey\" | \"unmuteAll\" | \"muteInstance\" | \"unmuteInstance\" | \"listAlertTypes\">"
+              ", \"get\" | \"delete\" | \"create\" | \"find\" | \"resolve\" | \"update\" | \"aggregate\" | \"enable\" | \"disable\" | \"muteAll\" | \"getAlertState\" | \"getAlertInstanceSummary\" | \"updateApiKey\" | \"unmuteAll\" | \"muteInstance\" | \"unmuteInstance\" | \"listAlertTypes\" | \"getSpaceId\">"
             ],
             "path": "x-pack/plugins/alerting/server/plugin.ts",
             "deprecated": false,
@@ -1669,7 +1777,7 @@
                 "section": "def-server.AlertingAuthorization",
                 "text": "AlertingAuthorization"
               },
-              ", \"ensureAuthorized\" | \"getSpaceId\" | \"getAugmentedRuleTypesWithAuthorization\" | \"getFindAuthorizationFilter\" | \"filterByRuleTypeAuthorization\">"
+              ", \"ensureAuthorized\" | \"getSpaceId\" | \"getAugmentedRuleTypesWithAuthorization\" | \"getFindAuthorizationFilter\" | \"getAuthorizationFilter\" | \"filterByRuleTypeAuthorization\">"
             ],
             "path": "x-pack/plugins/alerting/server/plugin.ts",
             "deprecated": false,
@@ -2022,6 +2130,14 @@
             "section": "def-server.FindResult",
             "text": "FindResult"
           },
+          "<Params>>; resolve: <Params extends Record<string, unknown> = never>({ id, }: { id: string; }) => Promise<",
+          {
+            "pluginId": "alerting",
+            "scope": "common",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-common.ResolvedSanitizedRule",
+            "text": "ResolvedSanitizedRule"
+          },
           "<Params>>; update: <Params extends Record<string, unknown> = never>({ id, data, }: ",
           "UpdateOptions",
           "<Params>) => Promise<",
@@ -2052,7 +2168,7 @@
           "MuteOptions",
           ") => Promise<void>; listAlertTypes: () => Promise<Set<",
           "RegistryAlertTypeWithAuth",
-          ">>; }"
+          ">>; getSpaceId: () => string | undefined; }"
         ],
         "path": "x-pack/plugins/alerting/server/index.ts",
         "deprecated": false,
@@ -3858,6 +3974,36 @@
           "RecoveryActionGroupId | \"recovered\""
         ],
         "path": "x-pack/plugins/alerting/common/builtin_action_groups.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.ResolvedSanitizedRule",
+        "type": "Type",
+        "tags": [],
+        "label": "ResolvedSanitizedRule",
+        "description": [],
+        "signature": [
+          "Pick<",
+          {
+            "pluginId": "alerting",
+            "scope": "common",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-common.Alert",
+            "text": "Alert"
+          },
+          "<Params>, \"enabled\" | \"id\" | \"name\" | \"params\" | \"actions\" | \"throttle\" | \"tags\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"notifyWhen\" | \"muteAll\" | \"mutedInstanceIds\" | \"executionStatus\"> & Pick<",
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCoreSavedObjectsPluginApi",
+            "section": "def-server.SavedObjectsResolveResponse",
+            "text": "SavedObjectsResolveResponse"
+          },
+          "<unknown>, \"outcome\" | \"alias_target_id\">"
+        ],
+        "path": "x-pack/plugins/alerting/common/alert.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
