@@ -8,16 +8,8 @@
 
 import { uniqBy } from 'lodash';
 import deepEqual from 'fast-deep-equal';
-import { merge, Observable, pipe, EMPTY } from 'rxjs';
-import {
-  distinctUntilChanged,
-  catchError,
-  switchMap,
-  startWith,
-  filter,
-  mapTo,
-  map,
-} from 'rxjs/operators';
+import { Observable, pipe } from 'rxjs';
+import { distinctUntilChanged, switchMap, filter, mapTo, map } from 'rxjs/operators';
 
 import { DashboardContainer } from '..';
 import { isErrorEmbeddable } from '../../services/embeddable';
@@ -36,7 +28,7 @@ export const syncDashboardIndexPatterns = ({
 }: SyncDashboardIndexPatternsProps) => {
   const updateIndexPatternsOperator = pipe(
     filter((container: DashboardContainer) => !!container && !isErrorEmbeddable(container)),
-    map((container: DashboardContainer): IndexPattern[] => {
+    map((container: DashboardContainer): IndexPattern[] | undefined => {
       let panelIndexPatterns: IndexPattern[] = [];
       Object.values(container.getChildIds()).forEach((id) => {
         const embeddableInstance = container.getChild(id);
@@ -46,18 +38,31 @@ export const syncDashboardIndexPatterns = ({
         panelIndexPatterns.push(...embeddableIndexPatterns);
       });
       panelIndexPatterns = uniqBy(panelIndexPatterns, 'id');
+
+      /**
+       * If no index patterns have been returned yet, and there is at least one embeddable which
+       * hasn't yet loaded, defer the loading of the default index pattern by returning undefined.
+       */
+      if (
+        panelIndexPatterns.length === 0 &&
+        Object.keys(container.getOutput().embeddableLoaded).length > 0 &&
+        Object.values(container.getOutput().embeddableLoaded).some((value) => value === false)
+      ) {
+        return;
+      }
       return panelIndexPatterns;
     }),
     distinctUntilChanged((a, b) =>
       deepEqual(
-        a.map((ip) => ip && ip.id),
-        b.map((ip) => ip && ip.id)
+        a?.map((ip) => ip && ip.id),
+        b?.map((ip) => ip && ip.id)
       )
     ),
     // using switchMap for previous task cancellation
-    switchMap((panelIndexPatterns: IndexPattern[]) => {
+    switchMap((panelIndexPatterns?: IndexPattern[]) => {
       return new Observable((observer) => {
-        if (panelIndexPatterns && panelIndexPatterns.length > 0) {
+        if (!panelIndexPatterns) return;
+        if (panelIndexPatterns.length > 0) {
           if (observer.closed) return;
           onUpdateIndexPatterns(panelIndexPatterns);
           observer.complete();
@@ -72,32 +77,8 @@ export const syncDashboardIndexPatterns = ({
     })
   );
 
-  return merge(
-    // output of dashboard container itself
-    dashboardContainer.getOutput$(),
-    // plus output of dashboard container children,
-    // children may change, so make sure we subscribe/unsubscribe with switchMap
-    dashboardContainer.getOutput$().pipe(
-      map(() => dashboardContainer!.getChildIds()),
-      distinctUntilChanged(deepEqual),
-      switchMap((newChildIds: string[]) =>
-        merge(
-          ...newChildIds.map((childId) =>
-            dashboardContainer!
-              .getChild(childId)
-              .getOutput$()
-              // Embeddables often throw errors into their output streams.
-              // This should not affect dashboard loading
-              .pipe(catchError(() => EMPTY))
-          )
-        )
-      )
-    )
-  )
-    .pipe(
-      mapTo(dashboardContainer),
-      startWith(dashboardContainer), // to trigger initial index pattern update
-      updateIndexPatternsOperator
-    )
+  return dashboardContainer
+    .getOutput$()
+    .pipe(mapTo(dashboardContainer), updateIndexPatternsOperator)
     .subscribe();
 };

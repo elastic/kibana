@@ -1,0 +1,142 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`StatusMessage should render with exact matches 1`] = `
+<EuiCallOut
+  color="success"
+  data-test-subj="createIndexPatternStatusMessage"
+  iconType="check"
+  size="s"
+  title={
+    <span>
+       
+      <FormattedMessage
+        defaultMessage="Your index pattern matches {sourceCount} {sourceCount, plural, one {source} other {sources} }."
+        id="indexPatternEditor.status.successLabel.successDetail"
+        values={
+          Object {
+            "sourceCount": 1,
+          }
+        }
+      />
+    </span>
+  }
+/>
+`;
+
+exports[`StatusMessage should render with no partial matches 1`] = `
+<EuiCallOut
+  color="warning"
+  data-test-subj="createIndexPatternStatusMessage"
+  size="s"
+  title={
+    <span>
+      <FormattedMessage
+        defaultMessage="The index pattern you entered doesn't match any data streams, indices, or index aliases. You can match {strongIndices}."
+        id="indexPatternEditor.status.notMatchLabel.notMatchDetail"
+        values={
+          Object {
+            "strongIndices": <strong>
+              <FormattedMessage
+                defaultMessage="{indicesLength, plural, one {# source} other {# sources} }"
+                id="indexPatternEditor.status.notMatchLabel.allIndicesLabel"
+                values={
+                  Object {
+                    "indicesLength": 2,
+                  }
+                }
+              />
+            </strong>,
+          }
+        }
+      />
+    </span>
+  }
+/>
+`;
+
+exports[`StatusMessage should render with partial matches 1`] = `
+<EuiCallOut
+  color="primary"
+  data-test-subj="createIndexPatternStatusMessage"
+  size="s"
+  title={
+    <span>
+      <FormattedMessage
+        defaultMessage="Your index pattern doesn't match any data streams, indices, or index aliases, but {strongIndices} {matchedIndicesLength, plural, one {is} other {are} } similar."
+        id="indexPatternEditor.status.partialMatchLabel.partialMatchDetail"
+        values={
+          Object {
+            "matchedIndicesLength": 1,
+            "strongIndices": <strong>
+              <FormattedMessage
+                defaultMessage="{matchedIndicesLength, plural, one {source} other {# sources} }"
+                id="indexPatternEditor.status.partialMatchLabel.strongIndicesLabel"
+                values={
+                  Object {
+                    "matchedIndicesLength": 1,
+                  }
+                }
+              />
+            </strong>,
+          }
+        }
+      />
+    </span>
+  }
+/>
+`;
+
+exports[`StatusMessage should render without a query 1`] = `
+<EuiCallOut
+  color="primary"
+  data-test-subj="createIndexPatternStatusMessage"
+  size="s"
+  title={
+    <span>
+      <FormattedMessage
+        defaultMessage="Your index pattern can match {sourceCount, plural, one {# source} other {# sources} }."
+        id="indexPatternEditor.status.matchAnyLabel.matchAnyDetail"
+        values={
+          Object {
+            "sourceCount": 2,
+          }
+        }
+      />
+    </span>
+  }
+/>
+`;
+
+exports[`StatusMessage should show that no indices exist 1`] = `
+<EuiCallOut
+  color="primary"
+  data-test-subj="createIndexPatternStatusMessage"
+  size="s"
+  title={
+    <span>
+      <FormattedMessage
+        defaultMessage="No data streams, indices, or index aliases match your index pattern."
+        id="indexPatternEditor.status.noSystemIndicesLabel"
+        values={Object {}}
+      />
+    </span>
+  }
+/>
+`;
+
+exports[`StatusMessage should show that system indices exist 1`] = `
+<EuiCallOut
+  color="primary"
+  data-test-subj="createIndexPatternStatusMessage"
+  size="s"
+  title={
+    <span>
+      <FormattedMessage
+        defaultMessage="No data streams, indices, or index aliases match your index pattern."
+        id="indexPatternEditor.status.noSystemIndicesLabel"
+        values={Object {}}
+      />
+    </span>
+  }
+/>
+`;

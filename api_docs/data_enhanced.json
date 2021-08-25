@@ -16,10 +16,7 @@
         "signature": [
           "\"ese\""
         ],
-        "source": {
-          "path": "src/plugins/data/common/search/strategies/ese_search/types.ts",
-          "lineNumber": 11
-        },
+        "path": "src/plugins/data/common/search/strategies/ese_search/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -33,10 +30,7 @@
         "signature": [
           "\"eql\""
         ],
-        "source": {
-          "path": "src/plugins/data/common/search/strategies/eql_search/types.ts",
-          "lineNumber": 14
-        },
+        "path": "src/plugins/data/common/search/strategies/eql_search/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       }
@@ -52,10 +46,7 @@
       "signature": [
         "void"
       ],
-      "source": {
-        "path": "x-pack/plugins/data_enhanced/public/plugin.ts",
-        "lineNumber": 37
-      },
+      "path": "x-pack/plugins/data_enhanced/public/plugin.ts",
       "deprecated": false,
       "lifecycle": "start",
       "initialIsOpen": true
@@ -92,10 +83,7 @@
           "DataEnhancedStartDependencies",
           ">"
         ],
-        "source": {
-          "path": "x-pack/plugins/data_enhanced/server/plugin.ts",
-          "lineNumber": 20
-        },
+        "path": "x-pack/plugins/data_enhanced/server/plugin.ts",
         "deprecated": false,
         "children": [
           {
@@ -108,10 +96,7 @@
             "signature": [
               "any"
             ],
-            "source": {
-              "path": "x-pack/plugins/data_enhanced/server/plugin.ts",
-              "lineNumber": 26
-            },
+            "path": "x-pack/plugins/data_enhanced/server/plugin.ts",
             "deprecated": false,
             "children": [
               {
@@ -131,10 +116,7 @@
                   },
                   "<Readonly<{} & { search: Readonly<{} & { sessions: Readonly<{} & { enabled: boolean; management: Readonly<{} & { refreshInterval: moment.Duration; maxSessions: number; refreshTimeout: moment.Duration; expiresSoonWarning: moment.Duration; }>; pageSize: number; trackingInterval: moment.Duration; cleanupInterval: moment.Duration; expireInterval: moment.Duration; monitoringTaskTimeout: moment.Duration; notTouchedTimeout: moment.Duration; notTouchedInProgressTimeout: moment.Duration; maxUpdateRetries: number; defaultExpiration: moment.Duration; }>; }>; }>>"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/data_enhanced/server/plugin.ts",
-                  "lineNumber": 26
-                },
+                "path": "x-pack/plugins/data_enhanced/server/plugin.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -163,10 +145,7 @@
               "DataEnhancedSetupDependencies",
               ") => void"
             ],
-            "source": {
-              "path": "x-pack/plugins/data_enhanced/server/plugin.ts",
-              "lineNumber": 31
-            },
+            "path": "x-pack/plugins/data_enhanced/server/plugin.ts",
             "deprecated": false,
             "children": [
               {
@@ -188,10 +167,7 @@
                   "DataEnhancedStartDependencies",
                   ", unknown>"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/data_enhanced/server/plugin.ts",
-                  "lineNumber": 31
-                },
+                "path": "x-pack/plugins/data_enhanced/server/plugin.ts",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -205,10 +181,7 @@
                 "signature": [
                   "DataEnhancedSetupDependencies"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/data_enhanced/server/plugin.ts",
-                  "lineNumber": 31
-                },
+                "path": "x-pack/plugins/data_enhanced/server/plugin.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -235,10 +208,7 @@
               "DataEnhancedStartDependencies",
               ") => void"
             ],
-            "source": {
-              "path": "x-pack/plugins/data_enhanced/server/plugin.ts",
-              "lineNumber": 59
-            },
+            "path": "x-pack/plugins/data_enhanced/server/plugin.ts",
             "deprecated": false,
             "children": [
               {
@@ -257,10 +227,7 @@
                     "text": "CoreStart"
                   }
                 ],
-                "source": {
-                  "path": "x-pack/plugins/data_enhanced/server/plugin.ts",
-                  "lineNumber": 59
-                },
+                "path": "x-pack/plugins/data_enhanced/server/plugin.ts",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -274,10 +241,7 @@
                 "signature": [
                   "DataEnhancedStartDependencies"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/data_enhanced/server/plugin.ts",
-                  "lineNumber": 59
-                },
+                "path": "x-pack/plugins/data_enhanced/server/plugin.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -294,10 +258,7 @@
             "signature": [
               "() => void"
             ],
-            "source": {
-              "path": "x-pack/plugins/data_enhanced/server/plugin.ts",
-              "lineNumber": 65
-            },
+            "path": "x-pack/plugins/data_enhanced/server/plugin.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -320,10 +281,7 @@
         "signature": [
           "\"ese\""
         ],
-        "source": {
-          "path": "src/plugins/data/common/search/strategies/ese_search/types.ts",
-          "lineNumber": 11
-        },
+        "path": "src/plugins/data/common/search/strategies/ese_search/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -337,10 +295,7 @@
         "signature": [
           "\"eql\""
         ],
-        "source": {
-          "path": "src/plugins/data/common/search/strategies/eql_search/types.ts",
-          "lineNumber": 14
-        },
+        "path": "src/plugins/data/common/search/strategies/eql_search/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       }

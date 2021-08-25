@@ -14,8 +14,9 @@ const isEnabled = (f: Filter) => f && f.meta && !f.meta.disabled;
 
 /**
  * Checks to see if only disabled filters have been changed
- *
  * @returns {bool} Only disabled filters
+ *
+ * @public
  */
 export const onlyDisabledFiltersChanged = (newFilters?: Filter[], oldFilters?: Filter[]) => {
   // If it's the same - compare only enabled filters

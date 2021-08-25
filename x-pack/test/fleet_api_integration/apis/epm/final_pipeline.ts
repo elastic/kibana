@@ -14,6 +14,8 @@ const TEST_INDEX = 'logs-log.log-test';
 
 const FINAL_PIPELINE_ID = '.fleet_final_pipeline-1';
 
+const FINAL_PIPELINE_VERSION = 1;
+
 let pkgKey: string;
 
 export default function (providerContext: FtrProviderContext) {
@@ -81,14 +83,55 @@ export default function (providerContext: FtrProviderContext) {
       }
     });
 
+    it('should correctly update the final pipeline', async () => {
+      await es.ingest.putPipeline({
+        id: FINAL_PIPELINE_ID,
+        body: {
+          description: 'Test PIPELINE WITHOUT version',
+          processors: [
+            {
+              set: {
+                field: 'my-keyword-field',
+                value: 'foo',
+              },
+            },
+          ],
+        },
+      });
+      await supertest.post(`/api/fleet/setup`).set('kbn-xsrf', 'xxxx');
+      const pipelineRes = await es.ingest.getPipeline({ id: FINAL_PIPELINE_ID });
+      expect(pipelineRes.body).to.have.property(FINAL_PIPELINE_ID);
+      expect(pipelineRes.body[FINAL_PIPELINE_ID].version).to.be(1);
+    });
+
     it('should correctly setup the final pipeline and apply to fleet managed index template', async () => {
       const pipelineRes = await es.ingest.getPipeline({ id: FINAL_PIPELINE_ID });
       expect(pipelineRes.body).to.have.property(FINAL_PIPELINE_ID);
       const res = await es.indices.getIndexTemplate({ name: 'logs-log.log' });
-      expect(res.body.index_templates.length).to.be(1);
+      expect(res.body.index_templates.length).to.be(FINAL_PIPELINE_VERSION);
       expect(res.body.index_templates[0]?.index_template?.composed_of).to.contain(
         '.fleet_component_template-1'
       );
+    });
+
+    it('all docs should contain event.ingested without sub-seconds', async () => {
+      const res = await es.index({
+        index: 'logs-log.log-test',
+        body: {
+          '@timestamp': '2020-01-01T09:09:00',
+          message: 'hello',
+        },
+      });
+
+      const { body: doc } = await es.get({
+        id: res.body._id,
+        index: res.body._index,
+      });
+      // @ts-expect-error
+      const ingestTimestamp = doc._source.event.ingested;
+
+      // 2021-06-30T12:06:28Z
+      expect(ingestTimestamp).to.match(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/);
     });
 
     it('For a doc written without api key should write the correct api key status', async () => {

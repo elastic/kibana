@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
+export * from './constants';
 export * from './fields';
 export * from './types';
 export { IndexPatternsService, IndexPatternsContract } from './index_patterns';
-export type { IndexPattern } from './index_patterns';
+export type { IndexPattern, IndexPatternListItem } from './index_patterns';
 export * from './errors';
 export * from './expressions';
-export * from './constants';

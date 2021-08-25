@@ -8,6 +8,7 @@
 
 import { createMetricVisFn } from './metric_vis_fn';
 import { functionWrapper } from '../../expressions/common/expression_functions/specs/tests/utils';
+import { Datatable } from '../../expressions/common/expression_types/specs';
 
 describe('interpreter/functions#metric', () => {
   const fn = functionWrapper(createMetricVisFn());
@@ -55,5 +56,21 @@ describe('interpreter/functions#metric', () => {
     const actual = fn(context, args, undefined);
 
     expect(actual).toMatchSnapshot();
+  });
+
+  it('logs correct datatable to inspector', async () => {
+    let loggedTable: Datatable;
+    const handlers = {
+      inspectorAdapters: {
+        tables: {
+          logDatatable: (name: string, datatable: Datatable) => {
+            loggedTable = datatable;
+          },
+        },
+      },
+    };
+    await fn(context, args, handlers as any);
+
+    expect(loggedTable!).toMatchSnapshot();
   });
 });

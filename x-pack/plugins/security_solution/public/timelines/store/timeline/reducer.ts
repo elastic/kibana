@@ -46,6 +46,7 @@ import {
   updateTitleAndDescription,
   toggleModalSaveTimeline,
   updateEqlOptions,
+  setTimelineUpdatedAt,
 } from './actions';
 import {
   addNewTimeline,
@@ -330,7 +331,7 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
       },
     },
   }))
-  .case(setActiveTabTimeline, (state, { id, activeTab }) => ({
+  .case(setActiveTabTimeline, (state, { id, activeTab, scrollToTop }) => ({
     ...state,
     timelineById: {
       ...state.timelineById,
@@ -338,6 +339,11 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
         ...state.timelineById[id],
         activeTab,
         prevActiveTab: state.timelineById[id].activeTab,
+        scrollToTop: scrollToTop
+          ? {
+              timestamp: Math.floor(Date.now() / 1000), // convert to seconds to avoid unnecessary rerenders for multiple clicks
+            }
+          : undefined,
       },
     },
   }))
@@ -371,5 +377,15 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
   .case(showTimeline, (state, { id, show }) => ({
     ...state,
     timelineById: updateTimelineShowTimeline({ id, show, timelineById: state.timelineById }),
+  }))
+  .case(setTimelineUpdatedAt, (state, { id, updated }) => ({
+    ...state,
+    timelineById: {
+      ...state.timelineById,
+      [id]: {
+        ...state.timelineById[id],
+        updated,
+      },
+    },
   }))
   .build();

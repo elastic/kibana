@@ -18,10 +18,7 @@ export function offsetPreviousPeriodCoordinates({
   if (!previousPeriodTimeseries?.length) {
     return [];
   }
-  const currentPeriodStart = currentPeriodTimeseries?.length
-    ? currentPeriodTimeseries[0].x
-    : 0;
-
+  const currentPeriodStart = currentPeriodTimeseries?.[0].x ?? 0;
   const dateDiff = currentPeriodStart - previousPeriodTimeseries[0].x;
 
   return previousPeriodTimeseries.map(({ x, y }) => {

@@ -55,7 +55,7 @@ const makeSuccessMessage = (options) => {
  * @property {string} options.esFrom         Optionally run from source instead of snapshot
  */
 export async function runTests(options) {
-  if (!process.env.KBN_NP_PLUGINS_BUILT) {
+  if (!process.env.KBN_NP_PLUGINS_BUILT && !options.assertNoneExcluded) {
     const log = options.createLogger();
     log.warning('❗️❗️❗️');
     log.warning('❗️❗️❗️');
@@ -100,6 +100,12 @@ export async function runTests(options) {
         await runFtr({ configPath, options: opts });
       } finally {
         try {
+          const delay = config.get('kbnTestServer.delayShutdown');
+          if (typeof delay === 'number') {
+            log.info('Delaying shutdown of Kibana for', delay, 'ms');
+            await new Promise((r) => setTimeout(r, delay));
+          }
+
           await procs.stop('kibana');
         } finally {
           if (es) {

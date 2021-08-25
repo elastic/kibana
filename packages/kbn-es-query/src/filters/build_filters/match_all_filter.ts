@@ -6,17 +6,25 @@
  * Side Public License, v 1.
  */
 
+import { estypes } from '@elastic/elasticsearch';
+import { has } from 'lodash';
 import type { Filter, FilterMeta } from './types';
 
 export interface MatchAllFilterMeta extends FilterMeta {
-  field: any;
+  field: string;
   formattedValue: string;
 }
 
 export type MatchAllFilter = Filter & {
   meta: MatchAllFilterMeta;
-  match_all: any;
+  match_all: estypes.QueryDslMatchAllQuery;
 };
 
-export const isMatchAllFilter = (filter: any): filter is MatchAllFilter =>
-  filter && filter.match_all;
+/**
+ * @param filter
+ * @returns `true` if a filter is an `MatchAllFilter`
+ *
+ * @public
+ */
+export const isMatchAllFilter = (filter: Filter): filter is MatchAllFilter =>
+  has(filter, 'match_all');

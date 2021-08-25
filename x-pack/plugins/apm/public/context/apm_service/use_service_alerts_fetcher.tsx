@@ -6,24 +6,25 @@
  */
 
 import { useApmPluginContext } from '../apm_plugin/use_apm_plugin_context';
-import { useUrlParams } from '../url_params_context/use_url_params';
 import { useFetcher } from '../../hooks/use_fetcher';
 import type { APMServiceAlert } from './apm_service_context';
 
 export function useServiceAlertsFetcher({
   serviceName,
   transactionType,
+  environment,
+  start,
+  end,
 }: {
   serviceName?: string;
   transactionType?: string;
+  environment: string;
+  start: string;
+  end: string;
 }) {
   const {
     plugins: { observability },
   } = useApmPluginContext();
-
-  const {
-    urlParams: { start, end, environment },
-  } = useUrlParams();
 
   const experimentalAlertsEnabled = observability.isAlertingExperienceEnabled();
 

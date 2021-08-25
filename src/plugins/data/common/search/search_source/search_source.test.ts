@@ -8,12 +8,12 @@
 
 import { of } from 'rxjs';
 import { IndexPattern } from '../../index_patterns';
-import { GetConfigFn } from '../../types';
 import { SearchSource, SearchSourceDependencies, SortDirection } from './';
-import { AggConfigs, AggTypesRegistryStart, ES_SEARCH_STRATEGY } from '../../';
+import { AggConfigs, AggTypesRegistryStart } from '../../';
 import { mockAggTypesRegistry } from '../aggs/test_helpers';
 import { RequestResponder } from 'src/plugins/inspector/common';
 import { switchMap } from 'rxjs/operators';
+import { Filter } from '@kbn/es-query';
 
 const getComputedFields = () => ({
   storedFields: [],
@@ -359,6 +359,69 @@ describe('SearchSource', () => {
         expect(request.fields).toEqual(['*']);
         expect(request._source).toEqual(false);
       });
+
+      test('includes queries in the "filter" clause by default', async () => {
+        searchSource.setField('query', {
+          query: 'agent.keyword : "Mozilla" ',
+          language: 'kuery',
+        });
+        const request = searchSource.getSearchRequestBody();
+        expect(request.query).toMatchInlineSnapshot(`
+          Object {
+            "bool": Object {
+              "filter": Array [
+                Object {
+                  "bool": Object {
+                    "minimum_should_match": 1,
+                    "should": Array [
+                      Object {
+                        "match_phrase": Object {
+                          "agent.keyword": "Mozilla",
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+              "must": Array [],
+              "must_not": Array [],
+              "should": Array [],
+            },
+          }
+        `);
+      });
+
+      test('includes queries in the "must" clause if sorting by _score', async () => {
+        searchSource.setField('query', {
+          query: 'agent.keyword : "Mozilla" ',
+          language: 'kuery',
+        });
+        searchSource.setField('sort', [{ _score: SortDirection.asc }]);
+        const request = searchSource.getSearchRequestBody();
+        expect(request.query).toMatchInlineSnapshot(`
+          Object {
+            "bool": Object {
+              "filter": Array [],
+              "must": Array [
+                Object {
+                  "bool": Object {
+                    "minimum_should_match": 1,
+                    "should": Array [
+                      Object {
+                        "match_phrase": Object {
+                          "agent.keyword": "Mozilla",
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+              "must_not": Array [],
+              "should": Array [],
+            },
+          }
+        `);
+      });
     });
 
     describe('source filters handling', () => {
@@ -564,7 +627,7 @@ describe('SearchSource', () => {
         expect(request.fields).toEqual(['@timestamp']);
         expect(request.script_fields).toEqual({ hello: {} });
         expect(request.stored_fields).toEqual(['@timestamp', 'bar']);
-        expect(request.runtime_mappings).toEqual({ runtime_field: runtimeFieldDef });
+        expect(request.runtime_mappings).toEqual(runtimeFields);
       });
 
       test('filters request when a specific list of fields is provided with fieldsFromSource or fields', async () => {
@@ -761,7 +824,7 @@ describe('SearchSource', () => {
     test('should serialize filters', () => {
       const filter = [
         {
-          query: 'query',
+          query: { q: 'query' },
           meta: {
             alias: 'alias',
             disabled: false,
@@ -779,7 +842,7 @@ describe('SearchSource', () => {
       searchSource.setField('index', indexPattern123);
       const filter = [
         {
-          query: 'query',
+          query: { q: 'query' },
           meta: {
             alias: 'alias',
             disabled: false,
@@ -820,9 +883,9 @@ describe('SearchSource', () => {
   });
 
   describe('getSerializedFields', () => {
-    const filter = [
+    const filter: Filter[] = [
       {
-        query: 'query',
+        query: { q: 'query' },
         meta: {
           alias: 'alias',
           disabled: false,
@@ -851,7 +914,9 @@ describe('SearchSource', () => {
                 "index": "456",
                 "negate": false,
               },
-              "query": "query",
+              "query": Object {
+                "q": "query",
+              },
             },
           ],
           "index": "123",
@@ -890,45 +955,6 @@ describe('SearchSource', () => {
   });
 
   describe('fetch$', () => {
-    describe('#legacy COURIER_BATCH_SEARCHES', () => {
-      beforeEach(() => {
-        searchSourceDependencies = {
-          ...searchSourceDependencies,
-          getConfig: jest.fn(() => {
-            return true; // batchSearches = true
-          }) as GetConfigFn,
-        };
-      });
-
-      test('should override to use sync search if not set', async () => {
-        searchSource = new SearchSource({ index: indexPattern }, searchSourceDependencies);
-        const options = {};
-        await searchSource.fetch$(options).toPromise();
-
-        const [, callOptions] = mockSearchMethod.mock.calls[0];
-        expect(callOptions.strategy).toBe(ES_SEARCH_STRATEGY);
-      });
-
-      test('should remove searchSessionId when forcing ES_SEARCH_STRATEGY', async () => {
-        searchSource = new SearchSource({ index: indexPattern }, searchSourceDependencies);
-        const options = { sessionId: 'test' };
-        await searchSource.fetch$(options).toPromise();
-
-        const [, callOptions] = mockSearchMethod.mock.calls[0];
-        expect(callOptions.strategy).toBe(ES_SEARCH_STRATEGY);
-        expect(callOptions.sessionId).toBeUndefined();
-      });
-
-      test('should not override strategy if set ', async () => {
-        searchSource = new SearchSource({ index: indexPattern }, searchSourceDependencies);
-        const options = { strategy: 'banana' };
-        await searchSource.fetch$(options).toPromise();
-
-        const [, callOptions] = mockSearchMethod.mock.calls[0];
-        expect(callOptions.strategy).toBe('banana');
-      });
-    });
-
     describe('responses', () => {
       test('should return partial results', async () => {
         searchSource = new SearchSource({ index: indexPattern }, searchSourceDependencies);
@@ -943,27 +969,27 @@ describe('SearchSource', () => {
         expect(next).toBeCalledTimes(2);
         expect(complete).toBeCalledTimes(1);
         expect(next.mock.calls[0]).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "isPartial": true,
-            "isRunning": true,
-            "rawResponse": Object {
-              "test": 1,
-            },
-          },
-        ]
-        `);
+                  Array [
+                    Object {
+                      "isPartial": true,
+                      "isRunning": true,
+                      "rawResponse": Object {
+                        "test": 1,
+                      },
+                    },
+                  ]
+                `);
         expect(next.mock.calls[1]).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "isPartial": false,
-            "isRunning": false,
-            "rawResponse": Object {
-              "test": 2,
-            },
-          },
-        ]
-        `);
+                  Array [
+                    Object {
+                      "isPartial": false,
+                      "isRunning": false,
+                      "rawResponse": Object {
+                        "test": 2,
+                      },
+                    },
+                  ]
+                `);
       });
 
       test('shareReplays result', async () => {

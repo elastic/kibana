@@ -6,91 +6,18 @@
  * Side Public License, v 1.
  */
 
-/*
- * esQuery and esKuery:
- */
-
 import { PluginInitializerContext } from '../../../core/public';
 import { ConfigSchema } from '../config';
+
+export * from './deprecated';
 
 /*
  * Filters:
  */
 
-export * from './deprecated';
-
 export { getEsQueryConfig } from '../common';
 export { FilterLabel, FilterItem } from './ui';
 export { getDisplayValueFromFilter, generateFilters, extractTimeRange } from './query';
-
-/*
- * Field Formatters:
- */
-
-import {
-  FieldFormat,
-  FieldFormatsRegistry,
-  DEFAULT_CONVERTER_COLOR,
-  HTML_CONTEXT_TYPE,
-  TEXT_CONTEXT_TYPE,
-  FIELD_FORMAT_IDS,
-  BoolFormat,
-  BytesFormat,
-  ColorFormat,
-  DurationFormat,
-  IpFormat,
-  NumberFormat,
-  PercentFormat,
-  RelativeDateFormat,
-  SourceFormat,
-  StaticLookupFormat,
-  UrlFormat,
-  StringFormat,
-  TruncateFormat,
-  HistogramFormat,
-} from '../common/field_formats';
-
-import { DateNanosFormat, DateFormat } from './field_formats';
-export { baseFormattersPublic, FieldFormatsStart } from './field_formats';
-
-// Field formats helpers namespace:
-export const fieldFormats = {
-  FieldFormat,
-  FieldFormatsRegistry, // exported only for tests. Consider mock.
-
-  DEFAULT_CONVERTER_COLOR,
-  HTML_CONTEXT_TYPE,
-  TEXT_CONTEXT_TYPE,
-  FIELD_FORMAT_IDS,
-
-  BoolFormat,
-  BytesFormat,
-  ColorFormat,
-  DateFormat,
-  DateNanosFormat,
-  DurationFormat,
-  IpFormat,
-  NumberFormat,
-  PercentFormat,
-  RelativeDateFormat,
-  SourceFormat,
-  StaticLookupFormat,
-  UrlFormat,
-  StringFormat,
-  TruncateFormat,
-  HistogramFormat,
-};
-
-export {
-  IFieldFormat,
-  FieldFormatInstanceType,
-  IFieldFormatsRegistry,
-  FieldFormatsContentType,
-  FieldFormatsGetConfigFn,
-  FieldFormatConfig,
-  FieldFormatId,
-  FieldFormat,
-} from '../common';
 
 /**
  * Exporters (CSV)
@@ -118,7 +45,6 @@ import {
   isDefault,
   validateIndexPattern,
   flattenHitWrapper,
-  formatHitProvider,
 } from './index_patterns';
 
 export type { IndexPatternsService } from './index_patterns';
@@ -134,15 +60,9 @@ export const indexPatterns = {
   isNestedField,
   validate: validateIndexPattern,
   flattenHitWrapper,
-  formatHitProvider,
 };
 
-export {
-  IndexPatternsContract,
-  IndexPattern,
-  IIndexPatternFieldList,
-  IndexPatternField,
-} from './index_patterns';
+export { IndexPatternsContract, IndexPattern, IndexPatternField, TypeMeta } from './index_patterns';
 
 export {
   IIndexPattern,
@@ -151,13 +71,15 @@ export {
   KBN_FIELD_TYPES,
   IndexPatternAttributes,
   UI_SETTINGS,
-  TypeMeta as IndexPatternTypeMeta,
   AggregationRestrictions as IndexPatternAggRestrictions,
   IndexPatternSpec,
   IndexPatternLoadExpressionFunctionDefinition,
   fieldList,
+  GetFieldsOptions,
   INDEX_PATTERN_SAVED_OBJECT_TYPE,
+  AggregationRestrictions,
   IndexPatternType,
+  IndexPatternListItem,
 } from '../common';
 
 export { DuplicateIndexPatternError } from '../common/index_patterns/errors';
@@ -253,19 +175,10 @@ export type {
   ISearchStartSearchSource,
   ISearchGeneric,
   ISearchSource,
-  SearchInterceptor,
-  SearchInterceptorDeps,
   SearchRequest,
   SearchSourceFields,
-  // expression functions and types
-  EsdslExpressionFunctionDefinition,
-  EsRawResponseExpressionTypeDefinition,
   // errors
   IEsError,
-  SearchError,
-  SearchTimeoutError,
-  TimeoutErrorMode,
-  PainlessError,
   Reason,
   WaitUntilNextSessionCompletesOptions,
 } from './search';
@@ -274,7 +187,6 @@ export {
   parseSearchSourceJSON,
   injectSearchSourceReferences,
   extractSearchSourceReferences,
-  getEsPreference,
   getSearchParamsFromRequest,
   noSearchSessionStorageCapabilityMessage,
   SEARCH_SESSIONS_MANAGEMENT_ID,
@@ -286,6 +198,7 @@ export {
 
 export type {
   SearchSource,
+  // TODO: remove these when data_enhanced is merged into data
   ISessionService,
   SearchSessionInfoProvider,
   ISessionsClient,
@@ -358,7 +271,6 @@ export type {
   SavedQuery,
   SavedQueryService,
   SavedQueryTimeFilter,
-  InputTimeRange,
   TimefilterContract,
   TimeHistoryContract,
   QueryStateChange,

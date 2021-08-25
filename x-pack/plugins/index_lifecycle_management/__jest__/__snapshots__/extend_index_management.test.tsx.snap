@@ -326,6 +326,7 @@ exports[`extend index management ilm summary extension should return extension w
           >
             <div
               className="euiTextColor euiTextColor--default"
+              style={Object {}}
             >
               illegal_argument_exception
               : 

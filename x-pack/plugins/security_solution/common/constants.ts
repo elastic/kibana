@@ -7,6 +7,7 @@
 
 import type { TransformConfigSchema } from './transforms/types';
 import { ENABLE_CASE_CONNECTOR } from '../../cases/common';
+import { metadataTransformPattern } from './endpoint/constants';
 
 export const APP_ID = 'securitySolution';
 export const SERVER_APP_ID = 'siem';
@@ -54,12 +55,15 @@ export const DEFAULT_RULE_REFRESH_INTERVAL_ON = true;
 export const DEFAULT_RULE_REFRESH_INTERVAL_VALUE = 60000; // ms
 export const DEFAULT_RULE_REFRESH_IDLE_VALUE = 2700000; // ms
 export const DEFAULT_RULE_NOTIFICATION_QUERY_SIZE = 100;
-export const SAVED_OBJECTS_MANAGEMENT_FEATURE_ID = 'Saved Objects Management';
+export const SECURITY_FEATURE_ID = 'Security';
+export const DEFAULT_SPACE_ID = 'default';
 
 // Document path where threat indicator fields are expected. Fields are used
-// to enrich signals, and are copied to threat.indicator.
+// to enrich signals, and are copied to threat.enrichments.
 export const DEFAULT_INDICATOR_SOURCE_PATH = 'threatintel.indicator';
-export const INDICATOR_DESTINATION_PATH = 'threat.indicator';
+export const ENRICHMENT_DESTINATION_PATH = 'threat.enrichments';
+export const DEFAULT_THREAT_INDEX_KEY = 'securitySolution:defaultThreatIndex';
+export const DEFAULT_THREAT_INDEX_VALUE = ['filebeat-*'];
 
 export enum SecurityPageName {
   administration = 'administration',
@@ -191,7 +195,7 @@ export const SIGNALS_ID = `siem.signals`;
 export const REFERENCE_RULE_ALERT_TYPE_ID = `siem.referenceRule`;
 export const REFERENCE_RULE_PERSISTENCE_ALERT_TYPE_ID = `siem.referenceRulePersistence`;
 
-export const CUSTOM_ALERT_TYPE_ID = `siem.customRule`;
+export const QUERY_ALERT_TYPE_ID = `siem.queryRule`;
 export const EQL_ALERT_TYPE_ID = `siem.eqlRule`;
 export const INDICATOR_ALERT_TYPE_ID = `siem.indicatorRule`;
 export const ML_ALERT_TYPE_ID = `siem.mlRule`;
@@ -247,6 +251,9 @@ export const DETECTION_ENGINE_SIGNALS_MIGRATION_URL = `${DETECTION_ENGINE_SIGNAL
 export const DETECTION_ENGINE_SIGNALS_MIGRATION_STATUS_URL = `${DETECTION_ENGINE_SIGNALS_URL}/migration_status`;
 export const DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL = `${DETECTION_ENGINE_SIGNALS_URL}/finalize_migration`;
 
+export const ALERTS_AS_DATA_URL = '/internal/rac/alerts';
+export const ALERTS_AS_DATA_FIND_URL = `${ALERTS_AS_DATA_URL}/find`;
+
 /**
  * Common naming convention for an unauthenticated user
  */
@@ -286,11 +293,6 @@ if (ENABLE_CASE_CONNECTOR) {
 export const NOTIFICATION_THROTTLE_NO_ACTIONS = 'no_actions';
 export const NOTIFICATION_THROTTLE_RULE = 'rule';
 
-/**
- * Histograms for fields named in this list should be displayed with an
- * "All others" bucket, to count events that don't specify a value for
- * the field being counted
- */
 export const showAllOthersBucket: string[] = [
   'destination.ip',
   'event.action',
@@ -309,3 +311,5 @@ export const showAllOthersBucket: string[] = [
  * than use it from here.
  */
 export const ELASTIC_NAME = 'estc';
+
+export const TRANSFORM_STATS_URL = `/api/transform/transforms/${metadataTransformPattern}-*/_stats`;

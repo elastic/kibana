@@ -4,11 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { EuiDataGridCellValueElementProps, EuiLink } from '@elastic/eui';
 import { random } from 'lodash/fp';
 import moment from 'moment';
 import React from 'react';
+
+import { EuiDataGridCellValueElementProps, EuiLink } from '@elastic/eui';
+import { ALERT_DURATION, ALERT_STATUS } from '@kbn/rule-data-utils';
 
 import { TruncatableText } from '../../../../common/components/truncatable_text';
 import { Severity } from '../../../components/severity';
@@ -48,11 +49,11 @@ export const RenderCellValue: React.FC<
     })?.reduce((x) => x[0]) ?? '';
 
   switch (columnId) {
-    case 'kibana.rac.alert.status':
+    case ALERT_STATUS:
       return (
         <Status data-test-subj="alert-status" status={random(0, 1) ? 'recovered' : 'active'} />
       );
-    case 'kibana.rac.alert.duration.us':
+    case ALERT_DURATION:
       return <span data-test-subj="alert-duration">{moment().fromNow(true)}</span>;
     case 'signal.rule.severity':
       return <Severity data-test-subj="rule-severity" severity={value} />;

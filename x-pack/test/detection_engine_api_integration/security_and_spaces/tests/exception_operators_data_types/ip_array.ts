@@ -54,7 +54,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForRuleSuccessOrStatus(supertest, id);
         await waitForSignalsToBePresent(supertest, 4, [id]);
         const signalsOpen = await getSignalsById(supertest, id);
-        const ips = signalsOpen.hits.hits.map((hit) => hit._source.ip).sort();
+        const ips = signalsOpen.hits.hits.map((hit) => hit._source?.ip).sort();
         expect(ips).to.eql([
           [],
           ['127.0.0.1', '127.0.0.2', '127.0.0.3', '127.0.0.4'],
@@ -78,7 +78,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForRuleSuccessOrStatus(supertest, id);
         await waitForSignalsToBePresent(supertest, 3, [id]);
         const signalsOpen = await getSignalsById(supertest, id);
-        const ips = signalsOpen.hits.hits.map((hit) => hit._source.ip).sort();
+        const ips = signalsOpen.hits.hits.map((hit) => hit._source?.ip).sort();
         expect(ips).to.eql([
           [],
           ['127.0.0.5', null, '127.0.0.6', '127.0.0.7'],
@@ -109,7 +109,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForRuleSuccessOrStatus(supertest, id);
         await waitForSignalsToBePresent(supertest, 2, [id]);
         const signalsOpen = await getSignalsById(supertest, id);
-        const ips = signalsOpen.hits.hits.map((hit) => hit._source.ip).sort();
+        const ips = signalsOpen.hits.hits.map((hit) => hit._source?.ip).sort();
         expect(ips).to.eql([[], ['127.0.0.8', '127.0.0.9', '127.0.0.10']]);
       });
 
@@ -144,7 +144,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForRuleSuccessOrStatus(supertest, id);
         await waitForSignalsToBePresent(supertest, 1, [id]);
         const signalsOpen = await getSignalsById(supertest, id);
-        const ips = signalsOpen.hits.hits.map((hit) => hit._source.ip).sort();
+        const ips = signalsOpen.hits.hits.map((hit) => hit._source?.ip).sort();
         expect(ips).to.eql([[]]);
       });
 
@@ -163,7 +163,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForRuleSuccessOrStatus(supertest, id);
         await waitForSignalsToBePresent(supertest, 1, [id]);
         const signalsOpen = await getSignalsById(supertest, id);
-        const ips = signalsOpen.hits.hits.map((hit) => hit._source.ip).sort();
+        const ips = signalsOpen.hits.hits.map((hit) => hit._source?.ip).sort();
         expect(ips).to.eql([
           [],
           ['127.0.0.5', null, '127.0.0.6', '127.0.0.7'],
@@ -186,7 +186,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForRuleSuccessOrStatus(supertest, id);
         await waitForSignalsToBePresent(supertest, 1, [id]);
         const signalsOpen = await getSignalsById(supertest, id);
-        const ips = signalsOpen.hits.hits.map((hit) => hit._source.ip).sort();
+        const ips = signalsOpen.hits.hits.map((hit) => hit._source?.ip).sort();
         expect(ips).to.eql([[], ['127.0.0.8', '127.0.0.9', '127.0.0.10']]);
       });
     });
@@ -206,7 +206,7 @@ export default ({ getService }: FtrProviderContext) => {
         ]);
         await waitForRuleSuccessOrStatus(supertest, id);
         const signalsOpen = await getSignalsById(supertest, id);
-        const ips = signalsOpen.hits.hits.map((hit) => hit._source.ip).sort();
+        const ips = signalsOpen.hits.hits.map((hit) => hit._source?.ip).sort();
         expect(ips).to.eql([]);
       });
 
@@ -225,7 +225,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForRuleSuccessOrStatus(supertest, id);
         await waitForSignalsToBePresent(supertest, 1, [id]);
         const signalsOpen = await getSignalsById(supertest, id);
-        const ips = signalsOpen.hits.hits.map((hit) => hit._source.ip).sort();
+        const ips = signalsOpen.hits.hits.map((hit) => hit._source?.ip).sort();
         expect(ips).to.eql([['127.0.0.1', '127.0.0.2', '127.0.0.3', '127.0.0.4']]);
       });
 
@@ -250,7 +250,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForRuleSuccessOrStatus(supertest, id);
         await waitForSignalsToBePresent(supertest, 1, [id]);
         const signalsOpen = await getSignalsById(supertest, id);
-        const ips = signalsOpen.hits.hits.map((hit) => hit._source.ip).sort();
+        const ips = signalsOpen.hits.hits.map((hit) => hit._source?.ip).sort();
         expect(ips).to.eql([['127.0.0.1', '127.0.0.2', '127.0.0.3', '127.0.0.4']]);
       });
 
@@ -276,7 +276,7 @@ export default ({ getService }: FtrProviderContext) => {
         ]);
         await waitForRuleSuccessOrStatus(supertest, id);
         const signalsOpen = await getSignalsById(supertest, id);
-        const ips = signalsOpen.hits.hits.map((hit) => hit._source.ip).sort();
+        const ips = signalsOpen.hits.hits.map((hit) => hit._source?.ip).sort();
         expect(ips).to.eql([]);
       });
     });
@@ -297,7 +297,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForRuleSuccessOrStatus(supertest, id);
         await waitForSignalsToBePresent(supertest, 3, [id]);
         const signalsOpen = await getSignalsById(supertest, id);
-        const ips = signalsOpen.hits.hits.map((hit) => hit._source.ip).sort();
+        const ips = signalsOpen.hits.hits.map((hit) => hit._source?.ip).sort();
         expect(ips).to.eql([
           [],
           ['127.0.0.5', null, '127.0.0.6', '127.0.0.7'],
@@ -320,7 +320,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForRuleSuccessOrStatus(supertest, id);
         await waitForSignalsToBePresent(supertest, 2, [id]);
         const signalsOpen = await getSignalsById(supertest, id);
-        const ips = signalsOpen.hits.hits.map((hit) => hit._source.ip).sort();
+        const ips = signalsOpen.hits.hits.map((hit) => hit._source?.ip).sort();
         expect(ips).to.eql([[], ['127.0.0.8', '127.0.0.9', '127.0.0.10']]);
       });
 
@@ -339,7 +339,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForRuleSuccessOrStatus(supertest, id);
         await waitForSignalsToBePresent(supertest, 1, [id]);
         const signalsOpen = await getSignalsById(supertest, id);
-        const ips = signalsOpen.hits.hits.map((hit) => hit._source.ip).sort();
+        const ips = signalsOpen.hits.hits.map((hit) => hit._source?.ip).sort();
         expect(ips).to.eql([[]]);
       });
     });
@@ -359,7 +359,7 @@ export default ({ getService }: FtrProviderContext) => {
         ]);
         await waitForRuleSuccessOrStatus(supertest, id);
         const signalsOpen = await getSignalsById(supertest, id);
-        const ips = signalsOpen.hits.hits.map((hit) => hit._source.ip).sort();
+        const ips = signalsOpen.hits.hits.map((hit) => hit._source?.ip).sort();
         expect(ips).to.eql([]);
       });
 
@@ -378,7 +378,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForRuleSuccessOrStatus(supertest, id);
         await waitForSignalsToBePresent(supertest, 2, [id]);
         const signalsOpen = await getSignalsById(supertest, id);
-        const ips = signalsOpen.hits.hits.map((hit) => hit._source.ip).sort();
+        const ips = signalsOpen.hits.hits.map((hit) => hit._source?.ip).sort();
         expect(ips).to.eql([
           ['127.0.0.1', '127.0.0.2', '127.0.0.3', '127.0.0.4'],
           ['127.0.0.5', null, '127.0.0.6', '127.0.0.7'],
@@ -400,7 +400,7 @@ export default ({ getService }: FtrProviderContext) => {
         ]);
         await waitForRuleSuccessOrStatus(supertest, id);
         const signalsOpen = await getSignalsById(supertest, id);
-        const ips = signalsOpen.hits.hits.map((hit) => hit._source.ip).sort();
+        const ips = signalsOpen.hits.hits.map((hit) => hit._source?.ip).sort();
         expect(ips).to.eql([[]]);
       });
     });
@@ -420,7 +420,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForRuleSuccessOrStatus(supertest, id);
         await waitForSignalsToBePresent(supertest, 3, [id]);
         const signalsOpen = await getSignalsById(supertest, id);
-        const ips = signalsOpen.hits.hits.map((hit) => hit._source.ip).sort();
+        const ips = signalsOpen.hits.hits.map((hit) => hit._source?.ip).sort();
         expect(ips).to.eql([
           ['127.0.0.1', '127.0.0.2', '127.0.0.3', '127.0.0.4'],
           ['127.0.0.5', null, '127.0.0.6', '127.0.0.7'],
@@ -449,7 +449,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForRuleSuccessOrStatus(supertest, id);
         await waitForSignalsToBePresent(supertest, 3, [id]);
         const signalsOpen = await getSignalsById(supertest, id);
-        const ips = signalsOpen.hits.hits.map((hit) => hit._source.ip).sort();
+        const ips = signalsOpen.hits.hits.map((hit) => hit._source?.ip).sort();
         expect(ips).to.eql([
           [],
           ['127.0.0.5', null, '127.0.0.6', '127.0.0.7'],
@@ -476,7 +476,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForRuleSuccessOrStatus(supertest, id);
         await waitForSignalsToBePresent(supertest, 2, [id]);
         const signalsOpen = await getSignalsById(supertest, id);
-        const ips = signalsOpen.hits.hits.map((hit) => hit._source.ip).sort();
+        const ips = signalsOpen.hits.hits.map((hit) => hit._source?.ip).sort();
         expect(ips).to.eql([[], ['127.0.0.8', '127.0.0.9', '127.0.0.10']]);
       });
 
@@ -503,7 +503,7 @@ export default ({ getService }: FtrProviderContext) => {
         ]);
         await waitForRuleSuccessOrStatus(supertest, id);
         const signalsOpen = await getSignalsById(supertest, id);
-        const ips = signalsOpen.hits.hits.map((hit) => hit._source.ip).sort();
+        const ips = signalsOpen.hits.hits.map((hit) => hit._source?.ip).sort();
         expect(ips).to.eql([[]]);
       });
 
@@ -540,7 +540,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForRuleSuccessOrStatus(supertest, id);
         await waitForSignalsToBePresent(supertest, 1, [id]);
         const signalsOpen = await getSignalsById(supertest, id);
-        const ips = signalsOpen.hits.hits.map((hit) => hit._source.ip).sort();
+        const ips = signalsOpen.hits.hits.map((hit) => hit._source?.ip).sort();
         expect(ips).to.eql([[], ['127.0.0.8', '127.0.0.9', '127.0.0.10']]);
       });
 
@@ -571,7 +571,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForRuleSuccessOrStatus(supertest, id);
         await waitForSignalsToBePresent(supertest, 1, [id]);
         const signalsOpen = await getSignalsById(supertest, id);
-        const ips = signalsOpen.hits.hits.map((hit) => hit._source.ip).sort();
+        const ips = signalsOpen.hits.hits.map((hit) => hit._source?.ip).sort();
         expect(ips).to.eql([[], ['127.0.0.8', '127.0.0.9', '127.0.0.10']]);
       });
     });
@@ -596,7 +596,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForRuleSuccessOrStatus(supertest, id);
         await waitForSignalsToBePresent(supertest, 1, [id]);
         const signalsOpen = await getSignalsById(supertest, id);
-        const ips = signalsOpen.hits.hits.map((hit) => hit._source.ip).sort();
+        const ips = signalsOpen.hits.hits.map((hit) => hit._source?.ip).sort();
         expect(ips).to.eql([['127.0.0.1', '127.0.0.2', '127.0.0.3', '127.0.0.4']]);
       });
 
@@ -619,7 +619,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForRuleSuccessOrStatus(supertest, id);
         await waitForSignalsToBePresent(supertest, 2, [id]);
         const signalsOpen = await getSignalsById(supertest, id);
-        const ips = signalsOpen.hits.hits.map((hit) => hit._source.ip).sort();
+        const ips = signalsOpen.hits.hits.map((hit) => hit._source?.ip).sort();
         expect(ips).to.eql([
           ['127.0.0.1', '127.0.0.2', '127.0.0.3', '127.0.0.4'],
           ['127.0.0.5', null, '127.0.0.6', '127.0.0.7'],
@@ -650,7 +650,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForRuleSuccessOrStatus(supertest, id);
         await waitForSignalsToBePresent(supertest, 3, [id]);
         const signalsOpen = await getSignalsById(supertest, id);
-        const ips = signalsOpen.hits.hits.map((hit) => hit._source.ip).sort();
+        const ips = signalsOpen.hits.hits.map((hit) => hit._source?.ip).sort();
         expect(ips).to.eql([
           ['127.0.0.1', '127.0.0.2', '127.0.0.3', '127.0.0.4'],
           ['127.0.0.5', null, '127.0.0.6', '127.0.0.7'],
@@ -691,7 +691,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForRuleSuccessOrStatus(supertest, id);
         await waitForSignalsToBePresent(supertest, 2, [id]);
         const signalsOpen = await getSignalsById(supertest, id);
-        const ips = signalsOpen.hits.hits.map((hit) => hit._source.ip).sort();
+        const ips = signalsOpen.hits.hits.map((hit) => hit._source?.ip).sort();
         expect(ips).to.eql([
           ['127.0.0.1', '127.0.0.2', '127.0.0.3', '127.0.0.4'],
           ['127.0.0.5', null, '127.0.0.6', '127.0.0.7'],
@@ -725,7 +725,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForRuleSuccessOrStatus(supertest, id);
         await waitForSignalsToBePresent(supertest, 2, [id]);
         const signalsOpen = await getSignalsById(supertest, id);
-        const ips = signalsOpen.hits.hits.map((hit) => hit._source.ip).sort();
+        const ips = signalsOpen.hits.hits.map((hit) => hit._source?.ip).sort();
         expect(ips).to.eql([
           ['127.0.0.1', '127.0.0.2', '127.0.0.3', '127.0.0.4'],
           ['127.0.0.5', null, '127.0.0.6', '127.0.0.7'],

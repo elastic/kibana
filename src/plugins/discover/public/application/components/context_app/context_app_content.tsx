@@ -10,20 +10,17 @@ import React, { useState, Fragment, useMemo, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiHorizontalRule, EuiText } from '@elastic/eui';
 import { CONTEXT_STEP_SETTING, DOC_HIDE_TIME_COLUMN_SETTING } from '../../../../common';
-import { IndexPattern, IndexPatternField } from '../../../../../data/common';
+import { IndexPattern } from '../../../../../data/common';
 import { SortDirection } from '../../../../../data/public';
-import {
-  DocTableLegacy,
-  DocTableLegacyProps,
-} from '../../angular/doc_table/create_doc_table_react';
 import { LoadingStatus } from '../../angular/context_query_state';
 import { ActionBar } from '../../angular/context/components/action_bar/action_bar';
-import { DiscoverGrid, DiscoverGridProps } from '../discover_grid/discover_grid';
-import { ElasticSearchHit } from '../../doc_views/doc_views_types';
+import { DiscoverGrid } from '../discover_grid/discover_grid';
+import { DocViewFilterFn, ElasticSearchHit } from '../../doc_views/doc_views_types';
 import { AppState } from '../../angular/context_state';
-import { EsHitRecord, EsHitRecordList, SurrDocType } from '../../angular/context/api/context';
+import { EsHitRecordList, SurrDocType } from '../../angular/context/api/context';
 import { DiscoverServices } from '../../../build_services';
 import { MAX_CONTEXT_SIZE, MIN_CONTEXT_SIZE } from './utils/constants';
+import { DocTableContext } from '../../apps/main/components/doc_table/doc_table_context';
 
 export interface ContextAppContentProps {
   columns: string[];
@@ -44,11 +41,7 @@ export interface ContextAppContentProps {
   useNewFieldsApi: boolean;
   isLegacy: boolean;
   setAppState: (newState: Partial<AppState>) => void;
-  addFilter: (
-    field: IndexPatternField | string,
-    values: unknown,
-    operation: string
-  ) => Promise<void>;
+  addFilter: DocViewFilterFn;
 }
 
 const controlColumnIds = ['openDetails'];
@@ -57,8 +50,8 @@ export function clamp(value: number) {
   return Math.max(Math.min(MAX_CONTEXT_SIZE, value), MIN_CONTEXT_SIZE);
 }
 
-const DataGridMemoized = React.memo(DiscoverGrid);
-const DocTableLegacyMemoized = React.memo(DocTableLegacy);
+const DiscoverGridMemoized = React.memo(DiscoverGrid);
+const DocTableContextMemoized = React.memo(DocTableContext);
 const ActionBarMemoized = React.memo(ActionBar);
 
 export function ContextAppContent({
@@ -84,8 +77,7 @@ export function ContextAppContent({
 }: ContextAppContentProps) {
   const { uiSettings: config } = services;
 
-  const [expandedDoc, setExpandedDoc] = useState<EsHitRecord | undefined>(undefined);
-  const isAnchorLoaded = anchorStatus === LoadingStatus.LOADED;
+  const [expandedDoc, setExpandedDoc] = useState<ElasticSearchHit | undefined>();
   const isAnchorLoading =
     anchorStatus === LoadingStatus.LOADING || anchorStatus === LoadingStatus.UNINITIALIZED;
   const arePredecessorsLoading =
@@ -100,50 +92,8 @@ export function ContextAppContent({
   );
   const defaultStepSize = useMemo(() => parseInt(config.get(CONTEXT_STEP_SETTING), 10), [config]);
 
-  const docTableProps = () => {
-    return {
-      ariaLabelledBy: 'surDocumentsAriaLabel',
-      columns,
-      rows: rows as ElasticSearchHit[],
-      indexPattern,
-      expandedDoc,
-      isLoading: isAnchorLoading,
-      sampleSize: 0,
-      sort: sort as [[string, SortDirection]],
-      isSortEnabled: false,
-      showTimeCol,
-      services,
-      useNewFieldsApi,
-      isPaginationEnabled: false,
-      controlColumnIds,
-      setExpandedDoc,
-      onFilter: addFilter,
-      onAddColumn,
-      onRemoveColumn,
-      onSetColumns,
-    } as DiscoverGridProps;
-  };
-
-  const legacyDocTableProps = () => {
-    // @ts-expect-error doesn't implement full DocTableLegacyProps interface
-    return {
-      columns,
-      indexPattern,
-      minimumVisibleRows: rows.length,
-      rows,
-      onFilter: addFilter,
-      onAddColumn,
-      onRemoveColumn,
-      sort,
-      useNewFieldsApi,
-    } as DocTableLegacyProps;
-  };
-
   const loadingFeedback = () => {
-    if (
-      isLegacy &&
-      (anchorStatus === LoadingStatus.UNINITIALIZED || anchorStatus === LoadingStatus.LOADING)
-    ) {
+    if (isLegacy && isAnchorLoading) {
       return (
         <EuiText textAlign="center" data-test-subj="contextApp_loadingIndicator">
           <FormattedMessage id="discover.context.loadingDescription" defaultMessage="Loading..." />
@@ -170,18 +120,47 @@ export function ContextAppContent({
         docCountAvailable={predecessors.length}
         onChangeCount={onChangeCount}
         isLoading={arePredecessorsLoading}
-        isDisabled={!isAnchorLoaded}
+        isDisabled={isAnchorLoading}
       />
       {loadingFeedback()}
       <EuiHorizontalRule margin="xs" />
-      {isLegacy && isAnchorLoaded && (
-        <div className="discover-table">
-          <DocTableLegacyMemoized {...legacyDocTableProps()} />
-        </div>
+      {isLegacy && rows && rows.length !== 0 && (
+        <DocTableContextMemoized
+          columns={columns}
+          indexPattern={indexPattern}
+          rows={rows}
+          isLoading={isAnchorLoading}
+          onFilter={addFilter}
+          onAddColumn={onAddColumn}
+          onRemoveColumn={onRemoveColumn}
+          sort={sort}
+          useNewFieldsApi={useNewFieldsApi}
+          dataTestSubj="contextDocTable"
+        />
       )}
-      {!isLegacy && (
+      {!isLegacy && rows && rows.length && (
         <div className="dscDocsGrid">
-          <DataGridMemoized {...docTableProps()} />
+          <DiscoverGridMemoized
+            ariaLabelledBy="surDocumentsAriaLabel"
+            columns={columns}
+            rows={rows}
+            indexPattern={indexPattern}
+            expandedDoc={expandedDoc}
+            isLoading={isAnchorLoading}
+            sampleSize={0}
+            sort={sort}
+            isSortEnabled={false}
+            showTimeCol={showTimeCol}
+            services={services}
+            useNewFieldsApi={useNewFieldsApi}
+            isPaginationEnabled={false}
+            controlColumnIds={controlColumnIds}
+            setExpandedDoc={setExpandedDoc}
+            onFilter={addFilter}
+            onAddColumn={onAddColumn}
+            onRemoveColumn={onRemoveColumn}
+            onSetColumns={onSetColumns}
+          />
         </div>
       )}
       <EuiHorizontalRule margin="xs" />
@@ -192,7 +171,7 @@ export function ContextAppContent({
         docCountAvailable={successors.length}
         onChangeCount={onChangeCount}
         isLoading={areSuccessorsLoading}
-        isDisabled={!isAnchorLoaded}
+        isDisabled={isAnchorLoading}
       />
     </Fragment>
   );

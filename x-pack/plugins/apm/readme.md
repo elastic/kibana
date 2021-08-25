@@ -33,11 +33,7 @@ _Docker Compose is required_
 
 ### Cypress tests
 
-```sh
-node x-pack/plugins/apm/scripts/ftr_e2e/cypress_run.js
-```
-
-_Starts Kibana (:5701), APM Server (:8201) and Elasticsearch (:9201). Ingests sample data into Elasticsearch via APM Server and runs the Cypress tests_
+See [ftr_e2e](./ftr_e2e)
 
 ### Jest tests
 
@@ -82,9 +78,10 @@ For debugging access Elasticsearch on http://localhost:9220` (elastic/changeme)
 
 ### API integration tests
 
-API tests are separated in two suites: 
- - a basic license test suite
- - a trial license test suite (the equivalent of gold+)
+API tests are separated in two suites:
+
+- a basic license test suite
+- a trial license test suite (the equivalent of gold+)
 
 This requires separate test servers and test runners.
 
@@ -112,10 +109,10 @@ node scripts/functional_test_runner --config x-pack/test/apm_api_integration/tri
 
 The API tests for "trial" are located in `x-pack/test/apm_api_integration/trial/tests`.
 
-
 **API Test tips**
- - For debugging access Elasticsearch on http://localhost:9220` (elastic/changeme)
- - To update snapshots append `--updateSnapshots` to the functional_test_runner command
+
+- For debugging access Elasticsearch on http://localhost:9220` (elastic/changeme)
+- To update snapshots append `--updateSnapshots` to the functional_test_runner command
 
 ## Linting
 
@@ -141,22 +138,17 @@ node scripts/eslint.js x-pack/legacy/plugins/apm
 
 ## Setup default APM users
 
-APM behaves differently depending on which the role and permissions a logged in user has.
-For testing purposes APM uses 3 custom users:
-
-**apm_read_user**: Apps: read. Indices: read (`apm-*`)
-
-**apm_write_user**: Apps: read/write. Indices: read (`apm-*`)
-
-**kibana_write_user** Apps: read/write. Indices: None
-
-To create the users with the correct roles run the following script:
+APM behaves differently depending on which the role and permissions a logged in user has. To create the users run:
 
 ```sh
-node x-pack/plugins/apm/scripts/setup-kibana-security.js --role-suffix <github-username-or-something-unique>
+node x-pack/plugins/apm/scripts/create-apm-users-and-roles.js --username admin --password changeme --kibana-url http://localhost:5601 --role-suffix <github-username-or-something-unique>
 ```
 
-The users will be created with the password specified in kibana.dev.yml for `elasticsearch.password`
+This will create:
+
+**apm_read_user**: Read only user
+
+**apm_power_user**: Read+write user.
 
 ## Debugging Elasticsearch queries
 

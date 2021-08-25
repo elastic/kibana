@@ -471,11 +471,6 @@ module.exports = {
                   'Server modules cannot be imported into client modules or shared modules.',
               },
               {
-                target: ['src/**/*'],
-                from: ['x-pack/**/*'],
-                errorMessage: 'OSS cannot import x-pack files.',
-              },
-              {
                 target: ['src/core/**/*'],
                 from: ['plugins/**/*', 'src/plugins/**/*'],
                 errorMessage: 'The core cannot depend on any plugins.',
@@ -1572,7 +1567,7 @@ module.exports = {
     {
       files: [
         'src/plugins/security_oss/**/*.{js,mjs,ts,tsx}',
-        'src/plugins/spaces_oss/**/*.{js,mjs,ts,tsx}',
+        'src/plugins/interactive_setup/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/encrypted_saved_objects/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/security/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/spaces/**/*.{js,mjs,ts,tsx}',

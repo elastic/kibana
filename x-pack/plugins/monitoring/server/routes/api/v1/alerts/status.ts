@@ -41,7 +41,6 @@ export function alertStatusRoute(server: any, npRoute: RouteDependencies) {
 
         const status = await fetchStatus(
           rulesClient,
-          npRoute.licenseService,
           alertTypeIds,
           [clusterUuid],
           filters as CommonAlertFilter[]

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { FilterMeta, Filter, IFieldFormat } from '../../../../src/plugins/data/common';
+import type { Filter, FilterMeta } from '@kbn/es-query';
+import type { IFieldFormat } from '../../../../src/plugins/field_formats/common';
 import type { Datatable, SerializedFieldFormat } from '../../../../src/plugins/expressions/common';
 
 export type FormatFactory = (mapping?: SerializedFieldFormat) => IFieldFormat;
@@ -56,3 +57,5 @@ export interface CustomPaletteParams {
 }
 
 export type RequiredPaletteParamTypes = Required<CustomPaletteParams>;
+
+export type LayerType = 'data' | 'threshold';

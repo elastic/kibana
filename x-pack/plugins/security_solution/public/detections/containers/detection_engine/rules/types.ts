@@ -29,6 +29,8 @@ import {
   timestamp_override,
   threshold,
   BulkAction,
+  ruleExecutionStatus,
+  RuleExecutionStatus,
 } from '../../../../../common/detection_engine/schemas/common/schemas';
 import {
   CreateRulesSchema,
@@ -73,14 +75,6 @@ const MetaRule = t.intersection([
     throttle: t.string,
     kibana_siem_app_url: t.string,
   }),
-]);
-
-const StatusTypes = t.union([
-  t.literal('succeeded'),
-  t.literal('failed'),
-  t.literal('going to run'),
-  t.literal('partial failure'),
-  t.literal('warning'),
 ]);
 
 // TODO: make a ticket
@@ -130,7 +124,7 @@ export const RuleSchema = t.intersection([
     query: t.string,
     rule_name_override,
     saved_id: t.string,
-    status: StatusTypes,
+    status: ruleExecutionStatus,
     status_date: t.string,
     threshold,
     threat_query,
@@ -274,17 +268,10 @@ export interface RuleStatus {
   current_status: RuleInfoStatus;
   failures: RuleInfoStatus[];
 }
-
-export type RuleStatusType =
-  | 'failed'
-  | 'going to run'
-  | 'succeeded'
-  | 'partial failure'
-  | 'warning';
 export interface RuleInfoStatus {
   alert_id: string;
   status_date: string;
-  status: RuleStatusType | null;
+  status: RuleExecutionStatus | null;
   last_failure_at: string | null;
   last_success_at: string | null;
   last_failure_message: string | null;

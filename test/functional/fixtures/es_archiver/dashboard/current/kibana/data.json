@@ -1138,6 +1138,49 @@
 {
   "type": "doc",
   "value": {
+    "id": "dashboard:d2525040-3dcd-11e8-8660-4d65aa086b3b",
+    "index": ".kibana",
+    "source": {
+      "coreMigrationVersion": "7.14.0",
+      "dashboard": {
+        "description": "I have one of every visualization type since the last time I was created!",
+        "hits": 0,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"language\":\"lucene\",\"query\":\"\"},\"filter\":[],\"highlightAll\":true,\"version\":true}"
+        },
+        "optionsJSON": "{\"darkTheme\":false,\"hidePanelTitles\":false,\"useMargins\":true}",
+        "panelsJSON": "[{\"version\":\"7.3.0\",\"type\":\"visualization\",\"gridData\":{\"x\":0,\"y\":15,\"w\":24,\"h\":15,\"i\":\"3\"},\"panelIndex\":\"3\",\"embeddableConfig\":{\"enhancements\":{}},\"panelRefName\":\"panel_3\"}]",
+        "refreshInterval": {
+          "display": "Off",
+          "pause": false,
+          "value": 0
+        },
+        "timeFrom": "Mon Apr 09 2018 17:56:08 GMT-0400",
+        "timeRestore": true,
+        "timeTo": "Wed Apr 11 2018 17:56:08 GMT-0400",
+        "title": "dashboard with table",
+        "version": 1
+      },
+      "migrationVersion": {
+        "dashboard": "7.14.0"
+      },
+      "references": [
+        {
+          "id": "4b5d6ef0-3dcb-11e8-8660-4d65aa086b3c",
+          "name": "3:panel_3",
+          "type": "visualization"
+        }
+      ],
+      "type": "dashboard",
+      "updated_at": "2018-04-16T16:05:02.915Z"
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
     "id": "visualization:29bd0240-4197-11e8-bb13-d53698fb349a",
     "index": ".kibana",
     "source": {

@@ -8,10 +8,11 @@
 import React from 'react';
 
 import { Column } from '../reorderable_table/types';
+import { ItemWithAnID } from '../types';
 
 import { ActionColumn } from './action_column';
 import { EditingColumn } from './editing_column';
-import { ItemWithAnID, InlineEditableTableColumn } from './types';
+import { InlineEditableTableColumn } from './types';
 
 interface GetUpdatedColumnProps<Item extends ItemWithAnID> {
   columns: Array<InlineEditableTableColumn<Item>>;

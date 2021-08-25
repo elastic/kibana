@@ -14,19 +14,23 @@ import type {
   PluginInitializerContext,
   CoreStart,
 } from '../../../../src/core/public';
-import type { LastUpdatedAtProps, LoadingPanelProps, FieldBrowserWrappedProps } from './components';
+import type { LastUpdatedAtProps, LoadingPanelProps, FieldBrowserProps } from './components';
 import {
   getLastUpdatedLazy,
   getLoadingPanelLazy,
   getTGridLazy,
   getFieldsBrowserLazy,
   getAddToCaseLazy,
+  getAddToExistingCaseButtonLazy,
+  getAddToNewCaseButtonLazy,
+  getAddToCasePopoverLazy,
 } from './methods';
 import type { TimelinesUIStart, TGridProps, TimelinesStartPlugins } from './types';
 import { tGridReducer } from './store/t_grid/reducer';
 import { useDraggableKeyboardWrapper } from './components/drag_and_drop/draggable_keyboard_wrapper_hook';
 import { useAddToTimeline, useAddToTimelineSensor } from './hooks/use_add_to_timeline';
 import { getHoverActions } from './components/hover_actions';
+
 export class TimelinesPlugin implements Plugin<void, TimelinesUIStart> {
   constructor(private readonly initializerContext: PluginInitializerContext) {}
   private _store: Store | undefined;
@@ -60,7 +64,7 @@ export class TimelinesPlugin implements Plugin<void, TimelinesUIStart> {
       getLastUpdated: (props: LastUpdatedAtProps) => {
         return getLastUpdatedLazy(props);
       },
-      getFieldBrowser: (props: FieldBrowserWrappedProps) => {
+      getFieldBrowser: (props: FieldBrowserProps) => {
         return getFieldsBrowserLazy(props, {
           store: this._store!,
         });
@@ -78,7 +82,32 @@ export class TimelinesPlugin implements Plugin<void, TimelinesUIStart> {
         this.setStore(store);
       },
       getAddToCaseAction: (props) => {
-        return getAddToCaseLazy(props);
+        return getAddToCaseLazy(props, {
+          store: this._store!,
+          storage: this._storage,
+          setStore: this.setStore.bind(this),
+        });
+      },
+      getAddToCasePopover: (props) => {
+        return getAddToCasePopoverLazy(props, {
+          store: this._store!,
+          storage: this._storage,
+          setStore: this.setStore.bind(this),
+        });
+      },
+      getAddToExistingCaseButton: (props) => {
+        return getAddToExistingCaseButtonLazy(props, {
+          store: this._store!,
+          storage: this._storage,
+          setStore: this.setStore.bind(this),
+        });
+      },
+      getAddToNewCaseButton: (props) => {
+        return getAddToNewCaseButtonLazy(props, {
+          store: this._store!,
+          storage: this._storage,
+          setStore: this.setStore.bind(this),
+        });
       },
     };
   }

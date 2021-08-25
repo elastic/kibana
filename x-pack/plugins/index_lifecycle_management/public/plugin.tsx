@@ -55,7 +55,7 @@ export class IndexLifecycleManagementPlugin
             chrome: { docTitle },
             i18n: { Context: I18nContext },
             docLinks: { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION },
-            application: { navigateToApp, getUrlForApp },
+            application,
           } = coreStart;
 
           const license = await licensing.license$.pipe(first()).toPromise();
@@ -74,8 +74,7 @@ export class IndexLifecycleManagementPlugin
             element,
             I18nContext,
             history,
-            navigateToApp,
-            getUrlForApp,
+            application,
             this.breadcrumbService,
             license,
             cloud
@@ -98,7 +97,7 @@ export class IndexLifecycleManagementPlugin
             defaultMessage:
               'Define lifecycle policies to automatically perform operations as an index ages.',
           }),
-          icon: 'indexSettings',
+          icon: 'indexRollupApp',
           path: '/app/management/data/index_lifecycle_management',
           showOnHomePage: true,
           category: FeatureCatalogueCategory.ADMIN,

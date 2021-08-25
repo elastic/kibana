@@ -6,63 +6,95 @@
  * Side Public License, v 1.
  */
 import type { estypes } from '@elastic/elasticsearch';
-import { get, isPlainObject } from 'lodash';
+import { get, has, isPlainObject } from 'lodash';
 import type { Filter, FilterMeta } from './types';
 import type { IndexPatternFieldBase, IndexPatternBase } from '../../es_query';
 import { getConvertedValueForField } from './get_converted_value_for_field';
 
+export type PhraseFilterValue = string | number | boolean;
+
 export type PhraseFilterMeta = FilterMeta & {
   params?: {
-    query: string; // The unformatted value
+    query: PhraseFilterValue; // The unformatted value
   };
-  field?: any;
-  index?: any;
+  field?: string;
+  index?: string;
 };
 
 export type PhraseFilter = Filter & {
   meta: PhraseFilterMeta;
-  script?: {
-    script: {
-      source?: any;
-      lang?: estypes.ScriptLanguage;
-      params: any;
-    };
+  query: {
+    match_phrase?: estypes.QueryDslQueryContainer['match_phrase'];
+    match?: estypes.QueryDslQueryContainer['match'];
   };
 };
 
-type PhraseFilterValue = string | number | boolean;
-
-export const isPhraseFilter = (filter: any): filter is PhraseFilter => {
-  const isMatchPhraseQuery = filter && filter.query && filter.query.match_phrase;
-
-  const isDeprecatedMatchPhraseQuery =
-    filter &&
-    filter.query &&
-    filter.query.match &&
-    Object.values(filter.query.match).find((params: any) => params.type === 'phrase');
-
-  return Boolean(isMatchPhraseQuery || isDeprecatedMatchPhraseQuery);
+export type ScriptedPhraseFilter = Filter & {
+  meta: PhraseFilterMeta;
+  script: {
+    script: estypes.InlineScript;
+  };
 };
 
-export const isScriptedPhraseFilter = (filter: any): filter is PhraseFilter =>
-  Boolean(get(filter, 'script.script.params.value'));
+/**
+ * @param filter
+ * @returns `true` if a filter is a `PhraseFilter`
+ *
+ * @public
+ */
+export const isPhraseFilter = (filter: Filter): filter is PhraseFilter => {
+  const isMatchPhraseQuery = has(filter, 'query.match_phrase');
+  const matchQueryPart: estypes.QueryDslMultiMatchQuery[] = get(filter, 'query.match', []);
+  const isDeprecatedMatchPhraseQuery =
+    Object.values(matchQueryPart).find((params) => params.type === 'phrase') !== undefined;
 
+  return isMatchPhraseQuery || isDeprecatedMatchPhraseQuery;
+};
+
+/**
+ * @param filter
+ * @returns `true` if a filter is a scripted `PhrasesFilter`
+ *
+ * @public
+ */
+export const isScriptedPhraseFilter = (filter: Filter): filter is ScriptedPhraseFilter =>
+  has(filter, 'script.script.params.value');
+
+/** @internal */
 export const getPhraseFilterField = (filter: PhraseFilter) => {
-  const queryConfig = filter.query.match_phrase || filter.query.match;
+  const queryConfig = filter.query.match_phrase ?? filter.query.match ?? {};
   return Object.keys(queryConfig)[0];
 };
 
-export const getPhraseFilterValue = (filter: PhraseFilter): PhraseFilterValue => {
-  const queryConfig = filter.query.match_phrase || filter.query.match;
-  const queryValue = Object.values(queryConfig)[0] as any;
-  return isPlainObject(queryValue) ? queryValue.query : queryValue;
+/**
+ * @internal
+ */
+export const getPhraseFilterValue = (
+  filter: PhraseFilter | ScriptedPhraseFilter
+): PhraseFilterValue => {
+  if (isPhraseFilter(filter)) {
+    const queryConfig = filter.query.match_phrase || filter.query.match || {};
+    const queryValue = Object.values(queryConfig)[0];
+    return isPlainObject(queryValue) ? queryValue.query : queryValue;
+  } else {
+    return filter.script.script.params?.value;
+  }
 };
 
+/**
+ * Creates a filter where the given field matches a given value
+ * @param field
+ * @param params
+ * @param indexPattern
+ * @returns `PhraseFilter`
+ *
+ * @public
+ */
 export const buildPhraseFilter = (
   field: IndexPatternFieldBase,
-  value: any,
+  value: PhraseFilterValue,
   indexPattern: IndexPatternBase
-): PhraseFilter => {
+): PhraseFilter | ScriptedPhraseFilter => {
   const convertedValue = getConvertedValueForField(field, value);
 
   if (field.scripted) {
@@ -82,7 +114,8 @@ export const buildPhraseFilter = (
   }
 };
 
-export const getPhraseScript = (field: IndexPatternFieldBase, value: string) => {
+/** @internal */
+export const getPhraseScript = (field: IndexPatternFieldBase, value: PhraseFilterValue) => {
   const convertedValue = getConvertedValueForField(field, value);
   const script = buildInlineScriptForPhraseFilter(field);
 
@@ -93,7 +126,7 @@ export const getPhraseScript = (field: IndexPatternFieldBase, value: string) => 
       params: {
         value: convertedValue,
       },
-    },
+    } as estypes.InlineScript,
   };
 };
 
@@ -106,7 +139,7 @@ export const getPhraseScript = (field: IndexPatternFieldBase, value: string) => 
  * @param {object} scriptedField A Field object representing a scripted field
  * @returns {string} The inline script string
  */
-export const buildInlineScriptForPhraseFilter = (scriptedField: any) => {
+export const buildInlineScriptForPhraseFilter = (scriptedField: IndexPatternFieldBase) => {
   // We must wrap painless scripts in a lambda in case they're more than a simple expression
   if (scriptedField.lang === 'painless') {
     return (

@@ -15,7 +15,7 @@ import {
 import { ROLES } from '../../../../plugins/security_solution/common/test';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { createSignalsIndex, deleteSignalsIndex, getIndexNameFromLoad, waitFor } from '../../utils';
-import { createUserAndRole } from '../roles_users_utils';
+import { createUserAndRole } from '../../../common/services/security_solution';
 
 interface CreateResponse {
   index: string;

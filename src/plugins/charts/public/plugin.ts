@@ -12,6 +12,7 @@ import { palette, systemPalette } from '../common';
 
 import { ThemeService, LegacyColorsService } from './services';
 import { PaletteService } from './services/palettes/service';
+import { ActiveCursor } from './services/active_cursor';
 
 export type Theme = Omit<ThemeService, 'init'>;
 export type Color = Omit<LegacyColorsService, 'init'>;
@@ -28,13 +29,16 @@ export interface ChartsPluginSetup {
 }
 
 /** @public */
-export type ChartsPluginStart = ChartsPluginSetup;
+export type ChartsPluginStart = ChartsPluginSetup & {
+  activeCursor: ActiveCursor;
+};
 
 /** @public */
 export class ChartsPlugin implements Plugin<ChartsPluginSetup, ChartsPluginStart> {
   private readonly themeService = new ThemeService();
   private readonly legacyColorsService = new LegacyColorsService();
   private readonly paletteService = new PaletteService();
+  private readonly activeCursor = new ActiveCursor();
 
   private palettes: undefined | ReturnType<PaletteService['setup']>;
 
@@ -44,6 +48,8 @@ export class ChartsPlugin implements Plugin<ChartsPluginSetup, ChartsPluginStart
     this.themeService.init(core.uiSettings);
     this.legacyColorsService.init(core.uiSettings);
     this.palettes = this.paletteService.setup(this.legacyColorsService);
+
+    this.activeCursor.setup();
 
     return {
       legacyColors: this.legacyColorsService,
@@ -57,6 +63,7 @@ export class ChartsPlugin implements Plugin<ChartsPluginSetup, ChartsPluginStart
       legacyColors: this.legacyColorsService,
       theme: this.themeService,
       palettes: this.palettes!,
+      activeCursor: this.activeCursor,
     };
   }
 }

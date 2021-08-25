@@ -6,35 +6,21 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { find } from 'lodash/fp';
 import { useQuery } from 'react-query';
 
-import { GetPackagesResponse, epmRouteService } from '../../../../fleet/common';
-import { OSQUERY_INTEGRATION_NAME } from '../../../common';
 import { useKibana } from '../lib/kibana';
 import { useErrorToast } from './use_error_toast';
 
-export const useOsqueryIntegration = () => {
+export const useOsqueryIntegrationStatus = () => {
   const { http } = useKibana().services;
   const setErrorToast = useErrorToast();
 
-  return useQuery(
-    'integrations',
-    () =>
-      http.get(epmRouteService.getListPath(), {
-        query: {
-          experimental: true,
-        },
-      }),
-    {
-      select: ({ response }: GetPackagesResponse) =>
-        find(['name', OSQUERY_INTEGRATION_NAME], response),
-      onError: (error: Error) =>
-        setErrorToast(error, {
-          title: i18n.translate('xpack.osquery.osquery_integration.fetchError', {
-            defaultMessage: 'Error while fetching osquery integration',
-          }),
+  return useQuery('integration', () => http.get('/internal/osquery/status'), {
+    onError: (error: Error) =>
+      setErrorToast(error, {
+        title: i18n.translate('xpack.osquery.osquery_integration.fetchError', {
+          defaultMessage: 'Error while fetching osquery integration',
         }),
-    }
-  );
+      }),
+  });
 };
