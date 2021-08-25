@@ -291,10 +291,6 @@ const IndexPatternEditorFlyoutContentComponent = ({
     [http, allowHidden, allSources, type, rollupIndicesCapabilities, searchClient, isLoadingSources]
   );
 
-  useEffect(() => {
-    reloadMatchedIndices(title);
-  }, [allowHidden, reloadMatchedIndices, title]);
-
   const onTypeChange = useCallback(
     (newType) => {
       form.setFieldValue('title', '');
