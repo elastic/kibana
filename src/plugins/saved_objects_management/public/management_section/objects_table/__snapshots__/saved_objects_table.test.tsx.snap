@@ -25,9 +25,11 @@ exports[`SavedObjectsTable delete should show a confirm modal 1`] = `
 exports[`SavedObjectsTable export should allow the user to choose when exporting all 1`] = `
 <ExportModal
   filteredItemCount={4}
+  includeNamespaces={true}
   includeReferences={true}
   onCancel={[Function]}
   onExport={[Function]}
+  onIncludeNamespacesChange={[Function]}
   onIncludeReferenceChange={[Function]}
   onSelectedOptionsChange={[Function]}
   options={
@@ -173,7 +175,7 @@ exports[`SavedObjectsTable should render normally 1`] = `
       }
       goInspectObject={[Function]}
       isSearching={false}
-      itemId="id"
+      itemId={[Function]}
       items={
         Array [
           Object {

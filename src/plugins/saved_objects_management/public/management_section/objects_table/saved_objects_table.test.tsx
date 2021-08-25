@@ -224,8 +224,8 @@ describe('SavedObjectsTable', () => {
   describe('export', () => {
     it('should export selected objects', async () => {
       const mockSelectedSavedObjects = [
-        { id: '1', type: 'index-pattern' },
-        { id: '3', type: 'dashboard' },
+        { id: '1', type: 'index-pattern', meta: { namespaceType: 'single' } },
+        { id: '3', type: 'dashboard', meta: { namespaceType: 'single' } },
       ] as SavedObjectWithMetadata[];
 
       const mockSavedObjects = mockSelectedSavedObjects.map((obj) => ({
@@ -250,9 +250,20 @@ describe('SavedObjectsTable', () => {
       // Set some as selected
       component.instance().onSelectionChanged(mockSelectedSavedObjects);
 
-      await component.instance().onExport(true);
+      await component.instance().onExport({
+        includeNamespaces: true,
+        includeReferences: true,
+      });
 
-      expect(fetchExportObjectsMock).toHaveBeenCalledWith(http, mockSelectedSavedObjects, true);
+      expect(fetchExportObjectsMock).toHaveBeenCalledWith(
+        http,
+        mockSelectedSavedObjects.map(({ id, type }) => ({
+          id,
+          type,
+        })),
+        true,
+        true
+      );
       expect(notifications.toasts.addSuccess).toHaveBeenCalledWith({
         title: 'Your file is downloading in the background',
       });
@@ -260,8 +271,8 @@ describe('SavedObjectsTable', () => {
 
     it('should display a warning if the export contains missing references', async () => {
       const mockSelectedSavedObjects = [
-        { id: '1', type: 'index-pattern' },
-        { id: '3', type: 'dashboard' },
+        { id: '1', type: 'index-pattern', meta: { namespaceType: 'single' } },
+        { id: '3', type: 'dashboard', meta: { namespaceType: 'single' } },
       ] as SavedObjectWithMetadata[];
 
       const mockSavedObjects = mockSelectedSavedObjects.map((obj) => ({
@@ -294,9 +305,20 @@ describe('SavedObjectsTable', () => {
       // Set some as selected
       component.instance().onSelectionChanged(mockSelectedSavedObjects);
 
-      await component.instance().onExport(true);
+      await component.instance().onExport({
+        includeNamespaces: true,
+        includeReferences: true,
+      });
 
-      expect(fetchExportObjectsMock).toHaveBeenCalledWith(http, mockSelectedSavedObjects, true);
+      expect(fetchExportObjectsMock).toHaveBeenCalledWith(
+        http,
+        mockSelectedSavedObjects.map(({ id, type }) => ({
+          id,
+          type,
+        })),
+        true,
+        true
+      );
       expect(notifications.toasts.addWarning).toHaveBeenCalledWith({
         title:
           'Your file is downloading in the background. ' +
@@ -307,8 +329,8 @@ describe('SavedObjectsTable', () => {
 
     it('should display a specific message if the export contains excluded objects', async () => {
       const mockSelectedSavedObjects = [
-        { id: '1', type: 'index-pattern' },
-        { id: '3', type: 'dashboard' },
+        { id: '1', type: 'index-pattern', meta: { namespaceType: 'single' } },
+        { id: '3', type: 'dashboard', meta: { namespaceType: 'single' } },
       ] as SavedObjectWithMetadata[];
 
       const mockSavedObjects = mockSelectedSavedObjects.map((obj) => ({
@@ -341,9 +363,20 @@ describe('SavedObjectsTable', () => {
       // Set some as selected
       component.instance().onSelectionChanged(mockSelectedSavedObjects);
 
-      await component.instance().onExport(true);
+      await component.instance().onExport({
+        includeNamespaces: true,
+        includeReferences: true,
+      });
 
-      expect(fetchExportObjectsMock).toHaveBeenCalledWith(http, mockSelectedSavedObjects, true);
+      expect(fetchExportObjectsMock).toHaveBeenCalledWith(
+        http,
+        mockSelectedSavedObjects.map(({ id, type }) => ({
+          id,
+          type,
+        })),
+        true,
+        true
+      );
       expect(notifications.toasts.addSuccess).toHaveBeenCalledWith({
         title:
           'Your file is downloading in the background. ' +
@@ -384,6 +417,7 @@ describe('SavedObjectsTable', () => {
         http,
         types: allowedTypes,
         includeReferencesDeep: true,
+        includeNamespaces: true,
       });
       expect(saveAsMock).toHaveBeenCalledWith(blob, 'export.ndjson');
       expect(notifications.toasts.addSuccess).toHaveBeenCalledWith({
@@ -414,6 +448,7 @@ describe('SavedObjectsTable', () => {
         types: allowedTypes,
         search: 'test*',
         includeReferencesDeep: true,
+        includeNamespaces: true,
       });
       expect(saveAsMock).toHaveBeenCalledWith(blob, 'export.ndjson');
       expect(notifications.toasts.addSuccess).toHaveBeenCalledWith({
