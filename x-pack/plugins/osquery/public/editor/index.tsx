@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { EuiCodeEditor } from '@elastic/eui';
 import useDebounce from 'react-use/lib/useDebounce';
 import 'brace/theme/tomorrow';
@@ -32,6 +32,8 @@ const OsqueryEditorComponent: React.FC<OsqueryEditorProps> = ({ defaultValue, on
   useDebounce(() => onChange(editorValue.replaceAll('\n', ' ').replaceAll('  ', ' ')), 500, [
     editorValue,
   ]);
+
+  useEffect(() => setEditorValue(defaultValue), [defaultValue]);
 
   return (
     <EuiCodeEditor
