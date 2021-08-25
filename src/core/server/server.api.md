@@ -753,10 +753,10 @@ export interface DeprecationsDetails {
     // (undocumented)
     documentationUrl?: string;
     level: 'warning' | 'critical' | 'fetch_error';
-    // (undocumented)
     message: string;
     // (undocumented)
     requireRestart?: boolean;
+    title: string;
 }
 
 // @public
