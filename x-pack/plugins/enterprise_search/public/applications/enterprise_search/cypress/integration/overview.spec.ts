@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { login } from '../../../shared/cypress/commands';
+import { login, checkA11y } from '../../../shared/cypress/commands';
 import { overviewPath } from '../../../shared/cypress/routes';
 
 context('Enterprise Search Overview', () => {
@@ -26,6 +26,8 @@ context('Enterprise Search Overview', () => {
       .contains('Open Workplace Search')
       .should('have.attr', 'href')
       .and('match', /workplace_search/);
+
+    checkA11y();
   });
 
   it('should have a setup guide', () => {
@@ -38,5 +40,7 @@ context('Enterprise Search Overview', () => {
     cy.visit(`${overviewPath}/setup_guide`);
     cy.contains('Setup Guide');
     cy.contains('Add your Enterprise Search host URL to your Kibana configuration');
+
+    checkA11y();
   });
 });
