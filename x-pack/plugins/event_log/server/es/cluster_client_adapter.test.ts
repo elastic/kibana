@@ -338,13 +338,13 @@ describe('queryEventsBySavedObject', () => {
         },
       })
     );
-    await clusterClientAdapter.queryEventsBySavedObjects(
-      'index-name',
-      'namespace',
-      'saved-object-type',
-      ['saved-object-id'],
-      DEFAULT_OPTIONS
-    );
+    await clusterClientAdapter.queryEventsBySavedObjects({
+      index: 'index-name',
+      namespace: 'namespace',
+      type: 'saved-object-type',
+      ids: ['saved-object-id'],
+      findOptions: DEFAULT_OPTIONS,
+    });
 
     const [query] = clusterClient.search.mock.calls[0];
     expect(query).toMatchInlineSnapshot(`
@@ -429,13 +429,13 @@ describe('queryEventsBySavedObject', () => {
         },
       })
     );
-    await clusterClientAdapter.queryEventsBySavedObjects(
-      'index-name',
-      undefined,
-      'saved-object-type',
-      ['saved-object-id'],
-      DEFAULT_OPTIONS
-    );
+    await clusterClientAdapter.queryEventsBySavedObjects({
+      index: 'index-name',
+      namespace: undefined,
+      type: 'saved-object-type',
+      ids: ['saved-object-id'],
+      findOptions: DEFAULT_OPTIONS,
+    });
 
     const [query] = clusterClient.search.mock.calls[0];
     expect(query).toMatchInlineSnapshot(`
@@ -522,13 +522,13 @@ describe('queryEventsBySavedObject', () => {
         },
       })
     );
-    await clusterClientAdapter.queryEventsBySavedObjects(
-      'index-name',
-      'namespace',
-      'saved-object-type',
-      ['saved-object-id'],
-      { ...DEFAULT_OPTIONS, sort_field: 'event.end', sort_order: 'desc' }
-    );
+    await clusterClientAdapter.queryEventsBySavedObjects({
+      index: 'index-name',
+      namespace: 'namespace',
+      type: 'saved-object-type',
+      ids: ['saved-object-id'],
+      findOptions: { ...DEFAULT_OPTIONS, sort_field: 'event.end', sort_order: 'desc' },
+    });
 
     const [query] = clusterClient.search.mock.calls[0];
     expect(query).toMatchObject({
@@ -559,13 +559,13 @@ describe('queryEventsBySavedObject', () => {
 
     const start = '2020-07-08T00:52:28.350Z';
 
-    await clusterClientAdapter.queryEventsBySavedObjects(
-      'index-name',
-      'namespace',
-      'saved-object-type',
-      ['saved-object-id'],
-      { ...DEFAULT_OPTIONS, start }
-    );
+    await clusterClientAdapter.queryEventsBySavedObjects({
+      index: 'index-name',
+      namespace: 'namespace',
+      type: 'saved-object-type',
+      ids: ['saved-object-id'],
+      findOptions: { ...DEFAULT_OPTIONS, start },
+    });
 
     const [query] = clusterClient.search.mock.calls[0];
     expect(query).toMatchInlineSnapshot(`
@@ -661,14 +661,14 @@ describe('queryEventsBySavedObject', () => {
     const start = '2020-07-08T00:52:28.350Z';
     const end = '2020-07-08T00:00:00.000Z';
 
-    await clusterClientAdapter.queryEventsBySavedObjects(
-      'index-name',
-      'namespace',
-      'saved-object-type',
-      ['saved-object-id'],
-      { ...DEFAULT_OPTIONS, start, end },
-      ['legacy-id']
-    );
+    await clusterClientAdapter.queryEventsBySavedObjects({
+      index: 'index-name',
+      namespace: 'namespace',
+      type: 'saved-object-type',
+      ids: ['saved-object-id'],
+      findOptions: { ...DEFAULT_OPTIONS, start, end },
+      legacyIds: ['legacy-id'],
+    });
 
     const [query] = clusterClient.search.mock.calls[0];
     expect(query).toMatchObject({

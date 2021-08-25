@@ -41,18 +41,12 @@ export interface QueryEventsBySavedObjectResult {
   data: IValidatedEvent[];
 }
 
-interface QueryEventsBySavedObjectsFindOptions extends FindOptionsType {
-  end?: string | undefined;
-  start?: string | undefined;
-  filter?: string | undefined;
-}
-
 interface QueryOptionsEventsBySavedObjectFilter {
   index: string;
   namespace: string | undefined;
   type: string;
   ids: string[];
-  findOptions: QueryEventsBySavedObjectsFindOptions;
+  findOptions: FindOptionsType;
   legacyIds?: string[];
 }
 

@@ -119,19 +119,19 @@ describe('EventLogStart', () => {
         )
       ).toEqual(result);
 
-      expect(esContext.esAdapter.queryEventsBySavedObjects).toHaveBeenCalledWith(
-        esContext.esNames.indexPattern,
-        undefined,
-        'saved-object-type',
-        ['saved-object-id'],
-        {
+      expect(esContext.esAdapter.queryEventsBySavedObjects).toHaveBeenCalledWith({
+        index: esContext.esNames.indexPattern,
+        namespace: undefined,
+        type: 'saved-object-type',
+        ids: ['saved-object-id'],
+        findOptions: {
           page: 1,
           per_page: 10,
           sort_field: '@timestamp',
           sort_order: 'asc',
         },
-        ['legacy-id']
-      );
+        legacyIds: ['legacy-id'],
+      });
     });
 
     test('fetches all events in time frame that reference the saved object', async () => {
@@ -206,12 +206,12 @@ describe('EventLogStart', () => {
         )
       ).toEqual(result);
 
-      expect(esContext.esAdapter.queryEventsBySavedObjects).toHaveBeenCalledWith(
-        esContext.esNames.indexPattern,
-        undefined,
-        'saved-object-type',
-        ['saved-object-id'],
-        {
+      expect(esContext.esAdapter.queryEventsBySavedObjects).toHaveBeenCalledWith({
+        index: esContext.esNames.indexPattern,
+        namespace: undefined,
+        type: 'saved-object-type',
+        ids: ['saved-object-id'],
+        findOptions: {
           page: 1,
           per_page: 10,
           sort_field: '@timestamp',
@@ -219,8 +219,8 @@ describe('EventLogStart', () => {
           start,
           end,
         },
-        ['legacy-id']
-      );
+        legacyIds: ['legacy-id'],
+      });
     });
 
     test('validates that the start date is valid', async () => {
