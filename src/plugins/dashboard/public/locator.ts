@@ -33,6 +33,10 @@ const cleanEmptyKeys = (stateObj: Record<string, unknown>) => {
 
 export const DASHBOARD_APP_LOCATOR = 'DASHBOARD_APP_LOCATOR';
 
+/**
+ * We use `type` instead of `interface` to avoid having to extend this type with
+ * `SerializableRecord`. See https://github.com/microsoft/TypeScript/issues/15300.
+ */
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type DashboardAppLocatorParams = {
   /**
