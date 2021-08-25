@@ -103,6 +103,24 @@ describe('Overview - Fix deprecation logs step', () => {
 
       expect(exists('fetchLoggingError')).toBe(true);
     });
+
+    test('It doesnt show external links and deprecations count when toggle is disabled', async () => {
+      httpRequestsMockHelpers.setLoadDeprecationLoggingResponse({
+        isDeprecationLogIndexingEnabled: false,
+        isDeprecationLoggingEnabled: false,
+      });
+
+      await act(async () => {
+        testBed = await setupOverviewPage();
+      });
+
+      const { exists, component } = testBed;
+
+      component.update();
+
+      expect(exists('externalLinksTitle')).toBe(false);
+      expect(exists('deprecationsCountTitle')).toBe(false);
+    });
   });
 
   describe('Step 2 - Analyze logs', () => {
@@ -201,7 +219,7 @@ describe('Overview - Fix deprecation logs step', () => {
         testBed = await setupOverviewPage();
       });
 
-      const { find, exists, component } = testBed;
+      const { exists, actions, component } = testBed;
 
       component.update();
 
@@ -211,11 +229,7 @@ describe('Overview - Fix deprecation logs step', () => {
         count: 0,
       });
 
-      await act(async () => {
-        find('errorResetButton').simulate('click');
-      });
-
-      component.update();
+      await actions.clickRetryButton();
 
       expect(exists('noWarningsCallout')).toBe(true);
     });
@@ -229,7 +243,7 @@ describe('Overview - Fix deprecation logs step', () => {
         testBed = await setupOverviewPage();
       });
 
-      const { find, exists, component } = testBed;
+      const { exists, actions, component } = testBed;
 
       component.update();
 
@@ -240,11 +254,7 @@ describe('Overview - Fix deprecation logs step', () => {
         count: 0,
       });
 
-      await act(async () => {
-        find('resetLastStoredDate').simulate('click');
-      });
-
-      component.update();
+      await actions.clickResetButton();
 
       expect(exists('noWarningsCallout')).toBe(true);
     });

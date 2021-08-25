@@ -61,7 +61,7 @@ describe('deprecation logging API', () => {
 
     it('returns an error if it throws', async () => {
       (routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.cluster
-        .getSettings as jest.Mock).mockRejectedValue(new Error(`scary error!`));
+        .getSettings as jest.Mock).mockRejectedValue(new Error('scary error!'));
       await expect(
         routeDependencies.router.getHandler({
           method: 'get',
@@ -96,7 +96,7 @@ describe('deprecation logging API', () => {
 
     it('returns an error if it throws', async () => {
       (routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.cluster
-        .putSettings as jest.Mock).mockRejectedValue(new Error(`scary error!`));
+        .putSettings as jest.Mock).mockRejectedValue(new Error('scary error!'));
       await expect(
         routeDependencies.router.getHandler({
           method: 'put',
@@ -153,7 +153,7 @@ describe('deprecation logging API', () => {
 
     it('returns an error if it throws', async () => {
       (routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.indices
-        .exists as jest.Mock).mockRejectedValue(new Error(`scary error!`));
+        .exists as jest.Mock).mockRejectedValue(new Error('scary error!'));
       await expect(
         routeDependencies.router.getHandler({
           method: 'get',

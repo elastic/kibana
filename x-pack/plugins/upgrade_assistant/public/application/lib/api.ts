@@ -89,6 +89,7 @@ export class ApiService {
       path: `${API_BASE_PATH}/deprecation_logging/count`,
       method: 'get',
       query: { from },
+      pollIntervalMs: 60000,
     });
   }
 

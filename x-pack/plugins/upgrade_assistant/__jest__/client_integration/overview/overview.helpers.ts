@@ -37,8 +37,30 @@ const createActions = (testBed: TestBed) => {
     component.update();
   };
 
+  const clickRetryButton = async () => {
+    const { find, component } = testBed;
+
+    await act(async () => {
+      find('retryButton').simulate('click');
+    });
+
+    component.update();
+  };
+
+  const clickResetButton = async () => {
+    const { find, component } = testBed;
+
+    await act(async () => {
+      find('resetLastStoredDate').simulate('click');
+    });
+
+    component.update();
+  };
+
   return {
     clickDeprecationToggle,
+    clickRetryButton,
+    clickResetButton,
   };
 };
 

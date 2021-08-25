@@ -14,7 +14,7 @@ import {
 } from '../lib/es_deprecation_logging_apis';
 import { versionCheckHandlerWrapper } from '../lib/es_version_precheck';
 import { RouteDependencies } from '../types';
-import { DEPRECATION_LOGS_INDEX_PATTERN } from '../../common/constants';
+import { DEPRECATION_LOGS_INDEX } from '../../common/constants';
 
 export function registerDeprecationLoggingRoutes({ router }: RouteDependencies) {
   router.get(
@@ -85,7 +85,7 @@ export function registerDeprecationLoggingRoutes({ router }: RouteDependencies) 
         response
       ) => {
         const { body: indexExists } = await client.asCurrentUser.indices.exists({
-          index: DEPRECATION_LOGS_INDEX_PATTERN,
+          index: DEPRECATION_LOGS_INDEX,
         });
 
         if (!indexExists) {
@@ -93,7 +93,7 @@ export function registerDeprecationLoggingRoutes({ router }: RouteDependencies) 
         }
 
         const { body } = await client.asCurrentUser.count({
-          index: DEPRECATION_LOGS_INDEX_PATTERN,
+          index: DEPRECATION_LOGS_INDEX,
           body: {
             query: {
               range: {

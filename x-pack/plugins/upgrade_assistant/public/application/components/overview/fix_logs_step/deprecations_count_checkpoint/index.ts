@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { VerifyChanges } from './verify_changes';
+export { DeprecationsCountCheckpoint } from './deprecations_count_checkpoint';

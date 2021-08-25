@@ -7,7 +7,6 @@
 
 import React, { FunctionComponent, useState } from 'react';
 import moment from 'moment-timezone';
-import useInterval from 'react-use/lib/useInterval';
 import { FormattedDate, FormattedTime, FormattedMessage } from '@kbn/i18n/react';
 
 import { i18n } from '@kbn/i18n';
@@ -15,7 +14,6 @@ import { EuiCallOut, EuiButton, EuiLoadingContent, EuiFlexGroup, EuiFlexItem } f
 import { useAppContext } from '../../../../app_context';
 import { Storage } from '../../../../../shared_imports';
 
-const POLLING_INTERVAL = 60000;
 const LS_SETTING_ID = 'kibana.upgradeAssistant.lastCheckpoint';
 const localStorage = new Storage(window.localStorage);
 
@@ -66,19 +64,17 @@ const getPreviousCheckpointDate = () => {
   return now;
 };
 
-export const VerifyChanges: FunctionComponent = () => {
+export const DeprecationsCountCheckpoint: FunctionComponent = () => {
   const { api } = useAppContext();
   const [previousCheck, setPreviousCheck] = useState(getPreviousCheckpointDate());
-  const { data, error, isLoading, resendRequest } = api.getDeprecationLogsCount(previousCheck);
+  const { data, error, isLoading, resendRequest, isInitialRequest } = api.getDeprecationLogsCount(
+    previousCheck
+  );
 
   const warningsCount = data?.count || 0;
   const calloutTint = warningsCount > 0 ? 'warning' : 'success';
   const calloutIcon = warningsCount > 0 ? 'alert' : 'check';
   const calloutTestId = warningsCount > 0 ? 'hasWarningsCallout' : 'noWarningsCallout';
-
-  useInterval(() => {
-    resendRequest();
-  }, POLLING_INTERVAL);
 
   const onResetClick = () => {
     const now = moment().toISOString();
@@ -87,7 +83,7 @@ export const VerifyChanges: FunctionComponent = () => {
     localStorage.set(LS_SETTING_ID, now);
   };
 
-  if (!data && isLoading) {
+  if (isInitialRequest && isLoading) {
     return (
       <EuiFlexGroup>
         <EuiFlexItem>
@@ -108,7 +104,7 @@ export const VerifyChanges: FunctionComponent = () => {
         <p>
           {error.statusCode} - {error.message}
         </p>
-        <EuiButton color="danger" onClick={resendRequest} data-test-subj="errorResetButton">
+        <EuiButton color="danger" onClick={resendRequest} data-test-subj="retryButton">
           {i18nTexts.retryButton}
         </EuiButton>
       </EuiCallOut>
