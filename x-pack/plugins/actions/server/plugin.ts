@@ -230,7 +230,8 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       core.savedObjects,
       plugins.encryptedSavedObjects,
       this.actionTypeRegistry!,
-      plugins.taskManager.index
+      plugins.taskManager.index,
+      this.preconfiguredActions
     );
 
     registerBuiltInActionTypes({

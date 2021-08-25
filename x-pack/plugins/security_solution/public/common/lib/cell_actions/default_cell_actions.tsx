@@ -12,7 +12,6 @@ import type {
   TimelineNonEcsData,
 } from '../../../../../timelines/common/search_strategy';
 import { DataProvider, TGridCellAction } from '../../../../../timelines/common/types';
-import { TimelineId } from '../../../../common';
 import { getMappedNonEcsValue } from '../../../timelines/components/timeline/body/data_driven_columns';
 import { IS_OPERATOR } from '../../../timelines/components/timeline/data_providers/data_provider';
 import { allowTopN, escapeDataProviderId } from '../../components/drag_and_drop/helpers';
@@ -119,11 +118,15 @@ export const defaultCellActions: TGridCellAction[] = [
       </>
     );
   },
-  ({ browserFields, data }: { browserFields: BrowserFields; data: TimelineNonEcsData[][] }) => ({
-    rowIndex,
-    columnId,
-    Component,
-  }) => {
+  ({
+    browserFields,
+    data,
+    timelineId,
+  }: {
+    browserFields: BrowserFields;
+    data: TimelineNonEcsData[][];
+    timelineId: string;
+  }) => ({ rowIndex, columnId, Component }) => {
     const [showTopN, setShowTopN] = useState(false);
     const onClick = useCallback(() => setShowTopN(!showTopN), [showTopN]);
 
@@ -149,7 +152,7 @@ export const defaultCellActions: TGridCellAction[] = [
             ownFocus={false}
             showTopN={showTopN}
             showTooltip={false}
-            timelineId={TimelineId.active}
+            timelineId={timelineId}
             value={value}
           />
         )}

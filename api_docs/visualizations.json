@@ -1256,7 +1256,7 @@
             "text": "SerializedFieldFormat"
           },
           "<Record<string, any>> | undefined; source?: string | undefined; sourceParams?: ",
-          "Serializable",
+          "SerializableRecord",
           " | undefined; }; id: string; name: string; }[]; type: \"datatable\"; rows: Record<string, any>[]; }"
         ],
         "path": "src/plugins/visualizations/common/prepare_log_table.ts",
@@ -1389,6 +1389,128 @@
       }
     ],
     "interfaces": [
+      {
+        "parentPluginId": "visualizations",
+        "id": "def-public.DateHistogramParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "DateHistogramParams",
+        "description": [],
+        "path": "src/plugins/visualizations/common/expression_functions/xy_dimension.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-public.DateHistogramParams.date",
+            "type": "boolean",
+            "tags": [],
+            "label": "date",
+            "description": [],
+            "path": "src/plugins/visualizations/common/expression_functions/xy_dimension.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-public.DateHistogramParams.interval",
+            "type": "number",
+            "tags": [],
+            "label": "interval",
+            "description": [],
+            "path": "src/plugins/visualizations/common/expression_functions/xy_dimension.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-public.DateHistogramParams.intervalESValue",
+            "type": "number",
+            "tags": [],
+            "label": "intervalESValue",
+            "description": [],
+            "path": "src/plugins/visualizations/common/expression_functions/xy_dimension.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-public.DateHistogramParams.intervalESUnit",
+            "type": "string",
+            "tags": [],
+            "label": "intervalESUnit",
+            "description": [],
+            "path": "src/plugins/visualizations/common/expression_functions/xy_dimension.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-public.DateHistogramParams.format",
+            "type": "string",
+            "tags": [],
+            "label": "format",
+            "description": [],
+            "path": "src/plugins/visualizations/common/expression_functions/xy_dimension.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-public.DateHistogramParams.bounds",
+            "type": "Object",
+            "tags": [],
+            "label": "bounds",
+            "description": [],
+            "signature": [
+              "{ min: React.ReactText; max: React.ReactText; } | undefined"
+            ],
+            "path": "src/plugins/visualizations/common/expression_functions/xy_dimension.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
+        "id": "def-public.FakeParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "FakeParams",
+        "description": [],
+        "path": "src/plugins/visualizations/common/expression_functions/xy_dimension.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-public.FakeParams.defaultValue",
+            "type": "string",
+            "tags": [],
+            "label": "defaultValue",
+            "description": [],
+            "path": "src/plugins/visualizations/common/expression_functions/xy_dimension.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
+        "id": "def-public.HistogramParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "HistogramParams",
+        "description": [],
+        "path": "src/plugins/visualizations/common/expression_functions/xy_dimension.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-public.HistogramParams.interval",
+            "type": "number",
+            "tags": [],
+            "label": "interval",
+            "description": [],
+            "path": "src/plugins/visualizations/common/expression_functions/xy_dimension.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "visualizations",
         "id": "def-public.ISavedVis",
@@ -1651,7 +1773,7 @@
             "description": [],
             "signature": [
               "Pick<Pick<{ type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
-              "Serializable",
+              "SerializableRecord",
               " | undefined; schema?: string | undefined; }, \"enabled\" | \"id\" | \"schema\" | \"params\"> & Pick<{ type: ",
               {
                 "pluginId": "data",
@@ -2075,7 +2197,7 @@
             "description": [],
             "signature": [
               "Pick<Pick<{ type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
-              "Serializable",
+              "SerializableRecord",
               " | undefined; schema?: string | undefined; }, \"enabled\" | \"id\" | \"schema\" | \"params\"> & Pick<{ type: ",
               {
                 "pluginId": "data",
@@ -2574,13 +2696,7 @@
                 "text": "TimeRange"
               },
               "; setTime: (time: ",
-              {
-                "pluginId": "data",
-                "scope": "public",
-                "docId": "kibDataQueryPluginApi",
-                "section": "def-public.InputTimeRange",
-                "text": "InputTimeRange"
-              },
+              "InputTimeRange",
               ") => void; getRefreshInterval: () => ",
               {
                 "pluginId": "data",
@@ -2615,6 +2731,10 @@
               },
               " | undefined) => ",
               "RangeFilter",
+              " | ",
+              "ScriptedRangeFilter",
+              " | ",
+              "MatchAllRangeFilter",
               " | undefined; getBounds: () => ",
               {
                 "pluginId": "data",
@@ -3776,6 +3896,66 @@
     "misc": [
       {
         "parentPluginId": "visualizations",
+        "id": "def-public.Dimension",
+        "type": "Type",
+        "tags": [],
+        "label": "Dimension",
+        "description": [],
+        "signature": [
+          "[(",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionValueBoxed",
+            "text": "ExpressionValueBoxed"
+          },
+          "<\"vis_dimension\", { accessor: number | ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.DatatableColumn",
+            "text": "DatatableColumn"
+          },
+          "; format: { id?: string | undefined; params: Record<string, any>; }; }> | ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionValueBoxed",
+            "text": "ExpressionValueBoxed"
+          },
+          "<\"xy_dimension\", { label: string; aggType: string; params: {} | ",
+          "DateHistogramParams",
+          " | ",
+          "HistogramParams",
+          " | ",
+          "FakeParams",
+          "; accessor: number | ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.DatatableColumn",
+            "text": "DatatableColumn"
+          },
+          "; format: ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.SerializedFieldFormat",
+            "text": "SerializedFieldFormat"
+          },
+          "<Record<string, any>>; }>)[] | undefined, string]"
+        ],
+        "path": "src/plugins/visualizations/common/prepare_log_table.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
         "id": "def-public.ExpressionValueVisDimension",
         "type": "Type",
         "tags": [],
@@ -3793,6 +3973,42 @@
           "; format: { id?: string | undefined; params: Record<string, any>; }; }"
         ],
         "path": "src/plugins/visualizations/common/expression_functions/vis_dimension.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
+        "id": "def-public.ExpressionValueXYDimension",
+        "type": "Type",
+        "tags": [],
+        "label": "ExpressionValueXYDimension",
+        "description": [],
+        "signature": [
+          "{ type: \"xy_dimension\"; } & { label: string; aggType: string; params: {} | ",
+          "DateHistogramParams",
+          " | ",
+          "HistogramParams",
+          " | ",
+          "FakeParams",
+          "; accessor: number | ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.DatatableColumn",
+            "text": "DatatableColumn"
+          },
+          "; format: ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.SerializedFieldFormat",
+            "text": "SerializedFieldFormat"
+          },
+          "<Record<string, any>>; }"
+        ],
+        "path": "src/plugins/visualizations/common/expression_functions/xy_dimension.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -3996,7 +4212,7 @@
           "VisualizeByValueInput",
           ">; getInputAsRefType: () => Promise<",
           "VisualizeByReferenceInput",
-          ">; readonly runtimeId: number; readonly isContainer: boolean; fatalError?: Error | undefined; getIsContainer: () => this is ",
+          ">; readonly runtimeId: number; readonly isContainer: boolean; readonly deferEmbeddableLoad: boolean; fatalError?: Error | undefined; getIsContainer: () => this is ",
           {
             "pluginId": "embeddable",
             "scope": "public",
@@ -4834,8 +5050,49 @@
     "functions": [],
     "interfaces": [],
     "enums": [],
-    "misc": [],
-    "objects": []
+    "misc": [
+      {
+        "parentPluginId": "visualizations",
+        "id": "def-server.VISUALIZE_ENABLE_LABS_SETTING",
+        "type": "string",
+        "tags": [],
+        "label": "VISUALIZE_ENABLE_LABS_SETTING",
+        "description": [],
+        "signature": [
+          "\"visualize:enableLabs\""
+        ],
+        "path": "src/plugins/visualizations/common/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "visualizations",
+      "id": "def-server.VisualizationsPluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "VisualizationsPluginSetup",
+      "description": [],
+      "path": "src/plugins/visualizations/server/types.ts",
+      "deprecated": false,
+      "children": [],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "visualizations",
+      "id": "def-server.VisualizationsPluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "VisualizationsPluginStart",
+      "description": [],
+      "path": "src/plugins/visualizations/server/types.ts",
+      "deprecated": false,
+      "children": [],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
   },
   "common": {
     "classes": [],
@@ -4881,7 +5138,7 @@
             "text": "SerializedFieldFormat"
           },
           "<Record<string, any>> | undefined; source?: string | undefined; sourceParams?: ",
-          "Serializable",
+          "SerializableRecord",
           " | undefined; }; id: string; name: string; }[]; type: \"datatable\"; rows: Record<string, any>[]; }"
         ],
         "path": "src/plugins/visualizations/common/prepare_log_table.ts",
@@ -4981,7 +5238,7 @@
             "text": "Adapters"
           },
           ", ",
-          "Serializable",
+          "SerializableRecord",
           ">>"
         ],
         "path": "src/plugins/visualizations/common/expression_functions/range.ts",
@@ -5047,7 +5304,7 @@
             "text": "Adapters"
           },
           ", ",
-          "Serializable",
+          "SerializableRecord",
           ">>"
         ],
         "path": "src/plugins/visualizations/common/expression_functions/vis_dimension.ts",
@@ -5120,7 +5377,7 @@
             "description": [],
             "signature": [
               "Pick<Pick<{ type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
-              "Serializable",
+              "SerializableRecord",
               " | undefined; schema?: string | undefined; }, \"enabled\" | \"id\" | \"schema\" | \"params\"> & Pick<{ type: ",
               {
                 "pluginId": "data",
@@ -5269,7 +5526,7 @@
         "label": "Dimension",
         "description": [],
         "signature": [
-          "[",
+          "[(",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -5285,7 +5542,37 @@
             "section": "def-common.DatatableColumn",
             "text": "DatatableColumn"
           },
-          "; format: { id?: string | undefined; params: Record<string, any>; }; }>[] | undefined, string]"
+          "; format: { id?: string | undefined; params: Record<string, any>; }; }> | ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionValueBoxed",
+            "text": "ExpressionValueBoxed"
+          },
+          "<\"xy_dimension\", { label: string; aggType: string; params: {} | ",
+          "DateHistogramParams",
+          " | ",
+          "HistogramParams",
+          " | ",
+          "FakeParams",
+          "; accessor: number | ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.DatatableColumn",
+            "text": "DatatableColumn"
+          },
+          "; format: ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.SerializedFieldFormat",
+            "text": "SerializedFieldFormat"
+          },
+          "<Record<string, any>>; }>)[] | undefined, string]"
         ],
         "path": "src/plugins/visualizations/common/prepare_log_table.ts",
         "deprecated": false,
