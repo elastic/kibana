@@ -33,19 +33,11 @@ See .search() documentation for :  https://www.elastic.co/guide/en/elasticsearch
       body: {
         aggs: {
           time_buckets: {
-            date_histogram: {
-              // Use date histogram aggregation on @timestamp field
+            auto_date_histogram: {
+              // Use auto date histogram aggregation on @timestamp field
               field: @timestamp
-              // The interval value will depend on the daterange picker (true), or use an integer to set an approximate bucket count
-              interval: {%autointerval%: true}
               // Make sure we get an entire range, even if it has no data
-              extended_bounds: {
-                // Use the current time range's start and end
-                min: {%timefilter%: "min"}
-                max: {%timefilter%: "max"}
-              }
-              // Use this for linear (e.g. line, area) graphs.  Without it, empty buckets will not show up
-              min_doc_count: 0
+              buckets: 50
             }
           }
         }
