@@ -12,12 +12,12 @@ import { Logger, SavedObject } from 'kibana/server';
 import { elasticsearchServiceMock, savedObjectsClientMock } from 'src/core/server/mocks';
 
 import type { IRuleDataClient } from '../../../../../../rule_registry/server';
+import { ruleRegistryMocks } from '../../../../../../rule_registry/server/mocks';
 import { PluginSetupContract as AlertingPluginSetupContract } from '../../../../../../alerting/server';
 import { ConfigType } from '../../../../config';
 import { AlertAttributes } from '../../signals/types';
 import { createRuleMock } from './rule';
 import { listMock } from '../../../../../../lists/server/mocks';
-import { ruleRegistryMocks } from '../../../../../../rule_registry/server/mocks';
 import { RuleParams } from '../../schemas/rule_schemas';
 
 export const createRuleTypeMocks = (
@@ -81,16 +81,9 @@ export const createRuleTypeMocks = (
       config$: mockedConfig$,
       lists: listMock.createSetup(),
       logger: loggerMock,
-      ruleDataClient: ({
-        getReader: jest.fn(() => ({
-          search: jest.fn(),
-        })),
-        getWriter: jest.fn(() => ({
-          bulk: jest.fn(),
-        })),
-        isWriteEnabled: jest.fn(() => true),
-        indexName: '.alerts-security.alerts',
-      } as unknown) as IRuleDataClient,
+      ruleDataClient: ruleRegistryMocks.createRuleDataClient(
+        '.alerts-security.alerts'
+      ) as IRuleDataClient,
       ruleDataService: ruleRegistryMocks.createRuleDataPluginService(),
     },
     services,
