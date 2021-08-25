@@ -1557,12 +1557,12 @@ export class RulesClient {
       updatedAt,
       meta,
       notifyWhen,
+      legacyId, // exclude from result because it is an internal variable
       scheduledTaskId,
       params,
       executionStatus,
       schedule,
       actions,
-      legacyId,
       ...partialRawAlert
     }: Partial<RawAlert>,
     references: SavedObjectReference[] | undefined
