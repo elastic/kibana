@@ -131,7 +131,7 @@ function EditorUI({ initialTextValue }: EditorProps) {
         if (data === null || data === '') {
           notifications.toasts.addWarning(
             i18n.translate('console.loadFromDataUriErrorMessage', {
-              defaultMessage: 'Unable to load data from the load_from query parameter URL',
+              defaultMessage: 'Unable to load data from the load_from query parameter in the URL',
             })
           );
           return;
