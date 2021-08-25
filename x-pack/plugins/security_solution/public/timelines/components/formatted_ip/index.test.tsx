@@ -104,7 +104,7 @@ describe('FormattedIp', () => {
     });
   });
 
-  test('if enableHostDetailsFlyout, should open NetworkDetailsSidePanel', async () => {
+  test('if enableIpDetailsFlyout, should open NetworkDetailsSidePanel', async () => {
     const context = {
       enableHostDetailsFlyout: true,
       enableIpDetailsFlyout: true,
@@ -160,7 +160,7 @@ describe('FormattedIp', () => {
     });
   });
 
-  test('if enableHostDetailsFlyout and timelineId not equals to `TimelineId.active`, should not call toggleExpandedDetail', async () => {
+  test('if enableIpDetailsFlyout but timelineId not equals to `TimelineId.active`, should not call toggleExpandedDetail', async () => {
     const context = {
       enableHostDetailsFlyout: true,
       enableIpDetailsFlyout: true,

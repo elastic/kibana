@@ -156,7 +156,7 @@ describe('HostName', () => {
     });
   });
 
-  test('if enableHostDetailsFlyout and timelineId not equals to `TimelineId.active`, should not call toggleExpandedDetail', async () => {
+  test('if enableHostDetailsFlyout but timelineId not equals to `TimelineId.active`, should not call toggleExpandedDetail', async () => {
     const context = {
       enableHostDetailsFlyout: true,
       enableIpDetailsFlyout: true,
