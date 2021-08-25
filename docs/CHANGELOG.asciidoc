@@ -13,6 +13,7 @@
 
 Review important information about the {kib} 7.14.x releases.
 
+* <<release-notes-7.14.1>>
 * <<release-notes-7.14.0>>
 //* <<release-notes-7.13.2>>
 //* <<release-notes-7.13.1>>
@@ -58,6 +59,66 @@ Review important information about the {kib} 7.14.x releases.
 //* <<release-notes-7.0.0-alpha1>>
 
 --
+[[release-notes-7.14.1]]
+== {kib} 7.14.1
+
+For information about the 7.14.1 release, review the following information.
+
+[float]
+[[breaking-changes-v7.14.1]]
+=== Breaking changes
+Breaking changes can prevent your application from optimal operation and performance. Before you upgrade to 7.14.14, review the <<breaking-changes-7.14.0,7.14.0 breaking changes>>, then mitigate the impact to your application.
+
+[float]
+[[enhancement-v7.14.1]]
+=== Enhancements
+Elastic Security::
+For the Elastic Security 7.14.1 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+Platform::
+* Adds new SavedObjectsRespository error type for 404 that do not originate from {es} responses {kibana-pull}107301[#107301]
+
+[float]
+[[fixes-v7.14.1]]
+=== Bug Fixes
+Alerting::
+* Allow rule to execute if the value is 0 and that mets the condition {kibana-pull}105626[#105626]
+Canvas::
+* Fixes numeric variable casting {kibana-pull}109744[#109744]
+Dashboard::
+* Adds Ability to Defer Embeddable Loaded State {kibana-pull}107227[#107227]
+Design::
+* Fixes accessibility focus trap issue {kibana-pull}107292[#107292]
+Discover::
+* Do not set source field when reading fields from source {kibana-pull}109069[#109069]
+* Fixes limit of 50 documents using classic table {kibana-pull}108322[#108322]
+Elastic Security::
+For the Elastic Security 7.14.1 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+Fleet::
+* Fixes integrations count in category facet {kibana-pull}107652[#107652]
+Lens & Visualizations::
+* Fixes small multiple title in dark mode {kibana-pull}109966[#109966]
+Machine Learning::
+* Fixes the Job audit messages service {kibana-pull}108526[#108526]
+Management::
+* Fixes bug with highlighting in String field formatter {kibana-pull}109401[#109401]
+* Fixed _meta field failing server validation {kibana-pull}109295[#109295]
+* No data experience to handle default Fleet assets {kibana-pull}108887[#108887]
+* Load index pattern list without loading field lists {kibana-pull}108823[#108823]
+* Fixes policy request flyout requiring policy name to show json {kibana-pull}108550[#108550]
+* Searchsource should send all index patterns defined on the runtime field {kibana-pull}108549[#108549]
+* Fixes bug where search sessions management UI displays wrong warning {kibana-pull}107556[#107556]
+Maps::
+* Fixes a bug where auto fit to bounds was not working when map was embedded in a dashboard {kibana-pull}109479[#109479]
+* Fixes a bug where TableListView empty view trapped users with no action to create new item {kibana-pull}109345[#109345]
+* Fixes a bug where the edit layer settings action showed when for read-only users {kibana-pull}109321[#109321]
+* Fixes fonts api {kibana-pull}107768[#107768]
+* Fixes a bug where more than two maps embeddables with geo-shape layers resulted in empty layers for 3+ {kibana-pull}107442[#107442]
+Metrics::
+* Fixes a bug where default rules were created when opening the dropdown {kibana-pull}107957[#107957]
+* Fixes metric threshold preview regression {kibana-pull}107674[#107674]
+Platform::
+* Updated onboarding interstitial to handle default Fleet assets {kibana-pull}108193[#108193]
+* Adds support of partial results to the switch expression function {kibana-pull}108086[#108086]
 
 [[release-notes-7.14.0]]
 == {kib} 7.14.0
@@ -130,6 +191,14 @@ When you upgrade to 7.14.0, {kib} automatically reflects the changes. No action 
 ====    
 
 // end::notable-breaking-changes[]
+
+To review the breaking changes in previous versions, review the following: 
+
+{kibana-ref-all}/7.13/release-notes-7.13.0.html#breaking-changes-7.13.0[7.13] | {kibana-ref-all}/7.12/release-notes-7.12.0.html#breaking-changes-7.12.0[7.12] | {kibana-ref-all}/7.11/breaking-changes-7.11.html[7.11] | {kibana-ref-all}/7.10/breaking-changes-7.10.html[7.10] |
+{kibana-ref-all}/7.9/breaking-changes-7.9.html[7.9] | {kibana-ref-all}/7.8/breaking-changes-7.8.html[7.8] | {kibana-ref-all}/7.7/breaking-changes-7.7.html[7.7] |
+{kibana-ref-all}/7.6/breaking-changes-7.6.html[7.6] | {kibana-ref-all}/7.5/breaking-changes-7.5.html[7.5] |
+{kibana-ref-all}/7.4/breaking-changes-7.4.html[7.4] | {kibana-ref-all}/7.3/breaking-changes-7.3.html[7.3] | {kibana-ref-all}/7.2/breaking-changes-7.2.html[7.2]
+| {kibana-ref-all}/7.1/breaking-changes-7.1.html[7.1] | {kibana-ref-all}/7.0/breaking-changes-7.0.html[7.0]
 
 [float]
 [[deprecations-7.14.0]]
