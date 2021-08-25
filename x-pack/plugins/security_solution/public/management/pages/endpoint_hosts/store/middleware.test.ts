@@ -251,6 +251,8 @@ describe('endpoint list middleware', () => {
         payload: {
           page,
           pageSize: 50,
+          startDate: 'now-1d',
+          endDate: 'now',
         },
       });
     };
@@ -372,6 +374,8 @@ describe('endpoint list middleware', () => {
         query: {
           page: 3,
           page_size: 50,
+          start_date: 'now-1d',
+          end_date: 'now',
         },
       });
     });
