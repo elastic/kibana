@@ -95,7 +95,7 @@ export function FailedTransactionsCorrelations({
   const startFetchHandler = useCallback(() => {
     startFetch(searchServicePrams);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [environment, serviceName, kuery, start, end]);
+  }, [environment, serviceName, transactionType, kuery, start, end]);
 
   // start fetching on load
   // we want this effect to execute exactly once after the component mounts

@@ -135,7 +135,7 @@ export function TransactionDistribution({
       cancelFetch();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [environment, serviceName, kuery, start, end]);
+  }, [environment, serviceName, transactionType, kuery, start, end]);
 
   useEffect(() => {
     if (isErrorMessage(error)) {
