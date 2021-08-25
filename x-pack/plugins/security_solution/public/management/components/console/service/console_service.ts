@@ -18,6 +18,8 @@ export interface CommandDefinition {
       required: boolean;
       about: string;
       validator?: () => Promise<boolean>;
+      // Selector: Idea is that the schema can plugin in a rich component for the user to select something (ex. a file)
+      selector?: () => Promise<unknown>;
     };
   };
 }

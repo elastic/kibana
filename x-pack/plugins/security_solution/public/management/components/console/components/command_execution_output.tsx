@@ -25,12 +25,14 @@ export const CommandExecutionOutput = memo<CommandExecutionOutputProps>(({ comma
       try {
         const commandOutput = await consoleService.executeCommand(command);
         setOutput(commandOutput.result);
+
+        // FIXME: PT the console should scroll the bottom as well
       } catch (error) {
         setOutput(<CommandExecutionFailure error={error} />);
       }
       setIsRunning(false);
     })();
-  }, []);
+  }, [command, consoleService]);
 
   return (
     <div>
