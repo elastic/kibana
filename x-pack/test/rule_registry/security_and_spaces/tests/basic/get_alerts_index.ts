@@ -20,7 +20,7 @@ export default ({ getService }: FtrProviderContext) => {
   const TEST_URL = '/internal/rac/alerts';
   const ALERTS_INDEX_URL = `${TEST_URL}/index`;
   const SPACE1 = 'space1';
-  const APM_ALERT_INDEX = '.alerts-observability-apm';
+  const APM_ALERT_INDEX = '.alerts-observability.apm.alerts';
   const SECURITY_SOLUTION_ALERT_INDEX = '.alerts-security.alerts';
 
   const getAPMIndexName = async (user: User, space: string, expected: number = 200) => {
