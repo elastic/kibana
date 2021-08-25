@@ -7,7 +7,7 @@
 
 import * as React from 'react';
 
-import { shallow, ShallowWrapper } from 'enzyme';
+import { shallow } from 'enzyme';
 
 import { EuiCopy, EuiButtonIcon, EuiFieldText } from '@elastic/eui';
 
@@ -17,7 +17,6 @@ const label = 'Credential';
 const testSubj = 'CredentialItemTest';
 const value = 'foo';
 
-let wrapper: ShallowWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>;
 const props = { label, testSubj, value };
 
 describe('CredentialItem', () => {
@@ -27,8 +26,6 @@ describe('CredentialItem', () => {
   beforeEach(() => {
     jest.spyOn(React, 'useState').mockImplementation(useStateMock);
     setState(false);
-
-    wrapper = shallow(<CredentialItem {...props} />);
   });
 
   afterEach(() => {
@@ -36,23 +33,27 @@ describe('CredentialItem', () => {
   });
 
   it('renders', () => {
+    const wrapper = shallow(<CredentialItem {...props} />);
+
     expect(wrapper.find(`[data-test-subj="${testSubj}"]`)).toHaveLength(1);
   });
 
   it('renders the copy button', () => {
     const copyMock = jest.fn();
+    const wrapper = shallow(<CredentialItem {...props} />);
+
     const copyEl = shallow(<div>{wrapper.find(EuiCopy).props().children(copyMock)}</div>);
     expect(copyEl.find(EuiButtonIcon).props().onClick).toEqual(copyMock);
   });
 
   it('does not render copy button when hidden', () => {
-    wrapper.setProps({ ...props, hideCopy: true });
+    const wrapper = shallow(<CredentialItem {...props} hideCopy />);
 
     expect(wrapper.find(EuiCopy)).toHaveLength(0);
   });
 
   it('handles credential visible toggle click', () => {
-    wrapper.setProps({ ...props, hideCopy: true });
+    const wrapper = shallow(<CredentialItem {...props} hideCopy />);
     const button = wrapper.find(EuiButtonIcon).dive().find('button');
     button.simulate('click');
 
@@ -61,7 +62,7 @@ describe('CredentialItem', () => {
   });
 
   it('handles select all button click', () => {
-    wrapper.setProps({ ...props, hideCopy: true });
+    const wrapper = shallow(<CredentialItem {...props} hideCopy />);
     // Toggle isVisible before EuiFieldText is visible
     const button = wrapper.find(EuiButtonIcon).dive().find('button');
     button.simulate('click');
