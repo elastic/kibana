@@ -911,7 +911,7 @@ export function overridePackageInputs(
 ): DryRunPackagePolicy {
   if (!inputsOverride) return basePackagePolicy;
 
-  const availablePolicyTemplates = (packageInfo.policy_templates ?? []).map(({ name }) => name);
+  const availablePolicyTemplates = packageInfo.policy_templates ?? [];
 
   const inputs = [
     ...basePackagePolicy.inputs.filter((input) => {
@@ -919,7 +919,22 @@ export function overridePackageInputs(
         return true;
       }
 
-      return availablePolicyTemplates.includes(input.policy_template);
+      const policyTemplate = availablePolicyTemplates.find(
+        ({ name }) => name === input.policy_template
+      );
+
+      // Ignore any policy template removes in the new package version
+      if (!policyTemplate) {
+        return false;
+      }
+
+      // Ignore any inputs removed from this policy template in the new package version
+      const policyTemplateStillIncludesInput =
+        policyTemplate.inputs?.some(
+          (policyTemplateInput) => policyTemplateInput.type === input.type
+        ) ?? false;
+
+      return policyTemplateStillIncludesInput;
     }),
   ];
 
