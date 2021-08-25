@@ -22,7 +22,7 @@ export const ESFieldsSelect: React.FunctionComponent<ESFieldsSelectProps> = (pro
     if (index !== prevIndex) {
       getFields(index).then((newFields) => {
         setFields(newFields || []);
-        onChange(selected.filter((option) => (newFields ?? []).includes(option)));
+        onChange(selected.filter((option) => (newFields || []).includes(option)));
       });
     }
   }, [index, prevIndex, onChange, selected]);
