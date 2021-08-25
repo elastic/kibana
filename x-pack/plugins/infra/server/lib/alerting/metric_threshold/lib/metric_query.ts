@@ -7,7 +7,6 @@
 
 import { networkTraffic } from '../../../../../common/inventory_models/shared/metrics/snapshot/network_traffic';
 import { MetricExpressionParams, Aggregators } from '../types';
-import { getIntervalInSeconds } from '../../../../utils/get_interval_in_seconds';
 import { createPercentileAggregation } from './create_percentile_aggregation';
 import { calculateDateHistogramOffset } from '../../../metrics/lib/calculate_date_histogram_offset';
 
@@ -34,8 +33,6 @@ export const getElasticsearchMetricQuery = (
     throw new Error('Can only aggregate without a metric if using the document count aggregator');
   }
   const interval = `${timeSize}${timeUnit}`;
-  const intervalAsSeconds = getIntervalInSeconds(interval);
-  const intervalAsMS = intervalAsSeconds * 1000;
   const to = timeframe.end;
   const from = timeframe.start;
 
