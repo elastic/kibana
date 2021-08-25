@@ -8,45 +8,11 @@
 
 import { readFileSync } from 'fs';
 
-export function analyzeWithAxe(context, options, callback) {
+export function analyzeWithAxe(context, config, options, callback) {
   Promise.resolve()
     .then(() => {
       if (window.axe) {
-        window.axe.configure({
-          rules: [
-            {
-              id: 'scrollable-region-focusable',
-              selector: '[data-skip-axe="scrollable-region-focusable"]',
-            },
-            {
-              id: 'aria-required-children',
-              selector: '[data-skip-axe="aria-required-children"] > *',
-            },
-            {
-              id: 'label',
-              selector: '[data-test-subj="comboBoxSearchInput"] *',
-            },
-            {
-              id: 'aria-roles',
-              selector: '[data-test-subj="comboBoxSearchInput"] *',
-            },
-            {
-              // EUI bug: https://github.com/elastic/eui/issues/4474
-              id: 'aria-required-parent',
-              selector: '[class=*"euiDataGridRowCell"][role="gridcell"]',
-            },
-            {
-              // 3rd-party library; button has aria-describedby
-              id: 'button-name',
-              selector: '[data-rbd-drag-handle-draggable-id]',
-            },
-            {
-              // EUI bug: https://github.com/elastic/eui/issues/4536
-              id: 'duplicate-id',
-              selector: '.euiSuperDatePicker *',
-            },
-          ],
-        });
+        window.axe.configure(config);
         return window.axe.run(context, options);
       }
 
