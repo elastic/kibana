@@ -14,12 +14,14 @@ import { FORMATS_UI_SETTINGS } from '../../../../../../../field_formats/common';
 import {
   DOC_HIDE_TIME_COLUMN_SETTING,
   SAMPLE_SIZE_SETTING,
+  SHOW_MULTIFIELDS,
   SORT_DEFAULT_ORDER_SETTING,
 } from '../../../../../../common';
-import { getServices, IndexPattern } from '../../../../../kibana_services';
+import { getServices, IndexPattern, IndexPatternField } from '../../../../../kibana_services';
 import { SortOrder } from './components/table_header/helpers';
 import { DocTableRow, TableRow } from './components/table_row';
 import { DocViewFilterFn } from '../../../../doc_views/doc_views_types';
+import { getFieldsToShow } from '../../../../helpers/get_fields_to_show';
 
 export interface DocTableProps {
   /**
@@ -81,6 +83,7 @@ export interface DocTableProps {
 }
 
 export interface DocTableRenderProps {
+  columnLength: number;
   rows: DocTableRow[];
   minimumVisibleRows: number;
   sampleSize: number;
@@ -119,6 +122,7 @@ export const DocTableWrapper = ({
     hideTimeColumn,
     isShortDots,
     sampleSize,
+    showMultiFields,
     filterManager,
     addBasePath,
   ] = useMemo(() => {
@@ -128,6 +132,7 @@ export const DocTableWrapper = ({
       services.uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false),
       services.uiSettings.get(FORMATS_UI_SETTINGS.SHORT_DOTS_ENABLE),
       services.uiSettings.get(SAMPLE_SIZE_SETTING, 500),
+      services.uiSettings.get(SHOW_MULTIFIELDS, false),
       services.filterManager,
       services.addBasePath,
     ];
@@ -147,6 +152,16 @@ export const DocTableWrapper = ({
     await wait(50);
     bottomMarker!.blur();
   }, [setMinimumVisibleRows, rows]);
+
+  const fieldsToShow = useMemo(
+    () =>
+      getFieldsToShow(
+        indexPattern.fields.map((field: IndexPatternField) => field.name),
+        indexPattern,
+        showMultiFields
+      ),
+    [indexPattern, showMultiFields]
+  );
 
   const renderHeader = useCallback(
     () => (
@@ -192,6 +207,7 @@ export const DocTableWrapper = ({
           onRemoveColumn={onRemoveColumn}
           filterManager={filterManager}
           addBasePath={addBasePath}
+          fieldsToShow={fieldsToShow}
         />
       ));
     },
@@ -205,6 +221,7 @@ export const DocTableWrapper = ({
       onRemoveColumn,
       filterManager,
       addBasePath,
+      fieldsToShow,
     ]
   );
 
@@ -219,6 +236,7 @@ export const DocTableWrapper = ({
     >
       {rows.length !== 0 &&
         render({
+          columnLength: columns.length,
           rows,
           minimumVisibleRows,
           sampleSize,

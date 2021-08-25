@@ -11,7 +11,6 @@
  * This way plugins can do targeted imports to reduce the final code bundle
  */
 import {
-  AlertConsumers as AlertConsumersTyped,
   ALERT_DURATION as ALERT_DURATION_TYPED,
   ALERT_REASON as ALERT_REASON_TYPED,
   ALERT_RULE_CONSUMER,
@@ -34,14 +33,17 @@ import {
   EuiDataGridColumn,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiContextMenu,
+  EuiContextMenuPanel,
   EuiPopover,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 import React, { Suspense, useMemo, useState, useCallback } from 'react';
 import { get } from 'lodash';
-import { useGetUserAlertsPermissions } from '../../hooks/use_alert_permission';
+import {
+  getAlertsPermissions,
+  useGetUserAlertsPermissions,
+} from '../../hooks/use_alert_permission';
 import type { TimelinesUIStart, TGridType, SortDirection } from '../../../../timelines/public';
 import { useStatusBulkActionItems } from '../../../../timelines/public';
 import type { TopAlert } from './';
@@ -62,14 +64,13 @@ import { LazyAlertsFlyout } from '../..';
 import { parseAlert } from './parse_alert';
 import { CoreStart } from '../../../../../../src/core/public';
 
-const AlertConsumers: typeof AlertConsumersTyped = AlertConsumersNonTyped;
 const ALERT_DURATION: typeof ALERT_DURATION_TYPED = ALERT_DURATION_NON_TYPED;
 const ALERT_REASON: typeof ALERT_REASON_TYPED = ALERT_REASON_NON_TYPED;
 const ALERT_STATUS: typeof ALERT_STATUS_TYPED = ALERT_STATUS_NON_TYPED;
 const ALERT_WORKFLOW_STATUS: typeof ALERT_WORKFLOW_STATUS_TYPED = ALERT_WORKFLOW_STATUS_NON_TYPED;
 
 interface AlertsTableTGridProps {
-  indexName: string;
+  indexNames: string[];
   rangeFrom: string;
   rangeTo: string;
   kuery: string;
@@ -147,13 +148,6 @@ const NO_ROW_RENDER: RowRenderer[] = [];
 
 const trailingControlColumns: never[] = [];
 
-const OBSERVABILITY_ALERT_CONSUMERS = [
-  AlertConsumers.APM,
-  AlertConsumers.LOGS,
-  AlertConsumers.INFRASTRUCTURE,
-  AlertConsumers.UPTIME,
-];
-
 function ObservabilityActions({
   data,
   eventId,
@@ -221,26 +215,25 @@ function ObservabilityActions({
     onUpdateFailure: onAlertStatusUpdated,
   });
 
-  const actionsPanels = useMemo(() => {
+  const actionsMenuItems = useMemo(() => {
     return [
-      {
-        id: 0,
-        content: [
-          timelines.getAddToExistingCaseButton({
-            event,
-            casePermissions,
-            appId: observabilityFeatureId,
-            onClose: afterCaseSelection,
-          }),
-          timelines.getAddToNewCaseButton({
-            event,
-            casePermissions,
-            appId: observabilityFeatureId,
-            onClose: afterCaseSelection,
-          }),
-          ...(alertPermissions.crud ? statusActionItems : []),
-        ],
-      },
+      ...(casePermissions?.crud
+        ? [
+            timelines.getAddToExistingCaseButton({
+              event,
+              casePermissions,
+              appId: observabilityFeatureId,
+              onClose: afterCaseSelection,
+            }),
+            timelines.getAddToNewCaseButton({
+              event,
+              casePermissions,
+              appId: observabilityFeatureId,
+              onClose: afterCaseSelection,
+            }),
+          ]
+        : []),
+      ...(alertPermissions.crud ? statusActionItems : []),
     ];
   }, [afterCaseSelection, casePermissions, timelines, event, statusActionItems, alertPermissions]);
 
@@ -264,38 +257,50 @@ function ObservabilityActions({
             aria-label="View alert in app"
           />
         </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiPopover
-            button={
-              <EuiButtonIcon
-                display="empty"
-                size="s"
-                color="text"
-                iconType="boxesHorizontal"
-                aria-label="More"
-                onClick={() => toggleActionsPopover(eventId)}
-              />
-            }
-            isOpen={openActionsPopoverId === eventId}
-            closePopover={closeActionsPopover}
-            panelPaddingSize="none"
-            anchorPosition="downLeft"
-          >
-            <EuiContextMenu panels={actionsPanels} initialPanelId={0} />
-          </EuiPopover>
-        </EuiFlexItem>
+        {actionsMenuItems.length > 0 && (
+          <EuiFlexItem>
+            <EuiPopover
+              button={
+                <EuiButtonIcon
+                  display="empty"
+                  size="s"
+                  color="text"
+                  iconType="boxesHorizontal"
+                  aria-label="More"
+                  onClick={() => toggleActionsPopover(eventId)}
+                />
+              }
+              isOpen={openActionsPopoverId === eventId}
+              closePopover={closeActionsPopover}
+              panelPaddingSize="none"
+              anchorPosition="downLeft"
+            >
+              <EuiContextMenuPanel size="s" items={actionsMenuItems} />
+            </EuiPopover>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     </>
   );
 }
 
 export function AlertsTableTGrid(props: AlertsTableTGridProps) {
-  const { indexName, rangeFrom, rangeTo, kuery, workflowStatus, setRefetch, addToQuery } = props;
-  const { timelines } = useKibana<{ timelines: TimelinesUIStart }>().services;
+  const { indexNames, rangeFrom, rangeTo, kuery, workflowStatus, setRefetch, addToQuery } = props;
+  const {
+    timelines,
+    application: { capabilities },
+  } = useKibana<CoreStart & { timelines: TimelinesUIStart }>().services;
 
   const [flyoutAlert, setFlyoutAlert] = useState<TopAlert | undefined>(undefined);
 
   const casePermissions = useGetUserCasesPermissions();
+
+  const hasAlertsCrudPermissions = useCallback(
+    (featureId: string) => {
+      return getAlertsPermissions(capabilities, featureId).crud;
+    },
+    [capabilities]
+  );
 
   const leadingControlColumns = useMemo(() => {
     return [
@@ -328,7 +333,6 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
     const type: TGridType = 'standalone';
     const sortDirection: SortDirection = 'desc';
     return {
-      alertConsumers: OBSERVABILITY_ALERT_CONSUMERS,
       appId: observabilityFeatureId,
       casePermissions,
       type,
@@ -337,8 +341,8 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
       defaultCellActions: getDefaultCellActions({ addToQuery }),
       end: rangeTo,
       filters: [],
-      indexNames: [indexName],
-      itemsPerPage: 10,
+      hasAlertsCrudPermissions,
+      indexNames,
       itemsPerPageOptions: [10, 25, 50],
       loadingText: i18n.translate('xpack.observability.alertsTable.loadingTextLabel', {
         defaultMessage: 'loading alerts',
@@ -372,14 +376,15 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
     };
   }, [
     casePermissions,
-    indexName,
-    kuery,
-    leadingControlColumns,
-    rangeFrom,
-    rangeTo,
-    setRefetch,
-    workflowStatus,
     addToQuery,
+    rangeTo,
+    hasAlertsCrudPermissions,
+    indexNames,
+    workflowStatus,
+    kuery,
+    rangeFrom,
+    setRefetch,
+    leadingControlColumns,
   ]);
   const handleFlyoutClose = () => setFlyoutAlert(undefined);
   const { observabilityRuleTypeRegistry } = usePluginContext();

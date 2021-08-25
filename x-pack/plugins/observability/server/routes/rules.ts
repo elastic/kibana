@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { observabilityFeatureId } from '../../common';
+import * as t from 'io-ts';
+import { Dataset } from '../../../rule_registry/server';
 import { createObservabilityServerRoute } from './create_observability_server_route';
 import { createObservabilityServerRouteRepository } from './create_observability_server_route_repository';
 
@@ -14,10 +15,27 @@ const alertsDynamicIndexPatternRoute = createObservabilityServerRoute({
   options: {
     tags: [],
   },
-  handler: async ({ ruleDataClient }) => {
-    const reader = ruleDataClient.getReader({ namespace: observabilityFeatureId });
+  params: t.type({
+    query: t.type({
+      registrationContexts: t.array(t.string),
+      namespace: t.string,
+    }),
+  }),
+  handler: async ({ ruleDataService, params }) => {
+    const { namespace, registrationContexts } = params.query;
+    const indexNames = registrationContexts.flatMap((registrationContext) => {
+      const indexName = ruleDataService
+        .findIndexByName(registrationContext, Dataset.alerts)
+        ?.getPrimaryAlias(namespace);
 
-    return reader.getDynamicIndexPattern();
+      if (indexName != null) {
+        return [indexName];
+      } else {
+        return [];
+      }
+    });
+
+    return indexNames;
   },
 });
 

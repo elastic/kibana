@@ -73,7 +73,7 @@ export const createRuleTypeMocks = (
           };
         },
         isWriteEnabled: jest.fn(() => true),
-        indexName: '.alerts-observability.synthetics.alerts',
+        indexName: '.alerts-observability.uptime.alerts',
       } as unknown) as IRuleDataClient,
     },
     services,

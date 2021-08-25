@@ -17,12 +17,12 @@ const createRuleDataPluginService = () => {
     isWriteEnabled: jest.fn(),
     initializeService: jest.fn(),
     initializeIndex: jest.fn(),
+    findIndexByName: jest.fn(),
+    findIndicesByFeature: jest.fn(),
   };
   return mocked;
 };
 
-export const ruleDataPluginServiceMock: {
-  create: () => jest.Mocked<PublicMethodsOf<RuleDataPluginService>>;
-} = {
+export const ruleDataPluginServiceMock = {
   create: createRuleDataPluginService,
 };
