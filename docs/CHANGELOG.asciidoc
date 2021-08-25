@@ -69,6 +69,14 @@ For information about the {kib} 7.13.4 release, review the following information
 Breaking changes can prevent your application from optimal operation and performance.
 Before you upgrade to 7.13.4, review the <<breaking-changes-7.13.0,7.13.0 breaking changes>>, then mitigate the impact to your application.
 
+Review the breaking changes in previous versions: 
+
+{kibana-ref-all}/7.12/release-notes-7.12.0.html#breaking-changes-7.12.0[7.12] | {kibana-ref-all}/7.11/breaking-changes-7.11.html[7.11] | {kibana-ref-all}/7.10/breaking-changes-7.10.html[7.10] |
+{kibana-ref-all}/7.9/breaking-changes-7.9.html[7.9] | {kibana-ref-all}/7.8/breaking-changes-7.8.html[7.8] | {kibana-ref-all}/7.7/breaking-changes-7.7.html[7.7] |
+{kibana-ref-all}/7.6/breaking-changes-7.6.html[7.6] | {kibana-ref-all}/7.5/breaking-changes-7.5.html[7.5] |
+{kibana-ref-all}/7.4/breaking-changes-7.4.html[7.4] | {kibana-ref-all}/7.3/breaking-changes-7.3.html[7.3] | {kibana-ref-all}/7.2/breaking-changes-7.2.html[7.2]
+| {kibana-ref-all}/7.1/breaking-changes-7.1.html[7.1] | {kibana-ref-all}/7.0/breaking-changes-7.0.html[7.0]
+
 [float]
 [[fixes-v7.13.4]]
 === Bug Fixes
@@ -91,6 +99,14 @@ For information about the {kib} 7.13.3 release, review the following information
 
 Breaking changes can prevent your application from optimal operation and performance.
 Before you upgrade to 7.13.3, review the <<breaking-changes-7.13.0,7.13.0 breaking changes>>, then mitigate the impact to your application.
+
+Review the breaking changes in previous versions: 
+
+{kibana-ref-all}/7.12/release-notes-7.12.0.html#breaking-changes-7.12.0[7.12] | {kibana-ref-all}/7.11/breaking-changes-7.11.html[7.11] | {kibana-ref-all}/7.10/breaking-changes-7.10.html[7.10] |
+{kibana-ref-all}/7.9/breaking-changes-7.9.html[7.9] | {kibana-ref-all}/7.8/breaking-changes-7.8.html[7.8] | {kibana-ref-all}/7.7/breaking-changes-7.7.html[7.7] |
+{kibana-ref-all}/7.6/breaking-changes-7.6.html[7.6] | {kibana-ref-all}/7.5/breaking-changes-7.5.html[7.5] |
+{kibana-ref-all}/7.4/breaking-changes-7.4.html[7.4] | {kibana-ref-all}/7.3/breaking-changes-7.3.html[7.3] | {kibana-ref-all}/7.2/breaking-changes-7.2.html[7.2]
+| {kibana-ref-all}/7.1/breaking-changes-7.1.html[7.1] | {kibana-ref-all}/7.0/breaking-changes-7.0.html[7.0]
 
 [float]
 [[fixes-v7.13.3]]
@@ -128,6 +144,14 @@ For information about the {kib} 7.13.2 release, review the following information
 
 Breaking changes can prevent your application from optimal operation and performance.
 Before you upgrade to 7.13.2, review the <<breaking-changes-7.13.0,7.13.0 breaking changes>>, then mitigate the impact to your application.
+
+Review the breaking changes in previous versions: 
+
+{kibana-ref-all}/7.12/release-notes-7.12.0.html#breaking-changes-7.12.0[7.12] | {kibana-ref-all}/7.11/breaking-changes-7.11.html[7.11] | {kibana-ref-all}/7.10/breaking-changes-7.10.html[7.10] |
+{kibana-ref-all}/7.9/breaking-changes-7.9.html[7.9] | {kibana-ref-all}/7.8/breaking-changes-7.8.html[7.8] | {kibana-ref-all}/7.7/breaking-changes-7.7.html[7.7] |
+{kibana-ref-all}/7.6/breaking-changes-7.6.html[7.6] | {kibana-ref-all}/7.5/breaking-changes-7.5.html[7.5] |
+{kibana-ref-all}/7.4/breaking-changes-7.4.html[7.4] | {kibana-ref-all}/7.3/breaking-changes-7.3.html[7.3] | {kibana-ref-all}/7.2/breaking-changes-7.2.html[7.2]
+| {kibana-ref-all}/7.1/breaking-changes-7.1.html[7.1] | {kibana-ref-all}/7.0/breaking-changes-7.0.html[7.0]
 
 [float]
 [[fixes-v7.13.2]]
@@ -171,6 +195,14 @@ For more information, refer to {kibana-issue}101430[#101430].
 
 Breaking changes can prevent your application from optimal operation and performance.
 Before you upgrade to 7.13.1, review the <<breaking-changes-7.13.0,7.13.0 breaking changes>>, then mitigate the impact to your application.
+
+Review the breaking changes in previous versions: 
+
+{kibana-ref-all}/7.12/release-notes-7.12.0.html#breaking-changes-7.12.0[7.12] | {kibana-ref-all}/7.11/breaking-changes-7.11.html[7.11] | {kibana-ref-all}/7.10/breaking-changes-7.10.html[7.10] |
+{kibana-ref-all}/7.9/breaking-changes-7.9.html[7.9] | {kibana-ref-all}/7.8/breaking-changes-7.8.html[7.8] | {kibana-ref-all}/7.7/breaking-changes-7.7.html[7.7] |
+{kibana-ref-all}/7.6/breaking-changes-7.6.html[7.6] | {kibana-ref-all}/7.5/breaking-changes-7.5.html[7.5] |
+{kibana-ref-all}/7.4/breaking-changes-7.4.html[7.4] | {kibana-ref-all}/7.3/breaking-changes-7.3.html[7.3] | {kibana-ref-all}/7.2/breaking-changes-7.2.html[7.2]
+| {kibana-ref-all}/7.1/breaking-changes-7.1.html[7.1] | {kibana-ref-all}/7.0/breaking-changes-7.0.html[7.0]
 
 [float]
 [[fixes-v7.13.1]]
@@ -297,6 +329,14 @@ To enable the *Explore underlying data* context menu, set `xpack.discoverEnhance
 ====
 
 // end::notable-breaking-changes[]
+
+Review the breaking changes in previous versions: 
+
+{kibana-ref-all}/7.12/release-notes-7.12.0.html#breaking-changes-7.12.0[7.12] | {kibana-ref-all}/7.11/breaking-changes-7.11.html[7.11] | {kibana-ref-all}/7.10/breaking-changes-7.10.html[7.10] |
+{kibana-ref-all}/7.9/breaking-changes-7.9.html[7.9] | {kibana-ref-all}/7.8/breaking-changes-7.8.html[7.8] | {kibana-ref-all}/7.7/breaking-changes-7.7.html[7.7] |
+{kibana-ref-all}/7.6/breaking-changes-7.6.html[7.6] | {kibana-ref-all}/7.5/breaking-changes-7.5.html[7.5] |
+{kibana-ref-all}/7.4/breaking-changes-7.4.html[7.4] | {kibana-ref-all}/7.3/breaking-changes-7.3.html[7.3] | {kibana-ref-all}/7.2/breaking-changes-7.2.html[7.2]
+| {kibana-ref-all}/7.1/breaking-changes-7.1.html[7.1] | {kibana-ref-all}/7.0/breaking-changes-7.0.html[7.0]
 
 [float]
 [[deprecations-7.13.0]]
