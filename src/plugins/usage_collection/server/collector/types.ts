@@ -25,7 +25,7 @@ export type AllowedSchemaNumberTypes =
 /** Types matching string values **/
 export type AllowedSchemaStringTypes = 'keyword' | 'text' | 'date';
 /** Types matching boolean values **/
-export type AllowedSchemaBooleanTypes = boolean;
+export type AllowedSchemaBooleanTypes = 'boolean';
 
 /**
  * Possible type values in the schema
