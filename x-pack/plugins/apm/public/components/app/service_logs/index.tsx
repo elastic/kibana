@@ -10,7 +10,6 @@ import { EuiLoadingSpinner, EuiEmptyPrompt } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
-import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { LogStream } from '../../../../../infra/public';
@@ -22,17 +21,16 @@ import {
   POD_NAME,
 } from '../../../../common/elasticsearch_fieldnames';
 import { useApmParams } from '../../../hooks/use_apm_params';
+import { useTimeRange } from '../../../hooks/use_time_range';
 
 export function ServiceLogs() {
   const { serviceName } = useApmServiceContext();
 
   const {
-    query: { environment, kuery },
+    query: { environment, kuery, rangeFrom, rangeTo },
   } = useApmParams('/services/:serviceName/logs');
 
-  const {
-    urlParams: { start, end },
-  } = useUrlParams();
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const { data, status } = useFetcher(
     (callApmApi) => {

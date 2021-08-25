@@ -7,7 +7,6 @@
  */
 import type { ChartsPluginSetup, PaletteOutput } from '../../charts/public';
 import type { SerializedFieldFormat } from '../../expressions/public';
-import { ExpressionValueVisDimension } from '../../visualizations/public';
 
 interface Dimension {
   accessor: number;
@@ -23,11 +22,6 @@ interface TagCloudCommonParams {
   minFontSize: number;
   maxFontSize: number;
   showLabel: boolean;
-}
-
-export interface TagCloudVisConfig extends TagCloudCommonParams {
-  metric: ExpressionValueVisDimension;
-  bucket?: ExpressionValueVisDimension;
 }
 
 export interface TagCloudVisParams extends TagCloudCommonParams {

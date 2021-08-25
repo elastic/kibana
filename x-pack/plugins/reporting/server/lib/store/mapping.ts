@@ -29,6 +29,9 @@ export const mapping = {
           },
         },
       },
+      isDeprecated: {
+        type: 'boolean',
+      },
     },
   },
   browser_type: { type: 'keyword' },

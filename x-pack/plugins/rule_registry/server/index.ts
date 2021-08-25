@@ -29,6 +29,7 @@ export {
 } from './utils/create_lifecycle_executor';
 export { createPersistenceRuleTypeFactory } from './utils/create_persistence_rule_type_factory';
 export * from './utils/persistence_types';
+export type { AlertsClient } from './alert_data_client/alerts_client';
 
 export const plugin = (initContext: PluginInitializerContext) =>
   new RuleRegistryPlugin(initContext);

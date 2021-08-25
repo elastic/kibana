@@ -10,12 +10,7 @@ import { i18n } from '@kbn/i18n';
 
 import { EnvironmentMode, PackageInfo } from '../config';
 import { ICspConfig } from '../csp';
-import {
-  InternalHttpServicePreboot,
-  InternalHttpServiceSetup,
-  KibanaRequest,
-  LegacyRequest,
-} from '../http';
+import { InternalHttpServicePreboot, InternalHttpServiceSetup, KibanaRequest } from '../http';
 import { UiPlugins, DiscoveredPlugin } from '../plugins';
 import { IUiSettingsClient, UserProvidedValues } from '../ui_settings';
 import type { InternalStatusServiceSetup } from '../status';
@@ -103,8 +98,8 @@ export interface InternalRenderingServiceSetup {
    * const html = await rendering.render(request, uiSettings);
    * ```
    */
-  render<R extends KibanaRequest | LegacyRequest>(
-    request: R,
+  render(
+    request: KibanaRequest,
     uiSettings: IUiSettingsClient,
     options?: IRenderOptions
   ): Promise<string>;

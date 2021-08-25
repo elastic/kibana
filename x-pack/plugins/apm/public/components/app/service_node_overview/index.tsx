@@ -18,9 +18,9 @@ import {
   asPercent,
 } from '../../../../common/utils/formatters';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
-import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useFetcher } from '../../../hooks/use_fetcher';
+import { useTimeRange } from '../../../hooks/use_time_range';
 import { truncate, unit } from '../../../utils/style';
 import { ServiceNodeMetricOverviewLink } from '../../shared/Links/apm/ServiceNodeMetricOverviewLink';
 import { ITableColumn, ManagedTable } from '../../shared/managed_table';
@@ -35,12 +35,10 @@ const ServiceNodeName = euiStyled.div`
 
 function ServiceNodeOverview() {
   const {
-    query: { environment, kuery },
+    query: { environment, kuery, rangeFrom, rangeTo },
   } = useApmParams('/services/:serviceName/nodes');
 
-  const {
-    urlParams: { start, end },
-  } = useUrlParams();
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const { serviceName } = useApmServiceContext();
 

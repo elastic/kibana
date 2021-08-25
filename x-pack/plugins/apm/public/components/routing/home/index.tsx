@@ -8,7 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { Outlet } from '@kbn/typed-react-router-config';
 import * as t from 'io-ts';
 import React from 'react';
-import { Redirect } from 'react-router-dom';
+import { RedirectTo } from '../redirect_to';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { environmentRt } from '../../../../common/environment_rt';
 import { BackendDetailOverview } from '../../app/backend_detail_overview';
@@ -121,7 +121,7 @@ export const home = {
     },
     {
       path: '/',
-      element: <Redirect to="/services" />,
+      element: <RedirectTo pathname="/services" />,
     },
   ],
 } as const;

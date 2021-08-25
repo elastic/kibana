@@ -168,7 +168,7 @@ export interface DashboardAppCapabilities {
   createNew: boolean;
   saveQuery: boolean;
   createShortUrl: boolean;
-  hideWriteControls: boolean;
+  showWriteControls: boolean;
   storeSearchSession: boolean;
   mapsCapabilities: { save: boolean };
   visualizeCapabilities: { save: boolean };

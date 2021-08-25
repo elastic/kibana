@@ -18,7 +18,7 @@ import {
   EuiFlyoutBody,
   EuiLoadingSpinner,
 } from '@elastic/eui';
-import { IUiSettingsClient } from 'kibana/public';
+import { ApplicationStart, HttpStart, IUiSettingsClient } from 'kibana/public';
 import { InspectorViewDescription } from '../types';
 import { Adapters } from '../../common';
 import { InspectorViewChooser } from './inspector_view_chooser';
@@ -41,6 +41,8 @@ interface InspectorPanelProps {
   options?: unknown;
   views: InspectorViewDescription[];
   dependencies: {
+    application: ApplicationStart;
+    http: HttpStart;
     uiSettings: IUiSettingsClient;
   };
 }

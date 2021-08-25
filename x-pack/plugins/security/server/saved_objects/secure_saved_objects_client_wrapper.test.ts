@@ -779,17 +779,6 @@ describe('#find', () => {
     );
   });
 
-  test(`throws BadRequestError when searching across namespaces when pit is provided`, async () => {
-    const options = {
-      type: [type1, type2],
-      pit: { id: 'abc123' },
-      namespaces: ['some-ns', 'another-ns'],
-    };
-    await expect(client.find(options)).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"_find across namespaces is not permitted when using the \`pit\` option."`
-    );
-  });
-
   test(`checks privileges for user, actions, and namespaces`, async () => {
     const options = { type: [type1, type2], namespaces };
     await expectPrivilegeCheck(client.find, { options }, namespaces);
@@ -884,7 +873,7 @@ describe('#openPointInTimeForType', () => {
     const apiCallReturnValue = Symbol();
     clientOpts.baseClient.openPointInTimeForType.mockReturnValue(apiCallReturnValue as any);
 
-    const options = { namespace };
+    const options = { namespaces: [namespace] };
     const result = await expectSuccess(client.openPointInTimeForType, { type, options });
     expect(result).toBe(apiCallReturnValue);
   });
@@ -892,17 +881,112 @@ describe('#openPointInTimeForType', () => {
   test(`adds audit event when successful`, async () => {
     const apiCallReturnValue = Symbol();
     clientOpts.baseClient.openPointInTimeForType.mockReturnValue(apiCallReturnValue as any);
-    const options = { namespace };
+    const options = { namespaces: [namespace] };
     await expectSuccess(client.openPointInTimeForType, { type, options });
     expect(clientOpts.auditLogger.log).toHaveBeenCalledTimes(1);
     expectAuditEvent('saved_object_open_point_in_time', 'unknown');
   });
 
-  test(`adds audit event when not successful`, async () => {
-    clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.mockRejectedValue(new Error());
-    await expect(() => client.openPointInTimeForType(type, { namespace })).rejects.toThrow();
+  test(`throws an error when unauthorized`, async () => {
+    clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.mockImplementation(
+      getMockCheckPrivilegesFailure
+    );
+    const options = { namespaces: [namespace] };
+    await expect(() => client.openPointInTimeForType(type, options)).rejects.toThrowError(
+      'unauthorized'
+    );
+  });
+
+  test(`adds audit event when unauthorized`, async () => {
+    clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.mockImplementation(
+      getMockCheckPrivilegesFailure
+    );
+    const options = { namespaces: [namespace] };
+    await expect(() => client.openPointInTimeForType(type, options)).rejects.toThrow();
     expect(clientOpts.auditLogger.log).toHaveBeenCalledTimes(1);
     expectAuditEvent('saved_object_open_point_in_time', 'failure');
+  });
+
+  test(`filters types based on authorization`, async () => {
+    clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.mockResolvedValue({
+      hasAllRequested: false,
+      username: USERNAME,
+      privileges: {
+        kibana: [
+          {
+            resource: 'some-ns',
+            privilege: 'mock-saved_object:foo/open_point_in_time',
+            authorized: true,
+          },
+          {
+            resource: 'some-ns',
+            privilege: 'mock-saved_object:bar/open_point_in_time',
+            authorized: true,
+          },
+          {
+            resource: 'some-ns',
+            privilege: 'mock-saved_object:baz/open_point_in_time',
+            authorized: false,
+          },
+          {
+            resource: 'some-ns',
+            privilege: 'mock-saved_object:qux/open_point_in_time',
+            authorized: false,
+          },
+          {
+            resource: 'another-ns',
+            privilege: 'mock-saved_object:foo/open_point_in_time',
+            authorized: true,
+          },
+          {
+            resource: 'another-ns',
+            privilege: 'mock-saved_object:bar/open_point_in_time',
+            authorized: false,
+          },
+          {
+            resource: 'another-ns',
+            privilege: 'mock-saved_object:baz/open_point_in_time',
+            authorized: true,
+          },
+          {
+            resource: 'another-ns',
+            privilege: 'mock-saved_object:qux/open_point_in_time',
+            authorized: false,
+          },
+          {
+            resource: 'forbidden-ns',
+            privilege: 'mock-saved_object:foo/open_point_in_time',
+            authorized: false,
+          },
+          {
+            resource: 'forbidden-ns',
+            privilege: 'mock-saved_object:bar/open_point_in_time',
+            authorized: false,
+          },
+          {
+            resource: 'forbidden-ns',
+            privilege: 'mock-saved_object:baz/open_point_in_time',
+            authorized: false,
+          },
+          {
+            resource: 'forbidden-ns',
+            privilege: 'mock-saved_object:qux/open_point_in_time',
+            authorized: false,
+          },
+        ],
+      },
+    });
+
+    await client.openPointInTimeForType(['foo', 'bar', 'baz', 'qux'], {
+      namespaces: ['some-ns', 'another-ns', 'forbidden-ns'],
+    });
+
+    expect(clientOpts.baseClient.openPointInTimeForType).toHaveBeenCalledWith(
+      ['foo', 'bar', 'baz'],
+      {
+        namespaces: ['some-ns', 'another-ns', 'forbidden-ns'],
+      }
+    );
   });
 });
 

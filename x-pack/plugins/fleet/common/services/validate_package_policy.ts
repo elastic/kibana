@@ -266,6 +266,18 @@ export const validatePackagePolicyConfig = (
     }
   }
 
+  if (
+    varDef.type === 'bool' &&
+    parsedValue &&
+    !['true', 'false'].includes(parsedValue.toString())
+  ) {
+    errors.push(
+      i18n.translate('xpack.fleet.packagePolicyValidation.boolValueError', {
+        defaultMessage: 'Boolean values must be either true or false',
+      })
+    );
+  }
+
   return errors.length ? errors : null;
 };
 

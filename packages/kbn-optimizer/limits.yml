@@ -12,7 +12,6 @@ pageLoadAssetSize:
   crossClusterReplication: 65408
   dashboard: 374194
   dashboardEnhanced: 65646
-  dashboardMode: 22716
   data: 824229
   dataEnhanced: 50420
   devTools: 38637
@@ -99,7 +98,6 @@ pageLoadAssetSize:
   runtimeFields: 41752
   stackAlerts: 29684
   presentationUtil: 94301
-  spacesOss: 18817
   indexPatternFieldEditor: 50000
   osquery: 107090
   fileUpload: 25664
@@ -117,3 +115,4 @@ pageLoadAssetSize:
   expressionMetric: 22238
   expressionShape: 34008
   interactiveSetup: 18532
+  expressionTagcloud: 27505

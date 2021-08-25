@@ -322,6 +322,7 @@ const getSavedObjectTypes = (
     },
     migrations: {
       '7.14.0': migrateInstallationToV7140,
+      '7.14.1': migrateInstallationToV7140,
     },
   },
   [ASSETS_SAVED_OBJECT_TYPE]: {

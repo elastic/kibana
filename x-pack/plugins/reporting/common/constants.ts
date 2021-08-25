@@ -79,6 +79,8 @@ export const CSV_JOB_TYPE_DEPRECATED = 'csv';
 
 export const USES_HEADLESS_JOB_TYPES = [PDF_JOB_TYPE, PNG_JOB_TYPE];
 
+export const DEPRECATED_JOB_TYPES = [CSV_JOB_TYPE_DEPRECATED];
+
 // Licenses
 export const LICENSE_TYPE_TRIAL = 'trial';
 export const LICENSE_TYPE_BASIC = 'basic';

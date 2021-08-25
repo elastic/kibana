@@ -159,12 +159,12 @@ export interface AuthToolkit {
 export class BasePath {
     // @internal
     constructor(serverBasePath?: string, publicBaseUrl?: string);
-    get: (request: KibanaRequest | LegacyRequest) => string;
+    get: (request: KibanaRequest) => string;
     prepend: (path: string) => string;
     readonly publicBaseUrl?: string;
     remove: (path: string) => string;
     readonly serverBasePath: string;
-    set: (request: KibanaRequest | LegacyRequest, requestSpecificBasePath: string) => void;
+    set: (request: KibanaRequest, requestSpecificBasePath: string) => void;
 }
 
 // Warning: (ae-forgotten-export) The symbol "BootstrapArgs" needs to be exported by the entry point index.d.ts
@@ -807,6 +807,7 @@ export type ElasticsearchClientConfig = Pick<ElasticsearchConfig, 'customHeaders
     requestTimeout?: ElasticsearchConfig['requestTimeout'] | ClientOptions['requestTimeout'];
     ssl?: Partial<ElasticsearchConfig['ssl']>;
     keepAlive?: boolean;
+    caFingerprint?: ClientOptions['caFingerprint'];
 };
 
 // @public
@@ -896,10 +897,10 @@ export interface FakeRequest {
 }
 
 // @public
-export type GetAuthHeaders = (request: KibanaRequest | LegacyRequest) => AuthHeaders | undefined;
+export type GetAuthHeaders = (request: KibanaRequest) => AuthHeaders | undefined;
 
 // @public
-export type GetAuthState = <T = unknown>(request: KibanaRequest | LegacyRequest) => {
+export type GetAuthState = <T = unknown>(request: KibanaRequest) => {
     status: AuthStatus;
     state: T;
 };
@@ -1003,6 +1004,7 @@ export interface HttpServerInfo {
 // @public
 export interface HttpServicePreboot {
     basePath: IBasePath;
+    getServerInfo: () => HttpServerInfo;
     registerRoutes(path: string, callback: (router: IRouter) => void): void;
 }
 
@@ -1137,7 +1139,7 @@ export interface IRouter<Context extends RequestHandlerContext = RequestHandlerC
 }
 
 // @public
-export type IsAuthenticated = (request: KibanaRequest | LegacyRequest) => boolean;
+export type IsAuthenticated = (request: KibanaRequest) => boolean;
 
 // @public (undocumented)
 export type ISavedObjectsExporter = PublicMethodsOf<SavedObjectsExporter>;
@@ -1262,10 +1264,6 @@ export const kibanaResponseFactory: {
 //
 // @public
 export type KnownHeaders = KnownKeys<IncomingHttpHeaders>;
-
-// @public @deprecated (undocumented)
-export interface LegacyRequest extends Request {
-}
 
 // Warning: (ae-forgotten-export) The symbol "lifecycleResponseFactory" needs to be exported by the entry point index.d.ts
 //
@@ -1532,7 +1530,8 @@ export interface PluginManifest {
     readonly id: PluginName;
     readonly kibanaVersion: string;
     readonly optionalPlugins: readonly PluginName[];
-    readonly owner?: {
+    // (undocumented)
+    readonly owner: {
         readonly name: string;
         readonly githubTeam?: string;
     };
@@ -1607,8 +1606,6 @@ export interface RegisterDeprecationsConfig {
 // @public
 export type RequestHandler<P = unknown, Q = unknown, B = unknown, Context extends RequestHandlerContext = RequestHandlerContext, Method extends RouteMethod = any, ResponseFactory extends KibanaResponseFactory = KibanaResponseFactory> = (context: Context, request: KibanaRequest<P, Q, B, Method>, response: ResponseFactory) => IKibanaResponse<any> | Promise<IKibanaResponse<any>>;
 
-// Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "LegacyScopedClusterClient"
-//
 // @public
 export interface RequestHandlerContext {
     // (undocumented)
@@ -2466,8 +2463,9 @@ export interface SavedObjectsMigrationVersion {
 export type SavedObjectsNamespaceType = 'single' | 'multiple' | 'multiple-isolated' | 'agnostic';
 
 // @public (undocumented)
-export interface SavedObjectsOpenPointInTimeOptions extends SavedObjectsBaseOptions {
+export interface SavedObjectsOpenPointInTimeOptions {
     keepAlive?: string;
+    namespaces?: string[];
     preference?: string;
 }
 
@@ -2719,7 +2717,7 @@ export class SavedObjectTypeRegistry {
 export type SavedObjectUnsanitizedDoc<T = unknown> = SavedObjectDoc<T> & Partial<Referencable>;
 
 // @public
-export type ScopeableRequest = KibanaRequest | LegacyRequest | FakeRequest;
+export type ScopeableRequest = KibanaRequest | FakeRequest;
 
 // @public (undocumented)
 export interface SearchResponse<T = unknown> {
@@ -2921,9 +2919,9 @@ export const validBodyOutput: readonly ["data", "stream"];
 //
 // src/core/server/elasticsearch/client/types.ts:94:7 - (ae-forgotten-export) The symbol "Explanation" needs to be exported by the entry point index.d.ts
 // src/core/server/http/router/response.ts:301:3 - (ae-forgotten-export) The symbol "KibanaResponse" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:380:3 - (ae-forgotten-export) The symbol "KibanaConfigType" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:380:3 - (ae-forgotten-export) The symbol "SharedGlobalConfigKeys" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:383:3 - (ae-forgotten-export) The symbol "SavedObjectsConfigType" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:489:5 - (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "create"
+// src/core/server/plugins/types.ts:377:3 - (ae-forgotten-export) The symbol "KibanaConfigType" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:377:3 - (ae-forgotten-export) The symbol "SharedGlobalConfigKeys" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:380:3 - (ae-forgotten-export) The symbol "SavedObjectsConfigType" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:486:5 - (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "create"
 
 ```
