@@ -49,6 +49,13 @@ jsts_transpiler(
   build_pkg_name = package_name(),
 )
 
+jsts_transpiler(
+  name = "target_web",
+  srcs = SRCS,
+  build_pkg_name = package_name(),
+  config_file = ".babelrc.browser"
+)
+
 ts_config(
   name = "tsconfig",
   src = "tsconfig.json",
@@ -75,7 +82,7 @@ ts_project(
 js_library(
   name = PKG_BASE_NAME,
   srcs = NPM_MODULE_EXTRA_FILES,
-  deps = RUNTIME_DEPS + [":target_node", ":tsc_types"],
+  deps = RUNTIME_DEPS + [":target_node", ":target_web", ":tsc_types"],
   package_name = PKG_REQUIRE_NAME,
   visibility = ["//visibility:public"],
 )
