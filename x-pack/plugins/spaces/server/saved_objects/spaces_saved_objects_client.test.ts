@@ -7,35 +7,14 @@
 
 import Boom from '@hapi/boom';
 
-import { SavedObjectTypeRegistry } from 'src/core/server';
-import { savedObjectsClientMock } from 'src/core/server/mocks';
+import type { SavedObject, SavedObjectsType } from 'src/core/server';
+import { SavedObjectsErrorHelpers } from 'src/core/server';
+import { savedObjectsClientMock, savedObjectsTypeRegistryMock } from 'src/core/server/mocks';
 
 import { DEFAULT_SPACE_ID } from '../../common/constants';
 import { spacesClientMock } from '../spaces_client/spaces_client.mock';
 import { spacesServiceMock } from '../spaces_service/spaces_service.mock';
 import { SpacesSavedObjectsClient } from './spaces_saved_objects_client';
-
-const typeRegistry = new SavedObjectTypeRegistry();
-typeRegistry.registerType({
-  name: 'foo',
-  namespaceType: 'single',
-  hidden: false,
-  mappings: { properties: {} },
-});
-
-typeRegistry.registerType({
-  name: 'bar',
-  namespaceType: 'single',
-  hidden: false,
-  mappings: { properties: {} },
-});
-
-typeRegistry.registerType({
-  name: 'space',
-  namespaceType: 'agnostic',
-  hidden: true,
-  mappings: { properties: {} },
-});
 
 const createMockRequest = () => ({});
 
@@ -69,6 +48,13 @@ const ERROR_NAMESPACE_SPECIFIED = 'Spaces currently determines the namespaces';
       const spacesService = createSpacesService(currentSpace.id);
       const spacesClient = spacesClientMock.create();
       spacesService.createSpacesClient.mockReturnValue(spacesClient);
+      const typeRegistry = savedObjectsTypeRegistryMock.create();
+      typeRegistry.getAllTypes.mockReturnValue(([
+        // for test purposes we only need the names of the object types
+        { name: 'foo' },
+        { name: 'bar' },
+        { name: 'space' },
+      ] as unknown) as SavedObjectsType[]);
 
       const client = new SpacesSavedObjectsClient({
         request,
@@ -76,7 +62,7 @@ const ERROR_NAMESPACE_SPECIFIED = 'Spaces currently determines the namespaces';
         getSpacesService: () => spacesService,
         typeRegistry,
       });
-      return { client, baseClient, spacesClient };
+      return { client, baseClient, spacesClient, typeRegistry };
     };
 
     describe('#get', () => {
@@ -157,7 +143,7 @@ const ERROR_NAMESPACE_SPECIFIED = 'Spaces currently determines the namespaces';
         // @ts-expect-error
         const actualReturnValue = await client.bulkGet(objects, options);
 
-        expect(actualReturnValue).toBe(expectedReturnValue);
+        expect(actualReturnValue).toEqual(expectedReturnValue);
         expect(baseClient.bulkGet).toHaveBeenCalledWith(objects, {
           foo: 'bar',
           namespace: currentSpace.expectedNamespace,
@@ -166,24 +152,70 @@ const ERROR_NAMESPACE_SPECIFIED = 'Spaces currently determines the namespaces';
       });
 
       test(`replaces object namespaces '*' with available spaces`, async () => {
-        const { client, baseClient, spacesClient } = createSpacesSavedObjectsClient();
+        const { client, baseClient, spacesClient, typeRegistry } = createSpacesSavedObjectsClient();
         spacesClient.getAll.mockResolvedValue([
           { id: 'available-space-a', name: 'a', disabledFeatures: [] },
           { id: 'available-space-b', name: 'b', disabledFeatures: [] },
         ]);
+        typeRegistry.isNamespaceAgnostic.mockImplementation((type) => type === 'foo');
+        typeRegistry.isShareable.mockImplementation((type) => type === 'bar');
+        // 'baz' is neither agnostic nor shareable, so it is isolated (namespaceType: 'single' or namespaceType: 'multiple-isolated')
+        baseClient.bulkGet.mockResolvedValue({
+          saved_objects: ([
+            { type: 'foo', id: '1', key: 'val' },
+            { type: 'bar', id: '2', key: 'val' },
+            { type: 'baz', id: '3', key: 'val' }, // this should be replaced with a 400 error
+            { type: 'foo', id: '4', error: { statusCode: 403 } },
+            { type: 'bar', id: '5', error: { statusCode: 403 } },
+            { type: 'baz', id: '6', error: { statusCode: 403 } }, // this should be not be replaced with a 400 error because it has a 403 error which is higher priority
+            { type: 'foo', id: '7', key: 'val' },
+            { type: 'bar', id: '8', key: 'val' },
+            { type: 'baz', id: '9', key: 'val' }, // this should not be replaced with a 400 error because the user did not search for it in '*' all spaces
+          ] as unknown) as SavedObject[],
+        });
 
         const objects = [
-          { type: 'foo', id: '1', namespaces: ['*'] },
+          { type: 'foo', id: '1', namespaces: ['*', 'this-is-ignored'] },
           { type: 'bar', id: '2', namespaces: ['*', 'this-is-ignored'] },
-          { type: 'baz', id: '3', namespaces: ['another-space'] },
+          { type: 'baz', id: '3', namespaces: ['*', 'this-is-ignored'] },
+          { type: 'foo', id: '4', namespaces: ['*'] },
+          { type: 'bar', id: '5', namespaces: ['*'] },
+          { type: 'baz', id: '6', namespaces: ['*'] },
+          { type: 'foo', id: '7', namespaces: ['another-space'] },
+          { type: 'bar', id: '8', namespaces: ['another-space'] },
+          { type: 'baz', id: '9', namespaces: ['another-space'] },
         ];
-        await client.bulkGet(objects);
+        const result = await client.bulkGet(objects);
 
+        expect(result.saved_objects).toEqual([
+          { type: 'foo', id: '1', key: 'val' },
+          { type: 'bar', id: '2', key: 'val' },
+          {
+            type: 'baz',
+            id: '3',
+            error: SavedObjectsErrorHelpers.createBadRequestError(
+              '"namespaces" can only specify a single space when used with space-isolated types'
+            ).output.payload,
+          },
+          { type: 'foo', id: '4', error: { statusCode: 403 } },
+          { type: 'bar', id: '5', error: { statusCode: 403 } },
+          { type: 'baz', id: '6', error: { statusCode: 403 } },
+          { type: 'foo', id: '7', key: 'val' },
+          { type: 'bar', id: '8', key: 'val' },
+          { type: 'baz', id: '9', key: 'val' },
+        ]);
         expect(baseClient.bulkGet).toHaveBeenCalledWith(
           [
             { type: 'foo', id: '1', namespaces: ['available-space-a', 'available-space-b'] },
             { type: 'bar', id: '2', namespaces: ['available-space-a', 'available-space-b'] },
-            { type: 'baz', id: '3', namespaces: ['another-space'] }, // even if another space doesn't exist, it can be specified explicitly
+            { type: 'baz', id: '3', namespaces: ['available-space-a', 'available-space-b'] },
+            { type: 'foo', id: '4', namespaces: ['available-space-a', 'available-space-b'] },
+            { type: 'bar', id: '5', namespaces: ['available-space-a', 'available-space-b'] },
+            { type: 'baz', id: '6', namespaces: ['available-space-a', 'available-space-b'] },
+            // even if another space doesn't exist, it can be specified explicitly
+            { type: 'foo', id: '7', namespaces: ['another-space'] },
+            { type: 'bar', id: '8', namespaces: ['another-space'] },
+            { type: 'baz', id: '9', namespaces: ['another-space'] },
           ],
           { namespace: currentSpace.expectedNamespace }
         );
@@ -193,6 +225,7 @@ const ERROR_NAMESPACE_SPECIFIED = 'Spaces currently determines the namespaces';
       test(`replaces object namespaces '*' with an empty array when the user doesn't have access to any spaces`, async () => {
         const { client, baseClient, spacesClient } = createSpacesSavedObjectsClient();
         spacesClient.getAll.mockRejectedValue(Boom.forbidden());
+        baseClient.bulkGet.mockResolvedValue({ saved_objects: [] }); // doesn't matter for this test
 
         const objects = [
           { type: 'foo', id: '1', namespaces: ['*'] },
