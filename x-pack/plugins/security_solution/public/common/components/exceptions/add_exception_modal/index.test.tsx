@@ -31,6 +31,7 @@ import {
 import { useRuleAsync } from '../../../../detections/containers/detection_engine/rules/use_rule_async';
 import { AlertData } from '../types';
 import { getMockTheme } from '../../../lib/kibana/kibana_react.mock';
+import { useUserData } from '../../../../detections/components/user_info';
 
 const mockTheme = getMockTheme({
   eui: {
@@ -54,6 +55,7 @@ jest.mock('@kbn/securitysolution-hook-utils', () => ({
   useAsync: jest.fn(),
 }));
 jest.mock('../../../../detections/containers/detection_engine/rules/use_rule_async');
+jest.mock('../../../../detections/components/user_info');
 
 describe('When the add exception modal is opened', () => {
   const ruleName = 'test rule';
@@ -74,6 +76,12 @@ describe('When the add exception modal is opened', () => {
       start: jest.fn(),
       loading: false,
     }));
+
+    (useUserData as jest.Mock).mockImplementation(() => [
+      {
+        hasIndexWrite: true,
+      },
+    ]);
 
     (useAddOrUpdateException as jest.Mock).mockImplementation(() => [
       { isLoading: false },
@@ -461,5 +469,70 @@ describe('When the add exception modal is opened', () => {
     expect(
       wrapper.find('button[data-test-subj="add-exception-confirm-button"]').getDOMNode()
     ).toBeDisabled();
+  });
+
+  describe('when user does not have alerts write privileges', () => {
+    let wrapper: ReactWrapper;
+    let callProps: {
+      onChange: (props: { exceptionItems: ExceptionListItemSchema[] }) => void;
+      exceptionListItems: ExceptionListItemSchema[];
+    };
+    beforeEach(async () => {
+      (useUserData as jest.Mock).mockImplementation(() => [
+        {
+          hasIndexWrite: false,
+        },
+      ]);
+      // Mocks the index patterns to contain the pre-populated endpoint fields so that the exception qualifies as bulk closable
+      (useFetchIndex as jest.Mock).mockImplementation(() => [
+        false,
+        {
+          indexPatterns: {
+            ...stubIndexPattern,
+            fields: [
+              { name: 'file.path.caseless', type: 'string' },
+              { name: 'subject_name', type: 'string' },
+              { name: 'trusted', type: 'string' },
+              { name: 'file.hash.sha256', type: 'string' },
+              { name: 'event.code', type: 'string' },
+            ],
+          },
+        },
+      ]);
+      const alertDataMock: AlertData = {
+        '@timestamp': '1234567890',
+        _id: 'test-id',
+        file: { path: 'test/path' },
+      };
+      wrapper = mount(
+        <ThemeProvider theme={mockTheme}>
+          <AddExceptionModal
+            ruleId={'123'}
+            ruleIndices={['filebeat-*']}
+            ruleName={ruleName}
+            exceptionListType={'endpoint'}
+            onCancel={jest.fn()}
+            onConfirm={jest.fn()}
+            alertData={alertDataMock}
+          />
+        </ThemeProvider>
+      );
+      callProps = ExceptionBuilderComponent.mock.calls[0][0];
+      await waitFor(() =>
+        callProps.onChange({ exceptionItems: [...callProps.exceptionListItems] })
+      );
+    });
+    it('should NOT render the close on add exception checkbox', () => {
+      expect(
+        wrapper.find('[data-test-subj="close-alert-on-add-add-exception-checkbox"]').exists()
+      ).toBeFalsy();
+    });
+    it('should NOT have the bulk close checkbox enabled', () => {
+      expect(
+        wrapper
+          .find('input[data-test-subj="bulk-close-alert-on-add-add-exception-checkbox"]')
+          .exists()
+      ).toBeFalsy();
+    });
   });
 });

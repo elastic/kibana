@@ -28,6 +28,7 @@ import {
 import { useRuleAsync } from '../../../../detections/containers/detection_engine/rules/use_rule_async';
 import { getMockTheme } from '../../../lib/kibana/kibana_react.mock';
 import { ExceptionBuilder } from '../../../../shared_imports';
+import { useUserData } from '../../../../detections/components/user_info';
 
 const mockTheme = getMockTheme({
   eui: {
@@ -57,6 +58,7 @@ jest.mock('../../../../shared_imports', () => {
     },
   };
 });
+jest.mock('../../../../detections/components/user_info');
 
 describe('When the edit exception modal is opened', () => {
   const ruleName = 'test rule';
@@ -89,6 +91,11 @@ describe('When the edit exception modal is opened', () => {
     (useRuleAsync as jest.Mock).mockImplementation(() => ({
       rule: getRulesSchemaMock(),
     }));
+    (useUserData as jest.Mock).mockImplementation(() => [
+      {
+        hasIndexWrite: true,
+      },
+    ]);
   });
 
   afterEach(() => {
@@ -375,5 +382,45 @@ describe('When the edit exception modal is opened', () => {
     expect(
       wrapper.find('button[data-test-subj="edit-exception-confirm-button"]').getDOMNode()
     ).toBeDisabled();
+  });
+
+  describe('when user does not have alerts write privileges', () => {
+    let wrapper: ReactWrapper;
+    beforeEach(async () => {
+      (useUserData as jest.Mock).mockImplementation(() => [
+        {
+          hasIndexWrite: false,
+        },
+      ]);
+      wrapper = mount(
+        <ThemeProvider theme={mockTheme}>
+          <EditExceptionModal
+            ruleIndices={['filebeat-*']}
+            ruleId="123"
+            ruleName={ruleName}
+            exceptionListType={'detection'}
+            onCancel={jest.fn()}
+            onConfirm={jest.fn()}
+            exceptionItem={getExceptionListItemSchemaMock()}
+          />
+        </ThemeProvider>
+      );
+      const callProps = ExceptionBuilderComponent.mock.calls[0][0];
+      await waitFor(() => {
+        callProps.onChange({ exceptionItems: [...callProps.exceptionListItems] });
+      });
+    });
+    it('should NOT render the close on add exception checkbox', () => {
+      expect(
+        wrapper.find('[data-test-subj="close-alert-on-add-add-exception-checkbox"]').exists()
+      ).toBeFalsy();
+    });
+    it('should NOT have the bulk close checkbox enabled', () => {
+      expect(
+        wrapper
+          .find('input[data-test-subj="bulk-close-alert-on-add-add-exception-checkbox"]')
+          .exists()
+      ).toBeFalsy();
+    });
   });
 });

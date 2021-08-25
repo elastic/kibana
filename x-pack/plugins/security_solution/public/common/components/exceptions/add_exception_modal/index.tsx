@@ -65,6 +65,7 @@ import { ErrorInfo, ErrorCallout } from '../error_callout';
 import { AlertData } from '../types';
 import { useFetchIndex } from '../../../containers/source';
 import { useGetInstalledJob } from '../../ml/hooks/use_get_jobs';
+import { useUserData } from '../../../../detections/components/user_info';
 
 export interface AddExceptionModalProps {
   ruleName: string;
@@ -126,6 +127,8 @@ export const AddExceptionModal = memo(function AddExceptionModal({
   alertStatus,
 }: AddExceptionModalProps) {
   const { http, data } = useKibana().services;
+  const [{ hasIndexWrite: hasAlertsIndexWrite }] = useUserData();
+
   const [errorsExist, setErrorExists] = useState(false);
   const [comment, setComment] = useState('');
   const { rule: maybeRule, loading: isRuleLoading } = useRuleAsync(ruleId);
@@ -506,29 +509,36 @@ export const AddExceptionModal = memo(function AddExceptionModal({
             </ModalBodySection>
             <EuiHorizontalRule />
             <ModalBodySection>
-              {alertData != null && alertStatus !== 'closed' && (
+              {/* {hasAlertsIndexWrite && ( */}
+              <>
+                {alertData != null && alertStatus !== 'closed' && (
+                  <EuiFormRow fullWidth>
+                    <EuiCheckbox
+                      data-test-subj="close-alert-on-add-add-exception-checkbox"
+                      id="close-alert-on-add-add-exception-checkbox"
+                      label="Close this alert"
+                      checked={shouldCloseAlert}
+                      onChange={onCloseAlertCheckboxChange}
+                    />
+                  </EuiFormRow>
+                )}
                 <EuiFormRow fullWidth>
                   <EuiCheckbox
-                    data-test-subj="close-alert-on-add-add-exception-checkbox"
-                    id="close-alert-on-add-add-exception-checkbox"
-                    label="Close this alert"
-                    checked={shouldCloseAlert}
-                    onChange={onCloseAlertCheckboxChange}
+                    data-test-subj="bulk-close-alert-on-add-add-exception-checkbox"
+                    id="bulk-close-alert-on-add-add-exception-checkbox"
+                    label={
+                      shouldDisableBulkClose
+                        ? i18n.BULK_CLOSE_LABEL_DISABLED
+                        : i18n.BULK_CLOSE_LABEL
+                    }
+                    checked={shouldBulkCloseAlert}
+                    onChange={onBulkCloseAlertCheckboxChange}
+                    disabled={shouldDisableBulkClose}
                   />
                 </EuiFormRow>
-              )}
-              <EuiFormRow fullWidth>
-                <EuiCheckbox
-                  data-test-subj="bulk-close-alert-on-add-add-exception-checkbox"
-                  id="bulk-close-alert-on-add-add-exception-checkbox"
-                  label={
-                    shouldDisableBulkClose ? i18n.BULK_CLOSE_LABEL_DISABLED : i18n.BULK_CLOSE_LABEL
-                  }
-                  checked={shouldBulkCloseAlert}
-                  onChange={onBulkCloseAlertCheckboxChange}
-                  disabled={shouldDisableBulkClose}
-                />
-              </EuiFormRow>
+              </>
+              {/* )} */}
+
               {exceptionListType === 'endpoint' && (
                 <>
                   <EuiSpacer size="s" />

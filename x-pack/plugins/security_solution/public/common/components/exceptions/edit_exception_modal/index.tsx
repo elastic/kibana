@@ -38,6 +38,7 @@ import { useFetchIndex } from '../../../containers/source';
 import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
 import { useRuleAsync } from '../../../../detections/containers/detection_engine/rules/use_rule_async';
 import { ExceptionBuilder } from '../../../../../public/shared_imports';
+import { useUserData } from '../../../../detections/components/user_info';
 
 import * as i18n from './translations';
 import * as sharedI18n from '../translations';
@@ -107,6 +108,7 @@ export const EditExceptionModal = memo(function EditExceptionModal({
   onRuleChange,
 }: EditExceptionModalProps) {
   const { http, data } = useKibana().services;
+  const [{ hasIndexWrite: hasAlertsIndexWrite }] = useUserData();
   const [comment, setComment] = useState('');
   const [errorsExist, setErrorExists] = useState(false);
   const { rule: maybeRule, loading: isRuleLoading } = useRuleAsync(ruleId);
@@ -375,18 +377,22 @@ export const EditExceptionModal = memo(function EditExceptionModal({
             </ModalBodySection>
             <EuiHorizontalRule />
             <ModalBodySection>
-              <EuiFormRow fullWidth>
-                <EuiCheckbox
-                  data-test-subj="close-alert-on-add-edit-exception-checkbox"
-                  id="close-alert-on-add-edit-exception-checkbox"
-                  label={
-                    shouldDisableBulkClose ? i18n.BULK_CLOSE_LABEL_DISABLED : i18n.BULK_CLOSE_LABEL
-                  }
-                  checked={shouldBulkCloseAlert}
-                  onChange={onBulkCloseAlertCheckboxChange}
-                  disabled={shouldDisableBulkClose}
-                />
-              </EuiFormRow>
+              {hasAlertsIndexWrite && (
+                <EuiFormRow fullWidth>
+                  <EuiCheckbox
+                    data-test-subj="close-alert-on-add-edit-exception-checkbox"
+                    id="close-alert-on-add-edit-exception-checkbox"
+                    label={
+                      shouldDisableBulkClose
+                        ? i18n.BULK_CLOSE_LABEL_DISABLED
+                        : i18n.BULK_CLOSE_LABEL
+                    }
+                    checked={shouldBulkCloseAlert}
+                    onChange={onBulkCloseAlertCheckboxChange}
+                    disabled={shouldDisableBulkClose}
+                  />
+                </EuiFormRow>
+              )}
               {exceptionListType === 'endpoint' && (
                 <>
                   <EuiSpacer size="s" />
