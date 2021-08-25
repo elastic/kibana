@@ -8,7 +8,7 @@ pageLoadAssetSize:
   charts: 95000
   cloud: 21076
   console: 46235
-  core: 435325
+  core: 436325
   crossClusterReplication: 65408
   dashboard: 374267
   dashboardEnhanced: 65646
@@ -119,4 +119,3 @@ pageLoadAssetSize:
   expressionImage: 19288
   expressionMetric: 22238
   expressionShape: 34008
-
