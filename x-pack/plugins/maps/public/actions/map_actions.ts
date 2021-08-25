@@ -176,7 +176,6 @@ export function mapExtentChanged(mapExtentState: MapExtentState) {
       mapState: {
         ...dataFilters,
         ...mapExtentState,
-        isForceRefresh: false,
       },
     });
 
@@ -188,7 +187,7 @@ export function mapExtentChanged(mapExtentState: MapExtentState) {
       });
     }
 
-    await dispatch(syncDataForAllLayers());
+    await dispatch(syncDataForAllLayers(false));
   };
 }
 
@@ -291,13 +290,12 @@ export function setQuery({
     dispatch({
       type: SET_QUERY,
       ...nextQueryContext,
-      isForceRefresh: forceRefresh,
     });
 
     if (getMapSettings(getState()).autoFitToDataBounds) {
       dispatch(autoFitToBounds());
     } else {
-      await dispatch(syncDataForAllLayers());
+      await dispatch(syncDataForAllLayers(forceRefresh));
     }
   };
 }
@@ -374,7 +372,7 @@ export function addNewFeatureToIndex(geometry: Geometry | Position[]) {
       return;
     }
     await layer.addFeature(geometry);
-    await dispatch(syncDataForLayer(layer, true));
+    await dispatch(syncDataForLayer(layer, true, false));
   };
 }
 
@@ -393,6 +391,6 @@ export function deleteFeatureFromIndex(featureId: string) {
       return;
     }
     await layer.deleteFeature(featureId);
-    await dispatch(syncDataForLayer(layer, true));
+    await dispatch(syncDataForLayer(layer, true, false));
   };
 }

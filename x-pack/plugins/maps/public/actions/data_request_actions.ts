@@ -66,6 +66,7 @@ export type DataRequestContext = {
   registerCancelCallback(requestToken: symbol, callback: () => void): void;
   dataFilters: DataFilters;
   forceRefreshDueToDrawing: boolean;
+  isForceRefresh: boolean;
 };
 
 export function clearDataRequests(layer: ILayer) {
@@ -117,7 +118,8 @@ function getDataRequestContext(
   dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
   getState: () => MapStoreState,
   layerId: string,
-  forceRefreshDueToDrawing: boolean = false
+  forceRefreshDueToDrawing: boolean,
+  isForceRefresh: boolean
 ): DataRequestContext {
   return {
     dataFilters: getDataFilters(getState()),
@@ -142,22 +144,23 @@ function getDataRequestContext(
     registerCancelCallback: (requestToken: symbol, callback: () => void) =>
       dispatch(registerCancelCallback(requestToken, callback)),
     forceRefreshDueToDrawing,
+    isForceRefresh,
   };
 }
 
-export function syncDataForAllLayers() {
+export function syncDataForAllLayers(isForceRefresh: boolean) {
   return async (
     dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
     getState: () => MapStoreState
   ) => {
     const syncPromises = getLayerList(getState()).map((layer) => {
-      return dispatch(syncDataForLayer(layer, false));
+      return dispatch(syncDataForLayer(layer, false, isForceRefresh));
     });
     await Promise.all(syncPromises);
   };
 }
 
-function syncDataForAllJoinLayers() {
+function syncDataForAllJoinLayers(isForceRefresh: boolean) {
   return async (
     dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
     getState: () => MapStoreState
@@ -167,19 +170,24 @@ function syncDataForAllJoinLayers() {
         return 'hasJoins' in layer ? (layer as IVectorLayer).hasJoins() : false;
       })
       .map((layer) => {
-        return dispatch(syncDataForLayer(layer, false));
+        return dispatch(syncDataForLayer(layer, false, isForceRefresh));
       });
     await Promise.all(syncPromises);
   };
 }
 
-export function syncDataForLayer(layer: ILayer, forceRefreshDueToDrawing: boolean = false) {
+export function syncDataForLayer(
+  layer: ILayer,
+  forceRefreshDueToDrawing: boolean,
+  isForceRefresh: boolean
+) {
   return async (dispatch: Dispatch, getState: () => MapStoreState) => {
     const dataRequestContext = getDataRequestContext(
       dispatch,
       getState,
       layer.getId(),
-      forceRefreshDueToDrawing
+      forceRefreshDueToDrawing,
+      isForceRefresh
     );
     if (!layer.isVisible() || !layer.showAtZoomLevel(dataRequestContext.dataFilters.zoom)) {
       return;
@@ -188,14 +196,14 @@ export function syncDataForLayer(layer: ILayer, forceRefreshDueToDrawing: boolea
   };
 }
 
-export function syncDataForLayerId(layerId: string | null) {
+export function syncDataForLayerId(layerId: string | null, isForceRefresh: boolean) {
   return async (
     dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
     getState: () => MapStoreState
   ) => {
     const layer = getLayerById(layerId, getState());
     if (layer) {
-      dispatch(syncDataForLayer(layer, false));
+      dispatch(syncDataForLayer(layer, false, isForceRefresh));
     }
   };
 }
@@ -352,7 +360,7 @@ export function fitToLayerExtent(layerId: string) {
     if (targetLayer) {
       try {
         const bounds = await targetLayer.getBounds(
-          getDataRequestContext(dispatch, getState, layerId)
+          getDataRequestContext(dispatch, getState, layerId, false, false)
         );
         if (bounds) {
           await dispatch(setGotoWithBounds(scaleBounds(bounds, FIT_TO_BOUNDS_SCALE_FACTOR)));
@@ -384,7 +392,9 @@ export function fitToDataBounds(onNoBounds?: () => void) {
       if (!(await layer.isFittable())) {
         return null;
       }
-      return layer.getBounds(getDataRequestContext(dispatch, getState, layer.getId()));
+      return layer.getBounds(
+        getDataRequestContext(dispatch, getState, layer.getId(), false, false)
+      );
     });
 
     let bounds;
@@ -445,14 +455,14 @@ export function autoFitToBounds() {
     // Joins are performed on the client.
     // As a result, bounds for join layers must also be performed on the client.
     // Therefore join layers need to fetch data prior to auto fitting bounds.
-    await dispatch(syncDataForAllJoinLayers());
+    await dispatch(syncDataForAllJoinLayers(true));
 
     if (localSetQueryCallId === lastSetQueryCallId) {
       // In cases where there are no bounds, such as no matching documents, fitToDataBounds does not trigger setGotoWithBounds.
       // Ensure layer syncing occurs when setGotoWithBounds is not triggered.
       function onNoBounds() {
         if (localSetQueryCallId === lastSetQueryCallId) {
-          dispatch(syncDataForAllLayers());
+          dispatch(syncDataForAllLayers(true));
         }
       }
       dispatch(fitToDataBounds(onNoBounds));

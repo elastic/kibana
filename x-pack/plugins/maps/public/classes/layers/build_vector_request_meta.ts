@@ -15,7 +15,8 @@ export function buildVectorRequestMeta(
   source: IVectorSource | ITermJoinSource,
   fieldNames: string[],
   dataFilters: DataFilters,
-  sourceQuery?: Query | null
+  sourceQuery: Query | null | undefined,
+  isForceRefresh: boolean
 ): VectorSourceRequestMeta {
   return {
     ...dataFilters,
@@ -26,5 +27,6 @@ export function buildVectorRequestMeta(
     applyGlobalTime: source.getApplyGlobalTime(),
     sourceMeta: source.getSyncMeta(),
     applyForceRefresh: source.isESSource() ? source.getApplyForceRefresh() : false,
+    isForceRefresh,
   };
 }

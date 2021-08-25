@@ -104,7 +104,8 @@ export class HeatmapLayer extends AbstractLayer {
           this.getSource(),
           this.getSource().getFieldNames(),
           syncContext.dataFilters,
-          this.getQuery()
+          this.getQuery(),
+          syncContext.isForceRefresh
         ),
         syncContext,
         source: this.getSource(),

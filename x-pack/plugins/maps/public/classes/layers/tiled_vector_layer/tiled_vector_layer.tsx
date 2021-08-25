@@ -113,9 +113,11 @@ export class TiledVectorLayer extends VectorLayer {
     stopLoading,
     onLoadError,
     dataFilters,
+    isForceRefresh,
   }: DataRequestContext) {
     const requestToken: symbol = Symbol(`layer-${this.getId()}-${SOURCE_DATA_REQUEST_ID}`);
     const requestMeta: VectorSourceRequestMeta = await this._getVectorSourceRequestMeta(
+      isForceRefresh,
       dataFilters,
       this.getSource(),
       this._style as IVectorStyle

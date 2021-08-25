@@ -332,6 +332,7 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     onLoadError,
     registerCancelCallback,
     dataFilters,
+    isForceRefresh,
   }: { join: InnerJoin } & DataRequestContext): Promise<JoinState> {
     const joinSource = join.getRightJoinSource();
     const sourceDataId = join.getSourceDataRequestId();
@@ -341,7 +342,8 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
       joinSource,
       joinSource.getFieldNames(),
       dataFilters,
-      joinSource.getWhereQuery()
+      joinSource.getWhereQuery(),
+      isForceRefresh
     );
 
     const prevDataRequest = this.getDataRequest(sourceDataId);
@@ -399,6 +401,7 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
   }
 
   async _getVectorSourceRequestMeta(
+    isForceRefresh: boolean,
     dataFilters: DataFilters,
     source: IVectorSource,
     style: IVectorStyle
@@ -413,7 +416,7 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     if (timesliceMaskFieldName) {
       fieldNames.push(timesliceMaskFieldName);
     }
-    return buildVectorRequestMeta(source, fieldNames, dataFilters, this.getQuery());
+    return buildVectorRequestMeta(source, fieldNames, dataFilters, this.getQuery(), isForceRefresh);
   }
 
   async _syncSourceStyleMeta(
@@ -633,7 +636,12 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
         layerId: this.getId(),
         layerName: await this.getDisplayName(source),
         prevDataRequest: this.getSourceDataRequest(),
-        requestMeta: await this._getVectorSourceRequestMeta(syncContext.dataFilters, source, style),
+        requestMeta: await this._getVectorSourceRequestMeta(
+          syncContext.isForceRefresh,
+          syncContext.dataFilters,
+          source,
+          style
+        ),
         syncContext,
         source,
         getUpdateDueToTimeslice: (timeslice?: Timeslice) => {

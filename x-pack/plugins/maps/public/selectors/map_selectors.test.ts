@@ -41,6 +41,7 @@ import { LayerDescriptor, VectorLayerDescriptor } from '../../common/descriptor_
 import { ILayer } from '../classes/layers/layer';
 import { Filter } from '../../../../../src/plugins/data/public';
 import { ESSearchSource } from '../classes/sources/es_search_source';
+import expect from '../../../../../packages/kbn-expect';
 
 describe('getDataFilters', () => {
   const mapExtent = {
@@ -69,7 +70,6 @@ describe('getDataFilters', () => {
     minLon: -0.25,
   };
   const isReadOnly = false;
-  const applyForceRefresh = true;
 
   test('should set buffer as searchSessionMapBuffer when using searchSessionId', () => {
     const dataFilters = getDataFilters.resultFunc(
@@ -83,8 +83,7 @@ describe('getDataFilters', () => {
       filters,
       searchSessionId,
       searchSessionMapBuffer,
-      isReadOnly,
-      applyForceRefresh
+      isReadOnly
     );
     expect(dataFilters.buffer).toEqual(searchSessionMapBuffer);
   });
@@ -101,8 +100,7 @@ describe('getDataFilters', () => {
       filters,
       searchSessionId,
       undefined,
-      isReadOnly,
-      applyForceRefresh
+      isReadOnly
     );
     expect(dataFilters.buffer).toEqual(mapBuffer);
   });

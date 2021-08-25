@@ -164,6 +164,7 @@ describe('ESGeoGridSource', () => {
     },
     sourceMeta: null,
     zoom: 0,
+    isForceRefresh: false,
   };
 
   describe('getGeoJsonWithMeta', () => {

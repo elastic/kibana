@@ -30,7 +30,6 @@ export type DataFilters = {
   timeslice?: Timeslice;
   zoom: number;
   isReadOnly: boolean;
-  isForceRefresh?: boolean;
 };
 
 export type ESSearchSourceSyncMeta = {
@@ -71,6 +70,7 @@ export type VectorSourceRequestMeta = DataFilters & {
   timesiceMaskField?: string;
   sourceQuery?: Query;
   sourceMeta: VectorSourceSyncMeta;
+  isForceRefresh: boolean;
 };
 
 export type VectorJoinSourceRequestMeta = Omit<VectorSourceRequestMeta, 'geogridPrecision'> & {

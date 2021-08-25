@@ -292,6 +292,7 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
     const dataRequestId = ACTIVE_COUNT_DATA_ID;
     const requestToken = Symbol(`layer-active-count:${this.getId()}`);
     const requestMeta: VectorSourceRequestMeta = await this._getVectorSourceRequestMeta(
+      syncContext.isForceRefresh,
       syncContext.dataFilters,
       this.getSource(),
       this.getCurrentStyle()
