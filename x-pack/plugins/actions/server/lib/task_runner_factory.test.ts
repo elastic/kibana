@@ -136,6 +136,7 @@ test('executes the task by calling the executor with proper parameters', async (
     }),
     taskInfo: {
       scheduled: new Date(),
+      attempts: 0,
     },
   });
 
@@ -262,6 +263,7 @@ test('uses API key when provided', async () => {
     }),
     taskInfo: {
       scheduled: new Date(),
+      attempts: 0,
     },
   });
 
@@ -311,6 +313,7 @@ test('uses relatedSavedObjects when provided', async () => {
     }),
     taskInfo: {
       scheduled: new Date(),
+      attempts: 0,
     },
   });
 });
@@ -348,6 +351,7 @@ test('sanitizes invalid relatedSavedObjects when provided', async () => {
     relatedSavedObjects: [],
     taskInfo: {
       scheduled: new Date(),
+      attempts: 0,
     },
   });
 });
@@ -381,6 +385,7 @@ test(`doesn't use API key when not provided`, async () => {
     }),
     taskInfo: {
       scheduled: new Date(),
+      attempts: 0,
     },
   });
 
