@@ -161,7 +161,6 @@ export interface CreateOptions<Params extends AlertTypeParams> {
     | 'mutedInstanceIds'
     | 'actions'
     | 'executionStatus'
-    | 'legacyId'
   > & { actions: NormalizedAlertAction[] };
   options?: {
     id?: string;
@@ -381,9 +380,13 @@ export class RulesClient {
 
   public async get<Params extends AlertTypeParams = never>({
     id,
+    includeLegacyId = false,
   }: {
     id: string;
-  }): Promise<SanitizedAlert<Params>> {
+    includeLegacyId?: boolean;
+  }): Promise<
+    SanitizedAlert<Params> | (SanitizedAlert<Params> & { legacyId: string | null | undefined })
+  > {
     const result = await this.unsecuredSavedObjectsClient.get<RawAlert>('alert', id);
     try {
       await this.authorization.ensureAuthorized({
@@ -412,7 +415,8 @@ export class RulesClient {
       result.id,
       result.attributes.alertTypeId,
       result.attributes,
-      result.references
+      result.references,
+      includeLegacyId
     );
   }
 
@@ -484,7 +488,9 @@ export class RulesClient {
     dateStart,
   }: GetAlertInstanceSummaryParams): Promise<AlertInstanceSummary> {
     this.logger.debug(`getAlertInstanceSummary(): getting alert ${id}`);
-    const alert = await this.get({ id });
+    const alert = (await this.get({ id, includeLegacyId: true })) as SanitizedAlert & {
+      legacyId: string | null | undefined;
+    };
     await this.authorization.ensureAuthorized({
       ruleTypeId: alert.alertTypeId,
       consumer: alert.consumer,
@@ -513,7 +519,7 @@ export class RulesClient {
           end: dateNow.toISOString(),
           sort_order: 'desc',
         },
-        !!alert.legacyId ? [alert.legacyId] : undefined
+        alert.legacyId ? [alert.legacyId] : undefined
       );
       events = queryResults.data;
     } catch (err) {
@@ -1529,13 +1535,18 @@ export class RulesClient {
     id: string,
     ruleTypeId: string,
     rawAlert: RawAlert,
-    references: SavedObjectReference[] | undefined
-  ): Alert {
+    references: SavedObjectReference[] | undefined,
+    includeLegacyId: boolean = false
+  ): Alert | (Alert & { legacyId: string }) {
     const ruleType = this.ruleTypeRegistry.get(ruleTypeId);
     // In order to support the partial update API of Saved Objects we have to support
     // partial updates of an Alert, but when we receive an actual RawAlert, it is safe
     // to cast the result to an Alert
-    return this.getPartialAlertFromRaw<Params>(id, ruleType, rawAlert, references) as Alert;
+    const res = this.getPartialAlertFromRaw<Params>(id, ruleType, rawAlert, references);
+    if (includeLegacyId) {
+      return res as Alert & { legacyId: string };
+    }
+    return omit(res, ['legacyId']) as Alert;
   }
 
   private getPartialAlertFromRaw<Params extends AlertTypeParams>(
@@ -1551,10 +1562,13 @@ export class RulesClient {
       executionStatus,
       schedule,
       actions,
+      legacyId,
       ...partialRawAlert
     }: Partial<RawAlert>,
     references: SavedObjectReference[] | undefined
-  ): PartialAlert<Params> {
+  ): PartialAlert<Params> & {
+    legacyId?: string;
+  } {
     return {
       id,
       notifyWhen,
@@ -1562,6 +1576,7 @@ export class RulesClient {
       // we currently only support the Interval Schedule type
       // Once we support additional types, this type signature will likely change
       schedule: schedule as IntervalSchedule,
+      ...(legacyId ? { legacyId } : {}),
       actions: actions ? this.injectReferencesIntoActions(id, actions, references || []) : [],
       params: this.injectReferencesIntoParams(id, ruleType, params, references || []) as Params,
       ...(updatedAt ? { updatedAt: new Date(updatedAt) } : {}),

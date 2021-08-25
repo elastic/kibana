@@ -41,6 +41,12 @@ export interface QueryEventsBySavedObjectResult {
   data: IValidatedEvent[];
 }
 
+interface QueryEventsBySavedObjectsFilterOptions extends FindOptionsType {
+  end?: string | undefined;
+  start?: string | undefined;
+  filter?: string | undefined;
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AliasAny = any;
 
@@ -206,10 +212,12 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
     namespace: string | undefined,
     type: string,
     ids: string[],
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    { page, per_page: perPage, start, end, sort_field, sort_order, filter }: FindOptionsType,
+    findOptions: QueryEventsBySavedObjectsFilterOptions,
     legacyIds?: string[]
   ): Promise<QueryEventsBySavedObjectResult> {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    const { page, per_page: perPage, start, end, sort_field, sort_order, filter } = findOptions;
+
     const defaultNamespaceQuery = {
       bool: {
         must_not: {
