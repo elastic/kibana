@@ -53,6 +53,7 @@ kibana_vars=(
     elasticsearch.requestTimeout
     elasticsearch.serviceAccountToken
     elasticsearch.shardTimeout
+    elasticsearch.skipStartupConnectionCheck
     elasticsearch.sniffInterval
     elasticsearch.sniffOnConnectionFault
     elasticsearch.sniffOnStart
