@@ -499,8 +499,7 @@ test('Panel removed from input state', async () => {
   const { container } = await creatHelloWorldContainerAndEmbeddable({
     id: 'hello',
     panels: {},
-    filters: [],
-  } as any);
+  });
 
   const embeddable = await container.addNewEmbeddable<
     FilterableEmbeddableInput,
@@ -526,8 +525,7 @@ test('Panel added to input state', async () => {
   const { container, start } = await creatHelloWorldContainerAndEmbeddable({
     id: 'hello',
     panels: {},
-    filters: [],
-  } as any);
+  });
 
   const embeddable = await container.addNewEmbeddable<
     FilterableEmbeddableInput,
