@@ -61,7 +61,7 @@ describe('CredentialItem', () => {
     expect(wrapper.find(EuiFieldText)).toHaveLength(1);
   });
 
-  it('handles select all button click', () => {
+  it.skip('handles select all button click', () => {
     const wrapper = shallow(<CredentialItem {...props} hideCopy />);
     // Toggle isVisible before EuiFieldText is visible
     const button = wrapper.find(EuiButtonIcon).dive().find('button');
