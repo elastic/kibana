@@ -11,6 +11,7 @@ import dedent from 'dedent';
 import fs from 'fs';
 import Path from 'path';
 import {
+  ApiDeclaration,
   ApiReference,
   ReferencedDeprecationsByAPI,
   ReferencedDeprecationsByPlugin,
@@ -20,6 +21,7 @@ import { getPluginApiDocId } from '../utils';
 export function writeDeprecationDocByApi(
   folder: string,
   deprecationsByPlugin: ReferencedDeprecationsByPlugin,
+  unReferencedDeprecations: ApiDeclaration[],
   log: ToolingLog
 ): void {
   const deprecationReferencesByApi = Object.values(deprecationsByPlugin).reduce(
@@ -82,7 +84,24 @@ tags: ['contributor', 'dev', 'apidocs', 'kibana']
 warning: This document is auto-generated and is meant to be viewed inside our experimental, new docs system.
 ---
 
+## Referenced deprecated APIs
+
 ${tableMdx}   
+
+## Unreferenced deprecated APIs
+
+Safe to remove.
+
+| Deprecated API |
+| ---------------|
+${unReferencedDeprecations
+  .map(
+    (api) =>
+      `| <DocLink id="${getPluginApiDocId(api.parentPluginId)}" section="${api.id}" text="${
+        api.label
+      }"/> |`
+  )
+  .join('\n')}
 
 `);
 

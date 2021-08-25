@@ -54,7 +54,6 @@
     { "path": "../plugins/banners/tsconfig.json" },
     { "path": "../plugins/cases/tsconfig.json" },
     { "path": "../plugins/cloud/tsconfig.json" },
-    { "path": "../plugins/dashboard_mode/tsconfig.json" },
     { "path": "../plugins/enterprise_search/tsconfig.json" },
     { "path": "../plugins/fleet/tsconfig.json" },
     { "path": "../plugins/global_search/tsconfig.json" },

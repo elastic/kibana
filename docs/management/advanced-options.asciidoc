@@ -398,14 +398,6 @@ changes.
 [[kibana-search-settings]]
 ==== Search
 
-[horizontal]
-[[courier-batchsearches]]`courier:batchSearches`::
-**Deprecated in 7.6. Starting in 8.0, this setting will be optimized internally.**
-When disabled, dashboard panels will load individually, and search requests will
-terminate when users navigate away or update the query. When enabled, dashboard
-panels will load together when all of the data is loaded, and searches will not
-terminate.
-
 [[courier-customrequestpreference]]`courier:customRequestPreference`::
 {ref}/search-request-body.html#request-body-search-preference[Request preference]
 to use when `courier:setRequestPreference` is set to "custom".

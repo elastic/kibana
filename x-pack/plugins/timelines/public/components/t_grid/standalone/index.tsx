@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { AlertConsumers } from '@kbn/rule-data-utils';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React, { useEffect, useMemo, useState } from 'react';
@@ -40,7 +39,6 @@ import { StatefulBody } from '../body';
 import { Footer, footerHeight } from '../footer';
 import { LastUpdatedAt } from '../..';
 import { SELECTOR_TIMELINE_GLOBAL_CONTAINER, UpdatedFlexItem, UpdatedFlexGroup } from '../styles';
-import * as i18n from '../translations';
 import { InspectButton, InspectButtonContainer } from '../../inspect';
 import { useFetchIndex } from '../../../container/source';
 import { AddToCaseAction } from '../../actions/timeline/cases/add_to_case_action';
@@ -72,7 +70,6 @@ const EventsContainerLoading = styled.div.attrs(({ className = '' }) => ({
 const FullWidthFlexGroup = styled(EuiFlexGroup)<{ $visible: boolean }>`
   overflow: hidden;
   margin: 0;
-  min-height: 490px;
   display: ${({ $visible }) => ($visible ? 'flex' : 'none')};
 `;
 
@@ -81,7 +78,6 @@ const ScrollableFlexItem = styled(EuiFlexItem)`
 `;
 
 export interface TGridStandaloneProps {
-  alertConsumers: AlertConsumers[];
   appId: string;
   casePermissions: {
     crud: boolean;
@@ -97,9 +93,9 @@ export interface TGridStandaloneProps {
   filters: Filter[];
   footerText: React.ReactNode;
   filterStatus: AlertStatus;
+  hasAlertsCrudPermissions: (featureId: string) => boolean;
   height?: number;
   indexNames: string[];
-  itemsPerPage: number;
   itemsPerPageOptions: number[];
   query: Query;
   onRuleChange?: () => void;
@@ -113,13 +109,11 @@ export interface TGridStandaloneProps {
   trailingControlColumns: ControlColumnProps[];
   bulkActions?: BulkActionsProp;
   data?: DataPublicPluginStart;
-  unit: (total: number) => React.ReactNode;
+  unit?: (total: number) => React.ReactNode;
 }
-const basicUnit = (n: number) => i18n.UNIT(n);
 
 const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
   afterCaseSelection,
-  alertConsumers,
   appId,
   casePermissions,
   columns,
@@ -131,8 +125,8 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
   filters,
   footerText,
   filterStatus,
+  hasAlertsCrudPermissions,
   indexNames,
-  itemsPerPage,
   itemsPerPageOptions,
   onRuleChange,
   query,
@@ -145,7 +139,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
   leadingControlColumns,
   trailingControlColumns,
   data,
-  unit = basicUnit,
+  unit,
 }) => {
   const dispatch = useDispatch();
   const columnsHeader = isEmpty(columns) ? defaultHeaders : columns;
@@ -210,9 +204,8 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
 
   const [
     loading,
-    { events, updatedAt, loadPage, pageInfo, refetch, totalCount = 0, inspect },
+    { consumers, events, updatedAt, loadPage, pageInfo, refetch, totalCount = 0, inspect },
   ] = useTimelineEvents({
-    alertConsumers,
     docValueFields: [],
     entityType,
     excludeEcsData: true,
@@ -228,6 +221,27 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
     data,
   });
   setRefetch(refetch);
+
+  const { hasAlertsCrud, totalSelectAllAlerts } = useMemo(() => {
+    return Object.entries(consumers).reduce<{
+      hasAlertsCrud: boolean;
+      totalSelectAllAlerts: number;
+    }>(
+      (acc, [featureId, nbrAlerts]) => {
+        const featureHasPermission = hasAlertsCrudPermissions(featureId);
+        return {
+          hasAlertsCrud: featureHasPermission || acc.hasAlertsCrud,
+          totalSelectAllAlerts: featureHasPermission
+            ? nbrAlerts + acc.totalSelectAllAlerts
+            : acc.totalSelectAllAlerts,
+        };
+      },
+      {
+        hasAlertsCrud: false,
+        totalSelectAllAlerts: 0,
+      }
+    );
+  }, [consumers, hasAlertsCrudPermissions]);
 
   const totalCountMinusDeleted = useMemo(
     () => (totalCount > 0 ? totalCount - deletedEventIds.length : 0),
@@ -288,7 +302,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
           end,
         },
         indexNames,
-        itemsPerPage,
+        itemsPerPage: itemsPerPageStore,
         itemsPerPageOptions,
         showCheckboxes: true,
       })
@@ -315,10 +329,10 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
               data-test-subj={`events-container-loading-${loading}`}
             >
               <UpdatedFlexGroup gutterSize="s" justifyContent="flexEnd" alignItems="baseline">
-                <UpdatedFlexItem grow={false} show={!loading}>
+                <UpdatedFlexItem grow={false} $show={!loading}>
                   <InspectButton title={justTitle} inspect={inspect} loading={loading} />
                 </UpdatedFlexItem>
-                <UpdatedFlexItem grow={false} show={!loading}>
+                <UpdatedFlexItem grow={false} $show={!loading}>
                   <LastUpdatedAt updatedAt={updatedAt} />
                 </UpdatedFlexItem>
               </UpdatedFlexGroup>
@@ -331,6 +345,8 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
                     data={nonDeletedEvents}
                     defaultCellActions={defaultCellActions}
                     filterQuery={filterQuery}
+                    hasAlertsCrud={hasAlertsCrud}
+                    hasAlertsCrudPermissions={hasAlertsCrudPermissions}
                     id={STANDALONE_ID}
                     indexNames={indexNames}
                     isEventViewer={true}
@@ -349,6 +365,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
                       itemsPerPage: itemsPerPageStore,
                     })}
                     totalItems={totalCountMinusDeleted}
+                    totalSelectAllAlerts={totalSelectAllAlerts}
                     unit={unit}
                     filterStatus={filterStatus}
                     trailingControlColumns={trailingControlColumns}

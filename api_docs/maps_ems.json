@@ -614,7 +614,7 @@
         "label": "DEFAULT_EMS_LANDING_PAGE_URL",
         "description": [],
         "signature": [
-          "\"https://maps.elastic.co/v7.13\""
+          "\"https://maps.elastic.co/v7.15\""
         ],
         "path": "src/plugins/maps_ems/common/ems_defaults.ts",
         "deprecated": false,
@@ -1054,7 +1054,7 @@
         "label": "DEFAULT_EMS_LANDING_PAGE_URL",
         "description": [],
         "signature": [
-          "\"https://maps.elastic.co/v7.13\""
+          "\"https://maps.elastic.co/v7.15\""
         ],
         "path": "src/plugins/maps_ems/common/ems_defaults.ts",
         "deprecated": false,

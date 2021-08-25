@@ -13,18 +13,21 @@ import { getNodeName, NodeType } from '../../../../../common/connections';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useFetcher } from '../../../../hooks/use_fetcher';
+import { useTimeRange } from '../../../../hooks/use_time_range';
 import { BackendLink } from '../../../shared/backend_link';
 import { DependenciesTable } from '../../../shared/dependencies_table';
 import { getTimeRangeComparison } from '../../../shared/time_comparison/get_time_range_comparison';
 
 export function BackendInventoryDependenciesTable() {
   const {
-    urlParams: { start, end, comparisonEnabled, comparisonType },
+    urlParams: { comparisonEnabled, comparisonType },
   } = useUrlParams();
 
   const {
     query: { rangeFrom, rangeTo, environment, kuery },
   } = useApmParams('/backends');
+
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const trackEvent = useUiTracker();
 
