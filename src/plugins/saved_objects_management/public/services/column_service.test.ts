@@ -7,7 +7,7 @@
  */
 
 import { spacesPluginMock } from '../../../../../x-pack/plugins/spaces/public/mocks';
-// import { ShareToSpaceSavedObjectsManagementColumn } from './columns';
+import { ShareToSpaceSavedObjectsManagementColumn } from './columns';
 import {
   SavedObjectsManagementColumnService,
   SavedObjectsManagementColumnServiceSetup,
@@ -45,7 +45,7 @@ describe('SavedObjectsManagementColumnRegistry', () => {
       const start = service.start(spacesPluginMock.createStartContract());
       expect(start.getAll()).toEqual([
         column,
-        // expect.any(ShareToSpaceSavedObjectsManagementColumn),
+        expect.any(ShareToSpaceSavedObjectsManagementColumn),
       ]);
     });
 
