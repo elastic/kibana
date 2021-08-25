@@ -7,7 +7,7 @@
 
 import React, { ReactNode } from 'react';
 
-import { EuiCodeBlock, EuiDescriptionList } from '@elastic/eui';
+import { EuiCard, EuiCodeBlock, EuiDescriptionList, EuiIcon, EuiText } from '@elastic/eui';
 import { EuiDescriptionListProps } from '@elastic/eui/src/components/description_list/description_list';
 import styled from 'styled-components';
 import {
@@ -93,6 +93,8 @@ export class EndpointConsoleService implements ConsoleServiceInterface {
         return { result: await this.getAboutInfo() };
       case 'get-process':
         return { result: await this.sendGetProcessList() };
+      case 'get-file':
+        return { result: await this.sendGetFile() };
       default:
         await delay();
         return {
@@ -399,6 +401,31 @@ Handles  NPM(K)    PM(K)      WS(K)     CPU(s)     Id  SI ProcessName
     135       9     1776       8556       0.05  12984   0 wuauclt
     815      53    29444      65784       0.98   4068   1 YourPhone
 `}</EuiCodeBlock>
+    );
+  }
+
+  private async sendGetFile(): Promise<ReactNode> {
+    await delay(6000);
+
+    return (
+      <EuiCard
+        title="endpoint-0000.log"
+        onClick={() => {}}
+        layout="horizontal"
+        display="plain"
+        icon={<EuiIcon type="document" size="xl" color="primary" />}
+        description={
+          <>
+            <EuiText className="eui-textBreakAll" color="ButtonText">
+              {'Retrieved from: C:\\Program Files\\Elastic\\Endpoint\\state\\log\\'}
+            </EuiText>
+          </>
+        }
+        style={{
+          marginTop: '1em',
+          width: '32%',
+        }}
+      />
     );
   }
 }
