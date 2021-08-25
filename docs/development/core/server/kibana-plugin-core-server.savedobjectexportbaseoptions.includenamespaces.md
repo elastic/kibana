@@ -4,7 +4,7 @@
 
 ## SavedObjectExportBaseOptions.includeNamespaces property
 
-Flag to also include namespace information in the export stream. By default, namespace information is not included in exported objects. This is only intended to be used internally during copy-to-space operations, and it is not exposed as an option for the external HTTP route for exports.
+Flag to also include namespace information in the export stream. By default, namespace information is included in exported objects.
 
 <b>Signature:</b>
 

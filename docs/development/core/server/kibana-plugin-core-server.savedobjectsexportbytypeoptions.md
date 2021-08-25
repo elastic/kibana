@@ -17,6 +17,7 @@ export interface SavedObjectsExportByTypeOptions extends SavedObjectExportBaseOp
 |  Property | Type | Description |
 |  --- | --- | --- |
 |  [hasReference](./kibana-plugin-core-server.savedobjectsexportbytypeoptions.hasreference.md) | <code>SavedObjectsFindOptionsReference[]</code> | optional array of references to search object for. |
+|  [namespaces](./kibana-plugin-core-server.savedobjectsexportbytypeoptions.namespaces.md) | <code>string[]</code> | optional list of namespaces to export from. Defaults to the current namespace if unspecified. |
 |  [search](./kibana-plugin-core-server.savedobjectsexportbytypeoptions.search.md) | <code>string</code> | optional query string to filter exported objects. |
 |  [types](./kibana-plugin-core-server.savedobjectsexportbytypeoptions.types.md) | <code>string[]</code> | array of saved object types. |
 
