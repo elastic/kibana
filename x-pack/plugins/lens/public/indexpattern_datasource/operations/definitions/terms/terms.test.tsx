@@ -21,7 +21,7 @@ import { createMockedIndexPattern } from '../../../mocks';
 import { ValuesInput } from './values_input';
 import type { TermsIndexPatternColumn } from '.';
 import { termsOperation } from '../index';
-import { IndexPattern, IndexPatternLayer } from '../../../types';
+import type { IndexPattern, IndexPatternField, IndexPatternLayer } from '../../../types';
 import { FrameDatasourceAPI } from '../../../../types';
 
 const uiSettingsMock = {} as IUiSettingsClient;
@@ -177,7 +177,7 @@ describe('terms', () => {
   describe('getPossibleOperationForField', () => {
     it('should return operation with the right type', () => {
       expect(
-        termsOperation.getPossibleOperationForField({
+        termsOperation.getPossibleOperationForField(({
           aggregatable: true,
           searchable: true,
           name: 'test',
@@ -188,7 +188,7 @@ describe('terms', () => {
               agg: 'terms',
             },
           },
-        })
+        } as unknown) as IndexPatternField)
       ).toEqual({
         dataType: 'string',
         isBucketed: true,
@@ -196,7 +196,7 @@ describe('terms', () => {
       });
 
       expect(
-        termsOperation.getPossibleOperationForField({
+        termsOperation.getPossibleOperationForField(({
           aggregatable: true,
           searchable: true,
           name: 'test',
@@ -207,7 +207,7 @@ describe('terms', () => {
               agg: 'terms',
             },
           },
-        })
+        } as unknown) as IndexPatternField)
       ).toEqual({
         dataType: 'number',
         isBucketed: true,
@@ -221,7 +221,7 @@ describe('terms', () => {
           name: 'test',
           displayName: 'test',
           type: 'boolean',
-        })
+        } as IndexPatternField)
       ).toEqual({
         dataType: 'boolean',
         isBucketed: true,
@@ -235,7 +235,7 @@ describe('terms', () => {
           name: 'test',
           displayName: 'test',
           type: 'ip',
-        })
+        } as IndexPatternField)
       ).toEqual({
         dataType: 'ip',
         isBucketed: true,
@@ -251,7 +251,7 @@ describe('terms', () => {
           name: 'test',
           displayName: 'test',
           type: 'string',
-        })
+        } as IndexPatternField)
       ).toEqual(undefined);
 
       expect(
@@ -262,7 +262,7 @@ describe('terms', () => {
           name: 'test',
           displayName: 'test',
           type: 'string',
-        })
+        } as IndexPatternField)
       ).toEqual(undefined);
     });
   });
@@ -277,7 +277,7 @@ describe('terms', () => {
           type: 'boolean',
           name: 'test',
           displayName: 'test',
-        },
+        } as IndexPatternField,
         layer: { columns: {}, columnOrder: [], indexPatternId: '' },
       });
       expect(termsColumn.dataType).toEqual('boolean');
@@ -292,7 +292,7 @@ describe('terms', () => {
           type: 'boolean',
           name: 'test',
           displayName: 'test',
-        },
+        } as IndexPatternField,
         layer: { columns: {}, columnOrder: [], indexPatternId: '' },
       });
       expect(termsColumn.params.otherBucket).toEqual(true);
@@ -307,7 +307,7 @@ describe('terms', () => {
           type: 'boolean',
           name: 'test',
           displayName: 'test',
-        },
+        } as IndexPatternField,
         layer: { columns: {}, columnOrder: [], indexPatternId: '' },
       });
       expect(termsColumn.params.otherBucket).toEqual(false);
@@ -335,7 +335,7 @@ describe('terms', () => {
           type: 'boolean',
           name: 'test',
           displayName: 'test',
-        },
+        } as IndexPatternField,
       });
       expect(termsColumn.params).toEqual(
         expect.objectContaining({
@@ -368,7 +368,7 @@ describe('terms', () => {
           type: 'boolean',
           name: 'test',
           displayName: 'test',
-        },
+        } as IndexPatternField,
       });
       expect(termsColumn.params).toEqual(
         expect.objectContaining({ orderBy: { type: 'alphabetical', fallback: true } })
@@ -385,7 +385,7 @@ describe('terms', () => {
           type: 'boolean',
           name: 'test',
           displayName: 'test',
-        },
+        } as IndexPatternField,
       });
       expect(termsColumn.params).toEqual(expect.objectContaining({ size: 3 }));
     });
@@ -400,7 +400,7 @@ describe('terms', () => {
           type: 'boolean',
           name: 'test',
           displayName: 'test',
-        },
+        } as IndexPatternField,
       });
       expect(termsColumn.params).toEqual(expect.objectContaining({ size: 5 }));
     });
