@@ -22,6 +22,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import moment from 'moment-timezone';
 import {
   TypedLensByValueInput,
   PersistedIndexPatternLayer,
@@ -33,6 +34,7 @@ import { OsqueryManagerPackagePolicyInputStream } from '../../common/types';
 import { ScheduledQueryErrorsTable } from './scheduled_query_errors_table';
 import { useScheduledQueryGroupQueryLastResults } from './use_scheduled_query_group_query_last_results';
 import { useScheduledQueryGroupQueryErrors } from './use_scheduled_query_group_query_errors';
+import { PreferenceFormattedDate } from '../components/preference_formatted_date';
 
 const VIEW_IN_DISCOVER = i18n.translate(
   'xpack.osquery.scheduledQueryGroup.queriesTable.viewDiscoverResultsActionAriaLabel',
@@ -263,8 +265,6 @@ const ViewResultsInDiscoverActionComponent: React.FC<ViewResultsInDiscoverAction
   const urlGenerator = useKibana().services.discover?.urlGenerator;
   const [discoverUrl, setDiscoverUrl] = useState<string>('');
 
-  console.error('useKibana().services.discover', useKibana().services.discover);
-
   useEffect(() => {
     const getDiscoverUrl = async () => {
       if (!urlGenerator?.createUrl) return;
@@ -353,7 +353,7 @@ export const ViewResultsInDiscoverAction = React.memo(ViewResultsInDiscoverActio
 
 interface ScheduledQueryExpandedContentProps {
   actionId: string;
-  agentIds: string[];
+  agentIds?: string[];
   interval: number;
 }
 
@@ -412,42 +412,52 @@ const ScheduledQueryLastResults: React.FC<ScheduledQueryLastResultsProps> = ({
     return <EuiLoadingSpinner />;
   }
 
-  // if (!lastResultsData) {
-  //   return <>{'-'}</>;
-  // }
+  if (!lastResultsData) {
+    return <>{'-'}</>;
+  }
 
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center">
-      {/* <EuiFlexItem>{moment(lastResultsData.first_event_ingested_time.value).fromNow()}</EuiFlexItem> */}
-      <EuiFlexItem grow={false}>
-        <EuiFlexGroup gutterSize="s" alignItems="center">
+      <EuiFlexItem grow={4}>
+        {lastResultsData.first_event_ingested_time?.value ? (
+          <EuiToolTip
+            content={
+              <PreferenceFormattedDate value={lastResultsData.first_event_ingested_time?.value} />
+            }
+          >
+            <>{moment(lastResultsData.first_event_ingested_time?.value).fromNow()}</>
+          </EuiToolTip>
+        ) : (
+          '-'
+        )}
+      </EuiFlexItem>
+      <EuiFlexItem grow={4}>
+        <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="flexEnd">
           <EuiFlexItem grow={false}>
             <EuiNotificationBadge color="subdued">
               {lastResultsData?.doc_count ?? 0}
             </EuiNotificationBadge>
           </EuiFlexItem>
-          <EuiFlexItem>{'Documents'}</EuiFlexItem>
+          <EuiFlexItem grow={false}>{'Documents'}</EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
 
-      <EuiFlexItem grow={false}>
-        <EuiFlexGroup gutterSize="s" alignItems="center">
+      <EuiFlexItem grow={4}>
+        <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="flexEnd">
           <EuiFlexItem grow={false}>
             <EuiNotificationBadge color="subdued">
               {lastResultsData?.unique_agents?.value ?? 0}
             </EuiNotificationBadge>
           </EuiFlexItem>
-          <EuiFlexItem>{'Agents'}</EuiFlexItem>
+          <EuiFlexItem grow={false}>{'Agents'}</EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
 
-      <EuiFlexItem grow={false}>
-        <EuiFlexGroup gutterSize="s" alignItems="center">
+      <EuiFlexItem grow={5}>
+        <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="flexEnd">
           <EuiFlexItem grow={false}>
-            <EuiNotificationBadge
-              color={errorsData?.rawResponse?.hits.total ? 'accent' : 'subdued'}
-            >
-              {errorsData?.rawResponse?.hits.total ?? 0}
+            <EuiNotificationBadge color={errorsData?.total ? 'accent' : 'subdued'}>
+              {errorsData?.total ?? 0}
             </EuiNotificationBadge>
           </EuiFlexItem>
 
@@ -455,9 +465,8 @@ const ScheduledQueryLastResults: React.FC<ScheduledQueryLastResultsProps> = ({
 
           <EuiFlexItem grow={false}>
             <EuiButtonIcon
-              isDisabled={!errorsData?.rawResponse?.hits.total}
+              isDisabled={!errorsData?.total}
               onClick={handleErrorsToggle}
-              aria-label={expanded ? 'Collapse' : 'Expand'}
               iconType={expanded ? 'arrowUp' : 'arrowDown'}
             />
           </EuiFlexItem>
@@ -470,7 +479,7 @@ const ScheduledQueryLastResults: React.FC<ScheduledQueryLastResultsProps> = ({
 const getPackActionId = (actionId: string, packName: string) => `pack_${packName}_${actionId}`;
 
 interface ScheduledQueryGroupQueriesStatusTableProps {
-  agentIds: string[];
+  agentIds?: string[];
   data: OsqueryManagerPackagePolicyInputStream[];
   scheduledQueryGroupName: string;
 }
@@ -515,6 +524,7 @@ const ScheduledQueryGroupQueriesStatusTableComponent: React.FC<ScheduledQueryGro
   const renderLastResultsColumn = useCallback(
     (item) => (
       <ScheduledQueryLastResults
+        // @ts-expect-error update types
         agentIds={agentIds}
         queryId={item.vars.id.value}
         actionId={getPackActionId(item.vars.id.value, scheduledQueryGroupName)}
@@ -575,6 +585,7 @@ const ScheduledQueryGroupQueriesStatusTableComponent: React.FC<ScheduledQueryGro
           defaultMessage: 'Query',
         }),
         render: renderQueryColumn,
+        width: '20%',
       },
       {
         name: i18n.translate(
@@ -584,7 +595,6 @@ const ScheduledQueryGroupQueriesStatusTableComponent: React.FC<ScheduledQueryGro
           }
         ),
         render: renderLastResultsColumn,
-        width: '500px',
       },
       {
         name: i18n.translate(

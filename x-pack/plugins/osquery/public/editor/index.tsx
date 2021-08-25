@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React, { useCallback, useRef } from 'react';
+import React, { useState } from 'react';
 import { EuiCodeEditor } from '@elastic/eui';
+import useDebounce from 'react-use/lib/useDebounce';
 import 'brace/theme/tomorrow';
 
 import './osquery_mode.ts';
@@ -26,22 +27,17 @@ interface OsqueryEditorProps {
 }
 
 const OsqueryEditorComponent: React.FC<OsqueryEditorProps> = ({ defaultValue, onChange }) => {
-  const editorValue = useRef(defaultValue ?? '');
+  const [editorValue, setEditorValue] = useState(defaultValue ?? '');
 
-  const handleChange = useCallback((newValue: string) => {
-    editorValue.current = newValue;
-  }, []);
-
-  const onBlur = useCallback(() => {
-    onChange(editorValue.current.replaceAll('\n', ' ').replaceAll('  ', ' '));
-  }, [onChange]);
+  useDebounce(() => onChange(editorValue.replaceAll('\n', ' ').replaceAll('  ', ' ')), 500, [
+    editorValue,
+  ]);
 
   return (
     <EuiCodeEditor
-      onBlur={onBlur}
-      value={defaultValue}
+      value={editorValue}
       mode="osquery"
-      onChange={handleChange}
+      onChange={setEditorValue}
       theme="tomorrow"
       name="osquery_editor"
       setOptions={EDITOR_SET_OPTIONS}

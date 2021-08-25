@@ -11,7 +11,7 @@ import { useKibana } from '../common/lib/kibana';
 
 interface UseScheduledQueryGroupQueryLastResultsProps {
   actionId: string;
-  agentIds: string[];
+  agentIds?: string[];
   interval: number;
   skip?: boolean;
 }
@@ -39,7 +39,7 @@ export const useScheduledQueryGroupQueryLastResults = ({
               size: 1,
             },
             aggs: {
-              first_event_ingested_time: { min: { field: 'event.ingested' } },
+              first_event_ingested_time: { min: { field: '@timestamp' } },
               unique_agents: { cardinality: { field: 'agent.id' } },
             },
           },
@@ -47,7 +47,7 @@ export const useScheduledQueryGroupQueryLastResults = ({
         query: {
           // @ts-expect-error update types
           bool: {
-            should: agentIds.map((agentId) => ({
+            should: agentIds?.map((agentId) => ({
               match_phrase: {
                 'agent.id': agentId,
               },
@@ -76,13 +76,13 @@ export const useScheduledQueryGroupQueryLastResults = ({
     },
     {
       keepPreviousData: true,
-      enabled: !skip || !actionId || !interval || !agentIds.length,
-      select: (response) => {
-        if (actionId.includes('rpm_packages')) {
-          console.error('resss', response);
-        }
-        return response.rawResponse.aggregations?.runs?.buckets[0] ?? [];
-      },
+      enabled: !!(!skip && actionId && interval && agentIds?.length),
+      // @ts-expect-error update types
+      select: (response) => response.rawResponse.aggregations?.runs?.buckets[0] ?? [],
+      refetchOnMount: false,
+      refetchOnReconnect: false,
+      refetchOnWindowFocus: false,
+      staleTime: Infinity,
     }
   );
 };

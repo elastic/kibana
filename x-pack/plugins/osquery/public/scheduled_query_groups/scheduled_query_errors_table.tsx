@@ -70,12 +70,12 @@ export const ViewErrorsInLogsAction = React.memo(ViewErrorsInLogsActionComponent
 
 interface ScheduledQueryErrorsTableProps {
   actionId: string;
-  agentIds: string[];
+  agentIds?: string[];
   interval: number;
 }
 
 const renderErrorMessage = (error: string) => (
-  <EuiCodeBlock language="prolog" fontSize="s" paddingSize="none" transparentBackground>
+  <EuiCodeBlock fontSize="s" paddingSize="none" transparentBackground>
     {error}
   </EuiCodeBlock>
 );
@@ -128,7 +128,7 @@ const ScheduledQueryErrorsTableComponent: React.FC<ScheduledQueryErrorsTableProp
         render: renderErrorMessage,
       },
       {
-        width: '90px',
+        width: '50px',
         actions: [
           {
             render: renderLogsErrorsAction,
@@ -139,15 +139,8 @@ const ScheduledQueryErrorsTableComponent: React.FC<ScheduledQueryErrorsTableProp
     [renderAgentIdColumn, renderLogsErrorsAction]
   );
 
-  const pagination = useMemo(
-    () => ({
-      initialPageSize: 10,
-      pageSizeOptions: [10, 20, 50, 100],
-    }),
-    []
-  );
-
-  return <EuiInMemoryTable items={lastErrorsData} columns={columns} pagination={pagination} />;
+  // @ts-expect-error update types
+  return <EuiInMemoryTable items={lastErrorsData?.hits} columns={columns} pagination={true} />;
 };
 
 export const ScheduledQueryErrorsTable = React.memo(ScheduledQueryErrorsTableComponent);

@@ -12,7 +12,7 @@ import { useKibana } from '../common/lib/kibana';
 
 interface UseScheduledQueryGroupQueryErrorsProps {
   actionId: string;
-  agentIds: string[];
+  agentIds?: string[];
   interval: number;
   skip?: boolean;
 }
@@ -32,9 +32,6 @@ export const useScheduledQueryGroupQueryErrors = ({
       const searchSource = await data.search.searchSource.create({
         index: indexPattern[0],
         fields: ['*'],
-        aggs: {
-          unique_agents: { cardinality: { field: 'agent.id' } },
-        },
         sort: [
           {
             '@timestamp': SortDirection.desc,
@@ -43,9 +40,9 @@ export const useScheduledQueryGroupQueryErrors = ({
         query: {
           // @ts-expect-error update types
           bool: {
-            should: agentIds.map((agentId) => ({
+            should: agentIds?.map((agentId) => ({
               match_phrase: {
-                'agent.id': agentId,
+                'elastic_agent.id': agentId,
               },
             })),
             minimum_should_match: 1,
@@ -57,13 +54,18 @@ export const useScheduledQueryGroupQueryErrors = ({
               },
               {
                 match_phrase: {
+                  'data_stream.dataset': 'elastic_agent.osquerybeat',
+                },
+              },
+              {
+                match_phrase: {
                   message: actionId,
                 },
               },
               {
                 range: {
                   '@timestamp': {
-                    gte: `now-${interval * 200}s`,
+                    gte: `now-${interval * 2}s`,
                     lte: 'now',
                   },
                 },
@@ -78,13 +80,12 @@ export const useScheduledQueryGroupQueryErrors = ({
     },
     {
       keepPreviousData: true,
-      enabled: !skip || !actionId || !interval || !agentIds.length,
-      select: (response) => {
-        if (actionId === 'windows_drivers') {
-          console.error('responose', response);
-        }
-        return response.rawResponse.hits ?? [];
-      },
+      enabled: !!(!skip && actionId && interval && agentIds?.length),
+      select: (response) => response.rawResponse.hits ?? [],
+      refetchOnMount: false,
+      refetchOnReconnect: false,
+      refetchOnWindowFocus: false,
+      staleTime: Infinity,
     }
   );
 };

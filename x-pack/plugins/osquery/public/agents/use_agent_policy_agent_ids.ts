@@ -9,7 +9,7 @@ import { map } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { useQuery } from 'react-query';
 
-import { AGENT_SAVED_OBJECT_TYPE, GetAgentsResponse } from '../../../fleet/common';
+import { AGENT_SAVED_OBJECT_TYPE, Agent } from '../../../fleet/common';
 import { useErrorToast } from '../common/hooks/use_error_toast';
 import { useKibana } from '../common/lib/kibana';
 
@@ -27,7 +27,7 @@ export const useAgentPolicyAgentIds = ({
   const { http } = useKibana().services;
   const setErrorToast = useErrorToast();
 
-  return useQuery<GetAgentsResponse>(
+  return useQuery<{ agents: Agent[] }, unknown, string[]>(
     ['agentPolicyAgentIds', agentPolicyId],
     () => {
       const kuery = `${AGENT_SAVED_OBJECT_TYPE}.policy_id:${agentPolicyId}`;
@@ -41,7 +41,6 @@ export const useAgentPolicyAgentIds = ({
     },
     {
       select: (data) => map(data?.agents, 'id') || ([] as string[]),
-      initialData: [] as string[],
       enabled: !skip || !agentPolicyId,
       onSuccess: () => setErrorToast(),
       onError: (error) =>
@@ -51,6 +50,9 @@ export const useAgentPolicyAgentIds = ({
             defaultMessage: 'Error while fetching agents',
           }),
         }),
+      refetchOnMount: false,
+      refetchOnReconnect: false,
+      refetchOnWindowFocus: false,
     }
   );
 };
