@@ -12,6 +12,7 @@ import {
   EuiFlexGroup,
   EuiFieldNumber,
   EuiFieldPassword,
+  EuiSelect,
   EuiSwitch,
   EuiFormRow,
   EuiTitle,
@@ -24,12 +25,13 @@ import { ActionConnectorFieldsProps } from '../../../../types';
 import { EmailActionConnector } from '../types';
 import { useKibana } from '../../../../common/lib/kibana';
 import { getEncryptedFieldNotifyLabel } from '../../get_encrypted_field_notify_label';
+import { emailServerTypes } from './email';
 
 export const EmailActionConnectorFields: React.FunctionComponent<
   ActionConnectorFieldsProps<EmailActionConnector>
 > = ({ action, editActionConfig, editActionSecrets, errors, readOnly }) => {
   const { docLinks } = useKibana().services;
-  const { from, host, port, secure, hasAuth } = action.config;
+  const { from, host, port, secure, hasAuth, serverType } = action.config;
   const { user, password } = action.secrets;
   useEffect(() => {
     if (!action.id) {
@@ -93,6 +95,27 @@ export const EmailActionConnectorFields: React.FunctionComponent<
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiFlexGroup justifyContent="spaceBetween">
+        <EuiFlexItem>
+          <EuiFormRow
+            label={i18n.translate(
+              'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.serverTypeTextFieldLabel',
+              {
+                defaultMessage: 'Server type',
+              }
+            )}
+          >
+            <EuiSelect
+              name="serverType"
+              value={serverType || 'other'}
+              disabled={readOnly}
+              data-test-subj="emailServerTypeSelect"
+              options={Object.values(emailServerTypes)}
+              onChange={(e) => {
+                editActionConfig('serverType', e.target.value);
+              }}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
         <EuiFlexItem>
           <EuiFormRow
             id="emailHost"

@@ -32,6 +32,16 @@ export type EmailActionTypeExecutorOptions = ActionTypeExecutorOptions<
 // config definition
 export type ActionTypeConfigType = TypeOf<typeof ConfigSchema>;
 
+export enum EmailServerTypes {
+  GMAIL = 'gmail',
+  OFFICE365 = 'office365',
+  EXCHANGE = 'exchange',
+  OUTLOOK = 'outlook',
+  ELASTIC_CLOUD = 'elastic_cloud',
+  AMAZON_SES = 'amazon_ses',
+  OTHER = 'other',
+}
+
 const EMAIL_FOOTER_DIVIDER = '\n\n--\n\n';
 
 const ConfigSchemaProps = {
@@ -41,6 +51,20 @@ const ConfigSchemaProps = {
   secure: schema.nullable(schema.boolean()),
   from: schema.string(),
   hasAuth: schema.boolean({ defaultValue: true }),
+  serverType: schema.oneOf(
+    [
+      schema.literal(EmailServerTypes.GMAIL),
+      schema.literal(EmailServerTypes.OFFICE365),
+      schema.literal(EmailServerTypes.EXCHANGE),
+      schema.literal(EmailServerTypes.OUTLOOK),
+      schema.literal(EmailServerTypes.ELASTIC_CLOUD),
+      schema.literal(EmailServerTypes.AMAZON_SES),
+      schema.literal(EmailServerTypes.OTHER),
+    ],
+    {
+      defaultValue: EmailServerTypes.OTHER,
+    }
+  ),
 };
 
 const ConfigSchema = schema.object(ConfigSchemaProps);

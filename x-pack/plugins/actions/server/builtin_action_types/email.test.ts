@@ -23,6 +23,7 @@ import {
   getActionType,
   EmailActionType,
   EmailActionTypeExecutorOptions,
+  EmailServerTypes,
 } from './email';
 
 const sendEmailMock = sendEmail as jest.Mock;
@@ -63,6 +64,7 @@ describe('config validation', () => {
       host: null,
       port: null,
       secure: null,
+      serverType: 'other',
     });
 
     delete config.service;
@@ -73,6 +75,7 @@ describe('config validation', () => {
       ...config,
       service: null,
       secure: null,
+      serverType: 'other',
     });
   });
 
@@ -240,6 +243,7 @@ describe('execute()', () => {
     secure: true,
     from: 'bob@example.com',
     hasAuth: true,
+    serverType: EmailServerTypes.OTHER,
   };
   const secrets: ActionTypeSecretsType = {
     user: 'bob',

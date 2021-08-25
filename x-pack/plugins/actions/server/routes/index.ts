@@ -30,4 +30,6 @@ export function defineRoutes(
   updateActionRoute(router, licenseState);
   connectorTypesRoute(router, licenseState);
   executeActionRoute(router, licenseState);
+
+  getWellKnownEmailServiceRoute(router, licenseState);
 }

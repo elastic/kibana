@@ -14,6 +14,72 @@ import {
 } from '../../../../types';
 import { EmailActionParams, EmailConfig, EmailSecrets, EmailActionConnector } from '../types';
 
+export const emailServerTypes: { [key: string]: any } = {
+  gmail: {
+    text: i18n.translate(
+      'xpack.triggersActionsUI.components.builtinActionTypes.emailAction.gmailServerTypeLabel',
+      {
+        defaultMessage: 'Gmail',
+      }
+    ),
+    value: 'gmail',
+  },
+  office365: {
+    text: i18n.translate(
+      'xpack.triggersActionsUI.components.builtinActionTypes.emailAction.office365ServerTypeLabel',
+      {
+        defaultMessage: 'Office 365',
+      }
+    ),
+    value: 'office365',
+  },
+  exchange: {
+    text: i18n.translate(
+      'xpack.triggersActionsUI.components.builtinActionTypes.emailAction.exchangeServerTypeLabel',
+      {
+        defaultMessage: 'MS Exchange',
+      }
+    ),
+    value: 'exchange',
+  },
+  outlook: {
+    text: i18n.translate(
+      'xpack.triggersActionsUI.components.builtinActionTypes.emailAction.outlookServerTypeLabel',
+      {
+        defaultMessage: 'Outlook',
+      }
+    ),
+    value: 'outlook',
+  },
+  elastic_cloud: {
+    text: i18n.translate(
+      'xpack.triggersActionsUI.components.builtinActionTypes.emailAction.elastic_cloudServerTypeLabel',
+      {
+        defaultMessage: 'Elastic Cloud',
+      }
+    ),
+    value: 'elastic_cloud',
+  },
+  amazon_ses: {
+    text: i18n.translate(
+      'xpack.triggersActionsUI.components.builtinActionTypes.emailAction.amazon_sesServerTypeLabel',
+      {
+        defaultMessage: 'Amazon SES',
+      }
+    ),
+    value: 'amazon_ses',
+  },
+  other: {
+    text: i18n.translate(
+      'xpack.triggersActionsUI.components.builtinActionTypes.emailAction.otherServerTypeLabel',
+      {
+        defaultMessage: 'Other',
+      }
+    ),
+    value: 'other',
+  },
+};
+
 export function getActionType(): ActionTypeModel<EmailConfig, EmailSecrets, EmailActionParams> {
   const mailformat = /^[^@\s]+@[^@\s]+$/;
   return {
@@ -34,7 +100,10 @@ export function getActionType(): ActionTypeModel<EmailConfig, EmailSecrets, Emai
     validateConnector: async (
       action: EmailActionConnector
     ): Promise<
-      ConnectorValidationResult<Omit<EmailConfig, 'secure' | 'hasAuth'>, EmailSecrets>
+      ConnectorValidationResult<
+        Omit<EmailConfig, 'secure' | 'hasAuth' | 'serverType'>,
+        EmailSecrets
+      >
     > => {
       const translations = await import('./translations');
       const configErrors = {
