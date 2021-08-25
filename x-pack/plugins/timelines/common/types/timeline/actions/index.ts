@@ -34,6 +34,7 @@ export interface ActionProps {
   refetch?: () => void;
   rowIndex: number;
   setEventsDeleted: SetEventsDeleted;
+  setEventsLoading: SetEventsLoading;
   showCheckboxes: boolean;
   showNotes?: boolean;
   tabType?: TimelineTabs;
