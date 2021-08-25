@@ -9,8 +9,9 @@
 import { defaults } from 'lodash';
 import { IndexPatternsService, IndexPattern } from '.';
 import { fieldFormatsMock } from '../../../../field_formats/common/mocks';
-import { stubbedSavedObjectIndexPattern } from './fixtures/stubbed_saved_object_index_pattern';
+
 import { UiSettingsCommon, SavedObjectsClientCommon, SavedObject } from '../types';
+import { stubbedSavedObjectIndexPattern } from '../index_pattern.stub';
 
 const createFieldsFetcher = jest.fn().mockImplementation(() => ({
   getFieldsForWildcard: jest.fn().mockImplementation(() => {

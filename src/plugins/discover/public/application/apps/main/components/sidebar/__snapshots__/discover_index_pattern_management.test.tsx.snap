@@ -106,9 +106,64 @@ exports[`Discover IndexPattern Management renders correctly 1`] = `
     }
   }
   selectedIndexPattern={
-    StubIndexPattern {
-      "_reindexFields": [Function],
+    IndexPattern {
+      "allowNoIndex": false,
+      "deleteFieldFormat": [Function],
+      "fieldAttrs": Object {},
       "fieldFormatMap": Object {},
+      "fieldFormats": Object {
+        "deserialize": [MockFunction],
+        "getByFieldType": [MockFunction],
+        "getDefaultConfig": [MockFunction],
+        "getDefaultInstance": [MockFunction] {
+          "calls": Array [
+            Array [
+              "string",
+            ],
+            Array [
+              "string",
+            ],
+            Array [
+              "string",
+            ],
+          ],
+          "results": Array [
+            Object {
+              "type": "return",
+              "value": Object {
+                "convert": [MockFunction],
+                "getConverterFor": [MockFunction],
+              },
+            },
+            Object {
+              "type": "return",
+              "value": Object {
+                "convert": [MockFunction],
+                "getConverterFor": [MockFunction],
+              },
+            },
+            Object {
+              "type": "return",
+              "value": Object {
+                "convert": [MockFunction],
+                "getConverterFor": [MockFunction],
+              },
+            },
+          ],
+        },
+        "getDefaultInstanceCacheResolver": [MockFunction],
+        "getDefaultInstancePlain": [MockFunction],
+        "getDefaultType": [MockFunction],
+        "getDefaultTypeName": [MockFunction],
+        "getInstance": [MockFunction],
+        "getType": [MockFunction],
+        "getTypeNameByEsTypes": [MockFunction],
+        "getTypeWithoutMetaParams": [MockFunction],
+        "has": [MockFunction],
+        "init": [MockFunction],
+        "parseDefaultTypeMap": [MockFunction],
+        "register": [MockFunction],
+      },
       "fields": FldList [
         Object {
           "aggregatable": true,
@@ -595,33 +650,29 @@ exports[`Discover IndexPattern Management renders correctly 1`] = `
           "type": "murmur3",
         },
       ],
-      "fieldsFetcher": Object {
-        "apiClient": Object {
-          "baseUrl": "",
-        },
-      },
       "flattenHit": [Function],
       "formatField": [Function],
       "formatHit": [Function],
-      "getComputedFields": [Function],
-      "getConfig": [Function],
-      "getFieldByName": [Function],
-      "getFormatterForField": [Function],
-      "getNonScriptedFields": [Function],
-      "getScriptedFields": [Function],
-      "getSourceFiltering": [Function],
+      "getFieldAttrs": [Function],
+      "getOriginalSavedObjectBody": [Function],
       "id": "logstash-*",
-      "isTimeBased": [Function],
+      "intervalName": undefined,
       "metaFields": Array [
         "_id",
         "_type",
         "_source",
       ],
-      "popularizeField": [Function],
+      "originalSavedObjectBody": Object {},
+      "resetOriginalSavedObjectBody": [Function],
+      "runtimeFieldMap": Object {},
       "setFieldFormat": [Function],
-      "stubSetFieldFormat": [Function],
+      "shortDotsEnable": false,
+      "sourceFilters": undefined,
       "timeFieldName": "time",
       "title": "logstash-*",
+      "type": undefined,
+      "typeMeta": undefined,
+      "version": undefined,
     }
   }
   services={

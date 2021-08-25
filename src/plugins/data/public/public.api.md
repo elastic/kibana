@@ -1305,9 +1305,9 @@ export interface IndexPatternAttributes {
     // (undocumented)
     title: string;
     // (undocumented)
-    type: string;
+    type?: string;
     // (undocumented)
-    typeMeta: string;
+    typeMeta?: string;
 }
 
 // @public (undocumented)
