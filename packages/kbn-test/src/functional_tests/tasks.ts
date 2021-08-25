@@ -9,7 +9,7 @@
 import { relative } from 'path';
 import * as Rx from 'rxjs';
 import { startWith, switchMap, take } from 'rxjs/operators';
-import { withProcRunner } from '@kbn/dev-utils';
+import { withProcRunner, ToolingLog } from '@kbn/dev-utils';
 import dedent from 'dedent';
 
 import {
@@ -19,13 +19,14 @@ import {
   assertNoneExcluded,
   hasTests,
   KIBANA_FTR_SCRIPT,
+  CreateFtrOptions,
 } from './lib';
 
 import { readConfigFile } from '../functional_test_runner/lib';
 
-const makeSuccessMessage = (options) => {
+const makeSuccessMessage = (options: StartServerOptions) => {
   const installDirFlag = options.installDir ? ` --kibana-install-dir=${options.installDir}` : '';
-  const configPaths = Array.isArray(options.config) ? options.config : [options.config];
+  const configPaths: string[] = Array.isArray(options.config) ? options.config : [options.config];
   const pathsMessage = options.useDefaultConfig
     ? ''
     : configPaths
@@ -47,14 +48,17 @@ const makeSuccessMessage = (options) => {
 
 /**
  * Run servers and tests for each config
- * @param {object} options                   Optional
- * @property {string[]} options.configs      Array of paths to configs
- * @property {function} options.log          An instance of the ToolingLog
- * @property {string} options.installDir     Optional installation dir from which to run Kibana
- * @property {boolean} options.bail          Whether to exit test run at the first failure
- * @property {string} options.esFrom         Optionally run from source instead of snapshot
  */
-export async function runTests(options) {
+interface RunTestsParams extends CreateFtrOptions {
+  /** Array of paths to configs */
+  configs: string[];
+  /** run from source instead of snapshot */
+  esFrom?: string;
+  createLogger: () => ToolingLog;
+  extraKbnOpts: string[];
+  assertNoneExcluded: boolean;
+}
+export async function runTests(options: RunTestsParams) {
   if (!process.env.KBN_NP_PLUGINS_BUILT && !options.assertNoneExcluded) {
     const log = options.createLogger();
     log.warning('❗️❗️❗️');
@@ -88,6 +92,7 @@ export async function runTests(options) {
       continue;
     }
 
+    // eslint-disable-next-line no-console
     console.log(`--- Running ${relative(process.cwd(), configPath)}`);
 
     await withProcRunner(log, async (procs) => {
@@ -117,15 +122,20 @@ export async function runTests(options) {
   }
 }
 
-/**
- * Start only servers using single config
- * @param {object} options                   Optional
- * @property {string} options.config         Path to a config file
- * @property {function} options.log          An instance of the ToolingLog
- * @property {string} options.installDir     Optional installation dir from which to run Kibana
- * @property {string} options.esFrom         Optionally run from source instead of snapshot
- */
-export async function startServers(options) {
+interface StartServerOptions {
+  /** Path to a config file */
+  config: string;
+  log: ToolingLog;
+  /** installation dir from which to run Kibana */
+  installDir?: string;
+  /** run from source instead of snapshot */
+  esFrom?: string;
+  createLogger: () => ToolingLog;
+  extraKbnOpts: string[];
+  useDefaultConfig?: boolean;
+}
+
+export async function startServers(options: StartServerOptions) {
   const log = options.createLogger();
   const opts = {
     ...options,
@@ -158,7 +168,7 @@ export async function startServers(options) {
   });
 }
 
-async function silence(log, milliseconds) {
+async function silence(log: ToolingLog, milliseconds: number) {
   await log
     .getWritten$()
     .pipe(
