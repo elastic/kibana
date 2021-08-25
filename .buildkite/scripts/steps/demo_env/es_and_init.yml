@@ -44,6 +44,7 @@ metadata:
   annotations:
     kubernetes.io/ingress.class: 'nginx'
     cert-manager.io/cluster-issuer: 'letsencrypt-prod'
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
 spec:
   tls:
     - hosts:
@@ -53,7 +54,7 @@ spec:
     - host: demo.kibana.dev
       http:
         paths:
-          - path: /$DEPLOYMENT_MINOR_VERSION
+          - path: /$DEPLOYMENT_MINOR_VERSION(/|$)(.*)
             pathType: ImplementationSpecific
             backend:
               service:
