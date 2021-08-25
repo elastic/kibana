@@ -12,6 +12,7 @@ import { InspectorPanel } from './inspector_panel';
 import { InspectorViewDescription } from '../types';
 import { Adapters } from '../../common';
 import type { ApplicationStart, HttpSetup, IUiSettingsClient } from 'kibana/public';
+import { SharePluginStart } from '../../../share/public';
 
 describe('InspectorPanel', () => {
   let adapters: Adapters;
@@ -19,8 +20,14 @@ describe('InspectorPanel', () => {
   const dependencies = {
     application: {},
     http: {},
+    share: {},
     uiSettings: {},
-  } as { application: ApplicationStart; http: HttpSetup; uiSettings: IUiSettingsClient };
+  } as {
+    application: ApplicationStart;
+    http: HttpSetup;
+    share: SharePluginStart;
+    uiSettings: IUiSettingsClient;
+  };
 
   beforeEach(() => {
     adapters = {
