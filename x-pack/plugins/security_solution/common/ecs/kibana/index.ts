@@ -9,6 +9,8 @@ import { RuleEcs } from '../rule';
 
 export interface KibanaEcs {
   alert?: {
+    risk_score?: string[];
+    severity?: string[];
     rule?: RuleEcs;
     original_time?: string[];
     status?: string[];

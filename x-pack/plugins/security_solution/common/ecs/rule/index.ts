@@ -6,7 +6,6 @@
  */
 
 export interface RuleEcs {
-  id?: string[];
   rule_id?: string[];
   uuid?: string[];
   name?: string[];

@@ -41,6 +41,8 @@ export const mockEcsDataWithAlert: Ecs = {
   },
   kibana: {
     alert: {
+      risk_score: ['21'],
+      severity: ['low'],
       rule: {
         created_at: ['2020-01-10T21:11:45.839Z'],
         updated_at: ['2020-01-10T21:11:45.839Z'],
@@ -50,7 +52,6 @@ export const mockEcsDataWithAlert: Ecs = {
         false_positives: ['test-1'],
         filters: [],
         from: ['now-300s'],
-        id: ['b5ba41ab-aaf3-4f43-971b-bdf9434ce0ea'],
         immutable: [false],
         index: ['auditbeat-*'],
         interval: ['5m'],

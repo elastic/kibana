@@ -240,7 +240,7 @@ export const requiredFieldMappingsForActionsRuleRegistry = {
   'alert.start': ALERT_START,
   'alert.uuid': ALERT_UUID,
   'event.action': 'event.action',
-  'alert.status': ALERT_WORKFLOW_STATUS,
+  'alert.workflow_status': ALERT_WORKFLOW_STATUS,
   'alert.duration.us': ALERT_DURATION,
   'rule.uuid': ALERT_RULE_UUID,
   'rule.name': ALERT_RULE_NAME,

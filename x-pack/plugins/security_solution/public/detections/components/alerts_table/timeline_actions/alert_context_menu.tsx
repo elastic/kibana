@@ -12,6 +12,7 @@ import { indexOf } from 'lodash';
 
 import { ExceptionListType } from '@kbn/securitysolution-io-ts-list-types';
 import { get, getOr } from 'lodash/fp';
+import { ALERT_RULE_NAME, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import { buildGetAlertByIdQuery } from '../../../../common/components/exceptions/helpers';
 import { EventsTdContent } from '../../../../timelines/components/timeline/styles';
 import { DEFAULT_ICON_BUTTON_WIDTH } from '../../../../timelines/components/timeline/helpers';
@@ -67,8 +68,8 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
   const afterItemSelection = useCallback(() => {
     setPopover(false);
   }, []);
-  const ruleId = get(0, ecsRowData?.kibana?.alert?.rule?.uuid);
-  const ruleName = get(0, ecsRowData?.kibana?.alert?.rule?.name);
+  const ruleId = getOr([], ALERT_RULE_UUID, ecsRowData);
+  const ruleName = getOr([], ALERT_RULE_NAME, ecsRowData);
   const { timelines: timelinesUi } = useKibana().services;
 
   const { addToCaseActionProps, addToCaseActionItems } = useAddToCaseActions({

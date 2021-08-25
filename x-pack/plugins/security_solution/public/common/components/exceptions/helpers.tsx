@@ -675,7 +675,7 @@ export const getPrepopulatedBehaviorException = ({
       field: 'rule.id',
       operator: 'included' as const,
       type: 'match' as const,
-      value: alertEcsData.rule?.id ?? '',
+      value: alertEcsData.rule?.uuid ?? '',
     },
     {
       field: 'process.executable.caseless',

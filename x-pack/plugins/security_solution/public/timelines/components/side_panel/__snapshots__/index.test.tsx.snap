@@ -88,6 +88,9 @@ exports[`Details Panel Component DetailsPanel:EventDetails: rendering it should 
           },
           "kibana": Object {
             "alert": Object {
+              "risk_score": Array [
+                "21",
+              ],
               "rule": Object {
                 "created_at": Array [
                   "2020-01-10T21:11:45.839Z",
@@ -107,9 +110,6 @@ exports[`Details Panel Component DetailsPanel:EventDetails: rendering it should 
                 "filters": Array [],
                 "from": Array [
                   "now-300s",
-                ],
-                "id": Array [
-                  "b5ba41ab-aaf3-4f43-971b-bdf9434ce0ea",
                 ],
                 "immutable": Array [
                   false,
@@ -174,6 +174,9 @@ exports[`Details Panel Component DetailsPanel:EventDetails: rendering it should 
                   "1",
                 ],
               },
+              "severity": Array [
+                "low",
+              ],
             },
           },
           "source": Object {
@@ -328,6 +331,9 @@ exports[`Details Panel Component DetailsPanel:EventDetails: rendering it should 
             },
             "kibana": Object {
               "alert": Object {
+                "risk_score": Array [
+                  "21",
+                ],
                 "rule": Object {
                   "created_at": Array [
                     "2020-01-10T21:11:45.839Z",
@@ -347,9 +353,6 @@ exports[`Details Panel Component DetailsPanel:EventDetails: rendering it should 
                   "filters": Array [],
                   "from": Array [
                     "now-300s",
-                  ],
-                  "id": Array [
-                    "b5ba41ab-aaf3-4f43-971b-bdf9434ce0ea",
                   ],
                   "immutable": Array [
                     false,
@@ -414,6 +417,9 @@ exports[`Details Panel Component DetailsPanel:EventDetails: rendering it should 
                     "1",
                   ],
                 },
+                "severity": Array [
+                  "low",
+                ],
               },
             },
             "source": Object {
@@ -632,6 +638,9 @@ Array [
               },
               "kibana": Object {
                 "alert": Object {
+                  "risk_score": Array [
+                    "21",
+                  ],
                   "rule": Object {
                     "created_at": Array [
                       "2020-01-10T21:11:45.839Z",
@@ -651,9 +660,6 @@ Array [
                     "filters": Array [],
                     "from": Array [
                       "now-300s",
-                    ],
-                    "id": Array [
-                      "b5ba41ab-aaf3-4f43-971b-bdf9434ce0ea",
                     ],
                     "immutable": Array [
                       false,
@@ -718,6 +724,9 @@ Array [
                       "1",
                     ],
                   },
+                  "severity": Array [
+                    "low",
+                  ],
                 },
               },
               "source": Object {
@@ -849,6 +858,9 @@ Array [
                           },
                           "kibana": Object {
                             "alert": Object {
+                              "risk_score": Array [
+                                "21",
+                              ],
                               "rule": Object {
                                 "created_at": Array [
                                   "2020-01-10T21:11:45.839Z",
@@ -868,9 +880,6 @@ Array [
                                 "filters": Array [],
                                 "from": Array [
                                   "now-300s",
-                                ],
-                                "id": Array [
-                                  "b5ba41ab-aaf3-4f43-971b-bdf9434ce0ea",
                                 ],
                                 "immutable": Array [
                                   false,
@@ -935,6 +944,9 @@ Array [
                                   "1",
                                 ],
                               },
+                              "severity": Array [
+                                "low",
+                              ],
                             },
                           },
                           "source": Object {
@@ -1107,6 +1119,9 @@ Array [
                 },
                 "kibana": Object {
                   "alert": Object {
+                    "risk_score": Array [
+                      "21",
+                    ],
                     "rule": Object {
                       "created_at": Array [
                         "2020-01-10T21:11:45.839Z",
@@ -1126,9 +1141,6 @@ Array [
                       "filters": Array [],
                       "from": Array [
                         "now-300s",
-                      ],
-                      "id": Array [
-                        "b5ba41ab-aaf3-4f43-971b-bdf9434ce0ea",
                       ],
                       "immutable": Array [
                         false,
@@ -1193,6 +1205,9 @@ Array [
                         "1",
                       ],
                     },
+                    "severity": Array [
+                      "low",
+                    ],
                   },
                 },
                 "source": Object {
@@ -1287,6 +1302,9 @@ Array [
                             },
                             "kibana": Object {
                               "alert": Object {
+                                "risk_score": Array [
+                                  "21",
+                                ],
                                 "rule": Object {
                                   "created_at": Array [
                                     "2020-01-10T21:11:45.839Z",
@@ -1306,9 +1324,6 @@ Array [
                                   "filters": Array [],
                                   "from": Array [
                                     "now-300s",
-                                  ],
-                                  "id": Array [
-                                    "b5ba41ab-aaf3-4f43-971b-bdf9434ce0ea",
                                   ],
                                   "immutable": Array [
                                     false,
@@ -1373,6 +1388,9 @@ Array [
                                     "1",
                                   ],
                                 },
+                                "severity": Array [
+                                  "low",
+                                ],
                               },
                             },
                             "source": Object {
@@ -1499,6 +1517,9 @@ Array [
             },
             "kibana": Object {
               "alert": Object {
+                "risk_score": Array [
+                  "21",
+                ],
                 "rule": Object {
                   "created_at": Array [
                     "2020-01-10T21:11:45.839Z",
@@ -1518,9 +1539,6 @@ Array [
                   "filters": Array [],
                   "from": Array [
                     "now-300s",
-                  ],
-                  "id": Array [
-                    "b5ba41ab-aaf3-4f43-971b-bdf9434ce0ea",
                   ],
                   "immutable": Array [
                     false,
@@ -1585,6 +1603,9 @@ Array [
                     "1",
                   ],
                 },
+                "severity": Array [
+                  "low",
+                ],
               },
             },
             "source": Object {
@@ -1716,6 +1737,9 @@ Array [
                         },
                         "kibana": Object {
                           "alert": Object {
+                            "risk_score": Array [
+                              "21",
+                            ],
                             "rule": Object {
                               "created_at": Array [
                                 "2020-01-10T21:11:45.839Z",
@@ -1735,9 +1759,6 @@ Array [
                               "filters": Array [],
                               "from": Array [
                                 "now-300s",
-                              ],
-                              "id": Array [
-                                "b5ba41ab-aaf3-4f43-971b-bdf9434ce0ea",
                               ],
                               "immutable": Array [
                                 false,
@@ -1802,6 +1823,9 @@ Array [
                                 "1",
                               ],
                             },
+                            "severity": Array [
+                              "low",
+                            ],
                           },
                         },
                         "source": Object {
@@ -1974,6 +1998,9 @@ Array [
               },
               "kibana": Object {
                 "alert": Object {
+                  "risk_score": Array [
+                    "21",
+                  ],
                   "rule": Object {
                     "created_at": Array [
                       "2020-01-10T21:11:45.839Z",
@@ -1993,9 +2020,6 @@ Array [
                     "filters": Array [],
                     "from": Array [
                       "now-300s",
-                    ],
-                    "id": Array [
-                      "b5ba41ab-aaf3-4f43-971b-bdf9434ce0ea",
                     ],
                     "immutable": Array [
                       false,
@@ -2060,6 +2084,9 @@ Array [
                       "1",
                     ],
                   },
+                  "severity": Array [
+                    "low",
+                  ],
                 },
               },
               "source": Object {
@@ -2154,6 +2181,9 @@ Array [
                           },
                           "kibana": Object {
                             "alert": Object {
+                              "risk_score": Array [
+                                "21",
+                              ],
                               "rule": Object {
                                 "created_at": Array [
                                   "2020-01-10T21:11:45.839Z",
@@ -2173,9 +2203,6 @@ Array [
                                 "filters": Array [],
                                 "from": Array [
                                   "now-300s",
-                                ],
-                                "id": Array [
-                                  "b5ba41ab-aaf3-4f43-971b-bdf9434ce0ea",
                                 ],
                                 "immutable": Array [
                                   false,
@@ -2240,6 +2267,9 @@ Array [
                                   "1",
                                 ],
                               },
+                              "severity": Array [
+                                "low",
+                              ],
                             },
                           },
                           "source": Object {

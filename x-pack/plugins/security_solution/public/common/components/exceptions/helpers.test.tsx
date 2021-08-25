@@ -1264,7 +1264,7 @@ describe('Exception helpers', () => {
       const defaultItems = defaultEndpointExceptionItems('list_id', 'my_rule', {
         _id: '123',
         rule: {
-          id: '123',
+          uuid: '123',
         },
         process: {
           command_line: 'command_line',
@@ -1451,7 +1451,7 @@ describe('Exception helpers', () => {
       const defaultItems = defaultEndpointExceptionItems('list_id', 'my_rule', {
         _id: '123',
         rule: {
-          id: '123',
+          uuid: '123',
         },
         process: {
           // command_line: 'command_line', intentionally left commented

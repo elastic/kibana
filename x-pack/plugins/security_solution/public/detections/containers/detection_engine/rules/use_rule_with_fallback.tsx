@@ -29,10 +29,10 @@ interface AlertHit {
   _index: string;
   _source: {
     '@timestamp': string;
-    signal: {
+    signal?: {
       rule: Rule;
     };
-    kibana: {
+    kibana?: {
       alert: {
         rule: Rule;
       };
@@ -86,7 +86,7 @@ export const useRuleWithFallback = (ruleId: string): UseRuleWithFallback => {
     if (result === null) {
       result = alertsData?.hits.hits[0]?._source.signal
         ? alertsData?.hits.hits[0]?._source.signal.rule
-        : alertsData?.hits.hits[0]?._source.kibana.alert.rule;
+        : alertsData?.hits.hits[0]?._source.kibana?.alert.rule;
     }
     if (result) {
       return transformInput(result);
