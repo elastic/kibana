@@ -74,7 +74,7 @@ describe('Status API', () => {
       expect(resp.payload).toEqual({
         readyForUpgrade: false,
         details:
-          'You have 1 Elasticsearch deprecation issues and 1 Kibana deprecation issues that must be resolved before upgrading.',
+          'You have 1 Elasticsearch deprecation warnings and 1 Kibana deprecation warnings that must be resolved before upgrading.',
       });
     });
 
@@ -97,7 +97,7 @@ describe('Status API', () => {
       expect(resp.status).toEqual(200);
       expect(resp.payload).toEqual({
         readyForUpgrade: true,
-        details: 'All deprecation issues have been resolved.',
+        details: 'All deprecation warnings have been resolved.',
       });
     });
 

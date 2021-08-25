@@ -52,9 +52,9 @@ export async function assertNoneExcluded({ configPath, options }) {
     throw new CliError(`
       ${stats.excludedTests.length} tests in the ${configPath} config
       are excluded when filtering by the tags run on CI. Make sure that all suites are
-      tagged with one of the following tags, or extend the list of tags in test/scripts/jenkins_xpack.sh
+      tagged with one of the following tags:
 
-      tags: ${JSON.stringify(options.suiteTags)}
+      ${JSON.stringify(options.suiteTags)}
 
       - ${stats.excludedTests.join('\n      - ')}
     `);

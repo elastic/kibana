@@ -51,7 +51,7 @@ export const MemoryProtection = React.memo(() => {
           defaultMessage="View {detectionRulesLink}. Prebuilt rules are tagged “Elastic” on the Detection Rules page."
           values={{
             detectionRulesLink: (
-              <LinkToApp appId={`${APP_ID}:${SecurityPageName.detections}`} appPath={`/rules`}>
+              <LinkToApp appId={APP_ID} deepLinkId={SecurityPageName.rules}>
                 <FormattedMessage
                   id="xpack.securitySolution.endpoint.policy.details.detectionRulesLink"
                   defaultMessage="related detection rules"

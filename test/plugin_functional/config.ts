@@ -20,6 +20,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   );
 
   return {
+    rootTags: ['runOutsideOfCiGroups'],
     testFiles: [
       require.resolve('./test_suites/usage_collection'),
       require.resolve('./test_suites/telemetry'),

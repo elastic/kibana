@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React, { createContext, useContext } from 'react';
 import {
   CoreStart,
   DeprecationsServiceStart,
@@ -12,7 +13,7 @@ import {
   HttpSetup,
   NotificationsStart,
 } from 'src/core/public';
-import React, { createContext, useContext } from 'react';
+import { SharePluginSetup } from 'src/plugins/share/public';
 import { ApiService } from './lib/api';
 import { BreadcrumbService } from './lib/breadcrumbs';
 
@@ -32,6 +33,7 @@ export interface ContextValue {
   breadcrumbs: BreadcrumbService;
   getUrlForApp: CoreStart['application']['getUrlForApp'];
   deprecations: DeprecationsServiceStart;
+  share: SharePluginSetup;
 }
 
 export const AppContext = createContext<ContextValue>({} as any);

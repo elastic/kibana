@@ -8,7 +8,7 @@
 
 import { has } from 'lodash';
 import type { IndexPatternFieldBase, IndexPatternBase } from '../../es_query';
-import type { FieldFilter, Filter, FilterMeta } from './types';
+import type { Filter, FilterMeta } from './types';
 
 /** @public */
 export type ExistsFilter = Filter & {
@@ -24,8 +24,7 @@ export type ExistsFilter = Filter & {
  *
  * @public
  */
-export const isExistsFilter = (filter: FieldFilter): filter is ExistsFilter =>
-  has(filter, 'exists');
+export const isExistsFilter = (filter: Filter): filter is ExistsFilter => has(filter, 'exists');
 
 /**
  * @internal

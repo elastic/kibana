@@ -807,6 +807,7 @@ export type ElasticsearchClientConfig = Pick<ElasticsearchConfig, 'customHeaders
     requestTimeout?: ElasticsearchConfig['requestTimeout'] | ClientOptions['requestTimeout'];
     ssl?: Partial<ElasticsearchConfig['ssl']>;
     keepAlive?: boolean;
+    caFingerprint?: ClientOptions['caFingerprint'];
 };
 
 // @public
@@ -1003,6 +1004,7 @@ export interface HttpServerInfo {
 // @public
 export interface HttpServicePreboot {
     basePath: IBasePath;
+    getServerInfo: () => HttpServerInfo;
     registerRoutes(path: string, callback: (router: IRouter) => void): void;
 }
 

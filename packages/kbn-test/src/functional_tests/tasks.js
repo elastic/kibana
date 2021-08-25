@@ -55,7 +55,7 @@ const makeSuccessMessage = (options) => {
  * @property {string} options.esFrom         Optionally run from source instead of snapshot
  */
 export async function runTests(options) {
-  if (!process.env.KBN_NP_PLUGINS_BUILT) {
+  if (!process.env.KBN_NP_PLUGINS_BUILT && !options.assertNoneExcluded) {
     const log = options.createLogger();
     log.warning('❗️❗️❗️');
     log.warning('❗️❗️❗️');

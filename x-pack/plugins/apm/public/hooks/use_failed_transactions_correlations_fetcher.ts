@@ -38,9 +38,7 @@ interface FailedTransactionsCorrelationsFetcherState {
   total: number;
 }
 
-export const useFailedTransactionsCorrelationsFetcher = (
-  params: Omit<SearchServiceParams, 'analyzeCorrelations'>
-) => {
+export const useFailedTransactionsCorrelationsFetcher = () => {
   const {
     services: { data },
   } = useKibana<ApmPluginStartDeps>();
@@ -74,7 +72,7 @@ export const useFailedTransactionsCorrelationsFetcher = (
     }));
   }
 
-  const startFetch = () => {
+  const startFetch = (params: SearchServiceParams) => {
     setFetchState((prevState) => ({
       ...prevState,
       error: undefined,

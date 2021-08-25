@@ -34,9 +34,10 @@ AdditionalContent.displayName = 'AdditionalContent';
 const StyledHoverActionsContainer = styled.div<{
   $showTopN: boolean;
   $showOwnFocus: boolean;
+  $hideTopN: boolean;
   $isActive: boolean;
 }>`
-  min-width: 138px;
+  min-width: ${({ $hideTopN }) => `${$hideTopN ? '112px' : '138px'}`};
   padding: ${(props) => `0 ${props.theme.eui.paddingSizes.s}`};
   display: flex;
 
@@ -91,6 +92,7 @@ interface Props {
   enableOverflowButton?: boolean;
   field: string;
   goGetTimelineId?: (args: boolean) => void;
+  hideTopN?: boolean;
   isObjectArray: boolean;
   onFilterAdded?: () => void;
   ownFocus: boolean;
@@ -129,6 +131,7 @@ export const HoverActions: React.FC<Props> = React.memo(
     field,
     goGetTimelineId,
     isObjectArray,
+    hideTopN = false,
     onFilterAdded,
     ownFocus,
     showOwnFocus = true,
@@ -207,6 +210,7 @@ export const HoverActions: React.FC<Props> = React.memo(
       enableOverflowButton,
       field,
       handleHoverActionClicked,
+      hideTopN,
       isObjectArray,
       isOverflowPopoverOpen,
       onFilterAdded,
@@ -231,6 +235,7 @@ export const HoverActions: React.FC<Props> = React.memo(
           onKeyDown={onKeyDown}
           $showTopN={showTopN}
           $showOwnFocus={showOwnFocus}
+          $hideTopN={hideTopN}
           $isActive={isActive}
           className={isActive ? 'hoverActions-active' : ''}
         >

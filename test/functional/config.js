@@ -178,6 +178,20 @@ export default async function ({ readConfigFile }) {
           },
           kibana: [],
         },
+        test_field_formatters: {
+          elasticsearch: {
+            cluster: [],
+            indices: [
+              {
+                names: ['field_formats_management_functional_tests*'],
+                privileges: ['read', 'view_index_metadata'],
+                field_security: { grant: ['*'], except: [] },
+              },
+            ],
+            run_as: [],
+          },
+          kibana: [],
+        },
         //for sample data - can remove but not add sample data.( not ml)- for ml use built in role.
         kibana_sample_admin: {
           elasticsearch: {

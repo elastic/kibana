@@ -1,5 +1,10 @@
 {
   "id": "expressionError",
+  "owner": {
+    "name": "Kibana Presentation",
+    "githubTeam": "kibana-presentation"
+  },
+  "description": "Adds 'error' renderer to expressions",
   "version": "1.0.0",
   "kibanaVersion": "kibana",
   "server": false,

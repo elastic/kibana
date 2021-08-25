@@ -9,10 +9,11 @@ import { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import { useGetUserAlertsPermissions } from '@kbn/alerts';
 
+import { useStatusBulkActionItems } from '../../../../../../timelines/public';
 import { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { timelineActions } from '../../../../timelines/store/timeline';
 import { SetEventsDeletedProps, SetEventsLoadingProps } from '../types';
-import { useStatusBulkActionItems } from '../../../../../../timelines/public';
+
 import { useKibana } from '../../../../common/lib/kibana';
 import { SERVER_APP_ID } from '../../../../../common/constants';
 interface Props {
