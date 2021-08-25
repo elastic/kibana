@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { isEmpty } from 'lodash';
+import { get, isEmpty } from 'lodash/fp';
 import { useState, useCallback, useMemo, SyntheticEvent } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
@@ -16,7 +16,7 @@ import { TimelineItem } from '../../common/';
 import { tGridActions } from '../store/t_grid';
 import { useDeepEqualSelector } from './use_selector';
 import { createUpdateSuccessToaster } from '../components/actions/timeline/cases/helpers';
-import { AddToCaseActionProps } from '../components/actions/timeline/cases/add_to_case_action';
+import { AddToCaseActionProps } from '../components/actions';
 
 interface UseAddToCase {
   addNewCaseClick: () => void;
@@ -250,8 +250,19 @@ export function normalizedEventFields(event?: TimelineItem) {
   const ruleUuidValue = ruleUuid && ruleUuid.value && ruleUuid.value[0];
   const ruleNameValue = ruleName && ruleName.value && ruleName.value[0];
   const idToUse = ruleIdValue ? ruleIdValue : ruleUuidValue;
+  const id =
+    idToUse ??
+    get(`ecs.${ALERT_RULE_UUID}[0]`, event) ??
+    get(`ecs.signal.rule.id[0]`, event) ??
+    null;
+  const name =
+    ruleNameValue ??
+    get(`ecs.${ALERT_RULE_NAME}[0]`, event) ??
+    get(`ecs.signal.rule.name[0]`, event) ??
+    null;
+
   return {
-    ruleId: idToUse ?? null,
-    ruleName: ruleNameValue ?? null,
+    ruleId: id,
+    ruleName: name,
   };
 }

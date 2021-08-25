@@ -35,7 +35,9 @@ export const AgentLogs: React.FunctionComponent<
       >(
         {
           ...DEFAULT_LOGS_STATE,
-          ...getStateFromKbnUrl<AgentLogsState>(STATE_STORAGE_KEY, window.location.href),
+          ...getStateFromKbnUrl<AgentLogsState>(STATE_STORAGE_KEY, window.location.href, {
+            getFromHashQuery: false,
+          }),
         },
         {
           update: (state) => (updatedState) => ({ ...state, ...updatedState }),
