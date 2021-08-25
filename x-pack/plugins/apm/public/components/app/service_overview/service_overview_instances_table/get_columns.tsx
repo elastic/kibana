@@ -39,6 +39,7 @@ type ServiceInstanceDetailedStatistics = APIReturnType<'GET /api/apm/services/{s
 
 export function getColumns({
   serviceName,
+  kuery,
   agentName,
   latencyAggregationType,
   detailedStatsData,
@@ -49,6 +50,7 @@ export function getColumns({
   itemIdToOpenActionMenuRowMap,
 }: {
   serviceName: string;
+  kuery: string;
   agentName?: string;
   latencyAggregationType?: LatencyAggregationType;
   detailedStatsData?: ServiceInstanceDetailedStatistics;
@@ -247,6 +249,7 @@ export function getColumns({
             <InstanceActionsMenu
               serviceName={serviceName}
               serviceNodeName={instanceItem.serviceNodeName}
+              kuery={kuery}
               onClose={() => toggleRowActionMenu(instanceItem.serviceNodeName)}
             />
           </ActionMenu>

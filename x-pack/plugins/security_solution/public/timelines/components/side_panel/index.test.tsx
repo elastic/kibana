@@ -15,6 +15,7 @@ import {
   SUB_PLUGINS_REDUCER,
   kibanaObservable,
   createSecuritySolutionStorageMock,
+  mockEcsDataWithAlert,
 } from '../../../common/mock';
 import { createStore, State } from '../../../common/store';
 import { DetailsPanel } from './index';
@@ -69,6 +70,7 @@ describe('Details Panel Component', () => {
       params: {
         eventId: 'my-id',
         indexName: 'my-index',
+        ecsData: mockEcsDataWithAlert,
       },
     },
   };
@@ -149,7 +151,7 @@ describe('Details Panel Component', () => {
 
   describe('DetailsPanel:HostDetails: rendering', () => {
     beforeEach(() => {
-      state.timeline.timelineById.test.expandedDetail = hostExpandedDetail;
+      state.timeline.timelineById.test.expandedDetail = hostExpandedDetail as TimelineExpandedDetail;
       store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
     });
 
@@ -166,7 +168,7 @@ describe('Details Panel Component', () => {
 
   describe('DetailsPanel:NetworkDetails: rendering', () => {
     beforeEach(() => {
-      state.timeline.timelineById.test.expandedDetail = networkExpandedDetail;
+      state.timeline.timelineById.test.expandedDetail = networkExpandedDetail as TimelineExpandedDetail;
       store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
     });
 
