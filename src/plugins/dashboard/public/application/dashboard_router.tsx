@@ -79,13 +79,13 @@ export async function mountApp({
     urlForwarding,
     data: dataStart,
     share: shareStart,
+    spaces: spacesApi,
     embeddable: embeddableStart,
     savedObjectsTaggingOss,
     visualizations,
     presentationUtil,
   } = pluginsStart;
 
-  const spacesApi = pluginsStart.spacesOss?.isSpacesAvailable ? pluginsStart.spacesOss : undefined;
   const activeSpaceId =
     spacesApi && (await spacesApi.getActiveSpace$().pipe(first()).toPromise())?.id;
   let globalEmbedSettings: DashboardEmbedSettings | undefined;

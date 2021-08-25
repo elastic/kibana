@@ -13,25 +13,30 @@ import React from 'react';
 import { useUiTracker } from '../../../../../../observability/public';
 import { ContentsProps } from '.';
 import { NodeStats } from '../../../../../common/service_map';
-import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { ApmRoutes } from '../../../routing/apm_route_config';
 import { StatsList } from './stats_list';
 
-export function BackendContents({ nodeData, environment }: ContentsProps) {
-  const { query } = useApmParams('/*');
+export function BackendContents({
+  nodeData,
+  environment,
+  start,
+  end,
+}: ContentsProps) {
+  const { query } = useApmParams(
+    '/service-map',
+    '/services/:serviceName/service-map'
+  );
+
   const apmRouter = useApmRouter();
-  const {
-    urlParams: { start, end },
-  } = useUrlParams();
 
   const backendName = nodeData.label;
 
   const { data = { transactionStats: {} } as NodeStats, status } = useFetcher(
     (callApmApi) => {
-      if (backendName && start && end) {
+      if (backendName) {
         return callApmApi({
           endpoint: 'GET /api/apm/service-map/backend/{backendName}',
           params: {
