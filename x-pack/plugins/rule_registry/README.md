@@ -73,7 +73,7 @@ await plugins.ruleRegistry.createOrUpdateComponentTemplate({
 await plugins.ruleRegistry.createOrUpdateIndexTemplate({
   name: plugins.ruleRegistry.getFullAssetName('apm-index-template'),
   body: {
-    index_patterns: [plugins.ruleRegistry.getFullAssetName('observability-apm*')],
+    index_patterns: [plugins.ruleRegistry.getFullAssetName('observability.apm*')],
     composed_of: [
       // Technical component template, required
       plugins.ruleRegistry.getFullAssetName(TECHNICAL_COMPONENT_TEMPLATE_NAME),
@@ -85,7 +85,7 @@ await plugins.ruleRegistry.createOrUpdateIndexTemplate({
 // Finally, create the rule data client that can be injected into rule type
 // executors and API endpoints
 const ruleDataClient = new RuleDataClient({
-  alias: plugins.ruleRegistry.getFullAssetName('observability-apm'),
+  alias: plugins.ruleRegistry.getFullAssetName('observability.apm'),
   getClusterClient: async () => {
     const coreStart = await getCoreStart();
     return coreStart.elasticsearch.client.asInternalUser;
