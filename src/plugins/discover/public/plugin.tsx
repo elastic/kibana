@@ -117,7 +117,7 @@ export interface DiscoverStart {
   savedSearchLoader: SavedObjectLoader;
 
   /**
-   * @deprecated Use URL locator instead. URL generaotr will be removed.
+   * @deprecated Use URL locator instead. URL generator will be removed.
    */
   readonly urlGenerator: undefined | UrlGeneratorContract<'DISCOVER_APP_URL_GENERATOR'>;
 
@@ -197,20 +197,12 @@ export class DiscoverPlugin
   private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
   private docViewsRegistry: DocViewsRegistry | null = null;
   private stopUrlTracking: (() => void) | undefined = undefined;
-  private servicesInitialized: boolean = false;
 
   /**
    * @deprecated
    */
   private urlGenerator?: DiscoverStart['urlGenerator'];
   private locator?: DiscoverAppLocator;
-
-  /**
-   * why are those functions public? they are needed for some mocha tests
-   * can be removed once all is Jest
-   */
-  public initializeInnerAngular?: () => void;
-  public initializeServices?: () => Promise<{ core: CoreStart; plugins: DiscoverStartPlugins }>;
 
   setup(
     core: CoreSetup<DiscoverStartPlugins, DiscoverStart>,
@@ -317,29 +309,18 @@ export class DiscoverPlugin
       defaultPath: '#/',
       category: DEFAULT_APP_CATEGORIES.kibana,
       mount: async (params: AppMountParameters) => {
-        if (!this.initializeServices) {
-          throw Error('Discover plugin method initializeServices is undefined');
-        }
-        if (!this.initializeInnerAngular) {
-          throw Error('Discover plugin method initializeInnerAngular is undefined');
-        }
+        const [, depsStart] = await core.getStartServices();
         setScopedHistory(params.history);
         setHeaderActionMenuMounter(params.setHeaderActionMenu);
         syncHistoryLocations();
         appMounted();
-        const {
-          plugins: { data: dataStart },
-        } = await this.initializeServices();
-        await this.initializeInnerAngular();
 
         // make sure the index pattern list is up to date
-        await dataStart.indexPatterns.clearCache();
+        await depsStart.data.indexPatterns.clearCache();
 
         const { renderApp } = await import('./application/application');
-        params.element.classList.add('dscAppWrapper');
-        const unmount = await renderApp('discoverEmbeddable', params.element);
+        const unmount = await renderApp('discover', params.element);
         return () => {
-          params.element.classList.remove('dscAppWrapper');
           unmount();
           appUnMounted();
         };
@@ -390,16 +371,8 @@ export class DiscoverPlugin
 
     setUiActions(plugins.uiActions);
 
-    this.initializeServices = async () => {
-      if (this.servicesInitialized) {
-        return { core, plugins };
-      }
-      const services = await buildServices(core, plugins, this.initializerContext);
-      setServices(services);
-      this.servicesInitialized = true;
-
-      return { core, plugins };
-    };
+    const services = buildServices(core, plugins, this.initializerContext);
+    setServices(services);
 
     return {
       urlGenerator: this.urlGenerator,

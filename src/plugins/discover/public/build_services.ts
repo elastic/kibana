@@ -64,11 +64,11 @@ export interface DiscoverServices {
   http: HttpStart;
 }
 
-export async function buildServices(
+export function buildServices(
   core: CoreStart,
   plugins: DiscoverStartPlugins,
   context: PluginInitializerContext
-): Promise<DiscoverServices> {
+): DiscoverServices {
   const services = {
     savedObjectsClient: core.savedObjects.client,
     savedObjects: plugins.savedObjects,
