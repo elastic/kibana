@@ -25,4 +25,4 @@ curl -s -k \
  -H 'kbn-xsrf: 123' \
  -u observer:changeme \
  -X POST ${KIBANA_URL}${SPACE_URL}/internal/rac/alerts/bulk_update \
--d "{\"query\": \"$QUERY\", \"status\":\"$STATUS\", \"index\":\".alerts-observability-apm\"}" | jq .
+-d "{\"query\": \"$QUERY\", \"status\":\"$STATUS\", \"index\":\".alerts-observability.apm.alerts\"}" | jq .
