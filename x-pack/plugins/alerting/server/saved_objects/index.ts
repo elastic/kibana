@@ -12,6 +12,7 @@ import type {
   SavedObjectsServiceSetup,
   SavedObjectsTypeMappingDefinition,
 } from 'kibana/server';
+import Semver from 'semver';
 import mappings from './mappings.json';
 import { getMigrations } from './migrations';
 import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
@@ -48,12 +49,14 @@ export function setupSavedObjects(
   savedObjects: SavedObjectsServiceSetup,
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup,
   ruleTypeRegistry: RuleTypeRegistry,
-  logger: Logger
+  logger: Logger,
+  kibanaVersion: string
 ) {
   savedObjects.registerType({
     name: 'alert',
     hidden: true,
-    namespaceType: 'single',
+    namespaceType: Semver.lt(kibanaVersion, '8.0.0') ? 'single' : 'multiple-isolated',
+    convertToMultiNamespaceTypeVersion: Semver.lt(kibanaVersion, '8.0.0') ? undefined : '8.0.0',
     migrations: getMigrations(encryptedSavedObjects),
     mappings: mappings.alert as SavedObjectsTypeMappingDefinition,
     management: {
