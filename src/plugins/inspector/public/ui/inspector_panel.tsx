@@ -22,7 +22,8 @@ import { ApplicationStart, HttpStart, IUiSettingsClient } from 'kibana/public';
 import { InspectorViewDescription } from '../types';
 import { Adapters } from '../../common';
 import { InspectorViewChooser } from './inspector_view_chooser';
-import { KibanaContextProvider } from '../../../kibana_react/public';
+import { KibanaContextProvider, RedirectAppLinks } from '../../../kibana_react/public';
+import { SharePluginStart } from '../../../share/public';
 
 function hasAdaptersChanged(oldAdapters: Adapters, newAdapters: Adapters) {
   return (
@@ -44,6 +45,7 @@ interface InspectorPanelProps {
     application: ApplicationStart;
     http: HttpStart;
     uiSettings: IUiSettingsClient;
+    share: SharePluginStart;
   };
 }
 
@@ -116,25 +118,27 @@ export class InspectorPanel extends Component<InspectorPanelProps, InspectorPane
 
     return (
       <KibanaContextProvider services={dependencies}>
-        <EuiFlyoutHeader hasBorder>
-          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-            <EuiFlexItem grow={true}>
-              <EuiTitle size="s">
-                <h1>{title}</h1>
-              </EuiTitle>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <InspectorViewChooser
-                views={views}
-                onViewSelected={this.onViewSelected}
-                selectedView={selectedView}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlyoutHeader>
-        <EuiFlyoutBody className="insInspectorPanel__flyoutBody">
-          {this.renderSelectedPanel()}
-        </EuiFlyoutBody>
+        <RedirectAppLinks application={dependencies.application}>
+          <EuiFlyoutHeader hasBorder>
+            <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+              <EuiFlexItem grow={true}>
+                <EuiTitle size="s">
+                  <h1>{title}</h1>
+                </EuiTitle>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <InspectorViewChooser
+                  views={views}
+                  onViewSelected={this.onViewSelected}
+                  selectedView={selectedView}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlyoutHeader>
+          <EuiFlyoutBody className="insInspectorPanel__flyoutBody">
+            {this.renderSelectedPanel()}
+          </EuiFlyoutBody>
+        </RedirectAppLinks>
       </KibanaContextProvider>
     );
   }

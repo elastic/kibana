@@ -9,6 +9,7 @@
   "include": ["common/**/*", "public/**/*", "index.ts"],
   "references": [
     { "path": "../../core/tsconfig.json" },
-    { "path": "../kibana_react/tsconfig.json" }
+    { "path": "../kibana_react/tsconfig.json" },
+    { "path": "../share/tsconfig.json" }
   ]
 }
