@@ -150,7 +150,7 @@ export class MbMap extends Component<Props, State> {
     }
   }, 256);
 
-  _getMapState() {
+  _getMapExtentState() {
     const zoom = this.state.mbMap!.getZoom();
     const mbCenter = this.state.mbMap!.getCenter();
     const mbBounds = this.state.mbMap!.getBounds();
@@ -257,7 +257,7 @@ export class MbMap extends Component<Props, State> {
       this._loadMakiSprites(mbMap);
       this._initResizerChecker();
       this._registerMapEventListeners(mbMap);
-      this.props.onMapReady(this._getMapState());
+      this.props.onMapReady(this._getMapExtentState());
     });
   }
 
@@ -269,7 +269,7 @@ export class MbMap extends Component<Props, State> {
     mbMap.on(
       'moveend',
       _.debounce(() => {
-        this.props.extentChanged(this._getMapState());
+        this.props.extentChanged(this._getMapExtentState());
       }, 100)
     );
 
@@ -413,7 +413,7 @@ export class MbMap extends Component<Props, State> {
     // hack to update extent after zoom update finishes moving map.
     if (zoomRangeChanged) {
       setTimeout(() => {
-        this.props.extentChanged(this._getMapState());
+        this.props.extentChanged(this._getMapExtentState());
       }, 300);
     }
   }
