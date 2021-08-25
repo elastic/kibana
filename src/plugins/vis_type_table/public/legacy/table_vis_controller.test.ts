@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import angular, { IRootScopeService, IScope, ICompileService } from 'angular';
+import angular, { ICompileService, IRootScopeService, IScope } from 'angular';
 import 'angular-mocks';
 import 'angular-sanitize';
 import $ from 'jquery';
@@ -16,11 +16,10 @@ import { initTableVisLegacyModule } from './table_vis_legacy_module';
 import { initAngularBootstrap } from '../../../kibana_legacy/public/angular_bootstrap';
 import { tableVisLegacyTypeDefinition } from './table_vis_legacy_type';
 import { Vis } from '../../../visualizations/public';
-import { stubFields } from '../../../data/public/stubs';
+import { createStubIndexPattern, stubFieldSpecMap } from '../../../data/public/stubs';
 import { tableVisLegacyResponseHandler } from './table_vis_legacy_response_handler';
 import { coreMock } from '../../../../core/public/mocks';
-import { IAggConfig, search } from '../../../data/public';
-import { getStubIndexPattern } from '../../../data/public/test_utils';
+import { IAggConfig, IndexPattern, search } from '../../../data/public';
 import { searchServiceMock } from '../../../data/public/search/mocks';
 
 const { createAggConfigs } = searchServiceMock.createStartContract().aggs;
@@ -66,7 +65,7 @@ describe('Table Vis - Controller', () => {
   let $el: JQuery<HTMLElement>;
   let tableAggResponse: any;
   let tabifiedResponse: any;
-  let stubIndexPattern: any;
+  let stubIndexPattern: IndexPattern;
 
   const initLocalAngular = () => {
     const tableVisModule = getAngularModule(
@@ -92,13 +91,14 @@ describe('Table Vis - Controller', () => {
   );
 
   beforeEach(() => {
-    stubIndexPattern = getStubIndexPattern(
-      'logstash-*',
-      (cfg: any) => cfg,
-      'time',
-      stubFields,
-      coreMock.createSetup()
-    );
+    stubIndexPattern = createStubIndexPattern({
+      spec: {
+        id: 'logstash-*',
+        title: 'logstash-*',
+        timeFieldName: 'time',
+        fields: stubFieldSpecMap,
+      },
+    });
   });
 
   function getRangeVis(params?: object) {

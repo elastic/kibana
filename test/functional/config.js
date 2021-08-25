@@ -43,7 +43,6 @@ export default async function ({ readConfigFile }) {
         ...commonConfig.get('kbnTestServer.serverArgs'),
         '--telemetry.optIn=false',
         '--savedObjects.maxImportPayloadBytes=10485760',
-        '--xpack.maps.showMapVisualizationTypes=true',
 
         // to be re-enabled once kibana/issues/102552 is completed
         '--xpack.security.enabled=false',

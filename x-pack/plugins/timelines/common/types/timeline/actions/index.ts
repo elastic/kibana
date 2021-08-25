@@ -20,6 +20,7 @@ export interface ActionProps {
   columnId: string;
   columnValues: string;
   data: TimelineNonEcsData[];
+  disabled?: boolean;
   ecsData: Ecs;
   eventId: string;
   eventIdToNoteIds?: Readonly<Record<string, string[]>>;
@@ -33,7 +34,6 @@ export interface ActionProps {
   refetch?: () => void;
   rowIndex: number;
   setEventsDeleted: SetEventsDeleted;
-  setEventsLoading: SetEventsLoading;
   showCheckboxes: boolean;
   showNotes?: boolean;
   tabType?: TimelineTabs;
