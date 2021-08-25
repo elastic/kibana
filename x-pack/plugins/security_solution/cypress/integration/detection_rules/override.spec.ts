@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ALERT_RISK_SCORE } from '@kbn/rule-data-utils';
 import { formatMitreAttackDescription } from '../../helpers/rules';
 import {
   getIndexPatterns,
@@ -16,7 +17,7 @@ import {
 import {
   NUMBER_OF_ALERTS,
   ALERT_GRID_CELL,
-  ALERT_RISK_SCORE,
+  ALERT_RISK_SCORE as ALERT_RISK_SCORE_FIELD,
   ALERT_RULE_NAME,
   ALERT_SEVERITY,
 } from '../../screens/alerts';
@@ -195,6 +196,6 @@ describe('Detection rules, override', () => {
     cy.get(NUMBER_OF_ALERTS).should(($count) => expect(+$count.text().split(' ')[0]).to.be.gte(1));
     cy.get(`${ALERT_GRID_CELL} ${ALERT_RULE_NAME}`).contains('auditbeat');
     cy.get(`${ALERT_GRID_CELL} ${ALERT_SEVERITY}`).contains('critical');
-    cy.get(`${ALERT_GRID_CELL} ${ALERT_RISK_SCORE}`).contains('80');
+    cy.get(`${ALERT_GRID_CELL} ${ALERT_RISK_SCORE_FIELD}`).contains('80');
   });
 });
