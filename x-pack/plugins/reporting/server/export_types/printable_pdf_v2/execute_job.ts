@@ -49,7 +49,7 @@ export const runTaskFnFactory: RunTaskFnFactory<
         apmGeneratePdf = apmTrans?.startSpan('generate_pdf_pipeline', 'execute');
         return generatePdfObservable(
           jobLogger,
-          jobId,
+          job,
           title,
           locatorParams.map(setForceNow(job.forceNow)),
           browserTimezone,

@@ -109,12 +109,10 @@ export const REPORTING_REDIRECT_LOCATOR_STORE_KEY = '__REPORTING_REDIRECT_LOCATO
 /**
  * A way to get the client side route for the reporting redirect app.
  *
- * This route currently expects a job ID and a locator that to use from that job so that it can redirect to the
- * correct page.
- *
- * TODO: Accommodate 'forceNow' value that some visualizations may rely on
+ * TODO: Add a job ID and a locator to use so that we can redirect without expecting state to
+ * be injected to the page
  */
-export const getRedirectAppPathHome = () => {
+export const getRedirectAppPath = () => {
   return '/app/management/insightsAndAlerting/reporting/r';
 };
 

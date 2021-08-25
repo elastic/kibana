@@ -9,7 +9,6 @@ jest.mock('../../../../common/lib/fetch');
 
 import { getPdfJobParams } from './utils';
 import { workpads } from '../../../../__fixtures__/workpads';
-import { IBasePath } from 'kibana/public';
 
 const workpadSharingData = { workpad: workpads[0], pageCount: 12 };
 
