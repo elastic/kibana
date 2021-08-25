@@ -65,9 +65,7 @@
                 "section": "def-public.CoreSetup",
                 "text": "CoreSetup"
               },
-              "<{}, { dashboardConfig: ",
-              "DashboardConfig",
-              "; loadFontAwesome: () => Promise<void>; loadAngularBootstrap: () => Promise<void>; config: Readonly<{} & { defaultAppId: string; }>; }>) => {}"
+              "<{}, { loadFontAwesome: () => Promise<void>; loadAngularBootstrap: () => Promise<void>; config: Readonly<{} & { defaultAppId: string; }>; }>) => {}"
             ],
             "path": "src/plugins/kibana_legacy/public/plugin.ts",
             "deprecated": false,
@@ -87,9 +85,7 @@
                     "section": "def-public.CoreSetup",
                     "text": "CoreSetup"
                   },
-                  "<{}, { dashboardConfig: ",
-                  "DashboardConfig",
-                  "; loadFontAwesome: () => Promise<void>; loadAngularBootstrap: () => Promise<void>; config: Readonly<{} & { defaultAppId: string; }>; }>"
+                  "<{}, { loadFontAwesome: () => Promise<void>; loadAngularBootstrap: () => Promise<void>; config: Readonly<{} & { defaultAppId: string; }>; }>"
                 ],
                 "path": "src/plugins/kibana_legacy/public/plugin.ts",
                 "deprecated": false,
@@ -114,9 +110,7 @@
                 "section": "def-public.CoreStart",
                 "text": "CoreStart"
               },
-              ") => { dashboardConfig: ",
-              "DashboardConfig",
-              "; loadFontAwesome: () => Promise<void>; loadAngularBootstrap: () => Promise<void>; config: Readonly<{} & { defaultAppId: string; }>; }"
+              ") => { loadFontAwesome: () => Promise<void>; loadAngularBootstrap: () => Promise<void>; config: Readonly<{} & { defaultAppId: string; }>; }"
             ],
             "path": "src/plugins/kibana_legacy/public/plugin.ts",
             "deprecated": false,
@@ -1164,9 +1158,7 @@
         "label": "KibanaLegacyStart",
         "description": [],
         "signature": [
-          "{ dashboardConfig: ",
-          "DashboardConfig",
-          "; loadFontAwesome: () => Promise<void>; loadAngularBootstrap: () => Promise<void>; config: Readonly<{} & { defaultAppId: string; }>; }"
+          "{ loadFontAwesome: () => Promise<void>; loadAngularBootstrap: () => Promise<void>; config: Readonly<{} & { defaultAppId: string; }>; }"
         ],
         "path": "src/plugins/kibana_legacy/public/plugin.ts",
         "deprecated": false,

@@ -10,7 +10,6 @@ import { Route, Switch } from 'react-router-dom';
 
 import { ENGINE_CRAWLER_DOMAIN_PATH, ENGINE_CRAWLER_PATH } from '../../routes';
 
-import { CrawlerLanding } from './crawler_landing';
 import { CrawlerOverview } from './crawler_overview';
 import { CrawlerSingleDomain } from './crawler_single_domain';
 
@@ -18,7 +17,7 @@ export const CrawlerRouter: React.FC = () => {
   return (
     <Switch>
       <Route exact path={ENGINE_CRAWLER_PATH}>
-        {process.env.NODE_ENV === 'development' ? <CrawlerOverview /> : <CrawlerLanding />}
+        <CrawlerOverview />
       </Route>
       <Route exact path={ENGINE_CRAWLER_DOMAIN_PATH}>
         <CrawlerSingleDomain />
