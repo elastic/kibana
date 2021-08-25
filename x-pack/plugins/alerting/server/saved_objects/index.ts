@@ -49,14 +49,13 @@ export function setupSavedObjects(
   savedObjects: SavedObjectsServiceSetup,
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup,
   ruleTypeRegistry: RuleTypeRegistry,
-  logger: Logger,
-  kibanaVersion: string
+  logger: Logger
 ) {
   savedObjects.registerType({
     name: 'alert',
     hidden: true,
-    namespaceType: Semver.lt(kibanaVersion, '8.0.0') ? 'single' : 'multiple-isolated',
-    convertToMultiNamespaceTypeVersion: Semver.lt(kibanaVersion, '8.0.0') ? undefined : '8.0.0',
+    namespaceType: 'multiple-isolated',
+    convertToMultiNamespaceTypeVersion: '8.0.0',
     migrations: getMigrations(encryptedSavedObjects),
     mappings: mappings.alert as SavedObjectsTypeMappingDefinition,
     management: {

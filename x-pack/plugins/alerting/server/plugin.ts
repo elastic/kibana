@@ -228,8 +228,7 @@ export class AlertingPlugin {
       core.savedObjects,
       plugins.encryptedSavedObjects,
       this.ruleTypeRegistry,
-      this.logger,
-      this.kibanaVersion
+      this.logger
     );
 
     initializeApiKeyInvalidator(
