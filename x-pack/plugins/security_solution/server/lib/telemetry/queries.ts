@@ -1,20 +1,28 @@
-import { ElasticsearchClient, Logger } from 'src/core/server';
+import { ElasticsearchClient, Logger, SavedObjectsClient } from 'src/core/server';
 import { SearchRequest } from '@elastic/elasticsearch/api/types';
-import { TelemetryEvent, ESLicense, ESClusterInfo} from './types'
-import { AgentService } from '../../../../fleet/server';
-
+import { TelemetryEvent, ESLicense, ESClusterInfo, GetEndpointListResponse} from './types'
+import { getTrustedAppsList } from '../../endpoint/routes/trusted_apps/service';
+import { AgentService, AgentPolicyServiceInterface } from '../../../../fleet/server';
+import { ExceptionListClient } from '../../../../lists/server';
+import { exceptionListItemToEndpointEntry } from './helpers' 
 
 
 export class TelemetryQuerier {
   private readonly logger: Logger; 
   private esClient?: ElasticsearchClient;
   private agentService?: AgentService;
+  private agentPolicyService?: AgentPolicyServiceInterface;
+  private savedObjectsClient?: SavedObjectsClient;
+  private exceptionListClient?: ExceptionListClient;
   private readonly max_records = 10_000;
   private maxQueueSize = 100;
 
-  constructor(esClient?: ElasticsearchClient, agentService?: AgentService) {
+  constructor(esClient?: ElasticsearchClient, agentService?: AgentService, agentPolicyService?: AgentPolicyServiceInterface, savedObjectsClient?: SavedObjectsClient, exceptionListClient?: ExceptionListClient) {
 	  this.agentService = agentService;
 	  this.esClient = esClient;
+	  this.agentPolicyService = agentPolicyService;
+	  this.savedObjectsClient = savedObjectsClient;
+	  this.exceptionListClient = exceptionListClient;
   }
 
 /**
@@ -43,7 +51,7 @@ public async fetchFleetAgents() {
 	});
       }
     
-private async fetchClusterInfo(): Promise<ESClusterInfo> {
+public async fetchClusterInfo(): Promise<ESClusterInfo> {
 	if (this.esClient === undefined) {
 	  throw Error("Couldn't fetch cluster info. es client is not available");
 	}
@@ -197,7 +205,7 @@ public async fetchEndpointPolicyResponses(executeFrom: string, executeTo: string
 	).body as Promise<{ license: ESLicense }>; // Note: We have to as cast since transport.request doesn't have generics
       }
 
-      private async fetchLicenseInfo(): Promise<ESLicense | undefined> {
+      public async fetchLicenseInfo(): Promise<ESLicense | undefined> {
 	if (!this.esClient) {
 	  return undefined;
 	}
@@ -210,7 +218,7 @@ public async fetchEndpointPolicyResponses(executeFrom: string, executeTo: string
 	}
       }
     
-      private copyLicenseFields(lic: ESLicense) {
+      public copyLicenseFields(lic: ESLicense) {
 	return {
 	  uid: lic.uid,
 	  status: lic.status,
@@ -219,4 +227,48 @@ public async fetchEndpointPolicyResponses(executeFrom: string, executeTo: string
 	  ...(lic.issuer ? { issuer: lic.issuer } : {}),
 	};
       }
+
+
+  public async fetchPolicyConfigs(id: string) {
+	if (this.savedObjectsClient === undefined || this.savedObjectsClient === null) {
+	  throw Error('could not fetch endpoint policy configs. saved object client is not available');
+	}
+    
+	return this.agentPolicyService?.get(this.savedObjectsClient, id);
+      }
+    
+      public async fetchTrustedApplications() {
+	if (this?.exceptionListClient === undefined || this?.exceptionListClient === null) {
+	  throw Error('could not fetch trusted applications. exception list client not available.');
+	}
+    
+	return getTrustedAppsList(this.exceptionListClient, { page: 1, per_page: 10_000 });
+      }
+    
+      public async fetchEndpointList(listId: string): Promise<GetEndpointListResponse> {
+	if (this?.exceptionListClient === undefined || this?.exceptionListClient === null) {
+	  throw Error('could not fetch trusted applications. exception list client not available.');
+	}
+    
+	// Ensure list is created if it does not exist
+	await this.exceptionListClient.createTrustedAppsList();
+    
+	const results = await this.exceptionListClient.findExceptionListItem({
+	  listId,
+	  page: 1,
+	  perPage: this.max_records,
+	  filter: undefined,
+	  namespaceType: 'agnostic',
+	  sortField: 'name',
+	  sortOrder: 'asc',
+	});
+    
+	return {
+	  data: results?.data.map(exceptionListItemToEndpointEntry) ?? [],
+	  total: results?.total ?? 0,
+	  page: results?.page ?? 1,
+	  per_page: results?.per_page ?? this.max_records,
+	};
+      }
+
 }

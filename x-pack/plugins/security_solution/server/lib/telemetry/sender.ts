@@ -9,7 +9,7 @@ import { cloneDeep } from 'lodash';
 import axios from 'axios';
 import { SavedObjectsClientContract } from 'kibana/server';
 import { URL } from 'url';
-import { CoreStart, ElasticsearchClient, Logger } from 'src/core/server';
+import { CoreStart, Logger } from 'src/core/server';
 import { TelemetryPluginStart, TelemetryPluginSetup } from 'src/plugins/telemetry/server';
 import { UsageCounter } from 'src/plugins/usage_collection/server';
 import { transformDataToNdjson } from '../../utils/read_stream/create_stream_from_ndjson';
@@ -20,13 +20,14 @@ import {
 import {
   TelemetryQuerier
 } from './queries'
+import {
+  processEvents
+} from './filters'
 import { DiagnosticTask, EndpointTask, ExceptionListsTask } from './tasks';
 import { EndpointAppContextService } from '../../endpoint/endpoint_app_context_services';
-import { AgentService, AgentPolicyServiceInterface } from '../../../../fleet/server';
-import { getTrustedAppsList } from '../../endpoint/routes/trusted_apps/service';
 import { ExceptionListClient } from '../../../../lists/server';
-import { GetEndpointListResponse } from './types';
-import { createUsageCounterLabel, exceptionListItemToEndpointEntry } from './helpers';
+import { createUsageCounterLabel } from './helpers';
+import { TelemetryEvent } from './types'
 
 const usageLabelPrefix: string[] = ['security_telemetry', 'sender'];
 
@@ -42,10 +43,7 @@ export class TelemetryEventsSender {
   private querier: TelemetryQuerier | undefined;
   private queue: TelemetryEvent[] = [];
   private isOptedIn?: boolean = true; // Assume true until the first check
-  private agentService?: AgentService;
-  private agentPolicyService?: AgentPolicyServiceInterface;
-  private savedObjectsClient?: SavedObjectsClientContract;
-  private exceptionListClient?: ExceptionListClient;
+
   private telemetryUsageCounter?: UsageCounter;
   private diagnosticTask?: DiagnosticTask;
   private endpointTask?: EndpointTask;
@@ -80,10 +78,10 @@ export class TelemetryEventsSender {
     this.telemetryStart = telemetryStart;
     const esClient = core?.elasticsearch.client.asInternalUser;
     const agentService = endpointContextService?.getAgentService();
-    this.querier = new TelemetryQuerier(esClient, agentService)
-    this.agentPolicyService = endpointContextService?.getAgentPolicyService();
-    this.savedObjectsClient = (core?.savedObjects.createInternalRepository() as unknown) as SavedObjectsClientContract;
-    this.exceptionListClient = exceptionListClient;
+    const agentPolicyService = endpointContextService?.getAgentPolicyService();
+    const savedObjectsClient = (core?.savedObjects.createInternalRepository() as unknown) as SavedObjectsClientContract;
+    this.querier = new TelemetryQuerier(esClient, agentService, agentPolicyService, savedObjectsClient, exceptionListClient)
+
 
     if (taskManager && this.diagnosticTask && this.endpointTask && this.exceptionListsTask) {
       this.logger.debug(`starting security telemetry tasks`);
@@ -105,48 +103,6 @@ export class TelemetryEventsSender {
     }
   }
 
-
-  public async fetchPolicyConfigs(id: string) {
-    if (this.savedObjectsClient === undefined || this.savedObjectsClient === null) {
-      throw Error('could not fetch endpoint policy configs. saved object client is not available');
-    }
-
-    return this.agentPolicyService?.get(this.savedObjectsClient, id);
-  }
-
-  public async fetchTrustedApplications() {
-    if (this?.exceptionListClient === undefined || this?.exceptionListClient === null) {
-      throw Error('could not fetch trusted applications. exception list client not available.');
-    }
-
-    return getTrustedAppsList(this.exceptionListClient, { page: 1, per_page: 10_000 });
-  }
-
-  public async fetchEndpointList(listId: string): Promise<GetEndpointListResponse> {
-    if (this?.exceptionListClient === undefined || this?.exceptionListClient === null) {
-      throw Error('could not fetch trusted applications. exception list client not available.');
-    }
-
-    // Ensure list is created if it does not exist
-    await this.exceptionListClient.createTrustedAppsList();
-
-    const results = await this.exceptionListClient.findExceptionListItem({
-      listId,
-      page: 1,
-      perPage: this.max_records,
-      filter: undefined,
-      namespaceType: 'agnostic',
-      sortField: 'name',
-      sortOrder: 'asc',
-    });
-
-    return {
-      data: results?.data.map(exceptionListItemToEndpointEntry) ?? [],
-      total: results?.total ?? 0,
-      page: results?.page ?? 1,
-      per_page: results?.per_page ?? this.max_records,
-    };
-  }
 
   public queueTelemetryEvents(events: TelemetryEvent[]) {
     const qlength = this.queue.length;
@@ -173,9 +129,9 @@ export class TelemetryEventsSender {
         counterType: 'num_capacity_exceeded',
         incrementBy: 1,
       });
-      this.queue.push(...this.processEvents(events.slice(0, this.maxQueueSize - qlength)));
+      this.queue.push(...processEvents(events.slice(0, this.maxQueueSize - qlength)));
     } else {
-      this.queue.push(...this.processEvents(events));
+      this.queue.push(...processEvents(events));
     }
   }
 
@@ -208,8 +164,8 @@ export class TelemetryEventsSender {
 
       const [telemetryUrl, clusterInfo, licenseInfo] = await Promise.all([
         this.fetchTelemetryUrl('alerts-endpoint'),
-        this.fetchClusterInfo(),
-        this.fetchLicenseInfo(),
+        this.querier?.fetchClusterInfo(),
+        this.querier?.fetchLicenseInfo(),
       ]);
 
       this.logger.debug(`Telemetry URL: ${telemetryUrl}`);
@@ -219,9 +175,9 @@ export class TelemetryEventsSender {
 
       const toSend: TelemetryEvent[] = cloneDeep(this.queue).map((event) => ({
         ...event,
-        ...(licenseInfo ? { license: this.copyLicenseFields(licenseInfo) } : {}),
-        cluster_uuid: clusterInfo.cluster_uuid,
-        cluster_name: clusterInfo.cluster_name,
+        ...(licenseInfo ? { license: this.querier?.copyLicenseFields(licenseInfo) } : {}),
+        cluster_uuid: clusterInfo?.cluster_uuid,
+        cluster_name: clusterInfo?.cluster_name,
       }));
       this.queue = [];
 
@@ -229,8 +185,8 @@ export class TelemetryEventsSender {
         toSend,
         telemetryUrl,
         'alerts-endpoint',
-        clusterInfo.cluster_uuid,
-        clusterInfo.version?.number,
+        clusterInfo?.cluster_uuid,
+        clusterInfo?.version?.number,
         licenseInfo?.uid
       );
     } catch (err) {
@@ -252,8 +208,8 @@ export class TelemetryEventsSender {
     try {
       const [telemetryUrl, clusterInfo, licenseInfo] = await Promise.all([
         this.fetchTelemetryUrl(channel),
-        this.fetchClusterInfo(),
-        this.fetchLicenseInfo(),
+        this.querier?.fetchClusterInfo(),
+        this.querier?.fetchLicenseInfo(),
       ]);
 
       this.logger.debug(`Telemetry URL: ${telemetryUrl}`);
@@ -265,8 +221,8 @@ export class TelemetryEventsSender {
         toSend,
         telemetryUrl,
         channel,
-        clusterInfo.cluster_uuid,
-        clusterInfo.version?.number,
+        clusterInfo?.cluster_uuid,
+        clusterInfo?.version?.number,
         licenseInfo?.uid
       );
     } catch (err) {
