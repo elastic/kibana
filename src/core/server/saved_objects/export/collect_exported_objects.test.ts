@@ -400,6 +400,10 @@ describe('collectExportedObjects', () => {
     });
 
     it('returns the missing references', async () => {
+      registerType('foo');
+      registerType('bar');
+      registerType('missing');
+
       const foo1 = createObject({
         type: 'foo',
         id: '1',
@@ -459,6 +463,8 @@ describe('collectExportedObjects', () => {
     });
 
     it('does not call `client.bulkGet` when no objects have references', async () => {
+      registerType('foo');
+
       const obj1 = createObject({
         type: 'foo',
         id: '1',
@@ -493,6 +499,9 @@ describe('collectExportedObjects', () => {
     });
 
     it('calls `applyExportTransforms` for each iteration', async () => {
+      registerType('foo');
+      registerType('bar');
+
       const foo1 = createObject({
         type: 'foo',
         id: '1',
@@ -541,6 +550,10 @@ describe('collectExportedObjects', () => {
     });
 
     it('ignores references that are already included in the export', async () => {
+      registerType('foo');
+      registerType('bar');
+      registerType('dolly');
+
       const foo1 = createObject({
         type: 'foo',
         id: '1',
@@ -612,6 +625,11 @@ describe('collectExportedObjects', () => {
     });
 
     it('does not fetch duplicates of references', async () => {
+      registerType('foo');
+      registerType('bar');
+      registerType('dolly');
+      registerType('baz');
+
       const foo1 = createObject({
         type: 'foo',
         id: '1',
@@ -669,6 +687,11 @@ describe('collectExportedObjects', () => {
     });
 
     it('fetch references for additional objects returned by the export transform', async () => {
+      registerType('foo');
+      registerType('bar');
+      registerType('dolly');
+      registerType('baz');
+
       const foo1 = createObject({
         type: 'foo',
         id: '1',
@@ -718,6 +741,11 @@ describe('collectExportedObjects', () => {
     });
 
     it('fetch references for additional objects returned by the export transform of nested references', async () => {
+      registerType('foo');
+      registerType('bar');
+      registerType('dolly');
+      registerType('baz');
+
       const foo1 = createObject({
         type: 'foo',
         id: '1',
@@ -785,6 +813,11 @@ describe('collectExportedObjects', () => {
     });
 
     it('excludes references filtered by the `isExportable` predicate for additional objects returned by the export transform', async () => {
+      registerType('foo');
+      registerType('bar');
+      registerType('dolly');
+      registerType('baz', { isExportable: () => false });
+
       const foo1 = createObject({
         type: 'foo',
         id: '1',
@@ -821,11 +854,6 @@ describe('collectExportedObjects', () => {
         id: '4',
       });
 
-      registerType('foo');
-      registerType('bar');
-      registerType('dolly');
-      registerType('baz', { isExportable: () => false });
-
       applyExportTransformsMock.mockImplementationOnce(({ objects }) => [...objects, bar2]);
 
       savedObjectsClient.bulkGet.mockResolvedValueOnce({
@@ -848,6 +876,9 @@ describe('collectExportedObjects', () => {
 
   describe('when `includeReferences` is `false`', () => {
     it('does not fetch the object references', async () => {
+      registerType('foo');
+      registerType('bar');
+
       const obj1 = createObject({
         type: 'foo',
         id: '1',
