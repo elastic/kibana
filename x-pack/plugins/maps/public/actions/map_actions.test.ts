@@ -46,7 +46,7 @@ describe('map_actions', () => {
       });
 
       it('should set buffer', () => {
-        const thunk = mapExtentChanged({
+        const action = mapExtentChanged({
           center: {
             lat: 7.5,
             lon: 97.5,
@@ -59,7 +59,7 @@ describe('map_actions', () => {
           },
           zoom: 5,
         });
-        thunk(dispatchMock, getStoreMock);
+        action(dispatchMock, getStoreMock);
 
         expect(dispatchMock.mock.calls[0]).toEqual([
           {
@@ -105,7 +105,7 @@ describe('map_actions', () => {
       });
 
       it('should not update buffer if extent is contained in existing buffer', () => {
-        const thunk = mapExtentChanged({
+        const action = mapExtentChanged({
           center: {
             lat: 8.5,
             lon: 98.5,
@@ -118,7 +118,7 @@ describe('map_actions', () => {
             minLon: 96,
           },
         });
-        thunk(dispatchMock, getStoreMock);
+        action(dispatchMock, getStoreMock);
 
         expect(dispatchMock.mock.calls[0]).toEqual([
           {
@@ -147,7 +147,7 @@ describe('map_actions', () => {
       });
 
       it('should update buffer if extent is outside of existing buffer', () => {
-        const thunk = mapExtentChanged({
+        const action = mapExtentChanged({
           center: {
             lat: 2.5,
             lon: 87.5,
@@ -160,7 +160,7 @@ describe('map_actions', () => {
             minLon: 85,
           },
         });
-        thunk(dispatchMock, getStoreMock);
+        action(dispatchMock, getStoreMock);
 
         expect(dispatchMock.mock.calls[0]).toEqual([
           {
@@ -189,7 +189,7 @@ describe('map_actions', () => {
       });
 
       it('should update buffer when zoom changes', () => {
-        const thunk = mapExtentChanged({
+        const action = mapExtentChanged({
           center: {
             lat: 8.5,
             lon: 98.5,
@@ -202,7 +202,7 @@ describe('map_actions', () => {
             minLon: 96,
           },
         });
-        thunk(dispatchMock, getStoreMock);
+        action(dispatchMock, getStoreMock);
 
         expect(dispatchMock.mock.calls[0]).toEqual([
           {
