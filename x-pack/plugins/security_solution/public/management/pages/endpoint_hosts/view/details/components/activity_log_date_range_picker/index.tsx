@@ -94,7 +94,6 @@ export const DateRangePicker = memo(() => {
                   aria-label="Start date"
                   endDate={endDate ? moment(endDate) : undefined}
                   isInvalid={isInvalidDateRange}
-                  maxDate={moment(endDate) || moment()}
                   onChange={onChangeStartDate}
                   onClear={() => onClear({ clearStart: true })}
                   placeholderText={i18.ACTIVITY_LOG.datePicker.startDate}
@@ -108,8 +107,6 @@ export const DateRangePicker = memo(() => {
                   aria-label="End date"
                   endDate={endDate ? moment(endDate) : undefined}
                   isInvalid={isInvalidDateRange}
-                  maxDate={moment()}
-                  minDate={startDate ? moment(startDate) : undefined}
                   onChange={onChangeEndDate}
                   onClear={() => onClear({ clearEnd: true })}
                   placeholderText={i18.ACTIVITY_LOG.datePicker.endDate}

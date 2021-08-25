@@ -10,6 +10,7 @@ import chalk from 'chalk';
 import testSubjectToCss from '@kbn/test-subj-selector';
 
 import { FtrService } from '../../ftr_provider_context';
+import { AXE_CONFIG, AXE_OPTIONS } from './constants';
 import { AxeReport, printResult } from './axe_report';
 // @ts-ignore JS that is run in browser as is
 import { analyzeWithAxe, analyzeWithAxeWithClient } from './analyze_with_axe';
@@ -77,26 +78,13 @@ export class AccessibilityService extends FtrService {
   }
 
   private async captureAxeReport(context: AxeContext): Promise<AxeReport> {
-    const axeOptions = {
-      reporter: 'v2',
-      runOnly: ['wcag2a', 'wcag2aa'],
-      rules: {
-        'color-contrast': {
-          enabled: false, // disabled because we have too many failures
-        },
-        bypass: {
-          enabled: false, // disabled because it's too flaky
-        },
-      },
-    };
-
     await this.Wd.driver.manage().setTimeouts({
       ...(await this.Wd.driver.manage().getTimeouts()),
       script: 600000,
     });
 
     const report = normalizeResult(
-      await this.browser.executeAsync(analyzeWithAxe, context, axeOptions)
+      await this.browser.executeAsync(analyzeWithAxe, context, AXE_CONFIG, AXE_OPTIONS)
     );
 
     if (report !== false) {
@@ -104,7 +92,7 @@ export class AccessibilityService extends FtrService {
     }
 
     const withClientReport = normalizeResult(
-      await this.browser.executeAsync(analyzeWithAxeWithClient, context, axeOptions)
+      await this.browser.executeAsync(analyzeWithAxeWithClient, context, AXE_CONFIG, AXE_OPTIONS)
     );
 
     if (withClientReport === false) {

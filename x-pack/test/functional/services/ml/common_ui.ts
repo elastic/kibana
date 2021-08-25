@@ -285,6 +285,20 @@ export function MachineLearningCommonUIProvider({
       await this.assertRowsNumberPerPage(testSubj, rowsNumber);
     },
 
+    async getEuiDescriptionListDescriptionFromTitle(testSubj: string, title: string) {
+      const subj = await testSubjects.find(testSubj);
+      const titles = await subj.findAllByTagName('dt');
+      const descriptions = await subj.findAllByTagName('dd');
+
+      for (let i = 0; i < titles.length; i++) {
+        const titleText = (await titles[i].parseDomContent()).html();
+        if (titleText === title) {
+          return (await descriptions[i].parseDomContent()).html();
+        }
+      }
+      return null;
+    },
+
     async changeToSpace(spaceId: string) {
       await PageObjects.spaceSelector.openSpacesNav();
       await PageObjects.spaceSelector.goToSpecificSpace(spaceId);

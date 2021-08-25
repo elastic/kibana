@@ -17,13 +17,21 @@ import { TransactionErrorRateChart } from '../transaction_error_rate_chart/';
 export function TransactionCharts({
   kuery,
   environment,
+  start,
+  end,
 }: {
   kuery: string;
   environment: string;
+  start: string;
+  end: string;
 }) {
   return (
     <>
-      <AnnotationsContextProvider environment={environment}>
+      <AnnotationsContextProvider
+        environment={environment}
+        start={start}
+        end={end}
+      >
         <ChartPointerEventContextProvider>
           <EuiFlexGrid columns={2} gutterSize="s">
             <EuiFlexItem data-cy={`transaction-duration-charts`}>
