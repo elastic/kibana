@@ -19,6 +19,7 @@ import { useMlKibana } from '../../application/contexts/kibana';
 import { TestsSelectionControl } from './tests_selection_control';
 import { isPopulatedObject } from '../../../common';
 import { ALL_JOBS_SELECTION } from '../../../common/constants/alerts';
+import { BetaBadge } from '../beta_badge';
 
 export type MlAnomalyAlertTriggerProps = AlertTypeParamsExpressionProps<MlAnomalyDetectionJobsHealthRuleParams>;
 
@@ -92,6 +93,15 @@ const AnomalyDetectionJobsHealthRuleTrigger: FC<MlAnomalyAlertTriggerProps> = ({
       error={formErrors}
       isInvalid={isFormInvalid}
     >
+      <BetaBadge
+        message={i18n.translate(
+          'xpack.ml.alertTypes.jobsHealthAlertingRule.betaBadgeTooltipContent',
+          {
+            defaultMessage: `Anomaly detection job health alerts are a beta feature. We'd love to hear your feedback.`,
+          }
+        )}
+      />
+
       <JobSelectorControl
         jobsAndGroupIds={includeJobsAndGroupIds}
         adJobsApiService={adJobsApiService}
