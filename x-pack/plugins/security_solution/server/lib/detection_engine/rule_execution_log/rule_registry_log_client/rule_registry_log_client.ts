@@ -82,13 +82,9 @@ export class RuleRegistryLogClient implements IRuleRegistryLogClient {
       componentTemplates: [
         {
           name: 'mappings',
-          version: 0,
           mappings: mappingFromFieldMap(ruleExecutionFieldMap, 'strict'),
         },
       ],
-      indexTemplate: {
-        version: 0,
-      },
     });
   }
 
