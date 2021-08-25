@@ -57,7 +57,7 @@ export interface Certificate {
 
 export interface PingResult {
   /**
-   * Response status code of ping request.
+   * Indicates whether the cluster requires authentication.
    */
   authRequired: boolean;
 

@@ -15,13 +15,19 @@ import type { Logger } from 'src/core/server';
 
 import { getDetailedErrorMessage } from './errors';
 
-export interface WriteConfigParameters {
+export type WriteConfigParameters = {
   host: string;
   caCert?: string;
-  username?: string;
-  password?: string;
-  serviceAccountToken?: { name: string; value: string };
-}
+} & (
+  | {
+      username: string;
+      password: string;
+    }
+  | {
+      serviceAccountToken: { name: string; value: string };
+    }
+  | {}
+);
 
 export class KibanaConfigWriter {
   constructor(private readonly configPath: string, private readonly logger: Logger) {}
@@ -72,14 +78,11 @@ export class KibanaConfigWriter {
     this.logger.debug(`Writing Elasticsearch configuration to ${this.configPath}.`);
     try {
       const config: Record<string, any> = { 'elasticsearch.hosts': [params.host] };
-      if (params.username) {
-        config['elasticsearch.username'] = params.username;
-      }
-      if (params.password) {
-        config['elasticsearch.password'] = params.password;
-      }
-      if (params.serviceAccountToken) {
+      if ('serviceAccountToken' in params) {
         config['elasticsearch.serviceAccountToken'] = params.serviceAccountToken.value;
+      } else if ('username' in params) {
+        config['elasticsearch.password'] = params.password;
+        config['elasticsearch.username'] = params.username;
       }
       if (params.caCert) {
         config['elasticsearch.ssl.certificateAuthorities'] = [caPath];

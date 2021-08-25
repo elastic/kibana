@@ -111,25 +111,15 @@ export const ClusterConfigurationForm: FunctionComponent<ClusterConfigurationFor
       return errors;
     },
     onSubmit: async (values) => {
-      try {
         await http.post('/internal/interactive_setup/configure', {
           body: JSON.stringify({
-            hosts: [host],
+          host,
             username: values.username,
             password: values.password,
             caCert: values.caCert,
           }),
         });
         onSuccess?.();
-      } catch (error) {
-        if (error.body?.message.includes('self signed certificate in certificate chain')) {
-          form.setError('caCert', 'Certificate is not valid for this cluster.');
-        } else if (error.body?.message.includes('unable to authenticate user')) {
-          form.setError('password', 'Invalid username or password.');
-        } else {
-          throw error;
-        }
-      }
     },
   });
 
@@ -142,7 +132,7 @@ export const ClusterConfigurationForm: FunctionComponent<ClusterConfigurationFor
           <EuiCallOut
             color="danger"
             title={i18n.translate('interactiveSetup.clusterConfigurationForm.submitErrorTitle', {
-              defaultMessage: "Couldn't check address",
+                defaultMessage: "Couldn't connect to cluster",
             })}
           >
             {(form.submitError as IHttpFetchError).body?.message}

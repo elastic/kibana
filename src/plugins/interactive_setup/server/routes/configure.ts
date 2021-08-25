@@ -25,14 +25,14 @@ export function defineConfigureRoute({
     {
       path: '/internal/interactive_setup/configure',
       validate: {
-        body: schema.oneOf([
-          schema.object({
-            hosts: schema.arrayOf(schema.uri({ scheme: 'https' }), {
-              minSize: 1,
+        query: schema.object({
+          code: schema.maybe(schema.string()),
             }),
+        body: schema.object({
+          host: schema.uri({ scheme: ['http', 'https'] }),
             username: schema.maybe(
               schema.string({
-                validate: (value) => {
+              validate: (value: string) => {
                   if (value === 'elastic') {
                     return (
                       'value of "elastic" is forbidden. This is a superuser account that can obfuscate ' +
@@ -43,16 +43,13 @@ export function defineConfigureRoute({
               })
             ),
             password: schema.maybe(schema.string()),
-            caCert: schema.string(),
+          caCert: schema.conditional(
+            schema.siblingRef('hosts'),
+            schema.uri({ scheme: 'https' }),
+            schema.string(),
+            schema.never()
+          ),
           }),
-          schema.object({
-            hosts: schema.arrayOf(schema.uri({ scheme: 'http' }), {
-              minSize: 1,
-            }),
-            username: schema.maybe(schema.string()),
-            password: schema.maybe(schema.string()),
-          }),
-        ]),
       },
       options: { authRequired: false },
     },

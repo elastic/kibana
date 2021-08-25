@@ -39,7 +39,7 @@ interface EnrollParameters {
 }
 
 interface AuthenticateParameters {
-  hosts: string[];
+  host: string;
   username?: string;
   password?: string;
   caCert?: string;
@@ -72,9 +72,15 @@ export interface ElasticsearchServiceSetup {
    */
   enroll: (params: EnrollParameters) => Promise<EnrollResult>;
 
+  /**
+   * Tries to authenticate specified user with cluster.
+   */
   authenticate: (params: AuthenticateParameters) => Promise<AuthenticateResult>;
 
-  ping: (hosts: string[]) => Promise<PingResult>;
+  /**
+   * Tries to connect to specified cluster and fetches certificate chain.
+   */
+  ping: (host: string) => Promise<PingResult>;
 }
 
 /**
@@ -166,7 +172,7 @@ export class ElasticsearchService {
   private async enroll(
     elasticsearch: ElasticsearchServicePreboot,
     { apiKey, hosts, caFingerprint }: EnrollParameters
-  ): Promise<EnrollResult> {
+  ) {
     const scopeableRequest: ScopeableRequest = { headers: { authorization: `ApiKey ${apiKey}` } };
 
     // We should iterate through all provided hosts until we find an accessible one.
@@ -178,6 +184,7 @@ export class ElasticsearchService {
       const enrollClient = elasticsearch.createClient('enroll', {
         hosts: [host],
         caFingerprint,
+        ssl: { verificationMode: 'none' },
       });
 
       let enrollmentResponse;
@@ -252,106 +259,77 @@ export class ElasticsearchService {
 
   private async authenticate(
     elasticsearch: ElasticsearchServicePreboot,
-    { hosts, username, password, caCert }: AuthenticateParameters
+    { host, username, password, caCert }: AuthenticateParameters
   ): Promise<AuthenticateResult> {
     if (caCert) {
       caCert = ElasticsearchService.createPemCertificate(caCert);
     }
 
-    // We should iterate through all provided hosts until we find an accessible one.
-    for (const host of hosts) {
-      const client = elasticsearch.createClient('authenticate', {
-        hosts: [host],
-        username,
-        password,
-        ssl: caCert ? { certificateAuthorities: [caCert] } : undefined,
-      });
+    const client = elasticsearch.createClient('authenticate', {
+      hosts: [host],
+      username,
+      password,
+      ssl: caCert ? { certificateAuthorities: [caCert] } : undefined,
+    });
 
-      try {
-        // Using `ping` instead of `authenticate` allows us to verify clusters with security enabled and disabled.
-        await client.asInternalUser.ping();
-      } catch (error) {
-        // We expect that all hosts belong to exactly same node and any non-connection error for one host would mean
-        // that enrollment will fail for any other host and we should bail out.
-        if (error instanceof errors.ConnectionError || error instanceof errors.TimeoutError) {
-          this.logger.error(
-            `Unable to connect to host "${host}", will proceed to the next host if available: ${getDetailedErrorMessage(
-              error
-            )}`
-          );
-          continue;
-        }
-
-        this.logger.error(
-          `Failed to authenticate with host "${host}": ${getDetailedErrorMessage(error)}`
-        );
-        throw error;
-      } finally {
-        await client.close();
-      }
-
-      return {
-        host,
-        username,
-        password,
-        caCert,
-      };
+    try {
+      // Using `ping` instead of `authenticate` allows us to verify clusters with both
+      // security enabled and disabled.
+      await client.asInternalUser.ping();
+    } catch (error) {
+      this.logger.error(
+        `Failed to authenticate with host "${host}": ${getDetailedErrorMessage(error)}`
+      );
+      throw error;
+    } finally {
+      await client.close();
     }
 
-    throw new Error('Unable to connect to any of the provided hosts.');
+    return {
+      host,
+      username,
+      password,
+      caCert,
+    };
   }
 
-  private async ping(elasticsearch: ElasticsearchServicePreboot, hosts: string[]) {
-    // We should iterate through all provided hosts until we find an accessible one.
-    for (const host of hosts) {
-      const client = elasticsearch.createClient('ping', {
-        hosts: [host],
-        username: '',
-        password: '',
-        ssl: { verificationMode: 'none' },
-      });
+  private async ping(elasticsearch: ElasticsearchServicePreboot, host: string) {
+    const client = elasticsearch.createClient('ping', {
+      hosts: [host],
+      username: '',
+      password: '',
+      ssl: { verificationMode: 'none' },
+    });
 
-      let authRequired = false;
-      try {
-        await client.asInternalUser.ping();
-      } catch (error) {
-        // We expect that all hosts belong to exactly same node and any non-connection error for one host would mean
-        // that enrollment will fail for any other host and we should bail out.
-        if (error instanceof errors.ConnectionError || error instanceof errors.TimeoutError) {
-          this.logger.error(
-            `Unable to connect to host "${host}", will proceed to the next host if available: ${getDetailedErrorMessage(
-              error
-            )}`
-          );
-          continue;
-        }
-
-        authRequired = error.statusCode === 401;
-      } finally {
-        await client.close();
-      }
-
-      let certificateChain: Certificate[] | undefined;
-      const { protocol, hostname, port } = new URL(host);
-      if (protocol === 'https:') {
-        try {
-          const cert = await ElasticsearchService.fetchPeerCertificate(hostname, port);
-          certificateChain = ElasticsearchService.flattenCertificateChain(cert).map(
-            ElasticsearchService.getCertificate
-          );
-        } catch (error) {
-          // TODO: log and throw or try next host
-          continue;
-        }
-      }
-
-      return {
-        authRequired,
-        certificateChain,
-      };
+    let authRequired = false;
+    try {
+      await client.asInternalUser.ping();
+    } catch (error) {
+      authRequired = error.statusCode === 401;
+    } finally {
+      await client.close();
     }
 
-    throw new Error('Unable to connect to any of the provided hosts.');
+    let certificateChain: Certificate[] | undefined;
+    const { protocol, hostname, port } = new URL(host);
+    if (protocol === 'https:') {
+      try {
+        const cert = await ElasticsearchService.fetchPeerCertificate(hostname, port);
+        certificateChain = ElasticsearchService.flattenCertificateChain(cert).map(
+          ElasticsearchService.getCertificate
+        );
+      } catch (error) {
+        this.logger.error(
+          `Failed to fetch peer certificate from host "${host}": ${getDetailedErrorMessage(error)}`
+        );
+        throw error;
+      }
+    }
+
+    return {
+      authRequired,
+      certificateChain,
+    };
   }
 
   private static fetchPeerCertificate(host: string, port: string | number) {

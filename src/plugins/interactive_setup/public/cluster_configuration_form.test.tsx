@@ -60,7 +60,7 @@ describe('ClusterConfigurationForm', () => {
         '/internal/interactive_setup/configure',
         {
           body: JSON.stringify({
-            hosts: ['https://localhost:9200'],
+            host: 'https://localhost:9200',
             username: 'kibana_system',
             password: 'changeme',
             caCert: 'cert',
@@ -105,5 +105,7 @@ describe('ClusterConfigurationForm', () => {
     });
 
     await findAllByText(/User 'elastic' can't be used as Kibana system user/i);
+
+    expect(coreStart.http.post).not.toHaveBeenCalled();
   });
 });

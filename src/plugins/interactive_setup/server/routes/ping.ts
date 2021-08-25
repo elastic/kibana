@@ -11,22 +11,13 @@ import { schema } from '@kbn/config-schema';
 import type { RouteDefinitionParams } from '.';
 import type { PingResult } from '../../common/types';
 
-export function definePingRoute({
-  router,
-  logger,
-  kibanaConfigWriter,
-  elasticsearch,
-  preboot,
-}: RouteDefinitionParams) {
+export function definePingRoute({ router, logger, elasticsearch, preboot }: RouteDefinitionParams) {
   router.post(
     {
       path: '/internal/interactive_setup/ping',
       validate: {
         body: schema.object({
-          hosts: schema.arrayOf(schema.uri({ scheme: ['http', 'https'] }), {
-            minSize: 1,
-            maxSize: 1,
-          }),
+          host: schema.uri({ scheme: ['http', 'https'] }),
         }),
       },
       options: { authRequired: false },
@@ -39,7 +30,7 @@ export function definePingRoute({
 
       let pingResult: PingResult;
       try {
-        pingResult = await elasticsearch.ping(request.body.hosts);
+        pingResult = await elasticsearch.ping(request.body.host);
       } catch {
         return response.customError({
           statusCode: 500,

@@ -40,7 +40,7 @@ describe('ClusterAddressForm', () => {
     await waitFor(() => {
       expect(coreStart.http.post).toHaveBeenLastCalledWith('/internal/interactive_setup/ping', {
         body: JSON.stringify({
-          hosts: ['https://localhost:9200'],
+          host: 'https://localhost:9200',
         }),
       });
       expect(onSuccess).toHaveBeenCalled();
@@ -64,5 +64,7 @@ describe('ClusterAddressForm', () => {
     fireEvent.click(await findByRole('button', { name: 'Check address', hidden: true }));
 
     await findAllByText(/Enter a valid address including protocol/i);
+
+    expect(coreStart.http.post).not.toHaveBeenCalled();
   });
 });
