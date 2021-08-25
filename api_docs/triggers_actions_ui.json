@@ -1718,7 +1718,7 @@
           {
             "parentPluginId": "triggersActionsUi",
             "id": "def-public.TriggersAndActionsUiServices.charts",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "charts",
             "description": [],
@@ -1729,7 +1729,10 @@
                 "docId": "kibChartsPluginApi",
                 "section": "def-public.ChartsPluginSetup",
                 "text": "ChartsPluginSetup"
-              }
+              },
+              " & { activeCursor: ",
+              "ActiveCursor",
+              "; }"
             ],
             "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx",
             "deprecated": false
@@ -1763,9 +1766,9 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "spacesOss",
+                "pluginId": "spaces",
                 "scope": "public",
-                "docId": "kibSpacesOssPluginApi",
+                "docId": "kibSpacesPluginApi",
                 "section": "def-public.SpacesApi",
                 "text": "SpacesApi"
               },
@@ -2143,6 +2146,20 @@
           "{ [x: string]: unknown; }"
         ],
         "path": "x-pack/plugins/alerting/common/alert.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
+        "id": "def-public.AsApiContract",
+        "type": "Type",
+        "tags": [],
+        "label": "AsApiContract",
+        "description": [],
+        "signature": [
+          "{ [K in keyof T as CamelToSnake<RenameActionToConnector<Extract<K, string>>>]: T[K]; }"
+        ],
+        "path": "x-pack/plugins/actions/common/rewrite_request_case.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -3333,7 +3350,7 @@
         "label": "CoreQueryParams",
         "description": [],
         "signature": [
-          "{ readonly termSize?: number | undefined; readonly termField?: string | undefined; readonly aggField?: string | undefined; readonly index: string | string[]; readonly groupBy: string; readonly timeWindowSize: number; readonly timeWindowUnit: string; readonly aggType: string; readonly timeField: string; }"
+          "{ readonly termSize?: number | undefined; readonly termField?: string | undefined; readonly aggField?: string | undefined; readonly index: string | string[]; readonly aggType: string; readonly groupBy: string; readonly timeWindowSize: number; readonly timeWindowUnit: string; readonly timeField: string; }"
         ],
         "path": "x-pack/plugins/triggers_actions_ui/server/data/lib/core_query_types.ts",
         "deprecated": false,
@@ -3389,7 +3406,7 @@
         "label": "TimeSeriesQuery",
         "description": [],
         "signature": [
-          "{ readonly interval?: string | undefined; readonly termSize?: number | undefined; readonly termField?: string | undefined; readonly aggField?: string | undefined; readonly dateStart?: string | undefined; readonly dateEnd?: string | undefined; readonly index: string | string[]; readonly groupBy: string; readonly timeWindowSize: number; readonly timeWindowUnit: string; readonly aggType: string; readonly timeField: string; }"
+          "{ readonly interval?: string | undefined; readonly termSize?: number | undefined; readonly termField?: string | undefined; readonly aggField?: string | undefined; readonly dateStart?: string | undefined; readonly dateEnd?: string | undefined; readonly index: string | string[]; readonly aggType: string; readonly groupBy: string; readonly timeWindowSize: number; readonly timeWindowUnit: string; readonly timeField: string; }"
         ],
         "path": "x-pack/plugins/triggers_actions_ui/server/data/lib/time_series_types.ts",
         "deprecated": false,
