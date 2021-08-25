@@ -26,7 +26,6 @@ import {
   declarePostUpdateByQueryRoute,
   declarePassthroughRoute,
   setProxyInterrupt,
-  getProxyInterrupt,
 } from './repository_with_proxy_utils';
 
 let esServer: kbnTestServer.TestElasticsearchUtils;
