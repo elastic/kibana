@@ -6,7 +6,7 @@
  */
 
 import { EuiFocusTrap, EuiScreenReaderOnly } from '@elastic/eui';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { DraggableId } from 'react-beautiful-dnd';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
@@ -144,7 +144,6 @@ export const HoverActions: React.FC<Props> = React.memo(
     const [stKeyboardEvent, setStKeyboardEvent] = useState<React.KeyboardEvent>();
     const [isActive, setIsActive] = useState(false);
     const [isOverflowPopoverOpen, setIsOverflowPopoverOpen] = useState(false);
-    const isCaseView = useMemo(() => timelineId === TimelineId.casePage, [timelineId]);
     const onOverflowButtonClick = useCallback(() => {
       setIsActive((prev) => !prev);
       setIsOverflowPopoverOpen(!isOverflowPopoverOpen);
@@ -202,6 +201,8 @@ export const HoverActions: React.FC<Props> = React.memo(
       },
       [ownFocus, toggleTopN]
     );
+
+    const isCaseView = timelineId === TimelineId.casePage;
 
     const { overflowActionItems, allActionItems } = useHoverActionItems({
       dataProvider,
