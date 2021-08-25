@@ -39,10 +39,10 @@ export const RequestCodeViewer = ({ indexPattern, json }: RequestCodeViewerProps
   const { services } = useKibana();
   const prepend = services.http?.basePath?.prepend;
   const navigateToUrl = services.application?.navigateToUrl;
-
+  const canShowDevTools = services.application?.capabilities?.dev_tools.show;
   const devToolsDataUri = compressToEncodedURIComponent(`GET ${indexPattern}/_search\n${json}`);
-
   const devToolsUrl = `/app/dev_tools#/console?load_from=data:text/plain,${devToolsDataUri}`;
+  const shouldShowDevToolsLink = !!(indexPattern && canShowDevTools);
 
   const handleDevToolsLinkClick = useCallback(
     (event: MouseEvent<HTMLAnchorElement>) => {
@@ -78,12 +78,12 @@ export const RequestCodeViewer = ({ indexPattern, json }: RequestCodeViewerProps
               </EuiButtonEmpty>
             )}
           </EuiCopy>
-          {indexPattern && prepend && (
+          {shouldShowDevToolsLink && (
             <EuiButtonEmpty
               size="xs"
               flush="right"
               iconType="wrench"
-              href={prepend(devToolsUrl)}
+              href={prepend && prepend(devToolsUrl)}
               onClick={handleDevToolsLinkClick}
               data-test-subj="inspectorRequestOpenInDevToolsButton"
             >
