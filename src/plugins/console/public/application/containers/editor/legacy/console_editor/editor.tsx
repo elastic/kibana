@@ -125,7 +125,18 @@ function EditorUI({ initialTextValue }: EditorProps) {
       // If we have a data URI instead of HTTP, LZ-decode it. This enables
       // opening requests in Console from anywhere in Kibana.
       if (/^data:/.test(url)) {
-        const data = decompressFromEncodedURIComponent(url.replace(/^data:text\/plain,/, '')) ?? '';
+        const data = decompressFromEncodedURIComponent(url.replace(/^data:text\/plain,/, ''));
+
+        // Show a toast if we have a failure
+        if (data === null || data === '') {
+          notifications.toasts.addWarning(
+            i18n.translate('console.loadFromDataUriErrorMessage', {
+              defaultMessage: 'Unable to load data from the load_from query parameter URL',
+            })
+          );
+          return;
+        }
+
         editor.update(data, true);
         editor.moveToNextRequestEdge(false);
         coreEditor.clearSelection();
@@ -189,7 +200,14 @@ function EditorUI({ initialTextValue }: EditorProps) {
         editorInstanceRef.current.getCoreEditor().destroy();
       }
     };
-  }, [saveCurrentTextObject, initialTextValue, history, setInputEditor, settingsService]);
+  }, [
+    notifications.toasts,
+    saveCurrentTextObject,
+    initialTextValue,
+    history,
+    setInputEditor,
+    settingsService,
+  ]);
 
   useEffect(() => {
     const { current: editor } = editorInstanceRef;
