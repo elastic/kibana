@@ -13,7 +13,7 @@ import React, { ReactNode } from 'react';
 import { Router } from 'react-router-dom';
 import { MockApmPluginContextWrapper } from '../../../context/apm_plugin/mock_apm_plugin_context';
 import { UrlParamsContext } from '../../../context/url_params_context/url_params_context';
-import { IUrlParams } from '../../../context/url_params_context/types';
+import { ApmUrlParams } from '../../../context/url_params_context/types';
 import { DatePicker } from './';
 
 const history = createMemoryHistory();
@@ -24,7 +24,7 @@ function MockUrlParamsProvider({
   children,
 }: {
   children: ReactNode;
-  urlParams?: IUrlParams;
+  urlParams?: ApmUrlParams;
 }) {
   return (
     <UrlParamsContext.Provider
@@ -39,7 +39,7 @@ function MockUrlParamsProvider({
   );
 }
 
-function mountDatePicker(urlParams?: IUrlParams) {
+function mountDatePicker(urlParams?: ApmUrlParams) {
   const setTimeSpy = jest.fn();
   const getTimeSpy = jest.fn().mockReturnValue({});
   const wrapper = mount(
