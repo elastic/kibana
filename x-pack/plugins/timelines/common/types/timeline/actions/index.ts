@@ -20,6 +20,7 @@ export interface ActionProps {
   columnId: string;
   columnValues: string;
   checked: boolean;
+  disabled?: boolean;
   onRowSelected: OnRowSelected;
   eventId: string;
   loadingEventIds: Readonly<string[]>;

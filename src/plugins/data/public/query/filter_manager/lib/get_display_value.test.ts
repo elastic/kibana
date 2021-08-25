@@ -8,8 +8,13 @@
 
 import { stubIndexPattern, phraseFilter } from 'src/plugins/data/common/stubs';
 import { getDisplayValueFromFilter } from './get_display_value';
+import { FieldFormat } from '../../../../../field_formats/common';
 
 describe('getDisplayValueFromFilter', () => {
+  beforeEach(() => {
+    jest.resetAllMocks();
+  });
+
   it('returns the value if string', () => {
     phraseFilter.meta.value = 'abc';
     const displayValue = getDisplayValueFromFilter(phraseFilter, [stubIndexPattern]);
@@ -22,24 +27,26 @@ describe('getDisplayValueFromFilter', () => {
     expect(displayValue).toBe('');
   });
 
-  it('calls the value function if proivided', () => {
+  it('calls the value function if provided', () => {
     // The type of value currently doesn't match how it's used. Refactor needed.
     phraseFilter.meta.value = jest.fn((x) => {
       return 'abc';
     }) as any;
+    jest.spyOn(stubIndexPattern, 'getFormatterForField').mockImplementation(() => undefined!);
     const displayValue = getDisplayValueFromFilter(phraseFilter, [stubIndexPattern]);
     expect(displayValue).toBe('abc');
     expect(phraseFilter.meta.value).toHaveBeenCalledWith(undefined);
   });
 
-  it('calls the value function if proivided, with formatter', () => {
-    stubIndexPattern.getFormatterForField = jest.fn().mockReturnValue('banana');
+  it('calls the value function if provided, with formatter', () => {
+    const mockFormatter = new (FieldFormat.from((value: string) => 'banana' + value))();
+    jest.spyOn(stubIndexPattern, 'getFormatterForField').mockImplementation(() => mockFormatter);
     phraseFilter.meta.value = jest.fn((x) => {
-      return x + 'abc';
+      return x.convert('abc');
     }) as any;
     const displayValue = getDisplayValueFromFilter(phraseFilter, [stubIndexPattern]);
     expect(stubIndexPattern.getFormatterForField).toHaveBeenCalledTimes(1);
-    expect(phraseFilter.meta.value).toHaveBeenCalledWith('banana');
+    expect(phraseFilter.meta.value).toHaveBeenCalledWith(mockFormatter);
     expect(displayValue).toBe('bananaabc');
   });
 });
