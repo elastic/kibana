@@ -653,7 +653,7 @@
         "label": "ActionParamsType",
         "description": [],
         "signature": [
-          "{ readonly to: string[]; readonly message: string; readonly cc: string[]; readonly bcc: string[]; readonly subject: string; readonly kibanaFooterLink: Readonly<{} & { text: string; path: string; }>; }"
+          "{ readonly to: string[]; readonly message: string; readonly cc: string[]; readonly bcc: string[]; readonly subject: string; readonly kibanaFooterLink: Readonly<{} & { path: string; text: string; }>; }"
         ],
         "path": "x-pack/plugins/actions/server/builtin_action_types/email.ts",
         "deprecated": false,
