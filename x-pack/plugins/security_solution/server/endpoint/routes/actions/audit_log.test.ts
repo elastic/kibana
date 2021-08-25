@@ -30,7 +30,7 @@ import {
 } from '../../mocks';
 import { registerActionAuditLogRoutes } from './audit_log';
 import uuid from 'uuid';
-import { aMockAction, aMockResponse, MockAction, mockAuditLog, MockResponse } from './mocks';
+import { aMockAction, aMockResponse, MockAction, mockSearchResult, MockResponse } from './mocks';
 import { SecuritySolutionRequestHandlerContext } from '../../../types';
 import { ActivityLog } from '../../../../common/endpoint/types';
 
@@ -105,10 +105,11 @@ describe('Action Log API', () => {
 
     // convenience for calling the route and handler for audit log
     let getActivityLog: (
+      params: EndpointActionLogRequestParams,
       query?: EndpointActionLogRequestQuery
     ) => Promise<jest.Mocked<KibanaResponseFactory>>;
     // convenience for injecting mock responses for actions index and responses
-    let havingActionsAndResponses: (actions: MockAction[], responses: any[]) => void;
+    let havingActionsAndResponses: (actions: MockAction[], responses: MockResponse[]) => void;
 
     let havingErrors: () => void;
 
@@ -125,9 +126,12 @@ describe('Action Log API', () => {
         experimentalFeatures: parseExperimentalConfigValue(createMockConfig().enableExperimental),
       });
 
-      getActivityLog = async (query?: any): Promise<jest.Mocked<KibanaResponseFactory>> => {
+      getActivityLog = async (
+        params: { agent_id: string },
+        query?: { page: number; page_size: number; start_date?: string; end_date?: string }
+      ): Promise<jest.Mocked<KibanaResponseFactory>> => {
         const req = httpServerMock.createKibanaRequest({
-          params: { agent_id: mockID },
+          params,
           query,
         });
         const mockResponse = httpServerMock.createResponseFactory();
@@ -152,18 +156,12 @@ describe('Action Log API', () => {
       };
 
       havingActionsAndResponses = (actions: MockAction[], responses: MockResponse[]) => {
-        const actionsData = actions.map((a) => ({
-          _index: '.fleet-actions-7',
-          _source: a.build(),
-        }));
-        const responsesData = responses.map((r) => ({
-          _index: '.ds-.fleet-actions-results-2021.06.09-000001',
-          _source: r.build(),
-        }));
-        const mockResult = mockAuditLog([...actionsData, ...responsesData]);
-        esClientMock.asCurrentUser.search = jest
-          .fn()
-          .mockImplementationOnce(() => Promise.resolve(mockResult));
+        esClientMock.asCurrentUser.search = jest.fn().mockImplementation((req) => {
+          const items: any[] =
+            req.index === '.fleet-actions' ? actions.splice(0, 50) : responses.splice(0, 1000);
+
+          return Promise.resolve(mockSearchResult(items.map((x) => x.build())));
+        });
       };
 
       havingErrors = () => {
@@ -181,28 +179,33 @@ describe('Action Log API', () => {
 
     it('should return an empty array when nothing in audit log', async () => {
       havingActionsAndResponses([], []);
-      const response = await getActivityLog();
+      const response = await getActivityLog({ agent_id: mockID });
       expect(response.ok).toBeCalled();
       expect((response.ok.mock.calls[0][0]?.body as ActivityLog).data).toHaveLength(0);
     });
 
     it('should have actions and action responses', async () => {
       havingActionsAndResponses(
-        [aMockAction().withAgent(mockID).withAction('isolate').withID(actionID)],
-        [aMockResponse(actionID, mockID)]
+        [
+          aMockAction().withAgent(mockID).withAction('isolate').withID(actionID),
+          aMockAction().withAgent(mockID).withAction('unisolate'),
+        ],
+        [aMockResponse(actionID, mockID).forAction(actionID).forAgent(mockID)]
       );
-      const response = await getActivityLog();
+      const response = await getActivityLog({ agent_id: mockID });
       const responseBody = response.ok.mock.calls[0][0]?.body as ActivityLog;
 
       expect(response.ok).toBeCalled();
-      expect(responseBody.data).toHaveLength(2);
+      expect(responseBody.data).toHaveLength(3);
+      expect(responseBody.data.filter((e) => e.type === 'response')).toHaveLength(1);
+      expect(responseBody.data.filter((e) => e.type === 'action')).toHaveLength(2);
     });
 
     it('should throw errors when no results for some agentID', async () => {
       havingErrors();
 
       try {
-        await getActivityLog();
+        await getActivityLog({ agent_id: mockID });
       } catch (error) {
         expect(error.message).toEqual(`Error fetching actions log for agent_id ${mockID}`);
       }
@@ -212,12 +215,15 @@ describe('Action Log API', () => {
       havingActionsAndResponses([], []);
       const startDate = new Date(new Date().setDate(new Date().getDate() - 1)).toISOString();
       const endDate = new Date().toISOString();
-      const response = await getActivityLog({
-        page: 1,
-        page_size: 50,
-        start_date: startDate,
-        end_date: endDate,
-      });
+      const response = await getActivityLog(
+        { agent_id: mockID },
+        {
+          page: 1,
+          page_size: 50,
+          start_date: startDate,
+          end_date: endDate,
+        }
+      );
       expect(response.ok).toBeCalled();
       expect((response.ok.mock.calls[0][0]?.body as ActivityLog).startDate).toEqual(startDate);
       expect((response.ok.mock.calls[0][0]?.body as ActivityLog).endDate).toEqual(endDate);
