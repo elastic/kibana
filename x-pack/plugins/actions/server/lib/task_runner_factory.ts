@@ -138,13 +138,13 @@ export class TaskRunnerFactory {
           throw e;
         }
 
-        if (executorResult.status === 'error') {
+        if (executorResult.status === 'error' && executorResult.retry !== undefined) {
           // Task manager error handler only kicks in when an error thrown (at this time)
           // So what we have to do is throw when the return status is `error`.
           throw new ExecutorError(
             executorResult.message,
             executorResult.data,
-            executorResult.retry == null ? false : executorResult.retry
+            executorResult.retry as boolean | Date
           );
         }
 
