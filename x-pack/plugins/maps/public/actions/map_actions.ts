@@ -13,6 +13,7 @@ import turfBooleanContains from '@turf/boolean-contains';
 import { Filter, Query, TimeRange } from 'src/plugins/data/public';
 import { Geometry, Position } from 'geojson';
 import { DRAW_MODE, DRAW_SHAPE } from '../../common/constants';
+import type { MapContext } from '../reducers/map/types';
 import { MapStoreState } from '../reducers/store';
 import {
   getDataFilters,
@@ -138,56 +139,50 @@ export function mapDestroyed() {
 }
 
 export function mapExtentChanged(mapExtentState: MapExtentState) {
-  return async (
+  return (
     dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
     getState: () => MapStoreState
   ) => {
-    const dataFilters = getDataFilters(getState());
-    const { extent, zoom: newZoom } = mapExtentState;
-    const { buffer, zoom: currentZoom } = dataFilters;
+    const { extent, zoom: nextZoom } = mapExtentState;
+    const { buffer: prevBuffer, zoom: prevZoom } = getDataFilters(getState());
 
-    if (extent) {
-      let doesBufferContainExtent = false;
-      if (buffer) {
-        const bufferGeometry = turfBboxPolygon([
-          buffer.minLon,
-          buffer.minLat,
-          buffer.maxLon,
-          buffer.maxLat,
-        ]);
-        const extentGeometry = turfBboxPolygon([
-          extent.minLon,
-          extent.minLat,
-          extent.maxLon,
-          extent.maxLat,
-        ]);
-
-        doesBufferContainExtent = turfBooleanContains(bufferGeometry, extentGeometry);
-      }
-
-      if (!doesBufferContainExtent || currentZoom !== newZoom) {
-        // snap to the smallest tile-bounds, to avoid jitter in the bounds
-        dataFilters.buffer = expandToTileBoundaries(extent, Math.ceil(newZoom));
-      }
+    let doesPrevBufferContainNextExtent = true;
+    if (prevBuffer) {
+      const bufferGeometry = turfBboxPolygon([
+        prevBuffer.minLon,
+        prevBuffer.minLat,
+        prevBuffer.maxLon,
+        prevBuffer.maxLat,
+      ]);
+      const extentGeometry = turfBboxPolygon([
+        extent.minLon,
+        extent.minLat,
+        extent.maxLon,
+        extent.maxLat,
+      ]);
+      doesPrevBufferContainNextExtent = turfBooleanContains(bufferGeometry, extentGeometry);
     }
 
     dispatch({
       type: MAP_EXTENT_CHANGED,
-      mapState: {
-        ...dataFilters,
+      mapViewContext: {
         ...mapExtentState,
-      },
+        buffer:
+          !prevBuffer || !doesPrevBufferContainNextExtent || prevZoom !== nextZoom
+            ? expandToTileBoundaries(extent, Math.ceil(nextZoom))
+            : prevBuffer,
+      } as Pick<MapContext, 'center' | 'zoom' | 'extent' | 'buffer'>,
     });
 
-    if (currentZoom !== newZoom) {
+    if (prevZoom !== nextZoom) {
       getLayerList(getState()).map((layer) => {
-        if (!layer.showAtZoomLevel(newZoom)) {
+        if (!layer.showAtZoomLevel(nextZoom)) {
           dispatch(cleanTooltipStateForLayer(layer.getId()));
         }
       });
     }
 
-    await dispatch(syncDataForAllLayers());
+    dispatch(syncDataForAllLayers());
   };
 }
 

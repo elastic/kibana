@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint @typescript-eslint/no-var-requires: 0 */
+
 jest.mock('../selectors/map_selectors', () => ({}));
 jest.mock('./data_request_actions', () => {
   return {
@@ -30,7 +32,7 @@ describe('map_actions', () => {
   });
 
   describe('mapExtentChanged', () => {
-    describe('store mapState is empty', () => {
+    describe('mapState.buffer is undefined', () => {
       beforeEach(() => {
         require('../selectors/map_selectors').getDataFilters = () => {
           return {
@@ -43,20 +45,12 @@ describe('map_actions', () => {
         };
       });
 
-      it('should add newMapConstants to dispatch action mapState', async () => {
-        const action = mapExtentChanged({ zoom: 5 });
-        await action(dispatchMock, getStoreMock);
-
-        expect(dispatchMock).toHaveBeenCalledWith({
-          mapState: {
-            zoom: 5,
+      it('should set buffer', () => {
+        const thunk = mapExtentChanged({
+          center: {
+            lat: 7.5,
+            lon: 97.5,
           },
-          type: 'MAP_EXTENT_CHANGED',
-        });
-      });
-
-      it('should add buffer to dispatch action mapState', async () => {
-        const action = mapExtentChanged({
           extent: {
             maxLat: 10,
             maxLon: 100,
@@ -65,30 +59,36 @@ describe('map_actions', () => {
           },
           zoom: 5,
         });
-        await action(dispatchMock, getStoreMock);
+        thunk(dispatchMock, getStoreMock);
 
-        expect(dispatchMock).toHaveBeenCalledWith({
-          mapState: {
-            zoom: 5,
-            extent: {
-              maxLat: 10,
-              maxLon: 100,
-              minLat: 5,
-              minLon: 95,
+        expect(dispatchMock.mock.calls[0]).toEqual([
+          {
+            mapViewContext: {
+              center: {
+                lat: 7.5,
+                lon: 97.5,
+              },
+              zoom: 5,
+              extent: {
+                maxLat: 10,
+                maxLon: 100,
+                minLat: 5,
+                minLon: 95,
+              },
+              buffer: {
+                maxLat: 11.1784,
+                maxLon: 101.25,
+                minLat: 0,
+                minLon: 90,
+              },
             },
-            buffer: {
-              maxLat: 11.1784,
-              maxLon: 101.25,
-              minLat: 0,
-              minLon: 90,
-            },
+            type: 'MAP_EXTENT_CHANGED',
           },
-          type: 'MAP_EXTENT_CHANGED',
-        });
+        ]);
       });
     });
 
-    describe('store mapState is populated', () => {
+    describe('mapState.buffer is defined', () => {
       const initialZoom = 10;
       beforeEach(() => {
         require('../selectors/map_selectors').getDataFilters = () => {
@@ -104,8 +104,12 @@ describe('map_actions', () => {
         };
       });
 
-      it('should not update buffer if extent is contained in existing buffer', async () => {
-        const action = mapExtentChanged({
+      it('should not update buffer if extent is contained in existing buffer', () => {
+        const thunk = mapExtentChanged({
+          center: {
+            lat: 8.5,
+            lon: 98.5,
+          },
           zoom: initialZoom,
           extent: {
             maxLat: 11,
@@ -114,30 +118,40 @@ describe('map_actions', () => {
             minLon: 96,
           },
         });
-        await action(dispatchMock, getStoreMock);
+        thunk(dispatchMock, getStoreMock);
 
-        expect(dispatchMock).toHaveBeenCalledWith({
-          mapState: {
-            zoom: 10,
-            extent: {
-              maxLat: 11,
-              maxLon: 101,
-              minLat: 6,
-              minLon: 96,
+        expect(dispatchMock.mock.calls[0]).toEqual([
+          {
+            mapViewContext: {
+              center: {
+                lat: 8.5,
+                lon: 98.5,
+              },
+              zoom: 10,
+              extent: {
+                maxLat: 11,
+                maxLon: 101,
+                minLat: 6,
+                minLon: 96,
+              },
+              buffer: {
+                maxLat: 12.5,
+                maxLon: 102.5,
+                minLat: 2.5,
+                minLon: 92.5,
+              },
             },
-            buffer: {
-              maxLat: 12.5,
-              maxLon: 102.5,
-              minLat: 2.5,
-              minLon: 92.5,
-            },
+            type: 'MAP_EXTENT_CHANGED',
           },
-          type: 'MAP_EXTENT_CHANGED',
-        });
+        ]);
       });
 
-      it('should update buffer if extent is outside of existing buffer', async () => {
-        const action = mapExtentChanged({
+      it('should update buffer if extent is outside of existing buffer', () => {
+        const thunk = mapExtentChanged({
+          center: {
+            lat: 2.5,
+            lon: 87.5,
+          },
           zoom: initialZoom,
           extent: {
             maxLat: 5,
@@ -146,30 +160,40 @@ describe('map_actions', () => {
             minLon: 85,
           },
         });
-        await action(dispatchMock, getStoreMock);
+        thunk(dispatchMock, getStoreMock);
 
-        expect(dispatchMock).toHaveBeenCalledWith({
-          mapState: {
-            zoom: 10,
-            extent: {
-              maxLat: 5,
-              maxLon: 90,
-              minLat: 0,
-              minLon: 85,
+        expect(dispatchMock.mock.calls[0]).toEqual([
+          {
+            mapViewContext: {
+              center: {
+                lat: 2.5,
+                lon: 87.5,
+              },
+              zoom: 10,
+              extent: {
+                maxLat: 5,
+                maxLon: 90,
+                minLat: 0,
+                minLon: 85,
+              },
+              buffer: {
+                maxLat: 5.26601,
+                maxLon: 90.35156,
+                minLat: -0.35156,
+                minLon: 84.72656,
+              },
             },
-            buffer: {
-              maxLat: 5.26601,
-              maxLon: 90.35156,
-              minLat: -0.35156,
-              minLon: 84.72656,
-            },
+            type: 'MAP_EXTENT_CHANGED',
           },
-          type: 'MAP_EXTENT_CHANGED',
-        });
+        ]);
       });
 
-      it('should update buffer when zoom changes', async () => {
-        const action = mapExtentChanged({
+      it('should update buffer when zoom changes', () => {
+        const thunk = mapExtentChanged({
+          center: {
+            lat: 8.5,
+            lon: 98.5,
+          },
           zoom: initialZoom + 1,
           extent: {
             maxLat: 11,
@@ -178,26 +202,32 @@ describe('map_actions', () => {
             minLon: 96,
           },
         });
-        await action(dispatchMock, getStoreMock);
+        thunk(dispatchMock, getStoreMock);
 
-        expect(dispatchMock).toHaveBeenCalledWith({
-          mapState: {
-            zoom: 11,
-            extent: {
-              maxLat: 11,
-              maxLon: 101,
-              minLat: 6,
-              minLon: 96,
+        expect(dispatchMock.mock.calls[0]).toEqual([
+          {
+            mapViewContext: {
+              center: {
+                lat: 8.5,
+                lon: 98.5,
+              },
+              zoom: 11,
+              extent: {
+                maxLat: 11,
+                maxLon: 101,
+                minLat: 6,
+                minLon: 96,
+              },
+              buffer: {
+                maxLat: 11.0059,
+                maxLon: 101.07422,
+                minLat: 5.96575,
+                minLon: 95.97656,
+              },
             },
-            buffer: {
-              maxLat: 11.0059,
-              maxLon: 101.07422,
-              minLat: 5.96575,
-              minLon: 95.97656,
-            },
+            type: 'MAP_EXTENT_CHANGED',
           },
-          type: 'MAP_EXTENT_CHANGED',
-        });
+        ]);
       });
     });
   });
@@ -262,13 +292,12 @@ describe('map_actions', () => {
           params: { query: 'png' },
         },
         query: { match_phrase: { extension: 'png' } },
-        $state: { store: 'appState' },
       },
     ];
     const searchSessionId = '1234';
 
     beforeEach(() => {
-      //Mocks the "previous" state
+      // Mocks the "previous" state
       require('../selectors/map_selectors').getQuery = () => {
         return query;
       };
