@@ -8,15 +8,9 @@
 import sinon from 'sinon';
 import { fromExpression } from '@kbn/interpreter/common';
 import { createWorkpadRouteContext } from './workpad_route_context';
-import {
-  kibanaResponseFactory,
-  RequestHandlerContext,
-  RequestHandler,
-  SavedObjectReference,
-} from 'src/core/server';
-import { savedObjectsClientMock, httpServerMock } from 'src/core/server/mocks';
+import { RequestHandlerContext, SavedObjectReference } from 'src/core/server';
+import { savedObjectsClientMock } from 'src/core/server/mocks';
 import { CanvasWorkpad } from '../types';
-import { extractReferences } from 'src/plugins/data/common';
 import { CANVAS_TYPE } from '../common/lib/constants';
 
 const mockedExpressionService = {
@@ -203,7 +197,7 @@ describe('workpad route context', () => {
         references,
       });
 
-      const result = await canvasContext.workpad.update(id, updatedWorkpad as CanvasWorkpad);
+      await canvasContext.workpad.update(id, updatedWorkpad as CanvasWorkpad);
 
       expect(mockContext.core.savedObjects.client.create).toBeCalledWith(
         CANVAS_TYPE,

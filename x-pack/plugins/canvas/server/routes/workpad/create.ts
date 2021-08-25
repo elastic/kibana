@@ -7,10 +7,8 @@
 
 import { schema } from '@kbn/config-schema';
 import { RouteInitializerDeps } from '../';
-import { CANVAS_TYPE, API_ROUTE_WORKPAD, TEMPLATE_TYPE } from '../../../common/lib/constants';
+import { API_ROUTE_WORKPAD, TEMPLATE_TYPE } from '../../../common/lib/constants';
 import { CanvasWorkpad } from '../../../types';
-import { getId } from '../../../common/lib/get_id';
-import { WorkpadAttributes } from './workpad_attributes';
 import { WorkpadSchema } from './workpad_schema';
 import { okResponse } from '../ok_response';
 import { catchErrorHandler } from '../catch_error_handler';

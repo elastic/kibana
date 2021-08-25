@@ -8,7 +8,7 @@
 import sinon from 'sinon';
 import { CANVAS_TYPE } from '../../../common/lib/constants';
 import { initializeUpdateWorkpadRoute, initializeUpdateWorkpadAssetsRoute } from './update';
-import { kibanaResponseFactory, RequestHandlerContext, RequestHandler } from 'src/core/server';
+import { kibanaResponseFactory, RequestHandler } from 'src/core/server';
 import { savedObjectsClientMock, httpServerMock } from 'src/core/server/mocks';
 import { workpads } from '../../../__fixtures__/workpads';
 import { okResponse } from '../ok_response';
@@ -26,7 +26,6 @@ const mockRouteContext = ({
 
 const workpad = workpads[0];
 const now = new Date();
-const nowIso = now.toISOString();
 
 jest.mock('uuid/v4', () => jest.fn().mockReturnValue('123abc'));
 
