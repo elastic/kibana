@@ -407,7 +407,7 @@ describe('endpoint list middleware', () => {
     });
   });
 
-  describe.only('loads selected endpoint details', () => {
+  describe('loads selected endpoint details', () => {
     beforeEach(() => {
       endpointPageHttpMock(fakeHttpServices);
     });
