@@ -43,7 +43,7 @@ import {
   ILLEGAL_CHARACTERS_VISIBLE,
   ILLEGAL_CHARACTERS,
   isDefault,
-  validateIndexPattern,
+  validateDataView,
   flattenHitWrapper,
 } from './index_patterns';
 
@@ -58,7 +58,7 @@ export const indexPatterns = {
   isDefault,
   isFilterable,
   isNestedField,
-  validate: validateIndexPattern,
+  validate: validateDataView,
   flattenHitWrapper,
 };
 
