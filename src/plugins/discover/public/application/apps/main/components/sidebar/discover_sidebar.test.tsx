@@ -11,36 +11,24 @@ import { ReactWrapper } from 'enzyme';
 import { findTestSubject } from '@elastic/eui/lib/test';
 // @ts-expect-error
 import realHits from '../../../../../__fixtures__/real_hits.js';
-// @ts-expect-error
-import stubbedLogstashFields from '../../../../../__fixtures__/logstash_fields';
+
 import { mountWithIntl } from '@kbn/test/jest';
 import React from 'react';
 import { DiscoverSidebarProps } from './discover_sidebar';
-import { coreMock } from '../../../../../../../../core/public/mocks';
 import { IndexPatternAttributes } from '../../../../../../../data/common';
-import { getStubIndexPattern } from '../../../../../../../data/public/test_utils';
 import { SavedObject } from '../../../../../../../../core/types';
 import { getDefaultFieldFilter } from './lib/field_filter';
 import { DiscoverSidebar } from './discover_sidebar';
 import { ElasticSearchHit } from '../../../../doc_views/doc_views_types';
 import { discoverServiceMock as mockDiscoverServices } from '../../../../../__mocks__/services';
+import { stubLogstashIndexPattern } from '../../../../../../../data/common/stubs';
 
 jest.mock('../../../../../kibana_services', () => ({
   getServices: () => mockDiscoverServices,
 }));
 
-jest.mock('./lib/get_index_pattern_field_list', () => ({
-  getIndexPatternFieldList: jest.fn((indexPattern) => indexPattern.fields),
-}));
-
 function getCompProps(): DiscoverSidebarProps {
-  const indexPattern = getStubIndexPattern(
-    'logstash-*',
-    (cfg: unknown) => cfg,
-    'time',
-    stubbedLogstashFields(),
-    coreMock.createSetup()
-  );
+  const indexPattern = stubLogstashIndexPattern;
 
   // @ts-expect-error _.each() is passing additional args to flattenHit
   const hits = (each(cloneDeep(realHits), indexPattern.flattenHit) as Array<
