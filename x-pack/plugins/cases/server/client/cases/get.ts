@@ -13,7 +13,6 @@ import { SavedObject } from 'kibana/server';
 import {
   CaseResponseRt,
   CaseResponse,
-  ESCaseAttributes,
   User,
   UsersRt,
   AllTagsFindRequest,
@@ -27,6 +26,7 @@ import {
   ENABLE_CASE_CONNECTOR,
   CasesByAlertId,
   CasesByAlertIdRt,
+  CaseAttributes,
 } from '../../../common';
 import { countAlertsForID, createCaseError, flattenCaseSavedObject } from '../../common';
 import { CasesClientArgs } from '..';
@@ -171,7 +171,7 @@ export const get = async (
       );
     }
 
-    let theCase: SavedObject<ESCaseAttributes>;
+    let theCase: SavedObject<CaseAttributes>;
     let subCaseIds: string[] = [];
     if (ENABLE_CASE_CONNECTOR) {
       const [caseInfo, subCasesForCaseId] = await Promise.all([

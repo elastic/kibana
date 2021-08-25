@@ -47,6 +47,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 serviceNodeIds: JSON.stringify(
                   await getServiceNodeIds({ apmApiSupertest, start, end })
                 ),
+                environment: 'ENVIRONMENT_ALL',
+                kuery: '',
               },
             })
           );
@@ -81,6 +83,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 numBuckets: 20,
                 transactionType: 'request',
                 serviceNodeIds: JSON.stringify(serviceNodeIds),
+                environment: 'ENVIRONMENT_ALL',
+                kuery: '',
               },
             })
           );
@@ -106,7 +110,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
           expectSnapshot(Object.keys(response.body.currentPeriod)).toMatchInline(`
             Array [
-              "6dc7ea7824d0887cdfa0cb876bca5b27346c8b7cd196a9b1a6fe91968b99fbc2",
+              "31651f3c624b81c55dd4633df0b5b9f9ab06b151121b0404ae796632cd1f87ad",
             ]
           `);
 
@@ -135,6 +139,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 end,
                 comparisonStart: start,
                 comparisonEnd: moment(start).add(15, 'minutes').toISOString(),
+                environment: 'ENVIRONMENT_ALL',
+                kuery: '',
               },
             })
           );
@@ -173,12 +179,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
           expectSnapshot(Object.keys(response.body.currentPeriod)).toMatchInline(`
             Array [
-              "6dc7ea7824d0887cdfa0cb876bca5b27346c8b7cd196a9b1a6fe91968b99fbc2",
+              "31651f3c624b81c55dd4633df0b5b9f9ab06b151121b0404ae796632cd1f87ad",
             ]
           `);
           expectSnapshot(Object.keys(response.body.previousPeriod)).toMatchInline(`
             Array [
-              "6dc7ea7824d0887cdfa0cb876bca5b27346c8b7cd196a9b1a6fe91968b99fbc2",
+              "31651f3c624b81c55dd4633df0b5b9f9ab06b151121b0404ae796632cd1f87ad",
             ]
           `);
 

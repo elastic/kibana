@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Location } from 'history';
-import { IUrlParams } from '../../../../../context/url_params_context/types';
+import type { Location } from 'history';
+import type { ApmUrlParams } from '../../../../../context/url_params_context/types';
 
 export const location = {
   pathname: '/services/opbeans-go/transactions/view',
@@ -25,12 +25,11 @@ export const urlParams = {
   page: 0,
   transactionId: '975c8d5bfd1dd20b',
   traceId: '513d33fafe99bbe6134749310c9b5322',
-  kuery: 'service.name: "opbeans-java" or service.name : "opbeans-go"',
   transactionName: 'GET /api/orders',
   transactionType: 'request',
   processorEvent: 'transaction',
   serviceName: 'opbeans-go',
-} as IUrlParams;
+} as ApmUrlParams;
 
 export const simpleTrace = {
   trace: {

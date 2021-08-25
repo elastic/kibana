@@ -19,7 +19,7 @@ import { updateOldState } from '../legacy/vis_update_state';
 import { extractReferences, injectReferences } from './saved_visualization_references';
 import { createSavedSearchesLoader } from '../../../discover/public';
 import type { SavedObjectsClientContract } from '../../../../core/public';
-import type { IIndexPattern, IndexPatternsContract } from '../../../../plugins/data/public';
+import type { IndexPatternsContract } from '../../../../plugins/data/public';
 import type { ISavedVis, SerializedVis } from '../types';
 
 export interface SavedVisServices {
@@ -93,7 +93,7 @@ export function createSavedVisClass(services: SavedVisServices) {
         extractReferences,
         injectReferences,
         id: (opts.id as string) || '',
-        indexPattern: opts.indexPattern as IIndexPattern,
+        indexPattern: opts.indexPattern,
         defaults: {
           title: '',
           visState,

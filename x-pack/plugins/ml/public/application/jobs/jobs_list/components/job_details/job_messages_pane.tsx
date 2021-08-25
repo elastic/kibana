@@ -30,6 +30,7 @@ export const JobMessagesPane: FC<JobMessagesPaneProps> = React.memo(
     const canCreateJob = checkPermission('canCreateJob');
 
     const [messages, setMessages] = useState<JobMessage[]>([]);
+    const [notificationIndices, setNotificationIndices] = useState<string[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
     const [isClearing, setIsClearing] = useState<boolean>(false);
@@ -42,7 +43,10 @@ export const JobMessagesPane: FC<JobMessagesPaneProps> = React.memo(
     const fetchMessages = async () => {
       setIsLoading(true);
       try {
-        setMessages(await ml.jobs.jobAuditMessages({ jobId, start, end }));
+        const messagesResp = await ml.jobs.jobAuditMessages({ jobId, start, end });
+
+        setMessages(messagesResp.messages);
+        setNotificationIndices(messagesResp.notificationIndices);
         setIsLoading(false);
       } catch (error) {
         setIsLoading(false);
@@ -63,7 +67,7 @@ export const JobMessagesPane: FC<JobMessagesPaneProps> = React.memo(
     const clearMessages = useCallback(async () => {
       setIsClearing(true);
       try {
-        await clearJobAuditMessages(jobId);
+        await clearJobAuditMessages(jobId, notificationIndices);
         setIsClearing(false);
         if (typeof refreshJobList === 'function') {
           refreshJobList();
@@ -77,13 +81,13 @@ export const JobMessagesPane: FC<JobMessagesPaneProps> = React.memo(
           })
         );
       }
-    }, [jobId]);
+    }, [jobId, JSON.stringify(notificationIndices)]);
 
     useEffect(() => {
       fetchMessages();
     }, []);
 
-    const disabled = messages.length > 0 && messages[0].clearable === false;
+    const disabled = notificationIndices.length === 0;
 
     const clearButton = (
       <EuiButton

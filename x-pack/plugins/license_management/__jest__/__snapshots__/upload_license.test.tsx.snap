@@ -1408,6 +1408,7 @@ exports[`UploadLicense should display an error when ES says license is expired 1
                                 >
                                   <div
                                     className="euiTextColor euiTextColor--default"
+                                    style={Object {}}
                                   >
                                     <ul>
                                       <li
@@ -2129,6 +2130,7 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
                                 >
                                   <div
                                     className="euiTextColor euiTextColor--default"
+                                    style={Object {}}
                                   >
                                     <ul>
                                       <li
@@ -2850,6 +2852,7 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
                                 >
                                   <div
                                     className="euiTextColor euiTextColor--default"
+                                    style={Object {}}
                                   >
                                     <ul>
                                       <li
@@ -3571,6 +3574,7 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
                                 >
                                   <div
                                     className="euiTextColor euiTextColor--default"
+                                    style={Object {}}
                                   >
                                     <ul>
                                       <li

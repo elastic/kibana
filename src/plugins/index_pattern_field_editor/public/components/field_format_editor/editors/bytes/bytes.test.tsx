@@ -10,7 +10,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { coreMock } from 'src/core/public/mocks';
 import { createKibanaReactContext } from '../../../../../../kibana_react/public';
-import { FieldFormat } from 'src/plugins/data/public';
+import { FieldFormat } from 'src/plugins/field_formats/common';
 
 import { BytesFormatEditor } from './bytes';
 

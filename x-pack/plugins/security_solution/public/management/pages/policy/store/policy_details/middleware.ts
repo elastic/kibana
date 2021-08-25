@@ -13,7 +13,6 @@ import {
   isOnPolicyDetailsPage,
   policyDetails,
   policyDetailsForUpdate,
-  getPolicyDataForUpdate,
 } from './selectors';
 import {
   sendGetPackagePolicy,
@@ -22,6 +21,7 @@ import {
 } from '../services/ingest';
 import { NewPolicyData, PolicyData } from '../../../../../../common/endpoint/types';
 import { ImmutableMiddlewareFactory } from '../../../../../common/store';
+import { getPolicyDataForUpdate } from '../../../../../../common/endpoint/service/policy/get_policy_data_for_update';
 
 export const policyDetailsMiddlewareFactory: ImmutableMiddlewareFactory<PolicyDetailsState> = (
   coreStart
@@ -55,6 +55,14 @@ export const policyDetailsMiddlewareFactory: ImmutableMiddlewareFactory<PolicyDe
           policyItem.inputs[0].config.policy.value.windows.popup.behavior_protection.message === ''
         ) {
           policyItem.inputs[0].config.policy.value.windows.popup.behavior_protection.message = DefaultPolicyNotificationMessage;
+        }
+        if (policyItem.inputs[0].config.policy.value.mac.popup.behavior_protection.message === '') {
+          policyItem.inputs[0].config.policy.value.mac.popup.behavior_protection.message = DefaultPolicyNotificationMessage;
+        }
+        if (
+          policyItem.inputs[0].config.policy.value.linux.popup.behavior_protection.message === ''
+        ) {
+          policyItem.inputs[0].config.policy.value.linux.popup.behavior_protection.message = DefaultPolicyNotificationMessage;
         }
       } catch (error) {
         dispatch({
@@ -104,7 +112,7 @@ export const policyDetailsMiddlewareFactory: ImmutableMiddlewareFactory<PolicyDe
               return sendPutPackagePolicy(
                 http,
                 id,
-                getPolicyDataForUpdate(latestUpdatedPolicyItem) as NewPolicyData
+                getPolicyDataForUpdate(latestUpdatedPolicyItem)
               );
             });
           }

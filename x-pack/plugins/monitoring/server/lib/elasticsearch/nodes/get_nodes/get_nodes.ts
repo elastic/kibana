@@ -6,18 +6,12 @@
  */
 
 import moment from 'moment';
-// @ts-ignore
 import { checkParam } from '../../../error_missing_required';
-// @ts-ignore
 import { createQuery } from '../../../create_query';
-// @ts-ignore
 import { calculateAuto } from '../../../calculate_auto';
-// @ts-ignore
 import { ElasticsearchMetric } from '../../../metrics';
-// @ts-ignore
 import { getMetricAggs } from './get_metric_aggs';
 import { handleResponse } from './handle_response';
-// @ts-ignore
 import { LISTING_METRICS_NAMES, LISTING_METRICS_PATHS } from './nodes_listing_metrics';
 import { LegacyRequest } from '../../../../types';
 import { ElasticsearchModifiedSource } from '../../../../../common/types/es';
@@ -103,7 +97,7 @@ export async function getNodes(
                 min_doc_count: 0,
                 fixed_interval: bucketSize + 's',
               },
-              aggs: getMetricAggs(LISTING_METRICS_NAMES, bucketSize),
+              aggs: getMetricAggs(LISTING_METRICS_NAMES),
             },
           },
         },

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { JsonObject } from '@kbn/common-utils';
+import { JsonObject } from '@kbn/utility-types';
+import { ALERT_ID, ALERT_RULE_CONSUMER } from '@kbn/rule-data-utils';
 
 import { getSpaceUrlPrefix } from '../../../../rule_registry/common/lib/authentication/spaces';
 
@@ -39,23 +40,17 @@ export default ({ getService }: FtrProviderContext) => {
         field: '@timestamp',
       },
       {
-        field: 'kibana.rac.alert.owner',
+        field: ALERT_RULE_CONSUMER,
       },
       {
-        field: 'kibana.rac.alert.id',
+        field: ALERT_ID,
       },
       {
         field: 'event.kind',
       },
     ],
     factoryQueryType: TimelineEventsQueries.all,
-    fieldRequested: [
-      '@timestamp',
-      'message',
-      'kibana.rac.alert.owner',
-      'kibana.rac.alert.id',
-      'event.kind',
-    ],
+    fieldRequested: ['@timestamp', 'message', ALERT_RULE_CONSUMER, ALERT_ID, 'event.kind'],
     fields: [],
     filterQuery: {
       bool: {

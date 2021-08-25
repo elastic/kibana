@@ -12,8 +12,8 @@ import React, { Component, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import type { NotificationsStart } from 'src/core/public';
-import type { Space } from 'src/plugins/spaces_oss/common';
 
+import type { Space } from '../../../common';
 import type { SpacesManager } from '../../spaces_manager';
 import { ConfirmDeleteModal } from '../components/confirm_delete_modal';
 

@@ -3,12 +3,12 @@
   "version": "1.0.0",
   "private": true,
   "license": "SSPL-1.0 OR Elastic License 2.0",
-  "main": "target/index.js",
-  "types": "target/index.d.ts",
+  "main": "target_node/index.js",
+  "types": "target_types/index.d.ts",
   "kibana": {
     "devOnly": false
   },
   "scripts": {
-    "test": "../../node_modules/.bin/tsd tsd_tests"
+    "test": "../../node_modules/.bin/tsd src/tsd_tests"
   }
 }

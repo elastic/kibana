@@ -79,7 +79,7 @@ export const anomalyDetectionJobsHealthRuleParams = schema.object({
       delayedData: schema.nullable(
         schema.object({
           enabled: schema.boolean({ defaultValue: true }),
-          docsCount: schema.nullable(schema.number()),
+          docsCount: schema.nullable(schema.number({ min: 1 })),
           timeInterval: schema.nullable(schema.string()),
         })
       ),

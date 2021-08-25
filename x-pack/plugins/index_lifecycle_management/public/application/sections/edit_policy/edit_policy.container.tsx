@@ -24,22 +24,10 @@ interface RouterProps {
   policyName: string;
 }
 
-interface Props {
-  getUrlForApp: (
-    appId: string,
-    options?: {
-      path?: string;
-      absolute?: boolean;
-    }
-  ) => string;
-}
-
-export const EditPolicy: React.FunctionComponent<Props & RouteComponentProps<RouterProps>> = ({
+export const EditPolicy: React.FunctionComponent<RouteComponentProps<RouterProps>> = ({
   match: {
     params: { policyName },
   },
-  getUrlForApp,
-  history,
 }) => {
   const {
     services: { breadcrumbService, license },
@@ -105,13 +93,15 @@ export const EditPolicy: React.FunctionComponent<Props & RouteComponentProps<Rou
         policyName: attemptToURIDecode(policyName),
         policy: existingPolicy?.policy ?? defaultPolicy,
         existingPolicies: policies,
-        getUrlForApp,
         license: {
           canUseSearchableSnapshot: () => license.hasAtLeast(MIN_SEARCHABLE_SNAPSHOT_LICENSE),
         },
+        indices: existingPolicy && existingPolicy.indices ? existingPolicy.indices : [],
+        indexTemplates:
+          existingPolicy && existingPolicy.indexTemplates ? existingPolicy.indexTemplates : [],
       }}
     >
-      <PresentationComponent history={history} />
+      <PresentationComponent />
     </EditPolicyContextProvider>
   );
 };

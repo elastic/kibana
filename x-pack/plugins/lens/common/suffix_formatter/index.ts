@@ -6,11 +6,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import {
   FieldFormat,
   FieldFormatInstanceType,
-  KBN_FIELD_TYPES,
-} from '../../../../../src/plugins/data/common';
+} from '../../../../../src/plugins/field_formats/common';
 import type { FormatFactory } from '../types';
 import type { TimeScaleUnit } from '../expressions/time_scale';
 
@@ -31,6 +31,7 @@ export const unitSuffixesLong: Record<TimeScaleUnit, string> = {
 export function getSuffixFormatter(formatFactory: FormatFactory): FieldFormatInstanceType {
   return class SuffixFormatter extends FieldFormat {
     static id = 'suffix';
+    static hidden = true; // Don't want this format to appear in index pattern editor
     static title = i18n.translate('xpack.lens.fieldFormats.suffix.title', {
       defaultMessage: 'Suffix',
     });

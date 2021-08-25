@@ -20,13 +20,72 @@
             "text": "SvgConfig"
           }
         ],
-        "source": {
-          "path": "src/plugins/expression_shape/public/components/reusable/utils.ts",
-          "lineNumber": 11
-        },
+        "path": "src/plugins/expression_shape/public/components/reusable/utils.ts",
         "deprecated": false,
         "children": [],
         "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressionShape",
+        "id": "def-public.LazyProgressDrawer",
+        "type": "Function",
+        "tags": [],
+        "label": "LazyProgressDrawer",
+        "description": [],
+        "signature": [
+          "React.ExoticComponent<Pick<Pick<",
+          {
+            "pluginId": "expressionShape",
+            "scope": "public",
+            "docId": "kibExpressionShapePluginApi",
+            "section": "def-public.ShapeDrawerProps",
+            "text": "ShapeDrawerProps"
+          },
+          ", \"children\" | \"ref\" | \"shapeType\" | \"shapeAttributes\" | \"shapeContentAttributes\" | \"textAttributes\">, \"children\" | \"shapeType\" | \"shapeAttributes\" | \"shapeContentAttributes\" | \"textAttributes\"> & React.RefAttributes<",
+          {
+            "pluginId": "expressionShape",
+            "scope": "public",
+            "docId": "kibExpressionShapePluginApi",
+            "section": "def-public.ShapeRef",
+            "text": "ShapeRef"
+          },
+          ">> & { readonly _result: React.ForwardRefExoticComponent<Pick<Pick<",
+          {
+            "pluginId": "expressionShape",
+            "scope": "public",
+            "docId": "kibExpressionShapePluginApi",
+            "section": "def-public.ShapeDrawerProps",
+            "text": "ShapeDrawerProps"
+          },
+          ", \"children\" | \"ref\" | \"shapeType\" | \"shapeAttributes\" | \"shapeContentAttributes\" | \"textAttributes\">, \"children\" | \"shapeType\" | \"shapeAttributes\" | \"shapeContentAttributes\" | \"textAttributes\"> & React.RefAttributes<",
+          {
+            "pluginId": "expressionShape",
+            "scope": "public",
+            "docId": "kibExpressionShapePluginApi",
+            "section": "def-public.ShapeRef",
+            "text": "ShapeRef"
+          },
+          ">>; }"
+        ],
+        "path": "src/plugins/expression_shape/public/components/progress/index.ts",
+        "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "expressionShape",
+            "id": "def-public.props",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -45,7 +104,7 @@
             "section": "def-public.ShapeDrawerProps",
             "text": "ShapeDrawerProps"
           },
-          ", \"ref\" | \"shapeType\" | \"shapeAttributes\" | \"shapeContentAttributes\">, \"shapeType\" | \"shapeAttributes\" | \"shapeContentAttributes\"> & React.RefAttributes<",
+          ", \"children\" | \"ref\" | \"shapeType\" | \"shapeAttributes\" | \"shapeContentAttributes\" | \"textAttributes\">, \"children\" | \"shapeType\" | \"shapeAttributes\" | \"shapeContentAttributes\" | \"textAttributes\"> & React.RefAttributes<",
           {
             "pluginId": "expressionShape",
             "scope": "public",
@@ -61,7 +120,7 @@
             "section": "def-public.ShapeDrawerProps",
             "text": "ShapeDrawerProps"
           },
-          ", \"ref\" | \"shapeType\" | \"shapeAttributes\" | \"shapeContentAttributes\">, \"shapeType\" | \"shapeAttributes\" | \"shapeContentAttributes\"> & React.RefAttributes<",
+          ", \"children\" | \"ref\" | \"shapeType\" | \"shapeAttributes\" | \"shapeContentAttributes\" | \"textAttributes\">, \"children\" | \"shapeType\" | \"shapeAttributes\" | \"shapeContentAttributes\" | \"textAttributes\"> & React.RefAttributes<",
           {
             "pluginId": "expressionShape",
             "scope": "public",
@@ -71,10 +130,7 @@
           },
           ">>; }"
         ],
-        "source": {
-          "path": "src/plugins/expression_shape/public/components/shape/index.ts",
-          "lineNumber": 12
-        },
+        "path": "src/plugins/expression_shape/public/components/shape/index.ts",
         "deprecated": false,
         "returnComment": [],
         "children": [
@@ -88,13 +144,42 @@
             "signature": [
               "P"
             ],
-            "source": {
-              "path": "node_modules/@types/react/index.d.ts",
-              "lineNumber": 359
-            },
+            "path": "node_modules/@types/react/index.d.ts",
             "deprecated": false
           }
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressionShape",
+        "id": "def-public.progressRenderer",
+        "type": "Function",
+        "tags": [],
+        "label": "progressRenderer",
+        "description": [],
+        "signature": [
+          "() => ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionRenderDefinition",
+            "text": "ExpressionRenderDefinition"
+          },
+          "<",
+          {
+            "pluginId": "expressionShape",
+            "scope": "common",
+            "docId": "kibExpressionShapePluginApi",
+            "section": "def-common.ProgressOutput",
+            "text": "ProgressOutput"
+          },
+          ">"
+        ],
+        "path": "src/plugins/expression_shape/public/expression_renderers/progress_renderer.tsx",
+        "deprecated": false,
+        "children": [],
+        "returnComment": [],
         "initialIsOpen": false
       },
       {
@@ -123,10 +208,7 @@
           },
           ">"
         ],
-        "source": {
-          "path": "src/plugins/expression_shape/public/expression_renderers/shape_renderer.tsx",
-          "lineNumber": 30
-        },
+        "path": "src/plugins/expression_shape/public/expression_renderers/shape_renderer.tsx",
         "deprecated": false,
         "children": [],
         "returnComment": [],
@@ -136,15 +218,64 @@
     "interfaces": [
       {
         "parentPluginId": "expressionShape",
+        "id": "def-public.CircleParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "CircleParams",
+        "description": [],
+        "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "expressionShape",
+            "id": "def-public.CircleParams.r",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "r",
+            "description": [],
+            "signature": [
+              "string | number | undefined"
+            ],
+            "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressionShape",
+            "id": "def-public.CircleParams.cx",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "cx",
+            "description": [],
+            "signature": [
+              "string | number | undefined"
+            ],
+            "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressionShape",
+            "id": "def-public.CircleParams.cy",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "cy",
+            "description": [],
+            "signature": [
+              "string | number | undefined"
+            ],
+            "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressionShape",
         "id": "def-public.Dimensions",
         "type": "Interface",
         "tags": [],
         "label": "Dimensions",
         "description": [],
-        "source": {
-          "path": "src/plugins/expression_shape/public/components/shape/types.ts",
-          "lineNumber": 18
-        },
+        "path": "src/plugins/expression_shape/public/components/shape/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -154,10 +285,7 @@
             "tags": [],
             "label": "width",
             "description": [],
-            "source": {
-              "path": "src/plugins/expression_shape/public/components/shape/types.ts",
-              "lineNumber": 19
-            },
+            "path": "src/plugins/expression_shape/public/components/shape/types.ts",
             "deprecated": false
           },
           {
@@ -167,10 +295,7 @@
             "tags": [],
             "label": "height",
             "description": [],
-            "source": {
-              "path": "src/plugins/expression_shape/public/components/shape/types.ts",
-              "lineNumber": 20
-            },
+            "path": "src/plugins/expression_shape/public/components/shape/types.ts",
             "deprecated": false
           }
         ],
@@ -183,10 +308,7 @@
         "tags": [],
         "label": "NodeDimensions",
         "description": [],
-        "source": {
-          "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
-          "lineNumber": 19
-        },
+        "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
         "deprecated": false,
         "children": [
           {
@@ -196,10 +318,7 @@
             "tags": [],
             "label": "width",
             "description": [],
-            "source": {
-              "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
-              "lineNumber": 20
-            },
+            "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
             "deprecated": false
           },
           {
@@ -209,10 +328,7 @@
             "tags": [],
             "label": "height",
             "description": [],
-            "source": {
-              "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
-              "lineNumber": 21
-            },
+            "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
             "deprecated": false
           }
         ],
@@ -235,10 +351,7 @@
           },
           " extends Arguments"
         ],
-        "source": {
-          "path": "src/plugins/expression_shape/common/types/expression_functions.ts",
-          "lineNumber": 37
-        },
+        "path": "src/plugins/expression_shape/common/types/expression_functions.ts",
         "deprecated": false,
         "children": [
           {
@@ -251,10 +364,7 @@
             "signature": [
               "\"shape\""
             ],
-            "source": {
-              "path": "src/plugins/expression_shape/common/types/expression_functions.ts",
-              "lineNumber": 38
-            },
+            "path": "src/plugins/expression_shape/common/types/expression_functions.ts",
             "deprecated": false
           }
         ],
@@ -267,10 +377,7 @@
         "tags": [],
         "label": "ParentNodeParams",
         "description": [],
-        "source": {
-          "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
-          "lineNumber": 24
-        },
+        "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
         "deprecated": false,
         "children": [
           {
@@ -280,10 +387,7 @@
             "tags": [],
             "label": "borderOffset",
             "description": [],
-            "source": {
-              "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
-              "lineNumber": 25
-            },
+            "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
             "deprecated": false
           },
           {
@@ -293,10 +397,7 @@
             "tags": [],
             "label": "width",
             "description": [],
-            "source": {
-              "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
-              "lineNumber": 26
-            },
+            "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
             "deprecated": false
           },
           {
@@ -306,10 +407,264 @@
             "tags": [],
             "label": "height",
             "description": [],
-            "source": {
-              "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
-              "lineNumber": 27
-            },
+            "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressionShape",
+        "id": "def-public.PathParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "PathParams",
+        "description": [],
+        "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "expressionShape",
+            "id": "def-public.PathParams.d",
+            "type": "string",
+            "tags": [],
+            "label": "d",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressionShape",
+            "id": "def-public.PathParams.strokeLinecap",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "strokeLinecap",
+            "description": [],
+            "signature": [
+              "\"inherit\" | \"butt\" | \"round\" | \"square\" | undefined"
+            ],
+            "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressionShape",
+        "id": "def-public.PolygonParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "PolygonParams",
+        "description": [],
+        "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "expressionShape",
+            "id": "def-public.PolygonParams.points",
+            "type": "string",
+            "tags": [],
+            "label": "points",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressionShape",
+            "id": "def-public.PolygonParams.strokeLinejoin",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "strokeLinejoin",
+            "description": [],
+            "signature": [
+              "\"inherit\" | \"round\" | \"miter\" | \"bevel\" | undefined"
+            ],
+            "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressionShape",
+        "id": "def-public.ProgressArguments",
+        "type": "Interface",
+        "tags": [],
+        "label": "ProgressArguments",
+        "description": [],
+        "path": "src/plugins/expression_shape/common/types/expression_functions.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "expressionShape",
+            "id": "def-public.ProgressArguments.barColor",
+            "type": "string",
+            "tags": [],
+            "label": "barColor",
+            "description": [],
+            "path": "src/plugins/expression_shape/common/types/expression_functions.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressionShape",
+            "id": "def-public.ProgressArguments.barWeight",
+            "type": "number",
+            "tags": [],
+            "label": "barWeight",
+            "description": [],
+            "path": "src/plugins/expression_shape/common/types/expression_functions.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressionShape",
+            "id": "def-public.ProgressArguments.font",
+            "type": "Object",
+            "tags": [],
+            "label": "font",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionTypeStyle",
+                "text": "ExpressionTypeStyle"
+              }
+            ],
+            "path": "src/plugins/expression_shape/common/types/expression_functions.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressionShape",
+            "id": "def-public.ProgressArguments.label",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "label",
+            "description": [],
+            "signature": [
+              "string | boolean"
+            ],
+            "path": "src/plugins/expression_shape/common/types/expression_functions.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressionShape",
+            "id": "def-public.ProgressArguments.max",
+            "type": "number",
+            "tags": [],
+            "label": "max",
+            "description": [],
+            "path": "src/plugins/expression_shape/common/types/expression_functions.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressionShape",
+            "id": "def-public.ProgressArguments.shape",
+            "type": "Enum",
+            "tags": [],
+            "label": "shape",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "expressionShape",
+                "scope": "common",
+                "docId": "kibExpressionShapePluginApi",
+                "section": "def-common.Progress",
+                "text": "Progress"
+              }
+            ],
+            "path": "src/plugins/expression_shape/common/types/expression_functions.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressionShape",
+            "id": "def-public.ProgressArguments.valueColor",
+            "type": "string",
+            "tags": [],
+            "label": "valueColor",
+            "description": [],
+            "path": "src/plugins/expression_shape/common/types/expression_functions.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressionShape",
+            "id": "def-public.ProgressArguments.valueWeight",
+            "type": "number",
+            "tags": [],
+            "label": "valueWeight",
+            "description": [],
+            "path": "src/plugins/expression_shape/common/types/expression_functions.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressionShape",
+        "id": "def-public.RectParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "RectParams",
+        "description": [],
+        "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "expressionShape",
+            "id": "def-public.RectParams.x",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "x",
+            "description": [],
+            "signature": [
+              "string | number | undefined"
+            ],
+            "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressionShape",
+            "id": "def-public.RectParams.y",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "y",
+            "description": [],
+            "signature": [
+              "string | number | undefined"
+            ],
+            "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressionShape",
+            "id": "def-public.RectParams.width",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "width",
+            "description": [],
+            "signature": [
+              "string | number | undefined"
+            ],
+            "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressionShape",
+            "id": "def-public.RectParams.height",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "height",
+            "description": [],
+            "signature": [
+              "string | number | undefined"
+            ],
+            "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
             "deprecated": false
           }
         ],
@@ -322,10 +677,7 @@
         "tags": [],
         "label": "ShapeAttributes",
         "description": [],
-        "source": {
-          "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
-          "lineNumber": 25
-        },
+        "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
         "deprecated": false,
         "children": [
           {
@@ -338,10 +690,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
-              "lineNumber": 26
-            },
+            "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
             "deprecated": false
           },
           {
@@ -354,10 +703,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
-              "lineNumber": 27
-            },
+            "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
             "deprecated": false
           },
           {
@@ -370,10 +716,7 @@
             "signature": [
               "string | number | undefined"
             ],
-            "source": {
-              "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
-              "lineNumber": 28
-            },
+            "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
             "deprecated": false
           },
           {
@@ -386,10 +729,7 @@
             "signature": [
               "string | number | undefined"
             ],
-            "source": {
-              "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
-              "lineNumber": 29
-            },
+            "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
             "deprecated": false
           },
           {
@@ -409,10 +749,7 @@
               },
               " | undefined"
             ],
-            "source": {
-              "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
-              "lineNumber": 30
-            },
+            "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
             "deprecated": false
           },
           {
@@ -425,10 +762,7 @@
             "signature": [
               "string | number | undefined"
             ],
-            "source": {
-              "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
-              "lineNumber": 31
-            },
+            "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
             "deprecated": false
           },
           {
@@ -441,10 +775,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
-              "lineNumber": 32
-            },
+            "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
             "deprecated": false
           }
         ],
@@ -474,10 +805,7 @@
             "text": "ShapeRendererConfig"
           }
         ],
-        "source": {
-          "path": "src/plugins/expression_shape/public/components/shape/types.ts",
-          "lineNumber": 13
-        },
+        "path": "src/plugins/expression_shape/public/components/shape/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -490,10 +818,7 @@
             "signature": [
               "() => void"
             ],
-            "source": {
-              "path": "src/plugins/expression_shape/public/components/shape/types.ts",
-              "lineNumber": 14
-            },
+            "path": "src/plugins/expression_shape/public/components/shape/types.ts",
             "deprecated": false,
             "returnComment": [],
             "children": []
@@ -508,10 +833,7 @@
             "signature": [
               "HTMLElement"
             ],
-            "source": {
-              "path": "src/plugins/expression_shape/public/components/shape/types.ts",
-              "lineNumber": 15
-            },
+            "path": "src/plugins/expression_shape/public/components/shape/types.ts",
             "deprecated": false
           }
         ],
@@ -524,10 +846,7 @@
         "tags": [],
         "label": "ShapeContentAttributes",
         "description": [],
-        "source": {
-          "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
-          "lineNumber": 35
-        },
+        "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
         "deprecated": false,
         "children": [
           {
@@ -540,10 +859,7 @@
             "signature": [
               "string | number | undefined"
             ],
-            "source": {
-              "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
-              "lineNumber": 36
-            },
+            "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
             "deprecated": false
           },
           {
@@ -556,10 +872,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
-              "lineNumber": 37
-            },
+            "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
             "deprecated": false
           },
           {
@@ -572,10 +885,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
-              "lineNumber": 38
-            },
+            "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
             "deprecated": false
           },
           {
@@ -588,10 +898,7 @@
             "signature": [
               "string | number | undefined"
             ],
-            "source": {
-              "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
-              "lineNumber": 39
-            },
+            "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
             "deprecated": false
           },
           {
@@ -604,72 +911,7 @@
             "signature": [
               "string | number | undefined"
             ],
-            "source": {
-              "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
-              "lineNumber": 40
-            },
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "expressionShape",
-        "id": "def-public.ShapeProps",
-        "type": "Interface",
-        "tags": [],
-        "label": "ShapeProps",
-        "description": [],
-        "source": {
-          "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
-          "lineNumber": 13
-        },
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "expressionShape",
-            "id": "def-public.ShapeProps.shapeAttributes",
-            "type": "Object",
-            "tags": [],
-            "label": "shapeAttributes",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "expressionShape",
-                "scope": "public",
-                "docId": "kibExpressionShapePluginApi",
-                "section": "def-public.ShapeAttributes",
-                "text": "ShapeAttributes"
-              },
-              " | undefined"
-            ],
-            "source": {
-              "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
-              "lineNumber": 14
-            },
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "expressionShape",
-            "id": "def-public.ShapeProps.shapeContentAttributes",
-            "type": "Object",
-            "tags": [],
-            "label": "shapeContentAttributes",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "expressionShape",
-                "scope": "public",
-                "docId": "kibExpressionShapePluginApi",
-                "section": "def-public.ShapeContentAttributes",
-                "text": "ShapeContentAttributes"
-              },
-              " | undefined"
-            ],
-            "source": {
-              "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
-              "lineNumber": 15
-            },
+            "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
             "deprecated": false
           }
         ],
@@ -682,10 +924,7 @@
         "tags": [],
         "label": "ShapeRef",
         "description": [],
-        "source": {
-          "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
-          "lineNumber": 79
-        },
+        "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
         "deprecated": false,
         "children": [
           {
@@ -705,13 +944,10 @@
                 "text": "SvgConfig"
               }
             ],
-            "source": {
-              "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
-              "lineNumber": 80
-            },
+            "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
             "deprecated": false,
-            "returnComment": [],
-            "children": []
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -723,10 +959,7 @@
         "tags": [],
         "label": "ShapeRendererConfig",
         "description": [],
-        "source": {
-          "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
-          "lineNumber": 11
-        },
+        "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
         "deprecated": false,
         "children": [
           {
@@ -736,10 +969,7 @@
             "tags": [],
             "label": "border",
             "description": [],
-            "source": {
-              "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
-              "lineNumber": 12
-            },
+            "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
             "deprecated": false
           },
           {
@@ -749,10 +979,7 @@
             "tags": [],
             "label": "borderWidth",
             "description": [],
-            "source": {
-              "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
-              "lineNumber": 13
-            },
+            "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
             "deprecated": false
           },
           {
@@ -771,10 +998,7 @@
                 "text": "Shape"
               }
             ],
-            "source": {
-              "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
-              "lineNumber": 14
-            },
+            "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
             "deprecated": false
           },
           {
@@ -784,10 +1008,7 @@
             "tags": [],
             "label": "fill",
             "description": [],
-            "source": {
-              "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
-              "lineNumber": 15
-            },
+            "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
             "deprecated": false
           },
           {
@@ -797,10 +1018,7 @@
             "tags": [],
             "label": "maintainAspect",
             "description": [],
-            "source": {
-              "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
-              "lineNumber": 16
-            },
+            "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
             "deprecated": false
           }
         ],
@@ -813,10 +1031,7 @@
         "tags": [],
         "label": "SvgConfig",
         "description": [],
-        "source": {
-          "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
-          "lineNumber": 67
-        },
+        "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
         "deprecated": false,
         "children": [
           {
@@ -836,10 +1051,7 @@
               },
               " | undefined"
             ],
-            "source": {
-              "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
-              "lineNumber": 68
-            },
+            "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
             "deprecated": false
           },
           {
@@ -858,10 +1070,7 @@
                 "text": "ViewBoxParams"
               }
             ],
-            "source": {
-              "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
-              "lineNumber": 69
-            },
+            "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
             "deprecated": false
           },
           {
@@ -880,7 +1089,15 @@
                 "section": "def-public.ShapeContentAttributes",
                 "text": "ShapeContentAttributes"
               },
-              " & CircleParams) | (",
+              " & ",
+              {
+                "pluginId": "expressionShape",
+                "scope": "public",
+                "docId": "kibExpressionShapePluginApi",
+                "section": "def-public.CircleParams",
+                "text": "CircleParams"
+              },
+              " & Readonly<{}> & Readonly<{ children?: React.ReactNode; }> & { ref?: React.RefObject<any> | undefined; }) | (",
               {
                 "pluginId": "expressionShape",
                 "scope": "public",
@@ -888,7 +1105,15 @@
                 "section": "def-public.ShapeContentAttributes",
                 "text": "ShapeContentAttributes"
               },
-              " & RectParams) | (",
+              " & ",
+              {
+                "pluginId": "expressionShape",
+                "scope": "public",
+                "docId": "kibExpressionShapePluginApi",
+                "section": "def-public.RectParams",
+                "text": "RectParams"
+              },
+              " & Readonly<{}> & Readonly<{ children?: React.ReactNode; }> & { ref?: React.RefObject<any> | undefined; }) | (",
               {
                 "pluginId": "expressionShape",
                 "scope": "public",
@@ -896,7 +1121,15 @@
                 "section": "def-public.ShapeContentAttributes",
                 "text": "ShapeContentAttributes"
               },
-              " & PathParams) | (",
+              " & ",
+              {
+                "pluginId": "expressionShape",
+                "scope": "public",
+                "docId": "kibExpressionShapePluginApi",
+                "section": "def-public.PathParams",
+                "text": "PathParams"
+              },
+              " & Readonly<{}> & Readonly<{ children?: React.ReactNode; }> & { ref?: React.RefObject<any> | undefined; }) | (",
               {
                 "pluginId": "expressionShape",
                 "scope": "public",
@@ -904,12 +1137,37 @@
                 "section": "def-public.ShapeContentAttributes",
                 "text": "ShapeContentAttributes"
               },
-              " & PolygonParams)"
+              " & ",
+              {
+                "pluginId": "expressionShape",
+                "scope": "public",
+                "docId": "kibExpressionShapePluginApi",
+                "section": "def-public.PolygonParams",
+                "text": "PolygonParams"
+              },
+              " & Readonly<{}> & Readonly<{ children?: React.ReactNode; }> & { ref?: React.RefObject<any> | undefined; })"
             ],
-            "source": {
-              "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
-              "lineNumber": 70
-            },
+            "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressionShape",
+            "id": "def-public.SvgConfig.textAttributes",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "textAttributes",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "expressionShape",
+                "scope": "public",
+                "docId": "kibExpressionShapePluginApi",
+                "section": "def-public.SvgTextAttributes",
+                "text": "SvgTextAttributes"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
             "deprecated": false
           }
         ],
@@ -922,10 +1180,7 @@
         "tags": [],
         "label": "ViewBoxParams",
         "description": [],
-        "source": {
-          "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
-          "lineNumber": 30
-        },
+        "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
         "deprecated": false,
         "children": [
           {
@@ -935,10 +1190,7 @@
             "tags": [],
             "label": "minX",
             "description": [],
-            "source": {
-              "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
-              "lineNumber": 31
-            },
+            "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
             "deprecated": false
           },
           {
@@ -948,10 +1200,7 @@
             "tags": [],
             "label": "minY",
             "description": [],
-            "source": {
-              "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
-              "lineNumber": 32
-            },
+            "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
             "deprecated": false
           },
           {
@@ -961,10 +1210,7 @@
             "tags": [],
             "label": "width",
             "description": [],
-            "source": {
-              "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
-              "lineNumber": 33
-            },
+            "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
             "deprecated": false
           },
           {
@@ -974,10 +1220,7 @@
             "tags": [],
             "label": "height",
             "description": [],
-            "source": {
-              "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
-              "lineNumber": 34
-            },
+            "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
             "deprecated": false
           }
         ],
@@ -987,15 +1230,23 @@
     "enums": [
       {
         "parentPluginId": "expressionShape",
+        "id": "def-public.Progress",
+        "type": "Enum",
+        "tags": [],
+        "label": "Progress",
+        "description": [],
+        "path": "src/plugins/expression_shape/common/types/expression_functions.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressionShape",
         "id": "def-public.Shape",
         "type": "Enum",
         "tags": [],
         "label": "Shape",
         "description": [],
-        "source": {
-          "path": "src/plugins/expression_shape/common/types/expression_functions.ts",
-          "lineNumber": 10
-        },
+        "path": "src/plugins/expression_shape/common/types/expression_functions.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -1006,15 +1257,78 @@
         "tags": [],
         "label": "SvgElementTypes",
         "description": [],
-        "source": {
-          "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
-          "lineNumber": 18
-        },
+        "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
         "deprecated": false,
         "initialIsOpen": false
       }
     ],
     "misc": [
+      {
+        "parentPluginId": "expressionShape",
+        "id": "def-public.ExpressionProgressFunction",
+        "type": "Type",
+        "tags": [],
+        "label": "ExpressionProgressFunction",
+        "description": [],
+        "signature": [
+          "() => ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionFunctionDefinition",
+            "text": "ExpressionFunctionDefinition"
+          },
+          "<\"progress\", number, ",
+          {
+            "pluginId": "expressionShape",
+            "scope": "common",
+            "docId": "kibExpressionShapePluginApi",
+            "section": "def-common.ProgressArguments",
+            "text": "ProgressArguments"
+          },
+          ", ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionValueBoxed",
+            "text": "ExpressionValueBoxed"
+          },
+          "<\"render\", { as: string; value: ",
+          {
+            "pluginId": "expressionShape",
+            "scope": "common",
+            "docId": "kibExpressionShapePluginApi",
+            "section": "def-common.ProgressArguments",
+            "text": "ProgressArguments"
+          },
+          "; }>, ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExecutionContext",
+            "text": "ExecutionContext"
+          },
+          "<",
+          {
+            "pluginId": "inspector",
+            "scope": "common",
+            "docId": "kibInspectorPluginApi",
+            "section": "def-common.Adapters",
+            "text": "Adapters"
+          },
+          ", ",
+          "SerializableRecord",
+          ">>"
+        ],
+        "path": "src/plugins/expression_shape/common/types/expression_functions.ts",
+        "deprecated": false,
+        "returnComment": [],
+        "children": [],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "expressionShape",
         "id": "def-public.ExpressionShapeFunction",
@@ -1056,14 +1370,13 @@
             "text": "Adapters"
           },
           ", ",
-          "SerializableState",
+          "SerializableRecord",
           ">>"
         ],
-        "source": {
-          "path": "src/plugins/expression_shape/common/types/expression_functions.ts",
-          "lineNumber": 41
-        },
+        "path": "src/plugins/expression_shape/common/types/expression_functions.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [],
         "initialIsOpen": false
       },
       {
@@ -1076,10 +1389,49 @@
         "signature": [
           "\"top\" | \"bottom\" | \"left\" | \"right\""
         ],
-        "source": {
-          "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
-          "lineNumber": 10
-        },
+        "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressionShape",
+        "id": "def-public.ProgressOutput",
+        "type": "Type",
+        "tags": [],
+        "label": "ProgressOutput",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "expressionShape",
+            "scope": "common",
+            "docId": "kibExpressionShapePluginApi",
+            "section": "def-common.ProgressArguments",
+            "text": "ProgressArguments"
+          },
+          " & { value: number; }"
+        ],
+        "path": "src/plugins/expression_shape/common/types/expression_functions.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressionShape",
+        "id": "def-public.ProgressRendererConfig",
+        "type": "Type",
+        "tags": [],
+        "label": "ProgressRendererConfig",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "expressionShape",
+            "scope": "common",
+            "docId": "kibExpressionShapePluginApi",
+            "section": "def-common.ProgressArguments",
+            "text": "ProgressArguments"
+          },
+          " & { value: number; }"
+        ],
+        "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -1091,7 +1443,7 @@
         "label": "renderers",
         "description": [],
         "signature": [
-          "(() => ",
+          "((() => ",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -1107,12 +1459,25 @@
             "section": "def-common.ShapeRendererConfig",
             "text": "ShapeRendererConfig"
           },
-          ">)[]"
+          ">) | (() => ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionRenderDefinition",
+            "text": "ExpressionRenderDefinition"
+          },
+          "<",
+          {
+            "pluginId": "expressionShape",
+            "scope": "common",
+            "docId": "kibExpressionShapePluginApi",
+            "section": "def-common.ProgressOutput",
+            "text": "ProgressOutput"
+          },
+          ">))[]"
         ],
-        "source": {
-          "path": "src/plugins/expression_shape/public/expression_renderers/index.ts",
-          "lineNumber": 11
-        },
+        "path": "src/plugins/expression_shape/public/expression_renderers/index.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -1124,7 +1489,7 @@
         "label": "ShapeDrawerComponentProps",
         "description": [],
         "signature": [
-          "{ ref: React.Ref<",
+          "{ readonly children?: React.ReactNode; ref: (((instance: ",
           {
             "pluginId": "expressionShape",
             "scope": "public",
@@ -1132,7 +1497,15 @@
             "section": "def-public.ShapeRef",
             "text": "ShapeRef"
           },
-          ">; shapeType: string; shapeAttributes?: ",
+          " | null) => void) & React.RefObject<any>) | (React.RefObject<",
+          {
+            "pluginId": "expressionShape",
+            "scope": "public",
+            "docId": "kibExpressionShapePluginApi",
+            "section": "def-public.ShapeRef",
+            "text": "ShapeRef"
+          },
+          "> & React.RefObject<any>); shapeType: string; shapeAttributes?: ",
           {
             "pluginId": "expressionShape",
             "scope": "public",
@@ -1140,7 +1513,7 @@
             "section": "def-public.ShapeAttributes",
             "text": "ShapeAttributes"
           },
-          " | undefined; shapeContentAttributes?: ",
+          " | undefined; shapeContentAttributes?: (",
           {
             "pluginId": "expressionShape",
             "scope": "public",
@@ -1148,12 +1521,73 @@
             "section": "def-public.ShapeContentAttributes",
             "text": "ShapeContentAttributes"
           },
+          " & ",
+          {
+            "pluginId": "expressionShape",
+            "scope": "public",
+            "docId": "kibExpressionShapePluginApi",
+            "section": "def-public.CircleParams",
+            "text": "CircleParams"
+          },
+          " & { ref?: React.RefObject<any> | undefined; }) | (",
+          {
+            "pluginId": "expressionShape",
+            "scope": "public",
+            "docId": "kibExpressionShapePluginApi",
+            "section": "def-public.ShapeContentAttributes",
+            "text": "ShapeContentAttributes"
+          },
+          " & ",
+          {
+            "pluginId": "expressionShape",
+            "scope": "public",
+            "docId": "kibExpressionShapePluginApi",
+            "section": "def-public.RectParams",
+            "text": "RectParams"
+          },
+          " & { ref?: React.RefObject<any> | undefined; }) | (",
+          {
+            "pluginId": "expressionShape",
+            "scope": "public",
+            "docId": "kibExpressionShapePluginApi",
+            "section": "def-public.ShapeContentAttributes",
+            "text": "ShapeContentAttributes"
+          },
+          " & ",
+          {
+            "pluginId": "expressionShape",
+            "scope": "public",
+            "docId": "kibExpressionShapePluginApi",
+            "section": "def-public.PathParams",
+            "text": "PathParams"
+          },
+          " & { ref?: React.RefObject<any> | undefined; }) | (",
+          {
+            "pluginId": "expressionShape",
+            "scope": "public",
+            "docId": "kibExpressionShapePluginApi",
+            "section": "def-public.ShapeContentAttributes",
+            "text": "ShapeContentAttributes"
+          },
+          " & ",
+          {
+            "pluginId": "expressionShape",
+            "scope": "public",
+            "docId": "kibExpressionShapePluginApi",
+            "section": "def-public.PolygonParams",
+            "text": "PolygonParams"
+          },
+          " & { ref?: React.RefObject<any> | undefined; }) | undefined; textAttributes?: ",
+          {
+            "pluginId": "expressionShape",
+            "scope": "public",
+            "docId": "kibExpressionShapePluginApi",
+            "section": "def-public.SvgTextAttributes",
+            "text": "SvgTextAttributes"
+          },
           " | undefined; }"
         ],
-        "source": {
-          "path": "src/plugins/expression_shape/public/components/shape/types.ts",
-          "lineNumber": 22
-        },
+        "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -1165,7 +1599,7 @@
         "label": "ShapeDrawerProps",
         "description": [],
         "signature": [
-          "{ shapeType: string; getShape: (shapeType: string) => { Component: ({ shapeAttributes, shapeContentAttributes }: ",
+          "{ shapeType: string; getShape: (shapeType: string) => { Component: ({ shapeAttributes, shapeContentAttributes, children, textAttributes, }: ",
           {
             "pluginId": "expressionShape",
             "scope": "public",
@@ -1189,19 +1623,183 @@
             "section": "def-public.ShapeRef",
             "text": "ShapeRef"
           },
-          ">; } & ",
+          ">; } & { shapeAttributes?: ",
           {
             "pluginId": "expressionShape",
             "scope": "public",
             "docId": "kibExpressionShapePluginApi",
-            "section": "def-public.ShapeProps",
-            "text": "ShapeProps"
-          }
+            "section": "def-public.ShapeAttributes",
+            "text": "ShapeAttributes"
+          },
+          " | undefined; shapeContentAttributes?: (",
+          {
+            "pluginId": "expressionShape",
+            "scope": "public",
+            "docId": "kibExpressionShapePluginApi",
+            "section": "def-public.ShapeContentAttributes",
+            "text": "ShapeContentAttributes"
+          },
+          " & ",
+          {
+            "pluginId": "expressionShape",
+            "scope": "public",
+            "docId": "kibExpressionShapePluginApi",
+            "section": "def-public.CircleParams",
+            "text": "CircleParams"
+          },
+          " & { ref?: React.RefObject<any> | undefined; }) | (",
+          {
+            "pluginId": "expressionShape",
+            "scope": "public",
+            "docId": "kibExpressionShapePluginApi",
+            "section": "def-public.ShapeContentAttributes",
+            "text": "ShapeContentAttributes"
+          },
+          " & ",
+          {
+            "pluginId": "expressionShape",
+            "scope": "public",
+            "docId": "kibExpressionShapePluginApi",
+            "section": "def-public.RectParams",
+            "text": "RectParams"
+          },
+          " & { ref?: React.RefObject<any> | undefined; }) | (",
+          {
+            "pluginId": "expressionShape",
+            "scope": "public",
+            "docId": "kibExpressionShapePluginApi",
+            "section": "def-public.ShapeContentAttributes",
+            "text": "ShapeContentAttributes"
+          },
+          " & ",
+          {
+            "pluginId": "expressionShape",
+            "scope": "public",
+            "docId": "kibExpressionShapePluginApi",
+            "section": "def-public.PathParams",
+            "text": "PathParams"
+          },
+          " & { ref?: React.RefObject<any> | undefined; }) | (",
+          {
+            "pluginId": "expressionShape",
+            "scope": "public",
+            "docId": "kibExpressionShapePluginApi",
+            "section": "def-public.ShapeContentAttributes",
+            "text": "ShapeContentAttributes"
+          },
+          " & ",
+          {
+            "pluginId": "expressionShape",
+            "scope": "public",
+            "docId": "kibExpressionShapePluginApi",
+            "section": "def-public.PolygonParams",
+            "text": "PolygonParams"
+          },
+          " & { ref?: React.RefObject<any> | undefined; }) | undefined; textAttributes?: ",
+          {
+            "pluginId": "expressionShape",
+            "scope": "public",
+            "docId": "kibExpressionShapePluginApi",
+            "section": "def-public.SvgTextAttributes",
+            "text": "SvgTextAttributes"
+          },
+          " | undefined; } & Readonly<{}> & Readonly<{ children?: React.ReactNode; }> & { ref?: React.RefObject<any> | undefined; }"
         ],
-        "source": {
-          "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
-          "lineNumber": 73
-        },
+        "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressionShape",
+        "id": "def-public.ShapeProps",
+        "type": "Type",
+        "tags": [],
+        "label": "ShapeProps",
+        "description": [],
+        "signature": [
+          "{ shapeAttributes?: ",
+          {
+            "pluginId": "expressionShape",
+            "scope": "public",
+            "docId": "kibExpressionShapePluginApi",
+            "section": "def-public.ShapeAttributes",
+            "text": "ShapeAttributes"
+          },
+          " | undefined; shapeContentAttributes?: (",
+          {
+            "pluginId": "expressionShape",
+            "scope": "public",
+            "docId": "kibExpressionShapePluginApi",
+            "section": "def-public.ShapeContentAttributes",
+            "text": "ShapeContentAttributes"
+          },
+          " & ",
+          {
+            "pluginId": "expressionShape",
+            "scope": "public",
+            "docId": "kibExpressionShapePluginApi",
+            "section": "def-public.CircleParams",
+            "text": "CircleParams"
+          },
+          " & { ref?: React.RefObject<any> | undefined; }) | (",
+          {
+            "pluginId": "expressionShape",
+            "scope": "public",
+            "docId": "kibExpressionShapePluginApi",
+            "section": "def-public.ShapeContentAttributes",
+            "text": "ShapeContentAttributes"
+          },
+          " & ",
+          {
+            "pluginId": "expressionShape",
+            "scope": "public",
+            "docId": "kibExpressionShapePluginApi",
+            "section": "def-public.RectParams",
+            "text": "RectParams"
+          },
+          " & { ref?: React.RefObject<any> | undefined; }) | (",
+          {
+            "pluginId": "expressionShape",
+            "scope": "public",
+            "docId": "kibExpressionShapePluginApi",
+            "section": "def-public.ShapeContentAttributes",
+            "text": "ShapeContentAttributes"
+          },
+          " & ",
+          {
+            "pluginId": "expressionShape",
+            "scope": "public",
+            "docId": "kibExpressionShapePluginApi",
+            "section": "def-public.PathParams",
+            "text": "PathParams"
+          },
+          " & { ref?: React.RefObject<any> | undefined; }) | (",
+          {
+            "pluginId": "expressionShape",
+            "scope": "public",
+            "docId": "kibExpressionShapePluginApi",
+            "section": "def-public.ShapeContentAttributes",
+            "text": "ShapeContentAttributes"
+          },
+          " & ",
+          {
+            "pluginId": "expressionShape",
+            "scope": "public",
+            "docId": "kibExpressionShapePluginApi",
+            "section": "def-public.PolygonParams",
+            "text": "PolygonParams"
+          },
+          " & { ref?: React.RefObject<any> | undefined; }) | undefined; textAttributes?: ",
+          {
+            "pluginId": "expressionShape",
+            "scope": "public",
+            "docId": "kibExpressionShapePluginApi",
+            "section": "def-public.SvgTextAttributes",
+            "text": "SvgTextAttributes"
+          },
+          " | undefined; } & Readonly<{}> & Readonly<{ children?: React.ReactNode; }> & { ref?: React.RefObject<any> | undefined; }"
+        ],
+        "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -1213,7 +1811,7 @@
         "label": "ShapeType",
         "description": [],
         "signature": [
-          "{ Component: ({ shapeAttributes, shapeContentAttributes }: ",
+          "{ Component: ({ shapeAttributes, shapeContentAttributes, children, textAttributes, }: ",
           {
             "pluginId": "expressionShape",
             "scope": "public",
@@ -1231,10 +1829,65 @@
           },
           "; }"
         ],
-        "source": {
-          "path": "src/plugins/expression_shape/public/components/reusable/shape_factory.tsx",
-          "lineNumber": 49
-        },
+        "path": "src/plugins/expression_shape/public/components/reusable/shape_factory.tsx",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressionShape",
+        "id": "def-public.SpecificShapeContentAttributes",
+        "type": "Type",
+        "tags": [],
+        "label": "SpecificShapeContentAttributes",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "expressionShape",
+            "scope": "public",
+            "docId": "kibExpressionShapePluginApi",
+            "section": "def-public.CircleParams",
+            "text": "CircleParams"
+          },
+          " | ",
+          {
+            "pluginId": "expressionShape",
+            "scope": "public",
+            "docId": "kibExpressionShapePluginApi",
+            "section": "def-public.RectParams",
+            "text": "RectParams"
+          },
+          " | ",
+          {
+            "pluginId": "expressionShape",
+            "scope": "public",
+            "docId": "kibExpressionShapePluginApi",
+            "section": "def-public.PathParams",
+            "text": "PathParams"
+          },
+          " | ",
+          {
+            "pluginId": "expressionShape",
+            "scope": "public",
+            "docId": "kibExpressionShapePluginApi",
+            "section": "def-public.PolygonParams",
+            "text": "PolygonParams"
+          }
+        ],
+        "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressionShape",
+        "id": "def-public.SvgTextAttributes",
+        "type": "Type",
+        "tags": [],
+        "label": "SvgTextAttributes",
+        "description": [],
+        "signature": [
+          "Partial<Element> & { x?: string | number | undefined; y?: string | number | undefined; textAnchor?: string | undefined; dominantBaseline?: string | number | undefined; dx?: string | number | undefined; dy?: string | number | undefined; } & { style?: React.CSSProperties | undefined; } & { ref?: React.RefObject<SVGTextElement> | undefined; }"
+        ],
+        "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
         "deprecated": false,
         "initialIsOpen": false
       }
@@ -1250,10 +1903,7 @@
       "signature": [
         "void"
       ],
-      "source": {
-        "path": "src/plugins/expression_shape/public/plugin.ts",
-        "lineNumber": 23
-      },
+      "path": "src/plugins/expression_shape/public/plugin.ts",
       "deprecated": false,
       "lifecycle": "start",
       "initialIsOpen": true
@@ -1265,11 +1915,50 @@
     "interfaces": [],
     "enums": [],
     "misc": [],
-    "objects": []
+    "objects": [],
+    "start": {
+      "parentPluginId": "expressionShape",
+      "id": "def-server.ExpressionShapePluginStart",
+      "type": "Type",
+      "tags": [],
+      "label": "ExpressionShapePluginStart",
+      "description": [],
+      "signature": [
+        "void"
+      ],
+      "path": "src/plugins/expression_shape/server/plugin.ts",
+      "deprecated": false,
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
   },
   "common": {
     "classes": [],
     "functions": [
+      {
+        "parentPluginId": "expressionShape",
+        "id": "def-common.getAvailableProgressShapes",
+        "type": "Function",
+        "tags": [],
+        "label": "getAvailableProgressShapes",
+        "description": [],
+        "signature": [
+          "() => ",
+          {
+            "pluginId": "expressionShape",
+            "scope": "common",
+            "docId": "kibExpressionShapePluginApi",
+            "section": "def-common.Progress",
+            "text": "Progress"
+          },
+          "[]"
+        ],
+        "path": "src/plugins/expression_shape/common/lib/available_shapes.ts",
+        "deprecated": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "expressionShape",
         "id": "def-common.getAvailableShapes",
@@ -1288,10 +1977,7 @@
           },
           "[]"
         ],
-        "source": {
-          "path": "src/plugins/expression_shape/common/lib/available_shapes.ts",
-          "lineNumber": 11
-        },
+        "path": "src/plugins/expression_shape/common/lib/available_shapes.ts",
         "deprecated": false,
         "children": [],
         "returnComment": [],
@@ -1306,10 +1992,7 @@
         "tags": [],
         "label": "NodeDimensions",
         "description": [],
-        "source": {
-          "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
-          "lineNumber": 19
-        },
+        "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
         "deprecated": false,
         "children": [
           {
@@ -1319,10 +2002,7 @@
             "tags": [],
             "label": "width",
             "description": [],
-            "source": {
-              "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
-              "lineNumber": 20
-            },
+            "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
             "deprecated": false
           },
           {
@@ -1332,10 +2012,7 @@
             "tags": [],
             "label": "height",
             "description": [],
-            "source": {
-              "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
-              "lineNumber": 21
-            },
+            "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
             "deprecated": false
           }
         ],
@@ -1358,10 +2035,7 @@
           },
           " extends Arguments"
         ],
-        "source": {
-          "path": "src/plugins/expression_shape/common/types/expression_functions.ts",
-          "lineNumber": 37
-        },
+        "path": "src/plugins/expression_shape/common/types/expression_functions.ts",
         "deprecated": false,
         "children": [
           {
@@ -1374,10 +2048,7 @@
             "signature": [
               "\"shape\""
             ],
-            "source": {
-              "path": "src/plugins/expression_shape/common/types/expression_functions.ts",
-              "lineNumber": 38
-            },
+            "path": "src/plugins/expression_shape/common/types/expression_functions.ts",
             "deprecated": false
           }
         ],
@@ -1390,10 +2061,7 @@
         "tags": [],
         "label": "ParentNodeParams",
         "description": [],
-        "source": {
-          "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
-          "lineNumber": 24
-        },
+        "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
         "deprecated": false,
         "children": [
           {
@@ -1403,10 +2071,7 @@
             "tags": [],
             "label": "borderOffset",
             "description": [],
-            "source": {
-              "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
-              "lineNumber": 25
-            },
+            "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
             "deprecated": false
           },
           {
@@ -1416,10 +2081,7 @@
             "tags": [],
             "label": "width",
             "description": [],
-            "source": {
-              "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
-              "lineNumber": 26
-            },
+            "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
             "deprecated": false
           },
           {
@@ -1429,10 +2091,121 @@
             "tags": [],
             "label": "height",
             "description": [],
-            "source": {
-              "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
-              "lineNumber": 27
-            },
+            "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressionShape",
+        "id": "def-common.ProgressArguments",
+        "type": "Interface",
+        "tags": [],
+        "label": "ProgressArguments",
+        "description": [],
+        "path": "src/plugins/expression_shape/common/types/expression_functions.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "expressionShape",
+            "id": "def-common.ProgressArguments.barColor",
+            "type": "string",
+            "tags": [],
+            "label": "barColor",
+            "description": [],
+            "path": "src/plugins/expression_shape/common/types/expression_functions.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressionShape",
+            "id": "def-common.ProgressArguments.barWeight",
+            "type": "number",
+            "tags": [],
+            "label": "barWeight",
+            "description": [],
+            "path": "src/plugins/expression_shape/common/types/expression_functions.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressionShape",
+            "id": "def-common.ProgressArguments.font",
+            "type": "Object",
+            "tags": [],
+            "label": "font",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionTypeStyle",
+                "text": "ExpressionTypeStyle"
+              }
+            ],
+            "path": "src/plugins/expression_shape/common/types/expression_functions.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressionShape",
+            "id": "def-common.ProgressArguments.label",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "label",
+            "description": [],
+            "signature": [
+              "string | boolean"
+            ],
+            "path": "src/plugins/expression_shape/common/types/expression_functions.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressionShape",
+            "id": "def-common.ProgressArguments.max",
+            "type": "number",
+            "tags": [],
+            "label": "max",
+            "description": [],
+            "path": "src/plugins/expression_shape/common/types/expression_functions.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressionShape",
+            "id": "def-common.ProgressArguments.shape",
+            "type": "Enum",
+            "tags": [],
+            "label": "shape",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "expressionShape",
+                "scope": "common",
+                "docId": "kibExpressionShapePluginApi",
+                "section": "def-common.Progress",
+                "text": "Progress"
+              }
+            ],
+            "path": "src/plugins/expression_shape/common/types/expression_functions.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressionShape",
+            "id": "def-common.ProgressArguments.valueColor",
+            "type": "string",
+            "tags": [],
+            "label": "valueColor",
+            "description": [],
+            "path": "src/plugins/expression_shape/common/types/expression_functions.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressionShape",
+            "id": "def-common.ProgressArguments.valueWeight",
+            "type": "number",
+            "tags": [],
+            "label": "valueWeight",
+            "description": [],
+            "path": "src/plugins/expression_shape/common/types/expression_functions.ts",
             "deprecated": false
           }
         ],
@@ -1445,10 +2218,7 @@
         "tags": [],
         "label": "ShapeRendererConfig",
         "description": [],
-        "source": {
-          "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
-          "lineNumber": 11
-        },
+        "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
         "deprecated": false,
         "children": [
           {
@@ -1458,10 +2228,7 @@
             "tags": [],
             "label": "border",
             "description": [],
-            "source": {
-              "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
-              "lineNumber": 12
-            },
+            "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
             "deprecated": false
           },
           {
@@ -1471,10 +2238,7 @@
             "tags": [],
             "label": "borderWidth",
             "description": [],
-            "source": {
-              "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
-              "lineNumber": 13
-            },
+            "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
             "deprecated": false
           },
           {
@@ -1493,10 +2257,7 @@
                 "text": "Shape"
               }
             ],
-            "source": {
-              "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
-              "lineNumber": 14
-            },
+            "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
             "deprecated": false
           },
           {
@@ -1506,10 +2267,7 @@
             "tags": [],
             "label": "fill",
             "description": [],
-            "source": {
-              "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
-              "lineNumber": 15
-            },
+            "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
             "deprecated": false
           },
           {
@@ -1519,10 +2277,7 @@
             "tags": [],
             "label": "maintainAspect",
             "description": [],
-            "source": {
-              "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
-              "lineNumber": 16
-            },
+            "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
             "deprecated": false
           }
         ],
@@ -1535,10 +2290,7 @@
         "tags": [],
         "label": "ViewBoxParams",
         "description": [],
-        "source": {
-          "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
-          "lineNumber": 30
-        },
+        "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
         "deprecated": false,
         "children": [
           {
@@ -1548,10 +2300,7 @@
             "tags": [],
             "label": "minX",
             "description": [],
-            "source": {
-              "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
-              "lineNumber": 31
-            },
+            "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
             "deprecated": false
           },
           {
@@ -1561,10 +2310,7 @@
             "tags": [],
             "label": "minY",
             "description": [],
-            "source": {
-              "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
-              "lineNumber": 32
-            },
+            "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
             "deprecated": false
           },
           {
@@ -1574,10 +2320,7 @@
             "tags": [],
             "label": "width",
             "description": [],
-            "source": {
-              "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
-              "lineNumber": 33
-            },
+            "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
             "deprecated": false
           },
           {
@@ -1587,10 +2330,7 @@
             "tags": [],
             "label": "height",
             "description": [],
-            "source": {
-              "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
-              "lineNumber": 34
-            },
+            "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
             "deprecated": false
           }
         ],
@@ -1600,20 +2340,136 @@
     "enums": [
       {
         "parentPluginId": "expressionShape",
+        "id": "def-common.Progress",
+        "type": "Enum",
+        "tags": [],
+        "label": "Progress",
+        "description": [],
+        "path": "src/plugins/expression_shape/common/types/expression_functions.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressionShape",
         "id": "def-common.Shape",
         "type": "Enum",
         "tags": [],
         "label": "Shape",
         "description": [],
-        "source": {
-          "path": "src/plugins/expression_shape/common/types/expression_functions.ts",
-          "lineNumber": 10
-        },
+        "path": "src/plugins/expression_shape/common/types/expression_functions.ts",
         "deprecated": false,
         "initialIsOpen": false
       }
     ],
     "misc": [
+      {
+        "parentPluginId": "expressionShape",
+        "id": "def-common.BOOLEAN_FALSE",
+        "type": "string",
+        "tags": [],
+        "label": "BOOLEAN_FALSE",
+        "description": [],
+        "signature": [
+          "\"`false`\""
+        ],
+        "path": "src/plugins/expression_shape/common/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressionShape",
+        "id": "def-common.BOOLEAN_TRUE",
+        "type": "string",
+        "tags": [],
+        "label": "BOOLEAN_TRUE",
+        "description": [],
+        "signature": [
+          "\"`true`\""
+        ],
+        "path": "src/plugins/expression_shape/common/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressionShape",
+        "id": "def-common.CSS",
+        "type": "string",
+        "tags": [],
+        "label": "CSS",
+        "description": [],
+        "signature": [
+          "\"CSS\""
+        ],
+        "path": "src/plugins/expression_shape/common/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressionShape",
+        "id": "def-common.ExpressionProgressFunction",
+        "type": "Type",
+        "tags": [],
+        "label": "ExpressionProgressFunction",
+        "description": [],
+        "signature": [
+          "() => ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionFunctionDefinition",
+            "text": "ExpressionFunctionDefinition"
+          },
+          "<\"progress\", number, ",
+          {
+            "pluginId": "expressionShape",
+            "scope": "common",
+            "docId": "kibExpressionShapePluginApi",
+            "section": "def-common.ProgressArguments",
+            "text": "ProgressArguments"
+          },
+          ", ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionValueBoxed",
+            "text": "ExpressionValueBoxed"
+          },
+          "<\"render\", { as: string; value: ",
+          {
+            "pluginId": "expressionShape",
+            "scope": "common",
+            "docId": "kibExpressionShapePluginApi",
+            "section": "def-common.ProgressArguments",
+            "text": "ProgressArguments"
+          },
+          "; }>, ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExecutionContext",
+            "text": "ExecutionContext"
+          },
+          "<",
+          {
+            "pluginId": "inspector",
+            "scope": "common",
+            "docId": "kibInspectorPluginApi",
+            "section": "def-common.Adapters",
+            "text": "Adapters"
+          },
+          ", ",
+          "SerializableRecord",
+          ">>"
+        ],
+        "path": "src/plugins/expression_shape/common/types/expression_functions.ts",
+        "deprecated": false,
+        "returnComment": [],
+        "children": [],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "expressionShape",
         "id": "def-common.ExpressionShapeFunction",
@@ -1655,13 +2511,40 @@
             "text": "Adapters"
           },
           ", ",
-          "SerializableState",
+          "SerializableRecord",
           ">>"
         ],
-        "source": {
-          "path": "src/plugins/expression_shape/common/types/expression_functions.ts",
-          "lineNumber": 41
-        },
+        "path": "src/plugins/expression_shape/common/types/expression_functions.ts",
+        "deprecated": false,
+        "returnComment": [],
+        "children": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressionShape",
+        "id": "def-common.FONT_FAMILY",
+        "type": "string",
+        "tags": [],
+        "label": "FONT_FAMILY",
+        "description": [],
+        "signature": [
+          "\"`font-family`\""
+        ],
+        "path": "src/plugins/expression_shape/common/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressionShape",
+        "id": "def-common.FONT_WEIGHT",
+        "type": "string",
+        "tags": [],
+        "label": "FONT_WEIGHT",
+        "description": [],
+        "signature": [
+          "\"`font-weight`\""
+        ],
+        "path": "src/plugins/expression_shape/common/constants.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -1675,10 +2558,7 @@
         "signature": [
           "\"top\" | \"bottom\" | \"left\" | \"right\""
         ],
-        "source": {
-          "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
-          "lineNumber": 10
-        },
+        "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -1692,10 +2572,7 @@
         "signature": [
           "\"expressionShape\""
         ],
-        "source": {
-          "path": "src/plugins/expression_shape/common/constants.ts",
-          "lineNumber": 9
-        },
+        "path": "src/plugins/expression_shape/common/constants.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -1709,10 +2586,49 @@
         "signature": [
           "\"expressionShape\""
         ],
-        "source": {
-          "path": "src/plugins/expression_shape/common/constants.ts",
-          "lineNumber": 10
-        },
+        "path": "src/plugins/expression_shape/common/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressionShape",
+        "id": "def-common.ProgressOutput",
+        "type": "Type",
+        "tags": [],
+        "label": "ProgressOutput",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "expressionShape",
+            "scope": "common",
+            "docId": "kibExpressionShapePluginApi",
+            "section": "def-common.ProgressArguments",
+            "text": "ProgressArguments"
+          },
+          " & { value: number; }"
+        ],
+        "path": "src/plugins/expression_shape/common/types/expression_functions.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressionShape",
+        "id": "def-common.ProgressRendererConfig",
+        "type": "Type",
+        "tags": [],
+        "label": "ProgressRendererConfig",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "expressionShape",
+            "scope": "common",
+            "docId": "kibExpressionShapePluginApi",
+            "section": "def-common.ProgressArguments",
+            "text": "ProgressArguments"
+          },
+          " & { value: number; }"
+        ],
+        "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -1726,10 +2642,7 @@
         "signature": [
           "\"SVG\""
         ],
-        "source": {
-          "path": "src/plugins/expression_shape/common/constants.ts",
-          "lineNumber": 11
-        },
+        "path": "src/plugins/expression_shape/common/constants.ts",
         "deprecated": false,
         "initialIsOpen": false
       }

@@ -92,8 +92,8 @@ export const OutlierExploration: FC<ExplorationProps> = React.memo(({ jobId }) =
 
   const scatterplotFieldOptions = useScatterplotFieldOptions(
     indexPattern,
-    jobConfig?.analyzed_fields.includes,
-    jobConfig?.analyzed_fields.excludes,
+    jobConfig?.analyzed_fields?.includes,
+    jobConfig?.analyzed_fields?.excludes,
     resultsField
   );
 

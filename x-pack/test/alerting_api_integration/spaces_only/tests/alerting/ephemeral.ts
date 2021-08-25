@@ -24,7 +24,7 @@ import { DEFAULT_MAX_EPHEMERAL_ACTIONS_PER_ALERT } from '../../../../../plugins/
 export default function createNotifyWhenTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const retry = getService('retry');
-  const es = getService('legacyEs');
+  const es = getService('es');
 
   const esTestIndexTool = new ESTestIndexTool(es, retry);
 
@@ -117,7 +117,7 @@ export default function createNotifyWhenTests({ getService }: FtrProviderContext
       );
 
       const searchResult = await esTestIndexTool.search('action:test.index-record');
-      expect(searchResult.hits.total.value).equal(
+      expect(searchResult.body.hits.total.value).equal(
         nonEphemeralTasks + DEFAULT_MAX_EPHEMERAL_ACTIONS_PER_ALERT
       );
     });

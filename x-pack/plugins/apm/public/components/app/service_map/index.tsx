@@ -20,7 +20,6 @@ import {
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { useLicenseContext } from '../../../context/license/use_license_context';
 import { useTheme } from '../../../hooks/use_theme';
-import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { LicensePrompt } from '../../shared/license_prompt';
 import { Controls } from './Controls';
 import { Cytoscape } from './Cytoscape';
@@ -32,6 +31,9 @@ import { TimeoutPrompt } from './timeout_prompt';
 import { useRefDimensions } from './useRefDimensions';
 import { SearchBar } from '../../shared/search_bar';
 import { useServiceName } from '../../../hooks/use_service_name';
+import { useApmParams } from '../../../hooks/use_apm_params';
+import { Environment } from '../../../../common/environment_rt';
+import { useTimeRange } from '../../../hooks/use_time_range';
 
 function PromptContainer({ children }: { children: ReactNode }) {
   return (
@@ -63,10 +65,49 @@ function LoadingSpinner() {
   );
 }
 
-export function ServiceMap() {
+export function ServiceMapHome() {
+  const {
+    query: { environment, kuery, rangeFrom, rangeTo },
+  } = useApmParams('/service-map');
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
+  return (
+    <ServiceMap
+      environment={environment}
+      kuery={kuery}
+      start={start}
+      end={end}
+    />
+  );
+}
+
+export function ServiceMapServiceDetail() {
+  const {
+    query: { environment, kuery, rangeFrom, rangeTo },
+  } = useApmParams('/services/:serviceName/service-map');
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
+  return (
+    <ServiceMap
+      environment={environment}
+      kuery={kuery}
+      start={start}
+      end={end}
+    />
+  );
+}
+
+export function ServiceMap({
+  environment,
+  kuery,
+  start,
+  end,
+}: {
+  environment: Environment;
+  kuery: string;
+  start: string;
+  end: string;
+}) {
   const theme = useTheme();
   const license = useLicenseContext();
-  const { urlParams } = useUrlParams();
 
   const serviceName = useServiceName();
 
@@ -77,23 +118,20 @@ export function ServiceMap() {
         return;
       }
 
-      const { start, end, environment } = urlParams;
-      if (start && end) {
-        return callApmApi({
-          isCachable: false,
-          endpoint: 'GET /api/apm/service-map',
-          params: {
-            query: {
-              start,
-              end,
-              environment,
-              serviceName,
-            },
+      return callApmApi({
+        isCachable: false,
+        endpoint: 'GET /api/apm/service-map',
+        params: {
+          query: {
+            start,
+            end,
+            environment,
+            serviceName,
           },
-        });
-      }
+        },
+      });
     },
-    [license, serviceName, urlParams]
+    [license, serviceName, environment, start, end]
   );
 
   const { ref, height } = useRefDimensions();
@@ -154,7 +192,13 @@ export function ServiceMap() {
             <Controls />
             {serviceName && <EmptyBanner />}
             {status === FETCH_STATUS.LOADING && <LoadingSpinner />}
-            <Popover focusedServiceName={serviceName} />
+            <Popover
+              focusedServiceName={serviceName}
+              environment={environment}
+              kuery={kuery}
+              start={start}
+              end={end}
+            />
           </Cytoscape>
         </div>
       </EuiPanel>

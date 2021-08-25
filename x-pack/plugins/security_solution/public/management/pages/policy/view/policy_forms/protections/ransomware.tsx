@@ -25,6 +25,12 @@ import { ProtectionSwitch } from '../components/protection_switch';
 export const Ransomware = React.memo(() => {
   const OSes: Immutable<RansomwareProtectionOSes[]> = [OS.windows];
   const protection = 'ransomware';
+  const protectionLabel = i18n.translate(
+    'xpack.securitySolution.endpoint.policy.protections.ransomware',
+    {
+      defaultMessage: 'Ransomware protections',
+    }
+  );
 
   return (
     <ConfigForm
@@ -33,7 +39,9 @@ export const Ransomware = React.memo(() => {
       })}
       supportedOss={[OperatingSystem.WINDOWS]}
       dataTestSubj="ransomwareProtectionsForm"
-      rightCorner={<ProtectionSwitch protection={protection} osList={OSes} />}
+      rightCorner={
+        <ProtectionSwitch protectionLabel={protectionLabel} protection={protection} osList={OSes} />
+      }
     >
       <RadioButtons protection={protection} osList={OSes} />
       <UserNotification protection={protection} osList={OSes} />

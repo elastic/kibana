@@ -11,8 +11,10 @@ import { useActions, useValues } from 'kea';
 
 import { EuiFormRow, EuiText } from '@elastic/eui';
 
+import { ItemWithAnID } from '../types';
+
 import { InlineEditableTableLogic } from './inline_editable_table_logic';
-import { InlineEditableTableColumn, ItemWithAnID } from './types';
+import { InlineEditableTableColumn } from './types';
 
 interface EditingColumnProps<Item extends ItemWithAnID> {
   column: InlineEditableTableColumn<Item>;

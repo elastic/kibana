@@ -11,8 +11,6 @@ export * from './build_filters';
 export * from './build_empty_filter';
 export * from './custom_filter';
 export * from './exists_filter';
-export * from './geo_bounding_box_filter';
-export * from './geo_polygon_filter';
 export * from './get_filter_field';
 export * from './get_filter_params';
 export * from './match_all_filter';

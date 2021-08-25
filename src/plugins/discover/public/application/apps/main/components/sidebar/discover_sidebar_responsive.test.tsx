@@ -7,6 +7,7 @@
  */
 
 import { each, cloneDeep } from 'lodash';
+import { BehaviorSubject } from 'rxjs';
 import { ReactWrapper } from 'enzyme';
 import { findTestSubject } from '@elastic/eui/lib/test';
 // @ts-expect-error
@@ -25,6 +26,8 @@ import {
 } from './discover_sidebar_responsive';
 import { DiscoverServices } from '../../../../../build_services';
 import { ElasticSearchHit } from '../../../../doc_views/doc_views_types';
+import { FetchStatus } from '../../../../types';
+import { DataDocuments$ } from '../../services/use_saved_search';
 
 const mockServices = ({
   history: () => ({
@@ -86,8 +89,10 @@ function getCompProps(): DiscoverSidebarResponsiveProps {
   }
   return {
     columns: ['extension'],
-    fieldCounts,
-    hits,
+    documents$: new BehaviorSubject({
+      fetchStatus: FetchStatus.COMPLETE,
+      result: hits as ElasticSearchHit[],
+    }) as DataDocuments$,
     indexPatternList,
     onChangeIndexPattern: jest.fn(),
     onAddFilter: jest.fn(),

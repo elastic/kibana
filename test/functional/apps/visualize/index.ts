@@ -52,6 +52,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       loadTestFile(require.resolve('./_vertical_bar_chart'));
       loadTestFile(require.resolve('./_vertical_bar_chart_nontimeindex'));
       loadTestFile(require.resolve('./_pie_chart'));
+      loadTestFile(require.resolve('./_timelion'));
     });
 
     describe('visualize ciGroup9', function () {
@@ -90,8 +91,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       loadTestFile(require.resolve('./_linked_saved_searches'));
       loadTestFile(require.resolve('./_visualize_listing'));
       loadTestFile(require.resolve('./_add_to_dashboard.ts'));
-      loadTestFile(require.resolve('./_tile_map'));
-      loadTestFile(require.resolve('./_region_map'));
     });
 
     describe('visualize ciGroup12', function () {

@@ -23,11 +23,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   registry.when('Top traces when data is not loaded', { config: 'basic', archives: [] }, () => {
     it('handles empty state', async () => {
-      const response = await supertest.get(`/api/apm/traces?start=${start}&end=${end}`);
+      const response = await supertest.get(
+        `/api/apm/traces?start=${start}&end=${end}&environment=ENVIRONMENT_ALL&kuery=`
+      );
 
       expect(response.status).to.be(200);
       expect(response.body.items.length).to.be(0);
-      expect(response.body.isAggregationAccurate).to.be(true);
     });
   });
 
@@ -37,7 +38,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     () => {
       let response: any;
       before(async () => {
-        response = await supertest.get(`/api/apm/traces?start=${start}&end=${end}`);
+        response = await supertest.get(
+          `/api/apm/traces?start=${start}&end=${end}&environment=ENVIRONMENT_ALL&kuery=`
+        );
       });
 
       it('returns the correct status code', async () => {
@@ -45,7 +48,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       it('returns the correct number of buckets', async () => {
-        expectSnapshot(response.body.items.length).toMatchInline(`111`);
+        expectSnapshot(response.body.items.length).toMatchInline(`81`);
       });
 
       it('returns the correct buckets', async () => {
@@ -60,7 +63,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expectSnapshot(firstItem).toMatchInline(`
           Object {
-            "averageResponseTime": 1663,
+            "averageResponseTime": 1639,
             "impact": 0,
             "key": Object {
               "service.name": "opbeans-java",
@@ -75,16 +78,16 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expectSnapshot(lastItem).toMatchInline(`
           Object {
-            "averageResponseTime": 131831.268456376,
+            "averageResponseTime": 5963775,
             "impact": 100,
             "key": Object {
-              "service.name": "kibana",
-              "transaction.name": "markAvailableTasksAsClaimed",
+              "service.name": "opbeans-dotnet",
+              "transaction.name": "GET Orders/Get",
             },
-            "serviceName": "kibana",
-            "transactionName": "markAvailableTasksAsClaimed",
-            "transactionType": "taskManager markAvailableTasksAsClaimed",
-            "transactionsPerMinute": 39.7333333333333,
+            "serviceName": "opbeans-dotnet",
+            "transactionName": "GET Orders/Get",
+            "transactionType": "request",
+            "transactionsPerMinute": 0.633333333333333,
           }
         `);
 
@@ -99,16 +102,16 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               "transaction.name": "POST /api/orders",
             },
             Object {
-              "service.name": "kibana",
-              "transaction.name": "GET /translations/?.json",
-            },
-            Object {
-              "service.name": "kibana",
-              "transaction.name": "GET /ui/#",
-            },
-            Object {
               "service.name": "opbeans-node",
-              "transaction.name": "GET /api/orders/:id",
+              "transaction.name": "GET /api/products/:id",
+            },
+            Object {
+              "service.name": "opbeans-dotnet",
+              "transaction.name": "POST Orders/Post",
+            },
+            Object {
+              "service.name": "opbeans-python",
+              "transaction.name": "GET opbeans.views.product",
             },
           ]
         `);

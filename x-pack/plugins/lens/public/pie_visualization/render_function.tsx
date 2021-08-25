@@ -75,6 +75,8 @@ export function PieComponent(
     legendPosition,
     nestedLegend,
     percentDecimals,
+    legendMaxLines,
+    truncateLegend,
     hideLabels,
     palette,
   } = props.args;
@@ -250,7 +252,7 @@ export function PieComponent(
       <EuiText className="lnsChart__empty" textAlign="center" color="subdued" size="xs">
         <FormattedMessage
           id="xpack.lens.pie.pieWithNegativeWarningLabel"
-          defaultMessage="{chartType} charts can't render with negative values. Try a different chart type."
+          defaultMessage="{chartType} charts can't render with negative values. Try a different visualization type."
           values={{
             chartType: CHART_NAMES[shape].label,
           }}
@@ -296,6 +298,9 @@ export function PieComponent(
             background: {
               ...chartTheme.background,
               color: undefined, // removes background for embeddables
+            },
+            legend: {
+              labelOptions: { maxLines: truncateLegend ? legendMaxLines ?? 1 : 0 },
             },
           }}
           baseTheme={chartBaseTheme}

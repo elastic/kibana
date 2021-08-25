@@ -107,6 +107,9 @@ Object {
                   "layerId": Array [
                     "first",
                   ],
+                  "layerType": Array [
+                    "data",
+                  ],
                   "seriesType": Array [
                     "area",
                   ],
@@ -142,8 +145,12 @@ Object {
                   "isVisible": Array [
                     true,
                   ],
+                  "maxLines": Array [],
                   "position": Array [
                     "bottom",
+                  ],
+                  "shouldTruncate": Array [
+                    true,
                   ],
                   "showSingleSeries": Array [],
                   "verticalAlignment": Array [],

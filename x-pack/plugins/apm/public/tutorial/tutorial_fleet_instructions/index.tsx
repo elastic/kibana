@@ -93,7 +93,7 @@ function TutorialFleetInstructions({ http, basePath, isDarkTheme }: Props) {
               <EuiButton
                 iconType="analyzeEvent"
                 color="secondary"
-                href={`${basePath}/app/integrations#/detail/apm-0.3.0/overview`}
+                href={`${basePath}/app/integrations#/detail/apm-0.4.0/overview`}
               >
                 {i18n.translate(
                   'xpack.apm.tutorial.apmServer.fleet.apmIntegration.button',
@@ -107,7 +107,7 @@ function TutorialFleetInstructions({ http, basePath, isDarkTheme }: Props) {
         </EuiFlexItem>
         <EuiFlexItem grow={3}>
           <EuiImage
-            src={`${basePath}/plugins/apm/assets/${
+            src={`${basePath}/plugins/kibanaReact/assets/${
               isDarkTheme
                 ? 'illustration_integrations_darkmode.svg'
                 : 'illustration_integrations_lightmode.svg'

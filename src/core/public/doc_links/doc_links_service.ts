@@ -198,6 +198,8 @@ export class DocLinksService {
           transportSettings: `${ELASTICSEARCH_DOCS}modules-network.html#common-network-settings`,
           typesRemoval: `${ELASTICSEARCH_DOCS}removal-of-types.html`,
           deprecationLogging: `${ELASTICSEARCH_DOCS}logging.html#deprecation-logging`,
+          setupUpgrade: `${ELASTICSEARCH_DOCS}setup-upgrade.html`,
+          releaseHighlights: `${ELASTICSEARCH_DOCS}release-highlights.html`,
         },
         siem: {
           guide: `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/index.html`,
@@ -228,6 +230,7 @@ export class DocLinksService {
           indexManagement: `${ELASTICSEARCH_DOCS}index-mgmt.html`,
           kibanaSearchSettings: `${KIBANA_DOCS}advanced-options.html#kibana-search-settings`,
           visualizationSettings: `${KIBANA_DOCS}advanced-options.html#kibana-visualization-settings`,
+          timelionSettings: `${KIBANA_DOCS}advanced-options.html#kibana-timelion-settings`,
         },
         ml: {
           guide: `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/index.html`,

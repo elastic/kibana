@@ -21,7 +21,6 @@ jest.mock('../lib/license_api_access.ts', () => ({
 }));
 
 const alerting = alertsMock.createStart();
-
 const currentDate = new Date().toISOString();
 beforeEach(() => {
   jest.resetAllMocks();
@@ -62,7 +61,15 @@ describe('healthRoute', () => {
     healthRoute(router, licenseState, encryptedSavedObjects);
     const [, handler] = router.get.mock.calls[0];
 
-    const [context, req, res] = mockHandlerArguments({ rulesClient }, {}, ['ok']);
+    const [context, req, res] = mockHandlerArguments(
+      {
+        rulesClient,
+        getFrameworkHealth: alerting.getFrameworkHealth,
+        areApiKeysEnabled: () => Promise.resolve(true),
+      },
+      {},
+      ['ok']
+    );
 
     await handler(context, req, res);
 
@@ -78,7 +85,11 @@ describe('healthRoute', () => {
     const [, handler] = router.get.mock.calls[0];
 
     const [context, req, res] = mockHandlerArguments(
-      { rulesClient, getFrameworkHealth: alerting.getFrameworkHealth },
+      {
+        rulesClient,
+        getFrameworkHealth: alerting.getFrameworkHealth,
+        areApiKeysEnabled: () => Promise.resolve(true),
+      },
       {},
       ['ok']
     );
@@ -105,16 +116,62 @@ describe('healthRoute', () => {
     });
   });
 
-  it('evaluates missing security info from the usage api to mean that the security plugin is disbled', async () => {
+  test('when ES security status cannot be determined from license state, isSufficientlySecure should return false', async () => {
     const router = httpServiceMock.createRouter();
-
     const licenseState = licenseStateMock.create();
     const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup({ canEncrypt: true });
+    licenseState.getIsSecurityEnabled.mockReturnValueOnce(null);
+
     healthRoute(router, licenseState, encryptedSavedObjects);
     const [, handler] = router.get.mock.calls[0];
 
     const [context, req, res] = mockHandlerArguments(
-      { rulesClient, getFrameworkHealth: alerting.getFrameworkHealth },
+      {
+        rulesClient,
+        getFrameworkHealth: alerting.getFrameworkHealth,
+        areApiKeysEnabled: () => Promise.resolve(true),
+      },
+      {},
+      ['ok']
+    );
+
+    expect(await handler(context, req, res)).toStrictEqual({
+      body: {
+        alerting_framework_heath: {
+          decryption_health: {
+            status: HealthStatus.OK,
+            timestamp: currentDate,
+          },
+          execution_health: {
+            status: HealthStatus.OK,
+            timestamp: currentDate,
+          },
+          read_health: {
+            status: HealthStatus.OK,
+            timestamp: currentDate,
+          },
+        },
+        has_permanent_encryption_key: true,
+        is_sufficiently_secure: false,
+      },
+    });
+  });
+
+  test('when ES security is disabled, isSufficientlySecure should return true', async () => {
+    const router = httpServiceMock.createRouter();
+    const licenseState = licenseStateMock.create();
+    const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup({ canEncrypt: true });
+    licenseState.getIsSecurityEnabled.mockReturnValueOnce(false);
+
+    healthRoute(router, licenseState, encryptedSavedObjects);
+    const [, handler] = router.get.mock.calls[0];
+
+    const [context, req, res] = mockHandlerArguments(
+      {
+        rulesClient,
+        getFrameworkHealth: alerting.getFrameworkHealth,
+        areApiKeysEnabled: () => Promise.resolve(false),
+      },
       {},
       ['ok']
     );
@@ -141,47 +198,12 @@ describe('healthRoute', () => {
     });
   });
 
-  it('evaluates missing security http info from the usage api to mean that the security plugin is disbled', async () => {
+  test('when ES security is enabled but user cannot generate api keys, isSufficientlySecure should return false', async () => {
     const router = httpServiceMock.createRouter();
-
     const licenseState = licenseStateMock.create();
     const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup({ canEncrypt: true });
-    healthRoute(router, licenseState, encryptedSavedObjects);
-    const [, handler] = router.get.mock.calls[0];
+    licenseState.getIsSecurityEnabled.mockReturnValueOnce(true);
 
-    const [context, req, res] = mockHandlerArguments(
-      { rulesClient, getFrameworkHealth: alerting.getFrameworkHealth },
-      {},
-      ['ok']
-    );
-
-    expect(await handler(context, req, res)).toStrictEqual({
-      body: {
-        alerting_framework_heath: {
-          decryption_health: {
-            status: HealthStatus.OK,
-            timestamp: currentDate,
-          },
-          execution_health: {
-            status: HealthStatus.OK,
-            timestamp: currentDate,
-          },
-          read_health: {
-            status: HealthStatus.OK,
-            timestamp: currentDate,
-          },
-        },
-        has_permanent_encryption_key: true,
-        is_sufficiently_secure: true,
-      },
-    });
-  });
-
-  it('evaluates security enabled, and missing ssl info from the usage api to mean that the user cannot generate keys', async () => {
-    const router = httpServiceMock.createRouter();
-
-    const licenseState = licenseStateMock.create();
-    const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup({ canEncrypt: true });
     healthRoute(router, licenseState, encryptedSavedObjects);
     const [, handler] = router.get.mock.calls[0];
 
@@ -217,11 +239,12 @@ describe('healthRoute', () => {
     });
   });
 
-  it('evaluates security enabled, SSL info present but missing http info from the usage api to mean that the user cannot generate keys', async () => {
+  test('when ES security is enabled and user can generate api keys, isSufficientlySecure should return true', async () => {
     const router = httpServiceMock.createRouter();
-
     const licenseState = licenseStateMock.create();
     const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup({ canEncrypt: true });
+    licenseState.getIsSecurityEnabled.mockReturnValueOnce(true);
+
     healthRoute(router, licenseState, encryptedSavedObjects);
     const [, handler] = router.get.mock.calls[0];
 
@@ -229,44 +252,8 @@ describe('healthRoute', () => {
       {
         rulesClient,
         getFrameworkHealth: alerting.getFrameworkHealth,
-        areApiKeysEnabled: () => Promise.resolve(false),
+        areApiKeysEnabled: () => Promise.resolve(true),
       },
-      {},
-      ['ok']
-    );
-
-    expect(await handler(context, req, res)).toStrictEqual({
-      body: {
-        alerting_framework_heath: {
-          decryption_health: {
-            status: HealthStatus.OK,
-            timestamp: currentDate,
-          },
-          execution_health: {
-            status: HealthStatus.OK,
-            timestamp: currentDate,
-          },
-          read_health: {
-            status: HealthStatus.OK,
-            timestamp: currentDate,
-          },
-        },
-        has_permanent_encryption_key: true,
-        is_sufficiently_secure: false,
-      },
-    });
-  });
-
-  it('evaluates security and tls enabled to mean that the user can generate keys', async () => {
-    const router = httpServiceMock.createRouter();
-
-    const licenseState = licenseStateMock.create();
-    const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup({ canEncrypt: true });
-    healthRoute(router, licenseState, encryptedSavedObjects);
-    const [, handler] = router.get.mock.calls[0];
-
-    const [context, req, res] = mockHandlerArguments(
-      { rulesClient, getFrameworkHealth: alerting.getFrameworkHealth },
       {},
       ['ok']
     );

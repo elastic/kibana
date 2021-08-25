@@ -80,10 +80,10 @@ export default ({ getService }: FtrProviderContext) => {
       .auth(user.username, user.password)
       .set('kbn-xsrf', 'true')
       .expect(200);
-    const securitySolution = indexNames?.index_name?.find(
-      (indexName) => indexName === SECURITY_SOLUTION_ALERT_INDEX
+    const securitySolution = indexNames?.index_name?.find((indexName) =>
+      indexName.startsWith(SECURITY_SOLUTION_ALERT_INDEX)
     );
-    expect(securitySolution).to.eql(SECURITY_SOLUTION_ALERT_INDEX); // assert this here so we can use constants in the dynamically-defined test cases below
+    expect(securitySolution).to.eql(`${SECURITY_SOLUTION_ALERT_INDEX}-${SPACE1}`); // assert this here so we can use constants in the dynamically-defined test cases below
   };
 
   describe('Alerts - GET - RBAC - spaces', () => {
@@ -152,11 +152,11 @@ export default ({ getService }: FtrProviderContext) => {
 
       unauthorizedUsers.forEach(({ username, password }) => {
         it(`${username} should NOT be able to access alert ${alertId} in ${space}/${index}`, async () => {
-          await supertestWithoutAuth
+          const res = await supertestWithoutAuth
             .get(`${getSpaceUrlPrefix(space)}${TEST_URL}?id=${alertId}&index=${index}`)
             .auth(username, password)
-            .set('kbn-xsrf', 'true')
-            .expect(403);
+            .set('kbn-xsrf', 'true');
+          expect([403, 404]).to.contain(res.statusCode);
         });
       });
     }

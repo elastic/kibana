@@ -18,8 +18,9 @@ import {
   SAVE_BUTTON_LABEL,
 } from '../../constants';
 
+import { ItemWithAnID } from '../types';
+
 import { InlineEditableTableLogic } from './inline_editable_table_logic';
-import { ItemWithAnID } from './types';
 
 interface ActionColumnProps<Item extends ItemWithAnID> {
   displayedItems: Item[];
