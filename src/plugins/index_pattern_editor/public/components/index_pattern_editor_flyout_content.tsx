@@ -69,7 +69,6 @@ const IndexPatternEditorFlyoutContentComponent = ({
   defaultTypeIsRollup,
   requireTimestampField = false,
 }: Props) => {
-  const isMounted = useRef<boolean>(false);
   const {
     services: { http, indexPatternService, uiSettings, searchClient },
   } = useKibana<IndexPatternEditorContext>();
@@ -156,19 +155,14 @@ const IndexPatternEditorFlyoutContentComponent = ({
 
   // loading list of index patterns
   useEffect(() => {
-    isMounted.current = true;
     loadSources();
     const getTitles = async () => {
       const indexPatternTitles = await indexPatternService.getTitles();
-      if (isMounted.current) {
-        setExistingIndexPatterns(indexPatternTitles);
-        setIsLoadingIndexPatterns(false);
-      }
+
+      setExistingIndexPatterns(indexPatternTitles);
+      setIsLoadingIndexPatterns(false);
     };
     getTitles();
-    return () => {
-      isMounted.current = false;
-    };
   }, [http, indexPatternService, loadSources]);
 
   // loading rollup info
@@ -176,10 +170,8 @@ const IndexPatternEditorFlyoutContentComponent = ({
     const getRollups = async () => {
       try {
         const response = await http.get('/api/rollup/indices');
-        if (isMounted.current) {
-          if (response) {
-            setRollupIndicesCapabilities(response);
-          }
+        if (response) {
+          setRollupIndicesCapabilities(response);
         }
       } catch (e) {
         // Silently swallow failure responses such as expired trials
@@ -214,10 +206,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
         );
         timestampOptions = extractTimeFields(fields, requireTimestampField);
       }
-      if (
-        isMounted.current &&
-        currentLoadingTimestampFieldsIdx === currentLoadingTimestampFieldsRef.current
-      ) {
+      if (currentLoadingTimestampFieldsIdx === currentLoadingTimestampFieldsRef.current) {
         setIsLoadingTimestampFields(false);
         setTimestampFieldOptions(timestampOptions);
       }
@@ -266,10 +255,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
               exactMatched: [],
             };
 
-        if (
-          currentLoadingMatchedIndicesIdx === currentLoadingMatchedIndicesRef.current &&
-          isMounted.current
-        ) {
+        if (currentLoadingMatchedIndicesIdx === currentLoadingMatchedIndicesRef.current) {
           // we are still interested in this result
           if (type === INDEX_PATTERN_TYPE.ROLLUP) {
             const rollupIndices = exactMatched.filter((index) => isRollupIndex(index.name));
