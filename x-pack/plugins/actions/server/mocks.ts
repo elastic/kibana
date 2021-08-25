@@ -19,7 +19,7 @@ export { actionsClientMock };
 const createSetupMock = () => {
   const mock: jest.Mocked<PluginSetupContract> = {
     registerType: jest.fn(),
-    preconfiguredConnectors: [],
+    isPreconfiguredConnector: jest.fn(),
   };
   return mock;
 };

@@ -186,7 +186,7 @@ describe('Actions Plugin', () => {
       });
     });
 
-    describe('preconfiguredConnectors', () => {
+    describe('isPreconfiguredConnector', () => {
       function getConfig(overrides = {}) {
         return {
           enabled: true,
@@ -231,13 +231,14 @@ describe('Actions Plugin', () => {
         };
       }
 
-      it('should return preconfigured connectors', async () => {
+      it('should correctly return whether connector is preconfigured', async () => {
         setup(getConfig());
         // coreMock.createSetup doesn't support Plugin generics
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const pluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);
 
-        expect(pluginSetup.preconfiguredConnectors.length).toEqual(1);
+        expect(pluginSetup.isPreconfiguredConnector('preconfiguredServerLog')).toEqual(true);
+        expect(pluginSetup.isPreconfiguredConnector('anotherConnectorId')).toEqual(false);
       });
     });
   });

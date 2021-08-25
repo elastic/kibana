@@ -19,7 +19,6 @@ import {
 import { RawAlert, RawAlertAction } from '../types';
 import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
 import type { IsMigrationNeededPredicate } from '../../../encrypted_saved_objects/server';
-import type { PreConfiguredAction } from '../../../actions/server';
 
 const SIEM_APP_ID = 'securitySolution';
 const SIEM_SERVER_APP_ID = 'siem';
@@ -57,7 +56,7 @@ export const isSecuritySolutionRule = (doc: SavedObjectUnsanitizedDoc<RawAlert>)
 
 export function getMigrations(
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup,
-  preconfiguredConnectors: PreConfiguredAction[]
+  isPreconfigured: (connectorId: string) => boolean
 ): SavedObjectMigrationMap {
   const migrationWhenRBACWasIntroduced = createEsoMigration(
     encryptedSavedObjects,
@@ -104,10 +103,7 @@ export function getMigrations(
   const migrateRules716 = createEsoMigration(
     encryptedSavedObjects,
     (doc): doc is SavedObjectUnsanitizedDoc<RawAlert> => true,
-    pipeMigrations(
-      setLegacyId,
-      getRemovePreconfiguredConnectorsFromReferencesFn(preconfiguredConnectors)
-    )
+    pipeMigrations(setLegacyId, getRemovePreconfiguredConnectorsFromReferencesFn(isPreconfigured))
   );
 
   return {
@@ -593,23 +589,16 @@ function setLegacyId(
 }
 
 function getRemovePreconfiguredConnectorsFromReferencesFn(
-  preconfiguredConnectors: PreConfiguredAction[]
+  isPreconfigured: (connectorId: string) => boolean
 ) {
   return (doc: SavedObjectUnsanitizedDoc<RawAlert>) => {
-    return removePreconfiguredConnectorsFromReferences(doc, preconfiguredConnectors);
+    return removePreconfiguredConnectorsFromReferences(doc, isPreconfigured);
   };
-}
-
-export function isPreconfiguredConnector(
-  id: string,
-  preconfiguredConnectors: PreConfiguredAction[]
-): boolean {
-  return !!preconfiguredConnectors.find((connector) => connector.id === id);
 }
 
 function removePreconfiguredConnectorsFromReferences(
   doc: SavedObjectUnsanitizedDoc<RawAlert>,
-  preconfiguredConnectors: PreConfiguredAction[]
+  isPreconfigured: (connectorId: string) => boolean
 ): SavedObjectUnsanitizedDoc<RawAlert> {
   const {
     attributes: { actions },
@@ -635,7 +624,7 @@ function removePreconfiguredConnectorsFromReferences(
       // Look for the corresponding entry in the actions array
       const correspondingAction = getCorrespondingAction(actions, connectorRef.name);
       if (correspondingAction) {
-        if (isPreconfiguredConnector(connectorRef.id, preconfiguredConnectors)) {
+        if (isPreconfigured(connectorRef.id)) {
           updatedActions.push({
             ...correspondingAction,
             actionRef: `preconfigured:${connectorRef.id}`,

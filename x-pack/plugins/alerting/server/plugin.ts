@@ -229,7 +229,7 @@ export class AlertingPlugin {
       plugins.encryptedSavedObjects,
       this.ruleTypeRegistry,
       this.logger,
-      plugins.actions.preconfiguredConnectors
+      plugins.actions.isPreconfiguredConnector
     );
 
     initializeApiKeyInvalidator(

@@ -15,16 +15,7 @@ import { migrationMocks } from 'src/core/server/mocks';
 const migrationContext = migrationMocks.createContext();
 const encryptedSavedObjectsSetup = encryptedSavedObjectsMock.createSetup();
 
-const preconfiguredConnectors = [
-  {
-    actionTypeId: 'foo',
-    config: {},
-    id: 'my-slack1',
-    name: 'Slack #xyz',
-    secrets: {},
-    isPreconfigured: true,
-  },
-];
+const isPreconfigured = jest.fn();
 
 describe('successful migrations', () => {
   beforeEach(() => {
@@ -33,9 +24,7 @@ describe('successful migrations', () => {
   });
   describe('7.10.0', () => {
     test('marks alerts as legacy', () => {
-      const migration710 = getMigrations(encryptedSavedObjectsSetup, preconfiguredConnectors)[
-        '7.10.0'
-      ];
+      const migration710 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['7.10.0'];
       const alert = getMockData({});
       expect(migration710(alert, migrationContext)).toMatchObject({
         ...alert,
@@ -49,9 +38,7 @@ describe('successful migrations', () => {
     });
 
     test('migrates the consumer for metrics', () => {
-      const migration710 = getMigrations(encryptedSavedObjectsSetup, preconfiguredConnectors)[
-        '7.10.0'
-      ];
+      const migration710 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['7.10.0'];
       const alert = getMockData({
         consumer: 'metrics',
       });
@@ -68,9 +55,7 @@ describe('successful migrations', () => {
     });
 
     test('migrates the consumer for siem', () => {
-      const migration710 = getMigrations(encryptedSavedObjectsSetup, preconfiguredConnectors)[
-        '7.10.0'
-      ];
+      const migration710 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['7.10.0'];
       const alert = getMockData({
         consumer: 'securitySolution',
       });
@@ -87,9 +72,7 @@ describe('successful migrations', () => {
     });
 
     test('migrates the consumer for alerting', () => {
-      const migration710 = getMigrations(encryptedSavedObjectsSetup, preconfiguredConnectors)[
-        '7.10.0'
-      ];
+      const migration710 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['7.10.0'];
       const alert = getMockData({
         consumer: 'alerting',
       });
@@ -106,9 +89,7 @@ describe('successful migrations', () => {
     });
 
     test('migrates PagerDuty actions to set a default dedupkey of the AlertId', () => {
-      const migration710 = getMigrations(encryptedSavedObjectsSetup, preconfiguredConnectors)[
-        '7.10.0'
-      ];
+      const migration710 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['7.10.0'];
       const alert = getMockData({
         actions: [
           {
@@ -145,9 +126,7 @@ describe('successful migrations', () => {
     });
 
     test('skips PagerDuty actions with a specified dedupkey', () => {
-      const migration710 = getMigrations(encryptedSavedObjectsSetup, preconfiguredConnectors)[
-        '7.10.0'
-      ];
+      const migration710 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['7.10.0'];
       const alert = getMockData({
         actions: [
           {
@@ -185,9 +164,7 @@ describe('successful migrations', () => {
     });
 
     test('skips PagerDuty actions with an eventAction of "trigger"', () => {
-      const migration710 = getMigrations(encryptedSavedObjectsSetup, preconfiguredConnectors)[
-        '7.10.0'
-      ];
+      const migration710 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['7.10.0'];
       const alert = getMockData({
         actions: [
           {
@@ -226,9 +203,7 @@ describe('successful migrations', () => {
     });
 
     test('creates execution status', () => {
-      const migration710 = getMigrations(encryptedSavedObjectsSetup, preconfiguredConnectors)[
-        '7.10.0'
-      ];
+      const migration710 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['7.10.0'];
       const alert = getMockData();
       const dateStart = Date.now();
       const migratedAlert = migration710(alert, migrationContext);
@@ -256,9 +231,7 @@ describe('successful migrations', () => {
 
   describe('7.11.0', () => {
     test('add updatedAt field to alert - set to SavedObject updated_at attribute', () => {
-      const migration711 = getMigrations(encryptedSavedObjectsSetup, preconfiguredConnectors)[
-        '7.11.0'
-      ];
+      const migration711 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['7.11.0'];
       const alert = getMockData({}, true);
       expect(migration711(alert, migrationContext)).toEqual({
         ...alert,
@@ -271,9 +244,7 @@ describe('successful migrations', () => {
     });
 
     test('add updatedAt field to alert - set to createdAt when SavedObject updated_at is not defined', () => {
-      const migration711 = getMigrations(encryptedSavedObjectsSetup, preconfiguredConnectors)[
-        '7.11.0'
-      ];
+      const migration711 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['7.11.0'];
       const alert = getMockData({});
       expect(migration711(alert, migrationContext)).toEqual({
         ...alert,
@@ -286,9 +257,7 @@ describe('successful migrations', () => {
     });
 
     test('add notifyWhen=onActiveAlert when throttle is null', () => {
-      const migration711 = getMigrations(encryptedSavedObjectsSetup, preconfiguredConnectors)[
-        '7.11.0'
-      ];
+      const migration711 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['7.11.0'];
       const alert = getMockData({});
       expect(migration711(alert, migrationContext)).toEqual({
         ...alert,
@@ -301,9 +270,7 @@ describe('successful migrations', () => {
     });
 
     test('add notifyWhen=onActiveAlert when throttle is set', () => {
-      const migration711 = getMigrations(encryptedSavedObjectsSetup, preconfiguredConnectors)[
-        '7.11.0'
-      ];
+      const migration711 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['7.11.0'];
       const alert = getMockData({ throttle: '5m' });
       expect(migration711(alert, migrationContext)).toEqual({
         ...alert,
@@ -318,9 +285,7 @@ describe('successful migrations', () => {
 
   describe('7.11.2', () => {
     test('transforms connectors that support incident correctly', () => {
-      const migration7112 = getMigrations(encryptedSavedObjectsSetup, preconfiguredConnectors)[
-        '7.11.2'
-      ];
+      const migration7112 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['7.11.2'];
       const alert = getMockData({
         actions: [
           {
@@ -462,9 +427,7 @@ describe('successful migrations', () => {
     });
 
     test('it transforms only subAction=pushToService', () => {
-      const migration7112 = getMigrations(encryptedSavedObjectsSetup, preconfiguredConnectors)[
-        '7.11.2'
-      ];
+      const migration7112 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['7.11.2'];
       const alert = getMockData({
         actions: [
           {
@@ -483,9 +446,7 @@ describe('successful migrations', () => {
     });
 
     test('it does not transforms other connectors', () => {
-      const migration7112 = getMigrations(encryptedSavedObjectsSetup, preconfiguredConnectors)[
-        '7.11.2'
-      ];
+      const migration7112 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['7.11.2'];
       const alert = getMockData({
         actions: [
           {
@@ -564,9 +525,7 @@ describe('successful migrations', () => {
     });
 
     test('it does not transforms alerts when the right structure connectors is already applied', () => {
-      const migration7112 = getMigrations(encryptedSavedObjectsSetup, preconfiguredConnectors)[
-        '7.11.2'
-      ];
+      const migration7112 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['7.11.2'];
       const alert = getMockData({
         actions: [
           {
@@ -603,9 +562,7 @@ describe('successful migrations', () => {
     });
 
     test('if incident attribute is an empty object, copy back the related attributes from subActionParams back to incident', () => {
-      const migration7112 = getMigrations(encryptedSavedObjectsSetup, preconfiguredConnectors)[
-        '7.11.2'
-      ];
+      const migration7112 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['7.11.2'];
       const alert = getMockData({
         actions: [
           {
@@ -667,9 +624,7 @@ describe('successful migrations', () => {
     });
 
     test('custom action does not get migrated/loss', () => {
-      const migration7112 = getMigrations(encryptedSavedObjectsSetup, preconfiguredConnectors)[
-        '7.11.2'
-      ];
+      const migration7112 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['7.11.2'];
       const alert = getMockData({
         actions: [
           {
@@ -698,9 +653,7 @@ describe('successful migrations', () => {
 
   describe('7.13.0', () => {
     test('security solution alerts get migrated and remove null values', () => {
-      const migration713 = getMigrations(encryptedSavedObjectsSetup, preconfiguredConnectors)[
-        '7.13.0'
-      ];
+      const migration713 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['7.13.0'];
       const alert = getMockData({
         alertTypeId: 'siem.signals',
         params: {
@@ -796,9 +749,7 @@ describe('successful migrations', () => {
     });
 
     test('non-null values in security solution alerts are not modified', () => {
-      const migration713 = getMigrations(encryptedSavedObjectsSetup, preconfiguredConnectors)[
-        '7.13.0'
-      ];
+      const migration713 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['7.13.0'];
       const alert = getMockData({
         alertTypeId: 'siem.signals',
         params: {
@@ -866,9 +817,7 @@ describe('successful migrations', () => {
     });
 
     test('security solution threshold alert with string in threshold.field is migrated to array', () => {
-      const migration713 = getMigrations(encryptedSavedObjectsSetup, preconfiguredConnectors)[
-        '7.13.0'
-      ];
+      const migration713 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['7.13.0'];
       const alert = getMockData({
         alertTypeId: 'siem.signals',
         params: {
@@ -899,9 +848,7 @@ describe('successful migrations', () => {
     });
 
     test('security solution threshold alert with empty string in threshold.field is migrated to empty array', () => {
-      const migration713 = getMigrations(encryptedSavedObjectsSetup, preconfiguredConnectors)[
-        '7.13.0'
-      ];
+      const migration713 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['7.13.0'];
       const alert = getMockData({
         alertTypeId: 'siem.signals',
         params: {
@@ -932,9 +879,7 @@ describe('successful migrations', () => {
     });
 
     test('security solution threshold alert with array in threshold.field and cardinality is left alone', () => {
-      const migration713 = getMigrations(encryptedSavedObjectsSetup, preconfiguredConnectors)[
-        '7.13.0'
-      ];
+      const migration713 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['7.13.0'];
       const alert = getMockData({
         alertTypeId: 'siem.signals',
         params: {
@@ -976,9 +921,7 @@ describe('successful migrations', () => {
     });
 
     test('security solution ML alert with string in machineLearningJobId is converted to an array', () => {
-      const migration713 = getMigrations(encryptedSavedObjectsSetup, preconfiguredConnectors)[
-        '7.13.0'
-      ];
+      const migration713 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['7.13.0'];
       const alert = getMockData({
         alertTypeId: 'siem.signals',
         params: {
@@ -1004,9 +947,7 @@ describe('successful migrations', () => {
     });
 
     test('security solution ML alert with an array in machineLearningJobId is preserved', () => {
-      const migration713 = getMigrations(encryptedSavedObjectsSetup, preconfiguredConnectors)[
-        '7.13.0'
-      ];
+      const migration713 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['7.13.0'];
       const alert = getMockData({
         alertTypeId: 'siem.signals',
         params: {
@@ -1034,9 +975,7 @@ describe('successful migrations', () => {
 
   describe('7.14.1', () => {
     test('security solution author field is migrated to array if it is undefined', () => {
-      const migration7141 = getMigrations(encryptedSavedObjectsSetup, preconfiguredConnectors)[
-        '7.14.1'
-      ];
+      const migration7141 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['7.14.1'];
       const alert = getMockData({
         alertTypeId: 'siem.signals',
         params: {},
@@ -1054,9 +993,7 @@ describe('successful migrations', () => {
     });
 
     test('security solution author field does not override existing values if they exist', () => {
-      const migration7141 = getMigrations(encryptedSavedObjectsSetup, preconfiguredConnectors)[
-        '7.14.1'
-      ];
+      const migration7141 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['7.14.1'];
       const alert = getMockData({
         alertTypeId: 'siem.signals',
         params: {
@@ -1080,9 +1017,7 @@ describe('successful migrations', () => {
 
   describe('7.15.0', () => {
     test('security solution is migrated to saved object references if it has 1 exceptionsList', () => {
-      const migration7150 = getMigrations(encryptedSavedObjectsSetup, preconfiguredConnectors)[
-        '7.15.0'
-      ];
+      const migration7150 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['7.15.0'];
       const alert = getMockData({
         alertTypeId: 'siem.signals',
         params: {
@@ -1111,9 +1046,7 @@ describe('successful migrations', () => {
     });
 
     test('security solution is migrated to saved object references if it has 2 exceptionsLists', () => {
-      const migration7150 = getMigrations(encryptedSavedObjectsSetup, preconfiguredConnectors)[
-        '7.15.0'
-      ];
+      const migration7150 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['7.15.0'];
       const alert = getMockData({
         alertTypeId: 'siem.signals',
         params: {
@@ -1153,9 +1086,7 @@ describe('successful migrations', () => {
     });
 
     test('security solution is migrated to saved object references if it has 3 exceptionsLists', () => {
-      const migration7150 = getMigrations(encryptedSavedObjectsSetup, preconfiguredConnectors)[
-        '7.15.0'
-      ];
+      const migration7150 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['7.15.0'];
       const alert = getMockData({
         alertTypeId: 'siem.signals',
         params: {
@@ -1206,9 +1137,7 @@ describe('successful migrations', () => {
     });
 
     test('security solution does not change anything if exceptionsList is missing', () => {
-      const migration7150 = getMigrations(encryptedSavedObjectsSetup, preconfiguredConnectors)[
-        '7.15.0'
-      ];
+      const migration7150 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['7.15.0'];
       const alert = getMockData({
         alertTypeId: 'siem.signals',
         params: {
@@ -1220,9 +1149,7 @@ describe('successful migrations', () => {
     });
 
     test('security solution will keep existing references if we do not have an exceptionsList but we do already have references', () => {
-      const migration7150 = getMigrations(encryptedSavedObjectsSetup, preconfiguredConnectors)[
-        '7.15.0'
-      ];
+      const migration7150 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['7.15.0'];
       const alert = {
         ...getMockData({
           alertTypeId: 'siem.signals',
@@ -1252,9 +1179,7 @@ describe('successful migrations', () => {
     });
 
     test('security solution keep any foreign references if they exist but still migrate other references', () => {
-      const migration7150 = getMigrations(encryptedSavedObjectsSetup, preconfiguredConnectors)[
-        '7.15.0'
-      ];
+      const migration7150 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['7.15.0'];
       const alert = {
         ...getMockData({
           alertTypeId: 'siem.signals',
@@ -1319,9 +1244,7 @@ describe('successful migrations', () => {
     });
 
     test('security solution is idempotent and if re-run on the same migrated data will keep the same items', () => {
-      const migration7150 = getMigrations(encryptedSavedObjectsSetup, preconfiguredConnectors)[
-        '7.15.0'
-      ];
+      const migration7150 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['7.15.0'];
       const alert = {
         ...getMockData({
           alertTypeId: 'siem.signals',
@@ -1361,9 +1284,7 @@ describe('successful migrations', () => {
     });
 
     test('security solution will migrate with only missing data if we have partially migrated data', () => {
-      const migration7150 = getMigrations(encryptedSavedObjectsSetup, preconfiguredConnectors)[
-        '7.15.0'
-      ];
+      const migration7150 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['7.15.0'];
       const alert = {
         ...getMockData({
           alertTypeId: 'siem.signals',
@@ -1412,9 +1333,7 @@ describe('successful migrations', () => {
     });
 
     test('security solution will not migrate if exception list if it is invalid data', () => {
-      const migration7150 = getMigrations(encryptedSavedObjectsSetup, preconfiguredConnectors)[
-        '7.15.0'
-      ];
+      const migration7150 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['7.15.0'];
       const alert = {
         ...getMockData({
           alertTypeId: 'siem.signals',
@@ -1428,9 +1347,7 @@ describe('successful migrations', () => {
     });
 
     test('security solution will migrate valid data if it is mixed with invalid data', () => {
-      const migration7150 = getMigrations(encryptedSavedObjectsSetup, preconfiguredConnectors)[
-        '7.15.0'
-      ];
+      const migration7150 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['7.15.0'];
       const alert = {
         ...getMockData({
           alertTypeId: 'siem.signals',
@@ -1472,9 +1389,7 @@ describe('successful migrations', () => {
     });
 
     test('security solution will not migrate if exception list is invalid data but will keep existing references', () => {
-      const migration7150 = getMigrations(encryptedSavedObjectsSetup, preconfiguredConnectors)[
-        '7.15.0'
-      ];
+      const migration7150 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['7.15.0'];
       const alert = {
         ...getMockData({
           alertTypeId: 'siem.signals',
@@ -1506,9 +1421,7 @@ describe('successful migrations', () => {
 
   describe('7.16.0', () => {
     test('add legacyId field to alert - set to SavedObject id attribute', () => {
-      const migration716 = getMigrations(encryptedSavedObjectsSetup, preconfiguredConnectors)[
-        '7.16.0'
-      ];
+      const migration716 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['7.16.0'];
       const alert = getMockData({}, true);
       expect(migration716(alert, migrationContext)).toEqual({
         ...alert,
@@ -1520,9 +1433,10 @@ describe('successful migrations', () => {
     });
 
     test('removes preconfigured connectors from references array', () => {
-      const migration716 = getMigrations(encryptedSavedObjectsSetup, preconfiguredConnectors)[
-        '7.16.0'
-      ];
+      isPreconfigured.mockReset();
+      isPreconfigured.mockReturnValueOnce(true);
+      isPreconfigured.mockReturnValueOnce(false);
+      const migration716 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['7.16.0'];
       const rule = {
         ...getMockData({
           actions: [
@@ -1594,9 +1508,11 @@ describe('successful migrations', () => {
     });
 
     test('removes preconfigured connectors from references array and maintains non-action references', () => {
-      const migration716 = getMigrations(encryptedSavedObjectsSetup, preconfiguredConnectors)[
-        '7.16.0'
-      ];
+      isPreconfigured.mockReset();
+      isPreconfigured.mockReturnValueOnce(true);
+      isPreconfigured.mockReturnValueOnce(false);
+      isPreconfigured.mockReturnValueOnce(false);
+      const migration716 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['7.16.0'];
       const rule = {
         ...getMockData({
           actions: [
@@ -1678,9 +1594,8 @@ describe('successful migrations', () => {
     });
 
     test('does nothing to rules with no references', () => {
-      const migration716 = getMigrations(encryptedSavedObjectsSetup, preconfiguredConnectors)[
-        '7.16.0'
-      ];
+      isPreconfigured.mockReset();
+      const migration716 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['7.16.0'];
       const rule = {
         ...getMockData({
           actions: [
@@ -1715,9 +1630,8 @@ describe('successful migrations', () => {
     });
 
     test('does nothing to rules with no action references', () => {
-      const migration716 = getMigrations(encryptedSavedObjectsSetup, preconfiguredConnectors)[
-        '7.16.0'
-      ];
+      isPreconfigured.mockReset();
+      const migration716 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['7.16.0'];
       const rule = {
         ...getMockData({
           actions: [
@@ -1758,9 +1672,8 @@ describe('successful migrations', () => {
     });
 
     test('does nothing to rules with references but no actions', () => {
-      const migration716 = getMigrations(encryptedSavedObjectsSetup, preconfiguredConnectors)[
-        '7.16.0'
-      ];
+      isPreconfigured.mockReset();
+      const migration716 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['7.16.0'];
       const rule = {
         ...getMockData({
           actions: [],
@@ -1798,9 +1711,7 @@ describe('handles errors during migrations', () => {
   });
   describe('7.10.0 throws if migration fails', () => {
     test('should show the proper exception', () => {
-      const migration710 = getMigrations(encryptedSavedObjectsSetup, preconfiguredConnectors)[
-        '7.10.0'
-      ];
+      const migration710 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['7.10.0'];
       const alert = getMockData({
         consumer: 'alerting',
       });
@@ -1825,9 +1736,7 @@ describe('handles errors during migrations', () => {
 
   describe('7.11.0 throws if migration fails', () => {
     test('should show the proper exception', () => {
-      const migration711 = getMigrations(encryptedSavedObjectsSetup, preconfiguredConnectors)[
-        '7.11.0'
-      ];
+      const migration711 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['7.11.0'];
       const alert = getMockData({
         consumer: 'alerting',
       });
@@ -1852,9 +1761,7 @@ describe('handles errors during migrations', () => {
 
   describe('7.11.2 throws if migration fails', () => {
     test('should show the proper exception', () => {
-      const migration7112 = getMigrations(encryptedSavedObjectsSetup, preconfiguredConnectors)[
-        '7.11.2'
-      ];
+      const migration7112 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['7.11.2'];
       const alert = getMockData({
         consumer: 'alerting',
       });
@@ -1879,9 +1786,7 @@ describe('handles errors during migrations', () => {
 
   describe('7.13.0 throws if migration fails', () => {
     test('should show the proper exception', () => {
-      const migration7130 = getMigrations(encryptedSavedObjectsSetup, preconfiguredConnectors)[
-        '7.13.0'
-      ];
+      const migration7130 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['7.13.0'];
       const alert = getMockData({
         consumer: 'alerting',
       });
@@ -1906,9 +1811,7 @@ describe('handles errors during migrations', () => {
 
   describe('7.16.0 throws if migration fails', () => {
     test('should show the proper exception', () => {
-      const migration7160 = getMigrations(encryptedSavedObjectsSetup, preconfiguredConnectors)[
-        '7.16.0'
-      ];
+      const migration7160 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['7.16.0'];
       const rule = getMockData();
       expect(() => {
         migration7160(rule, migrationContext);
