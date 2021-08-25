@@ -29,8 +29,12 @@ const TemplateComponent = ({ defPairs }: Props) => {
   );
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const formatRow = (hit: Record<string, any>, indexPattern: IndexPattern) => {
+export const formatRow = (
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  hit: Record<string, any>,
+  indexPattern: IndexPattern,
+  fieldsToShow: string[]
+) => {
   const highlights = hit?.highlight ?? {};
   // Keys are sorted in the hits object
   const formatted = indexPattern.formatHit(hit);
@@ -40,7 +44,13 @@ export const formatRow = (hit: Record<string, any>, indexPattern: IndexPattern) 
   Object.entries(formatted).forEach(([key, val]) => {
     const displayKey = fields.getByName ? fields.getByName(key)?.displayName : undefined;
     const pairs = highlights[key] ? highlightPairs : sourcePairs;
-    pairs.push([displayKey ? displayKey : key, val]);
+    if (displayKey) {
+      if (fieldsToShow.includes(displayKey)) {
+        pairs.push([displayKey, val]);
+      }
+    } else {
+      pairs.push([key, val]);
+    }
   });
   const maxEntries = getServices().uiSettings.get(MAX_DOC_FIELDS_DISPLAYED);
   return <TemplateComponent defPairs={[...highlightPairs, ...sourcePairs].slice(0, maxEntries)} />;

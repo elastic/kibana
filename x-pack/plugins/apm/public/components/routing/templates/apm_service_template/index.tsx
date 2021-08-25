@@ -27,6 +27,7 @@ import { useApmServiceContext } from '../../../../context/apm_service/use_apm_se
 import { useBreadcrumb } from '../../../../context/breadcrumbs/use_breadcrumb';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
+import { useTimeRange } from '../../../../hooks/use_time_range';
 import { SearchBar } from '../../../shared/search_bar';
 import { ServiceIcons } from '../../../shared/service_icons';
 import { ApmMainTemplate } from '../apm_main_template';
@@ -70,7 +71,10 @@ function TemplateWithContext({
   const {
     path: { serviceName },
     query,
+    query: { rangeFrom, rangeTo },
   } = useApmParams('/services/:serviceName/*');
+
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const router = useApmRouter();
 
@@ -100,7 +104,11 @@ function TemplateWithContext({
                   </EuiTitle>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <ServiceIcons serviceName={serviceName} />
+                  <ServiceIcons
+                    serviceName={serviceName}
+                    start={start}
+                    end={end}
+                  />
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>

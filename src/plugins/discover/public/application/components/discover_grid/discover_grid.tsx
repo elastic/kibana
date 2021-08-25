@@ -37,9 +37,10 @@ import { defaultPageSize, gridStyle, pageSizeArr, toolbarVisibility } from './co
 import { DiscoverServices } from '../../../build_services';
 import { getDisplayedColumns } from '../../helpers/columns';
 import { KibanaContextProvider } from '../../../../../kibana_react/public';
-import { MAX_DOC_FIELDS_DISPLAYED } from '../../../../common';
+import { MAX_DOC_FIELDS_DISPLAYED, SHOW_MULTIFIELDS } from '../../../../common';
 import { DiscoverGridDocumentToolbarBtn, getDocId } from './discover_grid_document_selection';
 import { SortPairArr } from '../../apps/main/components/doc_table/lib/get_sort';
+import { getFieldsToShow } from '../../helpers/get_fields_to_show';
 
 interface SortObj {
   id: string;
@@ -256,6 +257,13 @@ export const DiscoverGrid = ({
     [onSort, isSortEnabled]
   );
 
+  const showMultiFields = services.uiSettings.get(SHOW_MULTIFIELDS);
+
+  const fieldsToShow = useMemo(() => {
+    const indexPatternFields = indexPattern.fields.getAll().map((fld) => fld.name);
+    return getFieldsToShow(indexPatternFields, indexPattern, showMultiFields);
+  }, [indexPattern, showMultiFields]);
+
   /**
    * Cell rendering
    */
@@ -266,9 +274,10 @@ export const DiscoverGrid = ({
         displayedRows,
         displayedRows ? displayedRows.map((hit) => indexPattern.flattenHit(hit)) : [],
         useNewFieldsApi,
+        fieldsToShow,
         services.uiSettings.get(MAX_DOC_FIELDS_DISPLAYED)
       ),
-    [displayedRows, indexPattern, useNewFieldsApi, services.uiSettings]
+    [indexPattern, displayedRows, useNewFieldsApi, fieldsToShow, services.uiSettings]
   );
 
   /**
