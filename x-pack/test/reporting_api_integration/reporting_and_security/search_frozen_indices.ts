@@ -6,9 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import { Filter, FilterMeta } from '@kbn/es-query';
-import { SortDirectionFormat } from 'src/plugins/data/common';
-import { JobParamsDownloadCSV } from '../../../plugins/reporting/server/export_types/csv_searchsource_immediate/types';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
@@ -16,33 +13,58 @@ export default function ({ getService }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const supertestSvc = getService('supertest');
   const esSupertest = getService('esSupertest');
+  const indexPatternId = 'cool-test-index-pattern';
 
-  const generateAPI = {
-    getCSVFromSearchSource: async (job: JobParamsDownloadCSV) => {
-      return await supertestSvc
-        .post(`/api/reporting/v1/generate/immediate/csv_searchsource`)
-        .set('kbn-xsrf', 'xxx')
-        .send(job);
-    },
-  };
+  async function callExportAPI() {
+    const job = {
+      browserTimezone: 'UTC',
+      columns: ['@timestamp', 'ip', 'utilization'],
+      searchSource: {
+        fields: [{ field: '*', include_unmapped: 'true' }],
+        filter: [
+          {
+            meta: { field: '@timestamp', index: indexPatternId, params: {} },
+            range: {
+              '@timestamp': {
+                format: 'strict_date_optional_time',
+                gte: '2020-08-24T00:00:00.000Z',
+                lte: '2022-08-24T21:40:48.346Z',
+              },
+            },
+          },
+        ],
+        index: indexPatternId,
+        parent: { filter: [], index: indexPatternId, query: { language: 'kuery', query: '' } },
+        sort: [{ '@timestamp': 'desc' }],
+        trackTotalHits: true,
+      },
+      title: 'Test search',
+    };
+
+    return await supertestSvc
+      .post(`/api/reporting/v1/generate/immediate/csv_searchsource`)
+      .set('kbn-xsrf', 'xxx')
+      .send(job);
+  }
 
   describe('Frozen indices search', () => {
-    const indexPatternId = 'cool-test-index-pattern';
     const reset = async () => {
-      await esSupertest.delete('/test1,test2,test3');
-      await kibanaServer.savedObjects.delete({ type: 'index-pattern', id: indexPatternId });
-      await kibanaServer.uiSettings.update({
-        'csv:quoteValues': true,
-        'search:includeFrozen': false,
-      });
+      await kibanaServer.uiSettings.replace({ 'search:includeFrozen': false });
+      try {
+        await esSupertest.delete('/test1,test2,test3');
+        await kibanaServer.savedObjects.delete({ type: 'index-pattern', id: indexPatternId });
+      } catch (err) {
+        // ignore 404 error
+      }
     };
 
     before(reset);
     after(reset);
 
     it('Search includes frozen indices based on Advanced Setting', async () => {
-      // setup: settings and clear data from previous testing
       await kibanaServer.uiSettings.update({ 'csv:quoteValues': true });
+
+      // setup: settings and clear data from previous testing
       await esSupertest.delete('/test2,test2,test3');
 
       // setup: add multiple indices of test data
@@ -66,45 +88,7 @@ export default function ({ getService }: FtrProviderContext) {
         overwrite: true,
         attributes: { title: 'test*', timeFieldName: '@timestamp' },
       });
-
       expect(indexPatternCreateResponse.id).to.be(indexPatternId);
-
-      const callExportAPI = async () => {
-        return await generateAPI.getCSVFromSearchSource({
-          browserTimezone: 'UTC',
-          columns: ['@timestamp', 'ip', 'utilization'],
-          searchSource: {
-            fields: [{ field: '*', include_unmapped: 'true' }],
-            filter: [
-              {
-                meta: {
-                  field: '@timestamp',
-                  index: indexPatternId,
-                  params: {},
-                } as FilterMeta,
-                range: {
-                  '@timestamp': {
-                    format: 'strict_date_optional_time',
-                    gte: '2020-08-24T00:00:00.000Z',
-                    lte: '2022-08-24T21:40:48.346Z',
-                  },
-                },
-              } as Filter,
-            ],
-            // @ts-expect-error Type 'string' is not assignable to type 'IndexPattern | undefined'.
-            index: indexPatternId,
-            parent: {
-              filter: [],
-              // @ts-expect-error Type 'string' is not assignable to type 'IndexPattern | undefined'.
-              index: indexPatternId,
-              query: { language: 'kuery', query: '' },
-            },
-            sort: ([{ '@timestamp': 'desc' }] as unknown) as Record<string, SortDirectionFormat>,
-            trackTotalHits: true,
-          },
-          title: 'Test search',
-        });
-      };
 
       // 1. check the initial data with a CSV export
       const initialSearch = await callExportAPI();
