@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { login } from '../support/commands';
+import { login, checkA11y } from '../support/commands';
 
 context('Overview', () => {
   beforeEach(() => {
@@ -14,5 +14,6 @@ context('Overview', () => {
 
   it('renders', () => {
     cy.contains('Workplace Search');
+    checkA11y();
   });
 });
