@@ -41,10 +41,19 @@ export interface QueryEventsBySavedObjectResult {
   data: IValidatedEvent[];
 }
 
-interface QueryEventsBySavedObjectsFilterOptions extends FindOptionsType {
+interface QueryEventsBySavedObjectsFindOptions extends FindOptionsType {
   end?: string | undefined;
   start?: string | undefined;
   filter?: string | undefined;
+}
+
+interface QueryOptionsEventsBySavedObjectFilter {
+  index: string;
+  namespace: string | undefined;
+  type: string;
+  ids: string[];
+  findOptions: QueryEventsBySavedObjectsFindOptions;
+  legacyIds?: string[];
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -208,13 +217,9 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
   }
 
   public async queryEventsBySavedObjects(
-    index: string,
-    namespace: string | undefined,
-    type: string,
-    ids: string[],
-    findOptions: QueryEventsBySavedObjectsFilterOptions,
-    legacyIds?: string[]
+    queryOptions: QueryOptionsEventsBySavedObjectFilter
   ): Promise<QueryEventsBySavedObjectResult> {
+    const { index, namespace, type, ids, findOptions, legacyIds } = queryOptions;
     // eslint-disable-next-line @typescript-eslint/naming-convention
     const { page, per_page: perPage, start, end, sort_field, sort_order, filter } = findOptions;
 
