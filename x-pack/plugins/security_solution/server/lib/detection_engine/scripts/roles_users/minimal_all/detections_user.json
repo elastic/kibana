@@ -1,0 +1,6 @@
+{
+  "password": "changeme",
+  "roles": ["minimal_all"],
+  "full_name": "Minimal All",
+  "email": "minimal-all@example.com"
+}

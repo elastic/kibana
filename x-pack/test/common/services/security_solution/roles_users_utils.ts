@@ -16,6 +16,7 @@ import {
   platformEngineerUser,
   detectionsAdminUser,
   readerUser,
+  minimalAllUser,
   t1AnalystRole,
   t2AnalystRole,
   hunterRole,
@@ -24,6 +25,7 @@ import {
   platformEngineerRole,
   detectionsAdminRole,
   readerRole,
+  minimalAllRole,
 } from '../../../../plugins/security_solution/server/lib/detection_engine/scripts/roles_users';
 
 import { ROLES } from '../../../../plugins/security_solution/common/test';
@@ -66,6 +68,8 @@ export const createUserAndRole = async (
       );
     case ROLES.reader:
       return postRoleAndUser(ROLES.reader, readerRole, readerUser, getService);
+    case ROLES.minimal_all:
+      return postRoleAndUser(ROLES.minimal_all, minimalAllRole, minimalAllUser, getService);
     default:
       return assertUnreachable(role);
   }

@@ -1,0 +1,18 @@
+{
+  "elasticsearch": {
+    "cluster": [],
+    "indices": []
+  },
+  "kibana": [
+    {
+      "feature": {
+        "ml": ["read"],
+        "siem": ["minimal_all", "cases_all", "cases_read"],
+        "actions": ["read"],
+        "builtInAlerts": ["read"],
+        "dev_tools": ["read"]
+      },
+      "spaces": ["*"]
+    }
+  ]
+}
