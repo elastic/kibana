@@ -68,7 +68,7 @@ export const useSnapshotState = ({
       return;
     }
 
-    setSnapshotState(data);
+    setSnapshotState({ ...data, action: 'upgrade' });
 
     // Only keep polling if it exists and is in progress.
     if (data?.status === 'in_progress') {
@@ -97,7 +97,7 @@ export const useSnapshotState = ({
       return;
     }
 
-    setSnapshotState(data);
+    setSnapshotState({ ...data, action: 'upgrade' });
     updateSnapshotStatus();
   }, [api, jobId, snapshotId, updateSnapshotStatus]);
 
