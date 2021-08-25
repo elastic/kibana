@@ -35,6 +35,7 @@ import {
   EVENT_KIND,
   SPACE_IDS,
   TIMESTAMP,
+  VERSION,
 } from '../../common/technical_rule_data_field_names';
 import { IRuleDataClient } from '../rule_data_client';
 import { AlertExecutorOptionsWithExtraServices } from '../types';
@@ -250,6 +251,7 @@ export const createLifecycleExecutor = (
       [EVENT_KIND]: 'signal',
       [ALERT_RULE_CONSUMER]: rule.consumer,
       [ALERT_ID]: alertId,
+      [VERSION]: ruleDataClient.kibanaVersion,
     } as ParsedTechnicalFields;
 
     const isNew = !state.trackedAlerts[alertId];
