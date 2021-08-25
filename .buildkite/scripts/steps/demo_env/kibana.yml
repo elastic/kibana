@@ -14,13 +14,15 @@ spec:
       selfSignedCertificate:
         disabled: true
   config:
+    server:
+      basePath: '/$DEPLOYMENT_MINOR_VERSION'
+      publicBaseUrl: 'https://demo.kibana.dev/$DEPLOYMENT_MINOR_VERSION'
     xpack.security.authc.providers:
       basic.basic1:
         order: 0
       anonymous.anonymous1:
         order: 1
         credentials: 'elasticsearch_anonymous_user'
-    server.publicBaseUrl: 'https://$DEPLOYMENT_NAME.demo.kibana.dev'
   podTemplate:
     spec:
       containers:

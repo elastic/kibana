@@ -47,13 +47,13 @@ metadata:
 spec:
   tls:
     - hosts:
-        - $DEPLOYMENT_NAME.demo.kibana.dev
+        - demo.kibana.dev
       secretName: tls-certificate
   rules:
-    - host: $DEPLOYMENT_NAME.demo.kibana.dev
+    - host: demo.kibana.dev
       http:
         paths:
-          - path: /
+          - path: /$DEPLOYMENT_MINOR_VERSION
             pathType: ImplementationSpecific
             backend:
               service:
