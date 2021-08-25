@@ -24,3 +24,4 @@ export const config = {
 export type RuleRegistryPluginConfig = TypeOf<typeof config.schema>;
 
 export const INDEX_PREFIX = '.alerts' as const;
+export const INDEX_PREFIX_FOR_BACKING_INDICES = '.internal.alerts' as const;
