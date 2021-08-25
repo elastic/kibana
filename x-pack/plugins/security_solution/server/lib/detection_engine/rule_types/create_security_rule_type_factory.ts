@@ -280,7 +280,7 @@ export const createSecurityRuleTypeFactory: CreateSecurityRuleTypeFactory = ({
             logger.info(buildRuleMessage(`Found ${createdSignalsCount} signals for notification.`));
 
             if (ruleSO.attributes.throttle != null) {
-              scheduleThrottledNotificationActions({
+              await scheduleThrottledNotificationActions({
                 alertInstance: services.alertInstanceFactory(alertId),
                 throttle: ruleSO.attributes.throttle,
                 startedAt,

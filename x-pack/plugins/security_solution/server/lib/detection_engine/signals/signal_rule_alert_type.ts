@@ -407,7 +407,7 @@ export const signalRulesAlertType = ({
             );
 
             if (savedObject.attributes.throttle != null) {
-              scheduleThrottledNotificationActions({
+              await scheduleThrottledNotificationActions({
                 alertInstance: services.alertInstanceFactory(alertId),
                 throttle: savedObject.attributes.throttle,
                 startedAt,
