@@ -99,6 +99,27 @@ exports[`Table prevents saved objects from being deleted 1`] = `
             hasEmptyLabelSpace={false}
             labelType="label"
           >
+            <EuiSwitch
+              checked={true}
+              label={
+                <FormattedMessage
+                  defaultMessage="Include namespace information"
+                  id="savedObjectsManagement.objectsTable.exportObjectsConfirmModal.includeNamespaces"
+                  values={Object {}}
+                />
+              }
+              name="includeNamespaces"
+              onChange={[Function]}
+            />
+          </EuiFormRow>
+          <EuiFormRow
+            describedByIds={Array []}
+            display="row"
+            fullWidth={false}
+            hasChildLabel={true}
+            hasEmptyLabelSpace={false}
+            labelType="label"
+          >
             <EuiButton
               fill={true}
               iconType="exportAction"
@@ -304,6 +325,27 @@ exports[`Table should render normally 1`] = `
                 />
               }
               name="includeReferencesDeep"
+              onChange={[Function]}
+            />
+          </EuiFormRow>
+          <EuiFormRow
+            describedByIds={Array []}
+            display="row"
+            fullWidth={false}
+            hasChildLabel={true}
+            hasEmptyLabelSpace={false}
+            labelType="label"
+          >
+            <EuiSwitch
+              checked={true}
+              label={
+                <FormattedMessage
+                  defaultMessage="Include namespace information"
+                  id="savedObjectsManagement.objectsTable.exportObjectsConfirmModal.includeNamespaces"
+                  values={Object {}}
+                />
+              }
+              name="includeNamespaces"
               onChange={[Function]}
             />
           </EuiFormRow>
