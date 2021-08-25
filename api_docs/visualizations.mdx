@@ -10,7 +10,7 @@ warning: This document is auto-generated and is meant to be viewed inside our ex
 ---
 import visualizationsObj from './visualizations.json';
 
-Contains the new xy-axis chart using the elastic-charts library, which will eventually replace the vislib xy-axis charts including bar, area, and line.
+Contains the shared architecture among all the legacy visualizations, e.g. the visualization type registry or the visualization embeddable.
 
 Contact [Kibana App](https://github.com/orgs/elastic/teams/kibana-app) for questions regarding this plugin.
 
@@ -18,7 +18,7 @@ Contact [Kibana App](https://github.com/orgs/elastic/teams/kibana-app) for quest
 
 | Public API count  | Any count | Items lacking comments | Missing exports | 
 |-------------------|-----------|------------------------|-----------------|
-| 263 | 13 | 245 | 12 |
+| 279 | 13 | 261 | 15 |
 
 ## Client
 
@@ -45,6 +45,17 @@ Contact [Kibana App](https://github.com/orgs/elastic/teams/kibana-app) for quest
 
 ### Consts, variables and types
 <DocDefinitionList data={visualizationsObj.client.misc}/>
+
+## Server
+
+### Setup
+<DocDefinitionList data={[visualizationsObj.server.setup]}/>
+
+### Start
+<DocDefinitionList data={[visualizationsObj.server.start]}/>
+
+### Consts, variables and types
+<DocDefinitionList data={visualizationsObj.server.misc}/>
 
 ## Common
 
