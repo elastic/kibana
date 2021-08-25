@@ -72,52 +72,6 @@ image:images/runtime-field-menu.png[Dropdown menu located next to index pattern 
 For more information about adding fields to index patterns and examples, refer to <<runtime-fields>>.
 
 [float]
-[[lens-formulas]]
-==== Use formulas to perform math
-
-Formulas allow you to perform math on aggregated data. The most common formulas divide two values to produce a percent.
-
-. In the layer pane, click a field.
-
-. Click *Formula*, then enter the formula. 
-+
-Filter ratio example:: To filter a document set, use `kql=''`, then compare to other documents within the same grouping:
-+
-```
-count(kql='response.status_code > 400') / count()
-```
-+
-Week over week example:: To get the value for each grouping from the previous week, use `shift='1w'`. Do not use time shift formulas with the *Top values* function.
-+
-```
-percentile(system.network.in.bytes, percentile=99) /
-percentile(system.network.in.bytes, percentile=99, shift='1w')
-```
-+
-Percent of total example:: To convert each grouping into a percent of the total, formulas calculate `overall_sum` for all groupings:
-+
-```
-sum(products.base_price) / overall_sum(sum(products.base_price))
-```
-TIP: For detailed information on formulas, click image:dashboard/images/formula_reference.png[Formula reference icon].
-
-. To accurately display the formula, select *Percent* from the *Value format* dropdown.
-
-[float]
-[[compare-data-with-time-offsets]]
-==== Compare differences over time
-
-Compare your real-time data set to the results that are offset by a time increment. For example, you can compare the real-time percentage of a user CPU time spent to the results offset by one hour. 
-
-. In the layer pane, click the field you want to offset.
-
-. From the *Add advanced options* dropdown, select *Time shift*.
-
-. Select the time offset increment. 
-
-For a time shift example, refer to <<compare-time-ranges>>.
-
-[float]
 [[create-custom-tables]]
 ==== Create custom tables
 
@@ -176,20 +130,50 @@ image::images/lens_drag_drop_3.gif[Using drag and drop to reorder]
 . To confirm the action, press Space bar. To cancel, press Esc.
 
 [float]
-[[configure-the-visualization-components]]
-==== Configure the visualization components
+[[lens-formulas]]
+==== Use formulas to perform math
 
-Each visualiztion type comes with a set of components that you can configure, such as data labels, legend, axes, and more.
+Formulas allow you to perform math on aggregated data. The most common formulas divide two values to produce a percent.
 
-For example, to add data labels to bar and horizontal bar charts, use the *Values* menu.
+. In the layer pane, click a field.
 
-[role="screenshot"]
-image::images/lens_value_labels_xychart_toggle.png[Lens Bar chart value labels menu]
+. Click *Formula*, then enter the formula. 
++
+Filter ratio example:: To filter a document set, use `kql=''`, then compare to other documents within the same grouping:
++
+```
+count(kql='response.status_code > 400') / count()
+```
++
+Week over week example:: To get the value for each grouping from the previous week, use `shift='1w'`. Do not use time shift formulas with the *Top values* function.
++
+```
+percentile(system.network.in.bytes, percentile=99) /
+percentile(system.network.in.bytes, percentile=99, shift='1w')
+```
++
+Percent of total example:: To convert each grouping into a percent of the total, formulas calculate `overall_sum` for all groupings:
++
+```
+sum(products.base_price) / overall_sum(sum(products.base_price))
+```
+TIP: For detailed information on formulas, click image:dashboard/images/formula_reference.png[Formula reference icon].
 
-To add data labels to pie charts, donut charts, or treemaps, use the *Labels* menu.
+. To accurately display the formula, select *Percent* from the *Value format* dropdown.
 
-[role="screenshot"]
-image::images/lens_value_labels_partition_toggle.png[Lens Pie chart value labels menu]
+[float]
+[[compare-data-with-time-offsets]]
+==== Compare differences over time
+
+Compare your real-time data set to the results that are offset by a time increment. For example, you can compare the real-time percentage of a user CPU time spent to the results offset by one hour. 
+
+. In the layer pane, click the field you want to offset.
+
+. From the *Add advanced options* dropdown, select *Time shift*.
+
+. Select the time offset increment. 
+
+For a time shift example, refer to <<compare-time-ranges>>.
 
 [float]
 [[filter-the-data]]
@@ -202,6 +186,22 @@ In the legend, click the field, then choose one of the following options:
 * *Filter for value* &mdash; Applies a filter that displays only the field data in the visualization.
 
 * *Filter out value* &mdash; Applies a filter that removes the field data from the visualization.
+
+[float]
+[[configure-the-visualization-components]]
+==== Configure the visualization components
+
+Each visualiztion type comes with a set of components that you access from the editor toolbar.
+
+The following component menus are available:
+
+* *Visual options* &mdash; Specifies how to display area, line, and bar chart options. For example, you can specify how to display the labels in bar charts.
+
+* *Labels* &mdash; Specifies how to display the labels for donut charts, pie charts, and treemaps. 
+
+* *Legend* &mdash; Specifies how to display the legend. For example, you can display the legend inside the visualization and truncate the legend values.
+
+* *Left axis*, *Bottom axis*, and *Right axis* &mdash; Specify how you want to display the chart axes. For example, add axis labels and change the orientation and bounds.
 
 [float]
 [[lens-faq]]
