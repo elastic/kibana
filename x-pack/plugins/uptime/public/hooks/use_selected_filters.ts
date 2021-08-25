@@ -92,6 +92,7 @@ export const useSelectedFilters = () => {
     ];
 
     return {
+      excludedLocations,
       selectedTags,
       selectedPorts,
       selectedSchemes,

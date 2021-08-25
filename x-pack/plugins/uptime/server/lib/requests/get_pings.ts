@@ -53,6 +53,21 @@ const REMOVE_NON_SUMMARY_BROWSER_CHECKS = {
   ],
 };
 
+const excludedLocationsClause = (excludedLocations: string[]) =>
+  Array.isArray(excludedLocations) && excludedLocations.length > 0
+    ? {
+        bool: {
+          must_not: [
+            {
+              terms: {
+                'observer.geo.name': excludedLocations,
+              },
+            },
+          ],
+        },
+      }
+    : undefined;
+
 export const getPings: UMElasticsearchQueryFn<GetPingsParams, PingsResponse> = async ({
   uptimeEsClient,
   dateRange: { from, to },
@@ -62,6 +77,7 @@ export const getPings: UMElasticsearchQueryFn<GetPingsParams, PingsResponse> = a
   sort,
   size: sizeParam,
   locations,
+  excludedLocations,
 }) => {
   const size = sizeParam ?? DEFAULT_PAGE_SIZE;
 
@@ -84,6 +100,10 @@ export const getPings: UMElasticsearchQueryFn<GetPingsParams, PingsResponse> = a
       : {}),
   };
 
+  const elc = excludedLocationsClause(excludedLocations ? JSON.parse(excludedLocations) : []);
+  if (elc) {
+    searchBody.query.bool.filter.push(elc);
+  }
   const {
     body: {
       hits: { hits, total },
