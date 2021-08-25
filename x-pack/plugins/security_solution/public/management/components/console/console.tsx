@@ -145,7 +145,7 @@ export const Console = memo<ConsoleProps>(({ prompt }) => {
         }
 
         // unsupported arguments
-        for (const argName in Object.keys(parsedInput.args)) {
+        for (const argName of Object.keys(parsedInput.args)) {
           if (!commandDefinition.args[argName]) {
             setHistoryItems((prevState) => {
               return [
@@ -160,6 +160,8 @@ export const Console = memo<ConsoleProps>(({ prompt }) => {
 
             return;
           }
+
+          // FIXME:PT implement validation of arguments `allowMultiples`
 
           // FIXME:PT implement validation of required arguments
 

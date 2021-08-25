@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, PropsWithChildren, ReactNode } from 'react';
+import React, { memo, PropsWithChildren } from 'react';
 import { EuiCallOut, EuiText } from '@elastic/eui';
 import { UserCommandInput } from './user_command_input';
 import { ParsedCommandInput } from '../service/parsed_command_input';

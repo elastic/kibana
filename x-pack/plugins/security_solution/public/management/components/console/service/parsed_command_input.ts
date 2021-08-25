@@ -68,6 +68,7 @@ export const parseCommandInput = (input: string): ParsedCommandInput => {
       // Do we have multiple values for this argumentName, then create array for values
       if (args[argName].value !== undefined) {
         args[argName].values = [args[argName].value!, inputToken];
+        args[argName].value = undefined;
       } else {
         args[argName].value = inputToken;
       }
