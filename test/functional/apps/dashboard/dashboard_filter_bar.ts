@@ -182,7 +182,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardAddPanel.addSavedSearch('Rendering-Test:-saved-search');
         await PageObjects.dashboard.waitForRenderComplete();
         const isLegacyDefault = PageObjects.discover.useLegacyTable();
-        if (isLegacyDefault) {
+        if (await isLegacyDefault) {
           await testSubjects.click('docTableCellFilter');
         } else {
           const documentCell = await dataGrid.getCellElement(1, 3);

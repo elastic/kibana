@@ -27,7 +27,7 @@ class BrowserService extends FtrService {
    */
   public readonly keys = Key;
   public readonly isFirefox: boolean;
-  public readonly isChromium: AllowedSchemaBooleanTypes;
+  public readonly isChromium: boolean;
 
   private readonly log = this.ctx.getService('log');
 
