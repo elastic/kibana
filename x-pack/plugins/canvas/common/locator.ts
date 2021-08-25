@@ -7,7 +7,7 @@
 
 import type { LocatorDefinition, LocatorPublic } from 'src/plugins/share/common';
 
-import { CANVAS_APP } from './lib';
+import { CANVAS_APP } from './lib/constants';
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type CanvasAppLocatorParams = {
