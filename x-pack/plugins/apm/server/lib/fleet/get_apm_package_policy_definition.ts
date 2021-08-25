@@ -32,7 +32,7 @@ export function getApmPackagePolicyDefinition(
     ],
     package: {
       name: APM_PACKAGE_NAME,
-      version: '0.3.0',
+      version: '0.4.0',
       title: 'Elastic APM',
     },
   };
@@ -74,24 +74,12 @@ export const apmConfigMapping: Record<
     type: 'text',
     getValue: ({ cloudPluginSetup }) => cloudPluginSetup?.apm?.url,
   },
-  'apm-server.secret_token': {
-    name: 'secret_token',
-    type: 'text',
-  },
-  'apm-server.api_key.enabled': {
-    name: 'api_key_enabled',
-    type: 'bool',
-  },
   'apm-server.rum.enabled': {
     name: 'enable_rum',
     type: 'bool',
   },
   'apm-server.default_service_environment': {
     name: 'default_service_environment',
-    type: 'text',
-  },
-  'apm-server.rum.allow_service_names': {
-    name: 'rum_allow_service_names',
     type: 'text',
   },
   'apm-server.rum.allow_origins': {
@@ -106,14 +94,6 @@ export const apmConfigMapping: Record<
     name: 'rum_response_headers',
     type: 'yaml',
   },
-  'apm-server.rum.event_rate.limit': {
-    name: 'rum_event_rate_limit',
-    type: 'integer',
-  },
-  'apm-server.rum.event_rate.lru_size': {
-    name: 'rum_event_rate_lru_size',
-    type: 'integer',
-  },
   'apm-server.rum.library_pattern': {
     name: 'rum_library_pattern',
     type: 'text',
@@ -121,10 +101,6 @@ export const apmConfigMapping: Record<
   'apm-server.rum.exclude_from_grouping': {
     name: 'rum_exclude_from_grouping',
     type: 'text',
-  },
-  'apm-server.api_key.limit': {
-    name: 'api_key_limit',
-    type: 'integer',
   },
   'apm-server.max_event_size': {
     name: 'max_event_bytes',
@@ -189,5 +165,37 @@ export const apmConfigMapping: Record<
   'apm-server.ssl.curve_types': {
     name: 'tls_curve_types',
     type: 'text',
+  },
+  'apm-server.auth.secret_token': {
+    name: 'secret_token',
+    type: 'text',
+  },
+  'apm-server.auth.api_key.enabled': {
+    name: 'api_key_enabled',
+    type: 'bool',
+  },
+  'apm-server.auth.api_key.limit': {
+    name: 'api_key_limit',
+    type: 'bool',
+  },
+  'apm-server.auth.anonymous.enabled': {
+    name: 'anonymous_enabled',
+    type: 'bool',
+  },
+  'apm-server.auth.anonymous.allow_agent': {
+    name: 'anonymous_allow_agent',
+    type: 'text',
+  },
+  'apm-server.auth.anonymous.allow_service': {
+    name: 'anonymous_allow_service',
+    type: 'text',
+  },
+  'apm-server.auth.anonymous.rate_limit.ip_limit': {
+    name: 'anonymous_rate_limit_ip_limit',
+    type: 'integer',
+  },
+  'apm-server.auth.anonymous.rate_limit.event_limit': {
+    name: 'anonymous_rate_limit_event_limit',
+    type: 'integer',
   },
 };

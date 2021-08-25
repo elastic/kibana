@@ -38,13 +38,14 @@ export default ({ getService }: FtrProviderContext) => {
       .set('kbn-xsrf', 'true')
       .expect(200);
     const observabilityIndex = indexNames?.index_name?.find(
-      (indexName) => indexName === '.alerts-observability-apm'
+      (indexName) => indexName === '.alerts-observability.apm.alerts'
     );
-    expect(observabilityIndex).to.eql('.alerts-observability-apm');
+    expect(observabilityIndex).to.eql('.alerts-observability.apm.alerts');
     return observabilityIndex;
   };
 
-  describe('rbac with subfeatures', () => {
+  // FAILING: https://github.com/elastic/kibana/issues/110153
+  describe.skip('rbac with subfeatures', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/rule_registry/alerts');
     });

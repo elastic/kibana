@@ -659,8 +659,6 @@ export interface DataPublicPluginSetup {
     //
     // (undocumented)
     autocomplete: AutocompleteSetup;
-    // @deprecated (undocumented)
-    fieldFormats: FieldFormatsSetup;
     // (undocumented)
     query: QuerySetup;
     // (undocumented)
@@ -1305,9 +1303,9 @@ export interface IndexPatternAttributes {
     // (undocumented)
     title: string;
     // (undocumented)
-    type: string;
+    type?: string;
     // (undocumented)
-    typeMeta: string;
+    typeMeta?: string;
 }
 
 // @public (undocumented)
