@@ -10,12 +10,9 @@ import React from 'react';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { mountWithIntl } from '@kbn/test/jest';
 
-// @ts-expect-error
-import stubbedLogstashFields from '../../../../../__fixtures__/logstash_fields';
 import { DiscoverField } from './discover_field';
-import { coreMock } from '../../../../../../../../core/public/mocks';
 import { IndexPatternField } from '../../../../../../../data/public';
-import { getStubIndexPattern } from '../../../../../../../data/public/test_utils';
+import { stubIndexPattern } from '../../../../../../../data/common/stubs';
 
 jest.mock('../../../../../kibana_services', () => ({
   getServices: () => ({
@@ -48,14 +45,6 @@ function getComponent({
   showDetails?: boolean;
   field?: IndexPatternField;
 }) {
-  const indexPattern = getStubIndexPattern(
-    'logstash-*',
-    (cfg: unknown) => cfg,
-    'time',
-    stubbedLogstashFields(),
-    coreMock.createSetup()
-  );
-
   const finalField =
     field ??
     new IndexPatternField({
@@ -70,7 +59,7 @@ function getComponent({
     });
 
   const props = {
-    indexPattern,
+    indexPattern: stubIndexPattern,
     field: finalField,
     getDetails: jest.fn(() => ({ buckets: [], error: '', exists: 1, total: 2, columns: [] })),
     onAddFilter: jest.fn(),
