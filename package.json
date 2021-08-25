@@ -772,7 +772,7 @@
     "jsondiffpatch": "0.4.1",
     "license-checker": "^16.0.0",
     "listr": "^0.14.1",
-    "lmdb-store": "^1.2.4",
+    "lmdb-store": "^1.6.6",
     "load-grunt-config": "^3.0.1",
     "marge": "^1.0.1",
     "micromatch": "3.1.10",
