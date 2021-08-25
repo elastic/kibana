@@ -15,8 +15,6 @@ jest.mock('../../app_links', () => ({
 
 afterAll(() => jest.clearAllMocks());
 
-const addBasePathMock = jest.fn((path: string) => (path ? path : 'path'));
-
 const applicationStartMock = ({
   capabilities: { navLinks: { management: true, dev_tools: true } },
 } as unknown) as ApplicationStart;
@@ -24,7 +22,7 @@ const applicationStartMock = ({
 describe('overviewPageActions', () => {
   test('only add data button', () => {
     const array = overviewPageActions({
-      addBasePath: addBasePathMock,
+      addDataHref: '',
       application: applicationStartMock,
     });
     expect(array).toMatchSnapshot();
@@ -32,7 +30,7 @@ describe('overviewPageActions', () => {
 
   test('all buttons', () => {
     const array = overviewPageActions({
-      addBasePath: addBasePathMock,
+      addDataHref: '',
       application: applicationStartMock,
       showDevToolsLink: true,
       showManagementLink: true,
@@ -42,7 +40,7 @@ describe('overviewPageActions', () => {
 
   test('no buttons', () => {
     const array = overviewPageActions({
-      addBasePath: addBasePathMock,
+      addDataHref: '',
       application: applicationStartMock,
       hidden: true,
     });
