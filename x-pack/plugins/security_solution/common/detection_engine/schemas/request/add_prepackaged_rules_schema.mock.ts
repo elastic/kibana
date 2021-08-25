@@ -6,8 +6,14 @@
  */
 
 import { DEFAULT_MAX_SIGNALS } from '../../../constants';
+import {
+  AddPrepackagedRulesSchema,
+  AddPrepackagedRulesSchemaDecoded,
+} from './add_prepackaged_rules_schema';
 
-export const getAddPrepackagedRulesSchemaMock = (isRuleRegistryEnabled: boolean) => ({
+export const getAddPrepackagedRulesSchemaMock = (
+  isRuleRegistryEnabled: boolean
+): AddPrepackagedRulesSchema => ({
   description: 'some description',
   name: 'Query with a rule id',
   query: 'user.name: root or user.name: admin',
@@ -20,7 +26,9 @@ export const getAddPrepackagedRulesSchemaMock = (isRuleRegistryEnabled: boolean)
   ...(isRuleRegistryEnabled ? { namespace: 'default' } : {}),
 });
 
-export const getAddPrepackagedRulesSchemaDecodedMock = (isRuleRegistryEnabled: boolean) => ({
+export const getAddPrepackagedRulesSchemaDecodedMock = (
+  isRuleRegistryEnabled: boolean
+): AddPrepackagedRulesSchemaDecoded => ({
   author: [],
   description: 'some description',
   name: 'Query with a rule id',

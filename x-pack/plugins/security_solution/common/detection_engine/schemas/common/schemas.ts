@@ -59,6 +59,9 @@ export type FileName = t.TypeOf<typeof file_name>;
 export const exclude_export_details = t.boolean;
 export type ExcludeExportDetails = t.TypeOf<typeof exclude_export_details>;
 
+export const namespace = t.string;
+export type Namespace = t.TypeOf<typeof namespace>;
+
 /**
  * TODO: Right now the filters is an "unknown", when it could more than likely
  * become the actual ESFilter as a type.

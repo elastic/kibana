@@ -9,7 +9,6 @@ import {
   addPrepackagedRulesSchema,
   AddPrepackagedRulesSchemaDecoded,
   AddPrepackagedRulesSchema,
-  racAddPrepackagedRulesSchema,
 } from './add_prepackaged_rules_schema';
 
 import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
@@ -31,8 +30,7 @@ describe('add prepackaged rules schema', () => {
   ])('empty objects do not validate - %s', (_, isRuleRegistryEnabled) => {
     const payload: Partial<AddPrepackagedRulesSchema> = {};
 
-    const schema = isRuleRegistryEnabled ? racAddPrepackagedRulesSchema : addPrepackagedRulesSchema;
-    const decoded = schema.decode(payload);
+    const decoded = addPrepackagedRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual(
@@ -58,8 +56,7 @@ describe('add prepackaged rules schema', () => {
       madeUp: 'hi',
     };
 
-    const schema = isRuleRegistryEnabled ? racAddPrepackagedRulesSchema : addPrepackagedRulesSchema;
-    const decoded = schema.decode(payload);
+    const decoded = addPrepackagedRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual(['invalid keys "madeUp"']);
@@ -74,8 +71,7 @@ describe('add prepackaged rules schema', () => {
       rule_id: 'rule-1',
     };
 
-    const schema = isRuleRegistryEnabled ? racAddPrepackagedRulesSchema : addPrepackagedRulesSchema;
-    const decoded = schema.decode(payload);
+    const decoded = addPrepackagedRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual(
@@ -100,8 +96,7 @@ describe('add prepackaged rules schema', () => {
       description: 'some description',
     };
 
-    const schema = isRuleRegistryEnabled ? racAddPrepackagedRulesSchema : addPrepackagedRulesSchema;
-    const decoded = schema.decode(payload);
+    const decoded = addPrepackagedRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual(
@@ -126,8 +121,7 @@ describe('add prepackaged rules schema', () => {
       from: 'now-5m',
     };
 
-    const schema = isRuleRegistryEnabled ? racAddPrepackagedRulesSchema : addPrepackagedRulesSchema;
-    const decoded = schema.decode(payload);
+    const decoded = addPrepackagedRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual(
@@ -153,8 +147,7 @@ describe('add prepackaged rules schema', () => {
       to: 'now',
     };
 
-    const schema = isRuleRegistryEnabled ? racAddPrepackagedRulesSchema : addPrepackagedRulesSchema;
-    const decoded = schema.decode(payload);
+    const decoded = addPrepackagedRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual(
@@ -183,10 +176,7 @@ describe('add prepackaged rules schema', () => {
         name: 'some-name',
       };
 
-      const schema = isRuleRegistryEnabled
-        ? racAddPrepackagedRulesSchema
-        : addPrepackagedRulesSchema;
-      const decoded = schema.decode(payload);
+      const decoded = addPrepackagedRulesSchema.decode(payload);
       const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
       expect(getPaths(left(message.errors))).toEqual(
@@ -216,10 +206,7 @@ describe('add prepackaged rules schema', () => {
         severity: 'low',
       };
 
-      const schema = isRuleRegistryEnabled
-        ? racAddPrepackagedRulesSchema
-        : addPrepackagedRulesSchema;
-      const decoded = schema.decode(payload);
+      const decoded = addPrepackagedRulesSchema.decode(payload);
       const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
       expect(getPaths(left(message.errors))).toEqual(
@@ -249,10 +236,7 @@ describe('add prepackaged rules schema', () => {
         type: 'query',
       };
 
-      const schema = isRuleRegistryEnabled
-        ? racAddPrepackagedRulesSchema
-        : addPrepackagedRulesSchema;
-      const decoded = schema.decode(payload);
+      const decoded = addPrepackagedRulesSchema.decode(payload);
       const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
       expect(getPaths(left(message.errors))).toEqual(
@@ -282,10 +266,7 @@ describe('add prepackaged rules schema', () => {
         type: 'query',
       };
 
-      const schema = isRuleRegistryEnabled
-        ? racAddPrepackagedRulesSchema
-        : addPrepackagedRulesSchema;
-      const decoded = schema.decode(payload);
+      const decoded = addPrepackagedRulesSchema.decode(payload);
       const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
       expect(getPaths(left(message.errors))).toEqual(
@@ -316,10 +297,7 @@ describe('add prepackaged rules schema', () => {
         index: ['index-1'],
       };
 
-      const schema = isRuleRegistryEnabled
-        ? racAddPrepackagedRulesSchema
-        : addPrepackagedRulesSchema;
-      const decoded = schema.decode(payload);
+      const decoded = addPrepackagedRulesSchema.decode(payload);
       const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
       expect(getPaths(left(message.errors))).toEqual(
@@ -354,10 +332,7 @@ describe('add prepackaged rules schema', () => {
         ...(isRuleRegistryEnabled ? { namespace: 'default' } : {}),
       };
 
-      const schema = isRuleRegistryEnabled
-        ? racAddPrepackagedRulesSchema
-        : addPrepackagedRulesSchema;
-      const decoded = schema.decode(payload);
+      const decoded = addPrepackagedRulesSchema.decode(payload);
       const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
       expect(getPaths(left(message.errors))).toEqual([]);
@@ -413,10 +388,7 @@ describe('add prepackaged rules schema', () => {
         risk_score: 50,
       };
 
-      const schema = isRuleRegistryEnabled
-        ? racAddPrepackagedRulesSchema
-        : addPrepackagedRulesSchema;
-      const decoded = schema.decode(payload);
+      const decoded = addPrepackagedRulesSchema.decode(payload);
       const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
       expect(getPaths(left(message.errors))).toEqual(
@@ -451,10 +423,7 @@ describe('add prepackaged rules schema', () => {
         ...(isRuleRegistryEnabled ? { namespace: 'default' } : {}),
       };
 
-      const schema = isRuleRegistryEnabled
-        ? racAddPrepackagedRulesSchema
-        : addPrepackagedRulesSchema;
-      const decoded = schema.decode(payload);
+      const decoded = addPrepackagedRulesSchema.decode(payload);
       const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
       expect(getPaths(left(message.errors))).toEqual([]);
@@ -512,10 +481,7 @@ describe('add prepackaged rules schema', () => {
         language: 'kuery',
       };
 
-      const schema = isRuleRegistryEnabled
-        ? racAddPrepackagedRulesSchema
-        : addPrepackagedRulesSchema;
-      const decoded = schema.decode(payload);
+      const decoded = addPrepackagedRulesSchema.decode(payload);
       const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
       expect(getPaths(left(message.errors))).toEqual(
@@ -551,10 +517,7 @@ describe('add prepackaged rules schema', () => {
         ...(isRuleRegistryEnabled ? { namespace: 'default' } : {}),
       };
 
-      const schema = isRuleRegistryEnabled
-        ? racAddPrepackagedRulesSchema
-        : addPrepackagedRulesSchema;
-      const decoded = schema.decode(payload);
+      const decoded = addPrepackagedRulesSchema.decode(payload);
       const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
       expect(getPaths(left(message.errors))).toEqual(['invalid keys "output_index"']);
@@ -583,10 +546,7 @@ describe('add prepackaged rules schema', () => {
         ...(isRuleRegistryEnabled ? { namespace: 'default' } : {}),
       };
 
-      const schema = isRuleRegistryEnabled
-        ? racAddPrepackagedRulesSchema
-        : addPrepackagedRulesSchema;
-      const decoded = schema.decode(payload);
+      const decoded = addPrepackagedRulesSchema.decode(payload);
       const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
       expect(getPaths(left(message.errors))).toEqual([]);
@@ -629,8 +589,7 @@ describe('add prepackaged rules schema', () => {
       threat: [],
     };
 
-    const schema = isRuleRegistryEnabled ? racAddPrepackagedRulesSchema : addPrepackagedRulesSchema;
-    const decoded = schema.decode(payload);
+    const decoded = addPrepackagedRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
@@ -679,10 +638,7 @@ describe('add prepackaged rules schema', () => {
         ...(isRuleRegistryEnabled ? { namespace: 'default' } : {}),
       };
 
-      const schema = isRuleRegistryEnabled
-        ? racAddPrepackagedRulesSchema
-        : addPrepackagedRulesSchema;
-      const decoded = schema.decode(payload);
+      const decoded = addPrepackagedRulesSchema.decode(payload);
       const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
       expect(getPaths(left(message.errors))).toEqual([]);
@@ -741,8 +697,7 @@ describe('add prepackaged rules schema', () => {
       references: ['index-1'],
     };
 
-    const schema = isRuleRegistryEnabled ? racAddPrepackagedRulesSchema : addPrepackagedRulesSchema;
-    const decoded = schema.decode(payload);
+    const decoded = addPrepackagedRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
@@ -760,8 +715,7 @@ describe('add prepackaged rules schema', () => {
     const { references, ...noReferences } = getAddPrepackagedRulesSchemaMock(
       isRuleRegistryEnabled
     ) as AddPrepackagedRulesSchema;
-    const schema = isRuleRegistryEnabled ? racAddPrepackagedRulesSchema : addPrepackagedRulesSchema;
-    const decoded = schema.decode(noReferences);
+    const decoded = addPrepackagedRulesSchema.decode(noReferences);
     const checked = exactCheck(noReferences, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
@@ -781,8 +735,7 @@ describe('add prepackaged rules schema', () => {
       immutable: true,
     };
 
-    const schema = isRuleRegistryEnabled ? racAddPrepackagedRulesSchema : addPrepackagedRulesSchema;
-    const decoded = schema.decode(payload);
+    const decoded = addPrepackagedRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual(['invalid keys "immutable"']);
@@ -798,8 +751,7 @@ describe('add prepackaged rules schema', () => {
     ) as AddPrepackagedRulesSchema;
     delete payload.enabled;
 
-    const schema = isRuleRegistryEnabled ? racAddPrepackagedRulesSchema : addPrepackagedRulesSchema;
-    const decoded = schema.decode(payload);
+    const decoded = addPrepackagedRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
@@ -816,8 +768,7 @@ describe('add prepackaged rules schema', () => {
     // @ts-expect-error
     delete payload.rule_id;
 
-    const schema = isRuleRegistryEnabled ? racAddPrepackagedRulesSchema : addPrepackagedRulesSchema;
-    const decoded = schema.decode(payload);
+    const decoded = addPrepackagedRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
@@ -835,8 +786,7 @@ describe('add prepackaged rules schema', () => {
       references: [5],
     };
 
-    const schema = isRuleRegistryEnabled ? racAddPrepackagedRulesSchema : addPrepackagedRulesSchema;
-    const decoded = schema.decode(payload);
+    const decoded = addPrepackagedRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual(['Invalid value "5" supplied to "references"']);
@@ -852,8 +802,7 @@ describe('add prepackaged rules schema', () => {
       index: [5],
     };
 
-    const schema = isRuleRegistryEnabled ? racAddPrepackagedRulesSchema : addPrepackagedRulesSchema;
-    const decoded = schema.decode(payload);
+    const decoded = addPrepackagedRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual(['Invalid value "5" supplied to "index"']);
@@ -871,8 +820,7 @@ describe('add prepackaged rules schema', () => {
       ...noInterval,
     };
 
-    const schema = isRuleRegistryEnabled ? racAddPrepackagedRulesSchema : addPrepackagedRulesSchema;
-    const decoded = schema.decode(payload);
+    const decoded = addPrepackagedRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
@@ -900,8 +848,7 @@ describe('add prepackaged rules schema', () => {
       ...noMaxSignals,
     };
 
-    const schema = isRuleRegistryEnabled ? racAddPrepackagedRulesSchema : addPrepackagedRulesSchema;
-    const decoded = schema.decode(payload);
+    const decoded = addPrepackagedRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
@@ -926,8 +873,7 @@ describe('add prepackaged rules schema', () => {
       filters: [],
     };
 
-    const schema = isRuleRegistryEnabled ? racAddPrepackagedRulesSchema : addPrepackagedRulesSchema;
-    const decoded = schema.decode(payload);
+    const decoded = addPrepackagedRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
@@ -947,8 +893,7 @@ describe('add prepackaged rules schema', () => {
       filters: 'some string',
     };
 
-    const schema = isRuleRegistryEnabled ? racAddPrepackagedRulesSchema : addPrepackagedRulesSchema;
-    const decoded = schema.decode(payload);
+    const decoded = addPrepackagedRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
@@ -966,8 +911,7 @@ describe('add prepackaged rules schema', () => {
       language: 'kuery',
     };
 
-    const schema = isRuleRegistryEnabled ? racAddPrepackagedRulesSchema : addPrepackagedRulesSchema;
-    const decoded = schema.decode(payload);
+    const decoded = addPrepackagedRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
@@ -987,8 +931,7 @@ describe('add prepackaged rules schema', () => {
       language: 'lucene',
     };
 
-    const schema = isRuleRegistryEnabled ? racAddPrepackagedRulesSchema : addPrepackagedRulesSchema;
-    const decoded = schema.decode(payload);
+    const decoded = addPrepackagedRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
@@ -1008,8 +951,7 @@ describe('add prepackaged rules schema', () => {
       language: 'something-made-up',
     };
 
-    const schema = isRuleRegistryEnabled ? racAddPrepackagedRulesSchema : addPrepackagedRulesSchema;
-    const decoded = schema.decode(payload);
+    const decoded = addPrepackagedRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
@@ -1027,8 +969,7 @@ describe('add prepackaged rules schema', () => {
       max_signals: -1,
     };
 
-    const schema = isRuleRegistryEnabled ? racAddPrepackagedRulesSchema : addPrepackagedRulesSchema;
-    const decoded = schema.decode(payload);
+    const decoded = addPrepackagedRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
@@ -1046,8 +987,7 @@ describe('add prepackaged rules schema', () => {
       max_signals: 0,
     };
 
-    const schema = isRuleRegistryEnabled ? racAddPrepackagedRulesSchema : addPrepackagedRulesSchema;
-    const decoded = schema.decode(payload);
+    const decoded = addPrepackagedRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual(['Invalid value "0" supplied to "max_signals"']);
@@ -1063,8 +1003,7 @@ describe('add prepackaged rules schema', () => {
       max_signals: 1,
     };
 
-    const schema = isRuleRegistryEnabled ? racAddPrepackagedRulesSchema : addPrepackagedRulesSchema;
-    const decoded = schema.decode(payload);
+    const decoded = addPrepackagedRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
@@ -1084,8 +1023,7 @@ describe('add prepackaged rules schema', () => {
       tags: ['tag_1', 'tag_2'],
     };
 
-    const schema = isRuleRegistryEnabled ? racAddPrepackagedRulesSchema : addPrepackagedRulesSchema;
-    const decoded = schema.decode(payload);
+    const decoded = addPrepackagedRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
@@ -1105,8 +1043,7 @@ describe('add prepackaged rules schema', () => {
       tags: [0, 1, 2],
     };
 
-    const schema = isRuleRegistryEnabled ? racAddPrepackagedRulesSchema : addPrepackagedRulesSchema;
-    const decoded = schema.decode(payload);
+    const decoded = addPrepackagedRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
@@ -1143,10 +1080,7 @@ describe('add prepackaged rules schema', () => {
         ],
       };
 
-      const schema = isRuleRegistryEnabled
-        ? racAddPrepackagedRulesSchema
-        : addPrepackagedRulesSchema;
-      const decoded = schema.decode(payload);
+      const decoded = addPrepackagedRulesSchema.decode(payload);
       const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
       expect(getPaths(left(message.errors))).toEqual([
@@ -1178,10 +1112,7 @@ describe('add prepackaged rules schema', () => {
         ],
       };
 
-      const schema = isRuleRegistryEnabled
-        ? racAddPrepackagedRulesSchema
-        : addPrepackagedRulesSchema;
-      const decoded = schema.decode(payload);
+      const decoded = addPrepackagedRulesSchema.decode(payload);
       const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
       expect(getPaths(left(message.errors))).toEqual([
@@ -1211,10 +1142,7 @@ describe('add prepackaged rules schema', () => {
         ],
       };
 
-      const schema = isRuleRegistryEnabled
-        ? racAddPrepackagedRulesSchema
-        : addPrepackagedRulesSchema;
-      const decoded = schema.decode(payload);
+      const decoded = addPrepackagedRulesSchema.decode(payload);
       const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
       expect(getPaths(left(message.errors))).toEqual([]);
@@ -1244,8 +1172,7 @@ describe('add prepackaged rules schema', () => {
       false_positives: ['false_1', 'false_2'],
     };
 
-    const schema = isRuleRegistryEnabled ? racAddPrepackagedRulesSchema : addPrepackagedRulesSchema;
-    const decoded = schema.decode(payload);
+    const decoded = addPrepackagedRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
@@ -1267,10 +1194,7 @@ describe('add prepackaged rules schema', () => {
         false_positives: [5, 4],
       };
 
-      const schema = isRuleRegistryEnabled
-        ? racAddPrepackagedRulesSchema
-        : addPrepackagedRulesSchema;
-      const decoded = schema.decode(payload);
+      const decoded = addPrepackagedRulesSchema.decode(payload);
       const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
       expect(getPaths(left(message.errors))).toEqual([
@@ -1289,8 +1213,7 @@ describe('add prepackaged rules schema', () => {
       risk_score: 101,
     };
 
-    const schema = isRuleRegistryEnabled ? racAddPrepackagedRulesSchema : addPrepackagedRulesSchema;
-    const decoded = schema.decode(payload);
+    const decoded = addPrepackagedRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
@@ -1308,8 +1231,7 @@ describe('add prepackaged rules schema', () => {
       risk_score: -1,
     };
 
-    const schema = isRuleRegistryEnabled ? racAddPrepackagedRulesSchema : addPrepackagedRulesSchema;
-    const decoded = schema.decode(payload);
+    const decoded = addPrepackagedRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual(['Invalid value "-1" supplied to "risk_score"']);
@@ -1325,8 +1247,7 @@ describe('add prepackaged rules schema', () => {
       risk_score: 0,
     };
 
-    const schema = isRuleRegistryEnabled ? racAddPrepackagedRulesSchema : addPrepackagedRulesSchema;
-    const decoded = schema.decode(payload);
+    const decoded = addPrepackagedRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
@@ -1346,8 +1267,7 @@ describe('add prepackaged rules schema', () => {
       risk_score: 100,
     };
 
-    const schema = isRuleRegistryEnabled ? racAddPrepackagedRulesSchema : addPrepackagedRulesSchema;
-    const decoded = schema.decode(payload);
+    const decoded = addPrepackagedRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
@@ -1369,8 +1289,7 @@ describe('add prepackaged rules schema', () => {
       },
     };
 
-    const schema = isRuleRegistryEnabled ? racAddPrepackagedRulesSchema : addPrepackagedRulesSchema;
-    const decoded = schema.decode(payload);
+    const decoded = addPrepackagedRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
@@ -1392,8 +1311,7 @@ describe('add prepackaged rules schema', () => {
       meta: 'should not work',
     };
 
-    const schema = isRuleRegistryEnabled ? racAddPrepackagedRulesSchema : addPrepackagedRulesSchema;
-    const decoded = schema.decode(payload);
+    const decoded = addPrepackagedRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
@@ -1412,8 +1330,7 @@ describe('add prepackaged rules schema', () => {
       filters: [],
     };
 
-    const schema = isRuleRegistryEnabled ? racAddPrepackagedRulesSchema : addPrepackagedRulesSchema;
-    const decoded = schema.decode(payload);
+    const decoded = addPrepackagedRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
@@ -1438,8 +1355,7 @@ describe('add prepackaged rules schema', () => {
       timeline_title: 'timeline-title',
     };
 
-    const schema = isRuleRegistryEnabled ? racAddPrepackagedRulesSchema : addPrepackagedRulesSchema;
-    const decoded = schema.decode(payload);
+    const decoded = addPrepackagedRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
@@ -1462,8 +1378,7 @@ describe('add prepackaged rules schema', () => {
       ...noFrom,
     };
 
-    const schema = isRuleRegistryEnabled ? racAddPrepackagedRulesSchema : addPrepackagedRulesSchema;
-    const decoded = schema.decode(payload);
+    const decoded = addPrepackagedRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
@@ -1489,8 +1404,7 @@ describe('add prepackaged rules schema', () => {
       ...noTo,
     };
 
-    const schema = isRuleRegistryEnabled ? racAddPrepackagedRulesSchema : addPrepackagedRulesSchema;
-    const decoded = schema.decode(payload);
+    const decoded = addPrepackagedRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
@@ -1516,10 +1430,7 @@ describe('add prepackaged rules schema', () => {
         severity: 'junk',
       };
 
-      const schema = isRuleRegistryEnabled
-        ? racAddPrepackagedRulesSchema
-        : addPrepackagedRulesSchema;
-      const decoded = schema.decode(payload);
+      const decoded = addPrepackagedRulesSchema.decode(payload);
       const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
       expect(getPaths(left(message.errors))).toEqual([
@@ -1540,8 +1451,7 @@ describe('add prepackaged rules schema', () => {
       ...noActions,
     };
 
-    const schema = isRuleRegistryEnabled ? racAddPrepackagedRulesSchema : addPrepackagedRulesSchema;
-    const decoded = schema.decode(payload);
+    const decoded = addPrepackagedRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
@@ -1568,10 +1478,7 @@ describe('add prepackaged rules schema', () => {
         actions: [{ id: 'id', action_type_id: 'action_type_id', params: {} }],
       };
 
-      const schema = isRuleRegistryEnabled
-        ? racAddPrepackagedRulesSchema
-        : addPrepackagedRulesSchema;
-      const decoded = schema.decode(payload);
+      const decoded = addPrepackagedRulesSchema.decode(payload);
       const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
       expect(getPaths(left(message.errors))).toEqual([
@@ -1592,10 +1499,7 @@ describe('add prepackaged rules schema', () => {
         actions: [{ group: 'group', action_type_id: 'action_type_id', params: {} }],
       };
 
-      const schema = isRuleRegistryEnabled
-        ? racAddPrepackagedRulesSchema
-        : addPrepackagedRulesSchema;
-      const decoded = schema.decode(payload);
+      const decoded = addPrepackagedRulesSchema.decode(payload);
       const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
       expect(getPaths(left(message.errors))).toEqual([
@@ -1616,10 +1520,7 @@ describe('add prepackaged rules schema', () => {
         actions: [{ group: 'group', id: 'id', params: {} }],
       };
 
-      const schema = isRuleRegistryEnabled
-        ? racAddPrepackagedRulesSchema
-        : addPrepackagedRulesSchema;
-      const decoded = schema.decode(payload);
+      const decoded = addPrepackagedRulesSchema.decode(payload);
       const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
       expect(getPaths(left(message.errors))).toEqual([
@@ -1640,10 +1541,7 @@ describe('add prepackaged rules schema', () => {
         actions: [{ group: 'group', id: 'id', action_type_id: 'action_type_id' }],
       };
 
-      const schema = isRuleRegistryEnabled
-        ? racAddPrepackagedRulesSchema
-        : addPrepackagedRulesSchema;
-      const decoded = schema.decode(payload);
+      const decoded = addPrepackagedRulesSchema.decode(payload);
       const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
       expect(getPaths(left(message.errors))).toEqual([
@@ -1671,10 +1569,7 @@ describe('add prepackaged rules schema', () => {
         ],
       };
 
-      const schema = isRuleRegistryEnabled
-        ? racAddPrepackagedRulesSchema
-        : addPrepackagedRulesSchema;
-      const decoded = schema.decode(payload);
+      const decoded = addPrepackagedRulesSchema.decode(payload);
       const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
       expect(getPaths(left(message.errors))).toEqual([
@@ -1695,8 +1590,7 @@ describe('add prepackaged rules schema', () => {
       ...noThrottle,
     };
 
-    const schema = isRuleRegistryEnabled ? racAddPrepackagedRulesSchema : addPrepackagedRulesSchema;
-    const decoded = schema.decode(payload);
+    const decoded = addPrepackagedRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
@@ -1722,10 +1616,7 @@ describe('add prepackaged rules schema', () => {
         note: '# documentation markdown here',
       };
 
-      const schema = isRuleRegistryEnabled
-        ? racAddPrepackagedRulesSchema
-        : addPrepackagedRulesSchema;
-      const decoded = schema.decode(payload);
+      const decoded = addPrepackagedRulesSchema.decode(payload);
       const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
       expect(getPaths(left(message.errors))).toEqual([]);
@@ -1745,10 +1636,7 @@ describe('add prepackaged rules schema', () => {
         note: '',
       };
 
-      const schema = isRuleRegistryEnabled
-        ? racAddPrepackagedRulesSchema
-        : addPrepackagedRulesSchema;
-      const decoded = schema.decode(payload);
+      const decoded = addPrepackagedRulesSchema.decode(payload);
       const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
       expect(getPaths(left(message.errors))).toEqual([]);
@@ -1770,10 +1658,7 @@ describe('add prepackaged rules schema', () => {
         },
       };
 
-      const schema = isRuleRegistryEnabled
-        ? racAddPrepackagedRulesSchema
-        : addPrepackagedRulesSchema;
-      const decoded = schema.decode(payload);
+      const decoded = addPrepackagedRulesSchema.decode(payload);
       const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
       expect(getPaths(left(message.errors))).toEqual([
@@ -1804,10 +1689,7 @@ describe('add prepackaged rules schema', () => {
           ...(isRuleRegistryEnabled ? { namespace: 'default' } : {}),
         };
 
-        const schema = isRuleRegistryEnabled
-          ? racAddPrepackagedRulesSchema
-          : addPrepackagedRulesSchema;
-        const decoded = schema.decode(payload);
+        const decoded = addPrepackagedRulesSchema.decode(payload);
         const checked = exactCheck(payload, decoded);
         const message = pipe(checked, foldLeftRight);
         expect(getPaths(left(message.errors))).toEqual([]);
@@ -1868,10 +1750,7 @@ describe('add prepackaged rules schema', () => {
           ...(isRuleRegistryEnabled ? { namespace: 'default' } : {}),
         };
 
-        const schema = isRuleRegistryEnabled
-          ? racAddPrepackagedRulesSchema
-          : addPrepackagedRulesSchema;
-        const decoded = schema.decode(payload);
+        const decoded = addPrepackagedRulesSchema.decode(payload);
         const checked = exactCheck(payload, decoded);
         const message = pipe(checked, foldLeftRight);
         expect(getPaths(left(message.errors))).toEqual([]);
@@ -1944,10 +1823,7 @@ describe('add prepackaged rules schema', () => {
           ...(isRuleRegistryEnabled ? { namespace: 'default' } : {}),
         };
 
-        const schema = isRuleRegistryEnabled
-          ? racAddPrepackagedRulesSchema
-          : addPrepackagedRulesSchema;
-        const decoded = schema.decode(payload);
+        const decoded = addPrepackagedRulesSchema.decode(payload);
         const checked = exactCheck(payload, decoded);
         const message = pipe(checked, foldLeftRight);
         expect(getPaths(left(message.errors))).toEqual([]);
@@ -2009,10 +1885,7 @@ describe('add prepackaged rules schema', () => {
           ...(isRuleRegistryEnabled ? { namespace: 'default' } : {}),
         };
 
-        const schema = isRuleRegistryEnabled
-          ? racAddPrepackagedRulesSchema
-          : addPrepackagedRulesSchema;
-        const decoded = schema.decode(payload);
+        const decoded = addPrepackagedRulesSchema.decode(payload);
         const checked = exactCheck(payload, decoded);
         const message = pipe(checked, foldLeftRight);
         expect(getPaths(left(message.errors))).toEqual([
@@ -2047,10 +1920,7 @@ describe('add prepackaged rules schema', () => {
           ...(isRuleRegistryEnabled ? { namespace: 'default' } : {}),
         };
 
-        const schema = isRuleRegistryEnabled
-          ? racAddPrepackagedRulesSchema
-          : addPrepackagedRulesSchema;
-        const decoded = schema.decode(payload);
+        const decoded = addPrepackagedRulesSchema.decode(payload);
         const checked = exactCheck(payload, decoded);
         const message = pipe(checked, foldLeftRight);
         expect(getPaths(left(message.errors))).toEqual([]);
@@ -2095,10 +1965,7 @@ describe('add prepackaged rules schema', () => {
       'You can set a threat query, index, mapping, filters on a pre-packaged rule - %s',
       (_, isRuleRegistryEnabled) => {
         const payload = getAddPrepackagedThreatMatchRulesSchemaMock(isRuleRegistryEnabled);
-        const schema = isRuleRegistryEnabled
-          ? racAddPrepackagedRulesSchema
-          : addPrepackagedRulesSchema;
-        const decoded = schema.decode(payload);
+        const decoded = addPrepackagedRulesSchema.decode(payload);
         const checked = exactCheck(payload, decoded);
         const message = pipe(checked, foldLeftRight);
         const expected = getAddPrepackagedThreatMatchRulesSchemaDecodedMock(isRuleRegistryEnabled);
