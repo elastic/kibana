@@ -9,6 +9,7 @@ import {
   getEmptyFindResult,
   addPrepackagedRulesRequest,
   getFindResultWithSingleHit,
+  getAlertMock,
 } from '../__mocks__/request_responses';
 import { requestContextMock, serverMock, createMockConfig, mockGetCurrentUser } from '../__mocks__';
 import { AddPrepackagedRulesSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/add_prepackaged_rules_schema';
@@ -21,6 +22,7 @@ import { ExceptionListClient } from '../../../../../../lists/server';
 import { installPrepackagedTimelines } from '../../../timeline/routes/prepackaged_timelines/install_prepackaged_timelines';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
+import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
 
 jest.mock('../../rules/get_prepackaged_rules', () => {
   return {
@@ -90,6 +92,7 @@ describe('add_prepackaged_rules_route', () => {
     mockExceptionsClient = listMock.getExceptionListClient();
 
     clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
+    clients.rulesClient.update.mockResolvedValue(getAlertMock(getQueryRuleParams()));
 
     (installPrepackagedTimelines as jest.Mock).mockReset();
     (installPrepackagedTimelines as jest.Mock).mockResolvedValue({

@@ -7,7 +7,6 @@
 
 import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { defaults } from 'lodash/fp';
-import { NOTIFICATION_THROTTLE_NO_ACTIONS } from '../../../../common/constants';
 import { PartialAlert } from '../../../../../alerting/server';
 import { transformRuleToAlertAction } from '../../../../common/detection_engine/transform_actions';
 import {
@@ -22,6 +21,7 @@ import {
   calculateInterval,
   calculateName,
   calculateVersion,
+  maybeMute,
   removeUndefined,
   transformToAlertThrottle,
   transformToNotifyWhen,
@@ -34,8 +34,6 @@ class PatchError extends Error {
     this.statusCode = statusCode;
   }
 }
-
-/* eslint complexity: ["error", 21]*/
 
 export const patchRules = async ({
   rulesClient,
@@ -210,15 +208,8 @@ export const patchRules = async ({
     data: validated,
   });
 
-  // mutes or un-mutes the rule actions depending on the throttle
-  if (rule.muteAll && throttle !== undefined && throttle !== NOTIFICATION_THROTTLE_NO_ACTIONS) {
-    await rulesClient.unmuteAll({ id: update.id });
-  } else if (
-    !rule.muteAll &&
-    throttle !== undefined &&
-    throttle === NOTIFICATION_THROTTLE_NO_ACTIONS
-  ) {
-    await rulesClient.muteAll({ id: update.id });
+  if (throttle !== undefined) {
+    await maybeMute({ rulesClient, muteAll: rule.muteAll, throttle, id: update.id });
   }
 
   if (rule.enabled && enabled === false) {

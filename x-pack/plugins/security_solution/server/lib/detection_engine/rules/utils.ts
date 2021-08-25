@@ -59,6 +59,7 @@ import {
   NOTIFICATION_THROTTLE_NO_ACTIONS,
   NOTIFICATION_THROTTLE_RULE,
 } from '../../../../common/constants';
+import { RulesClient } from '../../../../../alerting/server';
 
 export const calculateInterval = (
   interval: string | undefined,
@@ -226,5 +227,32 @@ export const transformFromAlertThrottle = (rule: SanitizedAlert<RuleParams>): st
     return NOTIFICATION_THROTTLE_NO_ACTIONS;
   } else {
     return rule.throttle;
+  }
+};
+
+/**
+ * Mutes, unmutes, or does nothing to the alert if no changed is detected
+ * @param id The id of the alert to (un)mute
+ * @param rulesClient the rules client
+ * @param muteAll If the existing alert has all actions muted
+ * @param throttle If the existing alert has a throttle set
+ */
+export const maybeMute = async ({
+  id,
+  rulesClient,
+  muteAll,
+  throttle,
+}: {
+  id: SanitizedAlert['id'];
+  rulesClient: RulesClient;
+  muteAll: SanitizedAlert<RuleParams>['muteAll'];
+  throttle: string | null | undefined;
+}): Promise<void> => {
+  if (muteAll && throttle !== NOTIFICATION_THROTTLE_NO_ACTIONS) {
+    await rulesClient.unmuteAll({ id });
+  } else if (!muteAll && throttle === NOTIFICATION_THROTTLE_NO_ACTIONS) {
+    await rulesClient.muteAll({ id });
+  } else {
+    // Do nothing, no-operation
   }
 };

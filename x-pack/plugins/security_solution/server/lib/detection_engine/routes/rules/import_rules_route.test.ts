@@ -45,7 +45,7 @@ describe('import_rules_route', () => {
     ml = mlServicesMock.createSetupContract();
 
     clients.rulesClient.find.mockResolvedValue(getEmptyFindResult()); // no extant rules
-
+    clients.rulesClient.update.mockResolvedValue(getAlertMock(getQueryRuleParams()));
     context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue(
       elasticsearchClientMock.createSuccessTransportRequestPromise({ _shards: { total: 1 } })
     );
