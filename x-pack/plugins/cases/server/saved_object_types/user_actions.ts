@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectsType } from 'src/core/server';
+import { SavedObject, SavedObjectsType } from 'src/core/server';
 import { CASE_USER_ACTION_SAVED_OBJECT } from '../../common';
 import { userActionsMigrations } from './migrations';
 
@@ -49,4 +49,8 @@ export const caseUserActionSavedObjectType: SavedObjectsType = {
     },
   },
   migrations: userActionsMigrations,
+  management: {
+    importableAndExportable: true,
+    isExportable: (_: SavedObject<unknown>) => false,
+  },
 };
