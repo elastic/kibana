@@ -177,7 +177,7 @@ describe('Constants: Messages parseMessages()', () => {
         id: 'datafeed_preview_failed',
         status: 'error',
         text:
-          'The datafeed preview failed. This may be due to an error in the job or datafeed configs.',
+          'The datafeed preview failed. This may be due to an error in the job or datafeed configurations.',
       },
     ]);
   });
