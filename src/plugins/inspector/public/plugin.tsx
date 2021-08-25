@@ -95,7 +95,11 @@ export class InspectorPublicPlugin implements Plugin<Setup, Start> {
             adapters={adapters}
             title={options.title}
             options={options.options}
-            dependencies={{ uiSettings: core.uiSettings }}
+            dependencies={{
+              application: core.application,
+              http: core.http,
+              uiSettings: core.uiSettings,
+            }}
           />
         ),
         {
