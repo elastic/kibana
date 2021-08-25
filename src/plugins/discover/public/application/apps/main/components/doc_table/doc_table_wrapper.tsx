@@ -17,10 +17,11 @@ import {
   SHOW_MULTIFIELDS,
   SORT_DEFAULT_ORDER_SETTING,
 } from '../../../../../../common';
-import { getServices, IndexPattern } from '../../../../../kibana_services';
+import { getServices, IndexPattern, IndexPatternField } from '../../../../../kibana_services';
 import { SortOrder } from './components/table_header/helpers';
 import { DocTableRow, TableRow } from './components/table_row';
 import { DocViewFilterFn } from '../../../../doc_views/doc_views_types';
+import { getFieldsToShow } from '../../../../helpers/get_fields_to_show';
 
 export interface DocTableProps {
   /**
@@ -152,6 +153,16 @@ export const DocTableWrapper = ({
     bottomMarker!.blur();
   }, [setMinimumVisibleRows, rows]);
 
+  const fieldsToShow = useMemo(
+    () =>
+      getFieldsToShow(
+        indexPattern.fields.map((field: IndexPatternField) => field.name),
+        indexPattern,
+        showMultiFields
+      ),
+    [indexPattern, showMultiFields]
+  );
+
   const renderHeader = useCallback(
     () => (
       <TableHeader
@@ -196,7 +207,7 @@ export const DocTableWrapper = ({
           onRemoveColumn={onRemoveColumn}
           filterManager={filterManager}
           addBasePath={addBasePath}
-          showMultiFields={showMultiFields}
+          fieldsToShow={fieldsToShow}
         />
       ));
     },
@@ -210,7 +221,7 @@ export const DocTableWrapper = ({
       onRemoveColumn,
       filterManager,
       addBasePath,
-      showMultiFields,
+      fieldsToShow,
     ]
   );
 
