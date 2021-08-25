@@ -200,7 +200,7 @@ const AddressLinksItemComponent: React.FC<AddressLinksItemProps> = ({
   );
 
   // The below is explicitly defined this way as the onClick takes precedence when it and the href are both defined
-  // When this component is used outside of timeline (i.e. in the flyout) we would still like it to link to the IP Overview page
+  // When this component is used outside of timeline/alerts table (i.e. in the flyout) we would still like it to link to the IP Overview page
   const content = useMemo(
     () => (
       <Content field={fieldName} tooltipContent={fieldName}>
