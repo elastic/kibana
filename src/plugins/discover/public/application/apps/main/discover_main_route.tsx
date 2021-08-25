@@ -125,7 +125,7 @@ export function DiscoverMainRoute({ services, history }: DiscoverMainProps) {
 
   useEffect(() => {
     chrome.setBreadcrumbs(
-      savedSearch ? getSavedSearchBreadcrumbs(savedSearch.title) : getRootBreadcrumbs()
+      savedSearch && savedSearch.title ? getSavedSearchBreadcrumbs(savedSearch.title) : getRootBreadcrumbs()
     );
   }, [chrome, savedSearch]);
 
