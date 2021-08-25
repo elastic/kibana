@@ -10,14 +10,23 @@ import { FAILED_TRANSACTIONS_IMPACT_THRESHOLD } from '../../../../../common/sear
 
 export function getFailedTransactionsCorrelationImpactLabel(
   pValue: number
-): FailureCorrelationImpactThreshold | null {
+): { impact: FailureCorrelationImpactThreshold; color: string } | null {
   // The lower the p value, the higher the impact
   if (pValue >= 0 && pValue < 1e-6)
-    return FAILED_TRANSACTIONS_IMPACT_THRESHOLD.HIGH;
+    return {
+      impact: FAILED_TRANSACTIONS_IMPACT_THRESHOLD.HIGH,
+      color: 'danger',
+    };
   if (pValue >= 1e-6 && pValue < 0.001)
-    return FAILED_TRANSACTIONS_IMPACT_THRESHOLD.MEDIUM;
+    return {
+      impact: FAILED_TRANSACTIONS_IMPACT_THRESHOLD.MEDIUM,
+      color: 'warning',
+    };
   if (pValue >= 0.001 && pValue < 0.02)
-    return FAILED_TRANSACTIONS_IMPACT_THRESHOLD.LOW;
+    return {
+      impact: FAILED_TRANSACTIONS_IMPACT_THRESHOLD.LOW,
+      color: 'default',
+    };
 
   return null;
 }

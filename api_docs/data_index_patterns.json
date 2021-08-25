@@ -301,204 +301,6 @@
           }
         ],
         "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
-        "id": "def-server.IndexPatternsServiceProvider",
-        "type": "Class",
-        "tags": [],
-        "label": "IndexPatternsServiceProvider",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "data",
-            "scope": "server",
-            "docId": "kibDataIndexPatternsPluginApi",
-            "section": "def-server.IndexPatternsServiceProvider",
-            "text": "IndexPatternsServiceProvider"
-          },
-          " implements ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCorePluginApi",
-            "section": "def-server.Plugin",
-            "text": "Plugin"
-          },
-          "<void, ",
-          "IndexPatternsServiceStart",
-          ", object, object>"
-        ],
-        "path": "src/plugins/data/server/index_patterns/index_patterns_service.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "data",
-            "id": "def-server.IndexPatternsServiceProvider.setup",
-            "type": "Function",
-            "tags": [],
-            "label": "setup",
-            "description": [],
-            "signature": [
-              "(core: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.CoreSetup",
-                "text": "CoreSetup"
-              },
-              "<",
-              "IndexPatternsServiceStartDeps",
-              ", ",
-              {
-                "pluginId": "data",
-                "scope": "server",
-                "docId": "kibDataPluginApi",
-                "section": "def-server.DataPluginStart",
-                "text": "DataPluginStart"
-              },
-              ">, { expressions, usageCollection }: ",
-              "IndexPatternsServiceSetupDeps",
-              ") => void"
-            ],
-            "path": "src/plugins/data/server/index_patterns/index_patterns_service.ts",
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "data",
-                "id": "def-server.IndexPatternsServiceProvider.setup.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "core",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-server.CoreSetup",
-                    "text": "CoreSetup"
-                  },
-                  "<",
-                  "IndexPatternsServiceStartDeps",
-                  ", ",
-                  {
-                    "pluginId": "data",
-                    "scope": "server",
-                    "docId": "kibDataPluginApi",
-                    "section": "def-server.DataPluginStart",
-                    "text": "DataPluginStart"
-                  },
-                  ">"
-                ],
-                "path": "src/plugins/data/server/index_patterns/index_patterns_service.ts",
-                "deprecated": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "data",
-                "id": "def-server.IndexPatternsServiceProvider.setup.$2",
-                "type": "Object",
-                "tags": [],
-                "label": "{ expressions, usageCollection }",
-                "description": [],
-                "signature": [
-                  "IndexPatternsServiceSetupDeps"
-                ],
-                "path": "src/plugins/data/server/index_patterns/index_patterns_service.ts",
-                "deprecated": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-server.IndexPatternsServiceProvider.start",
-            "type": "Function",
-            "tags": [],
-            "label": "start",
-            "description": [],
-            "signature": [
-              "(core: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.CoreStart",
-                "text": "CoreStart"
-              },
-              ", { fieldFormats, logger }: ",
-              "IndexPatternsServiceStartDeps",
-              ") => { indexPatternsServiceFactory: (savedObjectsClient: Pick<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsClient",
-                "text": "SavedObjectsClient"
-              },
-              ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">, elasticsearchClient: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.ElasticsearchClient",
-                "text": "ElasticsearchClient"
-              },
-              ") => Promise<",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataIndexPatternsPluginApi",
-                "section": "def-common.IndexPatternsService",
-                "text": "IndexPatternsService"
-              },
-              ">; }"
-            ],
-            "path": "src/plugins/data/server/index_patterns/index_patterns_service.ts",
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "data",
-                "id": "def-server.IndexPatternsServiceProvider.start.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "core",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-server.CoreStart",
-                    "text": "CoreStart"
-                  }
-                ],
-                "path": "src/plugins/data/server/index_patterns/index_patterns_service.ts",
-                "deprecated": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "data",
-                "id": "def-server.IndexPatternsServiceProvider.start.$2",
-                "type": "Object",
-                "tags": [],
-                "label": "{ fieldFormats, logger }",
-                "description": [],
-                "signature": [
-                  "IndexPatternsServiceStartDeps"
-                ],
-                "path": "src/plugins/data/server/index_patterns/index_patterns_service.ts",
-                "deprecated": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          }
-        ],
-        "initialIsOpen": false
       }
     ],
     "functions": [
@@ -526,115 +328,6 @@
               "Record<string, { rollup_jobs: any; }>"
             ],
             "path": "src/plugins/data/server/index_patterns/fetcher/lib/map_capabilities.ts",
-            "deprecated": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
-        "id": "def-server.mergeCapabilitiesWithFields",
-        "type": "Function",
-        "tags": [],
-        "label": "mergeCapabilitiesWithFields",
-        "description": [],
-        "signature": [
-          "(rollupIndexCapabilities: { [key: string]: any; }, fieldsFromFieldCapsApi: Record<string, ",
-          {
-            "pluginId": "data",
-            "scope": "server",
-            "docId": "kibDataIndexPatternsPluginApi",
-            "section": "def-server.FieldDescriptor",
-            "text": "FieldDescriptor"
-          },
-          ">, previousFields?: ",
-          {
-            "pluginId": "data",
-            "scope": "server",
-            "docId": "kibDataIndexPatternsPluginApi",
-            "section": "def-server.FieldDescriptor",
-            "text": "FieldDescriptor"
-          },
-          "[]) => ",
-          {
-            "pluginId": "data",
-            "scope": "server",
-            "docId": "kibDataIndexPatternsPluginApi",
-            "section": "def-server.FieldDescriptor",
-            "text": "FieldDescriptor"
-          },
-          "[]"
-        ],
-        "path": "src/plugins/data/server/index_patterns/fetcher/lib/merge_capabilities_with_fields.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "data",
-            "id": "def-server.mergeCapabilitiesWithFields.$1.rollupIndexCapabilities",
-            "type": "Object",
-            "tags": [],
-            "label": "rollupIndexCapabilities",
-            "description": [],
-            "path": "src/plugins/data/server/index_patterns/fetcher/lib/merge_capabilities_with_fields.ts",
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "data",
-                "id": "def-server.mergeCapabilitiesWithFields.$1.rollupIndexCapabilities.Unnamed",
-                "type": "Any",
-                "tags": [],
-                "label": "Unnamed",
-                "description": [],
-                "signature": [
-                  "any"
-                ],
-                "path": "src/plugins/data/server/index_patterns/fetcher/lib/merge_capabilities_with_fields.ts",
-                "deprecated": false
-              }
-            ]
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-server.mergeCapabilitiesWithFields.$2",
-            "type": "Object",
-            "tags": [],
-            "label": "fieldsFromFieldCapsApi",
-            "description": [],
-            "signature": [
-              "Record<string, ",
-              {
-                "pluginId": "data",
-                "scope": "server",
-                "docId": "kibDataIndexPatternsPluginApi",
-                "section": "def-server.FieldDescriptor",
-                "text": "FieldDescriptor"
-              },
-              ">"
-            ],
-            "path": "src/plugins/data/server/index_patterns/fetcher/lib/merge_capabilities_with_fields.ts",
-            "deprecated": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-server.mergeCapabilitiesWithFields.$3",
-            "type": "Array",
-            "tags": [],
-            "label": "previousFields",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "data",
-                "scope": "server",
-                "docId": "kibDataIndexPatternsPluginApi",
-                "section": "def-server.FieldDescriptor",
-                "text": "FieldDescriptor"
-              },
-              "[]"
-            ],
-            "path": "src/plugins/data/server/index_patterns/fetcher/lib/merge_capabilities_with_fields.ts",
             "deprecated": false,
             "isRequired": true
           }
@@ -689,95 +382,6 @@
       }
     ],
     "interfaces": [
-      {
-        "parentPluginId": "data",
-        "id": "def-server.FieldDescriptor",
-        "type": "Interface",
-        "tags": [],
-        "label": "FieldDescriptor",
-        "description": [],
-        "path": "src/plugins/data/server/index_patterns/fetcher/index_patterns_fetcher.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "data",
-            "id": "def-server.FieldDescriptor.aggregatable",
-            "type": "boolean",
-            "tags": [],
-            "label": "aggregatable",
-            "description": [],
-            "path": "src/plugins/data/server/index_patterns/fetcher/index_patterns_fetcher.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-server.FieldDescriptor.name",
-            "type": "string",
-            "tags": [],
-            "label": "name",
-            "description": [],
-            "path": "src/plugins/data/server/index_patterns/fetcher/index_patterns_fetcher.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-server.FieldDescriptor.readFromDocValues",
-            "type": "boolean",
-            "tags": [],
-            "label": "readFromDocValues",
-            "description": [],
-            "path": "src/plugins/data/server/index_patterns/fetcher/index_patterns_fetcher.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-server.FieldDescriptor.searchable",
-            "type": "boolean",
-            "tags": [],
-            "label": "searchable",
-            "description": [],
-            "path": "src/plugins/data/server/index_patterns/fetcher/index_patterns_fetcher.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-server.FieldDescriptor.type",
-            "type": "string",
-            "tags": [],
-            "label": "type",
-            "description": [],
-            "path": "src/plugins/data/server/index_patterns/fetcher/index_patterns_fetcher.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-server.FieldDescriptor.esTypes",
-            "type": "Array",
-            "tags": [],
-            "label": "esTypes",
-            "description": [],
-            "signature": [
-              "string[]"
-            ],
-            "path": "src/plugins/data/server/index_patterns/fetcher/index_patterns_fetcher.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-server.FieldDescriptor.subType",
-            "type": "Object",
-            "tags": [],
-            "label": "subType",
-            "description": [],
-            "signature": [
-              "FieldSubType | undefined"
-            ],
-            "path": "src/plugins/data/server/index_patterns/fetcher/index_patterns_fetcher.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
       {
         "parentPluginId": "data",
         "id": "def-server.FieldDescriptor",
@@ -1067,6 +671,7 @@
             ],
             "path": "src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts",
             "deprecated": true,
+            "removeBy": "8.1",
             "references": []
           },
           {
@@ -1434,6 +1039,7 @@
             ],
             "path": "src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts",
             "deprecated": true,
+            "removeBy": "8.1",
             "references": [],
             "children": [
               {
@@ -1501,7 +1107,17 @@
             ],
             "path": "src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts",
             "deprecated": true,
-            "references": [],
+            "removeBy": "8.1",
+            "references": [
+              {
+                "plugin": "indexPatternManagement",
+                "path": "src/plugins/index_pattern_management/public/components/edit_index_pattern/scripted_fields_table/scripted_fields_table.tsx"
+              },
+              {
+                "plugin": "indexPatternManagement",
+                "path": "src/plugins/index_pattern_management/public/components/field_editor/field_editor.tsx"
+              }
+            ],
             "children": [
               {
                 "parentPluginId": "data",
@@ -1544,6 +1160,7 @@
             ],
             "path": "src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts",
             "deprecated": true,
+            "removeBy": "8.1",
             "references": [
               {
                 "plugin": "visTypeTimeseries",
@@ -1564,6 +1181,26 @@
               {
                 "plugin": "graph",
                 "path": "x-pack/plugins/graph/public/services/persistence/deserialize.test.ts"
+              },
+              {
+                "plugin": "indexPatternManagement",
+                "path": "src/plugins/index_pattern_management/public/components/edit_index_pattern/source_filters_table/components/table/table.tsx"
+              },
+              {
+                "plugin": "indexPatternManagement",
+                "path": "src/plugins/index_pattern_management/public/components/edit_index_pattern/edit_index_pattern.tsx"
+              },
+              {
+                "plugin": "indexPatternManagement",
+                "path": "src/plugins/index_pattern_management/public/components/edit_index_pattern/edit_index_pattern.tsx"
+              },
+              {
+                "plugin": "indexPatternManagement",
+                "path": "src/plugins/index_pattern_management/public/components/edit_index_pattern/edit_index_pattern.tsx"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/plugins/vis_type_timeseries/public/application/lib/fetch_fields.ts"
               }
             ],
             "children": [],
@@ -1593,7 +1230,13 @@
             ],
             "path": "src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts",
             "deprecated": true,
-            "references": [],
+            "removeBy": "8.1",
+            "references": [
+              {
+                "plugin": "indexPatternManagement",
+                "path": "src/plugins/index_pattern_management/public/components/edit_index_pattern/scripted_fields_table/scripted_fields_table.tsx"
+              }
+            ],
             "children": [],
             "returnComment": []
           },
@@ -1763,9 +1406,9 @@
               },
               ") => ",
               {
-                "pluginId": "data",
+                "pluginId": "fieldFormats",
                 "scope": "common",
-                "docId": "kibDataFieldFormatsPluginApi",
+                "docId": "kibFieldFormatsPluginApi",
                 "section": "def-common.FieldFormat",
                 "text": "FieldFormat"
               }
@@ -2042,9 +1685,9 @@
             "signature": [
               "(fieldname: string) => ",
               {
-                "pluginId": "data",
+                "pluginId": "fieldFormats",
                 "scope": "common",
-                "docId": "kibDataFieldFormatsPluginApi",
+                "docId": "kibFieldFormatsPluginApi",
                 "section": "def-common.FieldFormat",
                 "text": "FieldFormat"
               },
@@ -2785,9 +2428,9 @@
               },
               ") => ",
               {
-                "pluginId": "data",
+                "pluginId": "fieldFormats",
                 "scope": "common",
-                "docId": "kibDataFieldFormatsPluginApi",
+                "docId": "kibFieldFormatsPluginApi",
                 "section": "def-common.FieldFormat",
                 "text": "FieldFormat"
               },
@@ -2847,9 +2490,9 @@
                       },
                       ") => ",
                       {
-                        "pluginId": "data",
+                        "pluginId": "fieldFormats",
                         "scope": "common",
-                        "docId": "kibDataFieldFormatsPluginApi",
+                        "docId": "kibFieldFormatsPluginApi",
                         "section": "def-common.FieldFormat",
                         "text": "FieldFormat"
                       },
@@ -3055,7 +2698,15 @@
               "\nGet list of index pattern ids with titles"
             ],
             "signature": [
-              "(refresh?: boolean) => Promise<{ id: string; title: string; }[]>"
+              "(refresh?: boolean) => Promise<",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataIndexPatternsPluginApi",
+                "section": "def-common.IndexPatternListItem",
+                "text": "IndexPatternListItem"
+              },
+              "[]>"
             ],
             "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
             "deprecated": false,
@@ -3123,9 +2774,15 @@
             "signature": [
               "() => Promise<",
               "SavedObject",
-              "<",
-              "IndexPatternSavedObjectAttrs",
-              ">[] | null | undefined>"
+              "<Pick<",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataIndexPatternsPluginApi",
+                "section": "def-common.IndexPatternAttributes",
+                "text": "IndexPatternAttributes"
+              },
+              ", \"type\" | \"title\" | \"typeMeta\">>[] | null | undefined>"
             ],
             "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
             "deprecated": false,
@@ -3218,6 +2875,23 @@
                 "isRequired": true
               }
             ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.IndexPatternsService.hasUserIndexPattern",
+            "type": "Function",
+            "tags": [],
+            "label": "hasUserIndexPattern",
+            "description": [
+              "\nChecks if current user has a user created index pattern ignoring fleet's server default index patterns"
+            ],
+            "signature": [
+              "() => Promise<boolean>"
+            ],
+            "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
+            "deprecated": false,
+            "children": [],
             "returnComment": []
           },
           {
@@ -4019,7 +3693,7 @@
             "section": "def-common.IndexPatternLoadExpressionFunctionDefinition",
             "text": "IndexPatternLoadExpressionFunctionDefinition"
           },
-          ", \"type\" | \"telemetry\" | \"extract\" | \"inject\" | \"migrations\" | \"name\" | \"help\" | \"disabled\" | \"inputTypes\" | \"args\" | \"aliases\" | \"context\">"
+          ", \"type\" | \"telemetry\" | \"extract\" | \"inject\" | \"migrations\" | \"name\" | \"disabled\" | \"help\" | \"inputTypes\" | \"args\" | \"aliases\" | \"context\">"
         ],
         "path": "src/plugins/data/common/index_patterns/expressions/load_index_pattern.ts",
         "deprecated": false,
@@ -4192,9 +3866,7 @@
         "type": "Interface",
         "tags": [],
         "label": "FieldSpec",
-        "description": [
-          "\nSerialized version of IndexPatternField"
-        ],
+        "description": [],
         "signature": [
           {
             "pluginId": "data",
@@ -4735,6 +4407,7 @@
         ],
         "path": "src/plugins/data/common/index_patterns/fields/types.ts",
         "deprecated": true,
+        "removeBy": "8.1",
         "references": [
           {
             "plugin": "fleet",
@@ -4914,6 +4587,14 @@
           },
           {
             "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/connected_components/edit_layer_panel/join_editor/resources/join_expression.tsx"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/connected_components/edit_layer_panel/join_editor/resources/join_expression.tsx"
+          },
+          {
+            "plugin": "maps",
             "path": "x-pack/plugins/maps/public/components/metrics_editor/metric_editor.tsx"
           },
           {
@@ -4931,6 +4612,22 @@
           {
             "plugin": "maps",
             "path": "x-pack/plugins/maps/public/components/metrics_editor/metrics_editor.tsx"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/connected_components/edit_layer_panel/join_editor/resources/metrics_expression.tsx"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/connected_components/edit_layer_panel/join_editor/resources/metrics_expression.tsx"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/connected_components/edit_layer_panel/join_editor/resources/join.tsx"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/connected_components/edit_layer_panel/join_editor/resources/join.tsx"
           },
           {
             "plugin": "maps",
@@ -5353,6 +5050,30 @@
             "path": "x-pack/plugins/infra/target/types/public/pages/metrics/metrics_explorer/components/metrics.d.ts"
           },
           {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/target/types/public/connected_components/edit_layer_panel/join_editor/resources/join.d.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/target/types/public/connected_components/edit_layer_panel/join_editor/resources/join.d.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/target/types/public/connected_components/edit_layer_panel/join_editor/resources/join_expression.d.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/target/types/public/connected_components/edit_layer_panel/join_editor/resources/join_expression.d.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/target/types/public/connected_components/edit_layer_panel/join_editor/resources/metrics_expression.d.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/target/types/public/connected_components/edit_layer_panel/join_editor/resources/metrics_expression.d.ts"
+          },
+          {
             "plugin": "stackAlerts",
             "path": "x-pack/plugins/stack_alerts/target/types/public/alert_types/geo_containment/query_builder/util_components/single_field_select.d.ts"
           },
@@ -5391,6 +5112,22 @@
           {
             "plugin": "infra",
             "path": "x-pack/plugins/infra/target/types/public/pages/metrics/inventory_view/components/waffle/metric_control/index.d.ts"
+          },
+          {
+            "plugin": "indexPatternManagement",
+            "path": "src/plugins/index_pattern_management/public/components/utils.ts"
+          },
+          {
+            "plugin": "indexPatternManagement",
+            "path": "src/plugins/index_pattern_management/public/components/utils.ts"
+          },
+          {
+            "plugin": "indexPatternManagement",
+            "path": "src/plugins/index_pattern_management/target/types/public/components/utils.d.ts"
+          },
+          {
+            "plugin": "indexPatternManagement",
+            "path": "src/plugins/index_pattern_management/target/types/public/components/utils.d.ts"
           },
           {
             "plugin": "lens",
@@ -5443,6 +5180,14 @@
           {
             "plugin": "lens",
             "path": "x-pack/plugins/lens/target/types/public/indexpattern_datasource/types.d.ts"
+          },
+          {
+            "plugin": "visTypeTimeseries",
+            "path": "src/plugins/vis_type_timeseries/server/lib/search_strategies/strategies/abstract_search_strategy.test.ts"
+          },
+          {
+            "plugin": "visTypeTimeseries",
+            "path": "src/plugins/vis_type_timeseries/server/lib/search_strategies/strategies/abstract_search_strategy.test.ts"
           },
           {
             "plugin": "stackAlerts",
@@ -5695,9 +5440,9 @@
               },
               ") => ",
               {
-                "pluginId": "data",
+                "pluginId": "fieldFormats",
                 "scope": "common",
-                "docId": "kibDataFieldFormatsPluginApi",
+                "docId": "kibFieldFormatsPluginApi",
                 "section": "def-common.FieldFormat",
                 "text": "FieldFormat"
               },
@@ -5758,9 +5503,9 @@
                       },
                       ") => ",
                       {
-                        "pluginId": "data",
+                        "pluginId": "fieldFormats",
                         "scope": "common",
-                        "docId": "kibDataFieldFormatsPluginApi",
+                        "docId": "kibFieldFormatsPluginApi",
                         "section": "def-common.FieldFormat",
                         "text": "FieldFormat"
                       },
@@ -5801,38 +5546,6 @@
         "deprecated": true,
         "references": [
           {
-            "plugin": "observability",
-            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts"
-          },
-          {
-            "plugin": "observability",
-            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts"
-          },
-          {
-            "plugin": "observability",
-            "path": "x-pack/plugins/observability/public/pages/alerts/alerts_search_bar.tsx"
-          },
-          {
-            "plugin": "observability",
-            "path": "x-pack/plugins/observability/public/pages/alerts/alerts_search_bar.tsx"
-          },
-          {
-            "plugin": "timelines",
-            "path": "x-pack/plugins/timelines/public/components/utils/keury/index.ts"
-          },
-          {
-            "plugin": "timelines",
-            "path": "x-pack/plugins/timelines/public/components/utils/keury/index.ts"
-          },
-          {
-            "plugin": "timelines",
-            "path": "x-pack/plugins/timelines/public/components/utils/keury/index.ts"
-          },
-          {
-            "plugin": "timelines",
-            "path": "x-pack/plugins/timelines/public/components/utils/keury/index.ts"
-          },
-          {
             "plugin": "timelines",
             "path": "x-pack/plugins/timelines/public/components/t_grid/helpers.tsx"
           },
@@ -6034,22 +5747,6 @@
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/lib/keury/index.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/lib/keury/index.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/lib/keury/index.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/lib/keury/index.ts"
-          },
-          {
-            "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/helpers.tsx"
           },
           {
@@ -6142,6 +5839,10 @@
           },
           {
             "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/management/pages/endpoint_hosts/store/middleware.ts"
+          },
+          {
+            "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/public/common/components/search_bar/index.tsx"
           },
           {
@@ -6219,14 +5920,6 @@
           {
             "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/public/ueba/pages/details/types.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/lib/detection_engine/reference_rules/query.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/lib/detection_engine/reference_rules/query.ts"
           },
           {
             "plugin": "timelines",
@@ -6397,6 +6090,38 @@
             "path": "x-pack/plugins/ml/target/types/public/application/jobs/new_job/common/index_pattern_context.d.ts"
           },
           {
+            "plugin": "indexPatternManagement",
+            "path": "src/plugins/index_pattern_management/public/components/edit_index_pattern/indexed_fields_table/components/table/table.tsx"
+          },
+          {
+            "plugin": "indexPatternManagement",
+            "path": "src/plugins/index_pattern_management/public/components/edit_index_pattern/indexed_fields_table/components/table/table.tsx"
+          },
+          {
+            "plugin": "indexPatternManagement",
+            "path": "src/plugins/index_pattern_management/public/components/edit_index_pattern/scripted_fields_table/components/table/table.tsx"
+          },
+          {
+            "plugin": "indexPatternManagement",
+            "path": "src/plugins/index_pattern_management/public/components/edit_index_pattern/scripted_fields_table/components/table/table.tsx"
+          },
+          {
+            "plugin": "indexPatternManagement",
+            "path": "src/plugins/index_pattern_management/public/components/edit_index_pattern/index_header/index_header.tsx"
+          },
+          {
+            "plugin": "indexPatternManagement",
+            "path": "src/plugins/index_pattern_management/public/components/edit_index_pattern/index_header/index_header.tsx"
+          },
+          {
+            "plugin": "indexPatternManagement",
+            "path": "src/plugins/index_pattern_management/target/types/public/components/edit_index_pattern/index_header/index_header.d.ts"
+          },
+          {
+            "plugin": "indexPatternManagement",
+            "path": "src/plugins/index_pattern_management/target/types/public/components/edit_index_pattern/index_header/index_header.d.ts"
+          },
+          {
             "plugin": "ml",
             "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_management/components/action_clone/clone_action_name.tsx"
           },
@@ -6499,34 +6224,6 @@
           {
             "plugin": "infra",
             "path": "x-pack/plugins/infra/target/types/common/dependency_mocks/index_patterns.d.ts"
-          },
-          {
-            "plugin": "observability",
-            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/utils.ts"
-          },
-          {
-            "plugin": "observability",
-            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/utils.ts"
-          },
-          {
-            "plugin": "observability",
-            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/utils.ts"
-          },
-          {
-            "plugin": "observability",
-            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/utils.ts"
-          },
-          {
-            "plugin": "observability",
-            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/utils.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/jobs/new_job/utils/new_job_utils.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/application/jobs/new_job/utils/new_job_utils.ts"
           },
           {
             "plugin": "ml",
@@ -6772,9 +6469,9 @@
               },
               ") => ",
               {
-                "pluginId": "data",
+                "pluginId": "fieldFormats",
                 "scope": "common",
-                "docId": "kibDataFieldFormatsPluginApi",
+                "docId": "kibFieldFormatsPluginApi",
                 "section": "def-common.FieldFormat",
                 "text": "FieldFormat"
               },
@@ -7178,9 +6875,9 @@
               },
               ") => ",
               {
-                "pluginId": "data",
+                "pluginId": "fieldFormats",
                 "scope": "common",
-                "docId": "kibDataFieldFormatsPluginApi",
+                "docId": "kibFieldFormatsPluginApi",
                 "section": "def-common.FieldFormat",
                 "text": "FieldFormat"
               },
@@ -7241,9 +6938,9 @@
                       },
                       ") => ",
                       {
-                        "pluginId": "data",
+                        "pluginId": "fieldFormats",
                         "scope": "common",
-                        "docId": "kibDataFieldFormatsPluginApi",
+                        "docId": "kibFieldFormatsPluginApi",
                         "section": "def-common.FieldFormat",
                         "text": "FieldFormat"
                       },
@@ -7356,6 +7053,21 @@
                 "isRequired": true
               }
             ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.IIndexPatternsApiClient.hasUserIndexPattern",
+            "type": "Function",
+            "tags": [],
+            "label": "hasUserIndexPattern",
+            "description": [],
+            "signature": [
+              "() => Promise<boolean>"
+            ],
+            "path": "src/plugins/data/common/index_patterns/types.ts",
+            "deprecated": false,
+            "children": [],
             "returnComment": []
           }
         ],
@@ -7549,6 +7261,72 @@
               }
             ],
             "path": "src/plugins/data/common/index_patterns/expressions/load_index_pattern.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.IndexPatternListItem",
+        "type": "Interface",
+        "tags": [],
+        "label": "IndexPatternListItem",
+        "description": [],
+        "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-common.IndexPatternListItem.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.IndexPatternListItem.title",
+            "type": "string",
+            "tags": [],
+            "label": "title",
+            "description": [],
+            "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.IndexPatternListItem.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.IndexPatternListItem.typeMeta",
+            "type": "Object",
+            "tags": [],
+            "label": "typeMeta",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataIndexPatternsPluginApi",
+                "section": "def-common.TypeMeta",
+                "text": "TypeMeta"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
             "deprecated": false
           }
         ],
@@ -7808,7 +7586,7 @@
             "label": "type",
             "description": [],
             "signature": [
-              "\"boolean\" | \"date\" | \"keyword\" | \"long\" | \"double\" | \"ip\""
+              "\"boolean\" | \"date\" | \"keyword\" | \"long\" | \"double\" | \"ip\" | \"geo_point\""
             ],
             "path": "src/plugins/data/common/index_patterns/types.ts",
             "deprecated": false
@@ -8503,7 +8281,7 @@
             "text": "Adapters"
           },
           ", ",
-          "Serializable",
+          "SerializableRecord",
           ">>"
         ],
         "path": "src/plugins/data/common/index_patterns/expressions/load_index_pattern.ts",
@@ -8552,11 +8330,25 @@
           },
           "[]>; ensureDefaultIndexPattern: ",
           "EnsureDefaultIndexPattern",
-          "; getIds: (refresh?: boolean) => Promise<string[]>; getTitles: (refresh?: boolean) => Promise<string[]>; getIdsWithTitle: (refresh?: boolean) => Promise<{ id: string; title: string; }[]>; clearCache: (id?: string | undefined) => void; getCache: () => Promise<",
+          "; getIds: (refresh?: boolean) => Promise<string[]>; getTitles: (refresh?: boolean) => Promise<string[]>; getIdsWithTitle: (refresh?: boolean) => Promise<",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataIndexPatternsPluginApi",
+            "section": "def-common.IndexPatternListItem",
+            "text": "IndexPatternListItem"
+          },
+          "[]>; clearCache: (id?: string | undefined) => void; getCache: () => Promise<",
           "SavedObject",
-          "<",
-          "IndexPatternSavedObjectAttrs",
-          ">[] | null | undefined>; getDefault: () => Promise<",
+          "<Pick<",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataIndexPatternsPluginApi",
+            "section": "def-common.IndexPatternAttributes",
+            "text": "IndexPatternAttributes"
+          },
+          ", \"type\" | \"title\" | \"typeMeta\">>[] | null | undefined>; getDefault: () => Promise<",
           {
             "pluginId": "data",
             "scope": "common",
@@ -8564,7 +8356,7 @@
             "section": "def-common.IndexPattern",
             "text": "IndexPattern"
           },
-          " | null>; getDefaultId: () => Promise<string | null>; setDefault: (id: string | null, force?: boolean) => Promise<void>; getFieldsForWildcard: (options: ",
+          " | null>; getDefaultId: () => Promise<string | null>; setDefault: (id: string | null, force?: boolean) => Promise<void>; hasUserIndexPattern: () => Promise<boolean>; getFieldsForWildcard: (options: ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -8781,7 +8573,7 @@
             "signature": [
               "Pick<",
               "Toast",
-              ", \"children\" | \"onClick\" | \"onChange\" | \"color\" | \"onKeyDown\" | \"defaultChecked\" | \"defaultValue\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"className\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"hidden\" | \"lang\" | \"placeholder\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"security\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onError\" | \"onErrorCapture\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"toastLifeTimeMs\" | \"iconType\" | \"onClose\" | \"data-test-subj\"> & { title?: string | ",
+              ", \"children\" | \"onClick\" | \"onChange\" | \"color\" | \"onKeyDown\" | \"defaultChecked\" | \"defaultValue\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"className\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"hidden\" | \"lang\" | \"placeholder\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"security\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onError\" | \"onErrorCapture\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"data-test-subj\" | \"iconType\" | \"toastLifeTimeMs\" | \"onClose\"> & { title?: string | ",
               {
                 "pluginId": "core",
                 "scope": "public",
@@ -8813,7 +8605,7 @@
         "label": "RuntimeType",
         "description": [],
         "signature": [
-          "\"boolean\" | \"date\" | \"keyword\" | \"long\" | \"double\" | \"ip\""
+          "\"boolean\" | \"date\" | \"keyword\" | \"long\" | \"double\" | \"ip\" | \"geo_point\""
         ],
         "path": "src/plugins/data/common/index_patterns/types.ts",
         "deprecated": false,
@@ -8823,13 +8615,78 @@
     "objects": [
       {
         "parentPluginId": "data",
+        "id": "def-common.FLEET_ASSETS_TO_IGNORE",
+        "type": "Object",
+        "tags": [],
+        "label": "FLEET_ASSETS_TO_IGNORE",
+        "description": [
+          "\nUsed to determine if the instance has any user created index patterns by filtering index patterns\nthat are created and backed only by Fleet server data\nShould be revised after https://github.com/elastic/kibana/issues/82851 is fixed\nFor more background see: https://github.com/elastic/kibana/issues/107020"
+        ],
+        "path": "src/plugins/data/common/index_patterns/constants.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-common.FLEET_ASSETS_TO_IGNORE.LOGS_INDEX_PATTERN",
+            "type": "string",
+            "tags": [],
+            "label": "LOGS_INDEX_PATTERN",
+            "description": [],
+            "path": "src/plugins/data/common/index_patterns/constants.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.FLEET_ASSETS_TO_IGNORE.METRICS_INDEX_PATTERN",
+            "type": "string",
+            "tags": [],
+            "label": "METRICS_INDEX_PATTERN",
+            "description": [],
+            "path": "src/plugins/data/common/index_patterns/constants.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.FLEET_ASSETS_TO_IGNORE.LOGS_DATA_STREAM_TO_IGNORE",
+            "type": "string",
+            "tags": [],
+            "label": "LOGS_DATA_STREAM_TO_IGNORE",
+            "description": [],
+            "path": "src/plugins/data/common/index_patterns/constants.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.FLEET_ASSETS_TO_IGNORE.METRICS_DATA_STREAM_TO_IGNORE",
+            "type": "string",
+            "tags": [],
+            "label": "METRICS_DATA_STREAM_TO_IGNORE",
+            "description": [],
+            "path": "src/plugins/data/common/index_patterns/constants.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.FLEET_ASSETS_TO_IGNORE.METRICS_ENDPOINT_INDEX_TO_IGNORE",
+            "type": "string",
+            "tags": [],
+            "label": "METRICS_ENDPOINT_INDEX_TO_IGNORE",
+            "description": [],
+            "path": "src/plugins/data/common/index_patterns/constants.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
         "id": "def-common.RUNTIME_FIELD_TYPES",
         "type": "Object",
         "tags": [],
         "label": "RUNTIME_FIELD_TYPES",
         "description": [],
         "signature": [
-          "readonly [\"keyword\", \"long\", \"double\", \"date\", \"ip\", \"boolean\"]"
+          "readonly [\"keyword\", \"long\", \"double\", \"date\", \"ip\", \"boolean\", \"geo_point\"]"
         ],
         "path": "src/plugins/data/common/index_patterns/constants.ts",
         "deprecated": false,

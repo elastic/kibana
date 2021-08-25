@@ -16,7 +16,7 @@ import {
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { UIProcessorEvent } from '../../../../common/processor_event';
 import { environmentQuery } from '../../../../common/utils/environment_query';
-import { IUrlParams } from '../../../context/url_params_context/types';
+import { ApmUrlParams } from '../../../context/url_params_context/types';
 
 export function getBoolFilter({
   groupId,
@@ -29,7 +29,7 @@ export function getBoolFilter({
   processorEvent?: UIProcessorEvent;
   serviceName?: string;
   environment?: string;
-  urlParams: IUrlParams;
+  urlParams: ApmUrlParams;
 }) {
   const boolFilter: ESFilter[] = [];
 

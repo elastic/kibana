@@ -1,5 +1,6 @@
 {
   "id": "stackManagementUsageTest",
+  "owner": { "name": "Kibana Stack Management", "githubTeam": "kibana-stack-management" },
   "version": "1.0.0",
   "kibanaVersion": "kibana",
   "configPath": ["xpack", "stackManagementUsageTest"],
