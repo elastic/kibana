@@ -10,16 +10,18 @@ import { inspect } from 'util';
 
 import chalk from 'chalk';
 import getopts from 'getopts';
-
+/* eslint-disable no-console */
 export class CliError extends Error {
-  constructor(message, exitCode = 1) {
+  constructor(message: string) {
     super(message);
-    this.exitCode = exitCode;
     Error.captureStackTrace(this, CliError);
   }
 }
 
-export async function runCli(getHelpText, run) {
+export async function runCli(
+  getHelpText: () => string,
+  run: (options: getopts.ParsedOptions) => Promise<void>
+) {
   try {
     const userOptions = getopts(process.argv.slice(2)) || {};
     if (userOptions.help) {

@@ -21,7 +21,6 @@ pageLoadAssetSize:
   embeddableEnhanced: 41145
   enterpriseSearch: 35741
   esUiShared: 326654
-  expressions: 224136
   features: 21723
   fieldFormats: 92628
   globalSearch: 29696
@@ -116,3 +115,4 @@ pageLoadAssetSize:
   interactiveSetup: 18532
   expressionTagcloud: 27505
   securitySolution: 253930
+  expressions: 239290
