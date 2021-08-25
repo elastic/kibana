@@ -122,7 +122,6 @@ export class APMPlugin
       componentTemplates: [
         {
           name: 'mappings',
-          version: 0,
           mappings: mappingFromFieldMap(
             {
               [SERVICE_NAME]: {
@@ -142,9 +141,6 @@ export class APMPlugin
           ),
         },
       ],
-      indexTemplate: {
-        version: 0,
-      },
     });
 
     const resourcePlugins = mapValues(plugins, (value, key) => {
