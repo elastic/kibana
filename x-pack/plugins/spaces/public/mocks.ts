@@ -14,7 +14,6 @@ import type { SpacesApiUi, SpacesApiUiComponent } from './ui_api';
 const createApiMock = (): jest.Mocked<SpacesApi> => ({
   getActiveSpace$: jest.fn().mockReturnValue(of()),
   getActiveSpace: jest.fn(),
-  getSpaces: jest.fn(),
   ui: createApiUiMock(),
 });
 
