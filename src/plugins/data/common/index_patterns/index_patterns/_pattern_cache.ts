@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { IndexPattern } from './index_pattern';
+import { DataView } from './index_pattern';
 
-export interface PatternCache {
-  get: (id: string) => Promise<IndexPattern> | undefined;
-  set: (id: string, value: Promise<IndexPattern>) => Promise<IndexPattern>;
+export interface DataViewCache {
+  get: (id: string) => Promise<DataView> | undefined;
+  set: (id: string, value: Promise<DataView>) => Promise<DataView>;
   clear: (id: string) => void;
   clearAll: () => void;
 }
 
-export function createIndexPatternCache(): PatternCache {
+export function createDataViewCache(): DataViewCache {
   const vals: Record<string, any> = {};
-  const cache: PatternCache = {
+  const cache: DataViewCache = {
     get: (id: string) => {
       return vals[id];
     },

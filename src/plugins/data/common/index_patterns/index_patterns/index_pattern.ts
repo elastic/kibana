@@ -6,22 +6,24 @@
  * Side Public License, v 1.
  */
 
+/* eslint-disable max-classes-per-file */
+
 import _, { each, reject } from 'lodash';
-import { FieldAttrs, FieldAttrSet, IndexPatternAttributes } from '../..';
+import { castEsToKbnFieldTypeName } from '@kbn/field-types';
+import { FieldAttrs, FieldAttrSet, DataViewAttributes } from '../..';
 import type { RuntimeField } from '../types';
 import { DuplicateField } from '../../../../kibana_utils/common';
 
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES, IIndexPattern, IFieldType } from '../../../common';
-import { IndexPatternField, IIndexPatternFieldList, fieldList } from '../fields';
+import { DataViewField, IIndexPatternFieldList, fieldList } from '../fields';
 import { formatHitProvider } from './format_hit';
 import { flattenHitWrapper } from './flatten_hit';
 import { FieldFormatsStartCommon, FieldFormat } from '../../../../field_formats/common';
-import { IndexPatternSpec, TypeMeta, SourceFilter, IndexPatternFieldMap } from '../types';
+import { DataViewSpec, TypeMeta, SourceFilter, DataViewFieldMap } from '../types';
 import { SerializedFieldFormat } from '../../../../expressions/common';
-import { castEsToKbnFieldTypeName } from '../../kbn_field_types';
 
-interface IndexPatternDeps {
-  spec?: IndexPatternSpec;
+interface DataViewDeps {
+  spec?: DataViewSpec;
   fieldFormats: FieldFormatsStartCommon;
   shortDotsEnable?: boolean;
   metaFields?: string[];
@@ -41,7 +43,7 @@ interface SavedObjectBody {
 
 type FormatFieldFn = (hit: Record<string, any>, fieldName: string) => any;
 
-export class IndexPattern implements IIndexPattern {
+export class DataView implements IIndexPattern {
   public id?: string;
   public title: string = '';
   public fieldFormatMap: Record<string, any>;
@@ -49,7 +51,7 @@ export class IndexPattern implements IIndexPattern {
    * Only used by rollup indices, used by rollup specific endpoint to load field list
    */
   public typeMeta?: TypeMeta;
-  public fields: IIndexPatternFieldList & { toSpec: () => IndexPatternFieldMap };
+  public fields: IIndexPatternFieldList & { toSpec: () => DataViewFieldMap };
   public timeFieldName: string | undefined;
   /**
    * @deprecated Used by time range index patterns
@@ -84,12 +86,7 @@ export class IndexPattern implements IIndexPattern {
    */
   public readonly allowNoIndex: boolean = false;
 
-  constructor({
-    spec = {},
-    fieldFormats,
-    shortDotsEnable = false,
-    metaFields = [],
-  }: IndexPatternDeps) {
+  constructor({ spec = {}, fieldFormats, shortDotsEnable = false, metaFields = [] }: DataViewDeps) {
     // set dependencies
     this.fieldFormats = fieldFormats;
     // set config
@@ -206,7 +203,7 @@ export class IndexPattern implements IIndexPattern {
   /**
    * Create static representation of index pattern
    */
-  public toSpec(): IndexPatternSpec {
+  public toSpec(): DataViewSpec {
     return {
       id: this.id,
       version: this.version,
@@ -311,7 +308,7 @@ export class IndexPattern implements IIndexPattern {
     return this.fields.getByName(this.timeFieldName);
   }
 
-  getFieldByName(name: string): IndexPatternField | undefined {
+  getFieldByName(name: string): DataViewField | undefined {
     if (!this.fields || !this.fields.getByName) return undefined;
     return this.fields.getByName(name);
   }
@@ -323,7 +320,7 @@ export class IndexPattern implements IIndexPattern {
   /**
    * Returns index pattern as saved object body for saving
    */
-  getAsSavedObjectBody(): IndexPatternAttributes {
+  getAsSavedObjectBody(): DataViewAttributes {
     const fieldFormatMap = _.isEmpty(this.fieldFormatMap)
       ? undefined
       : JSON.stringify(this.fieldFormatMap);
@@ -349,9 +346,7 @@ export class IndexPattern implements IIndexPattern {
    * Provide a field, get its formatter
    * @param field
    */
-  getFormatterForField(
-    field: IndexPatternField | IndexPatternField['spec'] | IFieldType
-  ): FieldFormat {
+  getFormatterForField(field: DataViewField | DataViewField['spec'] | IFieldType): FieldFormat {
     const fieldFormat = this.getFormatterForFieldNoDefault(field.name);
     if (fieldFormat) {
       return fieldFormat;
@@ -490,3 +485,8 @@ export class IndexPattern implements IIndexPattern {
     delete this.fieldFormatMap[fieldName];
   };
 }
+
+/**
+ * @deprecated Use DataView instead. All index pattern interfaces were renamed.
+ */
+export class IndexPattern extends DataView {}

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { getFilterableKbnTypeNames } from '../../kbn_field_types';
+import { getFilterableKbnTypeNames } from '@kbn/field-types';
 import { IFieldType } from './types';
 
 const filterableTypes = getFilterableKbnTypeNames();
