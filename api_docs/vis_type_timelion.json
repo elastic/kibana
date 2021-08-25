@@ -1,0 +1,354 @@
+{
+  "id": "visTypeTimelion",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [
+      {
+        "parentPluginId": "visTypeTimelion",
+        "id": "def-public._LEGACY_",
+        "type": "Object",
+        "tags": [],
+        "label": "_LEGACY_",
+        "description": [],
+        "path": "src/plugins/vis_type_timelion/public/index.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "visTypeTimelion",
+            "id": "def-public._LEGACY_.DEFAULT_TIME_FORMAT",
+            "type": "string",
+            "tags": [],
+            "label": "DEFAULT_TIME_FORMAT",
+            "description": [],
+            "path": "src/plugins/vis_type_timelion/public/index.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "visTypeTimelion",
+            "id": "def-public._LEGACY_.calculateInterval",
+            "type": "Function",
+            "tags": [],
+            "label": "calculateInterval",
+            "description": [],
+            "signature": [
+              "(from: number, to: number, size: number, interval: string, min: string) => string"
+            ],
+            "path": "src/plugins/vis_type_timelion/public/index.ts",
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "visTypeTimelion",
+                "id": "def-public.from",
+                "type": "number",
+                "tags": [],
+                "label": "from",
+                "description": [],
+                "path": "src/plugins/vis_type_timelion/common/lib/calculate_interval.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "visTypeTimelion",
+                "id": "def-public.to",
+                "type": "number",
+                "tags": [],
+                "label": "to",
+                "description": [],
+                "path": "src/plugins/vis_type_timelion/common/lib/calculate_interval.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "visTypeTimelion",
+                "id": "def-public.size",
+                "type": "number",
+                "tags": [],
+                "label": "size",
+                "description": [],
+                "path": "src/plugins/vis_type_timelion/common/lib/calculate_interval.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "visTypeTimelion",
+                "id": "def-public.interval",
+                "type": "string",
+                "tags": [],
+                "label": "interval",
+                "description": [],
+                "path": "src/plugins/vis_type_timelion/common/lib/calculate_interval.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "visTypeTimelion",
+                "id": "def-public.min",
+                "type": "string",
+                "tags": [],
+                "label": "min",
+                "description": [],
+                "path": "src/plugins/vis_type_timelion/common/lib/calculate_interval.ts",
+                "deprecated": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "visTypeTimelion",
+            "id": "def-public._LEGACY_.parseTimelionExpressionAsync",
+            "type": "Function",
+            "tags": [],
+            "label": "parseTimelionExpressionAsync",
+            "description": [],
+            "signature": [
+              "(input: string) => Promise<",
+              "ParsedExpression",
+              ">"
+            ],
+            "path": "src/plugins/vis_type_timelion/public/index.ts",
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "visTypeTimelion",
+                "id": "def-public.input",
+                "type": "string",
+                "tags": [],
+                "label": "input",
+                "description": [],
+                "path": "src/plugins/vis_type_timelion/common/parser_async.ts",
+                "deprecated": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "visTypeTimelion",
+            "id": "def-public._LEGACY_.tickFormatters",
+            "type": "Function",
+            "tags": [],
+            "label": "tickFormatters",
+            "description": [],
+            "signature": [
+              "() => { bits: (val: number) => string; 'bits/s': (val: number) => string; bytes: (val: number) => string; 'bytes/s': (val: number) => string; currency(val: number, axis: ",
+              "LegacyAxis",
+              "): string; percent(val: number, axis: ",
+              "LegacyAxis",
+              "): string; custom(val: number, axis: ",
+              "LegacyAxis",
+              "): string; }"
+            ],
+            "path": "src/plugins/vis_type_timelion/public/index.ts",
+            "deprecated": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "visTypeTimelion",
+            "id": "def-public._LEGACY_.getTimezone",
+            "type": "Function",
+            "tags": [],
+            "label": "getTimezone",
+            "description": [],
+            "signature": [
+              "(config: ",
+              {
+                "pluginId": "core",
+                "scope": "public",
+                "docId": "kibCorePluginApi",
+                "section": "def-public.IUiSettingsClient",
+                "text": "IUiSettingsClient"
+              },
+              ") => string"
+            ],
+            "path": "src/plugins/vis_type_timelion/public/index.ts",
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "visTypeTimelion",
+                "id": "def-public.config",
+                "type": "Object",
+                "tags": [],
+                "label": "config",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "core",
+                    "scope": "public",
+                    "docId": "kibCorePluginApi",
+                    "section": "def-public.IUiSettingsClient",
+                    "text": "IUiSettingsClient"
+                  }
+                ],
+                "path": "src/plugins/vis_type_timelion/public/helpers/get_timezone.ts",
+                "deprecated": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "visTypeTimelion",
+            "id": "def-public._LEGACY_.xaxisFormatterProvider",
+            "type": "Function",
+            "tags": [],
+            "label": "xaxisFormatterProvider",
+            "description": [],
+            "signature": [
+              "(config: ",
+              {
+                "pluginId": "core",
+                "scope": "public",
+                "docId": "kibCorePluginApi",
+                "section": "def-public.IUiSettingsClient",
+                "text": "IUiSettingsClient"
+              },
+              ") => (esInterval: any) => any"
+            ],
+            "path": "src/plugins/vis_type_timelion/public/index.ts",
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "visTypeTimelion",
+                "id": "def-public.config",
+                "type": "Object",
+                "tags": [],
+                "label": "config",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "core",
+                    "scope": "public",
+                    "docId": "kibCorePluginApi",
+                    "section": "def-public.IUiSettingsClient",
+                    "text": "IUiSettingsClient"
+                  }
+                ],
+                "path": "src/plugins/vis_type_timelion/public/helpers/xaxis_formatter.ts",
+                "deprecated": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "visTypeTimelion",
+            "id": "def-public._LEGACY_.generateTicksProvider",
+            "type": "Function",
+            "tags": [],
+            "label": "generateTicksProvider",
+            "description": [],
+            "signature": [
+              "() => (axis: ",
+              "IAxis",
+              ") => number[]"
+            ],
+            "path": "src/plugins/vis_type_timelion/public/index.ts",
+            "deprecated": false,
+            "returnComment": [],
+            "children": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "start": {
+      "parentPluginId": "visTypeTimelion",
+      "id": "def-public.VisTypeTimelionPluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "VisTypeTimelionPluginStart",
+      "description": [],
+      "path": "src/plugins/vis_type_timelion/public/plugin.ts",
+      "deprecated": false,
+      "children": [
+        {
+          "parentPluginId": "visTypeTimelion",
+          "id": "def-public.VisTypeTimelionPluginStart.getArgValueSuggestions",
+          "type": "Function",
+          "tags": [],
+          "label": "getArgValueSuggestions",
+          "description": [],
+          "signature": [
+            "() => { hasDynamicSuggestionsForArgument: (functionName: string, argName: string) => any; getDynamicSuggestionsForArgument: (functionName: string, argName: string, functionArgs: ",
+            "TimelionExpressionArgument",
+            "[], partialInput?: string) => Promise<any>; getStaticSuggestionsForInput: (partialInput?: string, staticSuggestions?: ",
+            "TimelionFunctionArgsSuggestion",
+            "[] | undefined) => ",
+            "TimelionFunctionArgsSuggestion",
+            "[]; }"
+          ],
+          "path": "src/plugins/vis_type_timelion/public/plugin.ts",
+          "deprecated": false,
+          "returnComment": [],
+          "children": []
+        }
+      ],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    },
+    "setup": {
+      "parentPluginId": "visTypeTimelion",
+      "id": "def-public.VisTypeTimelionPluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "VisTypeTimelionPluginSetup",
+      "description": [],
+      "path": "src/plugins/vis_type_timelion/public/plugin.ts",
+      "deprecated": false,
+      "children": [
+        {
+          "parentPluginId": "visTypeTimelion",
+          "id": "def-public.VisTypeTimelionPluginSetup.isUiEnabled",
+          "type": "boolean",
+          "tags": [],
+          "label": "isUiEnabled",
+          "description": [],
+          "path": "src/plugins/vis_type_timelion/public/plugin.ts",
+          "deprecated": false
+        }
+      ],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    }
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "visTypeTimelion",
+        "id": "def-server.PluginSetupContract",
+        "type": "Interface",
+        "tags": [],
+        "label": "PluginSetupContract",
+        "description": [
+          "\nDescribes public Timelion plugin contract returned at the `setup` stage."
+        ],
+        "path": "src/plugins/vis_type_timelion/server/plugin.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "visTypeTimelion",
+            "id": "def-server.PluginSetupContract.uiEnabled",
+            "type": "boolean",
+            "tags": [],
+            "label": "uiEnabled",
+            "description": [],
+            "path": "src/plugins/vis_type_timelion/server/plugin.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

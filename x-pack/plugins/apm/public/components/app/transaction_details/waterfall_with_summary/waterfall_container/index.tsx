@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { keyBy } from 'lodash';
-import { IUrlParams } from '../../../../../context/url_params_context/types';
+import type { ApmUrlParams } from '../../../../../context/url_params_context/types';
 import {
   IWaterfall,
   WaterfallLegendType,
@@ -17,7 +17,7 @@ import { WaterfallLegends } from './WaterfallLegends';
 import { useApmServiceContext } from '../../../../../context/apm_service/use_apm_service_context';
 
 interface Props {
-  urlParams: IUrlParams;
+  urlParams: ApmUrlParams;
   waterfall: IWaterfall;
   exceedsMax: boolean;
 }

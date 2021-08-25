@@ -156,6 +156,7 @@ export const CaseView = React.memo(({ caseId, subCaseId, userCanCrud }: Props) =
           setSelectedAlertId(alertId);
         },
         userCanCrud,
+        hideSyncAlerts: true,
       })}
     </>
   );
