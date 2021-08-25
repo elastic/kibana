@@ -29,7 +29,7 @@ export const diffDashboardContainerInput = (
   return commonDiffFilters<DashboardContainerInput>(
     (originalInput as unknown) as DashboardDiffCommonFilters,
     (newInput as unknown) as DashboardDiffCommonFilters,
-    ['searchSessionId', 'lastReloadRequestTime']
+    ['searchSessionId', 'lastReloadRequestTime', 'executionContext']
   );
 };
 

@@ -6,9 +6,9 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
+import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { metadataCurrentIndexPattern } from '../../../../common/endpoint/constants';
 import { KibanaRequest } from '../../../../../../../src/core/server';
-import { esKuery } from '../../../../../../../src/plugins/data/server';
 import { EndpointAppContext } from '../../types';
 
 export interface QueryBuilderOptions {
@@ -123,9 +123,7 @@ function buildQueryBody(
   };
 
   if (request?.body?.filters?.kql) {
-    const kqlQuery = esKuery.toElasticsearchQuery(
-      esKuery.fromKueryExpression(request.body.filters.kql)
-    );
+    const kqlQuery = toElasticsearchQuery(fromKueryExpression(request.body.filters.kql));
     const q = [];
     if (filterUnenrolledAgents || filterStatusAgents) {
       q.push(idFilter);
@@ -161,6 +159,28 @@ export function getESQueryHostMetadataByID(agentID: string): estypes.SearchReque
       },
       sort: MetadataSortMethod,
       size: 1,
+    },
+    index: metadataCurrentIndexPattern,
+  };
+}
+
+export function getESQueryHostMetadataByFleetAgentIds(
+  fleetAgentIds: string[]
+): estypes.SearchRequest {
+  return {
+    body: {
+      query: {
+        bool: {
+          filter: [
+            {
+              bool: {
+                should: [{ terms: { 'elastic.agent.id': fleetAgentIds } }],
+              },
+            },
+          ],
+        },
+      },
+      sort: MetadataSortMethod,
     },
     index: metadataCurrentIndexPattern,
   };

@@ -18,6 +18,7 @@ import * as useFetcherModule from '../../../hooks/use_fetcher';
 import { ServiceMap } from '.';
 import { UrlParamsProvider } from '../../../context/url_params_context/url_params_context';
 import { Router } from 'react-router-dom';
+import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 
 const history = createMemoryHistory();
 
@@ -69,9 +70,17 @@ describe('ServiceMap', () => {
   describe('with no license', () => {
     it('renders null', async () => {
       expect(
-        await render(<ServiceMap />, {
-          wrapper: createWrapper(null),
-        }).queryByTestId('ServiceMap')
+        await render(
+          <ServiceMap
+            environment={ENVIRONMENT_ALL.value}
+            kuery=""
+            start="2021-08-20T10:00:00.000Z"
+            end="2021-08-20T10:15:00.000Z"
+          />,
+          {
+            wrapper: createWrapper(null),
+          }
+        ).queryByTestId('ServiceMap')
       ).not.toBeInTheDocument();
     });
   });
@@ -79,9 +88,17 @@ describe('ServiceMap', () => {
   describe('with an expired license', () => {
     it('renders the license banner', async () => {
       expect(
-        await render(<ServiceMap />, {
-          wrapper: createWrapper(expiredLicense),
-        }).findAllByText(/Platinum/)
+        await render(
+          <ServiceMap
+            environment={ENVIRONMENT_ALL.value}
+            kuery=""
+            start="2021-08-20T10:00:00.000Z"
+            end="2021-08-20T10:15:00.000Z"
+          />,
+          {
+            wrapper: createWrapper(expiredLicense),
+          }
+        ).findAllByText(/Platinum/)
       ).toHaveLength(1);
     });
   });
@@ -96,9 +113,17 @@ describe('ServiceMap', () => {
         });
 
         expect(
-          await render(<ServiceMap />, {
-            wrapper: createWrapper(activeLicense),
-          }).findAllByText(/No services available/)
+          await render(
+            <ServiceMap
+              environment={ENVIRONMENT_ALL.value}
+              kuery=""
+              start="2021-08-20T10:00:00.000Z"
+              end="2021-08-20T10:15:00.000Z"
+            />,
+            {
+              wrapper: createWrapper(activeLicense),
+            }
+          ).findAllByText(/No services available/)
         ).toHaveLength(1);
       });
     });

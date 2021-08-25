@@ -15,7 +15,7 @@ import { ES_FIELD_TYPES, KBN_FIELD_TYPES, IIndexPattern, IFieldType } from '../.
 import { IndexPatternField, IIndexPatternFieldList, fieldList } from '../fields';
 import { formatHitProvider } from './format_hit';
 import { flattenHitWrapper } from './flatten_hit';
-import { FieldFormatsStartCommon, FieldFormat } from '../../field_formats';
+import { FieldFormatsStartCommon, FieldFormat } from '../../../../field_formats/common';
 import { IndexPatternSpec, TypeMeta, SourceFilter, IndexPatternFieldMap } from '../types';
 import { SerializedFieldFormat } from '../../../../expressions/common';
 import { castEsToKbnFieldTypeName } from '../../kbn_field_types';

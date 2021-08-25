@@ -16,7 +16,7 @@ import {
 } from '../test_helpers';
 import { ReportingRequestHandlerContext } from '../types';
 import { ExportTypesRegistry, ReportingStore } from './';
-import { enqueueJobFactory } from './enqueue_job';
+import { enqueueJob } from './enqueue_job';
 import { Report } from './store';
 
 describe('Enqueue Job', () => {
@@ -72,13 +72,14 @@ describe('Enqueue Job', () => {
   });
 
   it('returns a Report object', async () => {
-    const enqueueJob = enqueueJobFactory(mockReporting, logger);
     const report = await enqueueJob(
+      mockReporting,
+      ({} as unknown) as KibanaRequest,
+      ({} as unknown) as ReportingRequestHandlerContext,
+      false,
       'printablePdf',
       mockBaseParams,
-      false,
-      ({} as unknown) as ReportingRequestHandlerContext,
-      ({} as unknown) as KibanaRequest
+      logger
     );
 
     const { _id, created_at: _created_at, ...snapObj } = report;
@@ -96,6 +97,7 @@ describe('Enqueue Job', () => {
         "kibana_name": undefined,
         "max_attempts": undefined,
         "meta": Object {
+          "isDeprecated": undefined,
           "layout": undefined,
           "objectType": "cool_object_type",
         },
@@ -117,14 +119,15 @@ describe('Enqueue Job', () => {
   });
 
   it('provides a default kibana version field for older POST URLs', async () => {
-    const enqueueJob = enqueueJobFactory(mockReporting, logger);
     mockBaseParams.version = undefined;
     const report = await enqueueJob(
+      mockReporting,
+      ({} as unknown) as KibanaRequest,
+      ({} as unknown) as ReportingRequestHandlerContext,
+      false,
       'printablePdf',
       mockBaseParams,
-      false,
-      ({} as unknown) as ReportingRequestHandlerContext,
-      ({} as unknown) as KibanaRequest
+      logger
     );
 
     const { _id, created_at: _created_at, ...snapObj } = report;

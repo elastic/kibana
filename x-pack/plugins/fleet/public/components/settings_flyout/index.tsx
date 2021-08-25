@@ -6,6 +6,7 @@
  */
 
 import React, { useEffect, useCallback } from 'react';
+import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFlyout,
@@ -21,9 +22,9 @@ import {
   EuiForm,
   EuiFormRow,
   EuiCode,
-  EuiCodeEditor,
   EuiLink,
   EuiPanel,
+  EuiTextColor,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiText } from '@elastic/eui';
@@ -39,13 +40,31 @@ import {
   sendPutOutput,
 } from '../../hooks';
 import { isDiffPathProtocol, normalizeHostsForAgents } from '../../../common';
+import { CodeEditor } from '../../../../../../src/plugins/kibana_react/public';
 
 import { SettingsConfirmModal } from './confirm_modal';
 import type { SettingsConfirmModalProps } from './confirm_modal';
 import { HostsInput } from './hosts_input';
 
-import 'brace/mode/yaml';
-import 'brace/theme/textmate';
+const CodeEditorContainer = styled.div`
+  min-height: 0;
+  position: relative;
+  height: 250px;
+`;
+
+const CodeEditorPlaceholder = styled(EuiTextColor).attrs((props) => ({
+  color: 'subdued',
+  size: 'xs',
+}))`
+  position: absolute;
+  top: 0;
+  left: 0;
+  // Matches monaco editor
+  font-family: Menlo, Monaco, 'Courier New', monospace;
+  font-size: 12px;
+  line-height: 21px;
+  pointer-events: none;
+`;
 
 const URL_REGEX = /^(https?):\/\/[^\s$.?#].[^\s]*$/gm;
 
@@ -85,6 +104,7 @@ function useSettingsForm(outputId: string | undefined, onSuccess: () => void) {
     }
 
     const res: Array<{ message: string; index: number }> = [];
+    const hostIndexes: { [key: string]: number[] } = {};
     value.forEach((val, idx) => {
       if (!val.match(URL_REGEX)) {
         res.push({
@@ -94,7 +114,23 @@ function useSettingsForm(outputId: string | undefined, onSuccess: () => void) {
           index: idx,
         });
       }
+      const curIndexes = hostIndexes[val] || [];
+      hostIndexes[val] = [...curIndexes, idx];
     });
+
+    Object.values(hostIndexes)
+      .filter(({ length }) => length > 1)
+      .forEach((indexes) => {
+        indexes.forEach((index) =>
+          res.push({
+            message: i18n.translate('xpack.fleet.settings.fleetServerHostsDuplicateError', {
+              defaultMessage: 'Duplicate URL',
+            }),
+            index,
+          })
+        );
+      });
+
     if (res.length) {
       return res;
     }
@@ -115,6 +151,7 @@ function useSettingsForm(outputId: string | undefined, onSuccess: () => void) {
 
   const elasticsearchUrlInput = useComboInput('esHostsComboxBox', [], (value) => {
     const res: Array<{ message: string; index: number }> = [];
+    const urlIndexes: { [key: string]: number[] } = {};
     value.forEach((val, idx) => {
       if (!val.match(URL_REGEX)) {
         res.push({
@@ -124,7 +161,23 @@ function useSettingsForm(outputId: string | undefined, onSuccess: () => void) {
           index: idx,
         });
       }
+      const curIndexes = urlIndexes[val] || [];
+      urlIndexes[val] = [...curIndexes, idx];
     });
+
+    Object.values(urlIndexes)
+      .filter(({ length }) => length > 1)
+      .forEach((indexes) => {
+        indexes.forEach((index) =>
+          res.push({
+            message: i18n.translate('xpack.fleet.settings.elasticHostDuplicateError', {
+              defaultMessage: 'Duplicate URL',
+            }),
+            index,
+          })
+        );
+      });
+
     if (res.length) {
       return res;
     }
@@ -145,11 +198,11 @@ function useSettingsForm(outputId: string | undefined, onSuccess: () => void) {
   });
 
   const validate = useCallback(() => {
-    if (
-      !fleetServerHostsInput.validate() ||
-      !elasticsearchUrlInput.validate() ||
-      !additionalYamlConfigInput.validate()
-    ) {
+    const fleetServerHostsValid = fleetServerHostsInput.validate();
+    const elasticsearchUrlsValid = elasticsearchUrlInput.validate();
+    const additionalYamlConfigValid = additionalYamlConfigInput.validate();
+
+    if (!fleetServerHostsValid || !elasticsearchUrlsValid || !additionalYamlConfigValid) {
       return false;
     }
 
@@ -361,21 +414,40 @@ export const SettingFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
           })}
           fullWidth
         >
-          <EuiCodeEditor
-            width="100%"
-            mode="yaml"
-            theme="textmate"
-            placeholder="# YAML settings here will be added to the Elasticsearch output section of each policy"
-            setOptions={{
-              minLines: 10,
-              maxLines: 30,
-              tabSize: 2,
-              showGutter: false,
-              showPrintMargin: false,
-            }}
-            {...inputs.additionalYamlConfig.props}
-            onChange={inputs.additionalYamlConfig.setValue}
-          />
+          <CodeEditorContainer>
+            <CodeEditor
+              languageId="yaml"
+              width="100%"
+              height="250px"
+              value={inputs.additionalYamlConfig.value}
+              onChange={inputs.additionalYamlConfig.setValue}
+              options={{
+                minimap: {
+                  enabled: false,
+                },
+
+                ariaLabel: i18n.translate('xpack.fleet.settings.yamlCodeEditor', {
+                  defaultMessage: 'YAML Code Editor',
+                }),
+                scrollBeyondLastLine: false,
+                wordWrap: 'on',
+                wrappingIndent: 'indent',
+                automaticLayout: true,
+                tabSize: 2,
+                // To avoid left margin
+                lineNumbers: 'off',
+                lineNumbersMinChars: 0,
+                glyphMargin: false,
+                folding: false,
+                lineDecorationsWidth: 0,
+              }}
+            />
+            {(!inputs.additionalYamlConfig.value || inputs.additionalYamlConfig.value === '') && (
+              <CodeEditorPlaceholder>
+                {`# YAML settings here will be added to the Elasticsearch output section of each policy`}
+              </CodeEditorPlaceholder>
+            )}
+          </CodeEditorContainer>
         </EuiFormRow>
       </EuiPanel>
     </EuiForm>

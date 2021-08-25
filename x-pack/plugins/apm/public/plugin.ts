@@ -7,6 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import { from } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { UsageCollectionStart } from 'src/plugins/usage_collection/public';
 import type { ConfigSchema } from '.';
 import {
   AppMountParameters,
@@ -32,9 +33,10 @@ import type { FeaturesPluginSetup } from '../../features/public';
 import type { LicensingPluginSetup } from '../../licensing/public';
 import type { MapsStartApi } from '../../maps/public';
 import type { MlPluginSetup, MlPluginStart } from '../../ml/public';
-import type {
+import {
   FetchDataParams,
   HasDataParams,
+  METRIC_TYPE,
   ObservabilityPublicSetup,
   ObservabilityPublicStart,
 } from '../../observability/public';
@@ -50,6 +52,7 @@ import {
 } from './components/fleet_integration';
 import { getLazyAPMPolicyCreateExtension } from './components/fleet_integration/lazy_apm_policy_create_extension';
 import { getLazyAPMPolicyEditExtension } from './components/fleet_integration/lazy_apm_policy_edit_extension';
+import { getLazyApmAgentsTabExtension } from './components/fleet_integration/lazy_apm_agents_tab_extension';
 
 export type ApmPluginSetup = ReturnType<ApmPlugin['setup']>;
 
@@ -79,6 +82,20 @@ export interface ApmPluginStartDeps {
   fleet?: FleetStart;
 }
 
+const servicesTitle = i18n.translate('xpack.apm.navigation.servicesTitle', {
+  defaultMessage: 'Services',
+});
+const tracesTitle = i18n.translate('xpack.apm.navigation.tracesTitle', {
+  defaultMessage: 'Traces',
+});
+const serviceMapTitle = i18n.translate('xpack.apm.navigation.serviceMapTitle', {
+  defaultMessage: 'Service Map',
+});
+
+const backendsTitle = i18n.translate('xpack.apm.navigation.backendsTitle', {
+  defaultMessage: 'Backends',
+});
+
 export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
   constructor(
     private readonly initializerContext: PluginInitializerContext<ConfigSchema>
@@ -94,25 +111,10 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       pluginSetupDeps.home.featureCatalogue.register(featureCatalogueEntry);
     }
 
-    const servicesTitle = i18n.translate('xpack.apm.navigation.servicesTitle', {
-      defaultMessage: 'Services',
-    });
-    const tracesTitle = i18n.translate('xpack.apm.navigation.tracesTitle', {
-      defaultMessage: 'Traces',
-    });
-    const serviceMapTitle = i18n.translate(
-      'xpack.apm.navigation.serviceMapTitle',
-      { defaultMessage: 'Service Map' }
-    );
-
-    const backendsTitle = i18n.translate('xpack.apm.navigation.backendsTitle', {
-      defaultMessage: 'Backends',
-    });
-
     // register observability nav if user has access to plugin
     plugins.observability.navigation.registerSections(
       from(core.getStartServices()).pipe(
-        map(([coreStart]) => {
+        map(([coreStart, pluginsStart]) => {
           if (coreStart.application.capabilities.apm.show) {
             return [
               // APM navigation
@@ -122,8 +124,26 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
                 entries: [
                   { label: servicesTitle, app: 'apm', path: '/services' },
                   { label: tracesTitle, app: 'apm', path: '/traces' },
+                  {
+                    label: backendsTitle,
+                    app: 'apm',
+                    path: '/backends',
+                    isNewFeature: true,
+                    onClick: () => {
+                      const { usageCollection } = pluginsStart as {
+                        usageCollection?: UsageCollectionStart;
+                      };
+
+                      if (usageCollection) {
+                        usageCollection.reportUiCounter(
+                          'apm',
+                          METRIC_TYPE.CLICK,
+                          'side_nav_backend'
+                        );
+                      }
+                    },
+                  },
                   { label: serviceMapTitle, app: 'apm', path: '/service-map' },
-                  { label: backendsTitle, app: 'apm', path: '/backends' },
                 ],
               },
 
@@ -345,6 +365,14 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
         package: 'apm',
         view: 'package-policy-edit',
         Component: getLazyAPMPolicyEditExtension(),
+      });
+
+      fleet.registerExtension({
+        package: 'apm',
+        view: 'package-policy-edit-tabs',
+        tabs: [
+          { title: 'APM Agents', Component: getLazyApmAgentsTabExtension() },
+        ],
       });
     }
   }

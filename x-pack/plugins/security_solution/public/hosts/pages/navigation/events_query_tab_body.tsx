@@ -26,6 +26,7 @@ import { DefaultCellRenderer } from '../../../timelines/components/timeline/cell
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../../../timelines/components/timeline/body/constants';
+import { defaultCellActions } from '../../../common/lib/cell_actions/default_cell_actions';
 
 const EVENTS_HISTOGRAM_ID = 'eventsHistogramQuery';
 
@@ -45,6 +46,7 @@ export const eventsStackByOptions: MatrixHistogramOption[] = [
 ];
 
 const DEFAULT_STACK_BY = 'event.action';
+const unit = (n: number) => i18n.EVENTS_UNIT(n);
 
 export const histogramConfigs: MatrixHistogramConfigs = {
   defaultStackByOption:
@@ -108,14 +110,17 @@ const EventsQueryTabBodyComponent: React.FC<HostsComponentsQueryProps> = ({
         />
       )}
       <StatefulEventsViewer
+        defaultCellActions={defaultCellActions}
         defaultModel={eventsDefaultModel}
         end={endDate}
+        entityType="events"
         id={TimelineId.hostsPageEvents}
         renderCellValue={DefaultCellRenderer}
         rowRenderers={defaultRowRenderers}
         scopeId={SourcererScopeName.default}
         start={startDate}
         pageFilters={pageFilters}
+        unit={unit}
       />
     </>
   );

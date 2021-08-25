@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isArray, xor } from 'lodash';
+import { isArray, isEmpty, xor } from 'lodash';
 import uuid from 'uuid';
 import { produce } from 'immer';
 
@@ -19,10 +19,7 @@ const FORM_ID = 'editQueryFlyoutForm';
 export interface UseScheduledQueryGroupQueryFormProps {
   uniqueQueryIds: string[];
   defaultValue?: OsqueryManagerPackagePolicyConfigRecord | undefined;
-  handleSubmit: FormConfig<
-    OsqueryManagerPackagePolicyConfigRecord,
-    ScheduledQueryGroupFormData
-  >['onSubmit'];
+  handleSubmit: FormConfig<ScheduledQueryGroupFormData, ScheduledQueryGroupFormData>['onSubmit'];
 }
 
 export interface ScheduledQueryGroupFormData {
@@ -31,6 +28,14 @@ export interface ScheduledQueryGroupFormData {
   interval: number;
   platform?: string | undefined;
   version?: string[] | undefined;
+  ecs_mapping?:
+    | Record<
+        string,
+        {
+          field: string;
+        }
+      >
+    | undefined;
 }
 
 export const useScheduledQueryGroupQueryForm = ({
@@ -51,6 +56,7 @@ export const useScheduledQueryGroupQueryForm = ({
     id: FORM_ID + uuid.v4(),
     onSubmit: async (formData, isValid) => {
       if (isValid && handleSubmit) {
+        // @ts-expect-error update types
         return handleSubmit(formData, isValid);
       }
     },
@@ -76,6 +82,9 @@ export const useScheduledQueryGroupQueryForm = ({
             draft.version = draft.version[0];
           }
         }
+        if (isEmpty(draft.ecs_mapping)) {
+          delete draft.ecs_mapping;
+        }
         return draft;
       }),
     deserializer: (payload) => {
@@ -87,6 +96,7 @@ export const useScheduledQueryGroupQueryForm = ({
         interval: parseInt(payload.interval.value, 10),
         platform: payload.platform?.value,
         version: payload.version?.value ? [payload.version?.value] : [],
+        ecs_mapping: payload.ecs_mapping?.value ?? {},
       };
     },
     schema: formSchema,

@@ -6,23 +6,15 @@
  */
 
 import { EuiFocusTrap, EuiScreenReaderOnly } from '@elastic/eui';
-import React, { useCallback, useEffect, useRef, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { DraggableId } from 'react-beautiful-dnd';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
-import { isEmpty } from 'lodash';
 
-import { useKibana } from '../../lib/kibana';
-import { getAllFieldsByName } from '../../containers/source';
-import { allowTopN } from './utils';
-import { useDeepEqualSelector } from '../../hooks/use_selector';
-import { ColumnHeaderOptions, DataProvider, TimelineId } from '../../../../common/types/timeline';
-import { SourcererScopeName } from '../../store/sourcerer/model';
-import { useSourcererScope } from '../../containers/sourcerer';
-import { timelineSelectors } from '../../../timelines/store/timeline';
+import { ColumnHeaderOptions, DataProvider } from '../../../../common/types/timeline';
 import { stopPropagationAndPreventDefault } from '../../../../../timelines/public';
-import { ShowTopNButton } from './actions/show_top_n';
 import { SHOW_TOP_N_KEYBOARD_SHORTCUT } from './keyboard_shortcut_constants';
+import { useHoverActionItems } from './use_hover_action_items';
 
 export const YOU_ARE_IN_A_DIALOG_CONTAINING_OPTIONS = (fieldName: string) =>
   i18n.translate(
@@ -39,10 +31,27 @@ export const AdditionalContent = styled.div`
 
 AdditionalContent.displayName = 'AdditionalContent';
 
-const StyledHoverActionsContainer = styled.div<{ $showTopN: boolean; $showOwnFocus: boolean }>`
-  min-width: 138px;
+const StyledHoverActionsContainer = styled.div<{
+  $showTopN: boolean;
+  $showOwnFocus: boolean;
+  $hideTopN: boolean;
+  $isActive: boolean;
+}>`
+  min-width: ${({ $hideTopN }) => `${$hideTopN ? '112px' : '138px'}`};
   padding: ${(props) => `0 ${props.theme.eui.paddingSizes.s}`};
   display: flex;
+
+  ${(props) =>
+    props.$isActive
+      ? `
+    .hoverActions-active {
+      .timelines__hoverActionButton,
+      .securitySolution__hoverActionButton {
+        opacity: 1;
+      }
+    }
+  `
+      : ''}
 
   ${(props) =>
     props.$showOwnFocus
@@ -75,12 +84,15 @@ const StyledHoverActionsContainer = styled.div<{ $showTopN: boolean; $showOwnFoc
 
 interface Props {
   additionalContent?: React.ReactNode;
+  closeTopN?: () => void;
   closePopOver?: () => void;
   dataProvider?: DataProvider | DataProvider[];
   dataType?: string;
   draggableId?: DraggableId;
+  enableOverflowButton?: boolean;
   field: string;
   goGetTimelineId?: (args: boolean) => void;
+  hideTopN?: boolean;
   isObjectArray: boolean;
   onFilterAdded?: () => void;
   ownFocus: boolean;
@@ -110,12 +122,16 @@ const isFocusTrapDisabled = ({
 export const HoverActions: React.FC<Props> = React.memo(
   ({
     additionalContent = null,
+    closePopOver,
+    closeTopN,
     dataProvider,
     dataType,
     draggableId,
+    enableOverflowButton = false,
     field,
     goGetTimelineId,
     isObjectArray,
+    hideTopN = false,
     onFilterAdded,
     ownFocus,
     showOwnFocus = true,
@@ -125,45 +141,25 @@ export const HoverActions: React.FC<Props> = React.memo(
     toggleTopN,
     values,
   }) => {
-    const kibana = useKibana();
-    const { timelines } = kibana.services;
-    // Common actions used by the alert table and alert flyout
-    const {
-      getAddToTimelineButton,
-      getColumnToggleButton,
-      getCopyButton,
-      getFilterForValueButton,
-      getFilterOutValueButton,
-    } = timelines.getHoverActions();
     const [stKeyboardEvent, setStKeyboardEvent] = useState<React.KeyboardEvent>();
-    const filterManagerBackup = useMemo(() => kibana.services.data.query.filterManager, [
-      kibana.services.data.query.filterManager,
-    ]);
-    const getManageTimeline = useMemo(() => timelineSelectors.getManageTimelineById(), []);
-    const { filterManager: activeFilterMananager } = useDeepEqualSelector((state) =>
-      getManageTimeline(state, timelineId ?? '')
-    );
-    const filterManager = useMemo(
-      () => (timelineId === TimelineId.active ? activeFilterMananager : filterManagerBackup),
-      [timelineId, activeFilterMananager, filterManagerBackup]
-    );
+    const [isActive, setIsActive] = useState(false);
+    const [isOverflowPopoverOpen, setIsOverflowPopoverOpen] = useState(false);
+    const onOverflowButtonClick = useCallback(() => {
+      setIsActive((prev) => !prev);
+      setIsOverflowPopoverOpen(!isOverflowPopoverOpen);
+    }, [isOverflowPopoverOpen, setIsOverflowPopoverOpen]);
 
-    //  Regarding data from useManageTimeline:
-    //  * `indexToAdd`, which enables the alerts index to be appended to
-    //    the `indexPattern` returned by `useWithSource`, may only be populated when
-    //    this component is rendered in the context of the active timeline. This
-    //    behavior enables the 'All events' view by appending the alerts index
-    //    to the index pattern.
-    const activeScope: SourcererScopeName =
-      timelineId === TimelineId.active
-        ? SourcererScopeName.timeline
-        : timelineId != null &&
-          [TimelineId.detectionsPage, TimelineId.detectionsRulesDetailsPage].includes(
-            timelineId as TimelineId
-          )
-        ? SourcererScopeName.detections
-        : SourcererScopeName.default;
-    const { browserFields } = useSourcererScope(activeScope);
+    const handleHoverActionClicked = useCallback(() => {
+      if (closeTopN) {
+        closeTopN();
+      }
+
+      setIsActive(false);
+      setIsOverflowPopoverOpen(false);
+      if (closePopOver) {
+        closePopOver();
+      }
+    }, [closePopOver, closeTopN]);
 
     const isInit = useRef(true);
     const defaultFocusedButtonRef = useRef<HTMLButtonElement | null>(null);
@@ -206,7 +202,27 @@ export const HoverActions: React.FC<Props> = React.memo(
       [ownFocus, toggleTopN]
     );
 
-    const showFilters = values != null;
+    const { overflowActionItems, allActionItems } = useHoverActionItems({
+      dataProvider,
+      dataType,
+      defaultFocusedButtonRef,
+      draggableId,
+      enableOverflowButton,
+      field,
+      handleHoverActionClicked,
+      hideTopN,
+      isObjectArray,
+      isOverflowPopoverOpen,
+      onFilterAdded,
+      onOverflowButtonClick,
+      ownFocus,
+      showTopN,
+      stKeyboardEvent,
+      timelineId,
+      toggleColumn,
+      toggleTopN,
+      values,
+    });
 
     return (
       <EuiFocusTrap
@@ -219,6 +235,9 @@ export const HoverActions: React.FC<Props> = React.memo(
           onKeyDown={onKeyDown}
           $showTopN={showTopN}
           $showOwnFocus={showOwnFocus}
+          $hideTopN={hideTopN}
+          $isActive={isActive}
+          className={isActive ? 'hoverActions-active' : ''}
         >
           <EuiScreenReaderOnly>
             <p>{YOU_ARE_IN_A_DIALOG_CONTAINING_OPTIONS(field)}</p>
@@ -226,88 +245,7 @@ export const HoverActions: React.FC<Props> = React.memo(
 
           {additionalContent != null && <AdditionalContent>{additionalContent}</AdditionalContent>}
 
-          {showFilters && (
-            <>
-              <div data-test-subj="hover-actions-filter-for">
-                {getFilterForValueButton({
-                  defaultFocusedButtonRef,
-                  field,
-                  filterManager,
-                  keyboardEvent: stKeyboardEvent,
-                  onFilterAdded,
-                  ownFocus,
-                  showTooltip: true,
-                  value: values,
-                })}
-              </div>
-              <div data-test-subj="hover-actions-filter-out">
-                {getFilterOutValueButton({
-                  field,
-                  filterManager,
-                  keyboardEvent: stKeyboardEvent,
-                  onFilterAdded,
-                  ownFocus,
-                  showTooltip: true,
-                  value: values,
-                })}
-              </div>
-            </>
-          )}
-          {toggleColumn && (
-            <div data-test-subj="hover-actions-toggle-column">
-              {getColumnToggleButton({
-                field,
-                isDisabled: isObjectArray && dataType !== 'geo_point',
-                isObjectArray,
-                keyboardEvent: stKeyboardEvent,
-                ownFocus,
-                showTooltip: true,
-                toggleColumn,
-                value: values,
-              })}
-            </div>
-          )}
-
-          {showFilters && (draggableId != null || !isEmpty(dataProvider)) && (
-            <div data-test-subj="hover-actions-add-timeline">
-              {getAddToTimelineButton({
-                dataProvider,
-                draggableId,
-                field,
-                keyboardEvent: stKeyboardEvent,
-                ownFocus,
-                showTooltip: true,
-                value: values,
-              })}
-            </div>
-          )}
-          {allowTopN({
-            browserField: getAllFieldsByName(browserFields)[field],
-            fieldName: field,
-          }) && (
-            <ShowTopNButton
-              data-test-subj="hover-actions-show-top-n"
-              field={field}
-              onClick={toggleTopN}
-              onFilterAdded={onFilterAdded}
-              ownFocus={ownFocus}
-              showTopN={showTopN}
-              timelineId={timelineId}
-              value={values}
-            />
-          )}
-          {field != null && (
-            <div data-test-subj="hover-actions-copy-button">
-              {getCopyButton({
-                field,
-                isHoverAction: true,
-                keyboardEvent: stKeyboardEvent,
-                ownFocus,
-                showTooltip: true,
-                value: values,
-              })}
-            </div>
-          )}
+          {enableOverflowButton ? overflowActionItems : allActionItems}
         </StyledHoverActionsContainer>
       </EuiFocusTrap>
     );

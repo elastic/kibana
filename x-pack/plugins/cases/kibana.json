@@ -1,7 +1,7 @@
 {
   "configPath":[
-     "cases",
-     "xpack"
+     "xpack",
+     "cases"
   ],
   "description":"The Case management system in Kibana",
   "extraPublicDirs":[
@@ -10,6 +10,7 @@
   "id":"cases",
   "kibanaVersion":"kibana",
   "optionalPlugins":[
+    "ruleRegistry",
      "security",
      "spaces"
   ],
@@ -20,10 +21,14 @@
   "requiredPlugins":[
      "actions",
      "esUiShared",
+     "lens",
      "features",
      "kibanaReact",
      "kibanaUtils",
      "triggersActionsUi"
+  ],
+  "requiredBundles": [
+    "savedObjects"
   ],
   "server":true,
   "ui":true,

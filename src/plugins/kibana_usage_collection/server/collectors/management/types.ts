@@ -12,6 +12,7 @@ export interface UsageStats {
    */
   'timelion:quandl.key': string;
   'securitySolution:defaultIndex': string;
+  'securitySolution:defaultThreatIndex': string;
   'securitySolution:newsFeedUrl': string;
   'xpackReporting:customPdfLogo': string;
   'notifications:banner': string;
@@ -35,7 +36,6 @@ export interface UsageStats {
   'discover:maxDocFieldsDisplayed': number;
   'securitySolution:rulesTableRefresh': string;
   'apm:enableSignificantTerms': boolean;
-  'apm:enableServiceOverview': boolean;
   'observability:enableInspectEsQueries': boolean;
   'visualize:enableLabs': boolean;
   'visualization:heatmap:maxBuckets': number;
@@ -60,7 +60,6 @@ export interface UsageStats {
   'securitySolution:enableNewsFeed': boolean;
   'search:includeFrozen': boolean;
   'courier:maxConcurrentShardRequests': number;
-  'courier:batchSearches': boolean;
   'courier:setRequestPreference': string;
   'courier:customRequestPreference': string;
   'courier:ignoreFilterIfFieldNotInIndex': boolean;

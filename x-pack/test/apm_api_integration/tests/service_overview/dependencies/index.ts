@@ -357,6 +357,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             'errorRate.timeseries',
             'throughput.timeseries',
             'latency.timeseries',
+            'totalTime.timeseries',
           ])
         ).toMatchInline(`
           Object {
@@ -369,6 +370,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             },
             "throughput": Object {
               "value": 1.83333333333333,
+            },
+            "totalTime": Object {
+              "value": 61439716,
             },
           }
         `);
@@ -467,8 +471,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           response.body.serviceDependencies.map((item) => ({
             name: getName(item.location),
             impact: item.currentStats.impact,
-            latency: item.currentStats.latency.value,
-            throughput: item.currentStats.throughput.value,
           })),
           'name'
         );
@@ -477,27 +479,50 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           Array [
             Object {
               "impact": 0,
-              "latency": 9496.32291666667,
               "name": "elasticsearch",
-              "throughput": 3.2,
             },
             Object {
               "impact": 100,
-              "latency": 1117085.74545455,
               "name": "opbeans-dotnet",
-              "throughput": 1.83333333333333,
             },
             Object {
               "impact": 71.0403531954737,
-              "latency": 27826.9968314322,
               "name": "postgresql",
-              "throughput": 52.6,
             },
             Object {
               "impact": 1.41447268043525,
-              "latency": 1468.27242524917,
               "name": "redis",
-              "throughput": 40.1333333333333,
+            },
+          ]
+        `);
+      });
+
+      it('returns the right totalTime values', () => {
+        const totalTimeValues = sortBy(
+          response.body.serviceDependencies.map((item) => ({
+            name: getName(item.location),
+            totalTime: item.currentStats.totalTime.value,
+          })),
+          'name'
+        );
+
+        expectSnapshot(totalTimeValues).toMatchInline(`
+          Array [
+            Object {
+              "name": "elasticsearch",
+              "totalTime": 911647,
+            },
+            Object {
+              "name": "opbeans-dotnet",
+              "totalTime": 61439716,
+            },
+            Object {
+              "name": "postgresql",
+              "totalTime": 43911001,
+            },
+            Object {
+              "name": "redis",
+              "totalTime": 1767800,
             },
           ]
         `);

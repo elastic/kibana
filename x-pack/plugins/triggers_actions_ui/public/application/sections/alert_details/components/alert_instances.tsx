@@ -8,7 +8,7 @@
 import React, { useState } from 'react';
 import moment, { Duration } from 'moment';
 import { i18n } from '@kbn/i18n';
-import { EuiBasicTable, EuiHealth, EuiSpacer, EuiSwitch, EuiToolTip } from '@elastic/eui';
+import { EuiBasicTable, EuiHealth, EuiSpacer, EuiToolTip } from '@elastic/eui';
 // @ts-ignore
 import { RIGHT_ALIGNMENT, CENTER_ALIGNMENT } from '@elastic/eui/lib/services';
 import { padStart, chunk } from 'lodash';
@@ -26,6 +26,7 @@ import {
 } from '../../common/components/with_bulk_alert_api_operations';
 import { DEFAULT_SEARCH_PAGE_SIZE } from '../../../constants';
 import './alert_instances.scss';
+import { RuleMutedSwitch } from './rule_muted_switch';
 
 type AlertInstancesProps = {
   alert: Alert;
@@ -112,17 +113,11 @@ export const alertInstancesTableColumns = (
     ),
     render: (alertInstance: AlertInstanceListItem) => {
       return (
-        <>
-          <EuiSwitch
-            label="mute"
-            showLabel={false}
-            compressed={true}
-            checked={alertInstance.isMuted}
-            disabled={readOnly}
-            data-test-subj={`muteAlertInstanceButton_${alertInstance.instance}`}
-            onChange={() => onMuteAction(alertInstance)}
-          />
-        </>
+        <RuleMutedSwitch
+          disabled={readOnly}
+          onMuteAction={async () => await onMuteAction(alertInstance)}
+          alertInstance={alertInstance}
+        />
       );
     },
     sortable: false,

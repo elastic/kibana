@@ -11,10 +11,16 @@ export const config = {
   schema: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
     write: schema.object({
-      enabled: schema.boolean({ defaultValue: false }),
+      enabled: schema.boolean({ defaultValue: true }),
     }),
-    index: schema.string({ defaultValue: '.alerts' }),
+    unsafe: schema.object({
+      legacyMultiTenancy: schema.object({
+        enabled: schema.boolean({ defaultValue: false }),
+      }),
+    }),
   }),
 };
 
 export type RuleRegistryPluginConfig = TypeOf<typeof config.schema>;
+
+export const INDEX_PREFIX = '.alerts' as const;

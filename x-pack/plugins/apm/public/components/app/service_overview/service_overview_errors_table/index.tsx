@@ -24,6 +24,8 @@ import { TableFetchWrapper } from '../../../shared/table_fetch_wrapper';
 import { getTimeRangeComparison } from '../../../shared/time_comparison/get_time_range_comparison';
 import { OverviewTableContainer } from '../../../shared/overview_table_container';
 import { getColumns } from './get_column';
+import { useApmParams } from '../../../../hooks/use_apm_params';
+import { useTimeRange } from '../../../../hooks/use_time_range';
 
 interface Props {
   serviceName: string;
@@ -32,7 +34,7 @@ type ErrorGroupMainStatistics = APIReturnType<'GET /api/apm/services/{serviceNam
 type ErrorGroupDetailedStatistics = APIReturnType<'GET /api/apm/services/{serviceName}/error_groups/detailed_statistics'>;
 
 type SortDirection = 'asc' | 'desc';
-type SortField = 'name' | 'last_seen' | 'occurrences';
+type SortField = 'name' | 'lastSeen' | 'occurrences';
 
 const PAGE_SIZE = 5;
 const DEFAULT_SORT = {
@@ -57,14 +59,7 @@ const INITIAL_STATE_DETAILED_STATISTICS: ErrorGroupDetailedStatistics = {
 
 export function ServiceOverviewErrorsTable({ serviceName }: Props) {
   const {
-    urlParams: {
-      environment,
-      kuery,
-      start,
-      end,
-      comparisonType,
-      comparisonEnabled,
-    },
+    urlParams: { comparisonType, comparisonEnabled },
   } = useUrlParams();
   const { transactionType } = useApmServiceContext();
   const [tableOptions, setTableOptions] = useState<{
@@ -77,6 +72,12 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
     pageIndex: 0,
     sort: DEFAULT_SORT,
   });
+
+  const {
+    query: { environment, kuery, rangeFrom, rangeTo },
+  } = useApmParams('/services/:serviceName/overview');
+
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const { comparisonStart, comparisonEnd } = getTimeRangeComparison({
     start,
@@ -143,7 +144,6 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
 
   const {
     data: errorGroupDetailedStatistics = INITIAL_STATE_DETAILED_STATISTICS,
-    status: errorGroupDetailedStatisticsStatus,
   } = useFetcher(
     (callApmApi) => {
       if (requestId && items.length && start && end && transactionType) {
@@ -206,11 +206,23 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
       <EuiFlexItem>
         <TableFetchWrapper status={status}>
           <OverviewTableContainer
+            fixedHeight={true}
             isEmptyAndLoading={
               totalItems === 0 && status === FETCH_STATUS.LOADING
             }
           >
             <EuiBasicTable
+              noItemsMessage={
+                status === FETCH_STATUS.LOADING
+                  ? i18n.translate(
+                      'xpack.apm.serviceOverview.errorsTable.loading',
+                      { defaultMessage: 'Loading...' }
+                    )
+                  : i18n.translate(
+                      'xpack.apm.serviceOverview.errorsTable.noResults',
+                      { defaultMessage: 'No errors found' }
+                    )
+              }
               columns={columns}
               items={items}
               pagination={{
@@ -220,10 +232,7 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
                 pageSizeOptions: [PAGE_SIZE],
                 hidePerPageOptions: true,
               }}
-              loading={
-                status === FETCH_STATUS.LOADING ||
-                errorGroupDetailedStatisticsStatus === FETCH_STATUS.LOADING
-              }
+              loading={status === FETCH_STATUS.LOADING}
               onChange={(newTableOptions: {
                 page?: {
                   index: number;

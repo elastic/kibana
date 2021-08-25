@@ -7,6 +7,7 @@
 
 export { checkLicense } from './check_license';
 export { checkParamsVersion } from './check_params_version';
+export { ContentStream, getContentStream } from './content_stream';
 export { cryptoFactory } from './crypto';
 export { ExportTypesRegistry, getExportTypesRegistry } from './export_types_registry';
 export { LevelLogger } from './level_logger';

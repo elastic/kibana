@@ -115,6 +115,7 @@ export function createPluginPrebootSetupContext(
     http: {
       registerRoutes: deps.http.registerRoutes,
       basePath: deps.http.basePath,
+      getServerInfo: deps.http.getServerInfo,
     },
     preboot: {
       isSetupOnHold: deps.preboot.isSetupOnHold,
@@ -156,7 +157,9 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
     elasticsearch: {
       legacy: deps.elasticsearch.legacy,
     },
-    executionContext: deps.executionContext,
+    executionContext: {
+      withContext: deps.executionContext.withContext,
+    },
     http: {
       createCookieSessionStorageFactory: deps.http.createCookieSessionStorageFactory,
       registerRouteHandlerContext: <

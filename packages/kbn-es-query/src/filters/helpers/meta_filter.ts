@@ -129,10 +129,10 @@ export const isFilters = (x: unknown): x is Filter[] =>
   Array.isArray(x) && !x.find((y) => !isFilter(y));
 
 /**
- * Clean out any invalid attributes from the filters
+ * Clean out decorators from the filters
  * @param {object} filter The filter to clean
  * @returns {object}
  *
  * @public
  */
-export const cleanFilter = (filter: Filter): Filter => omit(filter, ['meta', '$state']) as Filter;
+export const cleanFilter = (filter: Filter): Partial<Filter> => omit(filter, ['meta', '$state']);

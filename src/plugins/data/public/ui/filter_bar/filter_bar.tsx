@@ -37,6 +37,7 @@ interface Props {
   indexPatterns: IIndexPattern[];
   intl: InjectedIntl;
   appName: string;
+  timeRangeForSuggestionsOverride?: boolean;
 }
 
 function FilterBarUI(props: Props) {
@@ -65,6 +66,7 @@ function FilterBarUI(props: Props) {
           onRemove={() => onRemove(i)}
           indexPatterns={props.indexPatterns}
           uiSettings={uiSettings!}
+          timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
         />
       </EuiFlexItem>
     ));
@@ -112,6 +114,7 @@ function FilterBarUI(props: Props) {
                 onSubmit={onAdd}
                 onCancel={() => setIsAddFilterPopoverOpen(false)}
                 key={JSON.stringify(newFilter)}
+                timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
               />
             </div>
           </EuiFlexItem>

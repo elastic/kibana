@@ -15,7 +15,7 @@ import type {
   WrappedSignalHit,
   AlertAttributes,
 } from '../types';
-import { SavedObject, SavedObjectsFindResult } from '../../../../../../../../src/core/server';
+import { SavedObject } from '../../../../../../../../src/core/server';
 import { loggingSystemMock } from '../../../../../../../../src/core/server/mocks';
 import { IRuleStatusSOAttributes } from '../../rules/types';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
@@ -167,6 +167,22 @@ export const sampleDocNoSortId = (
   },
   sort: [],
 });
+
+export const sampleDocNoSortIdWithTimestamp = (
+  someUuid: string = sampleIdGuid,
+  ip?: string
+): SignalSourceHit & {
+  _source: Required<SignalSourceHit>['_source'] & { '@timestamp': string };
+} => {
+  const doc = sampleDocNoSortId(someUuid, ip);
+  return {
+    ...doc,
+    _source: {
+      ...doc._source,
+      '@timestamp': new Date().toISOString(),
+    },
+  };
+};
 
 export const sampleDocSeverity = (severity?: unknown, fieldName?: string): SignalSourceHit => {
   const doc = {
@@ -727,12 +743,6 @@ export const exampleRuleStatus: () => SavedObject<IRuleStatusSOAttributes> = () 
   updated_at: '2020-03-27T22:55:59.577Z',
   version: 'WzgyMiwxXQ==',
 });
-
-export const exampleFindRuleStatusResponse: (
-  mockStatuses: Array<SavedObject<IRuleStatusSOAttributes>>
-) => Array<SavedObjectsFindResult<IRuleStatusSOAttributes>> = (
-  mockStatuses = [exampleRuleStatus()]
-) => mockStatuses.map((obj) => ({ ...obj, score: 1 }));
 
 export const mockLogger = loggingSystemMock.createLogger();
 

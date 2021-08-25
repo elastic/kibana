@@ -10,12 +10,17 @@ import * as t from 'io-ts';
 import type {
   ClientRequestParamsOf,
   EndpointOf,
+  formatRequest as formatRequestType,
   ReturnOf,
   RouteRepositoryClient,
   ServerRouteRepository,
   ServerRoute,
 } from '@kbn/server-route-repository';
-import { formatRequest } from '@kbn/server-route-repository/target/format_request';
+// @ts-expect-error cannot find module or correspondent type declarations
+// The code and types are at separated folders on @kbn/server-route-repository
+// so in order to do targeted imports they must me imported separately, and
+// an error is expected here
+import { formatRequest } from '@kbn/server-route-repository/target_node/format_request';
 import { FetchOptions } from '../../../common/fetch_options';
 import { callApi } from './callApi';
 import type {
@@ -81,7 +86,10 @@ export function createCallApmApi(core: CoreStart | CoreSetup) {
       params?: Partial<Record<string, any>>;
     };
 
-    const { method, pathname } = formatRequest(endpoint, params?.path);
+    const { method, pathname } = formatRequest(
+      endpoint,
+      params?.path
+    ) as ReturnType<typeof formatRequestType>;
 
     return callApi(core, {
       ...opts,

@@ -14,9 +14,11 @@ import {
   fitToLayerExtent,
   removeLayer,
   setDrawMode,
+  showThisLayerOnly,
   toggleLayerVisible,
   updateEditLayer,
 } from '../../../../../../actions';
+import { getLayerListRaw } from '../../../../../../selectors/map_selectors';
 import { getIsReadOnly } from '../../../../../../selectors/ui_selectors';
 import { TOCEntryActionsPopover } from './toc_entry_actions_popover';
 import { DRAW_MODE } from '../../../../../../../common';
@@ -24,6 +26,7 @@ import { DRAW_MODE } from '../../../../../../../common';
 function mapStateToProps(state: MapStoreState) {
   return {
     isReadOnly: getIsReadOnly(state),
+    numLayers: getLayerListRaw(state).length,
   };
 }
 
@@ -48,6 +51,9 @@ function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyActi
     enablePointEditing: (layerId: string) => {
       dispatch(updateEditLayer(layerId));
       dispatch(setDrawMode(DRAW_MODE.DRAW_POINTS));
+    },
+    showThisLayerOnly: (layerId: string) => {
+      dispatch(showThisLayerOnly(layerId));
     },
   };
 }
