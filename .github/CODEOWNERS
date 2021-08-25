@@ -57,6 +57,8 @@
 /src/plugins/data/ @elastic/kibana-app-services
 /src/plugins/embeddable/ @elastic/kibana-app-services
 /src/plugins/expressions/ @elastic/kibana-app-services
+/src/plugins/field_formats/ @elastic/kibana-app-services
+/src/plugins/index_pattern_editor/ @elastic/kibana-app-services
 /src/plugins/inspector/ @elastic/kibana-app-services
 /src/plugins/kibana_react/ @elastic/kibana-app-services
 /src/plugins/kibana_react/public/code_editor @elastic/kibana-presentation
