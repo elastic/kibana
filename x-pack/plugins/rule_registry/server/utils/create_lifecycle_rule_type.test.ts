@@ -203,6 +203,7 @@ describe('createLifecycleRuleTypeFactory', () => {
               "kibana.space_ids": Array [
                 "spaceId",
               ],
+              "kibana.version": "7.16.0",
               "service.name": "opbeans-java",
               "tags": Array [
                 "tags",
@@ -226,6 +227,7 @@ describe('createLifecycleRuleTypeFactory', () => {
               "kibana.space_ids": Array [
                 "spaceId",
               ],
+              "kibana.version": "7.16.0",
               "service.name": "opbeans-node",
               "tags": Array [
                 "tags",
