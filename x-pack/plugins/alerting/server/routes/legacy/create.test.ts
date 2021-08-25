@@ -40,7 +40,6 @@ describe('createAlertRoute', () => {
       bar: true,
     },
     throttle: '30s',
-    legacyId: null,
     notifyWhen: 'onActionGroupChange',
     actions: [
       {
