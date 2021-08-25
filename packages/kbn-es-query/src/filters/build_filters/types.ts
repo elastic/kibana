@@ -26,12 +26,6 @@ export type FieldFilter =
   | MissingFilter;
 
 /**
- * A common type for filters supported by this package
- * @public
- **/
-export type FilterParams = any;
-
-/**
  * An enum of all types of filters supported by this package
  * @public
  */
@@ -49,6 +43,7 @@ export enum FILTERS {
 }
 
 /**
+  Filter,
  * An enum to denote whether a filter is specific to an application's context or whether it should be applied globally.
  * @public
  */
@@ -59,9 +54,9 @@ export enum FilterStateStore {
 
 // eslint-disable-next-line
 export type FilterMeta = {
-  alias: string | null;
-  disabled: boolean;
-  negate: boolean;
+  alias?: string | null;
+  disabled?: boolean;
+  negate?: boolean;
   // controlledBy is there to identify who owns the filter
   controlledBy?: string;
   // index and type are optional only because when you create a new filter, there are no defaults
@@ -79,7 +74,9 @@ export type Filter = {
     store: FilterStateStore;
   };
   meta: FilterMeta;
-  query?: any; // TODO: can we use the Query type her?
+
+  // TODO: research me! This is being extracted into the top level by translateToQuery. Maybe we can simplify.
+  query?: Record<string, any>;
 };
 
 // eslint-disable-next-line

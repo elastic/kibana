@@ -51,6 +51,7 @@ export const detectionsTimelineIds = [
 type Refetch = () => void;
 
 export interface TimelineArgs {
+  consumers: Record<string, number>;
   events: TimelineItem[];
   id: string;
   inspect: InspectResponse;
@@ -170,6 +171,7 @@ export const useTimelineEvents = ({
   );
 
   const [timelineResponse, setTimelineResponse] = useState<TimelineArgs>({
+    consumers: {},
     id,
     inspect: {
       dsl: [],
@@ -215,6 +217,7 @@ export const useTimelineEvents = ({
                   setTimelineResponse((prevResponse) => {
                     const newTimelineResponse = {
                       ...prevResponse,
+                      consumers: response.consumers,
                       events: getTimelineEvents(response.edges),
                       inspect: getInspectResponse(response, prevResponse.inspect),
                       pageInfo: response.pageInfo,
@@ -346,6 +349,7 @@ export const useTimelineEvents = ({
   useEffect(() => {
     if (isEmpty(filterQuery)) {
       setTimelineResponse({
+        consumers: {},
         id,
         inspect: {
           dsl: [],
