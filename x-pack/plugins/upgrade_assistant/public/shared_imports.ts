@@ -22,4 +22,6 @@ export { KibanaContextProvider } from '../../../../src/plugins/kibana_react/publ
 
 export { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 
+export { APP_WRAPPER_CLASS } from '../../../../src/core/public';
+
 export const useKibana = () => _useKibana<AppServicesContext>();

@@ -25,6 +25,7 @@ import {
 
 import { EnrichedDeprecationInfo } from '../../../../../../common/types';
 import { MlSnapshotContext } from './context';
+import { SnapshotState } from './use_snapshot_state';
 
 export interface FixSnapshotsFlyoutProps extends MlSnapshotContext {
   deprecation: EnrichedDeprecationInfo;
@@ -38,10 +39,22 @@ const i18nTexts = {
       defaultMessage: 'Upgrade',
     }
   ),
+  upgradingButtonLabel: i18n.translate(
+    'xpack.upgradeAssistant.esDeprecations.mlSnapshots.flyout.upgradingButtonLabel',
+    {
+      defaultMessage: 'Upgrading…',
+    }
+  ),
   retryUpgradeButtonLabel: i18n.translate(
     'xpack.upgradeAssistant.esDeprecations.mlSnapshots.flyout.retryUpgradeButtonLabel',
     {
       defaultMessage: 'Retry upgrade',
+    }
+  ),
+  upgradeResolvedButtonLabel: i18n.translate(
+    'xpack.upgradeAssistant.esDeprecations.mlSnapshots.flyout.deleteResolvupgradeResolvedButtonLabeledButtonLabel',
+    {
+      defaultMessage: 'Upgrade complete',
     }
   ),
   closeButtonLabel: i18n.translate(
@@ -54,6 +67,18 @@ const i18nTexts = {
     'xpack.upgradeAssistant.esDeprecations.mlSnapshots.flyout.deleteButtonLabel',
     {
       defaultMessage: 'Delete',
+    }
+  ),
+  deletingButtonLabel: i18n.translate(
+    'xpack.upgradeAssistant.esDeprecations.mlSnapshots.flyout.deletingButtonLabel',
+    {
+      defaultMessage: 'Deleting…',
+    }
+  ),
+  deleteResolvedButtonLabel: i18n.translate(
+    'xpack.upgradeAssistant.esDeprecations.mlSnapshots.flyout.deleteResolvedButtonLabel',
+    {
+      defaultMessage: 'Deletion complete',
     }
   ),
   retryDeleteButtonLabel: i18n.translate(
@@ -85,6 +110,44 @@ const i18nTexts = {
   ),
 };
 
+const getDeleteButtonLabel = (snapshotState: SnapshotState) => {
+  if (snapshotState.action === 'delete') {
+    if (snapshotState.error) {
+      return i18nTexts.retryDeleteButtonLabel;
+    }
+
+    switch (snapshotState.status) {
+      case 'in_progress':
+        return i18nTexts.deletingButtonLabel;
+      case 'complete':
+        return i18nTexts.deleteResolvedButtonLabel;
+      case 'idle':
+      default:
+        return i18nTexts.deleteButtonLabel;
+    }
+  }
+  return i18nTexts.deleteButtonLabel;
+};
+
+const getUpgradeButtonLabel = (snapshotState: SnapshotState) => {
+  if (snapshotState.action === 'upgrade') {
+    if (snapshotState.error) {
+      return i18nTexts.retryUpgradeButtonLabel;
+    }
+
+    switch (snapshotState.status) {
+      case 'in_progress':
+        return i18nTexts.upgradingButtonLabel;
+      case 'complete':
+        return i18nTexts.upgradeResolvedButtonLabel;
+      case 'idle':
+      default:
+        return i18nTexts.upgradeButtonLabel;
+    }
+  }
+  return i18nTexts.upgradeButtonLabel;
+};
+
 export const FixSnapshotsFlyout = ({
   deprecation,
   closeFlyout,
@@ -92,9 +155,6 @@ export const FixSnapshotsFlyout = ({
   upgradeSnapshot,
   deleteSnapshot,
 }: FixSnapshotsFlyoutProps) => {
-  // Flag used to hide certain parts of the UI if the deprecation has been resolved or is in progress
-  const isResolvable = ['idle', 'error'].includes(snapshotState.status);
-
   const onUpgradeSnapshot = () => {
     upgradeSnapshot();
     closeFlyout();
@@ -147,36 +207,40 @@ export const FixSnapshotsFlyout = ({
             </EuiButtonEmpty>
           </EuiFlexItem>
 
-          {isResolvable && (
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup>
-                <EuiFlexItem>
-                  <EuiButtonEmpty
-                    data-test-subj="deleteSnapshotButton"
-                    color="danger"
-                    onClick={onDeleteSnapshot}
-                    isLoading={false}
-                  >
-                    {snapshotState.action === 'delete' && snapshotState.error
-                      ? i18nTexts.retryDeleteButtonLabel
-                      : i18nTexts.deleteButtonLabel}
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiButton
-                    fill
-                    onClick={onUpgradeSnapshot}
-                    isLoading={false}
-                    data-test-subj="upgradeSnapshotButton"
-                  >
-                    {snapshotState.action === 'upgrade' && snapshotState.error
-                      ? i18nTexts.retryUpgradeButtonLabel
-                      : i18nTexts.upgradeButtonLabel}
-                  </EuiButton>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          )}
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup>
+              <EuiFlexItem>
+                <EuiButtonEmpty
+                  data-test-subj="deleteSnapshotButton"
+                  color="danger"
+                  onClick={onDeleteSnapshot}
+                  isLoading={
+                    snapshotState.action === 'delete' && snapshotState.status === 'in_progress'
+                  }
+                  disabled={
+                    snapshotState.status === 'in_progress' || snapshotState.status === 'complete'
+                  }
+                >
+                  {getDeleteButtonLabel(snapshotState)}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiButton
+                  fill
+                  onClick={onUpgradeSnapshot}
+                  isLoading={
+                    snapshotState.action === 'upgrade' && snapshotState.status === 'in_progress'
+                  }
+                  disabled={
+                    snapshotState.status === 'in_progress' || snapshotState.status === 'complete'
+                  }
+                  data-test-subj="upgradeSnapshotButton"
+                >
+                  {getUpgradeButtonLabel(snapshotState)}
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutFooter>
     </>
