@@ -36,7 +36,7 @@ function createEsoMigration(
   });
 }
 
-export function getMigrations(
+export function getActionsMigrations(
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
 ): SavedObjectMigrationMap {
   const migrationActionsTen = createEsoMigration(
