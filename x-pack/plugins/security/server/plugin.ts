@@ -152,9 +152,7 @@ export class SecurityPlugin
     return this.kibanaIndexName;
   };
 
-  private readonly authenticationService = new AuthenticationService(
-    this.initializerContext.logger.get('authentication')
-  );
+  private readonly authenticationService: AuthenticationService;
   private authenticationStart?: InternalAuthenticationServiceStart;
   private readonly getAuthentication = () => {
     if (!this.authenticationStart) {
@@ -172,21 +170,28 @@ export class SecurityPlugin
     return this.featureUsageServiceStart;
   };
 
-  private readonly auditService = new AuditService(this.initializerContext.logger.get('audit'));
+  private readonly auditService: AuditService;
   private readonly securityLicenseService = new SecurityLicenseService();
   private readonly authorizationService = new AuthorizationService();
-  private readonly elasticsearchService = new ElasticsearchService(
-    this.initializerContext.logger.get('elasticsearch')
-  );
-  private readonly sessionManagementService = new SessionManagementService(
-    this.initializerContext.logger.get('session')
-  );
-  private readonly anonymousAccessService = new AnonymousAccessService(
-    this.initializerContext.logger.get('anonymous-access'),
-    this.getConfig
-  );
+  private readonly elasticsearchService: ElasticsearchService;
+  private readonly sessionManagementService: SessionManagementService;
+  private readonly anonymousAccessService: AnonymousAccessService;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
+    this.authenticationService = new AuthenticationService(
+      this.initializerContext.logger.get('authentication')
+    );
+    this.auditService = new AuditService(this.initializerContext.logger.get('audit'));
+    this.elasticsearchService = new ElasticsearchService(
+      this.initializerContext.logger.get('elasticsearch')
+    );
+    this.sessionManagementService = new SessionManagementService(
+      this.initializerContext.logger.get('session')
+    );
+    this.anonymousAccessService = new AnonymousAccessService(
+      this.initializerContext.logger.get('anonymous-access'),
+      this.getConfig
+    );
     this.logger = this.initializerContext.logger.get();
   }
 

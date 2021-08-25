@@ -14,6 +14,7 @@ import { LegacyActionSequence } from 'selenium-webdriver/lib/actions';
 import { modifyUrl } from '@kbn/std';
 
 import Jimp from 'jimp';
+import { AllowedSchemaBooleanTypes } from 'src/plugins/usage_collection/server/collector';
 import { WebElementWrapper } from '../lib/web_element_wrapper';
 import { FtrProviderContext, FtrService } from '../../ftr_provider_context';
 import { Browsers } from '../remote/browsers';
@@ -25,9 +26,8 @@ class BrowserService extends FtrService {
    * Keyboard events
    */
   public readonly keys = Key;
-  public readonly isFirefox: boolean = this.browserType === Browsers.Firefox;
-  public readonly isChromium: boolean =
-    this.browserType === Browsers.Chrome || this.browserType === Browsers.ChromiumEdge;
+  public readonly isFirefox: boolean;
+  public readonly isChromium: AllowedSchemaBooleanTypes;
 
   private readonly log = this.ctx.getService('log');
 
@@ -37,6 +37,9 @@ class BrowserService extends FtrService {
     private readonly driver: WebDriver
   ) {
     super(ctx);
+    this.isFirefox = this.browserType === Browsers.Firefox;
+    this.isChromium =
+      this.browserType === Browsers.Chrome || this.browserType === Browsers.ChromiumEdge;
   }
 
   /**

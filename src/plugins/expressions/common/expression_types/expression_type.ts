@@ -29,8 +29,9 @@ export class ExpressionType {
    */
   serialize?: (value: ExpressionValue) => any;
   deserialize?: (serialized: any) => ExpressionValue;
+  private readonly definition: AnyExpressionTypeDefinition;
 
-  constructor(private readonly definition: AnyExpressionTypeDefinition) {
+  constructor(definition: AnyExpressionTypeDefinition) {
     const { name, help, deserialize, serialize, validate } = definition;
 
     this.name = name;
@@ -42,6 +43,7 @@ export class ExpressionType {
 
     this.serialize = serialize;
     this.deserialize = deserialize;
+    this.definition = definition;
   }
 
   getToFn = (

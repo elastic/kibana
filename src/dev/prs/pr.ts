@@ -21,12 +21,14 @@ export class Pr {
     return parseInt(input, 10);
   }
 
-  public readonly remoteRef = `pull/${this.number}/head`;
+  public readonly remoteRef: string;
 
   constructor(
     public readonly number: number,
     public readonly targetRef: string,
     public readonly owner: string,
     public readonly sourceBranch: string
-  ) {}
+  ) {
+    this.remoteRef = `pull/${this.number}/head`;
+  }
 }

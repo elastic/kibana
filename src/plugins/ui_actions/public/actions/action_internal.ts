@@ -7,7 +7,8 @@
  */
 
 // @ts-ignore
-import React from 'react';
+import { FC, React } from 'react';
+import { UiComponent } from 'src/plugins/kibana_utils/public';
 import { Action, ActionContext as Context, ActionDefinition } from './action';
 import { Presentable, PresentableGrouping } from '../util/presentable';
 import { uiToReactComponent } from '../../../kibana_react/public';
@@ -17,14 +18,21 @@ import { uiToReactComponent } from '../../../kibana_react/public';
  */
 export class ActionInternal<A extends ActionDefinition = ActionDefinition>
   implements Action<Context<A>>, Presentable<Context<A>> {
-  constructor(public readonly definition: A) {}
+  public readonly id: string;
+  public readonly type: string;
+  public readonly order: number;
+  public readonly MenuItem?: UiComponent;
+  public readonly ReactMenuItem?: FC;
+  public readonly grouping?: PresentableGrouping<Context<A>>;
 
-  public readonly id: string = this.definition.id;
-  public readonly type: string = this.definition.type || '';
-  public readonly order: number = this.definition.order || 0;
-  public readonly MenuItem? = this.definition.MenuItem;
-  public readonly ReactMenuItem? = this.MenuItem ? uiToReactComponent(this.MenuItem) : undefined;
-  public readonly grouping?: PresentableGrouping<Context<A>> = this.definition.grouping;
+  constructor(public readonly definition: A) {
+    this.id = this.definition.id;
+    this.type = this.definition.type || '';
+    this.order = this.definition.order || 0;
+    this.MenuItem = this.definition.MenuItem;
+    this.ReactMenuItem = this.MenuItem ? uiToReactComponent(this.MenuItem) : undefined;
+    this.grouping = this.definition.grouping;
+  }
 
   public execute(context: Context<A>) {
     return this.definition.execute(context);

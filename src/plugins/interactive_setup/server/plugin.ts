@@ -21,9 +21,7 @@ export class UserSetupPlugin implements PrebootPlugin {
   readonly #logger: Logger;
 
   #elasticsearchConnectionStatusSubscription?: Subscription;
-  readonly #elasticsearch = new ElasticsearchService(
-    this.initializerContext.logger.get('elasticsearch')
-  );
+  readonly #elasticsearch: ElasticsearchService;
 
   #configSubscription?: Subscription;
   #config?: ConfigType;
@@ -36,6 +34,9 @@ export class UserSetupPlugin implements PrebootPlugin {
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.#logger = this.initializerContext.logger.get();
+    this.#elasticsearch = new ElasticsearchService(
+      this.initializerContext.logger.get('elasticsearch')
+    );
   }
 
   public setup(core: CorePreboot) {

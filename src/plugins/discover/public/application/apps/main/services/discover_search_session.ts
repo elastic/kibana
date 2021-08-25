@@ -8,6 +8,7 @@
 
 import { History } from 'history';
 import { filter } from 'rxjs/operators';
+import type { Observable } from 'rxjs';
 import { DataPublicPluginStart } from '../../../../../../data/public';
 import {
   createQueryParamObservable,
@@ -29,17 +30,19 @@ export class DiscoverSearchSessionManager {
    * Notifies about `searchSessionId` changes in the URL,
    * skips if `searchSessionId` matches current search session id
    */
-  readonly newSearchSessionIdFromURL$ = createQueryParamObservable<string>(
-    this.deps.history,
-    SEARCH_SESSION_ID_QUERY_PARAM
-  ).pipe(
-    filter((searchSessionId) => {
-      if (!searchSessionId) return true;
-      return !this.deps.session.isCurrentSession(searchSessionId);
-    })
-  );
+  readonly newSearchSessionIdFromURL$: Observable<string | null>;
 
-  constructor(private readonly deps: DiscoverSearchSessionManagerDeps) {}
+  constructor(private readonly deps: DiscoverSearchSessionManagerDeps) {
+    this.newSearchSessionIdFromURL$ = createQueryParamObservable<string>(
+      this.deps.history,
+      SEARCH_SESSION_ID_QUERY_PARAM
+    ).pipe(
+      filter((searchSessionId) => {
+        if (!searchSessionId) return true;
+        return !this.deps.session.isCurrentSession(searchSessionId);
+      })
+    );
+  }
 
   /**
    * Get next session id by either starting or restoring a session.
@@ -80,6 +83,9 @@ export class DiscoverSearchSessionManager {
     return !!this.getSearchSessionIdFromURL();
   }
 
-  private getSearchSessionIdFromURL = () =>
-    getQueryParams(this.deps.history.location)[SEARCH_SESSION_ID_QUERY_PARAM] as string | undefined;
+  private getSearchSessionIdFromURL = () => {
+    return getQueryParams(this.deps.history.location)[SEARCH_SESSION_ID_QUERY_PARAM] as
+      | string
+      | undefined;
+  };
 }

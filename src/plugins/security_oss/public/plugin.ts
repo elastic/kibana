@@ -36,11 +36,14 @@ export interface SecurityOssPluginStart {
 
 export class SecurityOssPlugin
   implements Plugin<SecurityOssPluginSetup, SecurityOssPluginStart, {}, {}> {
-  private readonly config = this.initializerContext.config.get<ConfigType>();
-  private readonly insecureClusterService = new InsecureClusterService(this.config, localStorage);
+  private readonly config: ConfigType;
+  private readonly insecureClusterService: InsecureClusterService;
   private readonly appStateService = new AppStateService();
 
-  constructor(private readonly initializerContext: PluginInitializerContext) {}
+  constructor(private readonly initializerContext: PluginInitializerContext) {
+    this.config = this.initializerContext.config.get<ConfigType>();
+    this.insecureClusterService = new InsecureClusterService(this.config, localStorage);
+  }
 
   public setup(core: CoreSetup) {
     return {

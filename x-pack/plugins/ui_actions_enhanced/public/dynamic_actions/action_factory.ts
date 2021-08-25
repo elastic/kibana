@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { FC } from 'react';
 import { uiToReactComponent } from '../../../../../src/plugins/kibana_react/public';
 import type { UiActionsPresentable as Presentable } from '../../../../../src/plugins/ui_actions/public';
 import type { ActionFactoryDefinition } from './action_factory_definition';
@@ -15,10 +16,14 @@ import type {
   SerializedAction,
   SerializedEvent,
 } from './types';
-import type { ILicense, LicensingPluginStart } from '../../../licensing/public';
+import type { ILicense, LicensingPluginStart, LicenseType } from '../../../licensing/public';
 import type { UiActionsActionDefinition as ActionDefinition } from '../../../../../src/plugins/ui_actions/public';
 import type { SavedObjectReference } from '../../../../../src/core/types';
-import type { PersistableState } from '../../../../../src/plugins/kibana_utils/common';
+import type {
+  MigrateFunctionsObject,
+  PersistableState,
+  UiComponent,
+} from '../../../../../src/plugins/kibana_utils/common';
 
 export interface ActionFactoryDeps {
   readonly getLicense?: () => ILicense;
@@ -33,30 +38,42 @@ export class ActionFactory<
     Omit<Presentable<FactoryContext>, 'getHref'>,
     Configurable<Config, FactoryContext>,
     PersistableState<SerializedEvent> {
+  public readonly id: string;
+  public readonly isBeta: boolean;
+  public readonly minimalLicense?: LicenseType;
+  public readonly licenseFeatureName?: string;
+  public readonly order: number;
+  public readonly MenuItem?: UiComponent;
+  public readonly ReactMenuItem?: FC;
+  public readonly CollectConfig: UiComponent;
+  public readonly ReactCollectConfig: FC;
+  public readonly createConfig: (context: FactoryContext) => Config;
+  public readonly isConfigValid: (config: Config, context: FactoryContext) => boolean;
+  public readonly migrations: MigrateFunctionsObject;
+
   constructor(
     protected readonly def: ActionFactoryDefinition<Config, ExecutionContext, FactoryContext>,
     protected readonly deps: ActionFactoryDeps
   ) {
+    this.id = def.id;
+    this.isBeta = def.isBeta ?? false;
+    this.minimalLicense = def.minimalLicense;
+    this.licenseFeatureName = def.licenseFeatureName;
+    this.order = def.order || 0;
+    this.MenuItem = def.MenuItem;
+    this.ReactMenuItem = this.MenuItem ? uiToReactComponent(this.MenuItem) : undefined;
+    this.CollectConfig = def.CollectConfig;
+    this.ReactCollectConfig = uiToReactComponent(this.CollectConfig);
+    this.createConfig = def.createConfig;
+    this.isConfigValid = def.isConfigValid;
+    this.migrations = def.migrations || {};
+
     if (def.minimalLicense && !def.licenseFeatureName) {
       throw new Error(
         `ActionFactory [actionFactory.id = ${def.id}] "licenseFeatureName" is required, if "minimalLicense" is provided`
       );
     }
   }
-
-  public readonly id = this.def.id;
-  public readonly isBeta = this.def.isBeta ?? false;
-  public readonly minimalLicense = this.def.minimalLicense;
-  public readonly licenseFeatureName = this.def.licenseFeatureName;
-  public readonly order = this.def.order || 0;
-  public readonly MenuItem? = this.def.MenuItem;
-  public readonly ReactMenuItem? = this.MenuItem ? uiToReactComponent(this.MenuItem) : undefined;
-
-  public readonly CollectConfig = this.def.CollectConfig;
-  public readonly ReactCollectConfig = uiToReactComponent(this.CollectConfig);
-  public readonly createConfig = this.def.createConfig;
-  public readonly isConfigValid = this.def.isConfigValid;
-  public readonly migrations = this.def.migrations || {};
 
   public getIconType(context: FactoryContext): string | undefined {
     if (!this.def.getIconType) return undefined;
