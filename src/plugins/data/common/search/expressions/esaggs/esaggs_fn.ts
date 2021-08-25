@@ -67,7 +67,6 @@ export const getEsaggsMeta: () => Omit<EsaggsExpressionFunctionDefinition, 'fn'>
     aggs: {
       types: ['agg_type'],
       multi: true,
-      default: [],
       help: i18n.translate('data.search.functions.esaggs.aggConfigs.help', {
         defaultMessage: 'List of aggs configured with agg_type functions',
       }),
