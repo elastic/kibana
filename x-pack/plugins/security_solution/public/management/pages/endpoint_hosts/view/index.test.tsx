@@ -908,7 +908,7 @@ describe('when on the endpoint list page', () => {
         expect(emptyState).not.toBe(null);
       });
 
-      it('should not display empty state with no log data while date range filter is active', async () => {
+      it('should not display empty state when no log data', async () => {
         const activityLogTab = await renderResult.findByTestId('activity_log');
         reactTestingLibrary.act(() => {
           reactTestingLibrary.fireEvent.click(activityLogTab);
@@ -925,9 +925,9 @@ describe('when on the endpoint list page', () => {
         });
 
         const emptyState = await renderResult.queryByTestId('activityLogEmpty');
+        expect(emptyState).toBe(null);
 
         const superDatePicker = await renderResult.queryByTestId('activityLogSuperDatePicker');
-        expect(emptyState).toBe(null);
         expect(superDatePicker).not.toBe(null);
       });
 
