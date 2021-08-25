@@ -120,6 +120,7 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
       await loadEndpointDetails({ store, coreStart, selectedEndpoint: action.payload.endpointId });
     }
 
+    // get activity log API
     if (
       action.type === 'userChangedUrl' &&
       hasSelectedEndpoint(getState()) === true &&
@@ -502,99 +503,6 @@ async function endpointDetailsListMiddleware({
   }
 }
 
-async function endpointDetailsActivityLogPagingMiddleware({
-  store,
-  coreStart,
-}: {
-  store: ImmutableMiddlewareAPI<EndpointState, AppAction>;
-  coreStart: CoreStart;
-}) {
-  const { getState, dispatch } = store;
-  try {
-    const { disabled, page, pageSize, startDate, endDate } = getActivityLogDataPaging(getState());
-    // don't page when paging is disabled or when date ranges are invalid
-    if (disabled) {
-      return;
-    }
-    if (getIsInvalidDateRange({ startDate, endDate })) {
-      dispatch({
-        type: 'endpointDetailsActivityLogUpdateIsInvalidDateRange',
-        payload: {
-          isInvalidDateRange: true,
-        },
-      });
-      return;
-    }
-
-    dispatch({
-      type: 'endpointDetailsActivityLogUpdateIsInvalidDateRange',
-      payload: {
-        isInvalidDateRange: false,
-      },
-    });
-    dispatch({
-      type: 'endpointDetailsActivityLogChanged',
-      // ts error to be fixed when AsyncResourceState is refactored (#830)
-      // @ts-expect-error
-      payload: createLoadingResourceState<ActivityLog>(getActivityLogData(getState())),
-    });
-    const route = resolvePathVariables(ENDPOINT_ACTION_LOG_ROUTE, {
-      agent_id: selectedAgent(getState()),
-    });
-    const activityLog = await coreStart.http.get<ActivityLog>(route, {
-      query: {
-        page,
-        page_size: pageSize,
-        start_date: startDate,
-        end_date: endDate,
-      },
-    });
-
-    const lastLoadedLogData = getLastLoadedActivityLogData(getState());
-    if (lastLoadedLogData !== undefined) {
-      const updatedLogDataItems = ([
-        ...new Set([...lastLoadedLogData.data, ...activityLog.data]),
-      ] as ActivityLog['data']).sort((a, b) =>
-        new Date(b.item.data['@timestamp']) > new Date(a.item.data['@timestamp']) ? 1 : -1
-      );
-
-      const updatedLogData = {
-        page: activityLog.page,
-        pageSize: activityLog.pageSize,
-        startDate: activityLog.startDate,
-        endDate: activityLog.endDate,
-        data: activityLog.page === 1 ? activityLog.data : updatedLogDataItems,
-      };
-      dispatch({
-        type: 'endpointDetailsActivityLogChanged',
-        payload: createLoadedResourceState<ActivityLog>(updatedLogData),
-      });
-      if (!activityLog.data.length) {
-        dispatch({
-          type: 'endpointDetailsActivityLogUpdatePaging',
-          payload: {
-            disabled: true,
-            page: activityLog.page > 1 ? activityLog.page - 1 : 1,
-            pageSize: activityLog.pageSize,
-            startDate: activityLog.startDate,
-            endDate: activityLog.endDate,
-          },
-        });
-      }
-    } else {
-      dispatch({
-        type: 'endpointDetailsActivityLogChanged',
-        payload: createLoadedResourceState<ActivityLog>(activityLog),
-      });
-    }
-  } catch (error) {
-    dispatch({
-      type: 'endpointDetailsActivityLogChanged',
-      payload: createFailedResourceState<ActivityLog>(error.body ?? error),
-    });
-  }
-}
-
 async function loadEndpointDetails({
   selectedEndpoint,
   store,
@@ -720,7 +628,6 @@ async function endpointDetailsActivityLogChangedMiddleware({
   coreStart: CoreStart;
 }) {
   const { getState, dispatch } = store;
-  // call the activity log api
   dispatch({
     type: 'endpointDetailsActivityLogChanged',
     // ts error to be fixed when AsyncResourceState is refactored (#830)
@@ -740,6 +647,99 @@ async function endpointDetailsActivityLogChangedMiddleware({
       type: 'endpointDetailsActivityLogChanged',
       payload: createLoadedResourceState<ActivityLog>(activityLog),
     });
+  } catch (error) {
+    dispatch({
+      type: 'endpointDetailsActivityLogChanged',
+      payload: createFailedResourceState<ActivityLog>(error.body ?? error),
+    });
+  }
+}
+
+async function endpointDetailsActivityLogPagingMiddleware({
+  store,
+  coreStart,
+}: {
+  store: ImmutableMiddlewareAPI<EndpointState, AppAction>;
+  coreStart: CoreStart;
+}) {
+  const { getState, dispatch } = store;
+  try {
+    const { disabled, page, pageSize, startDate, endDate } = getActivityLogDataPaging(getState());
+    // don't page when paging is disabled or when date ranges are invalid
+    if (disabled) {
+      return;
+    }
+    if (getIsInvalidDateRange({ startDate, endDate })) {
+      dispatch({
+        type: 'endpointDetailsActivityLogUpdateIsInvalidDateRange',
+        payload: {
+          isInvalidDateRange: true,
+        },
+      });
+      return;
+    }
+
+    dispatch({
+      type: 'endpointDetailsActivityLogUpdateIsInvalidDateRange',
+      payload: {
+        isInvalidDateRange: false,
+      },
+    });
+    dispatch({
+      type: 'endpointDetailsActivityLogChanged',
+      // ts error to be fixed when AsyncResourceState is refactored (#830)
+      // @ts-expect-error
+      payload: createLoadingResourceState<ActivityLog>(getActivityLogData(getState())),
+    });
+    const route = resolvePathVariables(ENDPOINT_ACTION_LOG_ROUTE, {
+      agent_id: selectedAgent(getState()),
+    });
+    const activityLog = await coreStart.http.get<ActivityLog>(route, {
+      query: {
+        page,
+        page_size: pageSize,
+        start_date: startDate,
+        end_date: endDate,
+      },
+    });
+
+    const lastLoadedLogData = getLastLoadedActivityLogData(getState());
+    if (lastLoadedLogData !== undefined) {
+      const updatedLogDataItems = ([
+        ...new Set([...lastLoadedLogData.data, ...activityLog.data]),
+      ] as ActivityLog['data']).sort((a, b) =>
+        new Date(b.item.data['@timestamp']) > new Date(a.item.data['@timestamp']) ? 1 : -1
+      );
+
+      const updatedLogData = {
+        page: activityLog.page,
+        pageSize: activityLog.pageSize,
+        startDate: activityLog.startDate,
+        endDate: activityLog.endDate,
+        data: activityLog.page === 1 ? activityLog.data : updatedLogDataItems,
+      };
+      dispatch({
+        type: 'endpointDetailsActivityLogChanged',
+        payload: createLoadedResourceState<ActivityLog>(updatedLogData),
+      });
+      if (!activityLog.data.length) {
+        dispatch({
+          type: 'endpointDetailsActivityLogUpdatePaging',
+          payload: {
+            disabled: true,
+            page: activityLog.page > 1 ? activityLog.page - 1 : 1,
+            pageSize: activityLog.pageSize,
+            startDate: activityLog.startDate,
+            endDate: activityLog.endDate,
+          },
+        });
+      }
+    } else {
+      dispatch({
+        type: 'endpointDetailsActivityLogChanged',
+        payload: createLoadedResourceState<ActivityLog>(activityLog),
+      });
+    }
   } catch (error) {
     dispatch({
       type: 'endpointDetailsActivityLogChanged',
