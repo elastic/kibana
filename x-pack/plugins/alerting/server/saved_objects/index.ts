@@ -12,7 +12,6 @@ import type {
   SavedObjectsServiceSetup,
   SavedObjectsTypeMappingDefinition,
 } from 'kibana/server';
-import Semver from 'semver';
 import mappings from './mappings.json';
 import { getMigrations } from './migrations';
 import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
