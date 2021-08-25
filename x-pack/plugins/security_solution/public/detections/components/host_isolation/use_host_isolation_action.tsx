@@ -46,27 +46,19 @@ export const useHostIsolationAction = ({
     [detailsData]
   );
 
-  const hostCapabilities = useMemo(
-    () =>
-      getFieldValues(
-        { category: 'Endpoint', field: 'Endpoint.capabilities' },
-        detailsData
-      ) as string[],
-    [detailsData]
-  );
-
-  const isolationSupported = isIsolationSupported({
-    osName: hostOsFamily,
-    version: agentVersion,
-    capabilities: hostCapabilities,
-  });
-
   const {
     loading: loadingHostIsolationStatus,
     isIsolated: isolationStatus,
     agentStatus,
+    capabilities,
   } = useHostIsolationStatus({
     agentId,
+  });
+
+  const isolationSupported = isIsolationSupported({
+    osName: hostOsFamily,
+    version: agentVersion,
+    capabilities,
   });
 
   const { isAllowed: isIsolationAllowed } = useIsolationPrivileges();
