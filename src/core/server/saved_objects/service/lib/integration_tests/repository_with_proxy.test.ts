@@ -56,8 +56,8 @@ const registerSOTypes = (setup: InternalCoreSetup) => {
     namespaceType: 'single',
   });
 };
-// blocked  pending resolution of https://github.com/elastic/kibana/pull/109755#discussion_r695143757
-describe.skip('404s from proxies', () => {
+
+describe('404s from proxies', () => {
   let root: Root;
   let start: InternalCoreStart;
 
@@ -72,7 +72,10 @@ describe.skip('404s from proxies', () => {
     const esUrl = new URL(esServer.hosts[0]);
     // For the proxy, use a port number that is 100 higher than the one that the actual ES instance is using
 
-    const proxyPort = parseInt(esUrl.port, 10) + 100;
+    // inspired by https://github.com/elastic/kibana/pull/88919
+    const proxyPort = process.env.TEST_PROXY_SERVER_PORT
+      ? parseInt(process.env.TEST_PROXY_SERVER_PORT, 10)
+      : 5698;
     // Setup custom hapi hapiServer with h2o2 plugin for proxying
 
     hapiServer = Hapi.server({
