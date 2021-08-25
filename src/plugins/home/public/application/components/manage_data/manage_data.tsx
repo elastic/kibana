@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { FC, MouseEvent, useEffect, useState } from 'react';
+import React, { FC, MouseEvent } from 'react';
 import {
   EuiButtonEmpty,
   EuiFlexGroup,
@@ -33,15 +33,10 @@ interface Props {
 
 export const ManageData: FC<Props> = ({ addBasePath, application, features }) => {
   const { share, trackUiMetric } = getServices();
-
-  const [consoleHref, setConsoleHref] = useState<string | undefined>(undefined);
-  useEffect(() => {
-    async function getHref() {
-      const url = await share.url.locators.get('CONSOLE_APP_LOCATOR')?.getUrl({});
-      setConsoleHref(url);
-    }
-    getHref();
-  }, [share]);
+  const consoleHref = share.url.locators.get('CONSOLE_APP_LOCATOR')?.useUrl({});
+  const managementHref = share.url.locators
+    .get('MANAGEMENT_APP_LOCATOR')
+    ?.useUrl({ sectionId: '' });
 
   if (features.length) {
     const {
@@ -95,7 +90,7 @@ export const ManageData: FC<Props> = ({ addBasePath, application, features }) =>
                           className="kbnOverviewPageHeader__actionButton"
                           flush="both"
                           iconType="gear"
-                          href={addBasePath('/app/management')}
+                          href={managementHref}
                         >
                           <FormattedMessage
                             id="home.manageData.stackManagementButtonLabel"
