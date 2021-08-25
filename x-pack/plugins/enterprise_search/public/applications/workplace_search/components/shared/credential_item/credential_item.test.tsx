@@ -52,7 +52,7 @@ describe('CredentialItem', () => {
     expect(wrapper.find(EuiCopy)).toHaveLength(0);
   });
 
-  it('handles credential visible toggle click', () => {
+  it.skip('handles credential visible toggle click', () => {
     const wrapper = shallow(<CredentialItem {...props} hideCopy />);
     const button = wrapper.find(EuiButtonIcon).dive().find('button');
     button.simulate('click');
