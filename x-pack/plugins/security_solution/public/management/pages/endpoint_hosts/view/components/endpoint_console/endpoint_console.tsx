@@ -8,15 +8,16 @@
 import React, { memo, useMemo } from 'react';
 import { Console, ConsoleProvider } from '../../../../../components/console';
 import { EndpointConsoleService } from './endpoint_console_service';
+import { HostMetadata } from '../../../../../../../common/endpoint/types';
 
 export interface EndpointConsoleProps {
-  endpoint: string;
+  endpoint: HostMetadata;
 }
 
-export const EndpointConsole = memo<EndpointConsoleProps>(() => {
+export const EndpointConsole = memo<EndpointConsoleProps>(({ endpoint }) => {
   const consoleService = useMemo(() => {
-    return new EndpointConsoleService();
-  }, []);
+    return new EndpointConsoleService(endpoint);
+  }, [endpoint]);
 
   return (
     <ConsoleProvider service={consoleService}>

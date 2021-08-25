@@ -134,7 +134,7 @@ export const useEndpointActionItems = (
             ev.preventDefault();
             consoleManagement.openConsole(endpointId, {
               title: endpointHostName,
-              console: <EndpointConsole endpoint={endpointId} />,
+              console: <EndpointConsole endpoint={endpointMetadata} />,
             });
           },
           children: (
