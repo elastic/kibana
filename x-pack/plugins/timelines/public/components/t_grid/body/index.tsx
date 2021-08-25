@@ -31,7 +31,7 @@ import React, {
 } from 'react';
 import { connect, ConnectedProps, useDispatch } from 'react-redux';
 
-import { ThemeContext } from 'styled-components';
+import styled, { ThemeContext } from 'styled-components';
 import { ALERT_RULE_CONSUMER } from '@kbn/rule-data-utils';
 import {
   TGridCellAction,
@@ -118,6 +118,8 @@ export const hasAdditionalActions = (id: TimelineId): boolean =>
 
 const EXTRA_WIDTH = 4; // px
 
+const ES_LIMIT_COUNT = 9999;
+
 const MIN_ACTION_COLUMN_WIDTH = 96; // px
 
 const EMPTY_CONTROL_COLUMNS: ControlColumnProps[] = [];
@@ -125,6 +127,14 @@ const EMPTY_CONTROL_COLUMNS: ControlColumnProps[] = [];
 const EmptyHeaderCellRender: ComponentType = () => null;
 
 const gridStyle: EuiDataGridStyle = { border: 'none', fontSize: 's', header: 'underline' };
+
+const EuiDataGridContainer = styled.div<{ hideLastPage: boolean }>`
+  ul.euiPagination__list {
+    li.euiPagination__item:last-child {
+      ${({ hideLastPage }) => `${hideLastPage ? 'display:none' : ''}`};
+    }
+  }
+`;
 
 /**
  * rowIndex is bigger than `data.length` for pages with page numbers bigger than one.
@@ -710,39 +720,51 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
 
     const onChangeItemsPerPage = useCallback(
       (itemsChangedPerPage) => {
+        clearSelected({ id });
+        dispatch(tGridActions.setTGridSelectAll({ id, selectAll: false }));
         dispatch(tGridActions.updateItemsPerPage({ id, itemsPerPage: itemsChangedPerPage }));
       },
-
-      [id, dispatch]
+      [id, dispatch, clearSelected]
     );
 
-    const height = useDataGridHeightHack(pageSize);
+    const onChangePage = useCallback(
+      (page) => {
+        clearSelected({ id });
+        dispatch(tGridActions.setTGridSelectAll({ id, selectAll: false }));
+        loadPage(page);
+      },
+      [id, loadPage, dispatch, clearSelected]
+    );
+
+    const height = useDataGridHeightHack(pageSize, data.length);
 
     return (
       <>
         {tableView === 'gridView' && (
-          <EuiDataGrid
-            height={height}
-            id={'body-data-grid'}
-            data-test-subj="body-data-grid"
-            aria-label={i18n.TGRID_BODY_ARIA_LABEL}
-            columns={columnsWithCellActions}
-            columnVisibility={{ visibleColumns, setVisibleColumns }}
-            gridStyle={gridStyle}
-            leadingControlColumns={leadingTGridControlColumns}
-            trailingControlColumns={trailingTGridControlColumns}
-            toolbarVisibility={toolbarVisibility}
-            rowCount={totalItems}
-            renderCellValue={renderTGridCellValue}
-            sorting={{ columns: sortingColumns, onSort }}
-            pagination={{
-              pageIndex: activePage,
-              pageSize,
-              pageSizeOptions: itemsPerPageOptions,
-              onChangeItemsPerPage,
-              onChangePage: loadPage,
-            }}
-          />
+          <EuiDataGridContainer hideLastPage={totalItems > ES_LIMIT_COUNT}>
+            <EuiDataGrid
+              height={height}
+              id={'body-data-grid'}
+              data-test-subj="body-data-grid"
+              aria-label={i18n.TGRID_BODY_ARIA_LABEL}
+              columns={columnsWithCellActions}
+              columnVisibility={{ visibleColumns, setVisibleColumns }}
+              gridStyle={gridStyle}
+              leadingControlColumns={leadingTGridControlColumns}
+              trailingControlColumns={trailingTGridControlColumns}
+              toolbarVisibility={toolbarVisibility}
+              rowCount={totalItems}
+              renderCellValue={renderTGridCellValue}
+              sorting={{ columns: sortingColumns, onSort }}
+              pagination={{
+                pageIndex: activePage,
+                pageSize,
+                pageSizeOptions: itemsPerPageOptions,
+                onChangeItemsPerPage,
+                onChangePage,
+              }}
+            />
+          </EuiDataGridContainer>
         )}
         {tableView === 'eventRenderedView' && (
           <EventRenderedView
@@ -750,7 +772,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
             browserFields={browserFields}
             events={data}
             leadingControlColumns={leadingTGridControlColumns ?? []}
-            onChangePage={loadPage}
+            onChangePage={onChangePage}
             onChangeItemsPerPage={onChangeItemsPerPage}
             pageIndex={activePage}
             pageSize={pageSize}

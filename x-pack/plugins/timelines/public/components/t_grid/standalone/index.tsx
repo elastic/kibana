@@ -153,6 +153,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
     itemsPerPage: itemsPerPageStore,
     itemsPerPageOptions: itemsPerPageOptionsStore,
     queryFields,
+    sort: sortStore,
     title,
   } = useDeepEqualSelector((state) => getTGrid(state, STANDALONE_ID ?? ''));
 
@@ -195,12 +196,12 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
 
   const sortField = useMemo(
     () =>
-      sort.map(({ columnId, columnType, sortDirection }) => ({
+      sortStore.map(({ columnId, columnType, sortDirection }) => ({
         field: columnId,
         type: columnType,
         direction: sortDirection as Direction,
       })),
-    [sort]
+    [sortStore]
   );
 
   const [
@@ -313,6 +314,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
         id: STANDALONE_ID,
         defaultColumns: columns,
         footerText,
+        sort,
         loadingText,
         unit,
       })

@@ -29,7 +29,7 @@ const MAGIC_GAP = 3;
  *
  * Please delete me and allow DataGrid to calculate its height when the bug is fixed.
  */
-export const useDataGridHeightHack = (pageSize: number) => {
+export const useDataGridHeightHack = (pageSize: number, rowCount: number) => {
   const [height, setHeight] = useState(INITIAL_DATA_GRID_HEIGHT);
 
   useLayoutEffect(() => {
@@ -48,7 +48,7 @@ export const useDataGridHeightHack = (pageSize: number) => {
         );
       }
     }, TIME_INTERVAL);
-  }, [pageSize, height]);
+  }, [pageSize, rowCount, height]);
 
   return height;
 };
