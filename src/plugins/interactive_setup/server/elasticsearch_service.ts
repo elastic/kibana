@@ -34,9 +34,7 @@ import { getDetailedErrorMessage } from './errors';
 interface EnrollParameters {
   apiKey: string;
   hosts: string[];
-  // TODO: Integrate fingerprint check as soon core supports this new option:
-  // https://github.com/elastic/kibana/pull/108514
-  caFingerprint?: string;
+  caFingerprint: string;
 }
 
 export interface ElasticsearchServiceSetupDeps {
@@ -141,10 +139,12 @@ export class ElasticsearchService {
    * @param apiKey The ApiKey to use to authenticate Kibana enrollment request.
    * @param hosts The list of Elasticsearch node addresses to enroll with. The addresses are supposed
    * to point to exactly same Elasticsearch node, potentially available via different network interfaces.
+   * @param caFingerprint The fingerprint of the root CA certificate that is supposed to sign certificate presented by
+   * the Elasticsearch node we're enrolling with. Should be in a form of a hex colon-delimited string in upper case.
    */
   private async enroll(
     elasticsearch: ElasticsearchServicePreboot,
-    { apiKey, hosts }: EnrollParameters
+    { apiKey, hosts, caFingerprint }: EnrollParameters
   ): Promise<EnrollResult> {
     const scopeableRequest: ScopeableRequest = { headers: { authorization: `ApiKey ${apiKey}` } };
     const elasticsearchConfig: Partial<ElasticsearchClientConfig> = {
@@ -153,10 +153,14 @@ export class ElasticsearchService {
 
     // We should iterate through all provided hosts until we find an accessible one.
     for (const host of hosts) {
-      this.logger.debug(`Trying to enroll with "${host}" host`);
+      this.logger.debug(
+        `Trying to enroll with "${host}" host using "${caFingerprint}" CA fingerprint.`
+      );
+
       const enrollClient = elasticsearch.createClient('enroll', {
         ...elasticsearchConfig,
         hosts: [host],
+        caFingerprint,
       });
 
       let enrollmentResponse;
@@ -197,6 +201,7 @@ export class ElasticsearchService {
 
       // Now try to use retrieved password and CA certificate to authenticate to this host.
       const authenticateClient = elasticsearch.createClient('authenticate', {
+        caFingerprint,
         hosts: [host],
         serviceAccountToken: enrollResult.serviceAccountToken.value,
         ssl: { certificateAuthorities: [enrollResult.ca] },

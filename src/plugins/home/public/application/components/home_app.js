@@ -33,7 +33,7 @@ export function HomeApp({ directories, solutions }) {
     addBasePath,
     environmentService,
     telemetry,
-    http,
+    indexPatternService,
   } = getServices();
   const environment = environmentService.getEnvironment();
   const isCloudEnabled = environment.cloud;
@@ -75,7 +75,7 @@ export function HomeApp({ directories, solutions }) {
               localStorage={localStorage}
               urlBasePath={getBasePath()}
               telemetry={telemetry}
-              http={http}
+              hasUserIndexPattern={() => indexPatternService.hasUserIndexPattern()}
             />
           </Route>
           <Route path="*" exact={true} component={RedirectToDefaultApp} />
