@@ -23,6 +23,7 @@ describe('useHoverActionItems', () => {
     field: 'signal.rule.name',
     handleHoverActionClicked: jest.fn(),
     hideTopN: false,
+    isCaseView: false,
     isObjectArray: false,
     ownFocus: false,
     showTopN: false,
@@ -156,6 +157,31 @@ describe('useHoverActionItems', () => {
       result.current.overflowActionItems[2].props.items.forEach((item: JSX.Element) => {
         expect(item.props['data-test-subj']).not.toEqual('hover-actions-toggle-column');
       });
+    });
+  });
+
+  test('should not have filter in, filter out, or toggle column', async () => {
+    await act(async () => {
+      const { result, waitForNextUpdate } = renderHook(() => {
+        const testProps = {
+          ...defaultProps,
+          isCaseView: true,
+          enableOverflowButton: false,
+        };
+        return useHoverActionItems(testProps);
+      });
+      await waitForNextUpdate();
+
+      expect(result.current.allActionItems).toHaveLength(3);
+      expect(result.current.allActionItems[0].props['data-test-subj']).toEqual(
+        'hover-actions-add-timeline'
+      );
+      expect(result.current.allActionItems[1].props['data-test-subj']).toEqual(
+        'hover-actions-show-top-n'
+      );
+      expect(result.current.allActionItems[2].props['data-test-subj']).toEqual(
+        'hover-actions-copy-button'
+      );
     });
   });
 });
