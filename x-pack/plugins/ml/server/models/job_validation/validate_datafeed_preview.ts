@@ -8,7 +8,7 @@
 import type { MlClient } from '../../lib/ml_client';
 import type { AuthorizationHeader } from '../../lib/request_authorization';
 import type { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
-import { JobValidationMessage } from '../../../common/constants/messages';
+import type { JobValidationMessage } from '../../../common/constants/messages';
 
 export async function validateDatafeedPreview(
   mlClient: MlClient,

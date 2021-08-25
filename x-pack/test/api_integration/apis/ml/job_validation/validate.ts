@@ -142,7 +142,6 @@ export default ({ getService }: FtrProviderContext) => {
               },
             ],
             influencers: ['order_id'],
-            // summary_count_field_name: 'doc_count',
           },
           data_description: { time_field: 'order_date' },
           analysis_limits: { model_memory_limit: '1MB' },

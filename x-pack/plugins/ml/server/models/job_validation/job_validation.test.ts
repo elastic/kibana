@@ -44,7 +44,7 @@ const mlClient = ({
 // so we can simulate possible runtime payloads
 // that don't satisfy the TypeScript specs.
 describe('ML - validateJob', () => {
-  it('basic validation messages', () => {
+  it('basic validation messages', async () => {
     const payload = ({
       job: { analysis_config: { detectors: [] } },
     } as unknown) as ValidateJobPayload;
@@ -62,7 +62,7 @@ describe('ML - validateJob', () => {
   });
 
   const jobIdTests = (testIds: string[], messageId: string) => {
-    const promises = testIds.map((id) => {
+    const promises = testIds.map(async (id) => {
       const payload = ({
         job: {
           analysis_config: { detectors: [] },
@@ -154,7 +154,7 @@ describe('ML - validateJob', () => {
     return bucketSpanFormatTests(validBucketSpanFormats, 'bucket_span_valid');
   });
 
-  it('at least one detector function is empty', () => {
+  it('at least one detector function is empty', async () => {
     const payload = ({
       job: { analysis_config: { detectors: [] as Array<{ function?: string }> } },
     } as unknown) as ValidateJobPayload;
@@ -175,7 +175,7 @@ describe('ML - validateJob', () => {
     });
   });
 
-  it('detector function is not empty', () => {
+  it('detector function is not empty', async () => {
     const payload = ({
       job: { analysis_config: { detectors: [] as Array<{ function?: string }> } },
     } as unknown) as ValidateJobPayload;
@@ -189,7 +189,7 @@ describe('ML - validateJob', () => {
     });
   });
 
-  it('invalid index fields', () => {
+  it('invalid index fields', async () => {
     const payload = ({
       job: { analysis_config: { detectors: [] } },
       fields: {},
@@ -201,7 +201,7 @@ describe('ML - validateJob', () => {
     });
   });
 
-  it('valid index fields', () => {
+  it('valid index fields', async () => {
     const payload = ({
       job: { analysis_config: { detectors: [] } },
       fields: { testField: {} },
@@ -213,7 +213,7 @@ describe('ML - validateJob', () => {
     });
   });
 
-  const getBasicPayload = (): any => ({
+  const getBasicPayload = (): ValidateJobPayload => ({
     job: {
       job_id: 'test',
       analysis_config: {
@@ -244,7 +244,7 @@ describe('ML - validateJob', () => {
     );
   });
 
-  it('detect duplicate detectors', () => {
+  it('detect duplicate detectors', async () => {
     const payload = getBasicPayload() as any;
     payload.job.analysis_config.detectors.push({ function: 'count' });
     return validateJob(mlClusterClient, mlClient, payload, authHeader).then((messages) => {
@@ -260,7 +260,7 @@ describe('ML - validateJob', () => {
     });
   });
 
-  it('dedupe duplicate messages', () => {
+  it('dedupe duplicate messages', async () => {
     const payload = getBasicPayload() as any;
     // in this test setup, the following configuration passes
     // the duplicate detectors check, but would return the same
@@ -282,7 +282,7 @@ describe('ML - validateJob', () => {
     });
   });
 
-  it('basic validation passes, extended checks return some messages', () => {
+  it('basic validation passes, extended checks return some messages', async () => {
     const payload = getBasicPayload();
     return validateJob(mlClusterClient, mlClient, payload, authHeader).then((messages) => {
       const ids = messages.map((m) => m.id);
@@ -295,8 +295,8 @@ describe('ML - validateJob', () => {
     });
   });
 
-  it('categorization job using mlcategory passes aggregatable field check', () => {
-    const payload: any = {
+  it('categorization job using mlcategory passes aggregatable field check', async () => {
+    const payload: ValidateJobPayload = {
       job: {
         job_id: 'categorization_test',
         analysis_config: {
@@ -329,8 +329,8 @@ describe('ML - validateJob', () => {
     });
   });
 
-  it('non-existent field reported as non aggregatable', () => {
-    const payload: any = {
+  it('non-existent field reported as non aggregatable', async () => {
+    const payload: ValidateJobPayload = {
       job: {
         job_id: 'categorization_test',
         analysis_config: {
@@ -361,8 +361,8 @@ describe('ML - validateJob', () => {
     });
   });
 
-  it('script field not reported as non aggregatable', () => {
-    const payload: any = {
+  it('script field not reported as non aggregatable', async () => {
+    const payload: ValidateJobPayload = {
       job: {
         job_id: 'categorization_test',
         analysis_config: {
@@ -404,8 +404,8 @@ describe('ML - validateJob', () => {
     });
   });
 
-  it('datafeed preview contains no docs', () => {
-    const payload: any = {
+  it('datafeed preview contains no docs', async () => {
+    const payload: ValidateJobPayload = {
       job: {
         job_id: 'categorization_test',
         analysis_config: {
@@ -421,10 +421,6 @@ describe('ML - validateJob', () => {
         data_description: { time_field: '@timestamp' },
         datafeed_config: {
           indices: [],
-          data_description: {
-            time_field: 'timestamp',
-            time_format: 'epoch_ms',
-          },
         },
       },
       fields: { testField: {} },
@@ -450,8 +446,8 @@ describe('ML - validateJob', () => {
     );
   });
 
-  it('datafeed preview failed', () => {
-    const payload: any = {
+  it('datafeed preview failed', async () => {
+    const payload: ValidateJobPayload = {
       job: {
         job_id: 'categorization_test',
         analysis_config: {
@@ -467,10 +463,6 @@ describe('ML - validateJob', () => {
         data_description: { time_field: '@timestamp' },
         datafeed_config: {
           indices: [],
-          data_description: {
-            time_field: 'timestamp',
-            time_format: 'epoch_ms',
-          },
         },
       },
       fields: { testField: {} },

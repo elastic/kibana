@@ -638,7 +638,7 @@ export const getMessages = once((docLinks?: DocLinksStart) => {
         'xpack.ml.models.jobValidation.messages.datafeedPreviewNoDocumentsMessage',
         {
           defaultMessage:
-            'Running the datafeed preview over the current job configuration produces no results.' +
+            'Running the datafeed preview over the current job configuration produces no results. ' +
             'If the index contains no documents this warning can be ignored, otherwise the job may be misconfigured.',
         }
       ),
