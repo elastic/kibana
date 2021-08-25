@@ -74,6 +74,11 @@ describe('@elastic/eui i18n tokens', () => {
       });
 
       test('defaultMessage is in sync with defString', () => {
+        // Certain complex tokens (e.g. ones that have a function as a defaultMessage)
+        // need custom i18n handling, and can't be checked for basic defString equality
+        const tokensToSkip = ['euiColumnSorting.buttonActive'];
+        if (tokensToSkip.includes(token)) return;
+
         // Clean up typical errors from the `@elastic/eui` extraction token tool
         const normalizedDefString = defString
           // Quoted words should use double-quotes
@@ -84,9 +89,6 @@ describe('@elastic/eui i18n tokens', () => {
           // Should trim extra spaces
           .replace(/\s{2,}/g, ' ')
           .trim();
-
-        // Skip defStrings that are functions
-        if (normalizedDefString.match(/^\(.*?\).*?=>/)) return;
 
         expect(i18nTranslateCall[1].defaultMessage).toBe(normalizedDefString);
       });
