@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiBadge, EuiLink, EuiText, EuiTextColor, EuiToolTip } from '@elastic/eui';
+import { EuiBadge, EuiLink, EuiText, EuiToolTip } from '@elastic/eui';
 import { EnrichedDeprecationInfo } from '../../../../common/types';
 import { DEPRECATION_TYPE_MAP } from '../constants';
 import { DeprecationTableColumns } from '../types';
@@ -80,8 +80,8 @@ export const EsDeprecationsTableCells: React.FunctionComponent<Props> = ({
 
     return (
       <EuiToolTip position="top" content={i18nTexts.manualCellTooltipLabel}>
-        <EuiText size="s">
-          <EuiTextColor color="subdued">{i18nTexts.manualCellLabel}</EuiTextColor>
+        <EuiText size="s" color="subdued">
+          {i18nTexts.manualCellLabel}
         </EuiText>
       </EuiToolTip>
     );
