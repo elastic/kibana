@@ -33,6 +33,7 @@ import {
   WithoutReservedActionGroups,
   ActionVariable,
   SanitizedRuleConfig,
+  AlertWithLegacyId,
 } from '../common';
 import { LicenseType } from '../../licensing/server';
 
@@ -189,8 +190,11 @@ export interface RawAlertExecutionStatus extends SavedObjectAttributes {
   };
 }
 
-export type PartialAlert<Params extends AlertTypeParams = never> = Pick<Alert<Params>, 'id'> &
-  Partial<Omit<Alert<Params>, 'id'>>;
+export type PartialAlert<Params extends AlertTypeParams = never> = Pick<
+  AlertWithLegacyId<Params>,
+  'id'
+> &
+  Partial<Omit<AlertWithLegacyId<Params>, 'id'>>;
 
 export interface RawAlert extends SavedObjectAttributes {
   enabled: boolean;

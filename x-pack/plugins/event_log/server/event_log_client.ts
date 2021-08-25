@@ -94,13 +94,13 @@ export class EventLogClient implements IEventLogClient {
     // verify the user has the required permissions to view this saved objects
     await this.savedObjectGetter(type, ids);
 
-    return await this.esContext.esAdapter.queryEventsBySavedObjects(
-      this.esContext.esNames.indexPattern,
+    return await this.esContext.esAdapter.queryEventsBySavedObjects({
+      index: this.esContext.esNames.indexPattern,
       namespace,
       type,
       ids,
       findOptions,
-      legacyIds
-    );
+      legacyIds,
+    });
   }
 }
