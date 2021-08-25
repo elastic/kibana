@@ -64,7 +64,7 @@ import { i18n } from '@kbn/i18n';
   deprecationsInfo:[{
     domainId: 'usageCollection',
     title: i18n.translate('usageCollection.uiCounters.deprecations.uiMetricDebugTitle', {
-      defaultMessage: '"ui_metric.debug" is a deprecated setting',
+      defaultMessage: 'Setting ui_metric.debug is deprecated',
     });
     level: 'critical',
     title: i18n.translate('usageCollection.uiCounters.deprecations.uiMetricDebugMessage', {
@@ -109,7 +109,7 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
       }
       addDeprecation({
         title: i18n.translate('kibana_legacy.deprecations.defaultAppIdTitle', {
-          defaultMessage: 'kibana.defaultAppId is a deprecated setting',
+          defaultMessage: 'Setting kibana.defaultAppId is deprecated',
         }),
         message: i18n.translate('kibana_legacy.deprecations.defaultAppIdMessage', {
           defaultMessage: '"kibana.defaultAppId" is deprecated and will be removed in 8.0. Please use the "defaultRoute" advanced setting instead',
@@ -258,7 +258,7 @@ We will inject `i18n` into the deprecation function to enable teams to use it be
 For context follow [this issue](https://github.com/elastic/kibana/issues/99072).
 
 
-### Writing guide
+### Writing guidelines
 The deprecation service enables you to specify a `title`, `message`, `documentationUrl`,
 and the `manual steps` for resolving a deprecation issue.
 
@@ -309,3 +309,56 @@ manualSteps: [
   }),
 ]
 ```
+
+#### General Guidelines
+
+##### What is deprecated
+Use the present tense: 
+- Types are deprecated in geo_shape queries.
+- Sorting is deprecated in reindex requests.
+
+Avoid:
+- The type should no longer be specified in geo_shape queries.
+- Sorting has been deprecated in reindex requests.
+
+##### What action the user needs to take
+Use the imperative voice:
+- Do not specify a type in the indexed_shape section. 
+- Use query filtering to reindex a subset of documents.
+
+Avoid:
+- Please use query filtering instead.
+- You should use query filtering instead.
+- Instead consider using query filtering to find the desired subset of data.
+
+##### Context
+Where possible, provide the specific context that resulted in the warning:
+- The Abc timezone used by rollup job Def is deprecated. Use Xyz instead.
+
+##### Impact
+Many deprecations are clearcut--you are using this old thing and need to switch to using this new thing.
+Others are more nuanced and don’t necessarily require any changes. In this case, the warning needs to address
+the impact of not taking action:
+- The default for the `cluster.routing.allocation.disk.watermark` setting is changing from false to true.
+  If you do not explicitly configure this setting when you upgrade, indices in this one node cluster will
+  become read-only if disk usage reaches 95%. 
+
+##### Version
+You do not need to include any form of "and will be removed in a future release".
+The assumption is that deprecated things are going to be removed, and the standard schedule for removal
+is the next major version. 
+
+If things are targeted for removal in a specific minor release, the message should include that information:
+- Abc is deprecated. Use Xyz to do the thing. Support for Abc will be removed in n.n.
+
+If an item is deprecated, but won’t be removed in the next major version, the message should indicate that:
+- Abc is deprecated. Use Xyz to do the thing. Support for Abc will be removed following the release of n.0. 
+
+Avoid:
+- Xyz is deprecated and will be removed in 8.0.
+- Xyz is deprecated and will be unsupported in future.
+- Xyz is deprecated and will not be supported in the next major version of Elasticsearch.
+
+##### Formatting
+Sentence style capitalization and punctuation. 
+- Avoid quotes for emphasis.
