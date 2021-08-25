@@ -66,7 +66,6 @@ pageLoadAssetSize:
   searchprofiler: 67080
   security: 95864
   securityOss: 30806
-  securitySolution: 217673
   share: 99061
   snapshotRestore: 79032
   spaces: 57868
@@ -116,3 +115,4 @@ pageLoadAssetSize:
   expressionShape: 34008
   interactiveSetup: 18532
   expressionTagcloud: 27505
+  securitySolution: 253930
