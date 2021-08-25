@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectsType } from 'src/core/server';
+import { SavedObject, SavedObjectsType } from 'src/core/server';
 import { CASE_COMMENT_SAVED_OBJECT } from '../../common';
 import { createCommentsMigrations, CreateCommentsMigrationsDeps } from './migrations';
 
@@ -109,5 +109,9 @@ export const createCaseCommentSavedObjectType = ({
       },
     },
   },
-  migrations: () => createCommentsMigrations(migrationDeps),
+  migrations: createCommentsMigrations(migrationDeps),
+  management: {
+    importableAndExportable: true,
+    isExportable: (_: SavedObject<unknown>) => false,
+  },
 });
