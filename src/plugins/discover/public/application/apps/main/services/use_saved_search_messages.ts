@@ -27,6 +27,7 @@ export function sendCompleteMsg(main$: DataMain$, foundDocuments = true) {
   main$.next({
     fetchStatus: FetchStatus.COMPLETE,
     foundDocuments,
+    error: undefined,
   });
 }
 

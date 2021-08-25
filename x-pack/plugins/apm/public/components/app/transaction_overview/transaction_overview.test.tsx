@@ -13,7 +13,7 @@ import { createKibanaReactContext } from 'src/plugins/kibana_react/public';
 import { MockApmPluginContextWrapper } from '../../../context/apm_plugin/mock_apm_plugin_context';
 import { ApmServiceContextProvider } from '../../../context/apm_service/apm_service_context';
 import { UrlParamsProvider } from '../../../context/url_params_context/url_params_context';
-import { IUrlParams } from '../../../context/url_params_context/types';
+import type { ApmUrlParams } from '../../../context/url_params_context/types';
 import * as useFetcherHook from '../../../hooks/use_fetcher';
 import * as useServiceTransactionTypesHook from '../../../context/apm_service/use_service_transaction_types_fetcher';
 import * as useServiceAgentNameHook from '../../../context/apm_service/use_service_agent_fetcher';
@@ -37,7 +37,7 @@ function setup({
   urlParams,
   serviceTransactionTypes,
 }: {
-  urlParams: IUrlParams;
+  urlParams: ApmUrlParams;
   serviceTransactionTypes: string[];
 }) {
   history.replace({

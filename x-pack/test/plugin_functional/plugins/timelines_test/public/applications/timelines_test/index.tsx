@@ -54,6 +54,8 @@ const AppRoot = React.memo(
       refetch.current = _refetch;
     }, []);
 
+    const hasAlertsCrudPermissions = useCallback(() => true, []);
+
     return (
       <I18nProvider>
         <Router history={parameters.history}>
@@ -73,7 +75,7 @@ const AppRoot = React.memo(
                 end: '',
                 footerText: 'Events',
                 filters: [],
-                itemsPerPage: 50,
+                hasAlertsCrudPermissions,
                 itemsPerPageOptions: [1, 2, 3],
                 loadingText: 'Loading events',
                 renderCellValue: () => <div data-test-subj="timeline-wrapper">test</div>,
