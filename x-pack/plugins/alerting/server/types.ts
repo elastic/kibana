@@ -190,7 +190,10 @@ export interface RawAlertExecutionStatus extends SavedObjectAttributes {
   };
 }
 
-export type PartialAlert<Params extends AlertTypeParams = never> = Pick<
+export type PartialAlert<Params extends AlertTypeParams = never> = Pick<Alert<Params>, 'id'> &
+  Partial<Omit<Alert<Params>, 'id'>>;
+
+export type PartialAlertWithLegacyId<Params extends AlertTypeParams = never> = Pick<
   AlertWithLegacyId<Params>,
   'id'
 > &

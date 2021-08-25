@@ -36,6 +36,8 @@ import {
   AlertTypeParams,
   ResolvedSanitizedRule,
   AlertWithLegacyId,
+  SanitizedAlertWithLegacyId,
+  PartialAlertWithLegacyId,
 } from '../types';
 import {
   validateAlertTypeParams,
@@ -371,7 +373,6 @@ export class RulesClient {
       });
       createdAlert.attributes.scheduledTaskId = scheduledTask.id;
     }
-
     return this.getAlertFromRaw<Params>(
       createdAlert.id,
       createdAlert.attributes.alertTypeId,
@@ -386,9 +387,7 @@ export class RulesClient {
   }: {
     id: string;
     includeLegacyId?: boolean;
-  }): Promise<
-    SanitizedAlert<Params> | (SanitizedAlert<Params> & { legacyId: string | null | undefined })
-  > {
+  }): Promise<SanitizedAlert<Params> | SanitizedAlertWithLegacyId<Params>> {
     const result = await this.unsecuredSavedObjectsClient.get<RawAlert>('alert', id);
     try {
       await this.authorization.ensureAuthorized({
@@ -490,9 +489,7 @@ export class RulesClient {
     dateStart,
   }: GetAlertInstanceSummaryParams): Promise<AlertInstanceSummary> {
     this.logger.debug(`getAlertInstanceSummary(): getting alert ${id}`);
-    const alert = (await this.get({ id, includeLegacyId: true })) as SanitizedAlert & {
-      legacyId: string | null;
-    };
+    const alert = (await this.get({ id, includeLegacyId: true })) as SanitizedAlertWithLegacyId;
 
     await this.authorization.ensureAuthorized({
       ruleTypeId: alert.alertTypeId,
@@ -511,7 +508,6 @@ export class RulesClient {
 
     this.logger.debug(`getAlertInstanceSummary(): search the event log for alert ${id}`);
     let events: IEvent[];
-
     try {
       const queryResults = await eventLogClient.findEventsBySavedObjectIds(
         'alert',
@@ -1546,10 +1542,18 @@ export class RulesClient {
     // In order to support the partial update API of Saved Objects we have to support
     // partial updates of an Alert, but when we receive an actual RawAlert, it is safe
     // to cast the result to an Alert
-    const res = this.getPartialAlertFromRaw<Params>(id, ruleType, rawAlert, references);
+    const res = this.getPartialAlertFromRaw<Params>(
+      id,
+      ruleType,
+      rawAlert,
+      references,
+      includeLegacyId
+    );
+    // include to result because it is for internal rules client usage
     if (includeLegacyId) {
       return res as AlertWithLegacyId;
     }
+    // exclude from result because it is an internal variable
     return omit(res, ['legacyId']) as Alert;
   }
 
@@ -1561,7 +1565,7 @@ export class RulesClient {
       updatedAt,
       meta,
       notifyWhen,
-      legacyId, // exclude from result because it is an internal variable
+      legacyId,
       scheduledTaskId,
       params,
       executionStatus,
@@ -1569,16 +1573,16 @@ export class RulesClient {
       actions,
       ...partialRawAlert
     }: Partial<RawAlert>,
-    references: SavedObjectReference[] | undefined
-  ): PartialAlert<Params> {
-    return {
+    references: SavedObjectReference[] | undefined,
+    includeLegacyId: boolean = false
+  ): PartialAlert<Params> | PartialAlertWithLegacyId<Params> {
+    const rule = {
       id,
       notifyWhen,
       ...partialRawAlert,
       // we currently only support the Interval Schedule type
       // Once we support additional types, this type signature will likely change
       schedule: schedule as IntervalSchedule,
-      legacyId,
       actions: actions ? this.injectReferencesIntoActions(id, actions, references || []) : [],
       params: this.injectReferencesIntoParams(id, ruleType, params, references || []) as Params,
       ...(updatedAt ? { updatedAt: new Date(updatedAt) } : {}),
@@ -1588,6 +1592,9 @@ export class RulesClient {
         ? { executionStatus: alertExecutionStatusFromRaw(this.logger, id, executionStatus) }
         : {}),
     };
+    return includeLegacyId
+      ? ({ ...rule, legacyId } as PartialAlertWithLegacyId<Params>)
+      : (rule as PartialAlert<Params>);
   }
 
   private async validateActions(

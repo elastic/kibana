@@ -84,6 +84,10 @@ export interface AlertWithLegacyId<Params extends AlertTypeParams = never> exten
 }
 
 export type SanitizedAlert<Params extends AlertTypeParams = never> = Omit<Alert<Params>, 'apiKey'>;
+export type SanitizedAlertWithLegacyId<Params extends AlertTypeParams = never> = Omit<
+  AlertWithLegacyId<Params>,
+  'apiKey'
+>;
 export type ResolvedSanitizedRule<Params extends AlertTypeParams = never> = SanitizedAlert<Params> &
   Omit<SavedObjectsResolveResponse, 'saved_object'>;
 
