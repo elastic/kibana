@@ -64,6 +64,10 @@ function createManifest(
     requiredPlugins: required,
     optionalPlugins: optional,
     requiredBundles: [],
+    owner: {
+      name: 'Core',
+      githubTeam: 'kibana-core',
+    },
   };
 }
 
