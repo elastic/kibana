@@ -27,7 +27,7 @@ import {
 
 interface SavedObjectToDashboardStateProps {
   version: string;
-  hideWriteControls: boolean;
+  showWriteControls: boolean;
   savedDashboard: DashboardSavedObject;
   usageCollection: DashboardAppServices['usageCollection'];
   savedObjectsTagging: DashboardAppServices['savedObjectsTagging'];
@@ -55,9 +55,9 @@ interface StateToRawDashboardStateProps {
  */
 export const savedObjectToDashboardState = ({
   version,
-  hideWriteControls,
   savedDashboard,
   usageCollection,
+  showWriteControls,
   savedObjectsTagging,
 }: SavedObjectToDashboardStateProps): DashboardState => {
   const rawState = migrateAppState(
@@ -70,7 +70,7 @@ export const savedObjectToDashboardState = ({
       description: savedDashboard.description || '',
       tags: getTagsFromSavedDashboard(savedDashboard, savedObjectsTagging),
       panels: savedDashboard.panelsJSON ? JSON.parse(savedDashboard.panelsJSON) : [],
-      viewMode: savedDashboard.id || hideWriteControls ? ViewMode.VIEW : ViewMode.EDIT,
+      viewMode: savedDashboard.id || showWriteControls ? ViewMode.EDIT : ViewMode.VIEW,
       options: savedDashboard.optionsJSON ? JSON.parse(savedDashboard.optionsJSON) : {},
     },
     version,

@@ -1,0 +1,23 @@
+format_version: 1.0.0
+name: package_policy_upgrade
+title: Tests package policy upgrades
+description: This is a test package for upgrading package policies
+version: 0.2.0-add-non-required-test-var
+categories: []
+release: beta
+type: integration
+license: basic
+requirement:
+  elasticsearch:
+    versions: '>7.7.0'
+  kibana:
+    versions: '>7.7.0'
+policy_templates:
+  - name: package_policy_upgrade
+    title: Package Policy Upgrade
+    description: Test Package for Upgrading Package Policies
+    inputs:
+      - type: test_input
+        title: Test Input
+        description: Test Input
+        enabled: true

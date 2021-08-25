@@ -43,7 +43,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     }
   );
 
-  registry.when(
+  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/109583
+  registry.when.skip(
     'correlations latency slow transactions with data and default args',
     { config: 'trial', archives: ['apm_8.0.0'] },
     () => {

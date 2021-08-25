@@ -22,9 +22,21 @@ describe('extractCollectors', () => {
     const configs = await parseTelemetryRC(configRoot);
     expect(configs).toHaveLength(1);
     const programPaths = await getProgramPaths(configs[0]);
-
     const results = [...extractCollectors(programPaths, tsConfig)];
-    expect(results).toHaveLength(11);
-    expect(results).toStrictEqual(allExtractedCollectors);
+    expect(results).toHaveLength(12);
+
+    // loop over results for better error messages on failure:
+    for (const result of results) {
+      const [resultPath, resultCollectorDetails] = result;
+      const matchingCollector = allExtractedCollectors.find(
+        ([, extractorCollectorDetails]) =>
+          extractorCollectorDetails.collectorName === resultCollectorDetails.collectorName
+      );
+      if (!matchingCollector) {
+        throw new Error(`Unable to find matching collector in ${resultPath}`);
+      }
+
+      expect(result).toStrictEqual(matchingCollector);
+    }
   });
 });

@@ -650,6 +650,8 @@ export class AlertsClient {
 
   public async getAuthorizedAlertsIndices(featureIds: string[]): Promise<string[] | undefined> {
     try {
+      // ATTENTION FUTURE DEVELOPER when you are a super user the augmentedRuleTypes.authorizedRuleTypes will
+      // return all of the features that you can access and does not care about your featureIds
       const augmentedRuleTypes = await this.authorization.getAugmentedRuleTypesWithAuthorization(
         featureIds,
         [ReadOperations.Find, ReadOperations.Get, WriteOperations.Update],
@@ -665,7 +667,7 @@ export class AlertsClient {
       }
 
       const toReturn = Array.from(authorizedFeatures).flatMap((feature) => {
-        if (isValidFeatureId(feature)) {
+        if (featureIds.includes(feature) && isValidFeatureId(feature)) {
           if (feature === 'siem') {
             return `${mapConsumerToIndexName[feature]}-${this.spaceId}`;
           } else {

@@ -19,7 +19,12 @@ export interface SetValueOptions {
 
 export type MlCommonUI = ProvidedType<typeof MachineLearningCommonUIProvider>;
 
-export function MachineLearningCommonUIProvider({ getService }: FtrProviderContext) {
+export function MachineLearningCommonUIProvider({
+  getPageObjects,
+  getService,
+}: FtrProviderContext) {
+  const PageObjects = getPageObjects(['spaceSelector']);
+
   const canvasElement = getService('canvasElement');
   const log = getService('log');
   const retry = getService('retry');
@@ -278,6 +283,12 @@ export function MachineLearningCommonUIProvider({ getService }: FtrProviderConte
       await this.ensurePagePopupOpen(testSubj);
       await testSubjects.click(`tablePagination-${rowsNumber}-rows`);
       await this.assertRowsNumberPerPage(testSubj, rowsNumber);
+    },
+
+    async changeToSpace(spaceId: string) {
+      await PageObjects.spaceSelector.openSpacesNav();
+      await PageObjects.spaceSelector.goToSpecificSpace(spaceId);
+      await PageObjects.spaceSelector.expectHomePage(spaceId);
     },
   };
 }

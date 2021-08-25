@@ -73,12 +73,20 @@ export function defineEnrollRoutes({
         });
       }
 
+      // Convert a plain hex string returned in the enrollment token to a format that ES client
+      // expects, i.e. to a colon delimited hex string in upper case: deadbeef -> DE:AD:BE:EF.
+      const colonFormattedCaFingerprint =
+        request.body.caFingerprint
+          .toUpperCase()
+          .match(/.{1,2}/g)
+          ?.join(':') ?? '';
+
       let enrollResult: EnrollResult;
       try {
         enrollResult = await elasticsearch.enroll({
           apiKey: request.body.apiKey,
           hosts: request.body.hosts,
-          caFingerprint: request.body.caFingerprint,
+          caFingerprint: colonFormattedCaFingerprint,
         });
       } catch {
         // For security reasons, we shouldn't leak to the user whether Elasticsearch node couldn't process enrollment

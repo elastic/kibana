@@ -2943,13 +2943,6 @@
     },
     "maps": {
       "properties": {
-        "settings": {
-          "properties": {
-            "showMapVisualizationTypes": {
-              "type": "boolean"
-            }
-          }
-        },
         "indexPatternsWithGeoFieldCount": {
           "type": "long"
         },
@@ -5827,16 +5820,10 @@
         },
         "ui_open": {
           "properties": {
-            "cluster": {
+            "elasticsearch": {
               "type": "long",
               "_meta": {
-                "description": "Number of times a user viewed the list of Elasticsearch cluster deprecations."
-              }
-            },
-            "indices": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of times a user viewed the list of Elasticsearch index deprecations."
+                "description": "Number of times a user viewed the list of Elasticsearch deprecations."
               }
             },
             "overview": {

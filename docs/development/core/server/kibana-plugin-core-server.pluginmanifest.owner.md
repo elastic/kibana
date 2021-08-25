@@ -4,12 +4,10 @@
 
 ## PluginManifest.owner property
 
-TODO: make required once all internal plugins have this specified.
-
 <b>Signature:</b>
 
 ```typescript
-readonly owner?: {
+readonly owner: {
         readonly name: string;
         readonly githubTeam?: string;
     };
