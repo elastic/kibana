@@ -5,20 +5,13 @@
  * 2.0.
  */
 import type { Assign } from '@kbn/utility-types';
-import { omit } from 'lodash';
-import { useMemo, useContext } from 'react';
-import type { ApmUrlParams } from './types';
+import { useContext } from 'react';
+import type { UxUrlParams } from './types';
 import { UrlParamsContext } from './url_params_context';
 
-export function useUrlParams(): Assign<
+export function useUxUrlParams(): Assign<
   React.ContextType<typeof UrlParamsContext>,
-  { urlParams: ApmUrlParams }
+  { urlParams: UxUrlParams }
 > {
-  const context = useContext(UrlParamsContext);
-  return useMemo(() => {
-    return {
-      ...context,
-      urlParams: omit(context.urlParams, ['environment', 'kuery']),
-    };
-  }, [context]);
+  return useContext(UrlParamsContext);
 }
