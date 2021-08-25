@@ -27,6 +27,7 @@ import {
 import { useApmPluginContext } from '../../context/apm_plugin/use_apm_plugin_context';
 import { BreadcrumbsContextProvider } from '../../context/breadcrumbs/context';
 import { LicenseProvider } from '../../context/license/license_context';
+import { TimeRangeIdContextProvider } from '../../context/time_range_id/time_range_id_context';
 import { UrlParamsProvider } from '../../context/url_params_context/url_params_context';
 import { ApmPluginStartDeps } from '../../plugin';
 import { ApmHeaderActionMenu } from '../shared/apm_header_action_menu';
@@ -54,24 +55,26 @@ export function ApmAppRoot({
       <ApmPluginContext.Provider value={apmPluginContextValue}>
         <KibanaContextProvider services={{ ...core, ...pluginsStart }}>
           <i18nCore.Context>
-            <RouterProvider history={history} router={apmRouter as any}>
-              <TrackPageview>
-                <BreadcrumbsContextProvider>
-                  <UrlParamsProvider>
-                    <LicenseProvider>
-                      <AnomalyDetectionJobsContextProvider>
-                        <ApmThemeProvider>
-                          <MountApmHeaderActionMenu />
+            <TimeRangeIdContextProvider>
+              <RouterProvider history={history} router={apmRouter as any}>
+                <TrackPageview>
+                  <BreadcrumbsContextProvider>
+                    <UrlParamsProvider>
+                      <LicenseProvider>
+                        <AnomalyDetectionJobsContextProvider>
+                          <ApmThemeProvider>
+                            <MountApmHeaderActionMenu />
 
-                          <Route component={ScrollToTopOnPathChange} />
-                          <RouteRenderer />
-                        </ApmThemeProvider>
-                      </AnomalyDetectionJobsContextProvider>
-                    </LicenseProvider>
-                  </UrlParamsProvider>
-                </BreadcrumbsContextProvider>
-              </TrackPageview>
-            </RouterProvider>
+                            <Route component={ScrollToTopOnPathChange} />
+                            <RouteRenderer />
+                          </ApmThemeProvider>
+                        </AnomalyDetectionJobsContextProvider>
+                      </LicenseProvider>
+                    </UrlParamsProvider>
+                  </BreadcrumbsContextProvider>
+                </TrackPageview>
+              </RouterProvider>
+            </TimeRangeIdContextProvider>
           </i18nCore.Context>
         </KibanaContextProvider>
       </ApmPluginContext.Provider>

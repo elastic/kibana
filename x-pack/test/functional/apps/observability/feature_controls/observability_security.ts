@@ -65,8 +65,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('shows observability/cases navlink', async () => {
-        const navLinks = (await appsMenu.readLinks()).map((link) => link.text).slice(0, 2);
-        expect(navLinks).to.eql(['Overview', 'Cases']);
+        const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
+        expect(navLinks).to.contain('Cases');
       });
 
       it(`landing page shows "Create new case" button`, async () => {
@@ -133,8 +133,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('shows observability/cases navlink', async () => {
-        const navLinks = (await appsMenu.readLinks()).map((link) => link.text).slice(0, 2);
-        expect(navLinks).to.eql(['Overview', 'Cases']);
+        const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
+        expect(navLinks).to.contain('Cases');
       });
 
       it(`landing page shows disabled "Create new case" button`, async () => {

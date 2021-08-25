@@ -205,8 +205,8 @@ export const aggs: Agg[] = [
       ...aggDefaultMeta,
       isFieldFormattingDisabled: true,
       type: AGG_TYPE.PARENT_PIPELINE,
-      label: i18n.translate('visTypeTimeseries.aggUtils.calculationLabel', {
-        defaultMessage: 'Calculation',
+      label: i18n.translate('visTypeTimeseries.aggUtils.bucketScriptLabel', {
+        defaultMessage: 'Bucket Script',
       }),
     },
   },

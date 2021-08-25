@@ -163,7 +163,7 @@ describe('agg utils', () => {
           'Variance',
         ],
         parent_pipeline: [
-          'Calculation',
+          'Bucket Script',
           'Cumulative Sum',
           'Derivative',
           'Moving Average',
