@@ -134,18 +134,18 @@ export const collectExportedObjects = async ({
   };
 };
 
+type ObjectKey = string;
+
 const getObjKey = (
   obj: { type: string; id: string; namespaces?: string[] },
   typeRegistry: ISavedObjectTypeRegistry
-) => {
+): ObjectKey => {
   const namespaceType = typeRegistry.getType(obj.type)!.namespaceType;
   if (namespaceType === 'single') {
-    return `${obj.namespaces![0]}:${obj.type}:${obj.id}`;
+    return `${obj.namespaces ? obj.namespaces[0] : 'default'}:${obj.type}:${obj.id}`;
   }
   return `${obj.type}:${obj.id}`;
 };
-
-type ObjectKey = string;
 
 interface CollectedReference {
   id: string;
