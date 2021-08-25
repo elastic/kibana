@@ -8,11 +8,11 @@
 
 import ReactDOM from 'react-dom/server';
 import { formatRow, formatTopLevelObject } from './row_formatter';
-import { stubbedSavedObjectIndexPattern } from '../../../../../../__mocks__/stubbed_saved_object_index_pattern';
 import { IndexPattern } from '../../../../../../../../data/common/index_patterns/index_patterns';
 import { fieldFormatsMock } from '../../../../../../../../field_formats/common/mocks';
 import { setServices } from '../../../../../../kibana_services';
 import { DiscoverServices } from '../../../../../../build_services';
+import { stubbedSavedObjectIndexPattern } from '../../../../../../../../data/common/stubs';
 
 describe('Row formatter', () => {
   const hit = {
@@ -36,7 +36,7 @@ describe('Row formatter', () => {
     } = stubbedSavedObjectIndexPattern(id);
 
     return new IndexPattern({
-      spec: { id, type, version, timeFieldName, fields, title },
+      spec: { id, type, version, timeFieldName, fields: JSON.parse(fields), title },
       fieldFormats: fieldFormatsMock,
       shortDotsEnable: false,
       metaFields: [],

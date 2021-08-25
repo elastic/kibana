@@ -30,10 +30,23 @@ const Plugins = {
     'kibana.json': 'not-json',
   }),
   incomplete: () => ({
-    'kibana.json': JSON.stringify({ version: '1' }),
+    'kibana.json': JSON.stringify({
+      version: '1',
+      owner: {
+        name: 'foo',
+        githubTeam: 'foo',
+      },
+    }),
   }),
   incompatible: () => ({
-    'kibana.json': JSON.stringify({ id: 'plugin', version: '1' }),
+    'kibana.json': JSON.stringify({
+      id: 'plugin',
+      version: '1',
+      owner: {
+        name: 'foo',
+        githubTeam: 'foo',
+      },
+    }),
   }),
   incompatibleType: (id: string) => ({
     'kibana.json': JSON.stringify({
@@ -42,6 +55,10 @@ const Plugins = {
       kibanaVersion: '1.2.3',
       type: 'evenEarlierThanPreboot',
       server: true,
+      owner: {
+        name: 'foo',
+        githubTeam: 'foo',
+      },
     }),
   }),
   missingManifest: () => ({}),
@@ -49,6 +66,17 @@ const Plugins = {
     'kibana.json': mockFs.file({
       mode: 0, // 0000,
       content: JSON.stringify({ id: 'plugin', version: '1' }),
+    }),
+  }),
+  missingOwnerAttribute: () => ({
+    'kibana.json': JSON.stringify({
+      id: 'foo',
+      configPath: ['plugins', 'foo'],
+      version: '1',
+      kibanaVersion: '1.2.3',
+      requiredPlugins: [],
+      optionalPlugins: [],
+      server: true,
     }),
   }),
   valid: (id: string) => ({
@@ -60,6 +88,10 @@ const Plugins = {
       requiredPlugins: [],
       optionalPlugins: [],
       server: true,
+      owner: {
+        name: 'foo',
+        githubTeam: 'foo',
+      },
     }),
   }),
   validPreboot: (id: string) => ({
@@ -72,6 +104,10 @@ const Plugins = {
       requiredPlugins: [],
       optionalPlugins: [],
       server: true,
+      owner: {
+        name: 'foo',
+        githubTeam: 'foo',
+      },
     }),
   }),
 };
@@ -182,6 +218,7 @@ describe('plugins discovery system', () => {
         [`${KIBANA_ROOT}/src/plugins/plugin_c`]: Plugins.incompatible(),
         [`${KIBANA_ROOT}/src/plugins/plugin_d`]: Plugins.incompatibleType('pluginD'),
         [`${KIBANA_ROOT}/src/plugins/plugin_ad`]: Plugins.missingManifest(),
+        [`${KIBANA_ROOT}/src/plugins/plugin_e`]: Plugins.missingOwnerAttribute(),
       },
       { createCwd: false }
     );
@@ -196,21 +233,40 @@ describe('plugins discovery system', () => {
       )
       .toPromise();
 
-    expect(errors).toEqual(
-      expect.arrayContaining([
-        `Error: Unexpected token o in JSON at position 1 (invalid-manifest, ${manifestPath(
-          'plugin_a'
-        )})`,
-        `Error: Plugin manifest must contain an "id" property. (invalid-manifest, ${manifestPath(
-          'plugin_b'
-        )})`,
-        `Error: Plugin "plugin" is only compatible with Kibana version "1", but used Kibana version is "1.2.3". (incompatible-version, ${manifestPath(
-          'plugin_c'
-        )})`,
-        `Error: The "type" in manifest for plugin "pluginD" is set to "evenEarlierThanPreboot", but it should either be "standard" or "preboot". (invalid-manifest, ${manifestPath(
-          'plugin_d'
-        )})`,
-      ])
+    expect(errors).toContain(
+      `Error: Unexpected token o in JSON at position 1 (invalid-manifest, ${manifestPath(
+        'plugin_a'
+      )})`
+    );
+
+    expect(errors).toContain(
+      `Error: Plugin manifest must contain an "id" property. (invalid-manifest, ${manifestPath(
+        'plugin_b'
+      )})`
+    );
+
+    expect(errors).toContain(
+      `Error: Plugin "plugin" is only compatible with Kibana version "1", but used Kibana version is "1.2.3". (incompatible-version, ${manifestPath(
+        'plugin_c'
+      )})`
+    );
+
+    expect(errors).toContain(
+      `Error: The "type" in manifest for plugin "pluginD" is set to "evenEarlierThanPreboot", but it should either be "standard" or "preboot". (invalid-manifest, ${manifestPath(
+        'plugin_d'
+      )})`
+    );
+
+    expect(errors).toContain(
+      `Error: The "type" in manifest for plugin "pluginD" is set to "evenEarlierThanPreboot", but it should either be "standard" or "preboot". (invalid-manifest, ${manifestPath(
+        'plugin_d'
+      )})`
+    );
+
+    expect(errors).toContain(
+      `Error: Plugin manifest for "foo" must contain an "owner" property, which includes a nested "name" property. (invalid-manifest, ${manifestPath(
+        'plugin_e'
+      )})`
     );
   });
 

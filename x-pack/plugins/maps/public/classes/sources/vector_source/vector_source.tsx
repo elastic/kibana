@@ -75,7 +75,6 @@ export interface IVectorSource extends ISource {
     defaultFields: Record<string, Record<string, string>>
   ): Promise<void>;
   deleteFeature(featureId: string): Promise<void>;
-  isFilterByMapBounds(): boolean;
 }
 
 export class AbstractVectorSource extends AbstractSource implements IVectorSource {

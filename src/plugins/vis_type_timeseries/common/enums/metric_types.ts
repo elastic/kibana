@@ -7,21 +7,25 @@
  */
 
 // We should probably use METRIC_TYPES from data plugin in future.
-export enum METRIC_TYPES {
+export enum TSVB_METRIC_TYPES {
+  FILTER_RATIO = 'filter_ratio',
+  POSITIVE_RATE = 'positive_rate',
   PERCENTILE = 'percentile',
   PERCENTILE_RANK = 'percentile_rank',
-  TOP_HIT = 'top_hit',
-  COUNT = 'count',
-  DERIVATIVE = 'derivative',
+  STATIC = 'static',
   STD_DEVIATION = 'std_deviation',
-  VARIANCE = 'variance',
   SUM_OF_SQUARES = 'sum_of_squares',
-  CARDINALITY = 'cardinality',
+  TOP_HIT = 'top_hit',
   VALUE_COUNT = 'value_count',
-  AVERAGE = 'avg',
-  SUM = 'sum',
-  MIN = 'min',
-  MAX = 'max',
+  VARIANCE = 'variance',
+  CALCULATION = 'calculation',
+  MOVING_AVERAGE = 'moving_average',
+  POSITIVE_ONLY = 'positive_only',
+  STD_DEVIATION_BUCKET = 'std_deviation_bucket',
+  SUM_OF_SQUARES_BUCKET = 'sum_of_squares_bucket',
+  VARIANCE_BUCKET = 'variance_bucket',
+  SERIES_AGG = 'series_agg',
+  MATH = 'math',
 }
 
 // We should probably use BUCKET_TYPES from data plugin in future.
@@ -29,9 +33,3 @@ export enum BUCKET_TYPES {
   TERMS = 'terms',
   FILTERS = 'filters',
 }
-
-export const EXTENDED_STATS_TYPES = [
-  METRIC_TYPES.STD_DEVIATION,
-  METRIC_TYPES.VARIANCE,
-  METRIC_TYPES.SUM_OF_SQUARES,
-];

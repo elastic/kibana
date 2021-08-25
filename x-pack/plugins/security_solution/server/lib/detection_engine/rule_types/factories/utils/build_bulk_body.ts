@@ -46,7 +46,7 @@ export const buildBulkBody = (
   const filteredSource = filterSource(mergedDoc);
   const timestamp = new Date().toISOString();
 
-  const reason = buildReasonMessage({ mergedDoc, rule, timestamp });
+  const reason = buildReasonMessage({ mergedDoc, rule });
   if (isSourceDoc(mergedDoc)) {
     return {
       ...filteredSource,
