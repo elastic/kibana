@@ -28,13 +28,6 @@ export const THREAT_QUERY_LABEL = i18n.translate(
   }
 );
 
-export const SAVED_ID_LABEL = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.savedIdLabel',
-  {
-    defaultMessage: 'Saved query name',
-  }
-);
-
 export const ML_TYPE_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.mlRuleTypeDescription',
   {

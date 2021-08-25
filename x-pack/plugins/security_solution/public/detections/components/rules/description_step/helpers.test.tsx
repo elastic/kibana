@@ -189,7 +189,6 @@ describe('helpers', () => {
         query: mockQueryBarWithSavedId.query,
         savedId: mockQueryBarWithSavedId.saved_id,
       });
-      expect(result[0].title).toEqual(<>{i18n.SAVED_ID_LABEL} </>);
       expect(result[0].description).toEqual(<>{mockQueryBarWithSavedId.saved_id} </>);
     });
   });
