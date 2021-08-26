@@ -29,8 +29,7 @@ describe('SourceLogic', () => {
   const {
     clearFlashMessages,
     flashAPIErrors,
-    setSuccessMessage,
-    setQueuedSuccessMessage,
+    flashSuccessToast,
     setErrorMessage,
   } = mockFlashMessageHelpers;
   const { navigateToUrl } = mockKibanaValues;
@@ -79,7 +78,7 @@ describe('SourceLogic', () => {
         ...contentSource,
         name: NAME,
       });
-      expect(setSuccessMessage).toHaveBeenCalled();
+      expect(flashSuccessToast).toHaveBeenCalled();
     });
 
     it('setSearchResults', () => {
@@ -391,7 +390,7 @@ describe('SourceLogic', () => {
         expect(clearFlashMessages).toHaveBeenCalled();
         expect(http.delete).toHaveBeenCalledWith('/api/workplace_search/org/sources/123');
         await promise;
-        expect(setQueuedSuccessMessage).toHaveBeenCalled();
+        expect(flashSuccessToast).toHaveBeenCalled();
         expect(setButtonNotLoadingSpy).toHaveBeenCalled();
       });
 

@@ -14,7 +14,7 @@ import { HttpFetchQuery } from 'src/core/public';
 
 import {
   flashAPIErrors,
-  setSuccessMessage,
+  flashSuccessToast,
   clearFlashMessages,
   setErrorMessage,
 } from '../../../../../shared/flash_messages';
@@ -491,7 +491,7 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
         });
         if (successCallback) successCallback();
         if (isUpdating) {
-          setSuccessMessage(
+          flashSuccessToast(
             i18n.translate(
               'xpack.enterpriseSearch.workplaceSearch.sources.flashMessages.contentSourceConfigUpdated',
               {

@@ -8,7 +8,6 @@
 import React, { Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
-  EuiCodeEditor,
   EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
@@ -24,6 +23,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { serializeRestoreSettings } from '../../../../../common/lib';
+import { EuiCodeEditor } from '../../../../shared_imports';
 import { useServices } from '../../../app_context';
 import { StepProps } from './';
 import { CollapsibleIndicesList } from '../../collapsible_lists/collapsible_indices_list';

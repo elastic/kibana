@@ -49,7 +49,6 @@ describe('correlations', () => {
           end: '2021',
           environment: 'dev',
           kuery: '',
-          percentileThresholdValue: 75,
           includeFrozen: false,
         },
       });
@@ -83,13 +82,6 @@ describe('correlations', () => {
             {
               term: {
                 'transaction.name': 'actualTransactionName',
-              },
-            },
-            {
-              range: {
-                'transaction.duration.us': {
-                  gte: 75,
-                },
               },
             },
           ],

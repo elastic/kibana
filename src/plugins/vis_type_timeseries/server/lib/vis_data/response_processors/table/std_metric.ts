@@ -7,7 +7,7 @@
  */
 
 import { getSplits, getLastMetric, mapEmptyToZero } from '../../helpers';
-import { METRIC_TYPES } from '../../../../../common/enums';
+import { TSVB_METRIC_TYPES } from '../../../../../common/enums';
 
 import type { TableResponseProcessorsFunction } from './types';
 
@@ -20,11 +20,15 @@ export const stdMetric: TableResponseProcessorsFunction = ({
 }) => (next) => async (results) => {
   const metric = getLastMetric(series);
 
-  if (metric.type === METRIC_TYPES.STD_DEVIATION && metric.mode === 'band') {
+  if (metric.type === TSVB_METRIC_TYPES.STD_DEVIATION && metric.mode === 'band') {
     return next(results);
   }
 
-  if (METRIC_TYPES.PERCENTILE_RANK === metric.type || METRIC_TYPES.PERCENTILE === metric.type) {
+  if (
+    [TSVB_METRIC_TYPES.PERCENTILE_RANK, TSVB_METRIC_TYPES.PERCENTILE].includes(
+      metric.type as TSVB_METRIC_TYPES
+    )
+  ) {
     return next(results);
   }
 

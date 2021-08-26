@@ -75,6 +75,8 @@ export function PieComponent(
     legendPosition,
     nestedLegend,
     percentDecimals,
+    legendMaxLines,
+    truncateLegend,
     hideLabels,
     palette,
   } = props.args;
@@ -296,6 +298,9 @@ export function PieComponent(
             background: {
               ...chartTheme.background,
               color: undefined, // removes background for embeddables
+            },
+            legend: {
+              labelOptions: { maxLines: truncateLegend ? legendMaxLines ?? 1 : 0 },
             },
           }}
           baseTheme={chartBaseTheme}

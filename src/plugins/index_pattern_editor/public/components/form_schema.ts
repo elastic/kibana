@@ -18,7 +18,7 @@ export const schema = {
     defaultValue: '',
     helpText: i18n.translate('indexPatternEditor.validations.titleHelpText', {
       defaultMessage:
-        'Use an asterisk (*) to match multiple indices. Spaces and the characters , /, ?, ", <, >, | are not allowed.',
+        'Use an asterisk (*) to match multiple characters. Spaces and the characters , /, ?, ", <, >, | are not allowed.',
     }),
     validations: [
       {

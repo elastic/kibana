@@ -6,16 +6,22 @@
  */
 
 import {
+  ALERT_ID,
+  ALERT_RULE_CATEGORY,
   ALERT_RULE_CONSUMER,
+  ALERT_RULE_NAME,
+  ALERT_RULE_PRODUCER,
   ALERT_RULE_RISK_SCORE,
-  ALERT_STATUS,
-  ECS_VERSION,
   ALERT_RULE_TYPE_ID,
+  ALERT_RULE_UUID,
+  ALERT_STATUS,
+  ALERT_STATUS_ACTIVE,
+  ALERT_UUID,
+  ECS_VERSION,
   SPACE_IDS,
   TIMESTAMP,
   VERSION,
 } from '@kbn/rule-data-utils';
-
 import { BASE_RAC_ALERTS_API_PATH } from '../../common/constants';
 import { ParsedTechnicalFields } from '../../common/parse_technical_fields';
 import { getAlertByIdRoute } from './get_alert_by_id';
@@ -24,14 +30,20 @@ import { getReadRequest } from './__mocks__/request_responses';
 import { requestMock, serverMock } from './__mocks__/server';
 
 const getMockAlert = (): ParsedTechnicalFields => ({
-  [TIMESTAMP]: '2021-06-21T21:33:05.713Z',
-  [ECS_VERSION]: '1.0.0',
-  [VERSION]: '7.13.0',
-  [ALERT_RULE_TYPE_ID]: 'apm.error_rate',
+  [ALERT_ID]: 'fake-alert-id',
+  [ALERT_RULE_CATEGORY]: 'apm.error_rate',
   [ALERT_RULE_CONSUMER]: 'apm',
-  [ALERT_STATUS]: 'open',
+  [ALERT_RULE_NAME]: 'Check error rate',
+  [ALERT_RULE_PRODUCER]: 'apm',
   [ALERT_RULE_RISK_SCORE]: 20,
+  [ALERT_RULE_TYPE_ID]: 'fake-rule-type-id',
+  [ALERT_RULE_UUID]: 'fake-rule-uuid',
+  [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
+  [ALERT_UUID]: 'fake-alert-uuid',
+  [ECS_VERSION]: '1.0.0',
   [SPACE_IDS]: ['fake-space-id'],
+  [TIMESTAMP]: '2021-06-21T21:33:05.713Z',
+  [VERSION]: '7.13.0',
 });
 
 describe('getAlertByIdRoute', () => {

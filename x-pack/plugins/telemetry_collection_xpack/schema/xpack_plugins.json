@@ -228,6 +228,9 @@
             },
             "xpack_ml_anomaly_detection_alert": {
               "type": "long"
+            },
+            "xpack_ml_anomaly_detection_jobs_health": {
+              "type": "long"
             }
           }
         },
@@ -306,6 +309,9 @@
               "type": "long"
             },
             "xpack_ml_anomaly_detection_alert": {
+              "type": "long"
+            },
+            "xpack_ml_anomaly_detection_jobs_health": {
               "type": "long"
             }
           }
@@ -2943,13 +2949,6 @@
     },
     "maps": {
       "properties": {
-        "settings": {
-          "properties": {
-            "showMapVisualizationTypes": {
-              "type": "boolean"
-            }
-          }
-        },
         "indexPatternsWithGeoFieldCount": {
           "type": "long"
         },
@@ -3811,6 +3810,38 @@
                   }
                 }
               }
+            },
+            "xpack.ml.anomaly_detection_jobs_health": {
+              "properties": {
+                "count_by_check_type": {
+                  "properties": {
+                    "datafeed": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "total number of alerting rules performing the not started datafeed health check"
+                      }
+                    },
+                    "mml": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "total number of alerting rules performing the model memory limit health check"
+                      }
+                    },
+                    "delayedData": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "total number of alerting rules performing the delayed data health check"
+                      }
+                    },
+                    "errorMessages": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "total number of alerting rules performing the error messages health check"
+                      }
+                    }
+                  }
+                }
+              }
             }
           }
         }
@@ -4044,6 +4075,9 @@
             },
             "total": {
               "type": "long"
+            },
+            "deprecated": {
+              "type": "long"
             }
           }
         },
@@ -4053,6 +4087,9 @@
               "type": "boolean"
             },
             "total": {
+              "type": "long"
+            },
+            "deprecated": {
               "type": "long"
             }
           }
@@ -4064,6 +4101,9 @@
             },
             "total": {
               "type": "long"
+            },
+            "deprecated": {
+              "type": "long"
             }
           }
         },
@@ -4073,6 +4113,9 @@
               "type": "boolean"
             },
             "total": {
+              "type": "long"
+            },
+            "deprecated": {
               "type": "long"
             },
             "app": {
@@ -4105,9 +4148,6 @@
         },
         "status": {
           "properties": {
-            "cancelled": {
-              "type": "long"
-            },
             "completed": {
               "type": "long"
             },
@@ -4127,62 +4167,6 @@
         },
         "statuses": {
           "properties": {
-            "cancelled": {
-              "properties": {
-                "csv": {
-                  "properties": {
-                    "canvas workpad": {
-                      "type": "long"
-                    },
-                    "dashboard": {
-                      "type": "long"
-                    },
-                    "visualization": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "csv_searchsource": {
-                  "properties": {
-                    "canvas workpad": {
-                      "type": "long"
-                    },
-                    "dashboard": {
-                      "type": "long"
-                    },
-                    "visualization": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "PNG": {
-                  "properties": {
-                    "canvas workpad": {
-                      "type": "long"
-                    },
-                    "dashboard": {
-                      "type": "long"
-                    },
-                    "visualization": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "printable_pdf": {
-                  "properties": {
-                    "canvas workpad": {
-                      "type": "long"
-                    },
-                    "dashboard": {
-                      "type": "long"
-                    },
-                    "visualization": {
-                      "type": "long"
-                    }
-                  }
-                }
-              }
-            },
             "completed": {
               "properties": {
                 "csv": {
@@ -4483,6 +4467,9 @@
                 },
                 "total": {
                   "type": "long"
+                },
+                "deprecated": {
+                  "type": "long"
                 }
               }
             },
@@ -4492,6 +4479,9 @@
                   "type": "boolean"
                 },
                 "total": {
+                  "type": "long"
+                },
+                "deprecated": {
                   "type": "long"
                 }
               }
@@ -4503,6 +4493,9 @@
                 },
                 "total": {
                   "type": "long"
+                },
+                "deprecated": {
+                  "type": "long"
                 }
               }
             },
@@ -4512,6 +4505,9 @@
                   "type": "boolean"
                 },
                 "total": {
+                  "type": "long"
+                },
+                "deprecated": {
                   "type": "long"
                 },
                 "app": {
@@ -4544,9 +4540,6 @@
             },
             "status": {
               "properties": {
-                "cancelled": {
-                  "type": "long"
-                },
                 "completed": {
                   "type": "long"
                 },
@@ -4566,62 +4559,6 @@
             },
             "statuses": {
               "properties": {
-                "cancelled": {
-                  "properties": {
-                    "csv": {
-                      "properties": {
-                        "canvas workpad": {
-                          "type": "long"
-                        },
-                        "dashboard": {
-                          "type": "long"
-                        },
-                        "visualization": {
-                          "type": "long"
-                        }
-                      }
-                    },
-                    "csv_searchsource": {
-                      "properties": {
-                        "canvas workpad": {
-                          "type": "long"
-                        },
-                        "dashboard": {
-                          "type": "long"
-                        },
-                        "visualization": {
-                          "type": "long"
-                        }
-                      }
-                    },
-                    "PNG": {
-                      "properties": {
-                        "canvas workpad": {
-                          "type": "long"
-                        },
-                        "dashboard": {
-                          "type": "long"
-                        },
-                        "visualization": {
-                          "type": "long"
-                        }
-                      }
-                    },
-                    "printable_pdf": {
-                      "properties": {
-                        "canvas workpad": {
-                          "type": "long"
-                        },
-                        "dashboard": {
-                          "type": "long"
-                        },
-                        "visualization": {
-                          "type": "long"
-                        }
-                      }
-                    }
-                  }
-                },
                 "completed": {
                   "properties": {
                     "csv": {
@@ -5921,16 +5858,10 @@
         },
         "ui_open": {
           "properties": {
-            "cluster": {
+            "elasticsearch": {
               "type": "long",
               "_meta": {
-                "description": "Number of times a user viewed the list of Elasticsearch cluster deprecations."
-              }
-            },
-            "indices": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of times a user viewed the list of Elasticsearch index deprecations."
+                "description": "Number of times a user viewed the list of Elasticsearch deprecations."
               }
             },
             "overview": {

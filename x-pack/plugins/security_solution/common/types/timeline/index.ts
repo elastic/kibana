@@ -22,6 +22,7 @@ import {
 import { FlowTarget } from '../../search_strategy/security_solution/network';
 import { errorSchema } from '../../detection_engine/schemas/response/error_schema';
 import { Direction, Maybe } from '../../search_strategy';
+import { Ecs } from '../../ecs';
 
 export * from './actions';
 export * from './cells';
@@ -460,6 +461,17 @@ export enum TimelineTabs {
   eql = 'eql',
 }
 
+/**
+ * Used for scrolling top inside a tab. Especially when swiching tabs.
+ */
+export interface ScrollToTopEvent {
+  /**
+   * Timestamp of the moment when the event happened.
+   * The timestamp might be necessary for the scenario where the event could happen multiple times.
+   */
+  timestamp: number;
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type EmptyObject = Record<any, never>;
 
@@ -470,6 +482,7 @@ export type TimelineExpandedEventType =
         eventId: string;
         indexName: string;
         refetch?: () => void;
+        ecsData?: Ecs;
       };
     }
   | EmptyObject;

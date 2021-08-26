@@ -75,10 +75,9 @@ exports[`NoDataCard props href 1`] = `
   <div
     class="euiCard__footer"
   >
-    <a
+    <button
       class="euiButton euiButton--primary euiButton--fill"
-      href="#"
-      rel="noreferrer"
+      type="button"
     >
       <span
         class="euiButtonContent euiButton__content"
@@ -89,7 +88,7 @@ exports[`NoDataCard props href 1`] = `
           Button
         </span>
       </span>
-    </a>
+    </button>
   </div>
 </div>
 `;

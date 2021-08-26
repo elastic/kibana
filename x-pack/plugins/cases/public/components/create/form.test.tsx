@@ -23,6 +23,7 @@ import { useCaseConfigureResponse } from '../configure_cases/__mock__';
 jest.mock('../../containers/use_get_tags');
 jest.mock('../../containers/configure/use_connectors');
 jest.mock('../../containers/configure/use_configure');
+jest.mock('../markdown_editor/plugins/lens/use_lens_draft_comment');
 
 const useGetTagsMock = useGetTags as jest.Mock;
 const useConnectorsMock = useConnectors as jest.Mock;

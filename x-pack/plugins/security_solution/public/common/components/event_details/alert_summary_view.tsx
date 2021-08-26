@@ -19,8 +19,11 @@ import {
   ALERTS_HEADERS_THRESHOLD_CARDINALITY,
   ALERTS_HEADERS_THRESHOLD_COUNT,
   ALERTS_HEADERS_THRESHOLD_TERMS,
+  ALERTS_HEADERS_RULE_NAME,
   SIGNAL_STATUS,
+  ALERTS_HEADERS_TARGET_IMPORT_HASH,
   TIMESTAMP,
+  ALERTS_HEADERS_RULE_DESCRIPTION,
 } from '../../../detections/components/alerts_table/translations';
 import {
   AGENT_STATUS_FIELD_NAME,
@@ -38,6 +41,7 @@ import { getEmptyValue } from '../empty_value';
 import { ActionCell } from './table/action_cell';
 import { FieldValueCell } from './table/field_value_cell';
 import { TimelineEventsDetailsItem } from '../../../../common';
+import { EventCode } from '../../../../common/ecs/event';
 
 export const Indent = styled.div`
   padding: 0 8px;
@@ -48,7 +52,15 @@ const StyledEmptyComponent = styled.div`
   padding: ${(props) => `${props.theme.eui.paddingSizes.xs} 0`};
 `;
 
-const fields = [
+interface EventSummaryField {
+  id: string;
+  label?: string;
+  linkField?: string;
+  fieldType?: string;
+  overrideField?: string;
+}
+
+const defaultDisplayFields: EventSummaryField[] = [
   { id: 'signal.status', label: SIGNAL_STATUS },
   { id: '@timestamp', label: TIMESTAMP },
   {
@@ -68,18 +80,37 @@ const fields = [
   { id: 'signal.threshold_result.cardinality', label: ALERTS_HEADERS_THRESHOLD_CARDINALITY },
 ];
 
-const processFields = [
-  ...fields,
+const processCategoryFields: EventSummaryField[] = [
+  ...defaultDisplayFields,
   { id: 'process.name' },
   { id: 'process.parent.name' },
   { id: 'process.args' },
 ];
 
-const networkFields = [
-  ...fields,
+const networkCategoryFields: EventSummaryField[] = [
+  ...defaultDisplayFields,
   { id: 'destination.address' },
   { id: 'destination.port' },
   { id: 'process.name' },
+];
+
+const memoryShellCodeAlertFields: EventSummaryField[] = [
+  ...defaultDisplayFields,
+  { id: 'rule.name', label: ALERTS_HEADERS_RULE_NAME },
+  {
+    id: 'Target.process.thread.Ext.start_address_details.memory_pe.imphash',
+    label: ALERTS_HEADERS_TARGET_IMPORT_HASH,
+  },
+];
+
+const behaviorAlertFields: EventSummaryField[] = [
+  ...defaultDisplayFields,
+  { id: 'rule.description', label: ALERTS_HEADERS_RULE_DESCRIPTION },
+];
+
+const memorySignatureAlertFields: EventSummaryField[] = [
+  ...defaultDisplayFields,
+  { id: 'rule.name', label: ALERTS_HEADERS_RULE_NAME },
 ];
 
 const getDescription = ({
@@ -117,7 +148,35 @@ const getDescription = ({
   );
 };
 
-const getSummaryRows = ({
+function getEventFieldsToDisplay({
+  eventCategory,
+  eventCode,
+}: {
+  eventCategory: string;
+  eventCode?: string;
+}): EventSummaryField[] {
+  switch (eventCode) {
+    // memory protection fields
+    case EventCode.MALICIOUS_THREAD:
+      return memoryShellCodeAlertFields;
+    case EventCode.MEMORY_SIGNATURE:
+      return memorySignatureAlertFields;
+    case EventCode.BEHAVIOR:
+      return behaviorAlertFields;
+  }
+
+  switch (eventCategory) {
+    case 'network':
+      return networkCategoryFields;
+
+    case 'process':
+      return processCategoryFields;
+  }
+
+  return defaultDisplayFields;
+}
+
+export const getSummaryRows = ({
   data,
   browserFields,
   timelineId,
@@ -128,19 +187,19 @@ const getSummaryRows = ({
   timelineId: string;
   eventId: string;
 }) => {
-  const categoryField = find({ category: 'event', field: 'event.category' }, data) as
-    | TimelineEventsDetailsItem
-    | undefined;
-  const eventCategory = Array.isArray(categoryField?.originalValue)
-    ? categoryField?.originalValue[0]
-    : categoryField?.originalValue;
+  const eventCategoryField = find({ category: 'event', field: 'event.category' }, data);
 
-  const tableFields =
-    eventCategory === 'network'
-      ? networkFields
-      : eventCategory === 'process'
-      ? processFields
-      : fields;
+  const eventCategory = Array.isArray(eventCategoryField?.originalValue)
+    ? eventCategoryField?.originalValue[0]
+    : eventCategoryField?.originalValue;
+
+  const eventCodeField = find({ category: 'event', field: 'event.code' }, data);
+
+  const eventCode = Array.isArray(eventCodeField?.originalValue)
+    ? eventCodeField?.originalValue?.[0]
+    : eventCodeField?.originalValue;
+
+  const tableFields = getEventFieldsToDisplay({ eventCategory, eventCode });
 
   return data != null
     ? tableFields.reduce<SummaryRow[]>((acc, item) => {

@@ -13,8 +13,11 @@ import {
 import { useMemo } from 'react';
 import { useTimelineContext } from '../timeline_context/use_timeline_context';
 import { TemporaryProcessingPluginsType } from './types';
+import { KibanaServices } from '../../common/lib/kibana';
+import * as lensMarkdownPlugin from './plugins/lens';
 
 export const usePlugins = () => {
+  const kibanaConfig = KibanaServices.getConfig();
   const timelinePlugins = useTimelineContext()?.editor_plugins;
 
   return useMemo(() => {
@@ -31,10 +34,18 @@ export const usePlugins = () => {
       processingPlugins[1][1].components.timeline = timelinePlugins.processingPluginRenderer;
     }
 
+    if (kibanaConfig?.markdownPlugins?.lens) {
+      uiPlugins.push(lensMarkdownPlugin.plugin);
+    }
+
+    parsingPlugins.push(lensMarkdownPlugin.parser);
+    // This line of code is TS-compatible and it will break if [1][1] change in the future.
+    processingPlugins[1][1].components.lens = lensMarkdownPlugin.renderer;
+
     return {
       uiPlugins,
       parsingPlugins,
       processingPlugins,
     };
-  }, [timelinePlugins]);
+  }, [kibanaConfig?.markdownPlugins?.lens, timelinePlugins]);
 };

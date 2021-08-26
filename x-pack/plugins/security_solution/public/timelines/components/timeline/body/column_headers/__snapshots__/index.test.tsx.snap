@@ -2,7 +2,7 @@
 
 exports[`ColumnHeaders rendering renders correctly against snapshot 1`] = `
 <ColumnHeadersComponent
-  actionsColumnWidth={120}
+  actionsColumnWidth={72}
   browserFields={
     Object {
       "agent": Object {
@@ -521,6 +521,7 @@ exports[`ColumnHeaders rendering renders correctly against snapshot 1`] = `
           "compare": null,
           "type": [Function],
         },
+        "width": 108,
       },
     ]
   }

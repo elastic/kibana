@@ -9,8 +9,11 @@ import { ControlColumnProps } from '../../../../../../common/types/timeline';
 import { Actions } from '../actions';
 import { HeaderActions } from '../actions/header_actions';
 
+const DEFAULT_CONTROL_COLUMN_WIDTH = 108;
+
 export const defaultControlColumn: ControlColumnProps = {
   id: 'default-timeline-control-column',
+  width: DEFAULT_CONTROL_COLUMN_WIDTH,
   headerCellRender: HeaderActions,
   rowCellRender: Actions,
 };

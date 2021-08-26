@@ -23,7 +23,7 @@ import {
   SavedObjectsUpdateResponse,
 } from 'kibana/server';
 import { ACTION_SAVED_OBJECT_TYPE } from '../../../../actions/server';
-import { loggerMock } from '@kbn/logging/target/mocks';
+import { loggerMock } from '@kbn/logging/mocks';
 import { CaseConfigureService } from '.';
 import { ESCasesConfigureAttributes } from './types';
 import { getNoneCaseConnector, CONNECTOR_ID_REFERENCE_NAME } from '../../common';

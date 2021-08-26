@@ -8,7 +8,7 @@
 import React from 'react';
 import moment from 'moment';
 
-import { ALERT_END, ALERT_STATUS } from '@kbn/rule-data-utils';
+import { ALERT_END, ALERT_STATUS, ALERT_REASON } from '@kbn/rule-data-utils';
 
 import { AlertTypeInitializer } from '.';
 import { getMonitorRouteFromMonitorId } from './common';
@@ -36,7 +36,7 @@ export const initDurationAnomalyAlertType: AlertTypeInitializer = ({
   defaultActionMessage,
   requiresAppContext: true,
   format: ({ fields }) => ({
-    reason: fields.reason,
+    reason: fields[ALERT_REASON] || '',
     link: getMonitorRouteFromMonitorId({
       monitorId: fields['monitor.id']!,
       dateRangeEnd: fields[ALERT_STATUS] === 'open' ? 'now' : fields[ALERT_END]!,

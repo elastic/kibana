@@ -13,6 +13,7 @@ import { useApmServiceContext } from '../../../context/apm_service/use_apm_servi
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
+import { useTimeRange } from '../../../hooks/use_time_range';
 import { APIReturnType } from '../../../services/rest/createCallApmApi';
 import { InstancesLatencyDistributionChart } from '../../shared/charts/instances_latency_distribution_chart';
 import { getTimeRangeComparison } from '../../shared/time_comparison/get_time_range_comparison';
@@ -70,18 +71,14 @@ export function ServiceOverviewInstancesChartAndTable({
   const { direction, field } = sort;
 
   const {
-    query: { environment, kuery },
+    query: { environment, kuery, rangeFrom, rangeTo },
   } = useApmParams('/services/:serviceName/overview');
 
   const {
-    urlParams: {
-      latencyAggregationType,
-      start,
-      end,
-      comparisonType,
-      comparisonEnabled,
-    },
+    urlParams: { latencyAggregationType, comparisonType, comparisonEnabled },
   } = useUrlParams();
+
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const { comparisonStart, comparisonEnd } = getTimeRangeComparison({
     start,

@@ -6,16 +6,18 @@
  */
 
 import React from 'react';
-
+import { i18n } from '@kbn/i18n';
 import { ObservabilityPublicPluginsStart } from '../..';
 import { getMappedNonEcsValue } from './render_cell_value';
+import FilterForValueButton from './filter_for_value';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { TimelineNonEcsData } from '../../../../timelines/common/search_strategy';
 import { TGridCellAction } from '../../../../timelines/common/types/timeline';
 import { TimelinesUIStart } from '../../../../timelines/public';
 
-/** a noop required by the filter in / out buttons */
-const onFilterAdded = () => {};
+export const FILTER_FOR_VALUE = i18n.translate('xpack.observability.hoverActions.filterForValue', {
+  defaultMessage: 'Filter for value',
+});
 
 /** a hook to eliminate the verbose boilerplate required to use common services */
 const useKibanaServices = () => {
@@ -30,54 +32,6 @@ const useKibanaServices = () => {
 
   return { timelines, filterManager };
 };
-
-/** actions for adding filters to the search bar */
-const filterCellActions: TGridCellAction[] = [
-  ({ data }: { data: TimelineNonEcsData[][] }) => ({ rowIndex, columnId, Component }) => {
-    const { timelines, filterManager } = useKibanaServices();
-
-    const value = getMappedNonEcsValue({
-      data: data[rowIndex],
-      fieldName: columnId,
-    });
-
-    return (
-      <>
-        {timelines.getHoverActions().getFilterForValueButton({
-          Component,
-          field: columnId,
-          filterManager,
-          onFilterAdded,
-          ownFocus: false,
-          showTooltip: false,
-          value,
-        })}
-      </>
-    );
-  },
-  ({ data }: { data: TimelineNonEcsData[][] }) => ({ rowIndex, columnId, Component }) => {
-    const { timelines, filterManager } = useKibanaServices();
-
-    const value = getMappedNonEcsValue({
-      data: data[rowIndex],
-      fieldName: columnId,
-    });
-
-    return (
-      <>
-        {timelines.getHoverActions().getFilterOutValueButton({
-          Component,
-          field: columnId,
-          filterManager,
-          onFilterAdded,
-          ownFocus: false,
-          showTooltip: false,
-          value,
-        })}
-      </>
-    );
-  },
-];
 
 /** actions common to all cells (e.g. copy to clipboard) */
 const commonCellActions: TGridCellAction[] = [
@@ -104,6 +58,27 @@ const commonCellActions: TGridCellAction[] = [
   },
 ];
 
+/** actions for adding filters to the search bar */
+const buildFilterCellActions = (addToQuery: (value: string) => void): TGridCellAction[] => [
+  ({ data }: { data: TimelineNonEcsData[][] }) => ({ rowIndex, columnId, Component }) => {
+    const value = getMappedNonEcsValue({
+      data: data[rowIndex],
+      fieldName: columnId,
+    });
+
+    return (
+      <FilterForValueButton
+        Component={Component}
+        field={columnId}
+        value={value}
+        addToQuery={addToQuery}
+      />
+    );
+  },
+];
+
 /** returns the default actions shown in `EuiDataGrid` cells */
-export const getDefaultCellActions = ({ enableFilterActions }: { enableFilterActions: boolean }) =>
-  enableFilterActions ? [...filterCellActions, ...commonCellActions] : [...commonCellActions];
+export const getDefaultCellActions = ({ addToQuery }: { addToQuery: (value: string) => void }) => [
+  ...buildFilterCellActions(addToQuery),
+  ...commonCellActions,
+];

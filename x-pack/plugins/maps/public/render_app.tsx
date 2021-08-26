@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import _ from 'lodash';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Router, Switch, Route, Redirect, RouteComponentProps } from 'react-router-dom';
@@ -62,12 +61,10 @@ function setAppChrome() {
   });
 }
 
-export async function renderApp({
-  element,
-  history,
-  onAppLeave,
-  setHeaderActionMenu,
-}: AppMountParameters) {
+export async function renderApp(
+  { element, history, onAppLeave, setHeaderActionMenu }: AppMountParameters,
+  AppUsageTracker: React.FC
+) {
   goToSpecifiedPath = (path) => history.push(path);
   kbnUrlStateStorage = createKbnUrlStateStorage({
     useHash: false,
@@ -107,29 +104,31 @@ export async function renderApp({
 
   const I18nContext = getCoreI18n().Context;
   render(
-    <I18nContext>
-      <Router history={history}>
-        <Switch>
-          <Route path={`/map/:savedMapId`} render={renderMapApp} />
-          <Route exact path={`/map`} render={renderMapApp} />
-          // Redirect other routes to list, or if hash-containing, their non-hash equivalents
-          <Route
-            path={``}
-            render={({ location: { pathname, hash } }) => {
-              if (hash) {
-                // Remove leading hash
-                const newPath = hash.substr(1);
-                return <Redirect to={newPath} />;
-              } else if (pathname === '/' || pathname === '') {
-                return <ListPage stateTransfer={stateTransfer} />;
-              } else {
-                return <Redirect to="/" />;
-              }
-            }}
-          />
-        </Switch>
-      </Router>
-    </I18nContext>,
+    <AppUsageTracker>
+      <I18nContext>
+        <Router history={history}>
+          <Switch>
+            <Route path={`/map/:savedMapId`} render={renderMapApp} />
+            <Route exact path={`/map`} render={renderMapApp} />
+            // Redirect other routes to list, or if hash-containing, their non-hash equivalents
+            <Route
+              path={``}
+              render={({ location: { pathname, hash } }) => {
+                if (hash) {
+                  // Remove leading hash
+                  const newPath = hash.substr(1);
+                  return <Redirect to={newPath} />;
+                } else if (pathname === '/' || pathname === '') {
+                  return <ListPage stateTransfer={stateTransfer} />;
+                } else {
+                  return <Redirect to="/" />;
+                }
+              }}
+            />
+          </Switch>
+        </Router>
+      </I18nContext>
+    </AppUsageTracker>,
     element
   );
 

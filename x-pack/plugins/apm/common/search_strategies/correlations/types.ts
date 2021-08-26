@@ -27,7 +27,7 @@ export interface SearchServiceParams {
   start?: string;
   end?: string;
   percentileThreshold?: number;
-  percentileThresholdValue?: number;
+  analyzeCorrelations?: boolean;
 }
 
 export interface SearchServiceFetchParams extends SearchServiceParams {
