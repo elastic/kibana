@@ -1,5 +1,5 @@
 [[spaces-api-disable-legacy-url-aliases]]
-=== Create space API
+=== Disable legacy URL aliases API
 ++++
 <titleabbrev>Disable legacy URL aliases</titleabbrev>
 ++++
@@ -14,14 +14,21 @@ experimental[] Disable a <<legacy-url-aliases,legacy URL alias>> in {kib}.
 [[spaces-api-disable-legacy-url-aliases-request-body]]
 ==== Request body
 
-`targetSpace`::
-  (Required, string) The space where the alias target object exists.
+`aliases`::
+  (Required, object array) The aliases to disable.
++
+.Properties of `aliases`
+[%collapsible%open]
+=====
+  `targetSpace`::
+    (Required, string) The space where the alias target object exists.
 
-`targetType`::
-  (Required, string) The type of the alias target object.
+  `targetType`::
+    (Required, string) The type of the alias target object.
 
-`sourceId`::
-  (Required, string) The ID of the alias source object. This is the "legacy" object ID.
+  `sourceId`::
+    (Required, string) The ID of the alias source object. This is the "legacy" object ID.
+=====
 
 [[spaces-api-disable-legacy-url-aliases-response-codes]]
 ==== Response codes
@@ -36,9 +43,13 @@ experimental[] Disable a <<legacy-url-aliases,legacy URL alias>> in {kib}.
 --------------------------------------------------
 $ curl -X POST api/spaces/_disable_legacy_url_aliases
 {
-  "targetSpace": "bills-space",
-  "targetType": "dashboard",
-  "sourceId": "123"
+  "aliases": [
+    {
+      "targetSpace": "bills-space",
+      "targetType": "dashboard",
+      "sourceId": "123"
+    }
+  ]
 }
 --------------------------------------------------
 // KIBANA
