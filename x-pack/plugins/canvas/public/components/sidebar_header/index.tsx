@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import deepEqual from 'react-fast-compare';
 import { useDispatch, useSelector } from 'react-redux';
 // @ts-expect-error unconverted component
 import { insertNodes, elementLayer, removeElements } from '../../state/actions/elements';
@@ -55,8 +56,9 @@ const createHandlers = function <T>(
 
 export const SidebarHeader: React.FC<{ title: string }> = (props) => {
   const pageId = useSelector<State, string>((state) => getSelectedPage(state));
-  const selectedNodes = useSelector<State, Array<string | undefined>>((state) =>
-    getSelectedNodes(state, pageId)
+  const selectedNodes = useSelector<State, Array<string | undefined>>(
+    (state) => getSelectedNodes(state, pageId),
+    deepEqual
   );
 
   const dispatch = useDispatch();
