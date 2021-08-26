@@ -7,7 +7,7 @@
  */
 
 import $ from 'jquery';
-import moment from 'moment';
+import moment from 'moment-timezone';
 import angular from 'angular';
 import 'angular-mocks';
 import sinon from 'sinon';

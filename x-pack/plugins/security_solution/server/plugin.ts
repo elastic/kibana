@@ -233,16 +233,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         componentTemplates: [
           {
             name: 'mappings',
-            version: 0,
             mappings: mappingFromFieldMap(
               { ...alertsFieldMap, ...rulesFieldMap, ...ctiFieldMap },
               false
             ),
           },
         ],
-        indexTemplate: {
-          version: 0,
-        },
         secondaryAlias: config.signalsIndex,
       });
 
