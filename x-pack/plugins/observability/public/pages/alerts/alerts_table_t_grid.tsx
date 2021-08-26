@@ -296,8 +296,11 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
   const casePermissions = useGetUserCasesPermissions();
 
   const hasAlertsCrudPermissions = useCallback(
-    (featureId: string) => {
-      return getAlertsPermissions(capabilities, featureId).crud;
+    ({ ruleConsumer, ruleProducer }: { ruleConsumer: string; ruleProducer?: string }) => {
+      if (ruleConsumer === 'alerts' && ruleProducer) {
+        return getAlertsPermissions(capabilities, ruleProducer).crud;
+      }
+      return getAlertsPermissions(capabilities, ruleConsumer).crud;
     },
     [capabilities]
   );

@@ -38,7 +38,8 @@ export const timelineEventsAll: TimelineFactory<TimelineEventsQueries.all> = {
     let { fieldRequested, ...queryOptions } = cloneDeep(options);
     queryOptions.fields = buildFieldsRequest(fieldRequested, queryOptions.excludeEcsData);
     const { activePage, querySize } = options.pagination;
-    const buckets = getOr([], 'aggregations.consumers.buckets', response.rawResponse);
+    const consumerBuckets = getOr([], 'aggregations.consumers.buckets', response.rawResponse);
+    const producerBuckets = getOr([], 'aggregations.producers.buckets', response.rawResponse);
     const totalCount = response.rawResponse.hits.total || 0;
     const hits = response.rawResponse.hits.hits;
 
@@ -62,13 +63,28 @@ export const timelineEventsAll: TimelineFactory<TimelineEventsQueries.all> = {
       )
     );
 
-    const consumers = buckets.reduce(
+    const consumers: Record<string, number> = consumerBuckets.reduce(
       (acc: Record<string, number>, b: { key: string; doc_count: number }) => ({
         ...acc,
         [b.key]: b.doc_count,
       }),
       {}
     );
+    const producers: Record<string, number> = producerBuckets.reduce(
+      (acc: Record<string, number>, b: { key: string; doc_count: number }) => ({
+        ...acc,
+        [b.key]: b.doc_count,
+      }),
+      {}
+    );
+    Object.entries(producers).forEach(([producer, count]) => {
+      if (consumers[producer] && count > consumers[producer]) {
+        const diff = count - consumers[producer];
+        consumers[producer] = consumers[producer] + diff;
+      } else {
+        consumers[producer] = count;
+      }
+    });
 
     const inspect = {
       dsl: [inspectStringifyObject(buildTimelineEventsAllQuery(queryOptions))],

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ALERT_RULE_CONSUMER } from '@kbn/rule-data-utils';
+import { ALERT_RULE_CONSUMER, ALERT_RULE_PRODUCER } from '@kbn/rule-data-utils';
 import { isEmpty } from 'lodash/fp';
 
 import {
@@ -71,6 +71,11 @@ export const buildTimelineEventsAllQuery = ({
       aggregations: {
         consumers: {
           terms: { field: ALERT_RULE_CONSUMER },
+          exclude: ['alerts'],
+        },
+        producers: {
+          terms: { field: ALERT_RULE_PRODUCER },
+          exclude: ['alerts'],
         },
       },
       query: {
