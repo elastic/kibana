@@ -97,12 +97,14 @@ export const validatePackagePolicy = (
   >((varDefs, policyTemplate) => {
     (policyTemplate.inputs || []).forEach((input) => {
       const varDefKey = hasIntegrations ? `${policyTemplate.name}-${input.type}` : input.type;
+
       if ((input.vars || []).length) {
         varDefs[varDefKey] = keyBy(input.vars || [], 'name');
       }
     });
     return varDefs;
   }, {});
+
   const streamsByDatasetAndInput = (packageInfo.data_streams || []).reduce<
     Record<string, RegistryStream>
   >((streams, dataStream) => {
@@ -149,6 +151,7 @@ export const validatePackagePolicy = (
     if (input.streams.length) {
       input.streams.forEach((stream) => {
         const streamValidationResults: PackagePolicyConfigValidationResults = {};
+
         const streamVarDefs =
           streamVarDefsByDatasetAndInput[`${stream.data_stream.dataset}-${input.type}`];
 
@@ -157,7 +160,7 @@ export const validatePackagePolicy = (
           streamValidationResults.vars = Object.entries(stream.vars).reduce(
             (results, [name, configEntry]) => {
               results[name] =
-                streamVarDefs[name] && input.enabled && stream.enabled
+                streamVarDefs && streamVarDefs[name] && input.enabled && stream.enabled
                   ? validatePackagePolicyConfig(configEntry, streamVarDefs[name])
                   : null;
               return results;
