@@ -6,7 +6,7 @@
  */
 
 import { TelemetryEventsSender } from '../../telemetry/sender';
-import { TelemeryEvent } from '../../telemetry/types';
+import { TelemetryEvent } from '../../telemetry/types';
 import { BuildRuleMessage } from './rule_messages';
 import { SignalSearchResponse, SignalSource } from './types';
 import { Logger } from '../../../../../../../src/core/server';

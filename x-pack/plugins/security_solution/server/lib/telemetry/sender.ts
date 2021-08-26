@@ -17,7 +17,7 @@ import {
   TaskManagerStartContract,
 } from '../../../../task_manager/server';
 import { TelemetryReceiver } from './receiver';
-import { processEvents } from './filters';
+import { AllowlistFields, allowlistEventFields } from './filters';
 import { DiagnosticTask, EndpointTask, ExceptionListsTask } from './tasks';
 import { createUsageCounterLabel } from './helpers';
 import { TelemetryEvent } from './types';
@@ -120,9 +120,9 @@ export class TelemetryEventsSender {
         counterType: 'num_capacity_exceeded',
         incrementBy: 1,
       });
-      this.queue.push(...processEvents(events.slice(0, this.maxQueueSize - qlength)));
+      this.queue.push(...this.processEvents(events.slice(0, this.maxQueueSize - qlength)));
     } else {
-      this.queue.push(...processEvents(events));
+      this.queue.push(...this.processEvents(events));
     }
   }
 
@@ -185,6 +185,12 @@ export class TelemetryEventsSender {
     this.isSending = false;
   }
 
+  public processEvents(events: TelemetryEvent[]): TelemetryEvent[] {
+    return events.map(function (obj: TelemetryEvent): TelemetryEvent {
+      return copyAllowlistedFields(allowlistEventFields, obj);
+    });
+  }
+
   /**
    * This function sends events to the elastic telemetry channel. Caution is required
    * because it does no allowlist filtering. The caller is responsible for making sure
@@ -231,12 +237,11 @@ export class TelemetryEventsSender {
     events: unknown[],
     telemetryUrl: string,
     channel: string,
-    clusterUuid: string,
+    clusterUuid: string | undefined,
     clusterVersionNumber: string | undefined,
     licenseId: string | undefined
   ) {
     const ndjson = transformDataToNdjson(events);
-    // this.logger.debug(`NDJSON: ${ndjson}`);
 
     try {
       const resp = await axios.post(telemetryUrl, ndjson, {
@@ -287,4 +292,31 @@ export function getV3UrlFromV2(v2url: string, channel: string): string {
     url.pathname = `/v3-dev/send/${channel}`;
   }
   return url.toString();
+}
+
+export function copyAllowlistedFields(
+  allowlist: AllowlistFields,
+  event: TelemetryEvent
+): TelemetryEvent {
+  return Object.entries(allowlist).reduce<TelemetryEvent>((newEvent, [allowKey, allowValue]) => {
+    const eventValue = event[allowKey];
+    if (eventValue !== null && eventValue !== undefined) {
+      if (allowValue === true) {
+        return { ...newEvent, [allowKey]: eventValue };
+      } else if (typeof allowValue === 'object' && Array.isArray(eventValue)) {
+        const subValues = eventValue.filter((v) => typeof v === 'object');
+        return {
+          ...newEvent,
+          [allowKey]: subValues.map((v) => copyAllowlistedFields(allowValue, v as TelemetryEvent)),
+        };
+      } else if (typeof allowValue === 'object' && typeof eventValue === 'object') {
+        const values = copyAllowlistedFields(allowValue, eventValue as TelemetryEvent);
+        return {
+          ...newEvent,
+          ...(Object.keys(values).length > 0 ? { [allowKey]: values } : {}),
+        };
+      }
+    }
+    return newEvent;
+  }, {});
 }

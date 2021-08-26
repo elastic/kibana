@@ -12,12 +12,12 @@ import {
   SavedObjectsClientContract,
 } from 'src/core/server';
 import { SearchRequest } from '@elastic/elasticsearch/api/types';
-import { TelemetryEvent, ESLicense, ESClusterInfo, GetEndpointListResponse } from './types';
 import { getTrustedAppsList } from '../../endpoint/routes/trusted_apps/service';
 import { AgentService, AgentPolicyServiceInterface } from '../../../../fleet/server';
 import { ExceptionListClient } from '../../../../lists/server';
 import { EndpointAppContextService } from '../../endpoint/endpoint_app_context_services';
 import { exceptionListItemToEndpointEntry } from './helpers';
+import { TelemetryEvent, ESLicense, ESClusterInfo, GetEndpointListResponse } from './types';
 
 export class TelemetryReceiver {
   private readonly logger: Logger;
@@ -110,7 +110,7 @@ export class TelemetryReceiver {
                   sort: [
                     {
                       '@timestamp': {
-                        order: 'desc',
+                        order: 'desc' as const,
                       },
                     },
                   ],
@@ -157,7 +157,7 @@ export class TelemetryReceiver {
                   sort: [
                     {
                       '@timestamp': {
-                        order: 'desc',
+                        order: 'desc' as const,
                       },
                     },
                   ],

@@ -6,7 +6,7 @@
  */
 
 /* eslint-disable dot-notation */
-import { TelemetryEventsSender, copyAllowlistedFields, getV3UrlFromV2 } from './sender';
+import { TelemetryEventsSender, getV3UrlFromV2, copyAllowlistedFields } from './sender';
 import { loggingSystemMock } from 'src/core/server/mocks';
 import { usageCountersServiceMock } from 'src/plugins/usage_collection/server/usage_counters/usage_counters_service.mock';
 import { URL } from 'url';
@@ -175,12 +175,6 @@ describe('TelemetryEventsSender', () => {
         getTelemetryUrl: jest.fn(async () => new URL('https://telemetry.elastic.co')),
       };
       sender['telemetryUsageCounter'] = telemetryUsageCounter;
-      sender['fetchClusterInfo'] = jest.fn(async () => {
-        return {
-          cluster_name: 'test',
-          cluster_uuid: 'test-uuid',
-        };
-      });
       sender['sendEvents'] = jest.fn(async () => {
         sender['telemetryUsageCounter']?.incrementCounter({
           counterName: 'test_counter',
