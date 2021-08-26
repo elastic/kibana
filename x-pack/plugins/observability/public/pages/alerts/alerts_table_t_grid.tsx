@@ -38,9 +38,13 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
-import React, { Suspense, useMemo, useState, useCallback } from 'react';
+import React, { Suspense, useMemo, useState, useCallback, useEffect } from 'react';
+import usePrevious from 'react-use/lib/usePrevious';
 import { get } from 'lodash';
-import { useGetUserAlertsPermissions } from '../../hooks/use_alert_permission';
+import {
+  getAlertsPermissions,
+  useGetUserAlertsPermissions,
+} from '../../hooks/use_alert_permission';
 import type { TimelinesUIStart, TGridType, SortDirection } from '../../../../timelines/public';
 import { useStatusBulkActionItems } from '../../../../timelines/public';
 import type { TopAlert } from './';
@@ -214,18 +218,22 @@ function ObservabilityActions({
 
   const actionsMenuItems = useMemo(() => {
     return [
-      timelines.getAddToExistingCaseButton({
-        event,
-        casePermissions,
-        appId: observabilityFeatureId,
-        onClose: afterCaseSelection,
-      }),
-      timelines.getAddToNewCaseButton({
-        event,
-        casePermissions,
-        appId: observabilityFeatureId,
-        onClose: afterCaseSelection,
-      }),
+      ...(casePermissions?.crud
+        ? [
+            timelines.getAddToExistingCaseButton({
+              event,
+              casePermissions,
+              appId: observabilityFeatureId,
+              onClose: afterCaseSelection,
+            }),
+            timelines.getAddToNewCaseButton({
+              event,
+              casePermissions,
+              appId: observabilityFeatureId,
+              onClose: afterCaseSelection,
+            }),
+          ]
+        : []),
       ...(alertPermissions.crud ? statusActionItems : []),
     ];
   }, [afterCaseSelection, casePermissions, timelines, event, statusActionItems, alertPermissions]);
@@ -279,11 +287,36 @@ function ObservabilityActions({
 
 export function AlertsTableTGrid(props: AlertsTableTGridProps) {
   const { indexNames, rangeFrom, rangeTo, kuery, workflowStatus, setRefetch, addToQuery } = props;
-  const { timelines } = useKibana<{ timelines: TimelinesUIStart }>().services;
+  const prevWorkflowStatus = usePrevious(workflowStatus);
+  const {
+    timelines,
+    application: { capabilities },
+  } = useKibana<CoreStart & { timelines: TimelinesUIStart }>().services;
 
   const [flyoutAlert, setFlyoutAlert] = useState<TopAlert | undefined>(undefined);
 
   const casePermissions = useGetUserCasesPermissions();
+
+  const hasAlertsCrudPermissions = useCallback(
+    (featureId: string) => {
+      return getAlertsPermissions(capabilities, featureId).crud;
+    },
+    [capabilities]
+  );
+
+  const [deletedEventIds, setDeletedEventIds] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (workflowStatus !== prevWorkflowStatus) {
+      setDeletedEventIds([]);
+    }
+  }, [workflowStatus, prevWorkflowStatus]);
+
+  const setEventsDeleted = useCallback<ObservabilityActionsProps['setEventsDeleted']>((action) => {
+    if (action.isDeleted) {
+      setDeletedEventIds((ids) => [...ids, ...action.eventIds]);
+    }
+  }, []);
 
   const leadingControlColumns = useMemo(() => {
     return [
@@ -303,6 +336,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
           return (
             <ObservabilityActions
               {...actionProps}
+              setEventsDeleted={setEventsDeleted}
               currentStatus={workflowStatus}
               setFlyoutAlert={setFlyoutAlert}
             />
@@ -310,7 +344,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
         },
       },
     ];
-  }, [workflowStatus]);
+  }, [workflowStatus, setEventsDeleted]);
 
   const tGridProps = useMemo(() => {
     const type: TGridType = 'standalone';
@@ -320,12 +354,12 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
       casePermissions,
       type,
       columns,
-      deletedEventIds: [],
+      deletedEventIds,
       defaultCellActions: getDefaultCellActions({ addToQuery }),
       end: rangeTo,
       filters: [],
+      hasAlertsCrudPermissions,
       indexNames,
-      itemsPerPage: 10,
       itemsPerPageOptions: [10, 25, 50],
       loadingText: i18n.translate('xpack.observability.alertsTable.loadingTextLabel', {
         defaultMessage: 'loading alerts',
@@ -359,14 +393,16 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
     };
   }, [
     casePermissions,
-    indexNames,
-    kuery,
-    leadingControlColumns,
-    rangeFrom,
-    rangeTo,
-    setRefetch,
-    workflowStatus,
     addToQuery,
+    rangeTo,
+    hasAlertsCrudPermissions,
+    indexNames,
+    workflowStatus,
+    kuery,
+    rangeFrom,
+    setRefetch,
+    leadingControlColumns,
+    deletedEventIds,
   ]);
   const handleFlyoutClose = () => setFlyoutAlert(undefined);
   const { observabilityRuleTypeRegistry } = usePluginContext();

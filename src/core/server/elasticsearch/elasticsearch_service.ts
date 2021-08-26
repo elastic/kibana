@@ -23,8 +23,10 @@ import {
   InternalElasticsearchServiceSetup,
   InternalElasticsearchServiceStart,
 } from './types';
+import type { NodesVersionCompatibility } from './version_check/ensure_es_version';
 import { pollEsNodesVersion } from './version_check/ensure_es_version';
 import { calculateStatus$ } from './status';
+import { isValidConnection } from './is_valid_connection';
 
 interface SetupDeps {
   http: InternalHttpServiceSetup;
@@ -40,7 +42,7 @@ export class ElasticsearchService
   private kibanaVersion: string;
   private getAuthHeaders?: GetAuthHeaders;
   private executionContextClient?: IExecutionContext;
-
+  private esNodesCompatibility$?: Observable<NodesVersionCompatibility>;
   private client?: ClusterClient;
 
   constructor(private readonly coreContext: CoreContext) {
@@ -84,6 +86,8 @@ export class ElasticsearchService
       kibanaVersion: this.kibanaVersion,
     }).pipe(takeUntil(this.stop$), shareReplay({ refCount: true, bufferSize: 1 }));
 
+    this.esNodesCompatibility$ = esNodesCompatibility$;
+
     return {
       legacy: {
         config$: this.config$,
@@ -93,11 +97,24 @@ export class ElasticsearchService
     };
   }
   public async start(): Promise<InternalElasticsearchServiceStart> {
-    if (!this.client) {
+    if (!this.client || !this.esNodesCompatibility$) {
       throw new Error('ElasticsearchService needs to be setup before calling start');
     }
 
     const config = await this.config$.pipe(first()).toPromise();
+
+    // Log every error we may encounter in the connection to Elasticsearch
+    this.esNodesCompatibility$.subscribe(({ isCompatible, message }) => {
+      if (!isCompatible && message) {
+        this.log.error(message);
+      }
+    });
+
+    if (!config.skipStartupConnectionCheck) {
+      // Ensure that the connection is established and the product is valid before moving on
+      await isValidConnection(this.esNodesCompatibility$);
+    }
+
     return {
       client: this.client!,
       createClient: (type, clientConfig) => this.createClusterClient(type, config, clientConfig),
