@@ -6,16 +6,23 @@
  * Side Public License, v 1.
  */
 
-import React, { FC } from 'react';
+import React, { FC, MouseEventHandler } from 'react';
+import { ClassNames } from '@emotion/react';
 import { EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { get } from 'lodash';
 import { ShowDebugging } from './show_debugging';
+
+const euiCallOutHeaderClassDef = `
+  .euiCallOutHeader__icon {
+    cursor: pointer;
+  }
+`;
 
 export interface Props {
   payload: {
     error: Error;
   };
+  onClose?: () => void;
 }
 
 const strings = {
@@ -29,20 +36,34 @@ const strings = {
     }),
 };
 
-export const Error: FC<Props> = ({ payload }) => {
-  const message = get(payload, 'error.message');
+export const Error: FC<Props> = ({ payload, onClose }) => {
+  const message = payload.error?.message;
+
+  const onCalloutClose: MouseEventHandler<HTMLDivElement> = (e) => {
+    e.stopPropagation();
+    const isHeaderCloseButton = (e.target as Element).classList.contains('euiCallOutHeader__icon');
+    if (isHeaderCloseButton) {
+      onClose?.();
+    }
+  };
 
   return (
-    <EuiCallOut
-      style={{ maxWidth: 500 }}
-      color="danger"
-      iconType="cross"
-      title={strings.getTitle()}
-    >
-      <p>{message ? strings.getDescription() : ''}</p>
-      {message && <p style={{ padding: '0 16px' }}>{message}</p>}
+    <ClassNames>
+      {({ css }) => (
+        <EuiCallOut
+          style={{ maxWidth: 500 }}
+          color="danger"
+          iconType="cross"
+          title={strings.getTitle()}
+          onClick={onCalloutClose}
+          className={css(euiCallOutHeaderClassDef)}
+        >
+          <p>{message ? strings.getDescription() : ''}</p>
+          {message && <p style={{ padding: '0 16px' }}>{message}</p>}
 
-      <ShowDebugging payload={payload} />
-    </EuiCallOut>
+          <ShowDebugging payload={payload} />
+        </EuiCallOut>
+      )}
+    </ClassNames>
   );
 };
