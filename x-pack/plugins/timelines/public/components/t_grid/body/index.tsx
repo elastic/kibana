@@ -207,6 +207,7 @@ const transformControlColumns = ({
           </>
         );
       },
+      // eslint-disable-next-line react/display-name
       rowCellRender: ({
         isDetails,
         isExpandable,
@@ -223,7 +224,7 @@ const transformControlColumns = ({
             rowData.data.find((d) => d.field === ALERT_RULE_CONSUMER)?.value ?? [];
           const ruleProducers =
             rowData.data.find((d) => d.field === ALERT_RULE_PRODUCER)?.value ?? [];
-          disabled = hasAlertsCrudPermissions({
+          disabled = !hasAlertsCrudPermissions({
             ruleConsumer: ruleConsumers.length > 0 ? ruleConsumers[0] : '',
             ruleProducer: ruleProducers.length > 0 ? ruleProducers[0] : undefined,
           });
