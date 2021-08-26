@@ -62,4 +62,4 @@ The API returns the following:
 ]
 --------------------------------------------------
 
-<1> `referenced_by_count` - The number of rules referencing this connector. This value is not calculated if `is_preconfigured: true`.
+<1> `referenced_by_count` - The number of saved-objects referencing this connector. This value is not calculated if `is_preconfigured: true`.
