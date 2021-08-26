@@ -33,7 +33,6 @@ export type EmailActionTypeExecutorOptions = ActionTypeExecutorOptions<
 export type ActionTypeConfigType = TypeOf<typeof ConfigSchema>;
 
 const EMAIL_FOOTER_DIVIDER = '\n\n--\n\n';
-const defaultBackoffPerFailure = 10000;
 
 const ConfigSchemaProps = {
   service: schema.nullable(schema.string()),
@@ -134,6 +133,11 @@ function validateParams(paramsObject: unknown): string | void {
   }
 }
 
+const defaultBackoffPerFailure = 10000;
+function getRetry(attempts: number) {
+  return new Date(Date.now() + attempts * defaultBackoffPerFailure);
+}
+
 interface GetActionTypeParams {
   logger: Logger;
   publicBaseUrl?: string;
@@ -150,7 +154,8 @@ export function getActionType(params: GetActionTypeParams): EmailActionType {
     name: i18n.translate('xpack.actions.builtin.emailTitle', {
       defaultMessage: 'Email',
     }),
-    maxAttempts: 10,
+    maxAttempts: 3,
+    getRetry,
     validate: {
       config: schema.object(ConfigSchemaProps, {
         validate: curry(validateConfig)(configurationUtilities),
@@ -246,9 +251,7 @@ async function executor(
       actionId,
       message,
       serviceMessage: err.message,
-      retry: execOptions.taskInfo
-        ? new Date(Date.now() + execOptions.taskInfo?.attempts * defaultBackoffPerFailure)
-        : false,
+      retry: execOptions.taskInfo ? getRetry(execOptions.taskInfo?.attempts) : false,
     };
   }
 

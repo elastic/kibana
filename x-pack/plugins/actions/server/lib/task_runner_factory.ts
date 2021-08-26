@@ -61,7 +61,11 @@ export class TaskRunnerFactory {
     this.taskRunnerContext = taskRunnerContext;
   }
 
-  public create({ taskInstance }: RunContext) {
+  public create(
+    { taskInstance }: RunContext,
+    maxAttempts: number,
+    getRetry?: (attempts: number) => boolean | Date
+  ) {
     if (!this.isInitialized) {
       throw new Error('TaskRunnerFactory not initialized');
     }
@@ -119,7 +123,12 @@ export class TaskRunnerFactory {
 
         basePathService.set(fakeRequest, path);
 
-        let executorResult: ActionTypeExecutorResult<unknown>;
+        // Throwing an executor error means we will attempt to retry the task
+        // TM will treat a task as a failure if `attempts >= maxAttempts`
+        // so we need to handle that here to avoid TM persisting the failed task
+        const isRetryableBasedOnAttempts = taskInfo.attempts < maxAttempts;
+
+        let executorResult: ActionTypeExecutorResult<unknown> | undefined;
         try {
           executorResult = await actionExecutor.execute({
             params,
@@ -135,10 +144,18 @@ export class TaskRunnerFactory {
             // We'll stop re-trying due to action being forbidden
             throw new ExecutorError(e.message, {}, false);
           }
-          throw e;
+
+          if (isRetryableBasedOnAttempts) {
+            throw new ExecutorError(e.message, {}, getRetry ? getRetry(taskInfo.attempts) : true);
+          }
         }
 
-        if (executorResult.status === 'error' && executorResult.retry !== undefined) {
+        if (
+          executorResult &&
+          executorResult?.status === 'error' &&
+          executorResult?.retry !== undefined &&
+          isRetryableBasedOnAttempts
+        ) {
           // Task manager error handler only kicks in when an error thrown (at this time)
           // So what we have to do is throw when the return status is `error`.
           throw new ExecutorError(
