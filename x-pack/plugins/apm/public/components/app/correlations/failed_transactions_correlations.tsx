@@ -41,7 +41,6 @@ import { CorrelationsLog } from './correlations_log';
 import { CorrelationsEmptyStatePrompt } from './empty_state_prompt';
 import { CrossClusterSearchCompatibilityWarning } from './cross_cluster_search_warning';
 import { CorrelationsProgressControls } from './progress_controls';
-import type { SearchServiceParams } from '../../../../common/search_strategies/correlations/types';
 import type { FailedTransactionsCorrelationValue } from '../../../../common/search_strategies/failure_correlations/types';
 import { Summary } from '../../shared/Summary';
 import { asPercent } from '../../../../common/utils/formatters';
@@ -70,16 +69,6 @@ export function FailedTransactionsCorrelations({
 
   const inspectEnabled = uiSettings.get<boolean>(enableInspectEsQueries);
 
-  const searchServiceParams: SearchServiceParams = {
-    environment,
-    kuery,
-    serviceName,
-    transactionName,
-    transactionType,
-    start,
-    end,
-  };
-
   const result = useFailedTransactionsCorrelationsFetcher();
 
   const {
@@ -93,12 +82,27 @@ export function FailedTransactionsCorrelations({
   } = result;
 
   const startFetchHandler = useCallback(() => {
-    startFetch(searchServiceParams);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [environment, serviceName, transactionType, kuery, start, end]);
+    startFetch({
+      environment,
+      kuery,
+      serviceName,
+      transactionName,
+      transactionType,
+      start,
+      end,
+    });
+  }, [
+    startFetch,
+    environment,
+    serviceName,
+    transactionName,
+    transactionType,
+    kuery,
+    start,
+    end,
+  ]);
 
-  // start fetching on load
-  // we want this effect to execute exactly once after the component mounts
+  // start fetching on load and on changing environment
   useEffect(() => {
     if (isRunning) {
       cancelFetch();
@@ -108,11 +112,11 @@ export function FailedTransactionsCorrelations({
 
     return () => {
       // cancel any running async partial request when unmounting the component
-      // we want this effect to execute exactly once after the component mounts
       cancelFetch();
     };
+    // `isRunning` must not be part of the deps check
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [startFetchHandler]);
+  }, [cancelFetch, startFetchHandler]);
 
   const [
     selectedSignificantTerm,

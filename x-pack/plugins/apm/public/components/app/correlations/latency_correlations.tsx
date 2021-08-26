@@ -95,11 +95,18 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
       end,
       percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [environment, serviceName, transactionType, kuery, start, end]);
+  }, [
+    startFetch,
+    environment,
+    serviceName,
+    transactionName,
+    transactionType,
+    kuery,
+    start,
+    end,
+  ]);
 
-  // start fetching on load
-  // we want this effect to execute exactly once after the component mounts
+  // start fetching on load and on changing environment
   useEffect(() => {
     if (isRunning) {
       cancelFetch();
@@ -109,11 +116,11 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
 
     return () => {
       // cancel any running async partial request when unmounting the component
-      // we want this effect to execute exactly once after the component mounts
       cancelFetch();
     };
+    // `isRunning` must not be part of the deps check
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [startFetchHandler]);
+  }, [cancelFetch, startFetchHandler]);
 
   useEffect(() => {
     if (isErrorMessage(error)) {

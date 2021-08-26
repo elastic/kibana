@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useRef, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import type { Subscription } from 'rxjs';
 import {
   IKibanaSearchRequest,
@@ -84,63 +84,64 @@ export function useTransactionDistributionFetcher() {
     }));
   }
 
-  const startFetch = (
-    params: Omit<SearchServiceParams, 'analyzeCorrelations'>
-  ) => {
-    setFetchState((prevState) => ({
-      ...prevState,
-      error: undefined,
-      isComplete: false,
-    }));
-    searchSubscription$.current?.unsubscribe();
-    abortCtrl.current.abort();
-    abortCtrl.current = new AbortController();
+  const startFetch = useCallback(
+    (params: Omit<SearchServiceParams, 'analyzeCorrelations'>) => {
+      setFetchState((prevState) => ({
+        ...prevState,
+        error: undefined,
+        isComplete: false,
+      }));
+      searchSubscription$.current?.unsubscribe();
+      abortCtrl.current.abort();
+      abortCtrl.current = new AbortController();
 
-    const searchServiceParams: SearchServiceParams = {
-      ...params,
-      analyzeCorrelations: false,
-    };
-    const req = { params: searchServiceParams };
+      const searchServiceParams: SearchServiceParams = {
+        ...params,
+        analyzeCorrelations: false,
+      };
+      const req = { params: searchServiceParams };
 
-    // Submit the search request using the `data.search` service.
-    searchSubscription$.current = data.search
-      .search<
-        IKibanaSearchRequest,
-        IKibanaSearchResponse<SearchServiceRawResponse>
-      >(req, {
-        strategy: 'apmCorrelationsSearchStrategy',
-        abortSignal: abortCtrl.current.signal,
-      })
-      .subscribe({
-        next: (res: IKibanaSearchResponse<SearchServiceRawResponse>) => {
-          setResponse(res);
-          if (isCompleteResponse(res)) {
-            searchSubscription$.current?.unsubscribe();
+      // Submit the search request using the `data.search` service.
+      searchSubscription$.current = data.search
+        .search<
+          IKibanaSearchRequest,
+          IKibanaSearchResponse<SearchServiceRawResponse>
+        >(req, {
+          strategy: 'apmCorrelationsSearchStrategy',
+          abortSignal: abortCtrl.current.signal,
+        })
+        .subscribe({
+          next: (res: IKibanaSearchResponse<SearchServiceRawResponse>) => {
+            setResponse(res);
+            if (isCompleteResponse(res)) {
+              searchSubscription$.current?.unsubscribe();
+              setFetchState((prevState) => ({
+                ...prevState,
+                isRunnning: false,
+                isComplete: true,
+              }));
+            } else if (isErrorResponse(res)) {
+              searchSubscription$.current?.unsubscribe();
+              setFetchState((prevState) => ({
+                ...prevState,
+                error: (res as unknown) as Error,
+                setIsRunning: false,
+              }));
+            }
+          },
+          error: (error: Error) => {
             setFetchState((prevState) => ({
               ...prevState,
-              isRunnning: false,
-              isComplete: true,
-            }));
-          } else if (isErrorResponse(res)) {
-            searchSubscription$.current?.unsubscribe();
-            setFetchState((prevState) => ({
-              ...prevState,
-              error: (res as unknown) as Error,
+              error,
               setIsRunning: false,
             }));
-          }
-        },
-        error: (error: Error) => {
-          setFetchState((prevState) => ({
-            ...prevState,
-            error,
-            setIsRunning: false,
-          }));
-        },
-      });
-  };
+          },
+        });
+    },
+    [data.search]
+  );
 
-  const cancelFetch = () => {
+  const cancelFetch = useCallback(() => {
     searchSubscription$.current?.unsubscribe();
     searchSubscription$.current = undefined;
     abortCtrl.current.abort();
@@ -148,7 +149,7 @@ export function useTransactionDistributionFetcher() {
       ...prevState,
       setIsRunning: false,
     }));
-  };
+  }, []);
 
   return {
     ...fetchState,
