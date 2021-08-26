@@ -217,18 +217,22 @@ function ObservabilityActions({
 
   const actionsMenuItems = useMemo(() => {
     return [
-      timelines.getAddToExistingCaseButton({
-        event,
-        casePermissions,
-        appId: observabilityFeatureId,
-        onClose: afterCaseSelection,
-      }),
-      timelines.getAddToNewCaseButton({
-        event,
-        casePermissions,
-        appId: observabilityFeatureId,
-        onClose: afterCaseSelection,
-      }),
+      ...(casePermissions?.crud
+        ? [
+            timelines.getAddToExistingCaseButton({
+              event,
+              casePermissions,
+              appId: observabilityFeatureId,
+              onClose: afterCaseSelection,
+            }),
+            timelines.getAddToNewCaseButton({
+              event,
+              casePermissions,
+              appId: observabilityFeatureId,
+              onClose: afterCaseSelection,
+            }),
+          ]
+        : []),
       ...(alertPermissions.crud ? statusActionItems : []),
     ];
   }, [afterCaseSelection, casePermissions, timelines, event, statusActionItems, alertPermissions]);

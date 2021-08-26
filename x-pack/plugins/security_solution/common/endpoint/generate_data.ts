@@ -829,6 +829,7 @@ export class EndpointDocGenerator extends BaseDataGenerator {
       },
       rule: {
         id: this.randomUUID(),
+        description: 'Behavior rule description',
       },
       event: {
         action: 'rule_detection',

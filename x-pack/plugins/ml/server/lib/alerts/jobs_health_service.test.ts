@@ -93,6 +93,10 @@ describe('JobsHealthService', () => {
               model_size_stats: {
                 memory_status: j === 'test_job_01' ? 'hard_limit' : 'ok',
                 log_time: 1626935914540,
+                model_bytes: 1000000,
+                model_bytes_memory_limit: 800000,
+                peak_model_bytes: 1000000,
+                model_bytes_exceeded: 200000,
               },
             };
           }) as MlJobStats,
@@ -162,12 +166,21 @@ describe('JobsHealthService', () => {
 
   const getFieldsFormatRegistry = jest.fn().mockImplementation(() => {
     return Promise.resolve({
-      deserialize: jest.fn().mockImplementation(() => {
-        return {
-          convert: jest.fn().mockImplementation((v) => {
-            return new Date(v).toUTCString();
-          }),
-        };
+      deserialize: jest.fn().mockImplementation(({ id }: { id: string }) => {
+        if (id === 'date') {
+          return {
+            convert: jest.fn().mockImplementation((v) => {
+              return new Date(v).toUTCString();
+            }),
+          };
+        }
+        if (id === 'bytes') {
+          return {
+            convert: jest.fn().mockImplementation((v) => {
+              return `${Math.round(v / 1000)}KB`;
+            }),
+          };
+        }
       }),
     });
   }) as jest.Mocked<FieldFormatsRegistryProvider>;
@@ -358,6 +371,10 @@ describe('JobsHealthService', () => {
               job_id: 'test_job_01',
               log_time: 'Thu, 22 Jul 2021 06:38:34 GMT',
               memory_status: 'hard_limit',
+              model_bytes: '1000KB',
+              model_bytes_exceeded: '200KB',
+              model_bytes_memory_limit: '800KB',
+              peak_model_bytes: '1000KB',
             },
           ],
           message:

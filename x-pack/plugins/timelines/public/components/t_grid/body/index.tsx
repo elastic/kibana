@@ -63,7 +63,7 @@ import type { BrowserFields } from '../../../../common/search_strategy/index_fie
 import type { OnRowSelected, OnSelectAll } from '../types';
 import type { Refetch } from '../../../store/t_grid/inputs';
 import { getPageRowIndex } from '../../../../common/utils/pagination';
-import { StatefulFieldsBrowser } from '../../../';
+import { StatefulEventContext, StatefulFieldsBrowser } from '../../../';
 import { tGridActions, TGridModel, tGridSelectors, TimelineState } from '../../../store/t_grid';
 import { useDeepEqualSelector } from '../../../hooks/use_selector';
 import { RowAction } from './row_action';
@@ -724,50 +724,59 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
 
     const height = useDataGridHeightHack(pageSize, data.length);
 
+    // Store context in state rather than creating object in provider value={} to prevent re-renders caused by a new object being created
+    const [activeStatefulEventContext] = useState({
+      timelineID: id,
+      tabType,
+      enableHostDetailsFlyout: true,
+      enableIpDetailsFlyout: true,
+    });
     return (
       <>
-        {tableView === 'gridView' && (
-          <EuiDataGridContainer hideLastPage={totalItems > ES_LIMIT_COUNT}>
-            <EuiDataGrid
-              height={height}
-              id={'body-data-grid'}
-              data-test-subj="body-data-grid"
-              aria-label={i18n.TGRID_BODY_ARIA_LABEL}
-              columns={columnsWithCellActions}
-              columnVisibility={{ visibleColumns, setVisibleColumns }}
-              gridStyle={gridStyle}
-              leadingControlColumns={leadingTGridControlColumns}
-              trailingControlColumns={trailingTGridControlColumns}
-              toolbarVisibility={toolbarVisibility}
-              rowCount={totalItems}
-              renderCellValue={renderTGridCellValue}
-              sorting={{ columns: sortingColumns, onSort }}
-              pagination={{
-                pageIndex: activePage,
-                pageSize,
-                pageSizeOptions: itemsPerPageOptions,
-                onChangeItemsPerPage,
-                onChangePage,
-              }}
+        <StatefulEventContext.Provider value={activeStatefulEventContext}>
+          {tableView === 'gridView' && (
+            <EuiDataGridContainer hideLastPage={totalItems > ES_LIMIT_COUNT}>
+              <EuiDataGrid
+                height={height}
+                id={'body-data-grid'}
+                data-test-subj="body-data-grid"
+                aria-label={i18n.TGRID_BODY_ARIA_LABEL}
+                columns={columnsWithCellActions}
+                columnVisibility={{ visibleColumns, setVisibleColumns }}
+                gridStyle={gridStyle}
+                leadingControlColumns={leadingTGridControlColumns}
+                trailingControlColumns={trailingTGridControlColumns}
+                toolbarVisibility={toolbarVisibility}
+                rowCount={totalItems}
+                renderCellValue={renderTGridCellValue}
+                sorting={{ columns: sortingColumns, onSort }}
+                pagination={{
+                  pageIndex: activePage,
+                  pageSize,
+                  pageSizeOptions: itemsPerPageOptions,
+                  onChangeItemsPerPage,
+                  onChangePage,
+                }}
+              />
+            </EuiDataGridContainer>
+          )}
+          {tableView === 'eventRenderedView' && (
+            <EventRenderedView
+              alertToolbar={alertToolbar}
+              browserFields={browserFields}
+              events={data}
+              leadingControlColumns={leadingTGridControlColumns ?? []}
+              onChangePage={onChangePage}
+              onChangeItemsPerPage={onChangeItemsPerPage}
+              pageIndex={activePage}
+              pageSize={pageSize}
+              pageSizeOptions={itemsPerPageOptions}
+              rowRenderers={rowRenderers}
+              timelineId={id}
+              totalItemCount={totalItems}
             />
-          </EuiDataGridContainer>
-        )}
-        {tableView === 'eventRenderedView' && (
-          <EventRenderedView
-            alertToolbar={alertToolbar}
-            browserFields={browserFields}
-            events={data}
-            leadingControlColumns={leadingTGridControlColumns ?? []}
-            onChangePage={onChangePage}
-            onChangeItemsPerPage={onChangeItemsPerPage}
-            pageIndex={activePage}
-            pageSize={pageSize}
-            pageSizeOptions={itemsPerPageOptions}
-            rowRenderers={rowRenderers}
-            timelineId={id}
-            totalItemCount={totalItems}
-          />
-        )}
+          )}
+        </StatefulEventContext.Provider>
       </>
     );
   }
