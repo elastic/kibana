@@ -1,0 +1,45 @@
+[[legacy-url-aliases]]
+== Legacy URL Aliases
+
+This page describes legacy URL aliases: what they are, where they come from, and how to disable them.
+
+[[legacy-url-aliases-overview]]
+=== Overview
+
+Many saved object types are being converted in the 8.0 release of {kib} so they can eventually be shared across <<xpack-spaces,spaces>>.
+Before 8.0, you could have two objects with the same type and same ID in two different spaces. Part of this conversion is to make sure all
+object IDs of a given type are *globally unique across all spaces*.
+
+When a saved object is converted, if its ID is changed, {kib} creates a special entity called a _legacy URL alias_. This allows us to
+preserve any deep link URLs that may exist for that object.
+
+[[legacy-url-aliases-example]]
+=== Example
+
+For example, consider the following scenario:
+
+You have {kib} 7.16 installed and you created a new dashboard. This dashboard's ID is "123". Then, you create a new space called "Bill's space", and copy your dashboard to the other space. Now you have two different dashboards that can be accessed at the following URLs:
+
+* *Default space*: `http://localhost:5601/app/dashboards#/view/123`
+* *Bill's space*: `http://localhost:5601/s/bills-space/app/dashboards#/view/123`
+
+You use these two dashboards frequently, so you use your web browser to add bookmarks for them. After some time, you decide upgrade to {kib}
+8.0. When these two dashboards go through the conversion process, the one in "Bill's space" will have its ID changed to "456". Now, the URL
+to access that dashboard is different -- not to worry though, there is a legacy URL alias for that dashboard!
+
+If you use your bookmark to access that dashboard using its old URL, {kib} detects that you are using a legacy URL and it finds the new
+object ID. This means if you navigate to `http://localhost:5601/s/bills-space/app/dashboards#/view/123`, you'll see a helpful toast message
+indicating that the dashboard has a new URL, and you'll automatically get redirected to
+`http://localhost:5601/s/bills-space/app/dashboards#/view/456`.
+
+[[legacy-url-aliases-handling-errors]]
+=== Handling errors
+
+Legacy URL aliases are intended to be fully transparent, but there are some very rare situations where this can lead to an error. For
+example, you may have a dashboard and one of the visualizations may fail to load, directing you to this page. If you encounter an error
+in this situation, you might want to disable the legacy URL alias completely. This leaves the saved object intact and you will not lose any
+data by disabling the alias -- you just won't be able to use the old URL to access that saved object anymore.
+
+To disable a legacy URL alias, you'll need three pieces of information about it: the `targetSpace`, the `targetType`, and the `sourceId`.
+Once you have this information, you can use the <<spaces-api-disable-legacy-url-aliases,`_disable_legacy_url_aliases`>> API to disable the
+problematic legacy URL alias.

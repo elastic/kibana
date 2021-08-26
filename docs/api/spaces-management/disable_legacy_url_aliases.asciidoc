@@ -1,0 +1,48 @@
+[[spaces-api-disable-legacy-url-aliases]]
+=== Create space API
+++++
+<titleabbrev>Disable legacy URL aliases</titleabbrev>
+++++
+
+experimental[] Disable a <<legacy-url-aliases,legacy URL alias>> in {kib}.
+
+[[spaces-api-disable-legacy-url-aliases-request]]
+==== Request
+
+`POST <kibana host>:<port>/api/spaces/_disable_legacy_url_aliases`
+
+[[spaces-api-disable-legacy-url-aliases-request-body]]
+==== Request body
+
+`targetSpace`::
+  (Required, string) The space where the alias target object exists.
+
+`targetType`::
+  (Required, string) The type of the alias target object.
+
+`sourceId`::
+  (Required, string) The ID of the alias source object. This is the "legacy" object ID.
+
+[[spaces-api-disable-legacy-url-aliases-response-codes]]
+==== Response codes
+
+`204`::
+  Indicates a successful call.
+
+[[spaces-api-disable-legacy-url-aliases-example]]
+==== Example
+
+[source,sh]
+--------------------------------------------------
+$ curl -X POST api/spaces/_disable_legacy_url_aliases
+{
+  "targetSpace": "bills-space",
+  "targetType": "dashboard",
+  "sourceId": "123"
+}
+--------------------------------------------------
+// KIBANA
+
+This will leave the alias intact, but the legacy URL for this alias will no longer function. In this example, you had a legacy URL for
+`http://localhost:5601/s/bills-space/app/dashboards#/view/123`. That URL would no longer work after making this API call, but the dashboard
+itself still exists and can be accessed by its new URL.
