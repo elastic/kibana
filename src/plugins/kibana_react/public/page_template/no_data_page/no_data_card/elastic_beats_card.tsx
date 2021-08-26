@@ -22,7 +22,6 @@ export const ElasticBeatsCard: FunctionComponent<ElasticBeatsCardProps> = ({
   href,
   title,
   button,
-  href,
   solution, // unused for now
   ...cardRest
 }) => {
