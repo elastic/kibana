@@ -59,7 +59,7 @@ export class TelemetryReceiver {
   }
 
   public async fetchClusterInfo(): Promise<ESClusterInfo> {
-    if (this.esClient === undefined) {
+    if (this.esClient === undefined || this.esClient === null) {
       throw Error('elasticsearch client is unavailable: cannot retrieve cluster infomation');
     }
 
