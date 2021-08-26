@@ -6,7 +6,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Legacy } from './legacy_shims';
 import {
   App,
   AppMountParameters,
@@ -15,6 +14,7 @@ import {
   Plugin,
   PluginInitializerContext,
 } from 'kibana/public';
+import { Legacy } from './legacy_shims';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
 import {
   FeatureCatalogueCategory,
@@ -66,7 +66,6 @@ export class MonitoringPlugin
     if (!monitoring.ui.enabled || !monitoring.enabled) {
       return false;
     }
-    
 
     if (home) {
       home.featureCatalogue.register({
@@ -111,21 +110,19 @@ export class MonitoringPlugin
           appMountParameters: params,
         };
 
-        Legacy.init(
-          {
-            core: deps.core,
-            element: deps.element,
-            data: deps.data,
-            navigation: deps.navigation,
-            isCloud: deps.isCloud,
-            pluginInitializerContext: deps.pluginInitializerContext,
-            externalConfig: deps.externalConfig,
-            kibanaLegacy: deps.kibanaLegacy,
-            triggersActionsUi: deps.triggersActionsUi,
-            usageCollection: deps.usageCollection,
-            appMountParameters: deps.appMountParameters,
-          }
-        );
+        Legacy.init({
+          core: deps.core,
+          element: deps.element,
+          data: deps.data,
+          navigation: deps.navigation,
+          isCloud: deps.isCloud,
+          pluginInitializerContext: deps.pluginInitializerContext,
+          externalConfig: deps.externalConfig,
+          kibanaLegacy: deps.kibanaLegacy,
+          triggersActionsUi: deps.triggersActionsUi,
+          usageCollection: deps.usageCollection,
+          appMountParameters: deps.appMountParameters,
+        });
 
         const config = Object.fromEntries(externalConfig);
         if (config.renderReactApp) {
