@@ -20,26 +20,24 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 
+import { CloudBackupStatus } from '../../../../../common/types';
+import { UseRequestResponse } from '../../../../shared_imports';
+
+export interface CloudBackupStatusResponse extends UseRequestResponse {
+  data: CloudBackupStatus | null;
+}
+
 interface Props {
-  cloudBackupStatus: CloudBackupStatus;
+  cloudBackupStatusResponse: CloudBackupStatusResponse;
   cloudSnapshotsUrl: string;
 }
 
-export interface CloudBackupStatus {
-  isLoading?: boolean;
-  isInitialRequest?: boolean;
-  resendRequest?: () => void;
-  error?: any;
-  data?: {
-    isBackedUp: boolean;
-    lastBackupTime: string;
-  };
-}
-
 export const CloudBackup: React.FunctionComponent<Props> = ({
-  cloudBackupStatus: { isLoading, isInitialRequest, resendRequest, error, data },
+  cloudBackupStatusResponse,
   cloudSnapshotsUrl,
 }) => {
+  const { isInitialRequest, isLoading, error, data } = cloudBackupStatusResponse;
+
   if (isInitialRequest && isLoading) {
     return <EuiLoadingContent lines={3} />;
   }

@@ -48,24 +48,10 @@ export const Overview: FunctionComponent = () => {
     breadcrumbs.setBreadcrumbs('overview');
   }, [breadcrumbs]);
 
-  let cloudBackupStatus = {};
+  let cloudBackupStatusResponse;
 
   if (cloud?.isCloudEnabled) {
-    const {
-      data,
-      isLoading,
-      error,
-      isInitialRequest,
-      resendRequest,
-    } = api.useLoadCloudBackupStatus();
-
-    cloudBackupStatus = {
-      data,
-      isLoading,
-      error,
-      isInitialRequest,
-      resendRequest,
-    };
+    cloudBackupStatusResponse = api.useLoadCloudBackupStatus();
   }
 
   return (
@@ -108,7 +94,7 @@ export const Overview: FunctionComponent = () => {
 
         <EuiSteps
           steps={[
-            getBackupStep({ cloud, cloudBackupStatus }),
+            getBackupStep({ cloud, cloudBackupStatusResponse }),
             getFixIssuesStep({ nextMajor }),
             getFixLogsStep(),
             getUpgradeStep({ docLinks, nextMajor }),

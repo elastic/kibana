@@ -14,6 +14,7 @@ export {
   SendRequestResponse,
   useRequest,
   UseRequestConfig,
+  UseRequestResponse,
   SectionLoading,
   GlobalFlyout,
 } from '../../../../src/plugins/es_ui_shared/public/';
@@ -25,5 +26,7 @@ export { KibanaContextProvider } from '../../../../src/plugins/kibana_react/publ
 export { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 
 export { APP_WRAPPER_CLASS } from '../../../../src/core/public';
+
+export { CloudSetup } from '../../cloud/public';
 
 export const useKibana = () => _useKibana<AppServicesContext>();

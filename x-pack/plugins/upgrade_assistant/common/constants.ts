@@ -28,6 +28,11 @@ export const indexSettingDeprecations = {
 
 export const API_BASE_PATH = '/api/upgrade_assistant';
 
+/**
+ * This is the repository where Cloud stores its backup snapshots.
+ */
+export const CLOUD_SNAPSHOT_REPOSITORY = 'found-snapshots';
+
 export const DEPRECATION_WARNING_UPPER_LIMIT = 999999;
 export const DEPRECATION_LOGS_SOURCE_ID = 'deprecation_logs';
 export const DEPRECATION_LOGS_INDEX = '.logs-deprecation.elasticsearch-default';

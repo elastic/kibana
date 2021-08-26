@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { API_BASE_PATH } from '../../common/constants';
+import { API_BASE_PATH, CLOUD_SNAPSHOT_REPOSITORY } from '../../common/constants';
 import { versionCheckHandlerWrapper } from '../lib/es_version_precheck';
 import { RouteDependencies } from '../types';
 
@@ -23,7 +23,7 @@ export function registerCloudBackupStatusRoutes({
         const {
           body: { snapshots },
         } = await clusterClient.asCurrentUser.snapshot.get({
-          repository: 'found-snapshots',
+          repository: CLOUD_SNAPSHOT_REPOSITORY,
           snapshot: '_all',
           ignore_unavailable: true, // Allow request to succeed even if some snapshots are unavailable.
           // @ts-expect-error @elastic/elasticsearch "desc" is a new param

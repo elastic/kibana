@@ -9,9 +9,9 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 
-import { CloudSetup } from '../../../../../../cloud/public';
+import { CloudSetup } from '../../../../shared_imports';
 import { OnPremBackup } from './on_prem_backup';
-import { CloudBackup, CloudBackupStatus } from './cloud_backup';
+import { CloudBackup, CloudBackupStatusResponse } from './cloud_backup';
 
 const title = i18n.translate('xpack.upgradeAssistant.overview.backupStepTitle', {
   defaultMessage: 'Back up your data',
@@ -19,17 +19,17 @@ const title = i18n.translate('xpack.upgradeAssistant.overview.backupStepTitle', 
 
 interface Props {
   cloud?: CloudSetup;
-  cloudBackupStatus: CloudBackupStatus;
+  cloudBackupStatusResponse?: CloudBackupStatusResponse;
 }
 
-export const getBackupStep = ({ cloud, cloudBackupStatus }: Props): EuiStepProps => {
+export const getBackupStep = ({ cloud, cloudBackupStatusResponse }: Props): EuiStepProps => {
   if (cloud?.isCloudEnabled) {
     return {
       title,
-      status: cloudBackupStatus?.data?.isBackedUp ? 'complete' : 'incomplete',
+      status: cloudBackupStatusResponse!.data?.isBackedUp ? 'complete' : 'incomplete',
       children: (
         <CloudBackup
-          cloudBackupStatus={cloudBackupStatus}
+          cloudBackupStatusResponse={cloudBackupStatusResponse!}
           cloudSnapshotsUrl={`${cloud!.deploymentUrl}/elasticsearch/snapshots`}
         />
       ),
