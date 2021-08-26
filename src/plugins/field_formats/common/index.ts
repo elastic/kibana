@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-/* eslint-disable @kbn/eslint/no_export_all */
-
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { FieldFormatsRegistry } from './field_formats_registry';
 
