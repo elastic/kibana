@@ -9,6 +9,8 @@
 import type { EventEmitter } from 'events';
 import type { History } from 'history';
 
+import type { SerializableRecord } from '@kbn/utility-types';
+
 import type {
   CoreStart,
   PluginInitializerContext,
@@ -49,7 +51,7 @@ export type PureVisState = SavedVisState;
 
 export interface VisualizeAppState {
   filters: Filter[];
-  uiState: Record<string, unknown>;
+  uiState: SerializableRecord;
   vis: PureVisState;
   query: Query;
   savedQuery?: string;
@@ -103,6 +105,7 @@ export interface VisualizeServices extends CoreStart {
   savedObjectsTagging?: SavedObjectsTaggingApi;
   presentationUtil: PresentationUtilPluginStart;
   usageCollection?: UsageCollectionStart;
+  getKibanaVersion: () => string;
 }
 
 export interface SavedVisInstance {

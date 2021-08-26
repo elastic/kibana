@@ -7,18 +7,20 @@
  */
 
 import { SavedObjectAttributes } from 'kibana/server';
+import type { SerializableRecord } from '@kbn/utility-types';
 import { AggConfigOptions } from 'src/plugins/data/common';
 
 export interface VisParams {
   [key: string]: any;
 }
 
-export interface SavedVisState<TVisParams = VisParams> {
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type SavedVisState<TVisParams = SerializableRecord> = {
   title: string;
   type: string;
   params: TVisParams;
   aggs: AggConfigOptions[];
-}
+};
 
 export interface VisualizationSavedObjectAttributes extends SavedObjectAttributes {
   description: string;

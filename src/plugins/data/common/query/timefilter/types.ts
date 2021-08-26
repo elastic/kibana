@@ -8,10 +8,11 @@
 
 import { Moment } from 'moment';
 
-export interface RefreshInterval {
+// eslint-disable-next-line
+export type RefreshInterval = {
   pause: boolean;
   value: number;
-}
+};
 
 // eslint-disable-next-line
 export type TimeRange = {
