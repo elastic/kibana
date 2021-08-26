@@ -10,6 +10,7 @@ import moment from 'moment';
 import _, { isArray } from 'lodash';
 import type { estypes } from '@elastic/elasticsearch';
 
+import { RangeFilter } from '@kbn/es-query';
 import { AggGroupNames } from '../agg_groups';
 import { GenericBucket, AggConfigs, getTime, AggConfig } from '../../../../common';
 import { IBucketAggConfig } from '../buckets';
@@ -423,7 +424,7 @@ export function insertTimeShiftSplit(
     const timeFilter = getTime(aggConfigs.indexPattern, timeRange, {
       fieldName: timeField,
       forceNow: aggConfigs.forceNow,
-    });
+    }) as RangeFilter;
     if (timeFilter) {
       filters[key] = {
         range: {

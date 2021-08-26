@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient, SavedObjectsClientContract } from 'kibana/server';
 import {
   GetFieldsOptions,
   IIndexPatternsApiClient,
@@ -14,10 +14,14 @@ import {
 } from '../../common/index_patterns/types';
 import { IndexPatternMissingIndices } from '../../common/index_patterns/lib';
 import { IndexPatternsFetcher } from './fetcher';
+import { hasUserIndexPattern } from './has_user_index_pattern';
 
 export class IndexPatternsApiServer implements IIndexPatternsApiClient {
   esClient: ElasticsearchClient;
-  constructor(elasticsearchClient: ElasticsearchClient) {
+  constructor(
+    elasticsearchClient: ElasticsearchClient,
+    private readonly savedObjectsClient: SavedObjectsClientContract
+  ) {
     this.esClient = elasticsearchClient;
   }
   async getFieldsForWildcard({
@@ -49,5 +53,12 @@ export class IndexPatternsApiServer implements IIndexPatternsApiClient {
   async getFieldsForTimePattern(options: GetFieldsOptionsTimePattern) {
     const indexPatterns = new IndexPatternsFetcher(this.esClient);
     return await indexPatterns.getFieldsForTimePattern(options);
+  }
+
+  async hasUserIndexPattern() {
+    return hasUserIndexPattern({
+      esClient: this.esClient,
+      soClient: this.savedObjectsClient,
+    });
   }
 }

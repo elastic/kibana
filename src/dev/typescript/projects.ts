@@ -70,6 +70,7 @@ export const PROJECTS = [
 
   ...findProjects('packages/*/tsconfig.json'),
   ...findProjects('src/plugins/*/tsconfig.json'),
+  ...findProjects('src/plugins/chart_expressions/*/tsconfig.json'),
   ...findProjects('src/plugins/vis_types/*/tsconfig.json'),
   ...findProjects('x-pack/plugins/*/tsconfig.json'),
   ...findProjects('examples/*/tsconfig.json'),
