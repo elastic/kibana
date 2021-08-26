@@ -69,9 +69,6 @@ export const buildTimelineEventsAllQuery = ({
     body: {
       ...(!isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),
       aggregations: {
-        consumers: {
-          terms: { field: ALERT_RULE_CONSUMER, exclude: ['alerts'] },
-        },
         producers: {
           terms: { field: ALERT_RULE_PRODUCER, exclude: ['alerts'] },
         },
