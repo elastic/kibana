@@ -20,6 +20,11 @@ import {
   htmlIdGenerator,
   EuiLoadingSpinner,
   EuiIcon,
+  EuiButtonEmpty,
+  EuiPopover,
+  EuiButtonGroup,
+  EuiTitle,
+  EuiSwitch,
 } from '@elastic/eui';
 import { IndexPattern } from '../../../kibana_services';
 import { DocViewFilterFn, ElasticSearchHit } from '../../doc_views/doc_views_types';
@@ -311,6 +316,36 @@ export const DiscoverGrid = ({
     [controlColumnIds]
   );
 
+  const rowOptions = useMemo(
+    // Use of useMemo? The linter made me do it ;)
+    () => [
+      {
+        id: 'opt1',
+        label: '1',
+        value: 1,
+      },
+      {
+        id: 'opt2',
+        label: '3',
+        value: 3,
+      },
+      {
+        id: 'opt3',
+        label: '5',
+        value: 5,
+      },
+      {
+        id: 'opt4',
+        label: '10',
+        value: 10,
+      },
+    ],
+    []
+  );
+  const [isSelectionPopoverOpen, setIsSelectionPopoverOpen] = useState(false);
+  const [rowHeightValue, setRowHeightValue] = useState(1);
+  const [defaultColsOnly, setDefaultColsOnly] = useState(true);
+
   const additionalControls = useMemo(
     () =>
       usedSelectedDocs.length ? (
@@ -321,8 +356,62 @@ export const DiscoverGrid = ({
           setSelectedDocs={setSelectedDocs}
           setIsFilterActive={setIsFilterActive}
         />
-      ) : null,
-    [usedSelectedDocs, isFilterActive, rows, setIsFilterActive]
+      ) : (
+        <EuiPopover
+          closePopover={() => setIsSelectionPopoverOpen(false)}
+          isOpen={isSelectionPopoverOpen}
+          panelPaddingSize="m"
+          button={
+            <EuiButtonEmpty
+              size="xs"
+              color="text"
+              iconType="editorDistributeVertical"
+              onClick={() => setIsSelectionPopoverOpen(true)}
+            >
+              Row height
+            </EuiButtonEmpty>
+          }
+        >
+          <EuiTitle size="xxxs">
+            <h4>Number of lines per row</h4>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+          <EuiButtonGroup
+            legend="Select the number of lines to display per row"
+            name="somename"
+            options={rowOptions}
+            style={{ width: 240 }}
+            idSelected={rowOptions.find(({ value }) => value === rowHeightValue)!.id}
+            onChange={(optId) => {
+              setIsSelectionPopoverOpen(false);
+              const selectedValue = rowOptions.find(({ id }) => id === optId)!.value;
+              setRowHeightValue(selectedValue);
+            }}
+            buttonSize="compressed"
+            isFullWidth
+          />
+          <EuiSpacer size="m" />
+          <EuiSwitch
+            label="Apply to default view only"
+            checked={defaultColsOnly}
+            onChange={() => setDefaultColsOnly(!defaultColsOnly)}
+            compressed
+          />
+        </EuiPopover>
+      ),
+    [
+      usedSelectedDocs,
+      isFilterActive,
+      rows,
+      setIsFilterActive,
+      isSelectionPopoverOpen,
+      setIsSelectionPopoverOpen,
+      rowHeightValue,
+      setRowHeightValue,
+      defaultColsOnly,
+      setDefaultColsOnly,
+      rowOptions,
+    ]
   );
 
   if (!rowCount && isLoading) {
@@ -393,6 +482,19 @@ export const DiscoverGrid = ({
             pagination={paginationObj}
             renderCellValue={renderCellValue}
             rowCount={rowCount}
+            rowHeightsOptions={
+              defaultColumns
+                ? {
+                    defaultHeight: {
+                      lineCount: rowHeightValue,
+                    },
+                  }
+                : {
+                    defaultHeight: {
+                      lineCount: defaultColsOnly ? 1 : rowHeightValue,
+                    },
+                  }
+            }
             schemaDetectors={schemaDetectors}
             sorting={sorting as EuiDataGridSorting}
             toolbarVisibility={

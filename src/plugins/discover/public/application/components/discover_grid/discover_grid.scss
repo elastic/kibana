@@ -84,8 +84,23 @@
   @include euiTextTruncate;
 }
 
-.dscDiscoverGrid__descriptionListDescription {
-  word-break: normal !important;
+// TODO - apply this if testing feedback suggests cell content is too tight
+// .euiDataGrid--fontSizeSmall .euiDataGridRowCell {
+//   line-height: $euiFontSizeM * 1.25;
+// }
+
+// .dscDiscoverGrid__descriptionListDescription {
+//   word-break: normal !important;
+// }
+
+.euiCheckbox .euiCheckbox__input + .euiCheckbox__square {
+  padding: 6px; // it's 7px by default and the bottom edge is cut off
+}
+
+.euiDataGridRowCell__contentByHeight + .euiDataGridRowCell__expandButton {
+  // in compressed mode, the row heights are not 34px and this bleeds over row below
+  padding: 5px 0; // it's 6px by default, we need some to keep a reasonable target size
+  top: -4px; // this is a pure hack to align in compressed mode
 }
 
 @include euiBreakpoint('xs', 's', 'm') {
