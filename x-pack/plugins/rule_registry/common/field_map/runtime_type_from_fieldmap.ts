@@ -45,6 +45,7 @@ const BooleanFromString = new t.Type(
 
 const esFieldTypeMap = {
   keyword: t.string,
+  version: t.string,
   text: t.string,
   date: t.string,
   boolean: t.union([t.number, BooleanFromString]),

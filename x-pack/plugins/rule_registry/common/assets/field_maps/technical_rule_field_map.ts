@@ -30,7 +30,7 @@ export const technicalRuleFieldMap = {
   [Fields.ALERT_EVALUATION_THRESHOLD]: { type: 'scaled_float', scaling_factor: 100 },
   [Fields.ALERT_EVALUATION_VALUE]: { type: 'scaled_float', scaling_factor: 100 },
   [Fields.VERSION]: {
-    type: 'keyword',
+    type: 'version',
     array: false,
     required: false,
   },

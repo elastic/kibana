@@ -33,6 +33,7 @@ import {
   EVENT_ACTION,
   EVENT_KIND,
   TIMESTAMP,
+  VERSION,
 } from '../../common/technical_rule_data_field_names';
 import { IRuleDataClient } from '../rule_data_client';
 import { AlertExecutorOptionsWithExtraServices } from '../types';
@@ -263,6 +264,7 @@ export const createLifecycleExecutor = (
       [ALERT_UUID]: alertUuid,
       [EVENT_KIND]: 'signal',
       [EVENT_ACTION]: isNew ? 'open' : isActive ? 'active' : 'close',
+      [VERSION]: ruleDataClient.kibanaVersion,
       ...(isRecovered ? { [ALERT_END]: commonRuleFields[TIMESTAMP] } : {}),
     };
 
