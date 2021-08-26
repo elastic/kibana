@@ -12,6 +12,7 @@ import { EuiText, EuiSpacer, EuiPanel, EuiCallOut } from '@elastic/eui';
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 
 import { ExternalLinks } from './external_links';
+import { DeprecationsCountCheckpoint } from './deprecations_count_checkpoint';
 import { useDeprecationLogging } from './use_deprecation_logging';
 import { DeprecationLoggingToggle } from './deprecation_logging_toggle';
 
@@ -25,6 +26,12 @@ const i18nTexts = {
   analyzeTitle: i18n.translate('xpack.upgradeAssistant.overview.analyzeTitle', {
     defaultMessage: 'Analyze deprecation logs',
   }),
+  deprecationsCountCheckpointTitle: i18n.translate(
+    'xpack.upgradeAssistant.overview.deprecationsCountCheckpointTitle',
+    {
+      defaultMessage: 'Resolve deprecation issues and verify your changes',
+    }
+  ),
   onlyLogWritingEnabledTitle: i18n.translate(
     'xpack.upgradeAssistant.overview.deprecationLogs.deprecationWarningTitle',
     {
@@ -70,11 +77,18 @@ const FixLogsStep: FunctionComponent = () => {
       {state.isDeprecationLogIndexingEnabled && (
         <>
           <EuiSpacer size="xl" />
-          <EuiText>
+          <EuiText data-test-subj="externalLinksTitle">
             <h4>{i18nTexts.analyzeTitle}</h4>
           </EuiText>
           <EuiSpacer size="m" />
           <ExternalLinks />
+
+          <EuiSpacer size="xl" />
+          <EuiText data-test-subj="deprecationsCountTitle">
+            <h4>{i18nTexts.deprecationsCountCheckpointTitle}</h4>
+          </EuiText>
+          <EuiSpacer size="m" />
+          <DeprecationsCountCheckpoint />
         </>
       )}
     </>
