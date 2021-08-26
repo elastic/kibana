@@ -487,7 +487,11 @@ export class CommonPageObject extends FtrService {
     topOffset?: number
   ) {
     await this.testSubjects.click(clickTarget, undefined, topOffset);
-    const validate = isValidatorCssString ? this.find.byCssSelector : this.testSubjects.exists;
+    // Wrapping them in an arrow function so the methods below don't loose their internal `this` references
+    const validate = (validatorStr: string) =>
+      isValidatorCssString
+        ? this.find.byCssSelector(validatorStr)
+        : this.testSubjects.exists(validatorStr);
     await validate(validator);
   }
 }
