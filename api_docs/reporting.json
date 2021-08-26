@@ -473,7 +473,7 @@
             "signature": [
               "<T extends Pick<",
               "BaseParams",
-              ", \"title\" | \"objectType\" | \"layout\">>(baseParams: T) => ",
+              ", \"title\" | \"layout\" | \"objectType\">>(baseParams: T) => ",
               "BaseParams"
             ],
             "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
@@ -550,21 +550,6 @@
             "description": [],
             "signature": [
               "() => string"
-            ],
-            "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
-            "deprecated": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "reporting",
-            "id": "def-public.ReportingAPIClient.verifyConfig",
-            "type": "Function",
-            "tags": [],
-            "label": "verifyConfig",
-            "description": [],
-            "signature": [
-              "() => Promise<any>"
             ],
             "path": "x-pack/plugins/reporting/public/lib/reporting_api_client/reporting_api_client.ts",
             "deprecated": false,
@@ -842,25 +827,7 @@
         "initialIsOpen": false
       }
     ],
-    "functions": [
-      {
-        "parentPluginId": "reporting",
-        "id": "def-public.getDefaultLayoutSelectors",
-        "type": "Function",
-        "tags": [],
-        "label": "getDefaultLayoutSelectors",
-        "description": [],
-        "signature": [
-          "() => ",
-          "LayoutSelectorDictionary"
-        ],
-        "path": "x-pack/plugins/reporting/common/index.ts",
-        "deprecated": false,
-        "children": [],
-        "returnComment": [],
-        "initialIsOpen": false
-      }
-    ],
+    "functions": [],
     "interfaces": [],
     "enums": [],
     "misc": [],
@@ -1302,23 +1269,6 @@
               "() => Promise<Record<string, ",
               "LicenseCheckResult",
               ">>"
-            ],
-            "path": "x-pack/plugins/reporting/server/core.ts",
-            "deprecated": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "reporting",
-            "id": "def-server.ReportingCore.getScreenshotsObservable",
-            "type": "Function",
-            "tags": [],
-            "label": "getScreenshotsObservable",
-            "description": [],
-            "signature": [
-              "() => Promise<",
-              "ScreenshotsObservableFn",
-              ">"
             ],
             "path": "x-pack/plugins/reporting/server/core.ts",
             "deprecated": false,
@@ -2084,6 +2034,25 @@
           },
           {
             "parentPluginId": "reporting",
+            "id": "def-server.ReportingSetupDeps.screenshotMode",
+            "type": "Object",
+            "tags": [],
+            "label": "screenshotMode",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "screenshotMode",
+                "scope": "server",
+                "docId": "kibScreenshotModePluginApi",
+                "section": "def-server.ScreenshotModePluginSetup",
+                "text": "ScreenshotModePluginSetup"
+              }
+            ],
+            "path": "x-pack/plugins/reporting/server/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "reporting",
             "id": "def-server.ReportingSetupDeps.security",
             "type": "Object",
             "tags": [],
@@ -2155,25 +2124,6 @@
                 "text": "UsageCollectionSetup"
               },
               " | undefined"
-            ],
-            "path": "x-pack/plugins/reporting/server/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "reporting",
-            "id": "def-server.ReportingSetupDeps.screenshotMode",
-            "type": "Object",
-            "tags": [],
-            "label": "screenshotMode",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "screenshotMode",
-                "scope": "server",
-                "docId": "kibScreenshotModePluginApi",
-                "section": "def-server.ScreenshotModePluginSetup",
-                "text": "ScreenshotModePluginSetup"
-              }
             ],
             "path": "x-pack/plugins/reporting/server/types.ts",
             "deprecated": false
@@ -2473,25 +2423,7 @@
         "initialIsOpen": false
       }
     ],
-    "functions": [
-      {
-        "parentPluginId": "reporting",
-        "id": "def-common.getDefaultLayoutSelectors",
-        "type": "Function",
-        "tags": [],
-        "label": "getDefaultLayoutSelectors",
-        "description": [],
-        "signature": [
-          "() => ",
-          "LayoutSelectorDictionary"
-        ],
-        "path": "x-pack/plugins/reporting/common/index.ts",
-        "deprecated": false,
-        "children": [],
-        "returnComment": [],
-        "initialIsOpen": false
-      }
-    ],
+    "functions": [],
     "interfaces": [],
     "enums": [],
     "misc": [],

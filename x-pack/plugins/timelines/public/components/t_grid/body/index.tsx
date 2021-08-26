@@ -32,6 +32,7 @@ import React, {
 import { connect, ConnectedProps, useDispatch } from 'react-redux';
 
 import { ThemeContext } from 'styled-components';
+import { ALERT_RULE_CONSUMER } from '@kbn/rule-data-utils';
 import {
   TGridCellAction,
   BulkActionsProp,
@@ -103,6 +104,8 @@ interface OwnProps {
   trailingControlColumns?: ControlColumnProps[];
   unit?: (total: number) => React.ReactNode;
   hasAlertsCrud?: boolean;
+  hasAlertsCrudPermissions?: (featureId: string) => boolean;
+  totalSelectAllAlerts?: number;
 }
 
 const defaultUnit = (n: number) => i18n.ALERTS_UNIT(n);
@@ -143,6 +146,7 @@ const transformControlColumns = ({
   theme,
   setEventsLoading,
   setEventsDeleted,
+  hasAlertsCrudPermissions,
 }: {
   actionColumnsWidth: number;
   columnHeaders: ColumnHeaderOptions[];
@@ -163,6 +167,7 @@ const transformControlColumns = ({
   theme: EuiTheme;
   setEventsLoading: SetEventsLoading;
   setEventsDeleted: SetEventsDeleted;
+  hasAlertsCrudPermissions?: (featureId: string) => boolean;
 }): EuiDataGridControlColumn[] =>
   controlColumns.map(
     ({ id: columnId, headerCellRender = EmptyHeaderCellRender, rowCellRender, width }, i) => ({
@@ -200,6 +205,12 @@ const transformControlColumns = ({
         setCellProps,
       }: EuiDataGridCellValueElementProps) => {
         addBuildingBlockStyle(data[rowIndex].ecs, theme, setCellProps);
+        let disabled = false;
+        if (columnId === 'checkbox-control-column' && hasAlertsCrudPermissions != null) {
+          const alertConsumers =
+            data[rowIndex].data.find((d) => d.field === ALERT_RULE_CONSUMER)?.value ?? [];
+          disabled = alertConsumers.some((consumer) => !hasAlertsCrudPermissions(consumer));
+        }
 
         return (
           <RowAction
@@ -207,6 +218,7 @@ const transformControlColumns = ({
             columnHeaders={columnHeaders}
             controlColumn={controlColumns[i]}
             data={data}
+            disabled={disabled}
             index={i}
             isDetails={isDetails}
             isExpanded={isExpanded}
@@ -275,6 +287,8 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     trailingControlColumns = EMPTY_CONTROL_COLUMNS,
     unit = defaultUnit,
     hasAlertsCrud,
+    hasAlertsCrudPermissions,
+    totalSelectAllAlerts,
   }) => {
     const dispatch = useDispatch();
     const getManageTimeline = useMemo(() => tGridSelectors.getManageTimelineById(), []);
@@ -294,12 +308,18 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
       ({ eventIds, isSelected }: { eventIds: string[]; isSelected: boolean }) => {
         setSelected({
           id,
-          eventIds: getEventIdToDataMapping(data, eventIds, queryFields),
+          eventIds: getEventIdToDataMapping(
+            data,
+            eventIds,
+            queryFields,
+            hasAlertsCrud ?? false,
+            hasAlertsCrudPermissions
+          ),
           isSelected,
           isSelectAllChecked: isSelected && selectedCount + 1 === data.length,
         });
       },
-      [setSelected, id, data, selectedCount, queryFields]
+      [setSelected, id, data, queryFields, hasAlertsCrud, hasAlertsCrudPermissions, selectedCount]
     );
 
     const onSelectPage: OnSelectAll = useCallback(
@@ -310,13 +330,15 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
               eventIds: getEventIdToDataMapping(
                 data,
                 data.map((event) => event._id),
-                queryFields
+                queryFields,
+                hasAlertsCrud ?? false,
+                hasAlertsCrudPermissions
               ),
               isSelected,
               isSelectAllChecked: isSelected,
             })
           : clearSelected({ id }),
-      [setSelected, clearSelected, id, data, queryFields]
+      [setSelected, id, data, queryFields, hasAlertsCrud, hasAlertsCrudPermissions, clearSelected]
     );
 
     // Sync to selectAll so parent components can select all events
@@ -363,7 +385,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
               <StatefulAlertStatusBulkActions
                 data-test-subj="bulk-actions"
                 id={id}
-                totalItems={totalItems}
+                totalItems={totalSelectAllAlerts ?? totalItems}
                 filterStatus={filterStatus}
                 query={filterQuery}
                 indexName={indexNames.join()}
@@ -386,6 +408,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
         refetch,
         showBulkActions,
         totalItems,
+        totalSelectAllAlerts,
       ]
     );
 
@@ -400,7 +423,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
                   <StatefulAlertStatusBulkActions
                     data-test-subj="bulk-actions"
                     id={id}
-                    totalItems={totalItems}
+                    totalItems={totalSelectAllAlerts ?? totalItems}
                     filterStatus={filterStatus}
                     query={filterQuery}
                     indexName={indexNames.join()}
@@ -438,19 +461,20 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
         showStyleSelector: false,
       }),
       [
-        id,
         alertCountText,
+        showBulkActions,
+        id,
+        totalSelectAllAlerts,
         totalItems,
         filterStatus,
         filterQuery,
-        browserFields,
         indexNames,
-        columnHeaders,
-        additionalControls,
-        showBulkActions,
         onAlertStatusActionSuccess,
         onAlertStatusActionFailure,
         refetch,
+        additionalControls,
+        browserFields,
+        columnHeaders,
       ]
     );
 
@@ -544,28 +568,30 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
           theme,
           setEventsLoading,
           setEventsDeleted,
+          hasAlertsCrudPermissions,
         })
       );
     }, [
+      showCheckboxes,
+      leadingControlColumns,
+      trailingControlColumns,
       columnHeaders,
       data,
-      id,
       isEventViewer,
-      leadingControlColumns,
+      id,
       loadingEventIds,
       onRowSelected,
       onRuleChange,
       selectedEventIds,
-      showCheckboxes,
       tabType,
-      trailingControlColumns,
       isSelectAllChecked,
+      sort,
       browserFields,
       onSelectPage,
-      sort,
       theme,
       setEventsLoading,
       setEventsDeleted,
+      hasAlertsCrudPermissions,
     ]);
 
     const columnsWithCellActions: EuiDataGridColumn[] = useMemo(
