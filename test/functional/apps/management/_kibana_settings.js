@@ -17,14 +17,12 @@ export default function ({ getService, getPageObjects }) {
     before(async function () {
       // delete .kibana index and then wait for Kibana to re-create it
       await kibanaServer.uiSettings.replace({});
-      await PageObjects.settings.createIndexPattern('logstash-*');
       await PageObjects.settings.navigateTo();
-    });
-
-    after(async function afterAll() {
-      await PageObjects.settings.navigateTo();
-      await PageObjects.settings.clickKibanaIndexPatterns();
-      await PageObjects.settings.removeLogstashIndexPatternIfExist();
+      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover.json');
+      await kibanaServer.uiSettings.replace({
+        defaultIndex: 'logstash-*',
+      });
+      
     });
 
     it('should allow setting advanced settings', async function () {
@@ -42,6 +40,7 @@ export default function ({ getService, getPageObjects }) {
         throw new Error('State in url is missing or malformed: ' + currentUrl);
       }
 
+  
       it('defaults to null', async () => {
         await PageObjects.settings.clickKibanaSettings();
         const storeInSessionStorage = await PageObjects.settings.getAdvancedSettingCheckbox(
@@ -96,6 +95,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
     after(async function () {
+      await kibanaServer.savedObjects.clean({ types: ['index-pattern', 'search', 'visualize'] });
       await kibanaServer.uiSettings.replace({ 'dateFormat:tz': 'UTC' });
       await browser.refresh();
     });

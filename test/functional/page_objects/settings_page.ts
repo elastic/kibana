@@ -143,17 +143,36 @@ export class SettingsPageObject extends FtrService {
     return this.testSubjects.find('createIndexPatternNameInput');
   }
 
-  async getTimeFieldNameField() {
+  async waitForTimefieldEnabled() {
     const wrapperElement = await this.testSubjects.find('timestampField');
-    return wrapperElement.findByTestSubject('comboBoxSearchInput');
+    let timefieldComboxBox;
+    await this.retry.waitFor('wait for timefield comboBox to be enabled', async () => {
+      timefieldComboxBox = wrapperElement.findByTestSubject('comboBoxSearchInput');
+      const isEnabled = await (await timefieldComboxBox).isEnabled();
+      return isEnabled;
+    });
+    return timefieldComboxBox;
   }
 
   async selectTimeFieldOption(selection: string) {
-    // open dropdown
-    const timefield = await this.getTimeFieldNameField();
-    await timefield.click();
-    await this.browser.pressKeys(selection);
-    await this.browser.pressKeys(this.browser.keys.TAB);
+    // The problem here is that the timefield is enabled as soon as the first index query returns a timefield
+    // but as more characters are typed, the selection list keeps getting refreshed.
+    await this.waitForTimefieldEnabled();
+    const comboBoxInput = await this.testSubjects.find('comboBoxInput');
+    await this.retry.waitFor('wait for timefield to stop loading', async () => {
+      return !(await comboBoxInput.getAttribute('class')).includes('isLoading');
+    });
+    await this.common.sleep(500);
+    await this.retry.waitFor('timefield to be selected', async () => {
+      // open dropdown and click timefield selection
+      await this.testSubjects.click('comboBoxToggleListButton');
+      await this.common.sleep(500);
+      await (await this.find.displayedByCssSelector(`[title="${selection}"]`, 100)).click();
+      this.log.debug('We found and clicked on the timefield');
+      const selectedValue = await this.testSubjects.getVisibleText('comboBoxInput');
+      this.log.debug(`comboBoxInput: ${selectedValue}`);
+      return (selectedValue == selection);
+    });
   }
 
   async getTimeFieldOption(selection: string) {
@@ -305,7 +324,8 @@ export class SettingsPageObject extends FtrService {
   }
 
   async hasIndexPattern(name: string) {
-    return await this.find.existsByLinkText(name);
+    this.log.debug(`---- checking if ${name} already exists in ${await this.getAllIndexPatternNames()}`);
+    return (await this.getAllIndexPatternNames()).includes(name);
   }
 
   async clickIndexPatternByName(name: string) {

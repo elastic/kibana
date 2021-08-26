@@ -458,6 +458,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       indexPatternId = indexPatternResult.id!;
     });
 
+    after(async () => {
+      await es.indices.delete({ index: indexTitle });
+    });
+
     describe('edit formats', () => {
       before(async () => {
         await PageObjects.settings.navigateTo();
