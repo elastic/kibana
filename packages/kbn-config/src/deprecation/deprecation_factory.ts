@@ -19,7 +19,7 @@ import {
 
 const getDeprecationTitle = (deprecationPath: string) => {
   return i18n.translate('kbnConfig.deprecations.deprecatedSettingTitle', {
-    defaultMessage: 'Setting {deprecationPath} is deprecated',
+    defaultMessage: 'Setting "{deprecationPath}" is deprecated',
     values: { deprecationPath },
   });
 };
@@ -67,7 +67,7 @@ const _rename = (
       title: getDeprecationTitle(fullOldPath),
       message: i18n.translate('kbnConfig.deprecations.conflictSettingMessage', {
         defaultMessage:
-          'Setting "${fullOldPath}" is deprecated and has been replaced by "${fullNewPath}". However both key are present, ignoring "${fullOldPath}"',
+          'Setting "${fullOldPath}" is deprecated and has been replaced by "${fullNewPath}". However, both keys are present. Ignoring "${fullOldPath}"',
         values: { fullOldPath, fullNewPath },
       }),
       correctiveActions: {
@@ -106,14 +106,14 @@ const _unused = (
   addDeprecation({
     title: getDeprecationTitle(fullPath),
     message: i18n.translate('kbnConfig.deprecations.unusedSettingMessage', {
-      defaultMessage: 'Setting {fullPath} is deprecated and is no longer used',
+      defaultMessage: 'Setting "{fullPath}" is deprecated and is no longer used',
       values: { fullPath },
     }),
     correctiveActions: {
       manualSteps: [
         i18n.translate('kbnConfig.deprecations.unusedSetting.manualStepOneMessage', {
           defaultMessage:
-            'Remove "{fullPath}" from the Kibana config file, CLI flag, or environment variable (in Docker only)',
+            'Remove "{fullPath}" from the Kibana config file, CLI flag, or environment variable (in Docker only).',
           values: { fullPath },
         }),
       ],

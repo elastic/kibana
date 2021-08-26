@@ -49,7 +49,7 @@ describe('Config Deprecations', () => {
     expect(migrated.xpack.security.session.idleTimeout).toEqual(123);
     expect(messages).toMatchInlineSnapshot(`
       Array [
-        "\\"xpack.security.sessionTimeout\\" is deprecated and has been replaced by \\"xpack.security.session.idleTimeout\\"",
+        "Setting \\"xpack.security.sessionTimeout\\" is deprecated and has been replaced by \\"xpack.security.session.idleTimeout\\"",
       ]
     `);
   });
@@ -71,7 +71,7 @@ describe('Config Deprecations', () => {
     expect(migrated.xpack.security.audit.appender.type).toEqual('console');
     expect(messages).toMatchInlineSnapshot(`
       Array [
-        "\\"xpack.security.audit.appender.kind\\" is deprecated and has been replaced by \\"xpack.security.audit.appender.type\\"",
+        "Setting \\"xpack.security.audit.appender.kind\\" is deprecated and has been replaced by \\"xpack.security.audit.appender.type\\"",
       ]
     `);
   });
@@ -93,7 +93,7 @@ describe('Config Deprecations', () => {
     expect(migrated.xpack.security.audit.appender.layout.type).toEqual('pattern');
     expect(messages).toMatchInlineSnapshot(`
       Array [
-        "\\"xpack.security.audit.appender.layout.kind\\" is deprecated and has been replaced by \\"xpack.security.audit.appender.layout.type\\"",
+        "Setting \\"xpack.security.audit.appender.layout.kind\\" is deprecated and has been replaced by \\"xpack.security.audit.appender.layout.type\\"",
       ]
     `);
   });
@@ -115,7 +115,7 @@ describe('Config Deprecations', () => {
     expect(migrated.xpack.security.audit.appender.policy.type).toEqual('time-interval');
     expect(messages).toMatchInlineSnapshot(`
       Array [
-        "\\"xpack.security.audit.appender.policy.kind\\" is deprecated and has been replaced by \\"xpack.security.audit.appender.policy.type\\"",
+        "Setting \\"xpack.security.audit.appender.policy.kind\\" is deprecated and has been replaced by \\"xpack.security.audit.appender.policy.type\\"",
       ]
     `);
   });
@@ -137,7 +137,7 @@ describe('Config Deprecations', () => {
     expect(migrated.xpack.security.audit.appender.strategy.type).toEqual('numeric');
     expect(messages).toMatchInlineSnapshot(`
       Array [
-        "\\"xpack.security.audit.appender.strategy.kind\\" is deprecated and has been replaced by \\"xpack.security.audit.appender.strategy.type\\"",
+        "Setting \\"xpack.security.audit.appender.strategy.kind\\" is deprecated and has been replaced by \\"xpack.security.audit.appender.strategy.type\\"",
       ]
     `);
   });
@@ -160,7 +160,7 @@ describe('Config Deprecations', () => {
     expect(migrated.xpack.security.audit.appender.fileName).toEqual('./audit.log');
     expect(messages).toMatchInlineSnapshot(`
       Array [
-        "\\"xpack.security.audit.appender.path\\" is deprecated and has been replaced by \\"xpack.security.audit.appender.fileName\\"",
+        "Setting \\"xpack.security.audit.appender.path\\" is deprecated and has been replaced by \\"xpack.security.audit.appender.fileName\\"",
       ]
     `);
   });
@@ -222,7 +222,7 @@ describe('Config Deprecations', () => {
     expect(migrated.xpack.security.audit.appender.fileName).toEqual('./audit.log');
     expect(messages).toMatchInlineSnapshot(`
       Array [
-        "\\"xpack.security.audit.appender.path\\" is deprecated and has been replaced by \\"xpack.security.audit.appender.fileName\\"",
+        "Setting \\"xpack.security.audit.appender.path\\" is deprecated and has been replaced by \\"xpack.security.audit.appender.fileName\\"",
       ]
     `);
   });
@@ -242,7 +242,7 @@ describe('Config Deprecations', () => {
     const { messages } = applyConfigDeprecations(cloneDeep(config));
     expect(messages).toMatchInlineSnapshot(`
       Array [
-        "xpack.security.authorization.legacyFallback.enabled is deprecated and is no longer used",
+        "Setting xpack.security.authorization.legacyFallback.enabled is deprecated and is no longer used",
       ]
     `);
   });
@@ -262,7 +262,7 @@ describe('Config Deprecations', () => {
     const { messages } = applyConfigDeprecations(cloneDeep(config));
     expect(messages).toMatchInlineSnapshot(`
       Array [
-        "xpack.security.authc.saml.maxRedirectURLSize is deprecated and is no longer used",
+        "Setting xpack.security.authc.saml.maxRedirectURLSize is deprecated and is no longer used",
       ]
     `);
   });

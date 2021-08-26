@@ -49,7 +49,7 @@ describe('DeprecationFactory', () => {
                 ],
               },
               "message": "Setting \\"myplugin.deprecated\\" is deprecated and has been replaced by \\"myplugin.renamed\\"",
-              "title": "Setting myplugin.deprecated is deprecated",
+              "title": "Setting \\"myplugin.deprecated\\" is deprecated",
             },
           ],
         ]
@@ -105,7 +105,7 @@ describe('DeprecationFactory', () => {
                 ],
               },
               "message": "Setting \\"myplugin.oldsection.deprecated\\" is deprecated and has been replaced by \\"myplugin.newsection.renamed\\"",
-              "title": "Setting myplugin.oldsection.deprecated is deprecated",
+              "title": "Setting \\"myplugin.oldsection.deprecated\\" is deprecated",
             },
           ],
         ]
@@ -133,7 +133,7 @@ describe('DeprecationFactory', () => {
                 ],
               },
               "message": "Setting \\"$myplugin.deprecated\\" is deprecated and has been replaced by \\"$myplugin.renamed\\". However both key are present, ignoring \\"$myplugin.deprecated\\"",
-              "title": "Setting myplugin.deprecated is deprecated",
+              "title": "Setting \\"myplugin.deprecated\\" is deprecated",
             },
           ],
         ]
@@ -176,7 +176,7 @@ describe('DeprecationFactory', () => {
                 ],
               },
               "message": "Setting \\"myplugin.deprecated\\" is deprecated and has been replaced by \\"myplugin.renamed\\"",
-              "title": "Setting myplugin.deprecated is deprecated",
+              "title": "Setting \\"myplugin.deprecated\\" is deprecated",
             },
           ],
         ]
@@ -217,7 +217,7 @@ describe('DeprecationFactory', () => {
                 ],
               },
               "message": "Setting \\"oldplugin.deprecated\\" is deprecated and has been replaced by \\"newplugin.renamed\\"",
-              "title": "Setting oldplugin.deprecated is deprecated",
+              "title": "Setting \\"oldplugin.deprecated\\" is deprecated",
             },
           ],
         ]
@@ -270,7 +270,7 @@ describe('DeprecationFactory', () => {
                 ],
               },
               "message": "Setting \\"$myplugin.deprecated\\" is deprecated and has been replaced by \\"$myplugin.renamed\\". However both key are present, ignoring \\"$myplugin.deprecated\\"",
-              "title": "Setting myplugin.deprecated is deprecated",
+              "title": "Setting \\"myplugin.deprecated\\" is deprecated",
             },
           ],
         ]
@@ -302,8 +302,8 @@ describe('DeprecationFactory', () => {
                   "Remove \\"myplugin.deprecated\\" from the Kibana config file, CLI flag, or environment variable (in Docker only)",
                 ],
               },
-              "message": "Setting myplugin.deprecated is deprecated and is no longer used",
-              "title": "Setting myplugin.deprecated is deprecated",
+              "message": "Setting \\"myplugin.deprecated\\" is deprecated and is no longer used",
+              "title": "Setting \\"myplugin.deprecated\\" is deprecated",
             },
           ],
         ]
@@ -335,8 +335,8 @@ describe('DeprecationFactory', () => {
                   "Remove \\"myplugin.section.deprecated\\" from the Kibana config file, CLI flag, or environment variable (in Docker only)",
                 ],
               },
-              "message": "Setting myplugin.section.deprecated is deprecated and is no longer used",
-              "title": "Setting myplugin.section.deprecated is deprecated",
+              "message": "Setting \\"myplugin.section.deprecated\\" is deprecated and is no longer used",
+              "title": "Setting \\"myplugin.section.deprecated\\" is deprecated",
             },
           ],
         ]
@@ -386,8 +386,8 @@ describe('DeprecationFactory', () => {
                   "Remove \\"myplugin.deprecated\\" from the Kibana config file, CLI flag, or environment variable (in Docker only)",
                 ],
               },
-              "message": "Setting myplugin.deprecated is deprecated and is no longer used",
-              "title": "Setting myplugin.deprecated is deprecated",
+              "message": "Setting \\"myplugin.deprecated\\" is deprecated and is no longer used",
+              "title": "Setting \\"myplugin.deprecated\\" is deprecated",
             },
           ],
         ]

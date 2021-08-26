@@ -64,7 +64,7 @@ import { i18n } from '@kbn/i18n';
   deprecationsInfo:[{
     domainId: 'usageCollection',
     title: i18n.translate('usageCollection.uiCounters.deprecations.uiMetricDebugTitle', {
-      defaultMessage: 'Setting ui_metric.debug is deprecated',
+      defaultMessage: 'Setting "ui_metric.debug" is deprecated',
     });
     level: 'critical',
     title: i18n.translate('usageCollection.uiCounters.deprecations.uiMetricDebugMessage', {
@@ -109,10 +109,10 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
       }
       addDeprecation({
         title: i18n.translate('kibana_legacy.deprecations.defaultAppIdTitle', {
-          defaultMessage: 'Setting kibana.defaultAppId is deprecated',
+          defaultMessage: 'Setting "kibana.defaultAppId" is deprecated',
         }),
         message: i18n.translate('kibana_legacy.deprecations.defaultAppIdMessage', {
-          defaultMessage: '"kibana.defaultAppId" is deprecated and will be removed in 8.0. Please use the "defaultRoute" advanced setting instead',
+          defaultMessage: '"kibana.defaultAppId" is deprecated and will be removed in 8.0. Please use the "defaultRoute" advanced setting instead.',
         }),
         correctiveActions: {
           manualSteps: [
@@ -172,7 +172,7 @@ async function getDeprecations({ esClient, savedObjectsClient }: GetDeprecations
       defaultMessage: 'Found users using deprecated roles',
     }),
     message: i18n.translate('security.deprecations.kibanaUserRoleMessage', {
-      defaultMessage: 'User "test_dashboard_user" is using a deprecated role: "kibana_user"',
+      defaultMessage: 'User "test_dashboard_user" is using a deprecated role: "kibana_user".',
     }),
     documentationUrl: 'https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-put-user.html',
     level: 'critical',
@@ -195,10 +195,10 @@ async function getDeprecations({ esClient, savedObjectsClient }: GetDeprecations
       },
       manualSteps: [
         i18n.translate('security.deprecations.kibanaUserRole.manualStepOneMessage', {
-          defaultMessage: 'Using Kibana user management, change all users using the kibana_user role to the kibana_admin role.',
+          defaultMessage: 'Using Kibana user management, change all users using the kibana_user role to the "kibana_admin" role.',
         }),
         i18n.translate('security.deprecations.kibanaUserRole.manualStepTwoMessage', {
-          defaultMessage: 'Using Kibana role-mapping management, change all role-mappings which assing the kibana_user role to the kibana_admin role.'
+          defaultMessage: 'Using Kibana role-mapping management, change all role-mappings which assing the "kibana_user" role to the "kibana_admin" role.'
         }),
       ],
     },
@@ -253,10 +253,9 @@ Examples:
   > become read-only if disk usage reaches 95%. 
 
 ## Note on i18n
-We have decided to support i18n to the exposed deprecations for a better user experience when using the UA.
-We will inject `i18n` into the deprecation function to enable teams to use it before fully documenting its usage.
-For context follow [this issue](https://github.com/elastic/kibana/issues/99072).
-
+All deprecation titles, messsages, and manual steps should be wrapped in `i18n.translate`. This 
+provides a better user experience using different locales. Follow the writing guidelines below for
+best practices to writing the i18n messages and ids.
 
 ### Writing guidelines
 The deprecation service enables you to specify a `title`, `message`, `documentationUrl`,
@@ -360,5 +359,5 @@ Avoid:
 - Xyz is deprecated and will not be supported in the next major version of Elasticsearch.
 
 ##### Formatting
-Sentence style capitalization and punctuation. 
+- Sentence style capitalization and punctuation. 
 - Avoid quotes for emphasis.

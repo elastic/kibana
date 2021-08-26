@@ -193,7 +193,7 @@ describe('Kibana deprecations', () => {
       const kibanaDeprecationsMockResponse: DomainDeprecationDetails[] = [
         {
           domainId,
-          title: '??',
+          title: `Failed to fetch deprecations for ${domainId}`,
           message: `Failed to get deprecations info for plugin "${domainId}".`,
           level: 'fetch_error',
           correctiveActions: {

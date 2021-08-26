@@ -19,7 +19,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
 
   const CorePluginDeprecationsPluginDeprecations: DomainDeprecationDetails[] = [
     {
-      title: 'Setting corePluginDeprecations.oldProperty is deprecated',
+      title: 'Setting "corePluginDeprecations.oldProperty" is deprecated',
       level: 'critical',
       message:
         'Setting "corePluginDeprecations.oldProperty" is deprecated and has been replaced by "corePluginDeprecations.newProperty"',
@@ -33,7 +33,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       requireRestart: true,
     },
     {
-      title: 'Setting corePluginDeprecations.noLongerUsed is deprecated',
+      title: 'Setting "corePluginDeprecations.noLongerUsed" is deprecated',
       level: 'critical',
       message: 'Setting corePluginDeprecations.noLongerUsed is deprecated and is no longer used',
       correctiveActions: {
