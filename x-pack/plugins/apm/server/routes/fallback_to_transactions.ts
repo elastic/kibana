@@ -26,7 +26,10 @@ const fallbackToTransactionsRoute = createApmServerRoute({
       },
     } = resources;
     return {
-      fallbackToTransactions: await getIsUsingTransactionEvents({ setup, kuery }),
+      fallbackToTransactions: await getIsUsingTransactionEvents({
+        setup,
+        kuery,
+      }),
     };
   },
 });
