@@ -27,10 +27,12 @@ export type BuildReasonMessage = (args: BuildReasonMessageArgs) => string;
  * @export buildCommonReasonMessage - is only exported for testing purposes, and only used internally here.
  */
 export const buildReasonMessageUtil = ({ rule, mergedDoc }: BuildReasonMessageUtilArgs) => {
-  if (!rule) {
+  if (!rule || !mergedDoc) {
     // This should never happen, but in case, better to not show a malformed string
     return '';
   }
+  let destinationAddress;
+  let destinationPort;
   let eventCategory;
   let fileName;
   let hostName;
@@ -38,8 +40,6 @@ export const buildReasonMessageUtil = ({ rule, mergedDoc }: BuildReasonMessageUt
   let processParentName;
   let sourceAddress;
   let sourcePort;
-  let destinationAddress;
-  let destinationPort;
   let userName;
   if (mergedDoc?.fields) {
     destinationAddress = mergedDoc.fields['destination.address'] ?? null;
@@ -60,19 +60,18 @@ export const buildReasonMessageUtil = ({ rule, mergedDoc }: BuildReasonMessageUt
   };
 
   return i18n.translate('xpack.securitySolution.detectionEngine.signals.alertReasonDescription', {
-    defaultMessage: `{eventCategory} event with
-      {processName, select, null {} other {{whitespace}process {processName},} }
-      {processParentName, select, null {} other {{whitespace}parent process {processParentName},} }
-      {fileName, select, null {} other {{whitespace}file {fileName},} }
-      {sourceAddress, select, null {} other {{whitespace}source {sourceAddress}:{sourcePort},} }
-      {destinationAddress, select, null {} other {{whitespace}destination {destinationAddress}:{destinationPort},}}
-      {userName, select, null {} other {{whitespace}by {userName}} }
-      {hostName, select, null {} other {{whitespace}on {hostName}} }
-      created {alertSeverity} alert {alertName}.`,
+    defaultMessage: `{eventCategory} event with\
+{processName, select, null {} other {{whitespace}process {processName},} }\
+{processParentName, select, null {} other {{whitespace}parent process {processParentName},} }\
+{fileName, select, null {} other {{whitespace}file {fileName},} }\
+{sourceAddress, select, null {} other {{whitespace}source {sourceAddress}}}{sourcePort, select, null {} other {:{sourcePort},}}\
+{destinationAddress, select, null {} other {{whitespace}destination {destinationAddress}}}{destinationPort, select, null {} other {:{destinationPort},}}\
+{userName, select, null {} other {{whitespace}by {userName}} }\
+{hostName, select, null {} other {{whitespace}on {hostName}} } \
+created {alertSeverity} alert {alertName}.`,
     values: {
       alertName: rule.name,
       alertSeverity: rule.severity,
-      alertRiskScore: rule.risk_score,
       destinationAddress: getFieldTemplateValue(destinationAddress),
       destinationPort: getFieldTemplateValue(destinationPort),
       eventCategory: getFieldTemplateValue(eventCategory),
