@@ -8,6 +8,7 @@
 
 const Fs = require('fs');
 const ts = require('typescript');
+const { getExportCode, getExportNamedNamespaceCode } = require('../helpers/codegen');
 const tsEstree = require('@typescript-eslint/typescript-estree');
 
 const { getExportNamesDeep } = require('../helpers/exports');
@@ -47,35 +48,35 @@ module.exports = {
           return result.services.program.getSourceFile(path);
         };
 
-        const exportNames = getExportNamesDeep(parser, context.getFilename(), tsnode);
+        const exportSet = getExportNamesDeep(parser, context.getFilename(), tsnode);
 
         /** @param {Fixer} fixer */
         const fix = (fixer) => {
           const source = /** @type EsTreeStringLiteral */ (esNode.source);
-          const newClause = `{ ${Array.from(exportNames).join(', ')}}`;
           const isTypeExport = esNode.exportKind === 'type';
 
           if (tsnode.exportClause && ts.isNamespaceExport(tsnode.exportClause)) {
-            if (isTypeExport) {
+            if (isTypeExport || exportSet.types.size) {
               throw new Error('unable to automatically fix namespace exports of types');
             }
 
             return fixer.replaceText(
               node,
-              `import ${newClause} from '${
+              getExportNamedNamespaceCode(
+                tsnode.exportClause.name.getText(),
+                Array.from(exportSet.values),
                 source.value
-              }';\n export const ${tsnode.exportClause.name.getText()} = ${newClause}`
+              )
             );
           }
 
-          const mod = isTypeExport ? 'type' : '';
-          return fixer.replaceText(node, `export ${mod} ${newClause} from '${source.value}';`);
+          return fixer.replaceText(node, getExportCode(exportSet, source.value));
         };
 
         context.report({
           message: ERROR_MSG,
           loc: node.loc,
-          fix: exportNames?.size ? fix : undefined,
+          fix: exportSet?.size ? fix : undefined,
         });
       },
     };

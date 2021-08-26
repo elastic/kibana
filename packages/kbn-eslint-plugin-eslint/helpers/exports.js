@@ -10,6 +10,7 @@ const Fs = require('fs');
 const Path = require('path');
 const ts = require('typescript');
 const { REPO_ROOT } = require('@kbn/dev-utils');
+const { ExportSet } = require('./export_set');
 
 /** @typedef {import("@typescript-eslint/types").TSESTree.ExportAllDeclaration} ExportAllDeclaration */
 /** @typedef {import("estree").Node} Node */
@@ -92,10 +93,10 @@ const getImportPath = (dir, specifier) => {
  * @param {Parser} parser
  * @param {string} from
  * @param {ts.ExportDeclaration} exportFrom
- * @param {Set<string>} exportNames
- * @returns {Set<string>|undefined}
+ * @param {ExportSet} exportSet
+ * @returns {ExportSet | undefined}
  */
-const getExportNamesDeep = (parser, from, exportFrom, exportNames = new Set()) => {
+const getExportNamesDeep = (parser, from, exportFrom, exportSet = new ExportSet()) => {
   const specifier = ts.isStringLiteral(exportFrom.moduleSpecifier)
     ? exportFrom.moduleSpecifier.text
     : undefined;
@@ -114,39 +115,39 @@ const getExportNamesDeep = (parser, from, exportFrom, exportNames = new Set()) =
   for (const statement of sourceFile.statements) {
     // export function xyz() ...
     if (ts.isFunctionDeclaration(statement) && statement.name && hasExportMod(statement)) {
-      exportNames.add(statement.name.getText());
+      exportSet.values.add(statement.name.getText());
       continue;
     }
 
     // export const/let foo = ...
     if (ts.isVariableStatement(statement) && hasExportMod(statement)) {
       for (const dec of statement.declarationList.declarations) {
-        exportNames.add(dec.name.getText());
+        exportSet.values.add(dec.name.getText());
       }
       continue;
     }
 
     // export class xyc
     if (ts.isClassDeclaration(statement) && statement.name && hasExportMod(statement)) {
-      exportNames.add(statement.name.getText());
+      exportSet.values.add(statement.name.getText());
       continue;
     }
 
     // export interface Foo {...}
     if (ts.isInterfaceDeclaration(statement) && hasExportMod(statement)) {
-      exportNames.add(statement.name.getText());
+      exportSet.types.add(statement.name.getText());
       continue;
     }
 
     // export type Foo = ...
     if (ts.isTypeAliasDeclaration(statement) && hasExportMod(statement)) {
-      exportNames.add(statement.name.getText());
+      exportSet.types.add(statement.name.getText());
       continue;
     }
 
     // export enum ...
     if (ts.isEnumDeclaration(statement) && hasExportMod(statement)) {
-      exportNames.add(statement.name.getText());
+      exportSet.values.add(statement.name.getText());
       continue;
     }
 
@@ -155,7 +156,7 @@ const getExportNamesDeep = (parser, from, exportFrom, exportNames = new Set()) =
 
       // export * from '../foo';
       if (!clause) {
-        if (!getExportNamesDeep(parser, sourceFile.fileName, statement, exportNames)) {
+        if (!getExportNamesDeep(parser, sourceFile.fileName, statement, exportSet)) {
           // abort if we can't get all the exported names
           return undefined;
         }
@@ -164,7 +165,7 @@ const getExportNamesDeep = (parser, from, exportFrom, exportNames = new Set()) =
 
       // export * as foo from './foo'
       if (ts.isNamespaceExport(clause)) {
-        exportNames.add(clause.name.getText());
+        exportSet.values.add(clause.name.getText());
         continue;
       }
 
@@ -172,13 +173,13 @@ const getExportNamesDeep = (parser, from, exportFrom, exportNames = new Set()) =
       // export { foo as x } from 'other'
       // export { default as foo } from 'other'
       for (const e of clause.elements) {
-        exportNames.add(e.name.getText());
+        exportSet.values.add(e.name.getText());
       }
       continue;
     }
   }
 
-  return exportNames;
+  return exportSet;
 };
 
 module.exports = { getExportNamesDeep };

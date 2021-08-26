@@ -9,6 +9,28 @@
 const { RuleTester } = require('eslint');
 const rule = require('./no_export_all');
 const dedent = require('dedent');
+const { ExportSet } = require('../helpers/export_set');
+
+jest.mock('../helpers/exports');
+const { getExportNamesDeep } = jest.requireMock('../helpers/exports');
+
+getExportNamesDeep.mockImplementationOnce(() => {
+  const set = new ExportSet();
+  set.values.add('value1');
+  set.values.add('value2');
+  set.values.add('value3');
+  return set;
+});
+
+getExportNamesDeep.mockImplementationOnce(() => {
+  const set = new ExportSet();
+  set.types.add('type1');
+  set.types.add('type2');
+  set.values.add('value1');
+  set.values.add('value2');
+  set.values.add('value3');
+  return set;
+});
 
 const ruleTester = new RuleTester({
   parser: require.resolve('@typescript-eslint/parser'),
@@ -34,8 +56,8 @@ ruleTester.run('@kbn/eslint/no_export_all', rule, {
   invalid: [
     {
       code: dedent`
-        export * from './foo';
         export * as foo from './foo';
+        export * from './foo';
       `,
 
       errors: [
@@ -50,6 +72,17 @@ ruleTester.run('@kbn/eslint/no_export_all', rule, {
             '`export *` is not allowed in the index files of plugins to prevent accidentally exporting too many APIs',
         },
       ],
+
+      output: dedent`
+        import { value1, value2, value3 } from "./foo";
+        export const foo = {
+          value1,
+          value2,
+          value3
+        };
+        export type { type1, type2 } from "./foo";
+        export { value1, value2, value3 } from "./foo";
+      `,
     },
   ],
 });
