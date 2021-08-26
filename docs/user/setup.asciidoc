@@ -4,7 +4,7 @@
 [partintro]
 --
 
-The easiest way to "get started" with {kib} is to use our {es} Service. The Elasticsearch Service is available on AWS, GCP, and Azure, and automatically configures {kib} to work with {es}.
+The easiest way to get set up with {kib} is to use our {es} Service, which automatically configures {kib} to work with {es}, and enables you to take advantage of all the power that Elastic offers. 
 
 [float]
 [[hosted-elasticsearch-service]]
@@ -22,7 +22,7 @@ Try out the Elasticsearch Service for free, and then begin configuring your own 
 
 If you’d rather install and manage {kib} yourself, review the Elastic Support Matrix for information about supported operating systems and product compatibility.
 
-Using different versions of {es} and {kib} is unsupported. For example, using different major versions, such as {es} 2.x and {kib} 5.x, or a minor {kib} version that is newer than the {es} version, such as Kibana 5.1 and Elasticsearch 5.0, causes the installation to fail.
+Using different versions of {es} and {kib} is unsupported. For example, you are unable to use {es} 2.x with {kib} 5.x, or a minor {kib} version that is newer than the {es} version, such as Kibana 5.1 and Elasticsearch 5.0, causes the installation to fail.
 
 Using different patch versions of Kibana and Elasticsearch is generally supported, such as Kibana 5.0.0 and Elasticsearch 5.0.1, but we recommend using the same {es} and {kib} patch versions.
 
