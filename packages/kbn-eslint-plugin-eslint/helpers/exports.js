@@ -94,9 +94,16 @@ const getImportPath = (dir, specifier) => {
  * @param {string} from
  * @param {ts.ExportDeclaration} exportFrom
  * @param {ExportSet} exportSet
+ * @param {boolean} assumeAllTypes
  * @returns {ExportSet | undefined}
  */
-const getExportNamesDeep = (parser, from, exportFrom, exportSet = new ExportSet()) => {
+const getExportNamesDeep = (
+  parser,
+  from,
+  exportFrom,
+  exportSet = new ExportSet(),
+  assumeAllTypes = false
+) => {
   const specifier = ts.isStringLiteral(exportFrom.moduleSpecifier)
     ? exportFrom.moduleSpecifier.text
     : undefined;
@@ -153,19 +160,30 @@ const getExportNamesDeep = (parser, from, exportFrom, exportSet = new ExportSet(
 
     if (ts.isExportDeclaration(statement)) {
       const clause = statement.exportClause;
+      const types = assumeAllTypes || statement.isTypeOnly;
+      const set = types ? exportSet.types : exportSet.values;
 
       // export * from '../foo';
       if (!clause) {
-        if (!getExportNamesDeep(parser, sourceFile.fileName, statement, exportSet)) {
+        const childTypes = getExportNamesDeep(
+          parser,
+          sourceFile.fileName,
+          statement,
+          exportSet,
+          types
+        );
+
+        if (!childTypes) {
           // abort if we can't get all the exported names
           return undefined;
         }
+
         continue;
       }
 
       // export * as foo from './foo'
       if (ts.isNamespaceExport(clause)) {
-        exportSet.values.add(clause.name.getText());
+        set.add(clause.name.getText());
         continue;
       }
 
@@ -173,7 +191,7 @@ const getExportNamesDeep = (parser, from, exportFrom, exportSet = new ExportSet(
       // export { foo as x } from 'other'
       // export { default as foo } from 'other'
       for (const e of clause.elements) {
-        exportSet.values.add(e.name.getText());
+        set.add(e.name.getText());
       }
       continue;
     }
