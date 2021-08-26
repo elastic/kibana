@@ -22,13 +22,12 @@ import {
 
 import { CloudBackupStatus } from '../../../../../common/types';
 import { UseRequestResponse } from '../../../../shared_imports';
+import { ResponseError } from '../../../lib/api';
 
-export interface CloudBackupStatusResponse extends UseRequestResponse {
-  data: CloudBackupStatus | null;
-}
+export type CloudBackupStatusResponse = UseRequestResponse<CloudBackupStatus, ResponseError>;
 
 interface Props {
-  cloudBackupStatusResponse: CloudBackupStatusResponse;
+  cloudBackupStatusResponse: UseRequestResponse<CloudBackupStatus, ResponseError>;
   cloudSnapshotsUrl: string;
 }
 
@@ -36,7 +35,7 @@ export const CloudBackup: React.FunctionComponent<Props> = ({
   cloudBackupStatusResponse,
   cloudSnapshotsUrl,
 }) => {
-  const { isInitialRequest, isLoading, error, data } = cloudBackupStatusResponse;
+  const { isInitialRequest, isLoading, error, data, resendRequest } = cloudBackupStatusResponse;
 
   if (isInitialRequest && isLoading) {
     return <EuiLoadingContent lines={3} />;
