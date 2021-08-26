@@ -22,7 +22,7 @@ export default ({ getService }: FtrProviderContext) => {
   const SPACE1 = 'space1';
   const SPACE2 = 'space2';
   const APM_ALERT_ID = 'NoxgpHkBqbdrfX07MqXV';
-  const APM_ALERT_INDEX = '.alerts-observability-apm';
+  const APM_ALERT_INDEX = '.alerts-observability.apm.alerts';
   const SECURITY_SOLUTION_ALERT_INDEX = '.alerts-security.alerts';
 
   const getAPMIndexName = async (user: User) => {
