@@ -7,10 +7,15 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { SerializableRecord } from '@kbn/utility-types';
 import { Plugin, CoreSetup } from 'src/core/public';
 
 import { FeatureCatalogueCategory } from '../../home/public';
 import { AppSetupUIPluginDependencies } from './types';
+
+export interface ConsoleUILocatorParams extends SerializableRecord {
+  loadFrom?: string;
+}
 
 export class ConsoleUIPlugin implements Plugin<void, void, AppSetupUIPluginDependencies> {
   public setup(
@@ -61,9 +66,9 @@ export class ConsoleUIPlugin implements Plugin<void, void, AppSetupUIPluginDepen
       },
     });
 
-    const locator = share.url.locators.create({
+    const locator = share.url.locators.create<ConsoleUILocatorParams>({
       id: 'CONSOLE_APP_LOCATOR',
-      getLocation: async ({ loadFrom }: { loadFrom?: string }) => {
+      getLocation: async ({ loadFrom }) => {
         return {
           app: 'dev_tools',
           path: `#/console${loadFrom ? `?load_from=${loadFrom}` : ''}`,
