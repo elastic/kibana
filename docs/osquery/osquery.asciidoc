@@ -3,12 +3,12 @@
 [[osquery]]
 = Osquery
 
-Osquery enables you to to search, analyze, and visualize Osquery data ingested in {es}.
+*Osquery* enables you to search, analyze, and visualize Osquery data ingested in {es}.
 
 You can:
 
  * Run live queries with one or more agents
- * Define scheduled queries to capture changes to OS state over time
+ * Schedule queries to capture changes to OS state over time
  * View a history of past queries and their results
 
 For example, use *Osquery* to centralize security analytics and
@@ -16,7 +16,8 @@ contextualize OSquery results against other event data, anomalies, and threats,
 and then use that context to improve host visibility, analytical power, and monitoring.
 
 [role="screenshot"]
-image::images/live-query-check-results.png[Results of OSquery]
+image::images/live-query-history.png[A table showing query name, agents, create time, and who ran the query]
+
 
 [float]
 == Requirements
@@ -25,99 +26,113 @@ image::images/live-query-check-results.png[Results of OSquery]
 https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-module-osquery.html[Osquery Manager integration].
 This integration supports x86_64 bit Windows, Darwin, Arm64, and Linux platforms.
 * Your system has an agent in Fleet.
-* Your Osquery Manager has one or more policies. For more information, refer to the Fleet docs.
+* Osquery Manager has one or more policies. For more information, refer to the Fleet documentation.
 * You have the xxxx permission
 
 [float]
+[[osquery-open]]
 == Open Osquery
 
-Once you add the Osquery Manager integration to an agent policy, start *Osquery*
+Once you add the Osquery Manager integration to an agent policy, open *Osquery*
 and begin your exploring your data.
 
 . Open the main menu, and then click *Osquery*.
 . View the queries that have run.
-. To replay a query, click image::images/play-icon.png[Right-pointing triangle] This opens an editor with the query prepopulated.
-. To view the results and <<osquery-status,status>> for a query, click image::images/play-icon.png[Table icon].
+. To replay a query, click image:images/play-icon.png[Right-pointing triangle].
+. To view the query <<osquery-results,results>> and <<osquery-status,status>>,
+click image:images/table-icon.png[Table icon].
++
+[role="screenshot"]
+image::images/live-query-check-results.png[Results of OSquery]
 
-NOTE: If an agent is offline, the request status remains **pending** as {kib} retries the request.
-By default, a query request times out after 5 minutes. The time out applies to the time it takes
-to deliver the action request to an agent to run a query. If the action completes after the timeout period,
-the results are still returned.
 
 [float]
+[[osquery-run-query]]
 ==  Run live queries
 
 Run a query against one or more agents or policies
 and view the results. This is useful for testing your query and
-troubleshooting problems, such as a finding host that has an issue or an agent
-with a security vulnerability.
+troubleshooting problems.
 
 . In the *Live queries* view, click **New live query**.
-. Select one or more agents or groups to query. Just start typing in the search field,
-and you'll get suggestions for agents by name, ID, platform, and policy.
+. Select one or more agents or groups to query. Start typing in the search field,
+and you'll get suggestions for agents by name, ID, platform, or policy.
 . Enter a query or select a query from your saved queries.
 +
 [role="screenshot"]
 image::images/enter-query.png[Select saved query dropdown name showing query name and description]
 . Click **Submit**.
-. Review the results in a table, or navigate to *Discover* to dive into the field data
-or *Lens* to build visualizations.
-. To view more info about the request, for example, if there are any failures, click the *Status* tab.
-. When your query captures the data you want, click *Save for later* and define the query parameters.
+. Review the results in a table, or navigate to *Discover* to dive deeper into the response
+or to *Lens* to build visualizations.
+. To view more information about the request, for example, if there are any failures, open the *Status* tab.
+. When your query captures the data you want, click *Save for later* and define the ID,
+description, and other
+<<osquery-manage-query,details>>.
 
 
 [float]
+[[osquery-schedule-query]]
 == Schedule queries
 
 Group and schedule queries to run on a specified interval, in seconds.
-For example, you might have a compliance query group that checks
-for IT compliance-type issues, such as which chrome extensions you have installed.
-Another query group might monitor for evidence of malware.
-Scheduled query groups are per integration that you added to a policy.
-
+For example, you might create a group that checks
+for IT compliance-type issues and
+another group that monitors for evidence of malware.
 
 . Open the **Scheduled query groups** tab.
-For each group, you'll see the query how frequently it will run and the
-platform that it will run on.
-. Select an integration to which you want to add or edit scheduled queries.
-. To add individual queries, click *Add query*, and then enter the query ID and interval. Optionally set the minimum osquery version and the platform.
-. To upload queries from a .conf query pack, drag the pack to drop zone under the query table. To explore the community packs that Osquery publishes, click *Example packs*.
-. Click *Save query*. The queries start running once the policy receives the update.
-. Monitor your data through dashboards, detection rules, and machine learning jobs.
+
+. Click a group to view its details.
++
+[role="screenshot"]
+image::images/schedule-query.png[Each query has a name, id, query, platform, and min osquery version]
+
+. Click *Edit* to make changes.
+.. To add a query to the group, click *Add query*, and then enter the query ID and interval.
+Optionally, set the minimum osquery version and platform.
+.. To upload queries from a .conf query pack, drag the pack to drop zone under the query table. To explore the community packs that Osquery publishes, click *Example packs*.
+. Click *Save query*. The queries run once the policy receives the update.
 
 [float]
+[[osquery-manage-query]]
 == Manage your saved queries
 
-Create, run, and edit your saved queries on the *Saved queries* tab.
- Each query contains the following information:
+View, run, and edit your saved queries on the *Saved queries* tab.
+Queries have the following information:
 
-* A unique identifier for the query.
-* A brief description about the query.
+* A unique identifier.
+* A brief description.
 * The SQL query.
-* The Scheduled query group configuration. These options only apply if a saved query
-is added to a scheduled query group.
-** The frequency at which at which to run the query
+* The scheduled query group. This information is included when you
+add the query to a scheduled query group
+** The frequency at which at which to run the query.
 ** The minimum https://github.com/osquery/osquery/releases)[version of osquery] required to run the query.
 ** The operating system required to run the query. For information about supported platforms, click the *OSquery schema* link on the *Edit query* flyout.
 
 [float]
 [[osquery-status]]
-== Query statuses
+== Osquery status
 
+A query can have the following status:
 
 [cols="2*<"]
 |===
-| *Status* | *Description*
 | Successful | The query completed as expected.
 | Failed | The query encountered a problem and might have failed, because there was an issue with the query or the agent was disconnected.
 | Not yet responded | The query has not been sent to the agent.
 | Expired | The action request timed out. The agent may be offline.
 |===
 
-[float]
-=== Osquery results
+NOTE: If an agent is offline, the request status remains **pending** as {kib} retries the request.
+By default, a query request times out after 5 minutes. The time out applies to the time it takes
+to deliver the action request to an agent to run a query. If the action completes after the timeout period,
+the results are still returned.
 
-When you run a live or scheduled query, the Osquery responses include the following information:
+
+[float]
+[[osquery-results]]
+== Osquery results
+
+Osquery responses include the following information:
 
 * Everything prefaced with `osquery.` is part of the query response. These fields are not mapped to ECS.
 * The `host.*` and `agent.*` fields are mapped to ECS.
@@ -127,7 +142,7 @@ that represent a point in time with a set of results, with no differentials.
 https://osquery.readthedocs.io/en/stable/deployment/logging/#differential-logs[Differential logs] are not supported.
 * Osquery data is stored in the `logs-osquery_manager.result-default` datastream, and the result row data is under the `osquery` property in the document.
 
-Here is an example of a successful osquery result.
+This example shows a successful osquery result.
 
 
 ```ts
@@ -306,7 +321,7 @@ Adjust the agent path as needed for your setup.
 
 To get more details in the logs, change the agent logging level to debug:
 
-. Open the main menu, and then select **Fleet**
+. Open the main menu, and then select **Fleet**.
 . Select the agent that you want to debug.
 . On the **Logs** tab, change the **Agent logging level** to **debug**, and then click **Apply changes**.
 +
