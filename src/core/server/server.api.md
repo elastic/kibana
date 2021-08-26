@@ -237,7 +237,7 @@ export const config: {
                 delay: Type<import("moment").Duration>;
             }>;
             ignoreVersionMismatch: import("@kbn/config-schema/target_types/types").ConditionalType<false, boolean, boolean>;
-            skipStartupConnectionCheck: Type<boolean>;
+            skipStartupConnectionCheck: import("@kbn/config-schema/target_types/types").ConditionalType<true, boolean, boolean>;
         }>;
     };
     logging: {
@@ -826,6 +826,7 @@ export class ElasticsearchConfig {
     readonly requestTimeout: Duration;
     readonly serviceAccountToken?: string;
     readonly shardTimeout: Duration;
+    // @internal
     readonly skipStartupConnectionCheck: boolean;
     readonly sniffInterval: false | Duration;
     readonly sniffOnConnectionFault: boolean;

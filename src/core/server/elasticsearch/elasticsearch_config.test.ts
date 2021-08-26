@@ -398,3 +398,33 @@ test('serviceAccountToken does not throw if username is not set', () => {
 
   expect(() => config.schema.validate(obj)).not.toThrow();
 });
+
+describe('skipStartupConnectionCheck', () => {
+  test('defaults to `false`', () => {
+    const obj = {};
+    expect(() => config.schema.validate(obj)).not.toThrow();
+    expect(config.schema.validate(obj)).toEqual(
+      expect.objectContaining({
+        skipStartupConnectionCheck: false,
+      })
+    );
+  });
+
+  test('accepts `false` on both prod and dev mode', () => {
+    const obj = {
+      skipStartupConnectionCheck: false,
+    };
+    expect(() => config.schema.validate(obj, { dist: false })).not.toThrow();
+    expect(() => config.schema.validate(obj, { dist: true })).not.toThrow();
+  });
+
+  test('accepts `true` only when running from source to allow integration tests to run without an ES server', () => {
+    const obj = {
+      skipStartupConnectionCheck: true,
+    };
+    expect(() => config.schema.validate(obj, { dist: false })).not.toThrow();
+    expect(() => config.schema.validate(obj, { dist: true })).toThrowErrorMatchingInlineSnapshot(
+      `"[skipStartupConnectionCheck]: \\"skipStartupConnectionCheck\\" can only be set to true when running from source to allow integration tests to run without an ES server"`
+    );
+  });
+});
