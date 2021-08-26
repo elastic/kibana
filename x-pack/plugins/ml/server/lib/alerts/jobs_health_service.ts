@@ -55,10 +55,14 @@ export function jobsHealthServiceProvider(
   /**
    * Provides a callback for date formatting based on the Kibana settings.
    */
-  const getDateFormatter = memoize(async () => {
+  const getFormatters = memoize(async () => {
     const fieldFormatsRegistry = await getFieldsFormatRegistry();
     const dateFormatter = fieldFormatsRegistry.deserialize({ id: 'date' });
-    return dateFormatter.convert.bind(dateFormatter);
+    const bytesFormatter = fieldFormatsRegistry.deserialize({ id: 'bytes' });
+    return {
+      dateFormatter: dateFormatter.convert.bind(dateFormatter),
+      bytesFormatter: bytesFormatter.convert.bind(bytesFormatter),
+    };
   });
 
   /**
@@ -186,7 +190,7 @@ export function jobsHealthServiceProvider(
     async getMmlReport(jobIds: string[]): Promise<MmlTestResponse[]> {
       const jobsStats = await getJobStats(jobIds);
 
-      const dateFormatter = await getDateFormatter();
+      const { dateFormatter, bytesFormatter } = await getFormatters();
 
       return jobsStats
         .filter((j) => j.state === 'opened' && j.model_size_stats.memory_status !== 'ok')
@@ -195,10 +199,10 @@ export function jobsHealthServiceProvider(
             job_id: jobId,
             memory_status: modelSizeStats.memory_status,
             log_time: dateFormatter(modelSizeStats.log_time),
-            model_bytes: modelSizeStats.model_bytes,
-            model_bytes_memory_limit: modelSizeStats.model_bytes_memory_limit,
-            peak_model_bytes: modelSizeStats.peak_model_bytes,
-            model_bytes_exceeded: modelSizeStats.model_bytes_exceeded,
+            model_bytes: bytesFormatter(modelSizeStats.model_bytes),
+            model_bytes_memory_limit: bytesFormatter(modelSizeStats.model_bytes_memory_limit),
+            peak_model_bytes: bytesFormatter(modelSizeStats.peak_model_bytes),
+            model_bytes_exceeded: bytesFormatter(modelSizeStats.model_bytes_exceeded),
           };
         });
     },
@@ -227,7 +231,7 @@ export function jobsHealthServiceProvider(
       const defaultLookbackInterval = resolveLookbackInterval(resultJobs, datafeeds!);
       const earliestMs = getDelayedDataLookbackTimestamp(timeInterval, defaultLookbackInterval);
 
-      const getFormattedDate = await getDateFormatter();
+      const { dateFormatter } = await getFormatters();
 
       return (
         await annotationService.getDelayedDataAnnotations({
@@ -265,7 +269,7 @@ export function jobsHealthServiceProvider(
         .map((v) => {
           return {
             ...v,
-            end_timestamp: getFormattedDate(v.end_timestamp),
+            end_timestamp: dateFormatter(v.end_timestamp),
           };
         });
     },
@@ -279,7 +283,7 @@ export function jobsHealthServiceProvider(
       jobIds: string[],
       previousStartedAt: Date
     ): Promise<JobsErrorsResponse[]> {
-      const getFormattedDate = await getDateFormatter();
+      const { dateFormatter } = await getFormatters();
 
       return (
         await jobAuditMessagesService.getJobsErrorMessages(jobIds, previousStartedAt.getTime())
@@ -289,7 +293,7 @@ export function jobsHealthServiceProvider(
           errors: v.errors.map((e) => {
             return {
               ...e,
-              timestamp: getFormattedDate(e.timestamp),
+              timestamp: dateFormatter(e.timestamp),
             };
           }),
         };

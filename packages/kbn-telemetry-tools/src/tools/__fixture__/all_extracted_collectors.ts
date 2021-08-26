@@ -17,6 +17,7 @@ import { parsedWorkingCollector } from './parsed_working_collector';
 import { parsedCollectorWithDescription } from './parsed_working_collector_with_description';
 import { parsedStatsCollector } from './parsed_stats_collector';
 import { parsedImportedInterfaceFromExport } from './parsed_imported_interface_from_export';
+import { parsedEnumCollector } from './parsed_enum_collector';
 
 export const allExtractedCollectors: ParsedUsageCollection[] = [
   ...parsedExternallyDefinedCollector,
@@ -29,4 +30,5 @@ export const allExtractedCollectors: ParsedUsageCollection[] = [
   ...parsedStatsCollector,
   parsedCollectorWithDescription,
   parsedWorkingCollector,
+  parsedEnumCollector,
 ];

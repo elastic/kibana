@@ -19,6 +19,7 @@ import {
   HostResultList,
   HostIsolationResponse,
   ISOLATION_ACTIONS,
+  ActivityLog,
 } from '../../../../../common/endpoint/types';
 import { AppAction } from '../../../../common/store/actions';
 import { mockEndpointResultList } from './mock_endpoint_result_list';
@@ -244,6 +245,29 @@ describe('endpoint list middleware', () => {
       });
     };
 
+    const dispatchGetActivityLogPaging = ({ page = 1 }: { page: number }) => {
+      dispatch({
+        type: 'endpointDetailsActivityLogUpdatePaging',
+        payload: {
+          page,
+          pageSize: 50,
+        },
+      });
+    };
+
+    const dispatchGetActivityLogUpdateInvalidDateRange = ({
+      isInvalidDateRange = false,
+    }: {
+      isInvalidDateRange: boolean;
+    }) => {
+      dispatch({
+        type: 'endpointDetailsActivityLogUpdateIsInvalidDateRange',
+        payload: {
+          isInvalidDateRange,
+        },
+      });
+    };
+
     it('should set ActivityLog state to loading', async () => {
       dispatchUserChangedUrl();
       dispatchGetActivityLogLoading();
@@ -283,6 +307,69 @@ describe('endpoint list middleware', () => {
         },
       });
       expect(activityLogResponse.payload.type).toEqual('LoadedResourceState');
+    });
+
+    it('should set ActivityLog to Failed if API call fails', async () => {
+      dispatchUserChangedUrl();
+
+      const apiError = new Error('oh oh');
+      const failedDispatched = waitForAction('endpointDetailsActivityLogChanged', {
+        validate(action) {
+          return isFailedResourceState(action.payload);
+        },
+      });
+
+      mockedApis.responseProvider.activityLogResponse.mockImplementation(() => {
+        throw apiError;
+      });
+
+      const failedAction = (await failedDispatched).payload as FailedResourceState<ActivityLog>;
+      expect(failedAction.error).toBe(apiError);
+    });
+
+    it('should not fetch Activity Log with invalid date ranges', async () => {
+      dispatchUserChangedUrl();
+
+      const updateInvalidDateRangeDispatched = waitForAction(
+        'endpointDetailsActivityLogUpdateIsInvalidDateRange'
+      );
+      dispatchGetActivityLogUpdateInvalidDateRange({ isInvalidDateRange: true });
+      await updateInvalidDateRangeDispatched;
+
+      expect(mockedApis.responseProvider.activityLogResponse).not.toHaveBeenCalled();
+    });
+
+    it('should call get Activity Log API with valid date ranges', async () => {
+      dispatchUserChangedUrl();
+
+      const updatePagingDispatched = waitForAction('endpointDetailsActivityLogUpdatePaging');
+      dispatchGetActivityLogPaging({ page: 1 });
+
+      const updateInvalidDateRangeDispatched = waitForAction(
+        'endpointDetailsActivityLogUpdateIsInvalidDateRange'
+      );
+      dispatchGetActivityLogUpdateInvalidDateRange({ isInvalidDateRange: false });
+      await updateInvalidDateRangeDispatched;
+      await updatePagingDispatched;
+
+      expect(mockedApis.responseProvider.activityLogResponse).toHaveBeenCalled();
+    });
+
+    it('should call get Activity Log API with correct paging options', async () => {
+      dispatchUserChangedUrl();
+
+      const updatePagingDispatched = waitForAction('endpointDetailsActivityLogUpdatePaging');
+      dispatchGetActivityLogPaging({ page: 3 });
+
+      await updatePagingDispatched;
+
+      expect(mockedApis.responseProvider.activityLogResponse).toHaveBeenCalledWith({
+        path: expect.any(String),
+        query: {
+          page: 3,
+          page_size: 50,
+        },
+      });
     });
   });
 

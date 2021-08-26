@@ -9,7 +9,12 @@
 import { each } from 'lodash';
 import { IndexPatternBase, IndexPatternFieldBase } from '../../es_query';
 import { fields, getField } from '../stubs';
-import { buildRangeFilter, getRangeFilterField, RangeFilter } from './range_filter';
+import {
+  buildRangeFilter,
+  getRangeFilterField,
+  RangeFilter,
+  ScriptedRangeFilter,
+} from './range_filter';
 
 describe('Range filter builder', () => {
   let indexPattern: IndexPatternBase;
@@ -29,6 +34,7 @@ describe('Range filter builder', () => {
 
     expect(buildRangeFilter(field!, { gte: 1, lte: 3 }, indexPattern)).toEqual({
       meta: {
+        field: 'bytes',
         index: 'id',
         params: {},
       },
@@ -95,9 +101,12 @@ describe('Range filter builder', () => {
       `gte(() -> { ${field!.script} }, params.gte) && ` +
       `lte(() -> { ${field!.script} }, params.lte)`;
 
-    const rangeFilter = buildRangeFilter(field!, { gte: 1, lte: 3 }, indexPattern);
-
-    expect(rangeFilter.script!.script.source).toBe(expected);
+    const rangeFilter = buildRangeFilter(
+      field!,
+      { gte: 1, lte: 3 },
+      indexPattern
+    ) as ScriptedRangeFilter;
+    expect(rangeFilter.script.script.source).toBe(expected);
   });
 
   it('should throw an error when gte and gt, or lte and lt are both passed', () => {
@@ -120,22 +129,26 @@ describe('Range filter builder', () => {
         [key]: 5,
       };
 
-      const filter = buildRangeFilter(field!, params, indexPattern);
+      const filter = buildRangeFilter(field!, params, indexPattern) as ScriptedRangeFilter;
       const script = filter.script!.script;
 
       expect(script.source).toBe('(' + field!.script + ')' + operator + key);
-      expect(script.params[key]).toBe(5);
-      expect(script.params.value).toBe(operator + 5);
+      expect(script.params?.[key]).toBe(5);
+      expect(script.params?.value).toBe(operator + 5);
     });
   });
 
   describe('when given params where one side is infinite', () => {
     let field: IndexPatternFieldBase;
-    let filter: RangeFilter;
+    let filter: ScriptedRangeFilter;
 
     beforeEach(() => {
       field = getField('script number')!;
-      filter = buildRangeFilter(field, { gte: 0, lt: Infinity }, indexPattern);
+      filter = buildRangeFilter(
+        field,
+        { gte: 0, lt: Infinity },
+        indexPattern
+      ) as ScriptedRangeFilter;
     });
 
     describe('returned filter', () => {
@@ -161,11 +174,15 @@ describe('Range filter builder', () => {
 
   describe('when given params where both sides are infinite', () => {
     let field: IndexPatternFieldBase;
-    let filter: RangeFilter;
+    let filter: ScriptedRangeFilter;
 
     beforeEach(() => {
       field = getField('script number')!;
-      filter = buildRangeFilter(field, { gte: -Infinity, lt: Infinity }, indexPattern);
+      filter = buildRangeFilter(
+        field,
+        { gte: -Infinity, lt: Infinity },
+        indexPattern
+      ) as ScriptedRangeFilter;
     });
 
     describe('returned filter', () => {
@@ -192,7 +209,7 @@ describe('getRangeFilterField', function () {
 
   test('should return the name of the field a range query is targeting', () => {
     const field = indexPattern.fields.find((patternField) => patternField.name === 'bytes');
-    const filter = buildRangeFilter(field!, {}, indexPattern);
+    const filter = buildRangeFilter(field!, {}, indexPattern) as RangeFilter;
     const result = getRangeFilterField(filter);
     expect(result).toBe('bytes');
   });
