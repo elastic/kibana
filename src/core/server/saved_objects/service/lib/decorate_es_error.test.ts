@@ -117,7 +117,6 @@ describe('savedObjectsClient/decorateEsError', () => {
     expect(SavedObjectsErrorHelpers.isNotFoundError(error)).toBe(false);
     const genericError = decorateEsError(error);
     expect(genericError).not.toBe(error);
-    expect(SavedObjectsErrorHelpers.isNotFoundError(error)).toBe(false);
     expect(SavedObjectsErrorHelpers.isNotFoundError(genericError)).toBe(false);
     expect(SavedObjectsErrorHelpers.isEsUnavailableError(genericError)).toBe(true);
   });

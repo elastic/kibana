@@ -25,7 +25,7 @@ import {
   TIMELINE_CONTEXT_MENU_BTN,
   SELECT_EVENT_CHECKBOX,
 } from '../screens/alerts';
-import { REFRESH_BUTTON } from '../screens/security_header';
+import { LOADING_INDICATOR, REFRESH_BUTTON } from '../screens/security_header';
 import { TIMELINE_COLUMN_SPINNER } from '../screens/timeline';
 import {
   UPDATE_ENRICHMENT_RANGE_BUTTON,
@@ -99,7 +99,8 @@ export const goToOpenedAlerts = () => {
   cy.get(OPENED_ALERTS_FILTER_BTN).click({ force: true });
   cy.get(REFRESH_BUTTON).should('not.have.text', 'Updating');
   cy.get(REFRESH_BUTTON).should('have.text', 'Refresh');
-  cy.get(TIMELINE_COLUMN_SPINNER).should('not.exist');
+  cy.get(LOADING_INDICATOR).should('exist');
+  cy.get(LOADING_INDICATOR).should('not.exist');
 };
 
 export const openFirstAlert = () => {
