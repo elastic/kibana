@@ -10,7 +10,7 @@ import expect from '@kbn/expect';
 export default function ({ getPageObjects }) {
   const PageObjects = getPageObjects(['maps', 'header']);
 
-  describe('layer errors', () => {
+  describe.skip('layer errors', () => {
     before(async () => {
       await PageObjects.maps.loadSavedMap('layer with errors');
     });

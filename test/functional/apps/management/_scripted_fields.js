@@ -41,7 +41,7 @@ export default function ({ getService, getPageObjects }) {
     'timePicker',
   ]);
 
-  describe('scripted fields', function () {
+  describe.skip('scripted fields', function () {
     this.tags(['skipFirefox']);
 
     before(async function () {
@@ -154,7 +154,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       //add a test to sort numeric scripted field
-      it('should sort scripted field value in Discover', async function () {
+      it.skip('should sort scripted field value in Discover', async function () {
         await testSubjects.click(`docTableHeaderFieldSort_${scriptedPainlessFieldName}`);
         // after the first click on the scripted field, it becomes secondary sort after time.
         // click on the timestamp twice to make it be the secondary sort key.

@@ -79,7 +79,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(popoverJson).to.be(flyoutJson);
     });
 
-    describe('expand a document row', function () {
+    describe.skip('expand a document row', function () {
       const rowToInspect = 1;
 
       it('should expand the detail row when the toggle arrow is clicked', async function () {
