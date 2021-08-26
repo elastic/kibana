@@ -25,13 +25,7 @@ interface KibanaUsage extends KibanaSavedObjectCounts {
   index: string;
 }
 
-const TYPES = [
-  'dashboard',
-  'visualization',
-  'search',
-  'index-pattern',
-  'graph-workspace',
-];
+const TYPES = ['dashboard', 'visualization', 'search', 'index-pattern', 'graph-workspace'];
 
 export async function getKibanaSavedObjectCounts(
   esClient: ElasticsearchClient,

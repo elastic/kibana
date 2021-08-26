@@ -208,7 +208,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(value).to.eql('.e');
         const suggestions = await timelion.getSuggestionItemsText();
         expect(suggestions.length).to.eql(2);
-        console.log(suggestions);
         expect(suggestions[0].includes('es')).to.eql(true);
         expect(suggestions[1].includes('elasticsearch')).to.eql(true);
         await timelion.clickSuggestion(0);
@@ -226,7 +225,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             // wait for index patterns will be loaded
             await common.sleep(300);
             const suggestions = await timelion.getSuggestionItemsText();
-            console.log(suggestions);
             expect(suggestions.length).to.eql(5);
             expect(suggestions[0].includes('log*')).to.eql(true);
           });
@@ -238,7 +236,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
               'timelionCodeEditor'
             );
             const suggestions = await timelion.getSuggestionItemsText();
-            console.log(suggestions);
             expect(suggestions.length).to.eql(4);
             expect(suggestions[0].includes('@timestamp')).to.eql(true);
           });
@@ -250,7 +247,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
               'timelionCodeEditor'
             );
             const suggestions = await timelion.getSuggestionItemsText();
-            console.log(suggestions);
             expect(suggestions.length).not.to.eql(0);
             expect(suggestions[0].includes('@message.raw')).to.eql(true);
           });
@@ -261,7 +257,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
               'timelionCodeEditor'
             );
             const suggestions = await timelion.getSuggestionItemsText();
-            console.log(suggestions);
             expect(suggestions.length).not.to.eql(0);
             expect(suggestions[0].includes('avg:bytes')).to.eql(true);
           });

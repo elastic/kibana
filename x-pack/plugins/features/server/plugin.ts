@@ -95,9 +95,7 @@ export class FeaturesPlugin
     this.logger = this.initializerContext.logger.get();
   }
 
-  public setup(
-    core: CoreSetup,
-  ): RecursiveReadonly<PluginSetupContract> {
+  public setup(core: CoreSetup): RecursiveReadonly<PluginSetupContract> {
     defineRoutes({
       router: core.http.createRouter(),
       featureRegistry: this.featureRegistry,

@@ -48,7 +48,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.savedObjects.clickImportDone();
       const importedSavedObjects = await testSubjects.getVisibleText('exportAllObjects');
       // verifying the count of saved objects after importing .ndjson
-      await expect(importedSavedObjects).to.be('Export 88 objects');
+      await expect(importedSavedObjects).to.be('Export 87 objects');
     });
 
     it('should be able to import alerts and actions saved objects from 7.14 into 8.0.0', async function () {

@@ -46,7 +46,7 @@ export const REMOVED_TYPES: string[] = [
   // replaced by osquery-manager-usage-metric
   'osquery-usage-metric',
   // Was removed in 7.16
-  'timelion-sheet'
+  'timelion-sheet',
 ].sort();
 
 // When migrating from the outdated index we use a read query which excludes

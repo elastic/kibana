@@ -58,14 +58,11 @@ export interface VisTypeTimelionPluginStart {
   getArgValueSuggestions: typeof getArgValueSuggestions;
 }
 
-/** @public */
-export interface VisTypeTimelionPluginSetup {}
-
 /** @internal */
 export class TimelionVisPlugin
   implements
     Plugin<
-      VisTypeTimelionPluginSetup,
+      void,
       VisTypeTimelionPluginStart,
       TimelionVisSetupDependencies,
       TimelionVisStartDependencies
