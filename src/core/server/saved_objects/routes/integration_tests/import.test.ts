@@ -14,6 +14,7 @@ import { savedObjectsClientMock } from '../../../../../core/server/mocks';
 import { CoreUsageStatsClient } from '../../../core_usage_data';
 import { coreUsageStatsClientMock } from '../../../core_usage_data/core_usage_stats_client.mock';
 import { coreUsageDataServiceMock } from '../../../core_usage_data/core_usage_data_service.mock';
+import { loggingSystemMock } from '../../../logging/logging_system.mock';
 import { SavedObjectConfig } from '../../saved_objects_config';
 import { setupServer, createExportableType } from '../test_utils';
 import { SavedObjectsErrorHelpers, SavedObjectsImporter } from '../..';
@@ -30,6 +31,7 @@ describe(`POST ${URL}`, () => {
   let server: SetupServerReturn['server'];
   let httpSetup: SetupServerReturn['httpSetup'];
   let handlerContext: SetupServerReturn['handlerContext'];
+  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
   let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
 
   const emptyResponse = { saved_objects: [], total: 0, per_page: 0, page: 0 };
@@ -59,6 +61,8 @@ describe(`POST ${URL}`, () => {
         ({ management: { icon: `${type}-icon` } } as any)
     );
 
+    logger = loggingSystemMock.createLogger();
+
     savedObjectsClient = handlerContext.savedObjects.client;
     savedObjectsClient.find.mockResolvedValue(emptyResponse);
     savedObjectsClient.checkConflicts.mockResolvedValue({ errors: [] });
@@ -76,7 +80,7 @@ describe(`POST ${URL}`, () => {
     coreUsageStatsClient = coreUsageStatsClientMock.create();
     coreUsageStatsClient.incrementSavedObjectsImport.mockRejectedValue(new Error('Oh no!')); // intentionally throw this error, which is swallowed, so we can assert that the operation does not fail
     const coreUsageData = coreUsageDataServiceMock.createSetupContract(coreUsageStatsClient);
-    registerImportRoute(router, { config, coreUsageData });
+    registerImportRoute(router, { config, coreUsageData, logger });
 
     await server.start();
   });
@@ -107,7 +111,97 @@ describe(`POST ${URL}`, () => {
       request: expect.anything(),
       createNewCopies: false,
       overwrite: false,
+      usedDeprecatedQueryParams: false,
     });
+  });
+
+  it('logs deprecation warnings when a deprecated query param is used', async () => {
+    const result = await supertest(httpSetup.server.listener)
+      .post(`${URL}?createNewCopies=true`)
+      .set('content-Type', 'multipart/form-data; boundary=BOUNDARY')
+      .send(
+        [
+          '--BOUNDARY',
+          'Content-Disposition: form-data; name="file"; filename="export.ndjson"',
+          'Content-Type: application/ndjson',
+          '',
+          '',
+          '--BOUNDARY--',
+        ].join('\r\n')
+      )
+      .expect(200);
+
+    expect(result.body).toEqual({ success: true, successCount: 0, warnings: [] });
+    expect(logger.warn).toHaveBeenCalledTimes(1);
+    expect(logger.warn.mock.calls[0][0]).toMatchInlineSnapshot(
+      `"Importing saved objects with the [createNewCopies] query parameter has been deprecated. Please use [create_new_copies] instead."`
+    );
+  });
+
+  it('increments usage stats when a deprecated query param is used', async () => {
+    await supertest(httpSetup.server.listener)
+      .post(`${URL}?createNewCopies=true`)
+      .set('content-Type', 'multipart/form-data; boundary=BOUNDARY')
+      .send(
+        [
+          '--BOUNDARY',
+          'Content-Disposition: form-data; name="file"; filename="export.ndjson"',
+          'Content-Type: application/ndjson',
+          '',
+          '',
+          '--BOUNDARY--',
+        ].join('\r\n')
+      )
+      .expect(200);
+
+    expect(coreUsageStatsClient.incrementSavedObjectsImport).toHaveBeenCalledWith({
+      request: expect.anything(),
+      createNewCopies: true,
+      overwrite: false,
+      usedDeprecatedQueryParams: true,
+    });
+  });
+
+  it('returns a 400 when using both a new and deprecated query param', async () => {
+    const result = await supertest(httpSetup.server.listener)
+      .post(`${URL}?createNewCopies=true&create_new_copies=true`)
+      .set('content-Type', 'multipart/form-data; boundary=BOUNDARY')
+      .send(
+        [
+          '--BOUNDARY',
+          'Content-Disposition: form-data; name="file"; filename="export.ndjson"',
+          'Content-Type: application/ndjson',
+          '',
+          '',
+          '--BOUNDARY--',
+        ].join('\r\n')
+      )
+      .expect(400);
+
+    expect(result.body.message).toMatchInlineSnapshot(
+      `"[request query]: cannot use both [create_new_copies] and the deprecated [createNewCopies]"`
+    );
+  });
+
+  it('returns a 400 when using both overwrite and create_new_copies', async () => {
+    const result = await supertest(httpSetup.server.listener)
+      .post(`${URL}?overwrite=true&create_new_copies=true`)
+      .set('content-Type', 'multipart/form-data; boundary=BOUNDARY')
+      .send(
+        [
+          '--BOUNDARY',
+          'Content-Disposition: form-data; name="file"; filename="export.ndjson"',
+          'Content-Type: application/ndjson',
+          '',
+          '',
+          '--BOUNDARY--',
+        ].join('\r\n')
+      )
+      .expect(400);
+
+    expect(result.body.message).toMatchInlineSnapshot(
+      `"[request query]: cannot use [overwrite] with [create_new_copies]"`
+    );
   });
 
   it('defaults migrationVersion to empty object', async () => {

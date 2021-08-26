@@ -84,3 +84,21 @@ export const catchAndReturnBoomErrors: RequestHandlerWrapper = (handler) => {
     }
   };
 };
+
+/**
+ * Returns a new object with the own properties of `obj`, but the
+ * keys renamed according to the `keysMap`.
+ *
+ * @param keysMap - a map of the form `{oldKey: newKey}`
+ * @param obj - the object whose own properties will be renamed
+ */
+export const renameKeys = <T extends Record<string, unknown>, U extends Record<string, unknown>>(
+  keysMap: Record<keyof U, keyof T>,
+  obj: U
+): T =>
+  Object.keys(obj).reduce((acc, key) => {
+    return {
+      ...acc,
+      ...{ [keysMap[key] || key]: obj[key] },
+    };
+  }, {} as T);

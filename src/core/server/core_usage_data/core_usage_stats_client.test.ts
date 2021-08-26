@@ -774,6 +774,7 @@ describe('CoreUsageStatsClient', () => {
           `${IMPORT_STATS_PREFIX}.total`,
           `${IMPORT_STATS_PREFIX}.namespace.default.total`,
           `${IMPORT_STATS_PREFIX}.namespace.default.kibanaRequest.no`,
+          `${IMPORT_STATS_PREFIX}.usedDeprecatedQueryParams.no`,
           `${IMPORT_STATS_PREFIX}.createNewCopiesEnabled.no`,
           `${IMPORT_STATS_PREFIX}.overwriteEnabled.no`,
         ],
@@ -789,11 +790,13 @@ describe('CoreUsageStatsClient', () => {
         request,
         createNewCopies: true,
         overwrite: true,
+        usedDeprecatedQueryParams: false,
       } as IncrementSavedObjectsImportOptions);
       await usageStatsClient.incrementSavedObjectsImport({
         request,
         createNewCopies: false,
         overwrite: true,
+        usedDeprecatedQueryParams: true,
       } as IncrementSavedObjectsImportOptions);
       expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(2);
       expect(repositoryMock.incrementCounter).toHaveBeenNthCalledWith(
@@ -804,6 +807,7 @@ describe('CoreUsageStatsClient', () => {
           `${IMPORT_STATS_PREFIX}.total`,
           `${IMPORT_STATS_PREFIX}.namespace.default.total`,
           `${IMPORT_STATS_PREFIX}.namespace.default.kibanaRequest.yes`,
+          `${IMPORT_STATS_PREFIX}.usedDeprecatedQueryParams.no`,
           `${IMPORT_STATS_PREFIX}.createNewCopiesEnabled.yes`,
           // excludes 'overwriteEnabled.yes' and 'overwriteEnabled.no' when createNewCopies is true
         ],
@@ -817,6 +821,7 @@ describe('CoreUsageStatsClient', () => {
           `${IMPORT_STATS_PREFIX}.total`,
           `${IMPORT_STATS_PREFIX}.namespace.default.total`,
           `${IMPORT_STATS_PREFIX}.namespace.default.kibanaRequest.yes`,
+          `${IMPORT_STATS_PREFIX}.usedDeprecatedQueryParams.yes`,
           `${IMPORT_STATS_PREFIX}.createNewCopiesEnabled.no`,
           `${IMPORT_STATS_PREFIX}.overwriteEnabled.yes`,
         ],
@@ -839,6 +844,7 @@ describe('CoreUsageStatsClient', () => {
           `${IMPORT_STATS_PREFIX}.total`,
           `${IMPORT_STATS_PREFIX}.namespace.custom.total`,
           `${IMPORT_STATS_PREFIX}.namespace.custom.kibanaRequest.no`,
+          `${IMPORT_STATS_PREFIX}.usedDeprecatedQueryParams.no`,
           `${IMPORT_STATS_PREFIX}.createNewCopiesEnabled.no`,
           `${IMPORT_STATS_PREFIX}.overwriteEnabled.no`,
         ],
@@ -958,6 +964,7 @@ describe('CoreUsageStatsClient', () => {
           `${EXPORT_STATS_PREFIX}.namespace.default.total`,
           `${EXPORT_STATS_PREFIX}.namespace.default.kibanaRequest.no`,
           `${EXPORT_STATS_PREFIX}.allTypesSelected.no`,
+          `${EXPORT_STATS_PREFIX}.usedDeprecatedBodyFields.no`,
         ],
         incrementOptions
       );
@@ -971,6 +978,7 @@ describe('CoreUsageStatsClient', () => {
         request,
         types: ['foo', 'bar'],
         supportedTypes: ['foo', 'bar'],
+        usedDeprecatedBodyFields: true,
       } as IncrementSavedObjectsExportOptions);
       expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
       expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
@@ -981,6 +989,7 @@ describe('CoreUsageStatsClient', () => {
           `${EXPORT_STATS_PREFIX}.namespace.default.total`,
           `${EXPORT_STATS_PREFIX}.namespace.default.kibanaRequest.yes`,
           `${EXPORT_STATS_PREFIX}.allTypesSelected.yes`,
+          `${EXPORT_STATS_PREFIX}.usedDeprecatedBodyFields.yes`,
         ],
         incrementOptions
       );
@@ -1002,6 +1011,7 @@ describe('CoreUsageStatsClient', () => {
           `${EXPORT_STATS_PREFIX}.namespace.custom.total`,
           `${EXPORT_STATS_PREFIX}.namespace.custom.kibanaRequest.no`,
           `${EXPORT_STATS_PREFIX}.allTypesSelected.no`,
+          `${EXPORT_STATS_PREFIX}.usedDeprecatedBodyFields.no`,
         ],
         incrementOptions
       );

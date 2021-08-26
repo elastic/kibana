@@ -835,6 +835,20 @@ export function getCoreUsageCollector(
           description: 'How many times this API has been called without the `overwrite` option.',
         },
       },
+      'apiCalls.savedObjectsImport.usedDeprecatedQueryParams.yes': {
+        type: 'long',
+        _meta: {
+          description:
+            'How many times this API has been called with a query param that has been deprecated.',
+        },
+      },
+      'apiCalls.savedObjectsImport.usedDeprecatedQueryParams.no': {
+        type: 'long',
+        _meta: {
+          description:
+            'How many times this API has been called without a query param that has been deprecated.',
+        },
+      },
       'apiCalls.savedObjectsResolveImportErrors.total': {
         type: 'long',
         _meta: { description: 'How many times this API has been called.' },
@@ -927,6 +941,20 @@ export function getCoreUsageCollector(
         _meta: {
           description:
             'How many times this API has been called by a non-Kibana client in a custom space.',
+        },
+      },
+      'apiCalls.savedObjectsExport.usedDeprecatedBodyFields.yes': {
+        type: 'long',
+        _meta: {
+          description:
+            'How many times this API has been called with a body field that has been deprecated.',
+        },
+      },
+      'apiCalls.savedObjectsExport.usedDeprecatedBodyFields.no': {
+        type: 'long',
+        _meta: {
+          description:
+            'How many times this API has been called without a body field that has been deprecated.',
         },
       },
       'apiCalls.savedObjectsExport.allTypesSelected.yes': {

@@ -92,6 +92,8 @@ export interface CoreUsageStats {
   'apiCalls.savedObjectsImport.createNewCopiesEnabled.no'?: number;
   'apiCalls.savedObjectsImport.overwriteEnabled.yes'?: number;
   'apiCalls.savedObjectsImport.overwriteEnabled.no'?: number;
+  'apiCalls.savedObjectsImport.usedDeprecatedQueryParams.yes'?: number;
+  'apiCalls.savedObjectsImport.usedDeprecatedQueryParams.no'?: number;
   'apiCalls.savedObjectsResolveImportErrors.total'?: number;
   'apiCalls.savedObjectsResolveImportErrors.namespace.default.total'?: number;
   'apiCalls.savedObjectsResolveImportErrors.namespace.default.kibanaRequest.yes'?: number;
@@ -110,6 +112,8 @@ export interface CoreUsageStats {
   'apiCalls.savedObjectsExport.namespace.custom.kibanaRequest.no'?: number;
   'apiCalls.savedObjectsExport.allTypesSelected.yes'?: number;
   'apiCalls.savedObjectsExport.allTypesSelected.no'?: number;
+  'apiCalls.savedObjectsExport.usedDeprecatedBodyFields.yes'?: number;
+  'apiCalls.savedObjectsExport.usedDeprecatedBodyFields.no'?: number;
   // Saved Objects Repository counters
   'savedObjectsRepository.resolvedOutcome.exactMatch'?: number;
   'savedObjectsRepository.resolvedOutcome.aliasMatch'?: number;

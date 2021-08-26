@@ -51,8 +51,8 @@ export function registerRoutes({
   registerBulkCreateRoute(router, { coreUsageData });
   registerBulkUpdateRoute(router, { coreUsageData });
   registerLogLegacyImportRoute(router, logger);
-  registerExportRoute(router, { config, coreUsageData });
-  registerImportRoute(router, { config, coreUsageData });
+  registerExportRoute(router, { config, coreUsageData, logger });
+  registerImportRoute(router, { config, coreUsageData, logger });
   registerResolveImportErrorsRoute(router, { config, coreUsageData });
 
   const internalRouter = http.createRouter('/internal/saved_objects/');

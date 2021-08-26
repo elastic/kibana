@@ -23,7 +23,9 @@ export interface BaseIncrementOptions {
 }
 /** @internal */
 export type IncrementSavedObjectsImportOptions = BaseIncrementOptions &
-  Pick<SavedObjectsImportOptions, 'createNewCopies' | 'overwrite'>;
+  Pick<SavedObjectsImportOptions, 'createNewCopies' | 'overwrite'> & {
+    usedDeprecatedQueryParams?: boolean;
+  };
 /** @internal */
 export type IncrementSavedObjectsResolveImportErrorsOptions = BaseIncrementOptions &
   Pick<SavedObjectsResolveImportErrorsOptions, 'createNewCopies'>;
@@ -31,6 +33,8 @@ export type IncrementSavedObjectsResolveImportErrorsOptions = BaseIncrementOptio
 export type IncrementSavedObjectsExportOptions = BaseIncrementOptions & {
   types?: string[];
   supportedTypes: string[];
+} & {
+  usedDeprecatedBodyFields?: boolean;
 };
 
 export const BULK_CREATE_STATS_PREFIX = 'apiCalls.savedObjectsBulkCreate';
@@ -69,12 +73,16 @@ const ALL_COUNTER_FIELDS = [
   `${IMPORT_STATS_PREFIX}.createNewCopiesEnabled.no`,
   `${IMPORT_STATS_PREFIX}.overwriteEnabled.yes`,
   `${IMPORT_STATS_PREFIX}.overwriteEnabled.no`,
+  `${IMPORT_STATS_PREFIX}.usedDeprecatedQueryParams.yes`,
+  `${IMPORT_STATS_PREFIX}.usedDeprecatedQueryParams.no`,
   ...getFieldsForCounter(RESOLVE_IMPORT_STATS_PREFIX),
   `${RESOLVE_IMPORT_STATS_PREFIX}.createNewCopiesEnabled.yes`,
   `${RESOLVE_IMPORT_STATS_PREFIX}.createNewCopiesEnabled.no`,
   ...getFieldsForCounter(EXPORT_STATS_PREFIX),
   `${EXPORT_STATS_PREFIX}.allTypesSelected.yes`,
   `${EXPORT_STATS_PREFIX}.allTypesSelected.no`,
+  `${EXPORT_STATS_PREFIX}.usedDeprecatedBodyFields.yes`,
+  `${EXPORT_STATS_PREFIX}.usedDeprecatedBodyFields.no`,
   // Saved Objects Repository counters; these are included here for stats collection, but are incremented in the repository itself
   REPOSITORY_RESOLVE_OUTCOME_STATS.EXACT_MATCH,
   REPOSITORY_RESOLVE_OUTCOME_STATS.ALIAS_MATCH,
@@ -147,8 +155,9 @@ export class CoreUsageStatsClient {
   }
 
   public async incrementSavedObjectsImport(options: IncrementSavedObjectsImportOptions) {
-    const { createNewCopies, overwrite } = options;
+    const { createNewCopies, overwrite, usedDeprecatedQueryParams } = options;
     const counterFieldNames = [
+      `usedDeprecatedQueryParams.${usedDeprecatedQueryParams ? 'yes' : 'no'}`,
       `createNewCopiesEnabled.${createNewCopies ? 'yes' : 'no'}`,
       ...(!createNewCopies ? [`overwriteEnabled.${overwrite ? 'yes' : 'no'}`] : []), // the overwrite option is ignored when createNewCopies is true
     ];
@@ -164,9 +173,12 @@ export class CoreUsageStatsClient {
   }
 
   public async incrementSavedObjectsExport(options: IncrementSavedObjectsExportOptions) {
-    const { types, supportedTypes } = options;
+    const { types, supportedTypes, usedDeprecatedBodyFields } = options;
     const isAllTypesSelected = !!types && supportedTypes.every((x) => types.includes(x));
-    const counterFieldNames = [`allTypesSelected.${isAllTypesSelected ? 'yes' : 'no'}`];
+    const counterFieldNames = [
+      `allTypesSelected.${isAllTypesSelected ? 'yes' : 'no'}`,
+      `usedDeprecatedBodyFields.${usedDeprecatedBodyFields ? 'yes' : 'no'}`,
+    ];
     await this.updateUsageStats(counterFieldNames, EXPORT_STATS_PREFIX, options);
   }
 

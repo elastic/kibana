@@ -6,10 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { createSavedObjectsStreamFromNdJson, validateTypes, validateObjects } from './utils';
+import {
+  catchAndReturnBoomErrors,
+  createSavedObjectsStreamFromNdJson,
+  validateTypes,
+  validateObjects,
+  renameKeys,
+} from './utils';
 import { Readable } from 'stream';
 import { createPromiseFromStreams, createConcatStream } from '@kbn/utils';
-import { catchAndReturnBoomErrors } from './utils';
 import Boom from '@hapi/boom';
 import {
   KibanaRequest,
@@ -231,6 +236,33 @@ describe('catchAndReturnBoomErrors', () => {
     const wrapped = catchAndReturnBoomErrors(handler);
     await expect(wrapped(context, request, response)).rejects.toMatchInlineSnapshot(
       `[Error: Internal Server Error]`
+    );
+  });
+});
+
+describe('renameKeys', () => {
+  const renameMap = {
+    a: 'A',
+    b: 'B',
+    c: 'C',
+    C: 'C',
+    D: 'D',
+  } as const;
+
+  it('converts keys to the correct name', () => {
+    const obj = {
+      a: false,
+      b: false,
+      c: true,
+      D: true,
+    };
+    expect(renameKeys(renameMap, obj)).toEqual(
+      expect.objectContaining({
+        A: false,
+        B: false,
+        C: true,
+        D: true,
+      })
     );
   });
 });
