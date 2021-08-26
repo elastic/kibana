@@ -27,6 +27,7 @@ import {
   selectDatasourceStates,
   selectVisualization,
 } from '../../state_management';
+import type { LensInspector } from '../../lens_inspector_service';
 
 export interface EditorFrameProps {
   datasourceMap: DatasourceMap;
@@ -35,6 +36,7 @@ export interface EditorFrameProps {
   core: CoreStart;
   plugins: EditorFrameStartPlugins;
   showNoDataPopover: () => void;
+  lensInspector: LensInspector;
 }
 
 export function EditorFrame(props: EditorFrameProps) {
@@ -108,6 +110,7 @@ export function EditorFrame(props: EditorFrameProps) {
               core={props.core}
               plugins={props.plugins}
               ExpressionRenderer={props.ExpressionRenderer}
+              lensInspector={props.lensInspector}
               datasourceMap={datasourceMap}
               visualizationMap={visualizationMap}
               framePublicAPI={framePublicAPI}
