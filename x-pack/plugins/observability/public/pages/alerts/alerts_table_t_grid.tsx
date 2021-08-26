@@ -39,6 +39,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 import React, { Suspense, useMemo, useState, useCallback } from 'react';
+import usePrevious from 'react-use/lib/usePrevious';
 import { get } from 'lodash';
 import {
   getAlertsPermissions,
@@ -286,6 +287,7 @@ function ObservabilityActions({
 
 export function AlertsTableTGrid(props: AlertsTableTGridProps) {
   const { indexNames, rangeFrom, rangeTo, kuery, workflowStatus, setRefetch, addToQuery } = props;
+  const prevWorkflowStatus = usePrevious(workflowStatus);
   const {
     timelines,
     application: { capabilities },
@@ -301,6 +303,16 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
     },
     [capabilities]
   );
+
+  const [deletedEventIds, setDeletedEventIds] = useState<string[]>([]);
+  if (workflowStatus !== prevWorkflowStatus) {
+    setDeletedEventIds([]);
+  }
+  const setEventsDeleted = useCallback<ObservabilityActionsProps['setEventsDeleted']>((action) => {
+    if (action.isDeleted) {
+      setDeletedEventIds((ids) => [...ids, ...action.eventIds]);
+    }
+  }, []);
 
   const leadingControlColumns = useMemo(() => {
     return [
@@ -320,6 +332,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
           return (
             <ObservabilityActions
               {...actionProps}
+              setEventsDeleted={setEventsDeleted}
               currentStatus={workflowStatus}
               setFlyoutAlert={setFlyoutAlert}
             />
@@ -327,7 +340,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
         },
       },
     ];
-  }, [workflowStatus]);
+  }, [workflowStatus, setEventsDeleted]);
 
   const tGridProps = useMemo(() => {
     const type: TGridType = 'standalone';
@@ -337,7 +350,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
       casePermissions,
       type,
       columns,
-      deletedEventIds: [],
+      deletedEventIds,
       defaultCellActions: getDefaultCellActions({ addToQuery }),
       end: rangeTo,
       filters: [],
@@ -385,6 +398,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
     rangeFrom,
     setRefetch,
     leadingControlColumns,
+    deletedEventIds,
   ]);
   const handleFlyoutClose = () => setFlyoutAlert(undefined);
   const { observabilityRuleTypeRegistry } = usePluginContext();
