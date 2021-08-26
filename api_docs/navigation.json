@@ -471,7 +471,7 @@
             "section": "def-public.SearchBarProps",
             "text": "SearchBarProps"
           },
-          ", \"filters\" | \"query\" | \"placeholder\" | \"iconType\" | \"isClearable\" | \"isLoading\" | \"indexPatterns\" | \"customSubmitButton\" | \"screenTitle\" | \"dataTestSubj\" | \"showQueryBar\" | \"showQueryInput\" | \"showFilterBar\" | \"showDatePicker\" | \"showAutoRefreshOnly\" | \"isRefreshPaused\" | \"refreshInterval\" | \"dateRangeFrom\" | \"dateRangeTo\" | \"showSaveQuery\" | \"savedQuery\" | \"onQueryChange\" | \"onQuerySubmit\" | \"onSaved\" | \"onSavedQueryUpdated\" | \"onClearSavedQuery\" | \"onRefresh\" | \"indicateNoData\" | \"nonKqlMode\" | \"nonKqlModeHelpText\" | \"onFiltersUpdated\" | \"onRefreshChange\"> & { config?: ",
+          ", \"filters\" | \"query\" | \"isClearable\" | \"placeholder\" | \"isLoading\" | \"indexPatterns\" | \"customSubmitButton\" | \"screenTitle\" | \"dataTestSubj\" | \"showQueryBar\" | \"showQueryInput\" | \"showFilterBar\" | \"showDatePicker\" | \"showAutoRefreshOnly\" | \"isRefreshPaused\" | \"refreshInterval\" | \"dateRangeFrom\" | \"dateRangeTo\" | \"showSaveQuery\" | \"savedQuery\" | \"onQueryChange\" | \"onQuerySubmit\" | \"onSaved\" | \"onSavedQueryUpdated\" | \"onClearSavedQuery\" | \"onRefresh\" | \"indicateNoData\" | \"iconType\" | \"nonKqlMode\" | \"nonKqlModeHelpText\" | \"displayStyle\" | \"onFiltersUpdated\" | \"onRefreshChange\"> & { config?: ",
           {
             "pluginId": "navigation",
             "scope": "public",

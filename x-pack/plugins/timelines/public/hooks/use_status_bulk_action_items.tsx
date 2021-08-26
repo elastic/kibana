@@ -127,7 +127,6 @@ export const useStatusBulkActionItems = ({
           key="open"
           data-test-subj="open-alert-status"
           onClick={() => onClickUpdate(FILTER_OPEN)}
-          size="s"
         >
           {i18n.BULK_ACTION_OPEN_SELECTED}
         </EuiContextMenuItem>
@@ -139,7 +138,6 @@ export const useStatusBulkActionItems = ({
           key="acknowledge"
           data-test-subj="acknowledged-alert-status"
           onClick={() => onClickUpdate(FILTER_ACKNOWLEDGED)}
-          size="s"
         >
           {i18n.BULK_ACTION_ACKNOWLEDGED_SELECTED}
         </EuiContextMenuItem>
@@ -151,7 +149,6 @@ export const useStatusBulkActionItems = ({
           key="close"
           data-test-subj="close-alert-status"
           onClick={() => onClickUpdate(FILTER_CLOSED)}
-          size="s"
         >
           {i18n.BULK_ACTION_CLOSE_SELECTED}
         </EuiContextMenuItem>

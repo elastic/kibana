@@ -6,7 +6,7 @@
  */
 import { EuiLink, EuiHealth, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useEffect } from 'react';
+import React from 'react';
 /**
  * We need to produce types and code transpilation at different folders during the build of the package.
  * We have types and code at different imports because we don't want to import the whole package in the resulting webpack bundle for the plugin.
@@ -26,7 +26,7 @@ import {
   TIMESTAMP,
   // @ts-expect-error importing from a place other than root because we want to limit what we import from this package
 } from '@kbn/rule-data-utils/target_node/technical_field_names';
-
+import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
 import type { CellValueElementProps, TimelineNonEcsData } from '../../../../timelines/common';
 import { TimestampTooltip } from '../../components/shared/timestamp_tooltip';
 import { asDuration } from '../../../common/utils/formatters';
@@ -77,22 +77,12 @@ export const getRenderCellValue = ({
       fieldName: columnId,
     })?.reduce((x) => x[0]);
 
-    useEffect(() => {
-      if (columnId === ALERT_STATUS) {
-        setCellProps({
-          style: {
-            textAlign: 'center',
-          },
-        });
-      }
-    }, [columnId, setCellProps]);
-
     const theme = useTheme();
 
     switch (columnId) {
       case ALERT_STATUS:
         switch (value) {
-          case 'open':
+          case ALERT_STATUS_ACTIVE:
             return (
               <EuiHealth color="primary" textSize="xs">
                 {i18n.translate('xpack.observability.alertsTGrid.statusActiveDescription', {
@@ -100,7 +90,7 @@ export const getRenderCellValue = ({
                 })}
               </EuiHealth>
             );
-          case 'closed':
+          case ALERT_STATUS_RECOVERED:
             return (
               <EuiHealth color={theme.eui.euiColorLightShade} textSize="xs">
                 <EuiText color={theme.eui.euiColorLightShade} size="relative">
