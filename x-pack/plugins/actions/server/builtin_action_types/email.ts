@@ -133,11 +133,6 @@ function validateParams(paramsObject: unknown): string | void {
   }
 }
 
-const defaultBackoffPerFailure = 10000;
-function getRetry(attempts: number) {
-  return new Date(Date.now() + attempts * defaultBackoffPerFailure);
-}
-
 interface GetActionTypeParams {
   logger: Logger;
   publicBaseUrl?: string;
@@ -154,8 +149,6 @@ export function getActionType(params: GetActionTypeParams): EmailActionType {
     name: i18n.translate('xpack.actions.builtin.emailTitle', {
       defaultMessage: 'Email',
     }),
-    maxAttempts: 3,
-    getRetry,
     validate: {
       config: schema.object(ConfigSchemaProps, {
         validate: curry(validateConfig)(configurationUtilities),
@@ -251,7 +244,6 @@ async function executor(
       actionId,
       message,
       serviceMessage: err.message,
-      retry: execOptions.taskInfo ? getRetry(execOptions.taskInfo?.attempts) : false,
     };
   }
 

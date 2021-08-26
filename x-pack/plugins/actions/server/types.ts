@@ -106,7 +106,6 @@ export interface ActionType<
   id: string;
   name: string;
   maxAttempts?: number;
-  getRetry?: (attempts: number) => boolean | Date;
   minimumLicenseRequired: LicenseType;
   validate?: {
     params?: ValidatorType<Params>;

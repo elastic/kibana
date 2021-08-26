@@ -61,11 +61,7 @@ export class TaskRunnerFactory {
     this.taskRunnerContext = taskRunnerContext;
   }
 
-  public create(
-    { taskInstance }: RunContext,
-    maxAttempts: number,
-    getRetry?: (attempts: number) => boolean | Date
-  ) {
+  public create({ taskInstance }: RunContext, maxAttempts?: number) {
     if (!this.isInitialized) {
       throw new Error('TaskRunnerFactory not initialized');
     }
@@ -126,7 +122,7 @@ export class TaskRunnerFactory {
         // Throwing an executor error means we will attempt to retry the task
         // TM will treat a task as a failure if `attempts >= maxAttempts`
         // so we need to handle that here to avoid TM persisting the failed task
-        const isRetryableBasedOnAttempts = taskInfo.attempts < maxAttempts;
+        const isRetryableBasedOnAttempts = taskInfo.attempts < (maxAttempts ?? 1);
 
         let executorResult: ActionTypeExecutorResult<unknown> | undefined;
         try {

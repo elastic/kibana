@@ -135,7 +135,7 @@ export class ActionTypeRegistry {
           return false;
         },
         createTaskRunner: (context: RunContext) =>
-          this.taskRunnerFactory.create(context, actionType.maxAttempts ?? 1, actionType.getRetry),
+          this.taskRunnerFactory.create(context, actionType.maxAttempts),
       },
     });
     // No need to notify usage on basic action types
