@@ -77,8 +77,7 @@ export async function fetchUpgradeAssistantMetrics(
     const defaultTelemetrySavedObject = {
       ui_open: {
         overview: 0,
-        cluster: 0,
-        indices: 0,
+        elasticsearch: 0,
         kibana: 0,
       },
       ui_reindex: {
@@ -96,8 +95,7 @@ export async function fetchUpgradeAssistantMetrics(
     return {
       ui_open: {
         overview: get(upgradeAssistantTelemetrySavedObjectAttrs, 'ui_open.overview', 0),
-        cluster: get(upgradeAssistantTelemetrySavedObjectAttrs, 'ui_open.cluster', 0),
-        indices: get(upgradeAssistantTelemetrySavedObjectAttrs, 'ui_open.indices', 0),
+        elasticsearch: get(upgradeAssistantTelemetrySavedObjectAttrs, 'ui_open.elasticsearch', 0),
         kibana: get(upgradeAssistantTelemetrySavedObjectAttrs, 'ui_open.kibana', 0),
       },
       ui_reindex: {
@@ -146,18 +144,10 @@ export function registerUpgradeAssistantUsageCollector({
           },
         },
         ui_open: {
-          cluster: {
+          elasticsearch: {
             type: 'long',
             _meta: {
-              description:
-                'Number of times a user viewed the list of Elasticsearch cluster deprecations.',
-            },
-          },
-          indices: {
-            type: 'long',
-            _meta: {
-              description:
-                'Number of times a user viewed the list of Elasticsearch index deprecations.',
+              description: 'Number of times a user viewed the list of Elasticsearch deprecations.',
             },
           },
           overview: {

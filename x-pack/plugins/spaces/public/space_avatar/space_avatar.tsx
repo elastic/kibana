@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import type { SpaceAvatarProps } from 'src/plugins/spaces_oss/public';
+import type { SpaceAvatarProps } from './types';
 
 export const getSpaceAvatarComponent = async (): Promise<React.FC<SpaceAvatarProps>> => {
   const { SpaceAvatarInternal } = await import('./space_avatar_internal');

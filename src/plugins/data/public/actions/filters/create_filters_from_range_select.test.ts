@@ -10,11 +10,12 @@ import moment from 'moment';
 
 import { createFiltersFromRangeSelectAction } from './create_filters_from_range_select';
 
-import { IndexPatternsContract, RangeFilter } from '../../../public';
+import { IndexPatternsContract } from '../../../public';
 import { dataPluginMock } from '../../../public/mocks';
 import { setIndexPatterns, setSearchService } from '../../../public/services';
 import { FieldFormatsGetConfigFn } from '../../../../field_formats/common';
 import { DateFormat } from '../../../../field_formats/public/';
+import { RangeFilter } from '@kbn/es-query';
 
 describe('brushEvent', () => {
   const DAY_IN_MS = 24 * 60 * 60 * 1000;

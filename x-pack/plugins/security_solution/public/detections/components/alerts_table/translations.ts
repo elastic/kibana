@@ -73,6 +73,13 @@ export const ALERTS_HEADERS_RULE_NAME = i18n.translate(
   }
 );
 
+export const ALERTS_HEADERS_RULE_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.eventsViewer.alerts.defaultHeaders.ruleDescriptionTitle',
+  {
+    defaultMessage: 'Rule description',
+  }
+);
+
 export const ALERTS_HEADERS_VERSION = i18n.translate(
   'xpack.securitySolution.eventsViewer.alerts.defaultHeaders.versionTitle',
   {
@@ -182,13 +189,6 @@ export const ACTION_ADD_EVENT_FILTER = i18n.translate(
   'xpack.securitySolution.detectionEngine.alerts.actions.addEventFilter',
   {
     defaultMessage: 'Add Endpoint event filter',
-  }
-);
-
-export const ACTION_ADD_TO_CASE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.alerts.actions.addToCase',
-  {
-    defaultMessage: 'Add to case',
   }
 );
 

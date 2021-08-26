@@ -3,7 +3,7 @@
   "version": "8.0.0",
   "kibanaVersion": "kibana",
   "owner": {
-    "owner": "Stack Monitoring",
+    "name": "Stack Monitoring",
     "githubTeam": "stack-monitoring-ui"
   },
   "configPath": ["monitoring"],
