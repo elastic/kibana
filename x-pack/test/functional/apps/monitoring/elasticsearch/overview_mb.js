@@ -13,7 +13,7 @@ export default function ({ getService, getPageObjects }) {
   const overview = getService('monitoringElasticsearchOverview');
   const esClusterSummaryStatus = getService('monitoringElasticsearchSummaryStatus');
 
-  describe('Elasticsearch overview mb', () => {
+  describe.skip('Elasticsearch overview mb', () => {
     const { setup, tearDown } = getLifecycleMethods(getService, getPageObjects);
 
     before(async () => {

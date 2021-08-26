@@ -68,7 +68,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await security.testUser.restoreDefaults();
     });
 
-    describe('adding a filter that excludes all data', () => {
+    describe.skip('adding a filter that excludes all data', () => {
       before(async () => {
         await populateDashboard();
         await addFilterAndRefresh();

@@ -13,7 +13,7 @@ export default function ({ getService, getPageObjects }) {
   const nodesList = getService('monitoringElasticsearchNodes');
   const esClusterSummaryStatus = getService('monitoringElasticsearchSummaryStatus');
 
-  describe('Elasticsearch nodes listing', function () {
+  describe.skip('Elasticsearch nodes listing', function () {
     // FF issue: https://github.com/elastic/kibana/issues/35551
     this.tags(['skipFirefox']);
 
