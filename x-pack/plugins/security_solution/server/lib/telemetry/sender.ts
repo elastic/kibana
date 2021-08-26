@@ -230,7 +230,20 @@ export class TelemetryEventsSender {
     if (!telemetryUrl) {
       throw Error("Couldn't get telemetry URL");
     }
-    return getV3UrlFromV2(telemetryUrl.toString(), channel);
+    return this.getV3UrlFromV2(telemetryUrl.toString(), channel);
+  }
+
+  // Forms URLs like:
+  // https://telemetry.elastic.co/v3/send/my-channel-name or
+  // https://telemetry-staging.elastic.co/v3-dev/send/my-channel-name
+  public getV3UrlFromV2(v2url: string, channel: string): string {
+    const url = new URL(v2url);
+    if (!url.hostname.includes('staging')) {
+      url.pathname = `/v3/send/${channel}`;
+    } else {
+      url.pathname = `/v3-dev/send/${channel}`;
+    }
+    return url.toString();
   }
 
   private async sendEvents(
@@ -279,19 +292,6 @@ export class TelemetryEventsSender {
       });
     }
   }
-}
-
-// Forms URLs like:
-// https://telemetry.elastic.co/v3/send/my-channel-name or
-// https://telemetry-staging.elastic.co/v3-dev/send/my-channel-name
-export function getV3UrlFromV2(v2url: string, channel: string): string {
-  const url = new URL(v2url);
-  if (!url.hostname.includes('staging')) {
-    url.pathname = `/v3/send/${channel}`;
-  } else {
-    url.pathname = `/v3-dev/send/${channel}`;
-  }
-  return url.toString();
 }
 
 export function copyAllowlistedFields(

@@ -6,7 +6,7 @@
  */
 
 /* eslint-disable dot-notation */
-import { TelemetryEventsSender, getV3UrlFromV2, copyAllowlistedFields } from './sender';
+import { TelemetryEventsSender, copyAllowlistedFields } from './sender';
 import { loggingSystemMock } from 'src/core/server/mocks';
 import { usageCountersServiceMock } from 'src/plugins/usage_collection/server/usage_counters/usage_counters_service.mock';
 import { URL } from 'url';
@@ -333,21 +333,30 @@ describe('allowlistEventFields', () => {
 });
 
 describe('getV3UrlFromV2', () => {
+  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
+
+  beforeEach(() => {
+    logger = loggingSystemMock.createLogger();
+  });
+
   it('should return prod url', () => {
-    expect(getV3UrlFromV2('https://telemetry.elastic.co/xpack/v2/send', 'alerts-endpoint')).toBe(
-      'https://telemetry.elastic.co/v3/send/alerts-endpoint'
-    );
+    const sender = new TelemetryEventsSender(logger);
+    expect(
+      sender.getV3UrlFromV2('https://telemetry.elastic.co/xpack/v2/send', 'alerts-endpoint')
+    ).toBe('https://telemetry.elastic.co/v3/send/alerts-endpoint');
   });
 
   it('should return staging url', () => {
+    const sender = new TelemetryEventsSender(logger);
     expect(
-      getV3UrlFromV2('https://telemetry-staging.elastic.co/xpack/v2/send', 'alerts-endpoint')
+      sender.getV3UrlFromV2('https://telemetry-staging.elastic.co/xpack/v2/send', 'alerts-endpoint')
     ).toBe('https://telemetry-staging.elastic.co/v3-dev/send/alerts-endpoint');
   });
 
   it('should support ports and auth', () => {
+    const sender = new TelemetryEventsSender(logger);
     expect(
-      getV3UrlFromV2('http://user:pass@myproxy.local:1337/xpack/v2/send', 'alerts-endpoint')
+      sender.getV3UrlFromV2('http://user:pass@myproxy.local:1337/xpack/v2/send', 'alerts-endpoint')
     ).toBe('http://user:pass@myproxy.local:1337/v3/send/alerts-endpoint');
   });
 });
