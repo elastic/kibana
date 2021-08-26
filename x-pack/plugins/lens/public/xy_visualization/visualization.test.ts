@@ -317,6 +317,42 @@ describe('xy_visualization', () => {
         accessors: [],
       });
     });
+
+    it('should add a dimension to a threshold layer', () => {
+      expect(
+        xyVisualization.setDimension({
+          frame,
+          prevState: {
+            ...exampleState(),
+            layers: [
+              {
+                layerId: 'threshold',
+                layerType: layerTypes.THRESHOLD,
+                seriesType: 'line',
+                accessors: [],
+              },
+            ],
+          },
+          layerId: 'threshold',
+          groupId: 'xThreshold',
+          columnId: 'newCol',
+        }).layers[0]
+      ).toEqual({
+        layerId: 'threshold',
+        layerType: layerTypes.THRESHOLD,
+        seriesType: 'line',
+        accessors: ['newCol'],
+        yConfig: [
+          {
+            axisMode: 'bottom',
+            forAccessor: 'newCol',
+            icon: undefined,
+            lineStyle: 'solid',
+            lineWidth: 1,
+          },
+        ],
+      });
+    });
   });
 
   describe('#removeDimension', () => {
@@ -502,6 +538,159 @@ describe('xy_visualization', () => {
         { ...exampleOperation, dataType: 'date' },
       ];
       expect(ops.filter(filterOperations).map((x) => x.dataType)).toEqual(['number']);
+    });
+
+    describe('thresholds', () => {
+      beforeEach(() => {
+        frame.datasourceLayers = {
+          first: mockDatasource.publicAPIMock,
+          threshold: mockDatasource.publicAPIMock,
+        };
+      });
+
+      function getStateWithBaseThreshold(): State {
+        return {
+          ...exampleState(),
+          layers: [
+            {
+              layerId: 'first',
+              layerType: layerTypes.DATA,
+              seriesType: 'area',
+              splitAccessor: undefined,
+              xAccessor: undefined,
+              accessors: ['a'],
+            },
+            {
+              layerId: 'threshold',
+              layerType: layerTypes.THRESHOLD,
+              seriesType: 'line',
+              accessors: [],
+              yConfig: [{ axisMode: 'left', forAccessor: 'a' }],
+            },
+          ],
+        };
+      }
+
+      it('should support static value', () => {
+        const state = getStateWithBaseThreshold();
+        state.layers[0].accessors = [];
+        state.layers[1].yConfig = undefined;
+
+        expect(
+          xyVisualization.getConfiguration({
+            state: getStateWithBaseThreshold(),
+            frame,
+            layerId: 'threshold',
+          }).supportStaticValue
+        ).toBeTruthy();
+      });
+
+      it('should return no threshold groups for a empty data layer', () => {
+        const state = getStateWithBaseThreshold();
+        state.layers[0].accessors = [];
+        state.layers[1].yConfig = undefined;
+
+        const options = xyVisualization.getConfiguration({
+          state,
+          frame,
+          layerId: 'threshold',
+        }).groups;
+
+        expect(options).toHaveLength(0);
+      });
+
+      it('should return a group for the vertical left axis', () => {
+        const options = xyVisualization.getConfiguration({
+          state: getStateWithBaseThreshold(),
+          frame,
+          layerId: 'threshold',
+        }).groups;
+
+        expect(options).toHaveLength(1);
+        expect(options[0].groupId).toBe('yThresholdLeft');
+      });
+
+      it('should return a group for the vertical right axis', () => {
+        const state = getStateWithBaseThreshold();
+        state.layers[0].yConfig = [{ axisMode: 'right', forAccessor: 'a' }];
+        state.layers[1].yConfig![0].axisMode = 'right';
+
+        const options = xyVisualization.getConfiguration({
+          state,
+          frame,
+          layerId: 'threshold',
+        }).groups;
+
+        expect(options).toHaveLength(1);
+        expect(options[0].groupId).toBe('yThresholdRight');
+      });
+
+      it('should discard xAccessor as date histogram when computing groups', () => {
+        const state = getStateWithBaseThreshold();
+        state.layers[0].xAccessor = 'b';
+        state.layers[0].accessors = [];
+        state.layers[1].yConfig![0].axisMode = 'bottom';
+        // set the xAccessor as date_histogram
+        frame.datasourceLayers.threshold.getOperationForColumnId = jest.fn((accessor) => {
+          if (accessor === 'b') {
+            return {
+              dataType: 'date',
+              isBucketed: true,
+              scale: 'interval',
+              label: 'date_histogram',
+            };
+          }
+          return null;
+        });
+
+        const options = xyVisualization.getConfiguration({
+          state,
+          frame,
+          layerId: 'threshold',
+        }).groups;
+
+        expect(options).toHaveLength(0);
+      });
+
+      it('should return groups in a specific order (left, right, bottom)', () => {
+        const state = getStateWithBaseThreshold();
+        state.layers[0].xAccessor = 'c';
+        state.layers[0].accessors = ['a', 'b'];
+        // invert them on purpose
+        state.layers[0].yConfig = [
+          { axisMode: 'right', forAccessor: 'b' },
+          { axisMode: 'left', forAccessor: 'a' },
+        ];
+        state.layers[1].yConfig = [
+          { forAccessor: 'c', axisMode: 'bottom' },
+          { forAccessor: 'b', axisMode: 'right' },
+          { forAccessor: 'a', axisMode: 'left' },
+        ];
+        // set the xAccessor as number histogram
+        frame.datasourceLayers.threshold.getOperationForColumnId = jest.fn((accessor) => {
+          if (accessor === 'c') {
+            return {
+              dataType: 'number',
+              isBucketed: true,
+              scale: 'interval',
+              label: 'histogram',
+            };
+          }
+          return null;
+        });
+
+        const [left, right, bottom] = xyVisualization.getConfiguration({
+          state,
+          frame,
+          layerId: 'threshold',
+        }).groups;
+
+        expect(left.groupId).toBe('yThresholdLeft');
+        expect(right.groupId).toBe('yThresholdRight');
+        expect(bottom.groupId).toBe('xThreshold');
+      });
+
+      it.todo('should ignore terms operation for xAccessor');
     });
 
     describe('color assignment', () => {

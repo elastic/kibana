@@ -16,18 +16,11 @@ import { FieldFormatsStart } from 'src/plugins/field_formats/public';
 import { getSuggestions } from './xy_suggestions';
 import { XyToolbar, DimensionEditor } from './xy_config_panel';
 import { LayerHeader } from './xy_config_panel/layer_header';
-import type {
-  Visualization,
-  OperationMetadata,
-  VisualizationType,
-  AccessorConfig,
-  DatasourcePublicAPI,
-  FramePublicAPI,
-} from '../types';
-import { State, visualizationTypes, XYState } from './types';
+import type { Visualization, OperationMetadata, VisualizationType, AccessorConfig } from '../types';
+import { State, visualizationTypes } from './types';
 import { SeriesType, XYLayerConfig } from '../../common/expressions';
 import { LayerType, layerTypes } from '../../common';
-import { isHorizontalChart, isPercentageSeries } from './state_helpers';
+import { isHorizontalChart } from './state_helpers';
 import { toExpression, toPreviewExpression, getSortedAccessors } from './to_expression';
 import { LensIconChartBarStacked } from '../assets/chart_bar_stacked';
 import { LensIconChartMixedXy } from '../assets/chart_mixed_xy';
@@ -36,15 +29,17 @@ import { getAccessorColorConfig, getColorAssignments } from './color_assignment'
 import { getColumnToLabelMap } from './state_helpers';
 import { LensIconChartBarThreshold } from '../assets/chart_bar_threshold';
 import { generateId } from '../id_generator';
+import { getGroupsAvailableInData, getGroupsToShow, getStaticValue } from './threshold_helpers';
+import {
+  checkScaleOperation,
+  checkXAccessorCompatibility,
+  getAxisName,
+} from './visualization_helpers';
 
 const defaultIcon = LensIconChartBarStacked;
 const defaultSeriesType = 'bar_stacked';
 const isNumericMetric = (op: OperationMetadata) => !op.isBucketed && op.dataType === 'number';
 const isBucketed = (op: OperationMetadata) => op.isBucketed;
-
-interface ThresholdBase {
-  label: 'x' | 'yRight' | 'yLeft';
-}
 
 function getVisualizationType(state: State): VisualizationType | 'mixed' {
   if (!state.layers.length) {
@@ -215,9 +210,9 @@ export const getXyVisualization = ({
     const filledDataLayers = dataLayers.filter(
       ({ accessors, xAccessor }) => accessors.length || xAccessor
     );
-    const layerHasDateHistogramFn = checkScaleOperation(
+    const layerHasNumberHistogram = checkScaleOperation(
       'interval',
-      'date',
+      'number',
       frame?.datasourceLayers || {}
     );
     const thresholdGroups = getGroupsToShow(
@@ -242,7 +237,7 @@ export const getXyVisualization = ({
         icon: LensIconChartBarThreshold,
         disabled:
           !filledDataLayers.length ||
-          (dataLayers.every(layerHasDateHistogramFn) &&
+          (!dataLayers.some(layerHasNumberHistogram) &&
             dataLayers.every(({ accessors }) => !accessors.length)),
         tooltipContent: filledDataLayers.length
           ? undefined
@@ -259,7 +254,7 @@ export const getXyVisualization = ({
                 dataLayers,
                 label,
                 { activeData: frame?.activeData },
-                layerHasDateHistogramFn
+                layerHasNumberHistogram
               ),
             }))
           : undefined,
@@ -664,40 +659,6 @@ function validateLayersForDimension(
   };
 }
 
-function getAxisName(
-  axis: 'x' | 'y' | 'yLeft' | 'yRight',
-  { isHorizontal }: { isHorizontal: boolean }
-) {
-  const vertical = i18n.translate('xpack.lens.xyChart.verticalAxisLabel', {
-    defaultMessage: 'Vertical axis',
-  });
-  const horizontal = i18n.translate('xpack.lens.xyChart.horizontalAxisLabel', {
-    defaultMessage: 'Horizontal axis',
-  });
-  if (axis === 'x') {
-    return isHorizontal ? vertical : horizontal;
-  }
-  if (axis === 'y') {
-    return isHorizontal ? horizontal : vertical;
-  }
-  const verticalLeft = i18n.translate('xpack.lens.xyChart.verticalLeftAxisLabel', {
-    defaultMessage: 'Vertical left axis',
-  });
-  const verticalRight = i18n.translate('xpack.lens.xyChart.verticalRightAxisLabel', {
-    defaultMessage: 'Vertical right axis',
-  });
-  const horizontalTop = i18n.translate('xpack.lens.xyChart.horizontalLeftAxisLabel', {
-    defaultMessage: 'Horizontal top axis',
-  });
-  const horizontalBottom = i18n.translate('xpack.lens.xyChart.horizontalRightAxisLabel', {
-    defaultMessage: 'Horizontal bottom axis',
-  });
-  if (axis === 'yLeft') {
-    return isHorizontal ? horizontalTop : verticalLeft;
-  }
-  return isHorizontal ? horizontalBottom : verticalRight;
-}
-
 // i18n ids cannot be dynamically generated, hence the function below
 function getMessageIdsForDimension(dimension: string, layers: number[], isHorizontal: boolean) {
   const layersList = layers.map((i: number) => i + 1).join(', ');
@@ -741,199 +702,8 @@ function newLayerState(
   };
 }
 
-// min requirement for the bug:
-// * 2 or more layers
-// * at least one with date histogram
-// * at least one with interval function
-function checkXAccessorCompatibility(
-  state: XYState,
-  datasourceLayers: Record<string, DatasourcePublicAPI>
-) {
-  const errors = [];
-  const hasDateHistogramSet = state.layers.some(
-    checkScaleOperation('interval', 'date', datasourceLayers)
-  );
-  const hasNumberHistogram = state.layers.some(
-    checkScaleOperation('interval', 'number', datasourceLayers)
-  );
-  const hasOrdinalAxis = state.layers.some(
-    checkScaleOperation('ordinal', undefined, datasourceLayers)
-  );
-  if (state.layers.length > 1 && hasDateHistogramSet && hasNumberHistogram) {
-    errors.push({
-      shortMessage: i18n.translate('xpack.lens.xyVisualization.dataTypeFailureXShort', {
-        defaultMessage: `Wrong data type for {axis}.`,
-        values: {
-          axis: getAxisName('x', { isHorizontal: isHorizontalChart(state.layers) }),
-        },
-      }),
-      longMessage: i18n.translate('xpack.lens.xyVisualization.dataTypeFailureXLong', {
-        defaultMessage: `Data type mismatch for the {axis}. Cannot mix date and number interval types.`,
-        values: {
-          axis: getAxisName('x', { isHorizontal: isHorizontalChart(state.layers) }),
-        },
-      }),
-    });
-  }
-  if (state.layers.length > 1 && (hasDateHistogramSet || hasNumberHistogram) && hasOrdinalAxis) {
-    errors.push({
-      shortMessage: i18n.translate('xpack.lens.xyVisualization.dataTypeFailureXShort', {
-        defaultMessage: `Wrong data type for {axis}.`,
-        values: {
-          axis: getAxisName('x', { isHorizontal: isHorizontalChart(state.layers) }),
-        },
-      }),
-      longMessage: i18n.translate('xpack.lens.xyVisualization.dataTypeFailureXOrdinalLong', {
-        defaultMessage: `Data type mismatch for the {axis}, use a different function.`,
-        values: {
-          axis: getAxisName('x', { isHorizontal: isHorizontalChart(state.layers) }),
-        },
-      }),
-    });
-  }
-  return errors;
-}
-
-function checkScaleOperation(
-  scaleType: 'ordinal' | 'interval' | 'ratio',
-  dataType: 'date' | 'number' | 'string' | undefined,
-  datasourceLayers: Record<string, DatasourcePublicAPI>
-) {
-  return (layer: XYLayerConfig) => {
-    const datasourceAPI = datasourceLayers[layer.layerId];
-    if (!layer.xAccessor) {
-      return false;
-    }
-    const operation = datasourceAPI?.getOperationForColumnId(layer.xAccessor);
-    return Boolean(
-      operation && (!dataType || operation.dataType === dataType) && operation.scale === scaleType
-    );
-  };
-}
-
 function getLayersByType(state: State, byType?: string) {
   return state.layers.filter(({ layerType = layerTypes.DATA }) =>
     byType ? layerType === byType : true
   );
-}
-
-function getGroupsToShow<T extends ThresholdBase>(
-  thresholdLayers: T[],
-  state: State | undefined,
-  datasourceLayers: Record<string, DatasourcePublicAPI>
-): T[] {
-  if (!state) {
-    return [];
-  }
-  const dataLayers = state.layers.filter(
-    ({ layerType = layerTypes.DATA }) => layerType === layerTypes.DATA
-  );
-  const groupsAvailable = getGroupsAvailableInData(dataLayers, datasourceLayers);
-  return thresholdLayers.filter(({ label }: T) => groupsAvailable[label]);
-}
-
-function getGroupsAvailableInData(
-  dataLayers: State['layers'],
-  datasourceLayers: Record<string, DatasourcePublicAPI>
-) {
-  const hasNumberHistogram = dataLayers.some(
-    checkScaleOperation('interval', 'number', datasourceLayers)
-  );
-  return dataLayers.reduce(
-    (memo, dataLayer) => {
-      if (!memo.x && hasNumberHistogram) {
-        memo.x = Boolean(dataLayer.xAccessor);
-      }
-      if (!memo.yLeft) {
-        const leftConfigs = dataLayer.yConfig?.filter(({ axisMode }) => axisMode !== 'right');
-        const hasMoreConfigsThanAccessor =
-          dataLayer.accessors.length > (dataLayer.yConfig?.length ?? 0);
-
-        memo.yLeft = Boolean(
-          dataLayer.accessors.length &&
-            (leftConfigs == null || leftConfigs.length || hasMoreConfigsThanAccessor)
-        );
-      }
-      if (!memo.yRight) {
-        memo.yRight = Boolean(
-          dataLayer.accessors.length &&
-            dataLayer.yConfig?.some(({ axisMode }) => axisMode === 'right')
-        );
-      }
-      return memo;
-    },
-    { x: false, yLeft: false, yRight: false }
-  );
-}
-
-function getStaticValue(
-  dataLayers: State['layers'],
-  groupId: 'x' | 'yLeft' | 'yRight',
-  { activeData }: Pick<FramePublicAPI, 'activeData'>,
-  layerHasDateHistogramFn: (layer: XYLayerConfig) => boolean
-) {
-  const fallbackValue = 100;
-  if (!activeData) {
-    return fallbackValue;
-  }
-
-  // filter and organize data dimensions into threshold groups
-  // now pick the columnId in the active data
-  return (
-    computeStaticValueForGroup(
-      dataLayers,
-      activeData,
-      getAccessorCriteriaForGroup(groupId),
-      (layer) => groupId === 'x' && layerHasDateHistogramFn(layer)
-    ) || fallbackValue
-  );
-}
-
-function getAccessorCriteriaForGroup(
-  groupId: 'x' | 'yLeft' | 'yRight'
-): (layer: XYLayerConfig) => string | undefined {
-  switch (groupId) {
-    case 'x':
-      return ({ xAccessor }) => xAccessor;
-    case 'yLeft':
-      return ({ accessors, yConfig }) => {
-        if (yConfig == null) {
-          return accessors[0];
-        }
-        return yConfig.find(({ axisMode }) => axisMode == null || axisMode === 'left')?.forAccessor;
-      };
-    case 'yRight':
-      return ({ yConfig }) => {
-        return yConfig?.find(({ axisMode }) => axisMode === 'right')?.forAccessor;
-      };
-  }
-}
-
-function computeStaticValueForGroup(
-  dataLayers: State['layers'],
-  activeData: NonNullable<FramePublicAPI['activeData']>,
-  getColumnIdForGroup: (layer: XYLayerConfig) => string | undefined,
-  dropForDateHistogram: (layer: XYLayerConfig) => boolean
-) {
-  const dataLayer = dataLayers.find(getColumnIdForGroup);
-
-  if (dataLayer) {
-    if (isPercentageSeries(dataLayer?.seriesType)) {
-      return 0.75;
-    }
-    if (dropForDateHistogram(dataLayer)) {
-      return;
-    }
-    const columnId = getColumnIdForGroup(dataLayer);
-    const tableId = Object.keys(activeData).find((key) =>
-      activeData[key].columns.some(({ id }) => id === columnId)
-    );
-    if (columnId && tableId) {
-      const columnMax = activeData[tableId].rows.reduce(
-        (max, row) => Math.max(row[columnId], max),
-        -Infinity
-      );
-      return Number(((columnMax * 3) / 4).toFixed(2));
-    }
-  }
 }
