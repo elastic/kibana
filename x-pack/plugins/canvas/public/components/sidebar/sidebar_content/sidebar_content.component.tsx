@@ -6,18 +6,20 @@
  */
 
 import React, { Fragment } from 'react';
-import { useSelector } from 'react-redux';
 import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-
-import { getSelectedToplevelNodes, getSelectedElementId } from '../../state/selectors/workpad';
 // @ts-expect-error unconverted component
-import { SidebarHeader } from '../sidebar_header';
-import { MultiElementSettings } from './multi_element_settings';
-import { GroupSettings } from './group_settings';
-import { GlobalConfig } from './global_config';
-import { ElementSettings } from './element_settings';
-import { State } from '../../../types';
+import { SidebarHeader } from '../../sidebar_header';
+import { MultiElementSettings } from '../multi_element_settings';
+import { GroupSettings } from '../group_settings';
+import { GlobalConfig } from '../global_config';
+import { ElementSettings } from '../element_settings';
+
+interface SidebarContentProps {
+  commit?: Function;
+  selectedElementId: string | null;
+  selectedToplevelNodes: string[];
+}
 
 const strings = {
   getGroupedElementSidebarTitle: () =>
@@ -69,14 +71,10 @@ const SingleElementSidebar: React.FC<{ selectedElementId: string | null }> = ({
   </Fragment>
 );
 
-export const SidebarContent: React.FC<{ commit?: Function }> = () => {
-  const selectedToplevelNodes = useSelector<State, string[]>((state) =>
-    getSelectedToplevelNodes(state)
-  );
-  const selectedElementId = useSelector<State, string | null>((state) =>
-    getSelectedElementId(state)
-  );
-
+export const SidebarContent: React.FC<SidebarContentProps> = ({
+  selectedToplevelNodes,
+  selectedElementId,
+}) => {
   if (selectedToplevelNodes.length > 1) {
     return <MultiElementSidebar />;
   }
