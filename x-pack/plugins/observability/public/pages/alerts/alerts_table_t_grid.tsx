@@ -38,7 +38,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
-import React, { Suspense, useMemo, useState, useCallback } from 'react';
+import React, { Suspense, useMemo, useState, useCallback, useEffect } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
 import { get } from 'lodash';
 import {
@@ -305,9 +305,13 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
   );
 
   const [deletedEventIds, setDeletedEventIds] = useState<string[]>([]);
-  if (workflowStatus !== prevWorkflowStatus) {
-    setDeletedEventIds([]);
-  }
+
+  useEffect(() => {
+    if (workflowStatus !== prevWorkflowStatus) {
+      setDeletedEventIds([]);
+    }
+  }, [workflowStatus, prevWorkflowStatus]);
+
   const setEventsDeleted = useCallback<ObservabilityActionsProps['setEventsDeleted']>((action) => {
     if (action.isDeleted) {
       setDeletedEventIds((ids) => [...ids, ...action.eventIds]);
