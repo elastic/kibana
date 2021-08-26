@@ -27,7 +27,7 @@ echo "$TEMPLATE"
 cat << EOF | buildkite-agent annotate --style "info" --context demo-env-info
 The demo environment can be accessed here, once Kibana and ES are running:
 
-https://$DEPLOYMENT_NAME.demo.kibana.dev
+https://demo.kibana.dev/$DEPLOYMENT_MINOR_VERSION
 
 Logs, etc can be found here:
 
