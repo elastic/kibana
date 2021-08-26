@@ -9,6 +9,8 @@ import React, { memo } from 'react';
 import { CommonProps, EuiFlexGroup } from '@elastic/eui';
 import { HistoryItemComponent } from './history_item';
 
+// FIXME: implement a buffer for how many items should be shown in the console (maybe virtual scrolling)
+
 export type OutputHistoryProps = CommonProps & {
   children: HistoryItemComponent | HistoryItemComponent[];
 };

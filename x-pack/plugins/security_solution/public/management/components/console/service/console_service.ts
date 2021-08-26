@@ -48,5 +48,5 @@ export interface ConsoleServiceInterface {
    * If defined, then the `help` builtin command will display this output instead of the default one
    * which is generated out of the Command list
    */
-  getHelp?: () => Promise<ReactNode>;
+  getHelp?: () => Promise<{ result: ReactNode }>;
 }

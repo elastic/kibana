@@ -5,18 +5,40 @@
  * 2.0.
  */
 
-import React, { memo, PropsWithChildren } from 'react';
-import { EuiCallOut } from '@elastic/eui';
+import React, { memo, ReactNode, useEffect, useState } from 'react';
+import { EuiCallOut, EuiLoadingChart } from '@elastic/eui';
 import { UserCommandInput } from './user_command_input';
+import { CommandExecutionFailure } from './command_execution_failure';
 
-export type HelpOutputProps = PropsWithChildren<{ input: string }>;
+export interface HelpOutputProps {
+  input: string;
+  children: ReactNode | Promise<{ result: ReactNode }>;
+}
 export const HelpOutput = memo<HelpOutputProps>(({ input, children }) => {
+  const [content, setContent] = useState<ReactNode>(<EuiLoadingChart size="l" mono />);
+
+  useEffect(() => {
+    if (children instanceof Promise) {
+      (async () => {
+        try {
+          setContent((await children).result);
+        } catch (error) {
+          setContent(<CommandExecutionFailure error={error} />);
+        }
+      })();
+
+      return;
+    }
+
+    setContent(children);
+  }, [children]);
+
   return (
     <div>
       <div>
         <UserCommandInput input={input} />
       </div>
-      <EuiCallOut color="primary">{children}</EuiCallOut>
+      <EuiCallOut color="primary">{content}</EuiCallOut>
     </div>
   );
 });

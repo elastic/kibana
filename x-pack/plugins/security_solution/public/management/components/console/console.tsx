@@ -17,6 +17,8 @@ import { UnknownCommand } from './components/unknow_comand';
 import { CommandExecutionOutput } from './components/command_execution_output';
 import { parseCommandInput } from './service/parsed_command_input';
 import { BadArgument } from './components/bad_argument';
+import { ConsoleBuiltinCommandsService } from './builtins/commands_handler_service';
+import { Command } from './service/console_service';
 
 // FIXME:PT implement dark mode for the console or light mode switch
 
@@ -39,6 +41,7 @@ export const Console = memo<ConsoleProps>(({ prompt }) => {
   // TODO:PT Think about how much of this is driven by props -vs- the `ConsoleProvider` context
 
   const consoleService = useConsoleService();
+  const [builtinCommandService] = useState(new ConsoleBuiltinCommandsService());
   const [historyItems, setHistoryItems] = useState<HistoryItemComponent[]>([]);
   const consoleWindowRef = useRef<HTMLDivElement | null>(null);
   const inputFocusRef: CommandInputProps['focusRef'] = useRef(null);
@@ -59,48 +62,25 @@ export const Console = memo<ConsoleProps>(({ prompt }) => {
         return;
       }
 
-      // FIXME:PT create list of default console commands and allow user to override them
-      //      should include things like:
-      //        - clear
-      //        - help
-      //        - exit
-      if (parsedInput.name === 'help') {
-        // FIXME:PT This should just be a list of `CommandDefinition` that the console supports by default
+      // Is it an internal command?
+      if (builtinCommandService.isBuiltin(parsedInput.name)) {
+        const commandOutput = builtinCommandService.executeBuiltinCommand(
+          parsedInput,
+          consoleService
+        );
 
-        let helpOutput: ReactNode;
-
-        if (consoleService.getHelp) {
-          helpOutput = consoleService.getHelp();
+        if (commandOutput.clearBuffer) {
+          setHistoryItems([]);
         } else {
-          helpOutput = (
-            <p>
-              {'The following commands are available:'}
-              <EuiSpacer />
-              {consoleService.getCommandList().map((commandDefinition) => {
-                return <div>{`${commandDefinition.name} - ${commandDefinition.about}`}</div>;
-              })}
-              <EuiSpacer />
-            </p>
-          );
+          setHistoryItems((prevState) => {
+            return [...prevState, commandOutput.result];
+          });
         }
 
-        setHistoryItems((prevState) => {
-          return [
-            ...prevState,
-            <HistoryItem>
-              <HelpOutput input={parsedInput.input}>{helpOutput}</HelpOutput>
-            </HistoryItem>,
-          ];
-        });
-
         return;
       }
 
-      if (parsedInput.name === 'clear') {
-        // FIXME:PT This should just be a list of `CommandDefinition` that the console supports by default
-        setHistoryItems([]);
-        return;
-      }
+      // Validate and execute the defined command
 
       const commandDefinition = consoleService
         .getCommandList()
@@ -120,6 +100,8 @@ export const Console = memo<ConsoleProps>(({ prompt }) => {
 
       // FIXME:PT Implement support for a `--help` built in argument for all commands
       //        This Would output the help for only that command (usage ++ description of each argument)
+
+      // FIXME: the validation checks below should be lifted and centralized so that they can be reused (in builtinCommands)
 
       // If args were entered, then validate them
       if (parsedInput.hasArgs()) {
