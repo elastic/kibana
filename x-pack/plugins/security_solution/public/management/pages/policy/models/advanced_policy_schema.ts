@@ -665,7 +665,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.memory_protection.shellcode',
       {
         defaultMessage:
-          "A value of 'false' disables Shellcode Injection Protection, a feature of Memory Protection. Default: true.",
+          'Enable shellcode injection detection as a part of memory protection. Default: true.',
       }
     ),
   },
@@ -676,7 +676,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.memory_protection.signature',
       {
         defaultMessage:
-          "A value of 'false' disables Memory Signature Scanning, a feature of Memory Protection. Default: true.",
+          'Enable scanning for malicious memory regions as a part of memory protection. Default: true.',
       }
     ),
   },
