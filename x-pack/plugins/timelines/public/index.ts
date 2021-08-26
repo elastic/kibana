@@ -52,6 +52,7 @@ export {
   addFieldToTimelineColumns,
   getTimelineIdFromColumnDroppableId,
 } from './components/drag_and_drop/helpers';
+export { getPageRowIndex } from './components/t_grid/body';
 export { StatefulFieldsBrowser } from './components/t_grid/toolbar/fields_browser';
 export { useStatusBulkActionItems } from './hooks/use_status_bulk_action_items';
 // This exports static code and TypeScript types,

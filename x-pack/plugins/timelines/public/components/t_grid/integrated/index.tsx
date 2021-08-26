@@ -281,77 +281,80 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
         {isFirstUpdate.current && <EuiLoadingContent data-test-subj="loading-alerts-panel" />}
 
         {graphOverlay}
-        {canQueryTimeline ? (
-          <>
-            <EventsContainerLoading
-              data-timeline-id={id}
-              data-test-subj={`events-container-loading-${loading}`}
-            >
-              <UpdatedFlexGroup gutterSize="m" justifyContent="flexEnd" alignItems={alignItems}>
-                <UpdatedFlexItem grow={false} $show={!loading}>
-                  <InspectButton title={justTitle} inspect={inspect} loading={loading} />
-                </UpdatedFlexItem>
-                <UpdatedFlexItem grow={false} $show={!loading}>
-                  {!resolverIsShowing(graphEventId) && additionalFilters}
-                </UpdatedFlexItem>
-                {tGridEventRenderedViewEnabled && entityType === 'alerts' && (
-                  <UpdatedFlexItem grow={false} $show={!loading}>
-                    <SummaryViewSelector viewSelected={tableView} onViewChange={setTableView} />
-                  </UpdatedFlexItem>
-                )}
-              </UpdatedFlexGroup>
 
-              {totalCountMinusDeleted === 0 && loading === false && (
-                <EuiEmptyPrompt
-                  title={
-                    <h2>
-                      <FormattedMessage
-                        id="xpack.timelines.tGrid.noResultsMatchSearchCriteriaTitle"
-                        defaultMessage="No results match your search criteria"
-                      />
-                    </h2>
-                  }
-                  titleSize="s"
-                  body={
-                    <p>
-                      <FormattedMessage
-                        id="xpack.timelines.tGrid.noResultsMatchSearchCriteriaDescription"
-                        defaultMessage="Try searching over a longer period of time or modifying your search."
-                      />
-                    </p>
-                  }
-                />
+        {canQueryTimeline && (
+          <EventsContainerLoading
+            data-timeline-id={id}
+            data-test-subj={`events-container-loading-${loading}`}
+          >
+            <UpdatedFlexGroup gutterSize="m" justifyContent="flexEnd" alignItems={alignItems}>
+              <UpdatedFlexItem grow={false} $show={!loading}>
+                <InspectButton title={justTitle} inspect={inspect} loading={loading} />
+              </UpdatedFlexItem>
+              <UpdatedFlexItem grow={false} $show={!loading}>
+                {!resolverIsShowing(graphEventId) && additionalFilters}
+              </UpdatedFlexItem>
+              {tGridEventRenderedViewEnabled && entityType === 'alerts' && (
+                <UpdatedFlexItem grow={false} $show={!loading}>
+                  <SummaryViewSelector viewSelected={tableView} onViewChange={setTableView} />
+                </UpdatedFlexItem>
               )}
-              {totalCountMinusDeleted > 0 && (
-                <StatefulBody
-                  hasAlertsCrud={hasAlertsCrud}
-                  activePage={pageInfo.activePage}
-                  browserFields={browserFields}
-                  filterQuery={filterQuery}
-                  data={nonDeletedEvents}
-                  defaultCellActions={defaultCellActions}
-                  id={id}
-                  isEventViewer={true}
-                  itemsPerPageOptions={itemsPerPageOptions}
-                  loadPage={loadPage}
-                  onRuleChange={onRuleChange}
-                  pageSize={itemsPerPage}
-                  renderCellValue={renderCellValue}
-                  rowRenderers={rowRenderers}
-                  tabType={TimelineTabs.query}
-                  tableView={tableView}
-                  totalItems={totalCountMinusDeleted}
-                  unit={unit}
-                  filterStatus={filterStatus}
-                  leadingControlColumns={leadingControlColumns}
-                  trailingControlColumns={trailingControlColumns}
-                  refetch={refetch}
-                  indexNames={indexNames}
-                />
-              )}
-            </EventsContainerLoading>
-          </>
-        ) : null}
+            </UpdatedFlexGroup>
+
+            {!graphEventId && graphOverlay == null && (
+              <>
+                {totalCountMinusDeleted === 0 && loading === false && (
+                  <EuiEmptyPrompt
+                    title={
+                      <h2>
+                        <FormattedMessage
+                          id="xpack.timelines.tGrid.noResultsMatchSearchCriteriaTitle"
+                          defaultMessage="No results match your search criteria"
+                        />
+                      </h2>
+                    }
+                    titleSize="s"
+                    body={
+                      <p>
+                        <FormattedMessage
+                          id="xpack.timelines.tGrid.noResultsMatchSearchCriteriaDescription"
+                          defaultMessage="Try searching over a longer period of time or modifying your search."
+                        />
+                      </p>
+                    }
+                  />
+                )}
+                {totalCountMinusDeleted > 0 && (
+                  <StatefulBody
+                    hasAlertsCrud={hasAlertsCrud}
+                    activePage={pageInfo.activePage}
+                    browserFields={browserFields}
+                    filterQuery={filterQuery}
+                    data={nonDeletedEvents}
+                    defaultCellActions={defaultCellActions}
+                    id={id}
+                    isEventViewer={true}
+                    itemsPerPageOptions={itemsPerPageOptions}
+                    loadPage={loadPage}
+                    onRuleChange={onRuleChange}
+                    pageSize={itemsPerPage}
+                    renderCellValue={renderCellValue}
+                    rowRenderers={rowRenderers}
+                    tabType={TimelineTabs.query}
+                    tableView={tableView}
+                    totalItems={totalCountMinusDeleted}
+                    unit={unit}
+                    filterStatus={filterStatus}
+                    leadingControlColumns={leadingControlColumns}
+                    trailingControlColumns={trailingControlColumns}
+                    refetch={refetch}
+                    indexNames={indexNames}
+                  />
+                )}
+              </>
+            )}
+          </EventsContainerLoading>
+        )}
       </StyledEuiPanel>
     </InspectButtonContainer>
   );

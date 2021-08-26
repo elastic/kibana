@@ -12,6 +12,7 @@ import type {
   TimelineNonEcsData,
 } from '../../../../../timelines/common/search_strategy';
 import { DataProvider, TGridCellAction } from '../../../../../timelines/common/types';
+import { getPageRowIndex } from '../../../../../timelines/public';
 import { getMappedNonEcsValue } from '../../../timelines/components/timeline/body/data_driven_columns';
 import { IS_OPERATOR } from '../../../timelines/components/timeline/data_providers/data_provider';
 import { allowTopN, escapeDataProviderId } from '../../components/drag_and_drop/helpers';
@@ -33,20 +34,6 @@ const useKibanaServices = () => {
 
   return { timelines, filterManager };
 };
-
-/**
- * rowIndex is bigger than `data.length` for pages with page numbers bigger than one.
- * For that reason, we must calculate `rowIndex % itemsPerPage`.
- *
- * Ex:
- * Given `rowIndex` is `13` and `itemsPerPage` is `10`.
- * It means that the `activePage` is `2` and the `pageRowIndex` is `3`
- *
- * **Warning**:
- * Be careful with array out of bounds. `pageRowIndex` can be bigger or equal to `data.length`
- *  in the scenario where the user changes the event status (Open, Acknowledged, Closed).
- */
-export const getPageRowIndex = (rowIndex: number, itemsPerPage: number) => rowIndex % itemsPerPage;
 
 /** the default actions shown in `EuiDataGrid` cells */
 export const defaultCellActions: TGridCellAction[] = [

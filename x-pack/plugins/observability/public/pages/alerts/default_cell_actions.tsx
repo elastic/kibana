@@ -13,25 +13,11 @@ import FilterForValueButton from './filter_for_value';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { TimelineNonEcsData } from '../../../../timelines/common/search_strategy';
 import { TGridCellAction } from '../../../../timelines/common/types/timeline';
-import { TimelinesUIStart } from '../../../../timelines/public';
+import { getPageRowIndex, TimelinesUIStart } from '../../../../timelines/public';
 
 export const FILTER_FOR_VALUE = i18n.translate('xpack.observability.hoverActions.filterForValue', {
   defaultMessage: 'Filter for value',
 });
-
-/**
- * rowIndex is bigger than `data.length` for pages with page numbers bigger than one.
- * For that reason, we must calculate `rowIndex % itemsPerPage`.
- *
- * Ex:
- * Given `rowIndex` is `13` and `itemsPerPage` is `10`.
- * It means that the `activePage` is `2` and the `pageRowIndex` is `3`
- *
- * **Warning**:
- * Be careful with array out of bounds. `pageRowIndex` can be bigger or equal to `data.length`
- *  in the scenario where the user changes the event status (Open, Acknowledged, Closed).
- */
-export const getPageRowIndex = (rowIndex: number, itemsPerPage: number) => rowIndex % itemsPerPage;
 
 /** a hook to eliminate the verbose boilerplate required to use common services */
 const useKibanaServices = () => {
