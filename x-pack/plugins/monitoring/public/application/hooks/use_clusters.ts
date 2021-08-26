@@ -8,8 +8,7 @@ import { useState, useEffect } from 'react';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { STANDALONE_CLUSTER_CLUSTER_UUID } from '../../../common/constants';
 
-export function useClusters(codePaths?: string[], fetchAllClusters?: boolean, ccs?: any) {
-  const clusterUuid = fetchAllClusters ? null : '';
+export function useClusters(clusterUuid?: string | null, ccs?: any, codePaths?: string[]) {
   const { services } = useKibana<{ data: any }>();
 
   const bounds = services.data?.query.timefilter.timefilter.getBounds();
@@ -43,7 +42,7 @@ export function useClusters(codePaths?: string[], fetchAllClusters?: boolean, cc
       } catch (err) {
         // TODO: handle errors
       } finally {
-        setLoaded(null);
+        setLoaded(true);
       }
     };
 
