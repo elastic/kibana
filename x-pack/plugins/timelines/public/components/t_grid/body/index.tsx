@@ -62,6 +62,7 @@ import { DEFAULT_ICON_BUTTON_WIDTH } from '../helpers';
 import type { BrowserFields } from '../../../../common/search_strategy/index_fields';
 import type { OnRowSelected, OnSelectAll } from '../types';
 import type { Refetch } from '../../../store/t_grid/inputs';
+import { getPageRowIndex } from '../../../../common/utils/pagination';
 import { StatefulFieldsBrowser } from '../../../';
 import { tGridActions, TGridModel, tGridSelectors, TimelineState } from '../../../store/t_grid';
 import { useDeepEqualSelector } from '../../../hooks/use_selector';
@@ -135,21 +136,6 @@ const EuiDataGridContainer = styled.div<{ hideLastPage: boolean }>`
     }
   }
 `;
-
-/**
- * rowIndex is bigger than `data.length` for pages with page numbers bigger than one.
- * For that reason, we must calculate `rowIndex % itemsPerPage`.
- *
- * Ex:
- * Given `rowIndex` is `13` and `itemsPerPage` is `10`.
- * It means that the `activePage` is `2` and the `pageRowIndex` is `3`
- *
- * **Warning**:
- * Be careful with array out of bounds. `pageRowIndex` can be bigger or equal to `data.length`
- *  in the scenario where the user changes the event status (Open, Acknowledged, Closed).
- */
-
-export const getPageRowIndex = (rowIndex: number, itemsPerPage: number) => rowIndex % itemsPerPage;
 
 const transformControlColumns = ({
   actionColumnsWidth,
