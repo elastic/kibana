@@ -93,9 +93,10 @@
     "yarn": "^1.21.1"
   },
   "dependencies": {
+    "@babel/runtime": "^7.12.5",
     "@elastic/apm-rum": "^5.9.1",
     "@elastic/apm-rum-react": "^1.3.1",
-    "@elastic/charts": "34.1.1",
+    "@elastic/charts": "34.2.1",
     "@elastic/datemath": "link:bazel-bin/packages/elastic-datemath",
     "@elastic/elasticsearch": "npm:@elastic/elasticsearch-canary@^8.0.0-canary.18",
     "@elastic/ems-client": "7.15.0",
@@ -347,7 +348,7 @@
     "react-moment-proptypes": "^1.7.0",
     "react-monaco-editor": "^0.41.2",
     "react-popper-tooltip": "^2.10.1",
-    "react-query": "^3.18.1",
+    "react-query": "^3.21.0",
     "react-redux": "^7.2.0",
     "react-resizable": "^1.7.5",
     "react-resize-detector": "^4.2.0",
@@ -440,7 +441,6 @@
     "@babel/preset-react": "^7.12.10",
     "@babel/preset-typescript": "^7.12.7",
     "@babel/register": "^7.12.10",
-    "@babel/runtime": "^7.12.5",
     "@babel/traverse": "^7.12.12",
     "@babel/types": "^7.12.12",
     "@bazel/ibazel": "^0.15.10",

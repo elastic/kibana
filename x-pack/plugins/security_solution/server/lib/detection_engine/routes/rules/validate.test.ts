@@ -110,7 +110,7 @@ describe('validate', () => {
     test('it should do a validation correctly of a rule id with ruleStatus passed in', () => {
       const ruleStatuses = getRuleExecutionStatuses();
       const ruleAlert = getAlertMock(getQueryRuleParams());
-      const validatedOrError = transformValidateBulkError('rule-1', ruleAlert, null, ruleStatuses);
+      const validatedOrError = transformValidateBulkError('rule-1', ruleAlert, ruleStatuses);
       const expected: RulesSchema = {
         ...ruleOutput(),
         status: RuleExecutionStatus.succeeded,
