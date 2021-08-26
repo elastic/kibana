@@ -358,53 +358,15 @@ describe('successful migrations', () => {
   });
 
   describe('8.0.0', () => {
-    test('resolveSavedObjectIdsInActionTaskParams in default namespace', () => {
+    test('no op migration for rules SO', () => {
       const migration800 = getActionTaskParamsMigrations(encryptedSavedObjectsSetup, [])['8.0.0'];
-      const action = getMockData({
-        relatedSavedObjects: [
-          {
-            id: '1234',
-            type: 'action',
-            typeId: 'test',
-            namespace: 'some-namespace',
-          },
-        ],
-      });
-      const migratedAction = migration800(action, context);
-      expect(migratedAction).toEqual({
-        ...action,
+      const actionTaskParam = getMockData();
+      expect(migration800(actionTaskParam, context)).toEqual({
+        ...actionTaskParam,
         attributes: {
-          ...action.attributes,
-          relatedSavedObjects: [
-            {
-              id: '1234',
-              namespace: 'some-namespace',
-              type: 'action',
-              typeId: 'test',
-            },
-          ],
+          ...actionTaskParam.attributes,
         },
       });
-    });
-
-    test('resolveSavedObjectIdsInActionTaskParams in non default namespace', () => {
-      const migration800 = getActionTaskParamsMigrations(encryptedSavedObjectsSetup, [])['8.0.0'];
-      const action = getMockData(
-        {
-          relatedSavedObjects: [
-            {
-              id: '1234',
-              type: 'action',
-              typeId: 'test',
-              namespace: 'some-namespace',
-            },
-          ],
-        },
-        undefined,
-        ['custom']
-      );
-      const migratedAction = migration800(action, context);
-      expect(migratedAction.attributes.actionId).not.toEqual(action.attributes.actionId);
     });
   });
 });

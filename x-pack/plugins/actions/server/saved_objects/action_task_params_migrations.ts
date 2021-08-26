@@ -12,7 +12,6 @@ import {
   SavedObjectMigrationFn,
   SavedObjectMigrationContext,
   SavedObjectReference,
-  SavedObjectsUtils,
 } from '../../../../../src/core/server';
 import { ActionTaskParams, PreConfiguredAction } from '../types';
 import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
@@ -49,18 +48,17 @@ export function getActionTaskParamsMigrations(
     pipeMigrations(getUseSavedObjectReferencesFn(preconfiguredActions))
   );
 
-  const migrationResolveSavedObjectsIdsInActionTaskParams = createEsoMigration(
+  const migrationActionsTaskParams800 = createEsoMigration(
     encryptedSavedObjects,
-    (doc): doc is SavedObjectUnsanitizedDoc<ActionTaskParams> => doc.type === 'action_task_params',
-    pipeMigrations(resolveSavedObjectIdsInActionTaskParams)
+    (
+      doc: SavedObjectUnsanitizedDoc<ActionTaskParams>
+    ): doc is SavedObjectUnsanitizedDoc<ActionTaskParams> => true,
+    (doc) => doc // no-op
   );
 
   return {
     '7.16.0': executeMigrationWithErrorHandling(migrationActionTaskParamsSixteen, '7.16.0'),
-    '8.0.0': executeMigrationWithErrorHandling(
-      migrationResolveSavedObjectsIdsInActionTaskParams,
-      '8.0.0'
-    ),
+    '8.0.0': executeMigrationWithErrorHandling(migrationActionsTaskParams800, '8.0.0'),
   };
 }
 
@@ -141,23 +139,6 @@ function useSavedObjectReferences(
       ...(relatedSavedObjects ? { relatedSavedObjects: relatedSavedObjectRefs } : {}),
     },
     references: [...(references ?? []), ...(newReferences ?? [])],
-  };
-}
-
-function resolveSavedObjectIdsInActionTaskParams(
-  doc: SavedObjectUnsanitizedDoc<ActionTaskParams>
-): SavedObjectUnsanitizedDoc<ActionTaskParams> {
-  const namespace = doc.namespaces && doc.namespaces.length ? doc.namespaces[0] : undefined;
-  const newId =
-    namespace && namespace !== 'default'
-      ? SavedObjectsUtils.getConvertedObjectId(namespace, 'action', doc.attributes.actionId)
-      : doc.attributes.actionId;
-  return {
-    ...doc,
-    attributes: {
-      ...doc.attributes,
-      actionId: newId,
-    },
   };
 }
 
