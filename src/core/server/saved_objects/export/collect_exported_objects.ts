@@ -11,6 +11,7 @@ import type { KibanaRequest } from '../../http';
 import type { Logger } from '../../logging';
 import { SavedObjectsClientContract, SavedObjectsExportablePredicate } from '../types';
 import { ISavedObjectTypeRegistry } from '../saved_objects_type_registry';
+import { getObjKey, ObjectKey } from '../service/lib';
 import type { SavedObjectsExportTransform } from './types';
 import { applyExportTransforms } from './apply_export_transforms';
 
@@ -132,19 +133,6 @@ export const collectExportedObjects = async ({
     excludedObjects: collectedNonExportableObjects,
     missingRefs: collectedMissingRefs,
   };
-};
-
-type ObjectKey = string;
-
-const getObjKey = (
-  obj: { type: string; id: string; namespaces?: string[] },
-  typeRegistry: ISavedObjectTypeRegistry
-): ObjectKey => {
-  const namespaceType = typeRegistry.getType(obj.type)!.namespaceType;
-  if (namespaceType === 'single') {
-    return `${obj.namespaces ? obj.namespaces[0] : 'default'}:${obj.type}:${obj.id}`;
-  }
-  return `${obj.type}:${obj.id}`;
 };
 
 interface CollectedReference {

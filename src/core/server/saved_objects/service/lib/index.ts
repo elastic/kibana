@@ -41,3 +41,6 @@ export type {
   SavedObjectsUpdateObjectsSpacesResponse,
   SavedObjectsUpdateObjectsSpacesResponseObject,
 } from './update_objects_spaces';
+
+export { getObjKey } from './get_obj_key';
+export type { ObjectKey } from './get_obj_key';

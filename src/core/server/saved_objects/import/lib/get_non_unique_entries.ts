@@ -6,11 +6,18 @@
  * Side Public License, v 1.
  */
 
-type Entries = Array<{ type: string; id: string }>;
+import { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
+import { getObjKey } from '../../service/lib';
 
-export const getNonUniqueEntries = (objects: Entries) => {
-  const idCountMap = objects.reduce((acc, { type, id }) => {
-    const key = `${type}:${id}`;
+type Entries = Array<{ type: string; id: string; namespaces?: string[] }>;
+
+export const getNonUniqueEntries = (
+  objects: Entries,
+  typeRegistry: ISavedObjectTypeRegistry,
+  namespace?: string
+) => {
+  const idCountMap = objects.reduce((acc, obj) => {
+    const key = getObjKey(obj, typeRegistry);
     const val = acc.get(key) ?? 0;
     return acc.set(key, val + 1);
   }, new Map<string, number>());

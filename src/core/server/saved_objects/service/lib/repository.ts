@@ -560,10 +560,12 @@ export class SavedObjectsRepository {
     }
 
     const namespace = normalizeNamespace(options.namespace);
+    const getNamespaceId = (namespaces?: string[]) =>
+      namespaces !== undefined ? SavedObjectsUtils.namespaceStringToId(namespaces[0]) : namespace;
 
     let bulkGetRequestIndexCounter = 0;
     const expectedBulkGetResults: Either[] = objects.map((object) => {
-      const { type, id } = object;
+      const { type, id, namespaces = [namespace] } = object;
 
       if (!this._allowedTypes.includes(type)) {
         return {
@@ -581,16 +583,19 @@ export class SavedObjectsRepository {
         value: {
           type,
           id,
+          namespaces,
           esRequestIndex: bulkGetRequestIndexCounter++,
         },
       };
     });
 
-    const bulkGetDocs = expectedBulkGetResults.filter(isRight).map(({ value: { type, id } }) => ({
-      _id: this._serializer.generateRawId(namespace, type, id),
-      _index: this.getIndexForType(type),
-      _source: { includes: ['type', 'namespaces'] },
-    }));
+    const bulkGetDocs = expectedBulkGetResults
+      .filter(isRight)
+      .map(({ value: { type, id, namespaces } }) => ({
+        _id: this._serializer.generateRawId(getNamespaceId(namespaces), type, id),
+        _index: this.getIndexForType(type),
+        _source: { includes: ['type', 'namespaces'] },
+      }));
     const bulkGetResponse = bulkGetDocs.length
       ? await this.client.mget<SavedObjectsRawDocSource>(
           {
@@ -618,12 +623,13 @@ export class SavedObjectsRepository {
         return;
       }
 
-      const { type, id, esRequestIndex } = expectedResult.value;
+      const { type, id, namespaces, esRequestIndex } = expectedResult.value;
       const doc = bulkGetResponse?.body.docs[esRequestIndex];
       if (doc?.found) {
         errors.push({
           id,
           type,
+          namespaces,
           error: {
             ...errorContent(SavedObjectsErrorHelpers.createConflictError(type, id)),
             // @ts-expect-error MultiGetHit._source is optional

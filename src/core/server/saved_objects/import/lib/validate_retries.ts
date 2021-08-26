@@ -6,12 +6,17 @@
  * Side Public License, v 1.
  */
 
+import type { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import { SavedObjectsImportRetry } from '../types';
 import { getNonUniqueEntries } from './get_non_unique_entries';
 import { SavedObjectsImportError } from '../errors';
 
-export const validateRetries = (retries: SavedObjectsImportRetry[]) => {
-  const nonUniqueRetryObjects = getNonUniqueEntries(retries);
+export const validateRetries = (
+  retries: SavedObjectsImportRetry[],
+  typeRegistry: ISavedObjectTypeRegistry,
+  namespace?: string
+) => {
+  const nonUniqueRetryObjects = getNonUniqueEntries(retries, typeRegistry, namespace);
   if (nonUniqueRetryObjects.length > 0) {
     throw SavedObjectsImportError.nonUniqueRetryObjects(nonUniqueRetryObjects);
   }
@@ -19,7 +24,11 @@ export const validateRetries = (retries: SavedObjectsImportRetry[]) => {
   const destinationEntries = retries
     .filter((retry) => retry.destinationId !== undefined)
     .map(({ type, destinationId }) => ({ type, id: destinationId! }));
-  const nonUniqueRetryDestinations = getNonUniqueEntries(destinationEntries);
+  const nonUniqueRetryDestinations = getNonUniqueEntries(
+    destinationEntries,
+    typeRegistry,
+    namespace
+  );
   if (nonUniqueRetryDestinations.length > 0) {
     throw SavedObjectsImportError.nonUniqueRetryDestinations(nonUniqueRetryDestinations);
   }

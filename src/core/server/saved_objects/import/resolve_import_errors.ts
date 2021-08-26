@@ -9,6 +9,7 @@
 import { Readable } from 'stream';
 import { SavedObject, SavedObjectsClientContract, SavedObjectsImportRetry } from '../types';
 import { ISavedObjectTypeRegistry } from '../saved_objects_type_registry';
+import { getObjKey } from '../service/lib';
 import {
   SavedObjectsImportFailure,
   SavedObjectsImportHook,
@@ -67,13 +68,12 @@ export async function resolveSavedObjectsImportErrors({
   createNewCopies,
 }: ResolveSavedObjectsImportErrorsOptions): Promise<SavedObjectsImportResponse> {
   // throw a BadRequest error if we see invalid retries
-  validateRetries(retries);
+  validateRetries(retries, typeRegistry, namespace);
 
   let successCount = 0;
   let errorAccumulator: SavedObjectsImportFailure[] = [];
   let importIdMap: Map<string, { id?: string; omitOriginId?: boolean }> = new Map();
-  const supportedTypes = typeRegistry.getImportableAndExportableTypes().map((type) => type.name);
-  const filter = createObjectsFilter(retries);
+  const filter = createObjectsFilter(retries, typeRegistry, namespace);
 
   // Get the objects to resolve errors
   const { errors: collectorErrors, collectedObjects: objectsToResolve } = await collectSavedObjects(
@@ -81,68 +81,82 @@ export async function resolveSavedObjectsImportErrors({
       readStream,
       objectLimit,
       filter,
-      supportedTypes,
+      typeRegistry,
+      namespace,
     }
   );
   errorAccumulator = [...errorAccumulator, ...collectorErrors];
 
   // Create a map of references to replace for each object to avoid iterating through
   // retries for every object to resolve
-  const retriesReferencesMap = new Map<string, { [key: string]: string }>();
+  const retriesReferencesMap = new Map<string, Record<string, string>>();
   for (const retry of retries) {
-    const map: { [key: string]: string } = {};
+    const map: Record<string, string> = {};
     for (const { type, from, to } of retry.replaceReferences) {
-      map[`${type}:${from}`] = to;
+      map[
+        getObjKey({ type, id: from, namespaces: retry.namespaces }, typeRegistry, namespace)
+      ] = to;
     }
-    retriesReferencesMap.set(`${retry.type}:${retry.id}`, map);
+    retriesReferencesMap.set(getObjKey(retry, typeRegistry, namespace), map);
   }
 
   // Replace references
   for (const savedObject of objectsToResolve) {
-    const refMap = retriesReferencesMap.get(`${savedObject.type}:${savedObject.id}`);
+    const refMap = retriesReferencesMap.get(getObjKey(savedObject, typeRegistry, namespace));
     if (!refMap) {
       continue;
     }
     for (const reference of savedObject.references || []) {
-      if (refMap[`${reference.type}:${reference.id}`]) {
-        reference.id = refMap[`${reference.type}:${reference.id}`];
+      const refKey = getObjKey(
+        { ...reference, namespaces: savedObject.namespaces },
+        typeRegistry,
+        namespace
+      );
+      if (refMap[refKey]) {
+        reference.id = refMap[refKey];
       }
     }
   }
 
   // Validate references
-  const validateReferencesResult = await validateReferences(
-    objectsToResolve,
+  const validateReferencesResult = await validateReferences({
+    savedObjects: objectsToResolve,
     savedObjectsClient,
+    typeRegistry,
     namespace,
-    retries
-  );
+    retries,
+  });
   errorAccumulator = [...errorAccumulator, ...validateReferencesResult];
 
   if (createNewCopies) {
     // In case any missing reference errors were resolved, ensure that we regenerate those object IDs as well
     // This is because a retry to resolve a missing reference error may not necessarily specify a destinationId
-    importIdMap = regenerateIds(objectsToResolve);
+    importIdMap = regenerateIds({
+      objects: objectsToResolve,
+      typeRegistry,
+      namespace,
+    });
   }
 
   // Check single-namespace objects for conflicts in this namespace, and check multi-namespace objects for conflicts across all namespaces
-  const checkConflictsParams = {
+  const checkConflictsResult = await checkConflicts({
     objects: objectsToResolve,
     savedObjectsClient,
+    typeRegistry,
     namespace,
     retries,
     createNewCopies,
-  };
-  const checkConflictsResult = await checkConflicts(checkConflictsParams);
+  });
   errorAccumulator = [...errorAccumulator, ...checkConflictsResult.errors];
 
   // Check multi-namespace object types for regular conflicts and ambiguous conflicts
-  const getImportIdMapForRetriesParams = {
+  const importIdMapForRetries = getImportIdMapForRetries({
     objects: checkConflictsResult.filteredObjects,
     retries,
     createNewCopies,
-  };
-  const importIdMapForRetries = getImportIdMapForRetries(getImportIdMapForRetriesParams);
+    typeRegistry,
+    namespace,
+  });
   importIdMap = new Map([
     ...importIdMap,
     ...importIdMapForRetries,
@@ -157,24 +171,22 @@ export async function resolveSavedObjectsImportErrors({
     objects: Array<SavedObject<{ title?: string }>>,
     overwrite?: boolean
   ) => {
-    const createSavedObjectsParams = {
+    const { createdObjects, errors: bulkCreateErrors } = await createSavedObjects({
       objects,
       accumulatedErrors,
       savedObjectsClient,
+      typeRegistry,
       importIdMap,
       namespace,
       overwrite,
-    };
-    const { createdObjects, errors: bulkCreateErrors } = await createSavedObjects(
-      createSavedObjectsParams
-    );
+    });
     successObjects = [...successObjects, ...createdObjects];
     errorAccumulator = [...errorAccumulator, ...bulkCreateErrors];
     successCount += createdObjects.length;
     successResults = [
       ...successResults,
       ...createdObjects.map((createdObject) => {
-        const { type, id, destinationId, originId } = createdObject;
+        const { type, id, namespaces, destinationId, originId } = createdObject;
         const getTitle = typeRegistry.getType(type)?.management?.getTitle;
         const meta = {
           title: getTitle ? getTitle(createdObject) : createdObject.attributes.title,
@@ -183,6 +195,7 @@ export async function resolveSavedObjectsImportErrors({
         return {
           type,
           id,
+          namespaces,
           meta,
           ...(overwrite && { overwrite }),
           ...(destinationId && { destinationId }),
@@ -191,7 +204,12 @@ export async function resolveSavedObjectsImportErrors({
       }),
     ];
   };
-  const { objectsToOverwrite, objectsToNotOverwrite } = splitOverwrites(objectsToResolve, retries);
+  const { objectsToOverwrite, objectsToNotOverwrite } = splitOverwrites(
+    objectsToResolve,
+    retries,
+    typeRegistry,
+    namespace
+  );
   await bulkCreateObjects(objectsToOverwrite, true);
   await bulkCreateObjects(objectsToNotOverwrite);
 

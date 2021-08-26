@@ -16,6 +16,8 @@ import { SavedObject } from '../types';
 export interface SavedObjectsImportRetry {
   type: string;
   id: string;
+  namespaces?: string[];
+
   overwrite: boolean;
   /**
    * The object ID that will be created or overwritten. If not specified, the `id` field will be used.
@@ -89,6 +91,7 @@ export interface SavedObjectsImportMissingReferencesError {
 export interface SavedObjectsImportFailure {
   id: string;
   type: string;
+  namespaces?: string[];
   /**
    * @deprecated Use `meta.title` instead
    */

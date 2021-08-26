@@ -202,6 +202,7 @@ export interface SavedObjectsFindResponse<T = unknown, A = unknown> {
 export interface SavedObjectsCheckConflictsObject {
   id: string;
   type: string;
+  namespaces?: string[];
 }
 
 /**
@@ -212,6 +213,7 @@ export interface SavedObjectsCheckConflictsResponse {
   errors: Array<{
     id: string;
     type: string;
+    namespaces?: string[];
     error: SavedObjectError;
   }>;
 }

@@ -7,22 +7,26 @@
  */
 
 import { SavedObject } from '../../types';
+import { getObjKey } from '../../service/lib';
+import type { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import { SavedObjectsImportFailure, CreatedObject } from '../types';
 
 export function extractErrors(
   // TODO: define saved object type
   savedObjectResults: Array<CreatedObject<unknown>>,
-  savedObjectsToImport: Array<SavedObject<any>>
+  savedObjectsToImport: Array<SavedObject<any>>,
+  typeRegistry: ISavedObjectTypeRegistry,
+  namespace?: string
 ) {
   const errors: SavedObjectsImportFailure[] = [];
   const originalSavedObjectsMap = new Map<string, SavedObject<{ title: string }>>();
   for (const savedObject of savedObjectsToImport) {
-    originalSavedObjectsMap.set(`${savedObject.type}:${savedObject.id}`, savedObject);
+    originalSavedObjectsMap.set(getObjKey(savedObject, typeRegistry, namespace), savedObject);
   }
   for (const savedObject of savedObjectResults) {
     if (savedObject.error) {
       const originalSavedObject = originalSavedObjectsMap.get(
-        `${savedObject.type}:${savedObject.id}`
+        getObjKey(savedObject, typeRegistry, namespace)
       );
       const title = originalSavedObject?.attributes?.title;
       const { destinationId } = savedObject;
@@ -30,6 +34,7 @@ export function extractErrors(
         errors.push({
           id: savedObject.id,
           type: savedObject.type,
+          namespaces: savedObject.namespaces,
           title,
           meta: { title },
           error: {
@@ -42,6 +47,7 @@ export function extractErrors(
       errors.push({
         id: savedObject.id,
         type: savedObject.type,
+        namespaces: savedObject.namespaces,
         title,
         meta: { title },
         error: {

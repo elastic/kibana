@@ -86,7 +86,6 @@ export const registerImportRoute = (
       }
 
       const supportedTypes = typeRegistry.getImportableAndExportableTypes().map((t) => t.name);
-
       const includedHiddenTypes = supportedTypes.filter((supportedType) =>
         typeRegistry.isHidden(supportedType)
       );
