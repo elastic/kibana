@@ -10,7 +10,7 @@ import moment from 'moment-timezone';
 import { FormattedDate, FormattedTime, FormattedMessage } from '@kbn/i18n/react';
 
 import { i18n } from '@kbn/i18n';
-import { EuiCallOut, EuiButton, EuiLoadingContent, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiCallOut, EuiButton, EuiLoadingContent } from '@elastic/eui';
 import { useAppContext } from '../../../../app_context';
 import { Storage } from '../../../../../shared_imports';
 
@@ -84,13 +84,7 @@ export const DeprecationsCountCheckpoint: FunctionComponent = () => {
   };
 
   if (isInitialRequest && isLoading) {
-    return (
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiLoadingContent lines={6} />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
+    return <EuiLoadingContent lines={6} />;
   }
 
   if (error) {
