@@ -32,9 +32,16 @@ export function InspectorContextProvider({
   const { inspectorAdapters } = value;
 
   function addInspectorRequest(
-    result: FetcherResult<{ _inspect?: InspectResponse }>
+    result: FetcherResult<{
+      mainStatisticsData?: { _inspect?: InspectResponse };
+      _inspect?: InspectResponse;
+    }>
   ) {
-    result.data?._inspect?.forEach((operation) => {
+    (
+      result.data?._inspect ??
+      result.data?.mainStatisticsData?._inspect ??
+      []
+    ).forEach((operation) => {
       if (operation.response) {
         const { id, name } = operation;
         const requestParams = { id, name };
@@ -57,8 +64,10 @@ export function InspectorContextProvider({
   }
 
   useEffect(() => {
-    history.listen(() => {
-      inspectorAdapters.requests.reset();
+    history.listen((newLocation) => {
+      if (history.location.pathname !== newLocation.pathname) {
+        inspectorAdapters.requests.reset();
+      }
     });
   }, [history, inspectorAdapters]);
 

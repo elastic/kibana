@@ -155,7 +155,7 @@ export function getInspectResponse({
   operationName: string;
   startTime: number;
 }): InspectResponse[0] {
-  const id = ` ${operationName} (${kibanaRequest.route.path})`;
+  const id = `${operationName} (${kibanaRequest.route.path})`;
 
   return {
     id,
