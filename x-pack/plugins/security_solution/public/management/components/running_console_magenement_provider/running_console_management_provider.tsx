@@ -6,7 +6,15 @@
  */
 
 import React, { memo, ReactNode, useCallback, useContext, useMemo, useState } from 'react';
-import { EuiIcon, EuiModal, EuiModalBody, EuiModalHeader, EuiModalHeaderTitle } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiIcon,
+  EuiModal,
+  EuiModalBody,
+  EuiModalFooter,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
+} from '@elastic/eui';
 
 interface RunningConsole {
   id: string;
@@ -56,13 +64,19 @@ export const RunningConsoleManagementProvider = memo(({ children }) => {
     });
   }, []);
 
-  const closeConsole = useCallback<ConsoleManagement['closeConsole']>(() => {}, []);
+  const closeConsole = useCallback<ConsoleManagement['closeConsole']>((id) => {
+    setConsoles((prevState) => {
+      const newState = { ...prevState };
+      delete newState[id];
+      return newState;
+    });
+  }, []);
 
   const consoleCount = useMemo(() => {
     return Object.keys(consoles).length;
   }, [consoles]);
 
-  const consoleList: ConsoleManagement['getConsoleList'] = useMemo(() => {
+  const consoleList: ConsoleManagement['consoleList'] = useMemo(() => {
     return Object.entries(consoles).map(([id, { title }]) => {
       return {
         title,
@@ -97,6 +111,12 @@ export const RunningConsoleManagementProvider = memo(({ children }) => {
               </EuiModalHeaderTitle>
             </EuiModalHeader>
             <EuiModalBody>{console}</EuiModalBody>
+            <EuiModalFooter>
+              <EuiButton onClick={() => closeConsole(id)}>{'Terminate session'}</EuiButton>
+              <EuiButton onClick={() => hideConsole(id)} fill>
+                {'Hide'}
+              </EuiButton>
+            </EuiModalFooter>
           </EuiModal>
         );
       }
