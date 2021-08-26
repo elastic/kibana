@@ -13,7 +13,7 @@ import { AggSelect } from './agg_select';
 import { MetricSelect } from './metric_select';
 import { createChangeHandler } from '../lib/create_change_handler';
 import { createSelectHandler } from '../lib/create_select_handler';
-import { METRIC_TYPES } from '../../../../common/enums';
+import { TSVB_METRIC_TYPES } from '../../../../common/enums';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   htmlIdGenerator,
@@ -73,7 +73,7 @@ export function CumulativeSumAgg(props) {
               metric={model}
               fields={fields[getIndexPatternKey(indexPattern)]}
               value={model.field}
-              exclude={[METRIC_TYPES.TOP_HIT]}
+              exclude={[TSVB_METRIC_TYPES.TOP_HIT]}
             />
           </EuiFormRow>
         </EuiFlexItem>

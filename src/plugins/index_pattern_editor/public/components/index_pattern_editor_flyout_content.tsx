@@ -69,7 +69,6 @@ const IndexPatternEditorFlyoutContentComponent = ({
   defaultTypeIsRollup,
   requireTimestampField = false,
 }: Props) => {
-  const isMounted = useRef<boolean>(false);
   const {
     services: { http, indexPatternService, uiSettings, searchClient },
   } = useKibana<IndexPatternEditorContext>();
@@ -120,6 +119,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
 
   const [timestampFieldOptions, setTimestampFieldOptions] = useState<TimestampOption[]>([]);
   const [isLoadingTimestampFields, setIsLoadingTimestampFields] = useState<boolean>(false);
+  const currentLoadingTimestampFieldsRef = useRef(0);
   const [isLoadingMatchedIndices, setIsLoadingMatchedIndices] = useState<boolean>(false);
   const currentLoadingMatchedIndicesRef = useRef(0);
   const [allSources, setAllSources] = useState<MatchedItem[]>([]);
@@ -155,19 +155,14 @@ const IndexPatternEditorFlyoutContentComponent = ({
 
   // loading list of index patterns
   useEffect(() => {
-    isMounted.current = true;
     loadSources();
     const getTitles = async () => {
       const indexPatternTitles = await indexPatternService.getTitles();
-      if (isMounted.current) {
-        setExistingIndexPatterns(indexPatternTitles);
-        setIsLoadingIndexPatterns(false);
-      }
+
+      setExistingIndexPatterns(indexPatternTitles);
+      setIsLoadingIndexPatterns(false);
     };
     getTitles();
-    return () => {
-      isMounted.current = false;
-    };
   }, [http, indexPatternService, loadSources]);
 
   // loading rollup info
@@ -175,10 +170,8 @@ const IndexPatternEditorFlyoutContentComponent = ({
     const getRollups = async () => {
       try {
         const response = await http.get('/api/rollup/indices');
-        if (isMounted.current) {
-          if (response) {
-            setRollupIndicesCapabilities(response);
-          }
+        if (response) {
+          setRollupIndicesCapabilities(response);
         }
       } catch (e) {
         // Silently swallow failure responses such as expired trials
@@ -192,9 +185,12 @@ const IndexPatternEditorFlyoutContentComponent = ({
 
   const loadTimestampFieldOptions = useCallback(
     async (query: string) => {
+      const currentLoadingTimestampFieldsIdx = ++currentLoadingTimestampFieldsRef.current;
       let timestampOptions: TimestampOption[] = [];
       const isValidResult =
-        !existingIndexPatterns.includes(query) && matchedIndices.exactMatchedIndices.length > 0;
+        !existingIndexPatterns.includes(query) &&
+        matchedIndices.exactMatchedIndices.length > 0 &&
+        !isLoadingMatchedIndices;
       if (isValidResult) {
         setIsLoadingTimestampFields(true);
         const getFieldsOptions: GetFieldsOptions = {
@@ -210,7 +206,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
         );
         timestampOptions = extractTimeFields(fields, requireTimestampField);
       }
-      if (isMounted.current) {
+      if (currentLoadingTimestampFieldsIdx === currentLoadingTimestampFieldsRef.current) {
         setIsLoadingTimestampFields(false);
         setTimestampFieldOptions(timestampOptions);
       }
@@ -223,13 +219,14 @@ const IndexPatternEditorFlyoutContentComponent = ({
       rollupIndex,
       type,
       matchedIndices.exactMatchedIndices,
+      isLoadingMatchedIndices,
     ]
   );
 
   useEffect(() => {
     loadTimestampFieldOptions(title);
     getFields().timestampField?.setValue('');
-  }, [matchedIndices, loadTimestampFieldOptions, title, getFields]);
+  }, [loadTimestampFieldOptions, title, getFields]);
 
   const reloadMatchedIndices = useCallback(
     async (newTitle: string) => {
@@ -258,10 +255,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
               exactMatched: [],
             };
 
-        if (
-          currentLoadingMatchedIndicesIdx === currentLoadingMatchedIndicesRef.current &&
-          isMounted.current
-        ) {
+        if (currentLoadingMatchedIndicesIdx === currentLoadingMatchedIndicesRef.current) {
           // we are still interested in this result
           if (type === INDEX_PATTERN_TYPE.ROLLUP) {
             const rollupIndices = exactMatched.filter((index) => isRollupIndex(index.name));
@@ -282,10 +276,6 @@ const IndexPatternEditorFlyoutContentComponent = ({
     },
     [http, allowHidden, allSources, type, rollupIndicesCapabilities, searchClient, isLoadingSources]
   );
-
-  useEffect(() => {
-    reloadMatchedIndices(title);
-  }, [allowHidden, reloadMatchedIndices, title]);
 
   const onTypeChange = useCallback(
     (newType) => {

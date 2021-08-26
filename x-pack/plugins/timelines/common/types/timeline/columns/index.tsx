@@ -63,6 +63,7 @@ export type ColumnHeaderOptions = Pick<
   | 'id'
   | 'initialWidth'
   | 'isSortable'
+  | 'schema'
 > & {
   aggregatable?: boolean;
   tGridCellActions?: TGridCellAction[];

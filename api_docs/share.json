@@ -433,13 +433,7 @@
         "description": [],
         "signature": [
           "<P extends ",
-          {
-            "pluginId": "kibanaUtils",
-            "scope": "common",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.Serializable",
-            "text": "Serializable"
-          },
+          "SerializableRecord",
           ">(locator: ",
           {
             "pluginId": "share",
@@ -1037,7 +1031,7 @@
           },
           " extends Pick<",
           "EuiContextMenuPanelItemDescriptorEntry",
-          ", \"onClick\" | \"key\" | \"size\" | \"className\" | \"aria-label\" | \"data-test-subj\" | \"disabled\" | \"target\" | \"href\" | \"icon\" | \"rel\" | \"buttonRef\" | \"toolTipContent\" | \"toolTipTitle\" | \"toolTipPosition\" | \"layoutAlign\" | \"panel\">"
+          ", \"onClick\" | \"key\" | \"size\" | \"className\" | \"aria-label\" | \"disabled\" | \"data-test-subj\" | \"target\" | \"href\" | \"icon\" | \"rel\" | \"buttonRef\" | \"toolTipContent\" | \"toolTipTitle\" | \"toolTipPosition\" | \"layoutAlign\" | \"panel\">"
         ],
         "path": "src/plugins/share/public/types.ts",
         "deprecated": false,
@@ -1742,7 +1736,9 @@
         "UrlGeneratorsSetup",
         "; url: ",
         "UrlService",
-        "; }"
+        "; navigate(options: ",
+        "RedirectOptions",
+        "): void; }"
       ],
       "path": "src/plugins/share/public/plugin.ts",
       "deprecated": false,
@@ -1769,7 +1765,9 @@
         "UrlGeneratorsStart",
         "; url: ",
         "UrlService",
-        "; }"
+        "; navigate(options: ",
+        "RedirectOptions",
+        "): void; }"
       ],
       "path": "src/plugins/share/public/plugin.ts",
       "deprecated": false,
@@ -1880,13 +1878,7 @@
         "description": [],
         "signature": [
           "<P extends ",
-          {
-            "pluginId": "kibanaUtils",
-            "scope": "common",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.Serializable",
-            "text": "Serializable"
-          },
+          "SerializableRecord",
           ">(locator: ",
           {
             "pluginId": "share",
