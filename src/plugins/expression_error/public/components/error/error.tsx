@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import React, { FC, MouseEventHandler } from 'react';
+import React, { FC } from 'react';
 import { ClassNames } from '@emotion/react';
-import { EuiCallOut } from '@elastic/eui';
+import { EuiButtonIcon, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ShowDebugging } from './show_debugging';
 
@@ -39,13 +39,9 @@ const strings = {
 export const Error: FC<Props> = ({ payload, onClose }) => {
   const message = payload.error?.message;
 
-  const onCalloutClose: MouseEventHandler<HTMLDivElement> = (e) => {
-    e.stopPropagation();
-    const isHeaderCloseButton = (e.target as Element).classList.contains('euiCallOutHeader__icon');
-    if (isHeaderCloseButton) {
-      onClose?.();
-    }
-  };
+  const CloseIconButton = () => (
+    <EuiButtonIcon color="danger" iconType="cross" onClick={onClose} aria-hidden />
+  );
 
   return (
     <ClassNames>
@@ -53,9 +49,8 @@ export const Error: FC<Props> = ({ payload, onClose }) => {
         <EuiCallOut
           style={{ maxWidth: 500 }}
           color="danger"
-          iconType="cross"
+          iconType={CloseIconButton}
           title={strings.getTitle()}
-          onClick={onCalloutClose}
           className={css(euiCallOutHeaderClassDef)}
         >
           <p>{message ? strings.getDescription() : ''}</p>
