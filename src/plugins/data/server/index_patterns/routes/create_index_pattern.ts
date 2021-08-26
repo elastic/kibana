@@ -12,6 +12,7 @@ import { handleErrors } from './util/handle_errors';
 import {
   fieldSpecSchema,
   runtimeFieldSpecSchema,
+  runtimeCompositeSpecSchema,
   serializedFieldFormatSchema,
 } from './util/schemas';
 import { IRouter, StartServicesAccessor } from '../../../../../core/server';
@@ -44,6 +45,7 @@ const indexPatternSpecSchema = schema.object({
   ),
   allowNoIndex: schema.maybe(schema.boolean()),
   runtimeFieldMap: schema.maybe(schema.recordOf(schema.string(), runtimeFieldSpecSchema)),
+  runtimeCompositeMap: schema.maybe(schema.recordOf(schema.string(), runtimeCompositeSpecSchema)),
 });
 
 export const registerCreateIndexPatternRoute = (
