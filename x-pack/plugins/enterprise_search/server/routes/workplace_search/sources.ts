@@ -254,6 +254,25 @@ export function registerAccountSourceSettingsRoute({
   );
 }
 
+export function registerAccountSourceSyncRoute({
+  router,
+  enterpriseSearchRequestHandler,
+}: RouteDependencies) {
+  router.post(
+    {
+      path: '/api/workplace_search/account/sources/{id}/sync',
+      validate: {
+        params: schema.object({
+          id: schema.string(),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/ws/sources/:id/sync',
+    })
+  );
+}
+
 export function registerAccountPreSourceRoute({
   router,
   enterpriseSearchRequestHandler,
@@ -598,6 +617,25 @@ export function registerOrgSourceSettingsRoute({
   );
 }
 
+export function registerOrgSourceSyncRoute({
+  router,
+  enterpriseSearchRequestHandler,
+}: RouteDependencies) {
+  router.post(
+    {
+      path: '/api/workplace_search/org/sources/{id}/sync',
+      validate: {
+        params: schema.object({
+          id: schema.string(),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/ws/org/sources/:id/sync',
+    })
+  );
+}
+
 export function registerOrgPreSourceRoute({
   router,
   enterpriseSearchRequestHandler,
@@ -914,6 +952,7 @@ export const registerSourcesRoutes = (dependencies: RouteDependencies) => {
   registerAccountSourceFederatedSummaryRoute(dependencies);
   registerAccountSourceReauthPrepareRoute(dependencies);
   registerAccountSourceSettingsRoute(dependencies);
+  registerAccountSourceSyncRoute(dependencies);
   registerAccountPreSourceRoute(dependencies);
   registerAccountPrepareSourcesRoute(dependencies);
   registerAccountSourceSearchableRoute(dependencies);
@@ -929,6 +968,7 @@ export const registerSourcesRoutes = (dependencies: RouteDependencies) => {
   registerOrgSourceFederatedSummaryRoute(dependencies);
   registerOrgSourceReauthPrepareRoute(dependencies);
   registerOrgSourceSettingsRoute(dependencies);
+  registerOrgSourceSyncRoute(dependencies);
   registerOrgPreSourceRoute(dependencies);
   registerOrgPrepareSourcesRoute(dependencies);
   registerOrgSourceSearchableRoute(dependencies);

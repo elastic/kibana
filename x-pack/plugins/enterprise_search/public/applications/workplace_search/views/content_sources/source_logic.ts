@@ -38,6 +38,7 @@ export interface SourceActions {
     sourceId: string;
     source: ContentSourceFullData;
   };
+  syncContentSource(sourceId: string): { sourceId: string };
   resetSourceState(): void;
   removeContentSource(sourceId: string): { sourceId: string };
   initializeSource(sourceId: string): { sourceId: string };
@@ -83,6 +84,9 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
     initializeFederatedSummary: (sourceId: string) => ({ sourceId }),
     searchContentSourceDocuments: (sourceId: string) => ({ sourceId }),
     updateContentSource: (sourceId: string, source: SourceUpdatePayload) => ({ sourceId, source }),
+    syncContentSource: (sourceId: string) => ({
+      sourceId,
+    }),
     removeContentSource: (sourceId: string) => ({
       sourceId,
     }),
@@ -225,6 +229,27 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
         if (source.name) {
           actions.onUpdateSourceName(response.name);
         }
+      } catch (e) {
+        flashAPIErrors(e);
+      }
+    },
+    syncContentSource: async ({ sourceId }) => {
+      const { isOrganization } = AppLogic.values;
+      const route = isOrganization
+        ? `/api/workplace_search/org/sources/${sourceId}/sync`
+        : `/api/workplace_search/account/sources/${sourceId}/sync`;
+
+      try {
+        await HttpLogic.values.http.post(route);
+
+        flashSuccessToast(
+          i18n.translate(
+            'xpack.enterpriseSearch.workplaceSearch.sources.flashMessages.contentSourceSyncStarted',
+            {
+              defaultMessage: 'Synchronizing...',
+            }
+          )
+        );
       } catch (e) {
         flashAPIErrors(e);
       }

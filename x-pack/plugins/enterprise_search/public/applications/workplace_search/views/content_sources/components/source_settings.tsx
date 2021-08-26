@@ -32,10 +32,11 @@ import { NAV } from '../../../constants';
 
 import {
   CANCEL_BUTTON,
-  OK_BUTTON,
   CONFIRM_MODAL_TITLE,
-  SAVE_CHANGES_BUTTON,
+  OK_BUTTON,
   REMOVE_BUTTON,
+  SAVE_CHANGES_BUTTON,
+  SYNC_BUTTON,
 } from '../../../constants';
 import { SourceDataItem } from '../../../types';
 import { AddSourceLogic } from '../components/add_source/add_source_logic';
@@ -67,7 +68,7 @@ import { SourceLayout } from './source_layout';
 export const SourceSettings: React.FC = () => {
   const { http } = useValues(HttpLogic);
 
-  const { updateContentSource, removeContentSource } = useActions(SourceLogic);
+  const { updateContentSource, removeContentSource, syncContentSource } = useActions(SourceLogic);
   const { getSourceConfigData } = useActions(AddSourceLogic);
 
   const {
@@ -151,6 +152,10 @@ export const SourceSettings: React.FC = () => {
     removeContentSource(id);
   };
 
+  const syncClicked = () => {
+    syncContentSource(id);
+  };
+
   const confirmModal = (
     <EuiConfirmModal
       title={CONFIRM_MODAL_TITLE}
@@ -230,8 +235,16 @@ export const SourceSettings: React.FC = () => {
                 data-test-subj="SynchronizeToggle"
               />
             </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                color="primary"
+                onClick={syncClicked}
+                data-test-subj="SyncButton"
+              >
+                {SYNC_BUTTON}
+              </EuiButton>
+            </EuiFlexItem>
           </EuiFlexGroup>
-          <EuiSpacer />
           <EuiFlexGroup>
             <EuiFlexItem grow={false}>
               <EuiSwitch
