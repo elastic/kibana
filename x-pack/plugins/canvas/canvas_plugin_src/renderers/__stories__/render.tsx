@@ -13,7 +13,7 @@ export const defaultHandlers: RendererHandlers = {
   destroy: () => action('destroy'),
   getElementId: () => 'element-id',
   getFilter: () => 'filter',
-  getRenderMode: () => 'display',
+  getRenderMode: () => 'view',
   isSyncColorsEnabled: () => false,
   onComplete: (fn) => undefined,
   onEmbeddableDestroyed: action('onEmbeddableDestroyed'),

@@ -11,7 +11,7 @@ import React, { useRef, useEffect } from 'react';
 import { ExpressionRenderDefinition, IInterpreterRenderHandlers } from 'src/plugins/expressions';
 
 export const defaultHandlers: IInterpreterRenderHandlers = {
-  getRenderMode: () => 'display',
+  getRenderMode: () => 'view',
   isSyncColorsEnabled: () => false,
   done: action('done'),
   onDestroy: action('onDestroy'),

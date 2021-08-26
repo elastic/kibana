@@ -77,7 +77,7 @@ describe('PieVisualization component', () => {
         onClickValue: jest.fn(),
         chartsThemeService,
         paletteService: chartPluginMock.createPaletteRegistry(),
-        renderMode: 'display' as const,
+        renderMode: 'view' as const,
         syncColors: false,
       };
     }

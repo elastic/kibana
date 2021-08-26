@@ -480,7 +480,7 @@ describe('xy_expression', () => {
       defaultProps = {
         formatFactory: getFormatSpy,
         timeZone: 'UTC',
-        renderMode: 'display',
+        renderMode: 'view',
         chartsThemeService,
         chartsActiveCursorService,
         paletteService,

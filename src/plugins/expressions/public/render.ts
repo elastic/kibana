@@ -90,7 +90,7 @@ export class ExpressionRenderHandler {
         this.eventsSubject.next(data);
       },
       getRenderMode: () => {
-        return renderMode || 'display';
+        return renderMode || 'view';
       },
       isSyncColorsEnabled: () => {
         return syncColors || false;
