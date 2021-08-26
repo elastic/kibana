@@ -14,6 +14,7 @@ import {
 } from '../lib/es_deprecation_logging_apis';
 import { versionCheckHandlerWrapper } from '../lib/es_version_precheck';
 import { RouteDependencies } from '../types';
+import { DEPRECATION_LOGS_INDEX } from '../../common/constants';
 
 export function registerDeprecationLoggingRoutes({ router }: RouteDependencies) {
   router.get(
@@ -60,6 +61,51 @@ export function registerDeprecationLoggingRoutes({ router }: RouteDependencies) 
         return response.ok({
           body: await setDeprecationLogging(client, isEnabled),
         });
+      }
+    )
+  );
+
+  router.get(
+    {
+      path: `${API_BASE_PATH}/deprecation_logging/count`,
+      validate: {
+        query: schema.object({
+          from: schema.string(),
+        }),
+      },
+    },
+    versionCheckHandlerWrapper(
+      async (
+        {
+          core: {
+            elasticsearch: { client },
+          },
+        },
+        request,
+        response
+      ) => {
+        const { body: indexExists } = await client.asCurrentUser.indices.exists({
+          index: DEPRECATION_LOGS_INDEX,
+        });
+
+        if (!indexExists) {
+          return response.ok({ body: { count: 0 } });
+        }
+
+        const { body } = await client.asCurrentUser.count({
+          index: DEPRECATION_LOGS_INDEX,
+          body: {
+            query: {
+              range: {
+                '@timestamp': {
+                  gte: request.query.from,
+                },
+              },
+            },
+          },
+        });
+
+        return response.ok({ body: { count: body.count } });
       }
     )
   );
