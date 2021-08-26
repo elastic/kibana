@@ -14,6 +14,7 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 import realHits from '../../../../../__fixtures__/real_hits.js';
 // @ts-expect-error
 import stubbedLogstashFields from '../../../../../__fixtures__/logstash_fields';
+import { act } from 'react-dom/test-utils';
 import { mountWithIntl } from '@kbn/test/jest';
 import React from 'react';
 import { coreMock } from '../../../../../../../../core/public/mocks';
@@ -52,12 +53,21 @@ const mockServices = ({
   },
 } as unknown) as DiscoverServices;
 
+const mockfieldCounts: Record<string, number> = {};
+const mockCalcFieldCounts = jest.fn(() => {
+  return mockfieldCounts;
+});
+
 jest.mock('../../../../../kibana_services', () => ({
   getServices: () => mockServices,
 }));
 
 jest.mock('./lib/get_index_pattern_field_list', () => ({
   getIndexPatternFieldList: jest.fn((indexPattern) => indexPattern.fields),
+}));
+
+jest.mock('../../utils/calc_field_counts', () => ({
+  calcFieldCounts: () => mockCalcFieldCounts(),
 }));
 
 function getCompProps(): DiscoverSidebarResponsiveProps {
@@ -80,11 +90,9 @@ function getCompProps(): DiscoverSidebarResponsiveProps {
     { id: '2', attributes: { title: 'c' } } as SavedObject<IndexPatternAttributes>,
   ];
 
-  const fieldCounts: Record<string, number> = {};
-
   for (const hit of hits) {
     for (const key of Object.keys(indexPattern.flattenHit(hit))) {
-      fieldCounts[key] = (fieldCounts[key] || 0) + 1;
+      mockfieldCounts[key] = (mockfieldCounts[key] || 0) + 1;
     }
   }
   return {
@@ -122,6 +130,7 @@ describe('discover responsive sidebar', function () {
     expect(popular.children().length).toBe(1);
     expect(unpopular.children().length).toBe(7);
     expect(selected.children().length).toBe(1);
+    expect(mockCalcFieldCounts.mock.calls.length).toBe(1);
   });
   it('should allow selecting fields', function () {
     findTestSubject(comp, 'fieldToggle-bytes').simulate('click');
@@ -135,5 +144,16 @@ describe('discover responsive sidebar', function () {
     findTestSubject(comp, 'field-extension-showDetails').simulate('click');
     findTestSubject(comp, 'plus-extension-gif').simulate('click');
     expect(props.onAddFilter).toHaveBeenCalled();
+  });
+  it('should allow filtering by string, and calcFieldCount should just be executed once', function () {
+    expect(findTestSubject(comp, 'fieldList-unpopular').children().length).toBe(7);
+    act(() => {
+      findTestSubject(comp, 'fieldFilterSearchInput').simulate('change', {
+        target: { value: 'abc' },
+      });
+    });
+    comp.update();
+    expect(findTestSubject(comp, 'fieldList-unpopular').children().length).toBe(4);
+    expect(mockCalcFieldCounts.mock.calls.length).toBe(1);
   });
 });
