@@ -10,44 +10,70 @@ import { generateMockDetailItemData } from '../mock';
 import { endpointAlertCheck } from './endpoint_alert_check';
 
 describe('Endpoint Alert Check Utility', () => {
-  let mockDetailItemData: ReturnType<typeof generateMockDetailItemData>;
+  describe('when data type is an array', () => {
+    let mockDetailItemData: ReturnType<typeof generateMockDetailItemData>;
 
-  beforeEach(() => {
-    mockDetailItemData = generateMockDetailItemData();
+    beforeEach(() => {
+      mockDetailItemData = generateMockDetailItemData();
 
-    // Remove the filebeat agent type from the mock
-    _.remove(mockDetailItemData, { field: 'agent.type' });
+      // Remove the filebeat agent type from the mock
+      _.remove(mockDetailItemData, { field: 'agent.type' });
 
-    mockDetailItemData.push(
-      // Must be an Alert
-      {
-        field: 'signal.rule.id',
-        category: 'signal',
-        originalValue: 'endpoint',
-        values: ['endpoint'],
-        isObjectArray: false,
-      },
-      // Must be from an endpoint agent
-      {
-        field: 'agent.type',
-        originalValue: 'endpoint',
-        values: ['endpoint'],
-        isObjectArray: false,
-      }
-    );
+      mockDetailItemData.push(
+        // Must be an Alert
+        {
+          field: 'signal.rule.id',
+          category: 'signal',
+          originalValue: 'endpoint',
+          values: ['endpoint'],
+          isObjectArray: false,
+        },
+        // Must be from an endpoint agent
+        {
+          field: 'agent.type',
+          originalValue: 'endpoint',
+          values: ['endpoint'],
+          isObjectArray: false,
+        }
+      );
+    });
+
+    it('should return true if detections data comes from an endpoint rule', () => {
+      expect(endpointAlertCheck({ data: mockDetailItemData })).toBe(true);
+    });
+
+    it('should return false if it is not an Alert (ex. maybe an event)', () => {
+      _.remove(mockDetailItemData, { field: 'signal.rule.id' });
+      expect(endpointAlertCheck({ data: mockDetailItemData })).toBeFalsy();
+    });
+
+    it('should return false if it is not an endpoint agent', () => {
+      _.remove(mockDetailItemData, { field: 'agent.type' });
+      expect(endpointAlertCheck({ data: mockDetailItemData })).toBeFalsy();
+    });
   });
 
-  it('should return true if detections data comes from an endpoint rule', () => {
-    expect(endpointAlertCheck({ data: mockDetailItemData })).toBe(true);
-  });
+  describe('when data type is an object', () => {
+    it('should return true if detections data comes from an endpoint rule', () => {
+      const mockEcsData = {
+        'signal.rule.id': ['rule-id'],
+        'agent.type': ['endpoint'],
+      };
+      expect(endpointAlertCheck({ data: mockEcsData })).toBe(true);
+    });
 
-  it('should return false if it is not an Alert (ex. maybe an event)', () => {
-    _.remove(mockDetailItemData, { field: 'signal.rule.id' });
-    expect(endpointAlertCheck({ data: mockDetailItemData })).toBeFalsy();
-  });
+    it('should return false if it is not an Alert (ex. maybe an event)', () => {
+      const mockEcsData = {
+        'agent.type': ['endpoint'],
+      };
+      expect(endpointAlertCheck({ data: mockEcsData })).toBeFalsy();
+    });
 
-  it('should return false if it is not an endpoint agent', () => {
-    _.remove(mockDetailItemData, { field: 'agent.type' });
-    expect(endpointAlertCheck({ data: mockDetailItemData })).toBeFalsy();
+    it('should return false if it is not an endpoint agent', () => {
+      const mockEcsData = {
+        'agent.type': ['endpoint'],
+      };
+      expect(endpointAlertCheck({ data: mockEcsData })).toBeFalsy();
+    });
   });
 });
