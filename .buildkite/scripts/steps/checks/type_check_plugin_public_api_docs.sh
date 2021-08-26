@@ -2,8 +2,7 @@
 
 set -euo pipefail
 
-export DISABLE_BOOTSTRAP_VALIDATION=true
-export BUILD_TS_REFS_DISABLE=true
+source .buildkite/scripts/common/util.sh
 
 .buildkite/scripts/bootstrap.sh
 
