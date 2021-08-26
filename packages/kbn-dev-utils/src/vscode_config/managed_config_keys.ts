@@ -28,9 +28,11 @@ export const MANAGED_CONFIG_KEYS: ManagedConfigKey[] = [
       [Path.resolve(REPO_ROOT, '.yarn-local-mirror')]: true,
       [Path.resolve(REPO_ROOT, '.chromium')]: true,
       [Path.resolve(REPO_ROOT, 'data')]: true,
+      [Path.resolve(REPO_ROOT, 'kbn-pm/dist/index.js')]: true,
       ['**/bazel-*']: true,
       ['**/node_modules']: true,
       ['**/target']: true,
+      ['**/*.log']: true,
     },
   },
 ];
