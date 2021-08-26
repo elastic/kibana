@@ -176,7 +176,7 @@ export function TransactionDistributionChart({
   );
 
   useEffect(() => {
-    if (typeof onHasData === 'function') {
+    if (onHasData) {
       onHasData(chartLoadingState.hasData);
     }
   }, [chartLoadingState, onHasData]);

@@ -127,7 +127,7 @@ export const useTransactionLatencyCorrelationsFetcher = () => {
               setFetchState((prevState) => ({
                 ...prevState,
                 error: (res as unknown) as Error,
-                setIsRunning: false,
+                isRunning: false,
               }));
             }
           },
@@ -135,12 +135,12 @@ export const useTransactionLatencyCorrelationsFetcher = () => {
             setFetchState((prevState) => ({
               ...prevState,
               error,
-              setIsRunning: false,
+              isRunning: false,
             }));
           },
         });
     },
-    [data.search]
+    [data.search, setFetchState]
   );
 
   const cancelFetch = useCallback(() => {
@@ -149,9 +149,9 @@ export const useTransactionLatencyCorrelationsFetcher = () => {
     abortCtrl.current.abort();
     setFetchState((prevState) => ({
       ...prevState,
-      setIsRunning: false,
+      isRunning: false,
     }));
-  }, []);
+  }, [setFetchState]);
 
   return {
     ...fetchState,

@@ -108,7 +108,6 @@ export function TransactionDistribution({
   const {
     error,
     percentileThresholdValue,
-    isRunning,
     startFetch,
     cancelFetch,
     transactionDistribution,
@@ -136,20 +135,9 @@ export function TransactionDistribution({
     end,
   ]);
 
-  // start fetching on load and on changing environment
   useEffect(() => {
-    if (isRunning) {
-      cancelFetch();
-    }
-
     startFetchHandler();
-
-    return () => {
-      // cancel any running async partial request when unmounting the component
-      cancelFetch();
-    };
-    // `isRunning` must not be part of the deps check
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    return cancelFetch;
   }, [cancelFetch, startFetchHandler]);
 
   useEffect(() => {

@@ -125,7 +125,7 @@ export function useTransactionDistributionFetcher() {
               setFetchState((prevState) => ({
                 ...prevState,
                 error: (res as unknown) as Error,
-                setIsRunning: false,
+                isRunning: false,
               }));
             }
           },
@@ -133,12 +133,12 @@ export function useTransactionDistributionFetcher() {
             setFetchState((prevState) => ({
               ...prevState,
               error,
-              setIsRunning: false,
+              isRunning: false,
             }));
           },
         });
     },
-    [data.search]
+    [data.search, setFetchState]
   );
 
   const cancelFetch = useCallback(() => {
@@ -147,9 +147,9 @@ export function useTransactionDistributionFetcher() {
     abortCtrl.current.abort();
     setFetchState((prevState) => ({
       ...prevState,
-      setIsRunning: false,
+      isRunning: false,
     }));
-  }, []);
+  }, [setFetchState]);
 
   return {
     ...fetchState,
