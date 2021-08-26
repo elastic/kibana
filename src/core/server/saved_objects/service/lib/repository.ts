@@ -1004,7 +1004,7 @@ export class SavedObjectsRepository {
     const bulkGetDocs = expectedBulkGetResults
       .filter(isRight)
       .map(({ value: { type, id, fields, namespaces } }) => ({
-        _id: this._serializer.generateRawId(getNamespaceId(namespaces), type, id),
+        _id: this._serializer.generateRawId(getNamespaceId(namespaces), type, id), // the namespace prefix is only used for single-namespace object types
         _index: this.getIndexForType(type),
         _source: { includes: includedFields(type, fields) },
       }));

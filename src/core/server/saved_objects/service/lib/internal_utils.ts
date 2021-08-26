@@ -172,7 +172,8 @@ export function rawDocExistsInNamespaces(
 
   if (namespacesToCheck.size === 0 || existingNamespaces.length === 0) {
     return false;
-  } else if (namespacesToCheck.has(ALL_NAMESPACES_STRING)) {
+  }
+  if (namespacesToCheck.has(ALL_NAMESPACES_STRING)) {
     return true;
   }
 

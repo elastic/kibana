@@ -82,28 +82,28 @@ export default function ({ getService }: FtrProviderContext) {
       createTestDefinitions(normalTypes, false, { singleRequest: true }),
       createTestDefinitions(hiddenType, true),
     ].flat();
+    const crossNamespaceAuthorizedAtSpace = crossNamespace.reduce<{
+      authorized: BulkGetTestCase[];
+      unauthorized: BulkGetTestCase[];
+    }>(
+      ({ authorized, unauthorized }, cur) => {
+        // A user who is only authorized in a single space will be authorized to execute some of the cross-namespace test cases, but not all
+        if (cur.namespaces.some((x) => ![ALL_SPACES_ID, spaceId].includes(x))) {
+          return { authorized, unauthorized: [...unauthorized, cur] };
+        }
+        return { authorized: [...authorized, cur], unauthorized };
+      },
+      { authorized: [], unauthorized: [] }
+    );
 
     return {
       unauthorized: createTestDefinitions(allTypes, true),
       authorizedAtSpace: [
         authorizedCommon,
-        ...(() => {
-          const [authorized, unauthorized] = crossNamespace.reduce<
-            [BulkGetTestCase[], BulkGetTestCase[]]
-          >(
-            ([left, right], cur) => {
-              if (cur.namespaces.some((x) => ![ALL_SPACES_ID, spaceId].includes(x))) {
-                return [left, [...right, cur]];
-              }
-              return [[...left, cur], right];
-            },
-            [[], []]
-          );
-          return [
-            ...createTestDefinitions(authorized, false, { singleRequest: true }),
-            ...createTestDefinitions(unauthorized, true),
-          ];
-        })(),
+        createTestDefinitions(crossNamespaceAuthorizedAtSpace.authorized, false, {
+          singleRequest: true,
+        }),
+        createTestDefinitions(crossNamespaceAuthorizedAtSpace.unauthorized, true),
         createTestDefinitions(allTypes, true, { singleRequest: true }),
       ].flat(),
       authorizedEverywhere: [

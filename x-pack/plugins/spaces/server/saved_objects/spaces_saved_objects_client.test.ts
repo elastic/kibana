@@ -165,12 +165,9 @@ const ERROR_NAMESPACE_SPECIFIED = 'Spaces currently determines the namespaces';
             { type: 'foo', id: '1', key: 'val' },
             { type: 'bar', id: '2', key: 'val' },
             { type: 'baz', id: '3', key: 'val' }, // this should be replaced with a 400 error
-            { type: 'foo', id: '4', error: { statusCode: 403 } },
-            { type: 'bar', id: '5', error: { statusCode: 403 } },
-            { type: 'baz', id: '6', error: { statusCode: 403 } }, // this should be not be replaced with a 400 error because it has a 403 error which is higher priority
-            { type: 'foo', id: '7', key: 'val' },
-            { type: 'bar', id: '8', key: 'val' },
-            { type: 'baz', id: '9', key: 'val' }, // this should not be replaced with a 400 error because the user did not search for it in '*' all spaces
+            { type: 'foo', id: '4', key: 'val' },
+            { type: 'bar', id: '5', key: 'val' },
+            { type: 'baz', id: '6', key: 'val' }, // this should not be replaced with a 400 error because the user did not search for it in '*' all spaces
           ] as unknown) as SavedObject[],
         });
 
@@ -178,12 +175,9 @@ const ERROR_NAMESPACE_SPECIFIED = 'Spaces currently determines the namespaces';
           { type: 'foo', id: '1', namespaces: ['*', 'this-is-ignored'] },
           { type: 'bar', id: '2', namespaces: ['*', 'this-is-ignored'] },
           { type: 'baz', id: '3', namespaces: ['*', 'this-is-ignored'] },
-          { type: 'foo', id: '4', namespaces: ['*'] },
-          { type: 'bar', id: '5', namespaces: ['*'] },
-          { type: 'baz', id: '6', namespaces: ['*'] },
-          { type: 'foo', id: '7', namespaces: ['another-space'] },
-          { type: 'bar', id: '8', namespaces: ['another-space'] },
-          { type: 'baz', id: '9', namespaces: ['another-space'] },
+          { type: 'foo', id: '4', namespaces: ['another-space'] },
+          { type: 'bar', id: '5', namespaces: ['another-space'] },
+          { type: 'baz', id: '6', namespaces: ['another-space'] },
         ];
         const result = await client.bulkGet(objects);
 
@@ -197,25 +191,19 @@ const ERROR_NAMESPACE_SPECIFIED = 'Spaces currently determines the namespaces';
               '"namespaces" can only specify a single space when used with space-isolated types'
             ).output.payload,
           },
-          { type: 'foo', id: '4', error: { statusCode: 403 } },
-          { type: 'bar', id: '5', error: { statusCode: 403 } },
-          { type: 'baz', id: '6', error: { statusCode: 403 } },
-          { type: 'foo', id: '7', key: 'val' },
-          { type: 'bar', id: '8', key: 'val' },
-          { type: 'baz', id: '9', key: 'val' },
+          { type: 'foo', id: '4', key: 'val' },
+          { type: 'bar', id: '5', key: 'val' },
+          { type: 'baz', id: '6', key: 'val' },
         ]);
         expect(baseClient.bulkGet).toHaveBeenCalledWith(
           [
             { type: 'foo', id: '1', namespaces: ['available-space-a', 'available-space-b'] },
             { type: 'bar', id: '2', namespaces: ['available-space-a', 'available-space-b'] },
             { type: 'baz', id: '3', namespaces: ['available-space-a', 'available-space-b'] },
-            { type: 'foo', id: '4', namespaces: ['available-space-a', 'available-space-b'] },
-            { type: 'bar', id: '5', namespaces: ['available-space-a', 'available-space-b'] },
-            { type: 'baz', id: '6', namespaces: ['available-space-a', 'available-space-b'] },
             // even if another space doesn't exist, it can be specified explicitly
-            { type: 'foo', id: '7', namespaces: ['another-space'] },
-            { type: 'bar', id: '8', namespaces: ['another-space'] },
-            { type: 'baz', id: '9', namespaces: ['another-space'] },
+            { type: 'foo', id: '4', namespaces: ['another-space'] },
+            { type: 'bar', id: '5', namespaces: ['another-space'] },
+            { type: 'baz', id: '6', namespaces: ['another-space'] },
           ],
           { namespace: currentSpace.expectedNamespace }
         );

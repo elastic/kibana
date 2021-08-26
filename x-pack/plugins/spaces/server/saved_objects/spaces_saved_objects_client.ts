@@ -262,9 +262,8 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
               ? 'Left'
               : 'Right';
           return { tag, value: { ...object, namespaces: await getAvailableSpaces() } };
-        } else {
-          return { tag: 'Right', value: object };
         }
+        return { tag: 'Right', value: object };
       })
     );
 
@@ -278,7 +277,7 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
     return {
       saved_objects: expectedResults.map((expectedResult, i) => {
         const actualResult = responseObjects[i];
-        if (isLeft(expectedResult) && actualResult?.error?.statusCode !== 403) {
+        if (isLeft(expectedResult)) {
           const { type, id } = expectedResult.value;
           return ({
             type,

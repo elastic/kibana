@@ -305,6 +305,7 @@ describe('#rawDocExistsInNamespaces', () => {
       expect(rawDocExistsInNamespaces(registry, docInNoSpace, ['default'])).toBe(false);
       expect(rawDocExistsInNamespaces(registry, docInDefaultSpace, ['some-space'])).toBe(false);
       expect(rawDocExistsInNamespaces(registry, docInNoSpace, ['some-space'])).toBe(false);
+      expect(rawDocExistsInNamespaces(registry, docInNoSpace, ['*'])).toBe(false);
       expect(rawDocExistsInNamespaces(registry, docInDefaultSpace, [])).toBe(false);
       expect(rawDocExistsInNamespaces(registry, docInSomeSpace, [])).toBe(false);
       expect(rawDocExistsInNamespaces(registry, docInAllSpaces, [])).toBe(false);
