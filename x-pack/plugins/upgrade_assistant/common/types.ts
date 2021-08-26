@@ -220,7 +220,7 @@ export interface EnrichedDeprecationInfo
 
 export interface CloudBackupStatus {
   isBackedUp: boolean;
-  time?: string;
+  lastBackupTime?: string;
 }
 
 export interface ESUpgradeStatus {

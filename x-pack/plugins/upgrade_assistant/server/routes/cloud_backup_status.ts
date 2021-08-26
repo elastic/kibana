@@ -33,17 +33,17 @@ export function registerCloudBackupStatusRoutes({
         });
 
         let isBackedUp = false;
-        let time;
+        let lastBackupTime;
 
         if (snapshots && snapshots[0]) {
-          time = snapshots![0].start_time;
           isBackedUp = true;
+          lastBackupTime = snapshots![0].start_time;
         }
 
         return response.ok({
           body: {
             isBackedUp,
-            time,
+            lastBackupTime,
           },
         });
       } catch (error) {

@@ -32,7 +32,7 @@ export interface CloudBackupStatus {
   error?: any;
   data?: {
     isBackedUp: boolean;
-    time: string;
+    lastBackupTime: string;
   };
 }
 
@@ -66,7 +66,7 @@ export const CloudBackup: React.FunctionComponent<Props> = ({
     );
   }
 
-  const time = moment(data!.time).toISOString();
+  const lastBackupTime = moment(data!.lastBackupTime).toISOString();
 
   const statusMessage = data!.isBackedUp ? (
     <EuiFlexGroup alignItems="center" gutterSize="s">
@@ -79,12 +79,17 @@ export const CloudBackup: React.FunctionComponent<Props> = ({
           <p>
             <FormattedMessage
               id="xpack.upgradeAssistant.overview.cloudBackup.hasSnapshotMessage"
-              defaultMessage="Last snapshot created on {time}."
+              defaultMessage="Last snapshot created on {lastBackupTime}."
               values={{
-                time: (
+                lastBackupTime: (
                   <>
-                    <FormattedDate value={time} year="numeric" month="long" day="2-digit" />{' '}
-                    <FormattedTime value={time} timeZoneName="short" hour12={false} />
+                    <FormattedDate
+                      value={lastBackupTime}
+                      year="numeric"
+                      month="long"
+                      day="2-digit"
+                    />{' '}
+                    <FormattedTime value={lastBackupTime} timeZoneName="short" hour12={false} />
                   </>
                 ),
               }}
@@ -117,7 +122,6 @@ export const CloudBackup: React.FunctionComponent<Props> = ({
 
       <EuiSpacer size="s" />
 
-      {/* TODO: move this link to the Cloud plugin where it's easier to track */}
       <EuiButton
         href={cloudSnapshotsUrl}
         data-test-subj="cloudSnapshotsLink"
