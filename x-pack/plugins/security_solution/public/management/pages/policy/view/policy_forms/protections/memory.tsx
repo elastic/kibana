@@ -28,7 +28,7 @@ export const MemoryProtection = React.memo(() => {
   const protectionLabel = i18n.translate(
     'xpack.securitySolution.endpoint.policy.protections.memory',
     {
-      defaultMessage: 'Memory protections',
+      defaultMessage: 'Memory Manipulation Protection',
     }
   );
   return (
