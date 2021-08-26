@@ -108,7 +108,7 @@ Fleet::
 Lens & Visualizations::
 * Fixes small multiple title in dark mode {kibana-pull}109966[#109966]
 Machine Learning::
-* Fixes the Job audit messages service {kibana-pull}108526[#108526]
+* Fixes the job audit messages service {kibana-pull}108526[#108526]
 Management::
 * Fixes bug with highlighting in String field formatter {kibana-pull}109401[#109401]
 * Fixed _meta field failing server validation {kibana-pull}109295[#109295]
