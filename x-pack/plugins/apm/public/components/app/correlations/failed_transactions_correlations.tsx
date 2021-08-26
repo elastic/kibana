@@ -70,7 +70,7 @@ export function FailedTransactionsCorrelations({
 
   const inspectEnabled = uiSettings.get<boolean>(enableInspectEsQueries);
 
-  const searchServicePrams: SearchServiceParams = {
+  const searchServiceParams: SearchServiceParams = {
     environment,
     kuery,
     serviceName,
@@ -93,7 +93,7 @@ export function FailedTransactionsCorrelations({
   } = result;
 
   const startFetchHandler = useCallback(() => {
-    startFetch(searchServicePrams);
+    startFetch(searchServiceParams);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [environment, serviceName, transactionType, kuery, start, end]);
 
