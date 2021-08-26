@@ -16,6 +16,7 @@ import {
   SnapshotRequest,
   SnapshotNodePath,
   SnapshotNodeMetric,
+  SnapshotNode,
 } from '../../../../common/http_api';
 import { META_KEY } from './constants';
 import { InfraSource } from '../../../lib/sources';
@@ -47,42 +48,49 @@ export const transformMetricsApiResponseToSnapshotResponse = (
   source: InfraSource,
   metricsApiResponse: MetricsAPIResponse
 ): SnapshotNodeResponse => {
-  const nodes = metricsApiResponse.series.map((series) => {
-    const node = {
-      metrics: options.metrics
-        .filter((m) => m.id !== META_KEY)
-        .map((metric) => {
-          const name = metric.id as SnapshotMetricType;
-          const timeseries = {
-            id: name,
-            columns: [
-              { name: 'timestamp', type: 'date' as MetricsExplorerColumnType },
-              { name: 'metric_0', type: 'number' as MetricsExplorerColumnType },
-            ],
-            rows: series.rows.map((row) => {
-              return { timestamp: row.timestamp, metric_0: get(row, metric.id, null) };
-            }),
-          };
-          const maxValue = calculateMax(timeseries.rows);
-          const avg = calculateAvg(timeseries.rows);
-          const value = getLastValue(timeseries.rows);
-          const nodeMetric: SnapshotNodeMetric = { name, max: maxValue, value, avg };
-          if (snapshotRequest.includeTimeseries) {
-            nodeMetric.timeseries = timeseries;
-          }
-          return nodeMetric;
-        }),
-      path:
-        series.keys?.map((key) => {
-          return { value: key, label: key } as SnapshotNodePath;
-        }) ?? [],
-      name: '',
-    };
+  const nodes = metricsApiResponse.series
+    .map((series) => {
+      const node = {
+        metrics: options.metrics
+          .filter((m) => m.id !== META_KEY)
+          .map((metric) => {
+            const name = metric.id as SnapshotMetricType;
+            const timeseries = {
+              id: name,
+              columns: [
+                { name: 'timestamp', type: 'date' as MetricsExplorerColumnType },
+                { name: 'metric_0', type: 'number' as MetricsExplorerColumnType },
+              ],
+              rows: series.rows.map((row) => {
+                return { timestamp: row.timestamp, metric_0: get(row, metric.id, null) };
+              }),
+            };
+            const maxValue = calculateMax(timeseries.rows);
+            const avg = calculateAvg(timeseries.rows);
+            const value = getLastValue(timeseries.rows);
+            const nodeMetric: SnapshotNodeMetric = { name, max: maxValue, value, avg };
+            if (snapshotRequest.includeTimeseries) {
+              nodeMetric.timeseries = timeseries;
+            }
+            return nodeMetric;
+          }),
+        path:
+          series.keys?.map((key) => {
+            return { value: key, label: key } as SnapshotNodePath;
+          }) ?? [],
+        name: '',
+      };
 
-    const path = applyMetadataToLastPath(series, node, snapshotRequest, source);
-    const lastPath = last(path);
-    const name = (lastPath && lastPath.label) || 'N/A';
-    return { ...node, path, name };
-  });
+      const isNoData = node.metrics.every((m) => m.value === null);
+      const isAPMNode = series.metricsets?.includes('app');
+      if (isNoData && isAPMNode) return null;
+
+      const path = applyMetadataToLastPath(series, node, snapshotRequest, source);
+      const lastPath = last(path);
+      const name = (lastPath && lastPath.label) || 'N/A';
+
+      return { ...node, path, name };
+    })
+    .filter((n) => n !== null) as SnapshotNode[];
   return { nodes, interval: `${metricsApiResponse.info.interval}s` };
 };
