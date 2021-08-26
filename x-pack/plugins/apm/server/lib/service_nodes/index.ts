@@ -10,8 +10,10 @@ import {
   METRIC_JAVA_NON_HEAP_MEMORY_USED,
   METRIC_JAVA_THREAD_COUNT,
   METRIC_PROCESS_CPU_PERCENT,
+  HOST_NAME,
 } from '../../../common/elasticsearch_fieldnames';
 import { SERVICE_NODE_NAME_MISSING } from '../../../common/service_nodes';
+import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import { getServiceNodesProjection } from '../../projections/service_nodes';
 import { mergeProjection } from '../../projections/util/merge_projection';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
@@ -46,6 +48,14 @@ const getServiceNodes = async ({
             missing: SERVICE_NODE_NAME_MISSING,
           },
           aggs: {
+            latest: {
+              top_metrics: {
+                metrics: asMutableArray([{ field: HOST_NAME }] as const),
+                sort: {
+                  '@timestamp': 'desc',
+                },
+              },
+            },
             cpu: {
               avg: {
                 field: METRIC_PROCESS_CPU_PERCENT,
@@ -83,6 +93,10 @@ const getServiceNodes = async ({
       name: bucket.key as string,
       cpu: bucket.cpu.value,
       heapMemory: bucket.heapMemory.value,
+      hostName: bucket.latest.top?.[0]?.metrics?.['host.hostname'] as
+        | string
+        | null
+        | undefined,
       nonHeapMemory: bucket.nonHeapMemory.value,
       threadCount: bucket.threadCount.value,
     }))

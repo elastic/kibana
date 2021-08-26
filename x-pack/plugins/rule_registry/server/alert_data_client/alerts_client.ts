@@ -13,14 +13,13 @@ import type {
   getEsQueryConfig as getEsQueryConfigTyped,
   getSafeSortIds as getSafeSortIdsTyped,
   isValidFeatureId as isValidFeatureIdTyped,
-  mapConsumerToIndexName as mapConsumerToIndexNameTyped,
   STATUS_VALUES,
+  ValidFeatureId,
 } from '@kbn/rule-data-utils';
 import {
   getEsQueryConfig as getEsQueryConfigNonTyped,
   getSafeSortIds as getSafeSortIdsNonTyped,
   isValidFeatureId as isValidFeatureIdNonTyped,
-  mapConsumerToIndexName as mapConsumerToIndexNameNonTyped,
   // @ts-expect-error
 } from '@kbn/rule-data-utils/target_node/alerts_as_data_rbac';
 
@@ -42,11 +41,11 @@ import {
   SPACE_IDS,
 } from '../../common/technical_rule_data_field_names';
 import { ParsedTechnicalFields } from '../../common/parse_technical_fields';
+import { Dataset, RuleDataPluginService } from '../rule_data_plugin_service';
 
 const getEsQueryConfig: typeof getEsQueryConfigTyped = getEsQueryConfigNonTyped;
 const getSafeSortIds: typeof getSafeSortIdsTyped = getSafeSortIdsNonTyped;
 const isValidFeatureId: typeof isValidFeatureIdTyped = isValidFeatureIdNonTyped;
-const mapConsumerToIndexName: typeof mapConsumerToIndexNameTyped = mapConsumerToIndexNameNonTyped;
 
 // TODO: Fix typings https://github.com/elastic/kibana/issues/101776
 type NonNullableProps<Obj extends {}, Props extends keyof Obj> = Omit<Obj, Props> &
@@ -71,6 +70,7 @@ export interface ConstructorOptions {
   authorization: PublicMethodsOf<AlertingAuthorization>;
   auditLogger?: AuditLogger;
   esClient: ElasticsearchClient;
+  ruleDataService: RuleDataPluginService;
 }
 
 export interface UpdateOptions<Params extends AlertTypeParams> {
@@ -115,15 +115,17 @@ export class AlertsClient {
   private readonly authorization: PublicMethodsOf<AlertingAuthorization>;
   private readonly esClient: ElasticsearchClient;
   private readonly spaceId: string | undefined;
+  private readonly ruleDataService: RuleDataPluginService;
 
-  constructor({ auditLogger, authorization, logger, esClient }: ConstructorOptions) {
-    this.logger = logger;
-    this.authorization = authorization;
-    this.esClient = esClient;
-    this.auditLogger = auditLogger;
+  constructor(options: ConstructorOptions) {
+    this.logger = options.logger;
+    this.authorization = options.authorization;
+    this.esClient = options.esClient;
+    this.auditLogger = options.auditLogger;
     // If spaceId is undefined, it means that spaces is disabled
     // Otherwise, if space is enabled and not specified, it is "default"
     this.spaceId = this.authorization.getSpaceId();
+    this.ruleDataService = options.ruleDataService;
   }
 
   private getOutcome(
@@ -650,6 +652,8 @@ export class AlertsClient {
 
   public async getAuthorizedAlertsIndices(featureIds: string[]): Promise<string[] | undefined> {
     try {
+      // ATTENTION FUTURE DEVELOPER when you are a super user the augmentedRuleTypes.authorizedRuleTypes will
+      // return all of the features that you can access and does not care about your featureIds
       const augmentedRuleTypes = await this.authorization.getAugmentedRuleTypesWithAuthorization(
         featureIds,
         [ReadOperations.Find, ReadOperations.Get, WriteOperations.Update],
@@ -664,15 +668,18 @@ export class AlertsClient {
         authorizedFeatures.add(ruleType.producer);
       }
 
-      const toReturn = Array.from(authorizedFeatures).flatMap((feature) => {
-        if (isValidFeatureId(feature)) {
-          if (feature === 'siem') {
-            return `${mapConsumerToIndexName[feature]}-${this.spaceId}`;
-          } else {
-            return `${mapConsumerToIndexName[feature]}`;
-          }
+      const validAuthorizedFeatures = Array.from(authorizedFeatures).filter(
+        (feature): feature is ValidFeatureId =>
+          featureIds.includes(feature) && isValidFeatureId(feature)
+      );
+
+      const toReturn = validAuthorizedFeatures.flatMap((feature) => {
+        const indices = this.ruleDataService.findIndicesByFeature(feature, Dataset.alerts);
+        if (feature === 'siem') {
+          return indices.map((i) => `${i.baseName}-${this.spaceId}`);
+        } else {
+          return indices.map((i) => i.baseName);
         }
-        return [];
       });
 
       return toReturn;

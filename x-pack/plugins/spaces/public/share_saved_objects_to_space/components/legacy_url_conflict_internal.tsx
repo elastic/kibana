@@ -18,9 +18,9 @@ import { first } from 'rxjs/operators';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import type { ApplicationStart, StartServicesAccessor } from 'src/core/public';
-import type { LegacyUrlConflictProps } from 'src/plugins/spaces_oss/public';
 
 import type { PluginsStart } from '../../plugin';
+import type { LegacyUrlConflictProps } from '../types';
 import { DEFAULT_OBJECT_NOUN } from './constants';
 
 export interface InternalProps {

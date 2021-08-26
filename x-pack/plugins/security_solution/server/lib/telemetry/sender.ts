@@ -18,14 +18,15 @@ import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '../../../../task_manager/server';
-import { createUsageCounterLabel } from './helpers';
 import { TelemetryDiagTask } from './diagnostic_task';
 import { TelemetryEndpointTask } from './endpoint_task';
-import { TelemetryTrustedAppsTask } from './trusted_apps_task';
+import { TelemetryExceptionListsTask } from './security_lists_task';
 import { EndpointAppContextService } from '../../endpoint/endpoint_app_context_services';
 import { AgentService, AgentPolicyServiceInterface } from '../../../../fleet/server';
-import { ExceptionListClient } from '../../../../lists/server';
 import { getTrustedAppsList } from '../../endpoint/routes/trusted_apps/service';
+import { ExceptionListClient } from '../../../../lists/server';
+import { GetEndpointListResponse } from './types';
+import { createUsageCounterLabel, exceptionListItemToEndpointEntry } from './helpers';
 
 type BaseSearchTypes = string | number | boolean | object;
 export type SearchTypes = BaseSearchTypes | BaseSearchTypes[] | undefined;
@@ -63,7 +64,7 @@ export class TelemetryEventsSender {
   private isOptedIn?: boolean = true; // Assume true until the first check
   private diagTask?: TelemetryDiagTask;
   private epMetricsTask?: TelemetryEndpointTask;
-  private trustedAppsTask?: TelemetryTrustedAppsTask;
+  private exceptionListTask?: TelemetryExceptionListsTask;
   private agentService?: AgentService;
   private agentPolicyService?: AgentPolicyServiceInterface;
   private esClient?: ElasticsearchClient;
@@ -86,7 +87,7 @@ export class TelemetryEventsSender {
     if (taskManager) {
       this.diagTask = new TelemetryDiagTask(this.logger, taskManager, this);
       this.epMetricsTask = new TelemetryEndpointTask(this.logger, taskManager, this);
-      this.trustedAppsTask = new TelemetryTrustedAppsTask(this.logger, taskManager, this);
+      this.exceptionListTask = new TelemetryExceptionListsTask(this.logger, taskManager, this);
     }
   }
 
@@ -108,7 +109,7 @@ export class TelemetryEventsSender {
       this.logger.debug(`Starting diagnostic and endpoint telemetry tasks`);
       this.diagTask.start(taskManager);
       this.epMetricsTask.start(taskManager);
-      this.trustedAppsTask?.start(taskManager);
+      this.exceptionListTask?.start(taskManager);
     }
 
     this.logger.debug(`Starting local task`);
@@ -277,6 +278,32 @@ export class TelemetryEventsSender {
     }
 
     return getTrustedAppsList(this.exceptionListClient, { page: 1, per_page: 10_000 });
+  }
+
+  public async fetchEndpointList(listId: string): Promise<GetEndpointListResponse> {
+    if (this?.exceptionListClient === undefined || this?.exceptionListClient === null) {
+      throw Error('could not fetch trusted applications. exception list client not available.');
+    }
+
+    // Ensure list is created if it does not exist
+    await this.exceptionListClient.createTrustedAppsList();
+
+    const results = await this.exceptionListClient.findExceptionListItem({
+      listId,
+      page: 1,
+      perPage: this.max_records,
+      filter: undefined,
+      namespaceType: 'agnostic',
+      sortField: 'name',
+      sortOrder: 'asc',
+    });
+
+    return {
+      data: results?.data.map(exceptionListItemToEndpointEntry) ?? [],
+      total: results?.total ?? 0,
+      page: results?.page ?? 1,
+      per_page: results?.per_page ?? this.max_records,
+    };
   }
 
   public queueTelemetryEvents(events: TelemetryEvent[]) {
