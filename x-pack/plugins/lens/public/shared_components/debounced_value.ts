@@ -11,6 +11,10 @@ import { debounce } from 'lodash';
 /**
  * Debounces value changes and updates inputValue on root state changes if no debounced changes
  * are in flight because the user is currently modifying the value.
+ *
+ * * allowFalsyValue: update upstream with all falsy values but null or undefined
+ *
+ * When testing this function mock the "debounce" function in lodash (see this module test for an example)
  */
 
 export const useDebouncedValue = <T>(
