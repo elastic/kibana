@@ -11,12 +11,10 @@ import {
   SavedObjectUnsanitizedDoc,
   SavedObjectMigrationFn,
   SavedObjectMigrationContext,
-  SavedObjectsUtils,
 } from '../../../../../src/core/server';
-import { ActionTaskParams, RawAction } from '../types';
+import { RawAction } from '../types';
 import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
 import type { IsMigrationNeededPredicate } from '../../../encrypted_saved_objects/server';
-import { RelatedSavedObjects } from '../lib/related_saved_objects';
 
 interface ActionsLogMeta extends LogMeta {
   migrations: { actionDocument: SavedObjectUnsanitizedDoc<RawAction> };

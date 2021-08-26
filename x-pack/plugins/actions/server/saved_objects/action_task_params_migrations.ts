@@ -51,11 +51,7 @@ export function getActionTaskParamsMigrations(
 
   const migrationResolveSavedObjectsIdsInActionTaskParams = createEsoMigration(
     encryptedSavedObjects,
-    (
-      doc: SavedObjectUnsanitizedDoc<ActionTaskParams>
-    ): doc is SavedObjectUnsanitizedDoc<ActionTaskParams> =>
-      doc.type === 'action_task_params' && doc.attributes.hasOwnProperty('relatedSavedObjects'),
-
+    (doc): doc is SavedObjectUnsanitizedDoc<ActionTaskParams> => doc.type === 'action_task_params',
     pipeMigrations(resolveSavedObjectIdsInActionTaskParams)
   );
 
