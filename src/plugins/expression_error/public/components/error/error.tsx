@@ -7,16 +7,9 @@
  */
 
 import React, { FC } from 'react';
-import { ClassNames } from '@emotion/react';
 import { EuiButtonIcon, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ShowDebugging } from './show_debugging';
-
-const euiCallOutHeaderClassDef = `
-  .euiCallOutHeader__icon {
-    cursor: pointer;
-  }
-`;
 
 export interface Props {
   payload: {
@@ -44,21 +37,16 @@ export const Error: FC<Props> = ({ payload, onClose }) => {
   );
 
   return (
-    <ClassNames>
-      {({ css }) => (
-        <EuiCallOut
-          style={{ maxWidth: 500 }}
-          color="danger"
-          iconType={CloseIconButton}
-          title={strings.getTitle()}
-          className={css(euiCallOutHeaderClassDef)}
-        >
-          <p>{message ? strings.getDescription() : ''}</p>
-          {message && <p style={{ padding: '0 16px' }}>{message}</p>}
+    <EuiCallOut
+      style={{ maxWidth: 500 }}
+      color="danger"
+      iconType={CloseIconButton}
+      title={strings.getTitle()}
+    >
+      <p>{message ? strings.getDescription() : ''}</p>
+      {message && <p style={{ padding: '0 16px' }}>{message}</p>}
 
-          <ShowDebugging payload={payload} />
-        </EuiCallOut>
-      )}
-    </ClassNames>
+      <ShowDebugging payload={payload} />
+    </EuiCallOut>
   );
 };
