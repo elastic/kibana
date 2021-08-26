@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { omit } from 'lodash';
 import {
   LogMeta,
   SavedObjectMigrationMap,
@@ -19,20 +18,20 @@ import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objec
 import type { IsMigrationNeededPredicate } from '../../../encrypted_saved_objects/server';
 import { RelatedSavedObjects } from '../lib/related_saved_objects';
 
-interface ActionsLogMeta<T = RawAction> extends LogMeta {
-  migrations: { actionDocument: SavedObjectUnsanitizedDoc<T> };
+interface ActionsLogMeta extends LogMeta {
+  migrations: { actionDocument: SavedObjectUnsanitizedDoc<RawAction> };
 }
 
-type ActionMigration<T = RawAction> = (
-  doc: SavedObjectUnsanitizedDoc<T>
-) => SavedObjectUnsanitizedDoc<T>;
+type ActionMigration = (
+  doc: SavedObjectUnsanitizedDoc<RawAction>
+) => SavedObjectUnsanitizedDoc<RawAction>;
 
-function createEsoMigration<T = RawAction>(
+function createEsoMigration(
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup,
-  isMigrationNeededPredicate: IsMigrationNeededPredicate<T, T>,
-  migrationFunc: ActionMigration<T>
+  isMigrationNeededPredicate: IsMigrationNeededPredicate<RawAction, RawAction>,
+  migrationFunc: ActionMigration
 ) {
-  return encryptedSavedObjects.createMigration<T, T>({
+  return encryptedSavedObjects.createMigration<RawAction, RawAction>({
     isMigrationNeededPredicate,
     migration: migrationFunc,
     shouldMigrateIfDecryptionFails: true, // shouldMigrateIfDecryptionFails flag that applies the migration to undecrypted document if decryption fails
@@ -65,36 +64,22 @@ export function getMigrations(
     pipeMigrations(addisMissingSecretsField)
   );
 
-  const migrationResolveSavedObjectsIdsInActionTaskParams = createEsoMigration(
-    encryptedSavedObjects,
-    (
-      doc: SavedObjectUnsanitizedDoc<ActionTaskParams>
-    ): doc is SavedObjectUnsanitizedDoc<ActionTaskParams> =>
-      doc.type === 'action_task_params' && doc.attributes.hasOwnProperty('relatedSavedObjects'),
-
-    pipeMigrations(resolveSavedObjectIdsInActionTaskParams, moveRelatedSavedObjects)
-  );
-
   return {
     '7.10.0': executeMigrationWithErrorHandling(migrationActionsTen, '7.10.0'),
     '7.11.0': executeMigrationWithErrorHandling(migrationActionsEleven, '7.11.0'),
     '7.14.0': executeMigrationWithErrorHandling(migrationActionsFourteen, '7.14.0'),
-    '8.0.0': executeMigrationWithErrorHandling(
-      migrationResolveSavedObjectsIdsInActionTaskParams,
-      '8.0.0'
-    ),
   };
 }
 
-function executeMigrationWithErrorHandling<T = RawAction>(
-  migrationFunc: SavedObjectMigrationFn<T, T>,
+function executeMigrationWithErrorHandling(
+  migrationFunc: SavedObjectMigrationFn<RawAction, RawAction>,
   version: string
 ) {
-  return (doc: SavedObjectUnsanitizedDoc<T>, context: SavedObjectMigrationContext) => {
+  return (doc: SavedObjectUnsanitizedDoc<RawAction>, context: SavedObjectMigrationContext) => {
     try {
       return migrationFunc(doc, context);
     } catch (ex) {
-      context.log.error<ActionsLogMeta<T>>(
+      context.log.error<ActionsLogMeta>(
         `encryptedSavedObject ${version} migration failed for action ${doc.id} with error: ${ex.message}`,
         {
           migrations: {
@@ -178,48 +163,7 @@ const addisMissingSecretsField = (
   };
 };
 
-const moveRelatedSavedObjects = (
-  doc: SavedObjectUnsanitizedDoc<ActionTaskParams>
-): SavedObjectUnsanitizedDoc<ActionTaskParams> => {
-  const relatedSavedObjects = (doc.attributes
-    .relatedSavedObjects as unknown) as RelatedSavedObjects;
-
-  const references = doc.references ?? [];
-  references.push(
-    ...relatedSavedObjects.map((relatedSavedObject) => ({
-      name: relatedSavedObject.typeId ?? 'unknown',
-      type: relatedSavedObject.type,
-      id: relatedSavedObject.id,
-    }))
-  );
-  return {
-    ...doc,
-    references,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    attributes: omit(doc.attributes, ['relatedSavedObjects']) as any,
-  };
-};
-
-function resolveSavedObjectIdsInActionTaskParams(
-  doc: SavedObjectUnsanitizedDoc<ActionTaskParams>
-): SavedObjectUnsanitizedDoc<ActionTaskParams> {
-  const namespace = doc.namespaces && doc.namespaces.length ? doc.namespaces[0] : undefined;
-  const newId =
-    namespace && namespace !== 'default'
-      ? SavedObjectsUtils.getConvertedObjectId(namespace, 'action', doc.attributes.actionId)
-      : doc.attributes.actionId;
-  return {
-    ...doc,
-    attributes: {
-      ...doc.attributes,
-      actionId: newId,
-    },
-  };
-}
-
-function pipeMigrations<T = RawAction>(
-  ...migrations: Array<ActionMigration<T>>
-): ActionMigration<T> {
-  return (doc: SavedObjectUnsanitizedDoc<T>) =>
+function pipeMigrations(...migrations: ActionMigration[]): ActionMigration {
+  return (doc: SavedObjectUnsanitizedDoc<RawAction>) =>
     migrations.reduce((migratedDoc, nextMigration) => nextMigration(migratedDoc), doc);
 }
