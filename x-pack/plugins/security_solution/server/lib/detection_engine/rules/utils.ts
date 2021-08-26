@@ -27,7 +27,7 @@ import type {
 } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { ListArrayOrUndefined } from '@kbn/securitysolution-io-ts-list-types';
 import type { VersionOrUndefined } from '@kbn/securitysolution-io-ts-types';
-import { SanitizedAlert } from '../../../../../alerting/common';
+import { AlertNotifyWhenType, SanitizedAlert } from '../../../../../alerting/common';
 import {
   DescriptionOrUndefined,
   AnomalyThresholdOrUndefined,
@@ -54,7 +54,7 @@ import {
   EventCategoryOverrideOrUndefined,
 } from '../../../../common/detection_engine/schemas/common/schemas';
 import { PartialFilter } from '../types';
-import { NotifyWhen, RuleParams } from '../schemas/rule_schemas';
+import { RuleParams } from '../schemas/rule_schemas';
 import {
   NOTIFICATION_THROTTLE_NO_ACTIONS,
   NOTIFICATION_THROTTLE_RULE,
@@ -181,7 +181,9 @@ export const calculateName = ({
  * @params throttle The throttle from a "security_solution" rule
  * @returns The correct "NotifyWhen" for a Kibana alerting.
  */
-export const transformToNotifyWhen = (throttle: string | null | undefined): NotifyWhen | null => {
+export const transformToNotifyWhen = (
+  throttle: string | null | undefined
+): AlertNotifyWhenType | null => {
   if (throttle == null || throttle === NOTIFICATION_THROTTLE_NO_ACTIONS) {
     return null; // Although I return null, this does not change the value of the "notifyWhen" and it keeps the current value of "notifyWhen"
   } else if (throttle === NOTIFICATION_THROTTLE_RULE) {

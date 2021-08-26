@@ -196,8 +196,6 @@ export const notifyWhen = t.union([
   t.null,
 ]);
 
-export type NotifyWhen = t.TypeOf<typeof notifyWhen>;
-
 export const internalRuleCreate = t.type({
   name,
   tags,

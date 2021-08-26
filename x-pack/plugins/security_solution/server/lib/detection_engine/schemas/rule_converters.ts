@@ -160,7 +160,7 @@ export const convertCreateAPIToInternalSchema = (
     },
     schedule: { interval: input.interval ?? '5m' },
     enabled: input.enabled ?? true,
-    actions: input.actions != null ? input.actions.map(transformRuleToAlertAction) : [],
+    actions: input.actions?.map(transformRuleToAlertAction) ?? [],
     throttle: transformToAlertThrottle(input.throttle),
     notifyWhen: transformToNotifyWhen(input.throttle),
   };
