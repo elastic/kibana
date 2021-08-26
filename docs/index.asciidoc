@@ -14,6 +14,13 @@ include::{docs-root}/shared/versions/stack/{source_branch}.asciidoc[]
 :blob:           {kib-repo}blob/{branch}/
 :security-ref:   https://www.elastic.co/community/security/
 
+:Data-Sources: Index Patterns
+:Data-source: Index pattern
+:data-source: index pattern
+:Data-sources: Index patterns
+:data-sources: index patterns
+
+
 include::{docs-root}/shared/attributes.asciidoc[]
 
 include::user/index.asciidoc[]
