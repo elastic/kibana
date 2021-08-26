@@ -140,74 +140,7 @@ describe('Lens App', () => {
 
   it('renders the editor frame', async () => {
     const { frame } = await mountWith({});
-    expect(frame.EditorFrameContainer.mock.calls).toMatchInlineSnapshot(`
-      Array [
-        Array [
-          Object {
-            "lensInspector": Object {
-              "adapters": Object {
-                "expression": ExpressionsInspectorAdapter {
-                  "_ast": Object {},
-                  "_events": Object {},
-                  "_eventsCount": 0,
-                  "_maxListeners": undefined,
-                  Symbol(kCapture): false,
-                },
-                "requests": RequestAdapter {
-                  "_events": Object {},
-                  "_eventsCount": 0,
-                  "_maxListeners": undefined,
-                  "requests": Map {},
-                  Symbol(kCapture): false,
-                },
-                "tables": TablesAdapter {
-                  "_events": Object {},
-                  "_eventsCount": 0,
-                  "_maxListeners": undefined,
-                  "_tables": Object {},
-                  Symbol(kCapture): false,
-                },
-              },
-              "inspect": [Function],
-            },
-            "showNoDataPopover": [Function],
-          },
-          Object {},
-        ],
-        Array [
-          Object {
-            "lensInspector": Object {
-              "adapters": Object {
-                "expression": ExpressionsInspectorAdapter {
-                  "_ast": Object {},
-                  "_events": Object {},
-                  "_eventsCount": 0,
-                  "_maxListeners": undefined,
-                  Symbol(kCapture): false,
-                },
-                "requests": RequestAdapter {
-                  "_events": Object {},
-                  "_eventsCount": 0,
-                  "_maxListeners": undefined,
-                  "requests": Map {},
-                  Symbol(kCapture): false,
-                },
-                "tables": TablesAdapter {
-                  "_events": Object {},
-                  "_eventsCount": 0,
-                  "_maxListeners": undefined,
-                  "_tables": Object {},
-                  Symbol(kCapture): false,
-                },
-              },
-              "inspect": [Function],
-            },
-            "showNoDataPopover": [Function],
-          },
-          Object {},
-        ],
-      ]
-    `);
+    expect(frame.EditorFrameContainer.mock.calls).toMatchSnapshot();
   });
 
   it('updates global filters with store state', async () => {
