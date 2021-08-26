@@ -7,7 +7,6 @@
 
 import url from 'url';
 import archives_metadata from '../../../fixtures/es_archiver/archives_metadata';
-import { esArchiverLoad, esArchiverUnload } from '../../../tasks/es_archiver';
 
 const { start, end } = archives_metadata['apm_8.0.0'];
 
@@ -18,15 +17,10 @@ const baseUrl = url.format({
 });
 
 describe('Service Overview', () => {
-  before(() => {
-    esArchiverLoad('apm_8.0.0');
-  });
-  after(() => {
-    esArchiverUnload('apm_8.0.0');
-  });
   beforeEach(() => {
     cy.loginAsReadOnlyUser();
   });
+
   it('persists transaction type selected when clicking on Transactions tab', () => {
     cy.visit(baseUrl);
     cy.get('[data-test-subj="headerFilterTransactionType"]').should(
@@ -62,5 +56,24 @@ describe('Service Overview', () => {
       'have.value',
       'Worker'
     );
+  });
+
+  it('hides dependency tab when RUM service', () => {
+    cy.intercept('GET', '/api/apm/services/opbeans-rum/agent').as(
+      'agentRequest'
+    );
+    cy.visit(
+      url.format({
+        pathname: '/app/apm/services/opbeans-rum/overview',
+        query: { rangeFrom: start, rangeTo: end },
+      })
+    );
+    cy.contains('Overview');
+    cy.contains('Transactions');
+    cy.contains('Error');
+    cy.contains('Service Map');
+    // Waits until the agent request is finished to check the tab.
+    cy.wait('@agentRequest');
+    cy.contains('Dependencies').should('not.exist');
   });
 });

@@ -69,7 +69,9 @@ export function ExploratoryViewHeader({ seriesId, lensAttributes }: Props) {
                     timeRange,
                     attributes: lensAttributes,
                   },
-                  true
+                  {
+                    openInNewTab: true,
+                  }
                 );
               }
             }}

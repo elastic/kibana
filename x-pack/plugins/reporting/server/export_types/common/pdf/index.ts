@@ -101,10 +101,10 @@ export class PdfMaker {
     this._addContents(contents);
   }
 
-  addImage(base64EncodedData: string, opts = { title: '', description: '' }) {
+  addImage(image: Buffer, opts = { title: '', description: '' }) {
     const size = this._layout.getPdfImageSize();
     const img = {
-      image: `data:image/png;base64,${base64EncodedData}`,
+      image: `data:image/png;base64,${image.toString('base64')}`,
       alignment: 'center' as 'center',
       height: size.height,
       width: size.width,

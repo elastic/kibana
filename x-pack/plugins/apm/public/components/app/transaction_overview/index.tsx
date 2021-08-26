@@ -10,14 +10,16 @@ import { Location } from 'history';
 import React from 'react';
 import { useLocation } from 'react-router-dom';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
-import { IUrlParams } from '../../../context/url_params_context/types';
+import type { ApmUrlParams } from '../../../context/url_params_context/types';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useFallbackToTransactionsFetcher } from '../../../hooks/use_fallback_to_transactions_fetcher';
-import { AggregatedTransactionsCallout } from '../../shared/aggregated_transactions_callout';
+import { useTimeRange } from '../../../hooks/use_time_range';
+import { AggregatedTransactionsBadge } from '../../shared/aggregated_transactions_badge';
 import { TransactionCharts } from '../../shared/charts/transaction_charts';
 import { fromQuery, toQuery } from '../../shared/Links/url_helpers';
 import { TransactionsTable } from '../../shared/transactions_table';
+
 import { useRedirect } from './useRedirect';
 
 function getRedirectLocation({
@@ -27,7 +29,7 @@ function getRedirectLocation({
 }: {
   location: Location;
   transactionType?: string;
-  urlParams: IUrlParams;
+  urlParams: ApmUrlParams;
 }): Location | undefined {
   const transactionTypeFromUrlParams = urlParams.transactionType;
 
@@ -44,8 +46,10 @@ function getRedirectLocation({
 
 export function TransactionOverview() {
   const {
-    query: { environment, kuery },
+    query: { environment, kuery, rangeFrom, rangeTo },
   } = useApmParams('/services/:serviceName/transactions');
+
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const { fallbackToTransactions } = useFallbackToTransactionsFetcher({
     kuery,
@@ -69,13 +73,18 @@ export function TransactionOverview() {
         <>
           <EuiFlexGroup>
             <EuiFlexItem>
-              <AggregatedTransactionsCallout />
+              <AggregatedTransactionsBadge />
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiSpacer size="s" />
         </>
       )}
-      <TransactionCharts kuery={kuery} environment={environment} />
+      <TransactionCharts
+        kuery={kuery}
+        environment={environment}
+        start={start}
+        end={end}
+      />
       <EuiSpacer size="s" />
       <EuiPanel hasBorder={true}>
         <TransactionsTable
@@ -84,6 +93,8 @@ export function TransactionOverview() {
           showAggregationAccurateCallout
           environment={environment}
           kuery={kuery}
+          start={start}
+          end={end}
         />
       </EuiPanel>
     </>

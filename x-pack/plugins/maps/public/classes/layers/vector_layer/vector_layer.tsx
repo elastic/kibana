@@ -184,7 +184,6 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
   supportsFeatureEditing(): boolean {
     const dataRequest = this.getDataRequest(SUPPORTS_FEATURE_EDITING_REQUEST_ID);
     const data = dataRequest?.getData() as { supportsFeatureEditing: boolean } | undefined;
-
     return data ? data.supportsFeatureEditing : false;
   }
 
@@ -1116,7 +1115,8 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
 
   async addFeature(geometry: Geometry | Position[]) {
     const layerSource = this.getSource();
-    await layerSource.addFeature(geometry);
+    const defaultFields = await layerSource.getDefaultFields();
+    await layerSource.addFeature(geometry, defaultFields);
   }
 
   async deleteFeature(featureId: string) {

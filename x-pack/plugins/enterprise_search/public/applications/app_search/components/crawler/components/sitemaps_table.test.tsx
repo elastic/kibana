@@ -34,6 +34,9 @@ describe('SitemapsTable', () => {
     crawlRules: [],
     entryPoints: [],
     sitemaps,
+    deduplicationEnabled: true,
+    deduplicationFields: ['title'],
+    availableDeduplicationFields: ['title', 'description'],
   };
 
   beforeEach(() => {

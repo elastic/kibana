@@ -6,8 +6,14 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { ALERT_DURATION, ALERT_STATUS, ALERT_UUID } from '@kbn/rule-data-utils';
-import { loggerMock } from '@kbn/logging/target/mocks';
+import {
+  ALERT_DURATION,
+  ALERT_STATUS,
+  ALERT_STATUS_ACTIVE,
+  ALERT_STATUS_RECOVERED,
+  ALERT_UUID,
+} from '@kbn/rule-data-utils';
+import { loggerMock } from '@kbn/logging/mocks';
 import { castArray, omit, mapValues } from 'lodash';
 import { RuleDataClient } from '../rule_data_client';
 import { createRuleDataClientMock } from '../rule_data_client/rule_data_client.mock';
@@ -177,7 +183,9 @@ describe('createLifecycleRuleTypeFactory', () => {
         expect(evaluationDocuments.length).toBe(0);
         expect(alertDocuments.length).toBe(2);
 
-        expect(alertDocuments.every((doc) => doc[ALERT_STATUS] === 'open')).toBeTruthy();
+        expect(
+          alertDocuments.every((doc) => doc[ALERT_STATUS] === ALERT_STATUS_ACTIVE)
+        ).toBeTruthy();
 
         expect(alertDocuments.every((doc) => doc[ALERT_DURATION] === 0)).toBeTruthy();
 
@@ -198,10 +206,12 @@ describe('createLifecycleRuleTypeFactory', () => {
               "kibana.alert.rule.rule_type_id": "ruleTypeId",
               "kibana.alert.rule.uuid": "alertId",
               "kibana.alert.start": "2021-06-16T09:01:00.000Z",
-              "kibana.alert.status": "open",
+              "kibana.alert.status": "active",
+              "kibana.alert.workflow_status": "open",
               "kibana.space_ids": Array [
                 "spaceId",
               ],
+              "kibana.version": "7.16.0",
               "service.name": "opbeans-java",
               "tags": Array [
                 "tags",
@@ -220,10 +230,12 @@ describe('createLifecycleRuleTypeFactory', () => {
               "kibana.alert.rule.rule_type_id": "ruleTypeId",
               "kibana.alert.rule.uuid": "alertId",
               "kibana.alert.start": "2021-06-16T09:01:00.000Z",
-              "kibana.alert.status": "open",
+              "kibana.alert.status": "active",
+              "kibana.alert.workflow_status": "open",
               "kibana.space_ids": Array [
                 "spaceId",
               ],
+              "kibana.version": "7.16.0",
               "service.name": "opbeans-node",
               "tags": Array [
                 "tags",
@@ -280,7 +292,9 @@ describe('createLifecycleRuleTypeFactory', () => {
         expect(evaluationDocuments.length).toBe(0);
         expect(alertDocuments.length).toBe(2);
 
-        expect(alertDocuments.every((doc) => doc[ALERT_STATUS] === 'open')).toBeTruthy();
+        expect(
+          alertDocuments.every((doc) => doc[ALERT_STATUS] === ALERT_STATUS_ACTIVE)
+        ).toBeTruthy();
         expect(alertDocuments.every((doc) => doc['event.action'] === 'active')).toBeTruthy();
 
         expect(alertDocuments.every((doc) => doc[ALERT_DURATION] > 0)).toBeTruthy();
@@ -358,10 +372,10 @@ describe('createLifecycleRuleTypeFactory', () => {
         );
 
         expect(opbeansJavaAlertDoc['event.action']).toBe('active');
-        expect(opbeansJavaAlertDoc[ALERT_STATUS]).toBe('open');
+        expect(opbeansJavaAlertDoc[ALERT_STATUS]).toBe(ALERT_STATUS_ACTIVE);
 
         expect(opbeansNodeAlertDoc['event.action']).toBe('close');
-        expect(opbeansNodeAlertDoc[ALERT_STATUS]).toBe('closed');
+        expect(opbeansNodeAlertDoc[ALERT_STATUS]).toBe(ALERT_STATUS_RECOVERED);
       });
     });
   });

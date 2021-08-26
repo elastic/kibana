@@ -21,15 +21,13 @@ export const ALERT_ID = '[data-test-subj="draggable-content-_id"]';
 export const ALERT_RISK_SCORE_HEADER =
   '[data-test-subj="dataGridHeaderCell-signal.rule.risk_score"]';
 
-export const ALERT_RULE_METHOD = '[data-test-subj="draggable-content-signal.rule.type"]';
+export const ALERT_RULE_NAME = '[data-test-subj="formatted-field-signal.rule.name"]';
 
-export const ALERT_RULE_NAME = '[data-test-subj="draggable-content-signal.rule.name"]';
+export const ALERT_RULE_RISK_SCORE = '[data-test-subj="formatted-field-signal.rule.risk_score"]';
 
-export const ALERT_RULE_RISK_SCORE = '[data-test-subj="draggable-content-signal.rule.risk_score"]';
+export const ALERT_RULE_SEVERITY = '[data-test-subj="formatted-field-signal.rule.severity"]';
 
-export const ALERT_RULE_SEVERITY = '[data-test-subj="draggable-content-signal.rule.severity"]';
-
-export const ALERT_RULE_VERSION = '[data-test-subj="draggable-content-signal.rule.version"]';
+export const ALERT_DATA_GRID = '[data-test-subj="dataGridWrapper"]';
 
 export const CLOSE_ALERT_BTN = '[data-test-subj="close-alert-status"]';
 
@@ -39,16 +37,18 @@ export const CLOSED_ALERTS_FILTER_BTN = '[data-test-subj="closedAlerts"]';
 
 export const EXPAND_ALERT_BTN = '[data-test-subj="expand-event"]';
 
-export const IN_PROGRESS_ALERTS_FILTER_BTN = '[data-test-subj="inProgressAlerts"]';
+export const ACKNOWLEDGED_ALERTS_FILTER_BTN = '[data-test-subj="acknowledgedAlerts"]';
 
 export const LOADING_ALERTS_PANEL = '[data-test-subj="loading-alerts-panel"]';
 
+export const LOADING_SPINNER = '[data-test-subj="LoadingPanelTimeline"]';
+
 export const MANAGE_ALERT_DETECTION_RULES_BTN = '[data-test-subj="manage-alert-detection-rules"]';
 
-export const MARK_ALERT_IN_PROGRESS_BTN = '[data-test-subj="in-progress-alert-status"]';
+export const MARK_ALERT_ACKNOWLEDGED_BTN = '[data-test-subj="acknowledged-alert-status"]';
 
-export const MARK_SELECTED_ALERTS_IN_PROGRESS_BTN =
-  '[data-test-subj="markSelectedAlertsInProgressButton"]';
+export const MARK_SELECTED_ALERTS_ACKNOWLEDGED_BTN =
+  '[data-test-subj="markSelectedAlertsAcknowledgedButton"]';
 
 export const NUMBER_OF_ALERTS =
   '[data-test-subj="events-viewer-panel"] [data-test-subj="server-side-event-count"]';
@@ -70,3 +70,5 @@ export const SHOWING_ALERTS = '[data-test-subj="showingAlerts"]';
 export const TAKE_ACTION_POPOVER_BTN = '[data-test-subj="selectedShowBulkActionsButton"]';
 
 export const TIMELINE_CONTEXT_MENU_BTN = '[data-test-subj="timeline-context-menu-button"]';
+
+export const ATTACH_ALERT_TO_CASE_BUTTON = '[data-test-subj="attach-alert-to-case-button"]';

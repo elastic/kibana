@@ -11,7 +11,7 @@ import { isEqual } from 'lodash';
 
 import {
   clearFlashMessages,
-  setSuccessMessage,
+  flashSuccessToast,
   flashAPIErrors,
 } from '../../../shared/flash_messages';
 import { HttpLogic } from '../../../shared/http';
@@ -153,7 +153,7 @@ export const SecurityLogic = kea<MakeLogicType<SecurityValues, SecurityActions>>
       try {
         const response = await http.patch(route, { body });
         actions.setSourceRestrictionsUpdated(response);
-        setSuccessMessage(SOURCE_RESTRICTIONS_SUCCESS_MESSAGE);
+        flashSuccessToast(SOURCE_RESTRICTIONS_SUCCESS_MESSAGE);
         AppLogic.actions.setSourceRestriction(isEnabled);
       } catch (e) {
         flashAPIErrors(e);

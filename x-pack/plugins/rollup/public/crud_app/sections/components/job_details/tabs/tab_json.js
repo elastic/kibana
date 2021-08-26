@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { EuiCodeEditor } from '@elastic/eui';
+import { EuiCodeEditor } from '../../../../../shared_imports';
 
 export const TabJson = ({ json }) => {
   const jsonString = JSON.stringify(json, null, 2);

@@ -15,19 +15,12 @@ import {
   ISavedObjectTypeRegistry,
   SavedObjectsClientProviderOptions,
 } from './saved_objects';
-import {
-  InternalElasticsearchServiceStart,
-  IScopedClusterClient,
-  LegacyScopedClusterClient,
-} from './elasticsearch';
+import { InternalElasticsearchServiceStart, IScopedClusterClient } from './elasticsearch';
 import { InternalUiSettingsServiceStart, IUiSettingsClient } from './ui_settings';
 import { DeprecationsClient, InternalDeprecationsServiceStart } from './deprecations';
 
 class CoreElasticsearchRouteHandlerContext {
   #client?: IScopedClusterClient;
-  #legacy?: {
-    client: Pick<LegacyScopedClusterClient, 'callAsInternalUser' | 'callAsCurrentUser'>;
-  };
 
   constructor(
     private readonly elasticsearchStart: InternalElasticsearchServiceStart,
@@ -39,15 +32,6 @@ class CoreElasticsearchRouteHandlerContext {
       this.#client = this.elasticsearchStart.client.asScoped(this.request);
     }
     return this.#client;
-  }
-
-  public get legacy() {
-    if (this.#legacy == null) {
-      this.#legacy = {
-        client: this.elasticsearchStart.legacy.client.asScoped(this.request),
-      };
-    }
-    return this.#legacy;
   }
 }
 

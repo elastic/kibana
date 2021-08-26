@@ -109,10 +109,10 @@ export const ContextApp = ({ indexPattern, indexPatternId, anchorId }: ContextAp
       filterManager.addFilters(newFilters);
       if (indexPatterns) {
         const fieldName = typeof field === 'string' ? field : field.name;
-        await popularizeField(indexPattern, fieldName, indexPatterns);
+        await popularizeField(indexPattern, fieldName, indexPatterns, capabilities);
       }
     },
-    [filterManager, indexPatternId, indexPatterns, indexPattern]
+    [filterManager, indexPatternId, indexPatterns, indexPattern, capabilities]
   );
 
   const TopNavMenu = navigation.ui.TopNavMenu;

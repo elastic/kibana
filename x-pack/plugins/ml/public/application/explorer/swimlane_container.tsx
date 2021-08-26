@@ -47,10 +47,10 @@ import { useUiSettings } from '../contexts/kibana';
 import {
   Y_AXIS_LABEL_WIDTH,
   Y_AXIS_LABEL_PADDING,
-  Y_AXIS_LABEL_FONT_COLOR,
   X_AXIS_RIGHT_OVERFLOW,
 } from './swimlane_annotation_container';
 import { AnnotationsTable } from '../../../common/types/annotations';
+import { useCurrentEuiTheme } from '../components/color_range_legend';
 
 declare global {
   interface Window {
@@ -192,6 +192,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
   const [chartWidth, setChartWidth] = useState<number>(0);
 
   const isDarkTheme = !!useUiSettings().get('theme:darkMode');
+  const { euiTheme } = useCurrentEuiTheme();
 
   // Holds the container height for previously fetched data
   const containerHeightRef = useRef<number>();
@@ -284,6 +285,8 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
 
     return {
       onBrushEnd: (e: HeatmapBrushEvent) => {
+        if (!e.cells.length) return;
+
         onCellsSelection({
           lanes: e.y as string[],
           times: e.x.map((v) => (v as number) / 1000) as [number, number],
@@ -298,7 +301,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
         },
         stroke: {
           width: 1,
-          color: '#D3DAE6',
+          color: euiTheme.euiBorderColor,
         },
       },
       cell: {
@@ -308,31 +311,29 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
           visible: false,
         },
         border: {
-          stroke: '#D3DAE6',
+          stroke: euiTheme.euiBorderColor,
           strokeWidth: 0,
         },
       },
       yAxisLabel: {
         visible: true,
         width: Y_AXIS_LABEL_WIDTH,
-        // eui color subdued
-        fill: Y_AXIS_LABEL_FONT_COLOR,
+        fill: euiTheme.euiTextSubduedColor,
         padding: Y_AXIS_LABEL_PADDING,
         formatter: (laneLabel: string) => {
           return laneLabel === '' ? EMPTY_FIELD_VALUE_LABEL : laneLabel;
         },
-        fontSize: 12,
+        fontSize: parseInt(euiTheme.euiFontSizeXS, 10),
       },
       xAxisLabel: {
         visible: true,
-        // eui color subdued
-        fill: `#98A2B3`,
+        fill: euiTheme.euiTextSubduedColor,
         formatter: (v: number) => {
           timeBuckets.setInterval(`${swimlaneData.interval}s`);
           const scaledDateFormat = timeBuckets.getScaledDateFormat();
           return moment(v).format(scaledDateFormat);
         },
-        fontSize: 12,
+        fontSize: parseInt(euiTheme.euiFontSizeXS, 10),
         // Required to calculate where the swimlane ends
         width: X_AXIS_RIGHT_OVERFLOW * 2,
       },
@@ -354,8 +355,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
     onCellsSelection,
   ]);
 
-  // @ts-ignore
-  const onElementClick: ElementClickListener = useCallback(
+  const onElementClick = useCallback(
     (e: HeatmapElementEvent[]) => {
       const cell = e[0][0];
       const startTime = (cell.datum.x as number) / 1000;
@@ -368,7 +368,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
       onCellsSelection(payload);
     },
     [swimlaneType, swimlaneData?.fieldName, swimlaneData?.interval, onCellsSelection]
-  );
+  ) as ElementClickListener;
 
   const tooltipOptions: TooltipSettings = useMemo(
     () => ({
@@ -427,22 +427,36 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
 
                       <Heatmap
                         id={id}
-                        colorScale={ScaleType.Threshold}
-                        ranges={[
-                          ANOMALY_THRESHOLD.LOW,
-                          ANOMALY_THRESHOLD.WARNING,
-                          ANOMALY_THRESHOLD.MINOR,
-                          ANOMALY_THRESHOLD.MAJOR,
-                          ANOMALY_THRESHOLD.CRITICAL,
-                        ]}
-                        colors={[
-                          SEVERITY_COLORS.BLANK,
-                          SEVERITY_COLORS.LOW,
-                          SEVERITY_COLORS.WARNING,
-                          SEVERITY_COLORS.MINOR,
-                          SEVERITY_COLORS.MAJOR,
-                          SEVERITY_COLORS.CRITICAL,
-                        ]}
+                        colorScale={{
+                          type: 'bands',
+                          bands: [
+                            {
+                              start: ANOMALY_THRESHOLD.LOW,
+                              end: ANOMALY_THRESHOLD.WARNING,
+                              color: SEVERITY_COLORS.LOW,
+                            },
+                            {
+                              start: ANOMALY_THRESHOLD.WARNING,
+                              end: ANOMALY_THRESHOLD.MINOR,
+                              color: SEVERITY_COLORS.WARNING,
+                            },
+                            {
+                              start: ANOMALY_THRESHOLD.MINOR,
+                              end: ANOMALY_THRESHOLD.MAJOR,
+                              color: SEVERITY_COLORS.MINOR,
+                            },
+                            {
+                              start: ANOMALY_THRESHOLD.MAJOR,
+                              end: ANOMALY_THRESHOLD.CRITICAL,
+                              color: SEVERITY_COLORS.MAJOR,
+                            },
+                            {
+                              start: ANOMALY_THRESHOLD.CRITICAL,
+                              end: Infinity,
+                              color: SEVERITY_COLORS.CRITICAL,
+                            },
+                          ],
+                        }}
                         data={swimLanePoints}
                         xAccessor="time"
                         yAccessor="laneLabel"
