@@ -44,8 +44,7 @@ export default ({ getService }: FtrProviderContext) => {
     return observabilityIndex;
   };
 
-  // FAILING: https://github.com/elastic/kibana/issues/110153
-  describe.skip('rbac with subfeatures', () => {
+  describe('rbac with subfeatures', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/rule_registry/alerts');
     });
