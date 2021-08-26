@@ -4,50 +4,116 @@ steps:
 
   - wait
 
-  # - command: .buildkite/scripts/steps/build_kibana.sh
-  #   label: Build Kibana Distribution and Plugins
-  #   agents:
-  #     queue: c2-8
-  #   key: build
-  #   if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"
+  - command: .buildkite/scripts/steps/build_kibana.sh
+    label: Build Kibana Distribution and Plugins
+    agents:
+      queue: c2-8
+    key: build
+    if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"
 
-  # - command: .buildkite/scripts/steps/functional/xpack-cigroup.sh
-  #   label: 'Default CI Group'
-  #   parallelism: 13
-  #   agents:
-  #     queue: ci-group-6
-  #   artifact_paths: target/junit/**/*.xml
-  #   depends_on: build
-  #   key: default-cigroup
-  #   retry:
-  #     automatic:
-  #       - exit_status: '*'
-  #         limit: 1
+  - command: .buildkite/scripts/steps/functional/xpack_cigroup.sh
+    label: 'Default CI Group'
+    parallelism: 1 # TODO 13
+    agents:
+      queue: ci-group-6
+    artifact_paths: target/junit/**/*.xml
+    depends_on: build
+    key: default-cigroup
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 1
 
-  # - command: CI_GROUP=Docker .buildkite/scripts/steps/functional/xpack-cigroup.sh
-  #   label: 'Docker CI Group'
-  #   agents:
-  #     queue: ci-group-6
-  #   artifact_paths: target/junit/**/*.xml
-  #   depends_on: build
-  #   key: default-cigroup-docker
-  #   retry:
-  #     automatic:
-  #       - exit_status: '*'
-  #         limit: 1
+  - command: CI_GROUP=Docker .buildkite/scripts/steps/functional/xpack_cigroup.sh
+    label: 'Docker CI Group'
+    agents:
+      queue: ci-group-6
+    artifact_paths: target/junit/**/*.xml
+    depends_on: build
+    key: default-cigroup-docker
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 1
 
-  # - command: .buildkite/scripts/steps/functional/oss-cigroup.sh
-  #   label: 'OSS CI Group'
-  #   parallelism: 12
-  #   agents:
-  #     queue: ci-group-4d
-  #   artifact_paths: target/junit/**/*.xml
-  #   depends_on: build
-  #   key: oss-cigroup
-  #   retry:
-  #     automatic:
-  #       - exit_status: '*'
-  #         limit: 1
+  - command: .buildkite/scripts/steps/functional/oss_cigroup.sh
+    label: 'OSS CI Group'
+    parallelism: 1 # TODO 12
+    agents:
+      queue: ci-group-4d
+    artifact_paths: target/junit/**/*.xml
+    depends_on: build
+    key: oss-cigroup
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 1
+
+  - command: .buildkite/scripts/steps/functional/oss_accessibility.sh
+    label: 'OSS Accessibility Tests'
+    agents:
+      queue: ci-group-4d
+    artifact_paths: target/junit/**/*.xml
+    depends_on: build
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 1
+
+  - command: .buildkite/scripts/steps/functional/xpack_accessibility.sh
+    label: 'Default Accessibility Tests'
+    agents:
+      queue: ci-group-6
+    artifact_paths: target/junit/**/*.xml
+    depends_on: build
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 1
+
+  - command: .buildkite/scripts/steps/functional/oss_firefox.sh
+    label: 'OSS Firefox Tests'
+    agents:
+      queue: ci-group-4d
+    artifact_paths: target/junit/**/*.xml
+    depends_on: build
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 1
+
+  - command: .buildkite/scripts/steps/functional/xpack_firefox.sh
+    label: 'Default Firefox Tests'
+    agents:
+      queue: ci-group-6
+    artifact_paths: target/junit/**/*.xml
+    depends_on: build
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 1
+
+  - command: .buildkite/scripts/steps/functional/oss_misc.sh
+    label: 'OSS Misc Functional Tests'
+    agents:
+      queue: ci-group-4d
+    artifact_paths: target/junit/**/*.xml
+    depends_on: build
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 1
+
+  - command: .buildkite/scripts/steps/functional/xpack_saved_object_field_metrics.sh
+    label: 'Default Firefox Tests'
+    agents:
+      queue: ci-group-6
+    artifact_paths: target/junit/**/*.xml
+    depends_on: build
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 1
 
   - command: .buildkite/scripts/steps/test/jest_integration.sh
     label: 'Jest Integration Tests'

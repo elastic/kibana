@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-export DISABLE_BOOTSTRAP_VALIDATION=true
+source .buildkite/scripts/common/util.sh
 
 export CI_GROUP=${CI_GROUP:-$((BUILDKITE_PARALLEL_JOB+1))}
 export JOB=kibana-default-ciGroup${CI_GROUP}
@@ -16,10 +16,10 @@ echo "--- Running $JOB"
 
 cd "$XPACK_DIR"
 
-node scripts/functional_tests \
-  --bail \
-  --kibana-install-dir "$KIBANA_BUILD_LOCATION" \
-  --include-tag "ciGroup$CI_GROUP"
+checks-reporter-with-killswitch "X-Pack Chrome Functional tests / Group ${CI_GROUP}" \
+  node scripts/functional_tests \
+    --bail \
+    --kibana-install-dir "$KIBANA_BUILD_LOCATION" \
+    --include-tag "ciGroup$CI_GROUP"
 
 cd "$KIBANA_DIR"
-buildkite-agent artifact upload target/test_metadata.json || true

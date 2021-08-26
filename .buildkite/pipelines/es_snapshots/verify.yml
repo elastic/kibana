@@ -21,7 +21,7 @@ steps:
     key: build
     if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"
 
-  - command: .buildkite/scripts/steps/functional/xpack-cigroup.sh
+  - command: .buildkite/scripts/steps/functional/xpack_cigroup.sh
     label: 'Default CI Group'
     parallelism: 13
     agents:
@@ -34,7 +34,7 @@ steps:
         - exit_status: '*'
           limit: 1
 
-  - command: CI_GROUP=Docker .buildkite/scripts/steps/functional/xpack-cigroup.sh
+  - command: CI_GROUP=Docker .buildkite/scripts/steps/functional/xpack_cigroup.sh
     label: 'Docker CI Group'
     agents:
       queue: ci-group-6
@@ -46,7 +46,7 @@ steps:
         - exit_status: '*'
           limit: 1
 
-  - command: .buildkite/scripts/steps/functional/oss-cigroup.sh
+  - command: .buildkite/scripts/steps/functional/oss_cigroup.sh
     label: 'OSS CI Group'
     parallelism: 12
     agents:
