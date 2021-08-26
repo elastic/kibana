@@ -88,19 +88,6 @@ steps:
       queue: n2-2
     key: quick
 
-  - command: .buildkite/scripts/steps/es_snapshots/trigger_promote.sh
-    label: Trigger promotion
-    depends_on:
-      - default-cigroup
-      - default-cigroup-docker
-      - oss-cigroup
-      - jest-integration
-      - api-integration
-      - linting
-      - checks
-      - quick
-      - jest
-
   - wait: ~
     continue_on_failure: true
   - plugins:
