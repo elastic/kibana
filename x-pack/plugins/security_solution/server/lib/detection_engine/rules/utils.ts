@@ -51,6 +51,7 @@ import {
   RuleNameOverrideOrUndefined,
   TimestampOverrideOrUndefined,
   EventCategoryOverrideOrUndefined,
+  NamespaceOrUndefined,
 } from '../../../../common/detection_engine/schemas/common/schemas';
 import { PartialFilter } from '../types';
 
@@ -111,7 +112,7 @@ export interface UpdateProperties {
   version: VersionOrUndefined;
   exceptionsList: ListArrayOrUndefined;
   anomalyThreshold: AnomalyThresholdOrUndefined;
-  namespace?: string;
+  namespace: NamespaceOrUndefined;
 }
 
 export const calculateVersion = (

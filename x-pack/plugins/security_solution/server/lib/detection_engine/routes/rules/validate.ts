@@ -9,7 +9,6 @@ import { SavedObject, SavedObjectsFindResult } from 'kibana/server';
 
 import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 import {
-  fullRACResponseSchema,
   FullResponseSchema,
   fullResponseSchema,
 } from '../../../../../common/detection_engine/schemas/request';
@@ -29,8 +28,8 @@ import { transform, transformAlertToRule } from './utils';
 import { RuleActions } from '../../rule_actions/types';
 import { RuleParams } from '../../schemas/rule_schemas';
 
-export const transformValidate = <TRuleParams extends RuleParams>(
-  alert: PartialAlert<TRuleParams>,
+export const transformValidate = (
+  alert: PartialAlert<RuleParams>,
   ruleActions?: RuleActions | null,
   ruleStatus?: SavedObject<IRuleSavedAttributesSavedObjectAttributes>,
   isRuleRegistryEnabled?: boolean
@@ -43,8 +42,8 @@ export const transformValidate = <TRuleParams extends RuleParams>(
   }
 };
 
-export const newTransformValidate = <TRuleParams extends RuleParams>(
-  alert: PartialAlert<TRuleParams>,
+export const newTransformValidate = (
+  alert: PartialAlert<RuleParams>,
   ruleActions?: RuleActions | null,
   ruleStatus?: SavedObject<IRuleSavedAttributesSavedObjectAttributes>,
   isRuleRegistryEnabled?: boolean
@@ -53,10 +52,7 @@ export const newTransformValidate = <TRuleParams extends RuleParams>(
   if (transformed == null) {
     return [null, 'Internal error transforming'];
   } else {
-    return validateNonExact(
-      transformed,
-      isRuleRegistryEnabled ? fullRACResponseSchema : fullResponseSchema
-    );
+    return validateNonExact(transformed, fullResponseSchema);
   }
 };
 
@@ -64,10 +60,10 @@ export const transformValidateBulkError = (
   ruleId: string,
   alert: PartialAlert<RuleParams>,
   ruleActions?: RuleActions | null,
-  ruleStatus?: Array<SavedObjectsFindResult<IRuleStatusSOAttributes>>
+  ruleStatus?: Array<SavedObjectsFindResult<IRuleStatusSOAttributes>>,
+  isRuleRegistryEnabled?: boolean
 ): RulesSchema | BulkError => {
-  if (isAlertType(false, alert)) {
-    // TODO: support RAC
+  if (isAlertType(isRuleRegistryEnabled ?? false, alert)) {
     if (ruleStatus && ruleStatus?.length > 0 && isRuleStatusSavedObjectType(ruleStatus[0])) {
       const transformed = transformAlertToRule(alert, ruleActions, ruleStatus[0]);
       const [validated, errors] = validateNonExact(transformed, rulesSchema);

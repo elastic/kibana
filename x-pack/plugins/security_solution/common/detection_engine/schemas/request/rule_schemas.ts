@@ -68,6 +68,7 @@ import {
   last_success_message,
   last_failure_at,
   last_failure_message,
+  namespace,
 } from '../common/schemas';
 
 export const createSchema = <
@@ -155,6 +156,7 @@ const baseParams = {
     meta,
     rule_name_override,
     timestamp_override,
+    namespace,
   },
   defaultable: {
     tags,
@@ -176,26 +178,11 @@ const baseParams = {
     exceptions_list: listArray,
   },
 };
-
-const racBaseParams = {
-  ...baseParams,
-  required: {
-    ...baseParams.required,
-    namespace: t.string,
-  },
-};
-
 const {
   create: baseCreateParams,
   patch: basePatchParams,
   response: baseResponseParams,
 } = buildAPISchemas(baseParams);
-
-const {
-  create: racBaseCreateParams,
-  // patch: racBasePatchParams,
-  response: racBaseResponseParams,
-} = buildAPISchemas(racBaseParams);
 
 // "shared" types are the same across all rule types, and built from "baseParams" above
 // with some variations for each route. These intersect with type specific schemas below
@@ -206,25 +193,12 @@ export const sharedCreateSchema = t.intersection([
 ]);
 export type SharedCreateSchema = t.TypeOf<typeof sharedCreateSchema>;
 
-export const racSharedCreateSchema = t.intersection([
-  racBaseCreateParams,
-  t.exact(t.partial({ rule_id })),
-]);
-export type RACSharedCreateSchema = t.TypeOf<typeof racSharedCreateSchema>;
-
 export const sharedUpdateSchema = t.intersection([
   baseCreateParams,
   t.exact(t.partial({ rule_id })),
   t.exact(t.partial({ id })),
 ]);
 export type SharedUpdateSchema = t.TypeOf<typeof sharedUpdateSchema>;
-
-export const racSharedUpdateSchema = t.intersection([
-  racBaseCreateParams,
-  t.exact(t.partial({ rule_id })),
-  t.exact(t.partial({ id })),
-]);
-export type RACSharedUpdateSchema = t.TypeOf<typeof racSharedUpdateSchema>;
 
 const eqlRuleParams = {
   required: {
@@ -289,7 +263,6 @@ const queryRuleParams = {
     language: t.keyof({ kuery: null, lucene: null }),
   },
 };
-
 const {
   create: queryCreateParams,
   patch: queryPatchParams,
@@ -386,9 +359,6 @@ export type MachineLearningCreateSchema = CreateSchema<
 export const createRulesSchema = t.intersection([sharedCreateSchema, createTypeSpecific]);
 export type CreateRulesSchema = t.TypeOf<typeof createRulesSchema>;
 
-export const racCreateRulesSchema = t.intersection([racSharedCreateSchema, createTypeSpecific]);
-export type RACCreateRulesSchema = t.TypeOf<typeof racCreateRulesSchema>;
-
 type UpdateSchema<T> = SharedUpdateSchema & T;
 export type EqlUpdateSchema = UpdateSchema<t.TypeOf<typeof eqlCreateParams>>;
 export type ThreatMatchUpdateSchema = UpdateSchema<t.TypeOf<typeof threatMatchCreateParams>>;
@@ -421,9 +391,6 @@ export type ResponseTypeSpecific = t.TypeOf<typeof responseTypeSpecific>;
 export const updateRulesSchema = t.intersection([createTypeSpecific, sharedUpdateSchema]);
 export type UpdateRulesSchema = t.TypeOf<typeof updateRulesSchema>;
 
-export const racUpdateRulesSchema = t.intersection([createTypeSpecific, racSharedUpdateSchema]);
-export type RACUpdateRulesSchema = t.TypeOf<typeof racUpdateRulesSchema>;
-
 export const fullPatchSchema = t.intersection([
   basePatchParams,
   patchTypeSpecific,
@@ -455,11 +422,3 @@ export const fullResponseSchema = t.intersection([
   t.exact(t.partial(responseOptionalFields)),
 ]);
 export type FullResponseSchema = t.TypeOf<typeof fullResponseSchema>;
-
-export const fullRACResponseSchema = t.intersection([
-  racBaseResponseParams,
-  responseTypeSpecific,
-  t.exact(t.type(responseRequiredFields)),
-  t.exact(t.partial(responseOptionalFields)),
-]);
-export type FullRACResponseSchema = t.TypeOf<typeof fullRACResponseSchema>;

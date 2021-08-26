@@ -75,6 +75,7 @@ import {
   license,
   rule_name_override,
   timestamp_override,
+  namespace,
 } from '../common/schemas';
 
 import { typeAndTimelineOnlySchema, TypeAndTimelineOnly } from './type_timeline_only_schema';
@@ -113,13 +114,8 @@ export const requiredRulesSchema = t.type({
   version,
   exceptions_list: DefaultListArray,
 });
-export const requiredRACRulesSchema = t.intersection([
-  requiredRulesSchema,
-  t.type({ namespace: t.string }),
-]);
 
 export type RequiredRulesSchema = t.TypeOf<typeof requiredRulesSchema>;
-export type RequiredRACRulesSchema = t.TypeOf<typeof requiredRACRulesSchema>;
 
 /**
  * If you have type dependents or exclusive or situations add them here AND update the
@@ -179,6 +175,7 @@ export const partialRulesSchema = t.partial({
   filters,
   meta,
   index,
+  namespace,
   note,
 });
 
@@ -191,15 +188,6 @@ export const rulesWithoutTypeDependentsSchema = t.intersection([
   t.exact(requiredRulesSchema),
 ]);
 export type RulesWithoutTypeDependentsSchema = t.TypeOf<typeof rulesWithoutTypeDependentsSchema>;
-
-export const racRulesWithoutTypeDependentsSchema = t.intersection([
-  t.exact(dependentRulesSchema),
-  t.exact(partialRulesSchema),
-  t.exact(requiredRACRulesSchema),
-]);
-export type RACRulesWithoutTypeDependentsSchema = t.TypeOf<
-  typeof racRulesWithoutTypeDependentsSchema
->;
 
 /**
  * This is the rulesSchema you want to use for checking type dependents and all the properties
@@ -214,23 +202,6 @@ export const rulesSchema = new t.Type<
   (input: unknown): input is RulesWithoutTypeDependentsSchema => isObject(input),
   (input): Either<t.Errors, RulesWithoutTypeDependentsSchema> => {
     return checkTypeDependents(input);
-  },
-  t.identity
-);
-
-/**
- * This is the racRulesSchema you want to use for checking type dependents and all the properties
- * through: racRulesSchema.decode(someJSONObject)
- */
-export const racRulesSchema = new t.Type<
-  RACRulesWithoutTypeDependentsSchema,
-  RACRulesWithoutTypeDependentsSchema,
-  unknown
->(
-  'RACRulesSchema',
-  (input: unknown): input is RACRulesWithoutTypeDependentsSchema => isObject(input),
-  (input): Either<t.Errors, RACRulesWithoutTypeDependentsSchema> => {
-    return checkRACTypeDependents(input);
   },
   t.identity
 );
@@ -366,20 +337,6 @@ export const checkTypeDependents = (input: unknown): Either<t.Errors, RequiredRu
   const onRight = (
     typeAndTimelineOnly: TypeAndTimelineOnly
   ): Either<t.Errors, RequiredRulesSchema> => {
-    const intersections = getDependents(typeAndTimelineOnly);
-    return intersections.decode(input);
-  };
-  return pipe(typeOnlyDecoded, fold(onLeft, onRight));
-};
-
-export const checkRACTypeDependents = (
-  input: unknown
-): Either<t.Errors, RequiredRACRulesSchema> => {
-  const typeOnlyDecoded = typeAndTimelineOnlySchema.decode(input);
-  const onLeft = (errors: t.Errors): Either<t.Errors, RequiredRACRulesSchema> => left(errors);
-  const onRight = (
-    typeAndTimelineOnly: TypeAndTimelineOnly
-  ): Either<t.Errors, RequiredRACRulesSchema> => {
     const intersections = getDependents(typeAndTimelineOnly);
     return intersections.decode(input);
   };

@@ -32,6 +32,7 @@ import {
   buildingBlockTypeOrUndefined,
   description,
   enabled,
+  namespaceOrUndefined,
   noteOrUndefined,
   false_positives,
   rule_id,
@@ -65,45 +66,38 @@ import {
 import { SIGNALS_ID, SERVER_APP_ID } from '../../../../common/constants';
 
 const nonEqlLanguages = t.keyof({ kuery: null, lucene: null });
-export const baseRuleParamsObj = {
-  author,
-  buildingBlockType: buildingBlockTypeOrUndefined,
-  description,
-  note: noteOrUndefined,
-  falsePositives: false_positives,
-  from,
-  ruleId: rule_id,
-  immutable,
-  license: licenseOrUndefined,
-  outputIndex: output_index,
-  timelineId: timelineIdOrUndefined,
-  timelineTitle: timelineTitleOrUndefined,
-  meta: metaOrUndefined,
-  // maxSignals not used in ML rules but probably should be used
-  maxSignals: max_signals,
-  riskScore: risk_score,
-  riskScoreMapping: risk_score_mapping,
-  ruleNameOverride: ruleNameOverrideOrUndefined,
-  severity,
-  severityMapping: severity_mapping,
-  timestampOverride: timestampOverrideOrUndefined,
-  threat: threats,
-  to,
-  references,
-  version,
-  exceptionsList: listArray,
-};
-
-export const baseRuleParams = t.exact(t.type(baseRuleParamsObj));
-export type BaseRuleParams = t.TypeOf<typeof baseRuleParams>;
-
-export const baseRACRuleParams = t.exact(
+export const baseRuleParams = t.exact(
   t.type({
-    ...baseRuleParamsObj,
-    namespace: t.string,
+    author,
+    buildingBlockType: buildingBlockTypeOrUndefined,
+    description,
+    namespace: namespaceOrUndefined,
+    note: noteOrUndefined,
+    falsePositives: false_positives,
+    from,
+    ruleId: rule_id,
+    immutable,
+    license: licenseOrUndefined,
+    outputIndex: output_index,
+    timelineId: timelineIdOrUndefined,
+    timelineTitle: timelineTitleOrUndefined,
+    meta: metaOrUndefined,
+    // maxSignals not used in ML rules but probably should be used
+    maxSignals: max_signals,
+    riskScore: risk_score,
+    riskScoreMapping: risk_score_mapping,
+    ruleNameOverride: ruleNameOverrideOrUndefined,
+    severity,
+    severityMapping: severity_mapping,
+    timestampOverride: timestampOverrideOrUndefined,
+    threat: threats,
+    to,
+    references,
+    version,
+    exceptionsList: listArray,
   })
 );
-export type BaseRACRuleParams = t.TypeOf<typeof baseRACRuleParams>;
+export type BaseRuleParams = t.TypeOf<typeof baseRuleParams>;
 
 const eqlSpecificRuleParams = t.type({
   type: t.literal('eql'),
@@ -147,9 +141,6 @@ const querySpecificRuleParams = t.exact(
 );
 export const queryRuleParams = t.intersection([baseRuleParams, querySpecificRuleParams]);
 export type QueryRuleParams = t.TypeOf<typeof queryRuleParams>;
-
-export const queryRuleParamsRAC = t.intersection([baseRACRuleParams, querySpecificRuleParams]);
-export type QueryRuleParamsRAC = t.TypeOf<typeof queryRuleParamsRAC>;
 
 const savedQuerySpecificRuleParams = t.type({
   type: t.literal('saved_query'),
@@ -200,12 +191,10 @@ export type TypeSpecificRuleParams = t.TypeOf<typeof typeSpecificRuleParams>;
 export const ruleParams = t.intersection([baseRuleParams, typeSpecificRuleParams]);
 export type RuleParams = t.TypeOf<typeof ruleParams>;
 
-export const racRuleParams = t.intersection([baseRACRuleParams, typeSpecificRuleParams]);
-export type RACRuleParams = t.TypeOf<typeof racRuleParams>;
-
-const internalRuleCreateBase = {
+export const internalRuleCreate = t.type({
   name,
   tags,
+  alertTypeId: t.literal(SIGNALS_ID),
   consumer: t.literal(SERVER_APP_ID),
   schedule: t.type({
     interval: t.string,
@@ -215,36 +204,10 @@ const internalRuleCreateBase = {
   params: ruleParams,
   throttle: throttleOrNull,
   notifyWhen: t.null,
-};
-const internalRuleCreateBaseType = t.type(internalRuleCreateBase);
-export type InternalRuleCreateBase = t.TypeOf<typeof internalRuleCreateBaseType>;
-
-export const internalRuleCreate = t.type({
-  ...internalRuleCreateBase,
-  alertTypeId: t.literal(SIGNALS_ID),
-  params: ruleParams,
 });
 export type InternalRuleCreate = t.TypeOf<typeof internalRuleCreate>;
 
-export const internalRACRuleCreate = t.type({
-  ...internalRuleCreateBase,
-  alertTypeId: t.literal('siem.query'),
-  params: t.intersection([ruleParams, t.type({ namespace: t.string })]),
-});
-export type InternalRACRuleCreate = t.TypeOf<typeof internalRACRuleCreate>;
-
-export const isInternalRuleCreate = (obj: InternalRuleCreateBase): obj is InternalRuleCreate => {
-  return !('namespace' in obj.params);
-};
-
-export const isInternalRACRuleCreate = (
-  obj: InternalRuleCreateBase
-): obj is InternalRACRuleCreate => {
-  const namespace = (obj as InternalRACRuleCreate).params.namespace;
-  return namespace != null;
-};
-
-export const internalRuleUpdateBase = {
+export const internalRuleUpdate = t.type({
   name,
   tags,
   schedule: t.type({
@@ -254,31 +217,8 @@ export const internalRuleUpdateBase = {
   params: ruleParams,
   throttle: throttleOrNull,
   notifyWhen: t.null,
-};
-const internalRuleUpdateBaseType = t.type(internalRuleUpdateBase);
-export type InternalRuleUpdateBase = t.TypeOf<typeof internalRuleUpdateBaseType>;
-
-export const internalRuleUpdate = t.type({
-  ...internalRuleUpdateBase,
 });
 export type InternalRuleUpdate = t.TypeOf<typeof internalRuleUpdate>;
-
-export const internalRACRuleUpdate = t.type({
-  ...internalRuleUpdateBase,
-  params: t.intersection([ruleParams, t.type({ namespace: t.string })]),
-});
-export type InternalRACRuleUpdate = t.TypeOf<typeof internalRACRuleUpdate>;
-
-export const isInternalRuleUpdate = (obj: InternalRuleUpdateBase): obj is InternalRuleUpdate => {
-  return !('namespace' in obj.params);
-};
-
-export const isInternalRACRuleUpdate = (
-  obj: InternalRuleUpdateBase
-): obj is InternalRACRuleUpdate => {
-  const namespace = (obj as InternalRACRuleUpdate).params.namespace;
-  return namespace != null;
-};
 
 export const internalRuleResponse = t.intersection([
   internalRuleCreate,

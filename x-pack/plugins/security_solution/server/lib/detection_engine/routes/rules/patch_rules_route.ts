@@ -6,7 +6,6 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { IRuleDataClient } from '../../../../../../rule_registry/server';
 import { RuleAlertAction } from '../../../../../common/detection_engine/types';
 import { patchRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/patch_rules_type_dependents';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
@@ -31,7 +30,7 @@ import { PartialFilter } from '../../types';
 export const patchRulesRoute = (
   router: SecuritySolutionPluginRouter,
   ml: SetupPlugins['ml'],
-  ruleDataClient?: IRuleDataClient | null
+  isRuleRegistryEnabled: boolean
 ) => {
   router.patch(
     {
@@ -46,7 +45,6 @@ export const patchRulesRoute = (
       },
     },
     async (context, request, response) => {
-      const isRuleRegistryEnabled = ruleDataClient != null;
       const siemResponse = buildSiemResponse(response);
       const validationErrors = patchRuleValidateTypeDependents(request.body);
       if (validationErrors.length) {
@@ -187,7 +185,6 @@ export const patchRulesRoute = (
           machineLearningJobId,
           actions,
           exceptionsList,
-          isRuleRegistryEnabled,
         });
         if (rule != null && rule.enabled != null && rule.name != null) {
           const ruleActions = await updateRulesNotifications({

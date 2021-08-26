@@ -52,6 +52,7 @@ describe('duplicateRule', () => {
           query: 'process.args : "chmod"',
           filters: [],
           buildingBlockType: undefined,
+          namespace: undefined,
           note: undefined,
           timelineId: undefined,
           timelineTitle: undefined,

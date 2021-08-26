@@ -7,7 +7,6 @@
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 
-import { IRuleDataClient } from '../../../../../../rule_registry/server';
 import { findRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/find_rules_type_dependents';
 import {
   findRulesSchema,
@@ -20,16 +19,15 @@ import { buildSiemResponse } from '../utils';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import { transformFindAlerts } from './utils';
 import { getBulkRuleActionsSavedObject } from '../../rule_actions/get_bulk_rule_actions_saved_object';
-import { RACRuleParams, RuleParams } from '../../schemas/rule_schemas';
+import { RuleParams } from '../../schemas/rule_schemas';
 import { RulesClient } from '../../../../../../alerting/server';
 import { RuleExecutionLogClient } from '../../rule_execution_log/rule_execution_log_client';
 import { SavedObjectsClientContract } from '../../../../../../../../src/core/server';
 
 export const findRulesRoute = (
   router: SecuritySolutionPluginRouter,
-  ruleDataClient?: IRuleDataClient | null
+  isRuleRegistryEnabled: boolean
 ) => {
-  const isRuleRegistryEnabled = ruleDataClient != null;
   router.get(
     {
       path: `${DETECTION_ENGINE_RULES_URL}/_find`,
@@ -56,7 +54,7 @@ export const findRulesRoute = (
         savedObjectsClient: SavedObjectsClientContract;
       }) => {
         const { execLogClient, query, rulesClient, savedObjectsClient } = opts;
-        const rules = await findRules<TRuleParams>({
+        const rules = await findRules({
           isRuleRegistryEnabled,
           rulesClient,
           perPage: query.per_page,
@@ -78,12 +76,7 @@ export const findRulesRoute = (
           getBulkRuleActionsSavedObject({ alertIds, savedObjectsClient }),
         ]);
 
-        const transformed = transformFindAlerts<TRuleParams>(
-          rules,
-          ruleActions,
-          ruleStatuses,
-          isRuleRegistryEnabled
-        );
+        const transformed = transformFindAlerts(rules, ruleActions, ruleStatuses);
 
         if (transformed == null) {
           return siemResponse.error({ statusCode: 500, body: 'Internal error transforming' });
@@ -104,7 +97,7 @@ export const findRulesRoute = (
         const execLogClient = context.securitySolution.getExecutionLogClient();
 
         if (isRuleRegistryEnabled) {
-          return await findAndTransform<RACRuleParams>({
+          return await findAndTransform({
             execLogClient,
             query,
             rulesClient,

@@ -105,26 +105,19 @@ export const transformTags = (tags: string[]): string[] => {
 export const transformAlertToRule = <TRuleParams extends RuleParams>(
   alert: SanitizedAlert<TRuleParams>,
   ruleActions?: RuleActions | null,
-  ruleStatus?: SavedObject<IRuleSavedAttributesSavedObjectAttributes>,
-  isRuleRegistryEnabled?: boolean
+  ruleStatus?: SavedObject<IRuleSavedAttributesSavedObjectAttributes>
 ): Partial<RulesSchema> => {
-  return internalRuleToAPIResponse(
-    alert,
-    ruleActions,
-    ruleStatus?.attributes,
-    isRuleRegistryEnabled ?? false
-  );
+  return internalRuleToAPIResponse(alert, ruleActions, ruleStatus?.attributes);
 };
 
 export const transformAlertsToRules = (alerts: RuleAlertType[]): Array<Partial<RulesSchema>> => {
   return alerts.map((alert) => transformAlertToRule(alert));
 };
 
-export const transformFindAlerts = <TRuleParams extends RuleParams>(
-  findResults: FindResult<TRuleParams>,
+export const transformFindAlerts = (
+  findResults: FindResult<RuleParams>,
   ruleActions: { [key: string]: RuleActions | undefined },
-  ruleStatuses: { [key: string]: IRuleStatusSOAttributes[] | undefined },
-  isRuleRegistryEnabled: boolean
+  ruleStatuses: { [key: string]: IRuleStatusSOAttributes[] | undefined }
 ): {
   page: number;
   perPage: number;
@@ -138,18 +131,13 @@ export const transformFindAlerts = <TRuleParams extends RuleParams>(
     data: findResults.data.map((alert) => {
       const statuses = ruleStatuses[alert.id];
       const status = statuses ? statuses[0] : undefined;
-      return internalRuleToAPIResponse<TRuleParams>(
-        alert,
-        ruleActions[alert.id],
-        status,
-        isRuleRegistryEnabled
-      );
+      return internalRuleToAPIResponse(alert, ruleActions[alert.id], status);
     }),
   };
 };
 
-export const transform = <TRuleParams extends RuleParams>(
-  alert: PartialAlert<TRuleParams>,
+export const transform = (
+  alert: PartialAlert<RuleParams>,
   ruleActions?: RuleActions | null,
   ruleStatus?: SavedObject<IRuleSavedAttributesSavedObjectAttributes>,
   isRuleRegistryEnabled?: boolean
@@ -158,8 +146,7 @@ export const transform = <TRuleParams extends RuleParams>(
     return transformAlertToRule(
       alert,
       ruleActions,
-      isRuleStatusSavedObjectType(ruleStatus) ? ruleStatus : undefined,
-      isRuleRegistryEnabled
+      isRuleStatusSavedObjectType(ruleStatus) ? ruleStatus : undefined
     );
   }
 
@@ -191,10 +178,10 @@ export const transformOrBulkError = (
 export const transformOrImportError = (
   ruleId: string,
   alert: PartialAlert<RuleParams>,
-  existingImportSuccessError: ImportSuccessError
+  existingImportSuccessError: ImportSuccessError,
+  isRuleRegistryEnabled: boolean
 ): ImportSuccessError => {
-  if (isAlertType(false, alert)) {
-    // TODO: support RAC
+  if (isAlertType(isRuleRegistryEnabled, alert)) {
     return createSuccessObject(existingImportSuccessError);
   } else {
     return createImportErrorObject({

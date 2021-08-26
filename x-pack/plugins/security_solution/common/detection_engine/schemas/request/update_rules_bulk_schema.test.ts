@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  racUpdateRulesBulkSchema,
-  updateRulesBulkSchema,
-  UpdateRulesBulkSchema,
-} from './update_rules_bulk_schema';
+import { updateRulesBulkSchema, UpdateRulesBulkSchema } from './update_rules_bulk_schema';
 import { exactCheck, formatErrors, foldLeftRight } from '@kbn/securitysolution-io-ts-utils';
 import { getUpdateRulesSchemaMock } from './rule_schemas.mock';
 import { UpdateRulesSchema } from './rule_schemas';
@@ -20,6 +16,7 @@ import { UpdateRulesSchema } from './rule_schemas';
 describe('update_rules_bulk_schema', () => {
   test('can take an empty array and validate it', () => {
     const payload: UpdateRulesBulkSchema = [];
+
     const decoded = updateRulesBulkSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const output = foldLeftRight(checked);
@@ -27,14 +24,10 @@ describe('update_rules_bulk_schema', () => {
     expect(output.schema).toEqual([]);
   });
 
-  test.each([
-    ['Legacy', false],
-    ['RAC', true],
-  ])('made up values do not validate for a single element - %s', (isRuleRegistryEnabled) => {
+  test('made up values do not validate for a single element', () => {
     const payload: Array<{ madeUp: string }> = [{ madeUp: 'hi' }];
-    const schema = isRuleRegistryEnabled ? racUpdateRulesBulkSchema : updateRulesBulkSchema;
 
-    const decoded = schema.decode(payload);
+    const decoded = updateRulesBulkSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const output = foldLeftRight(checked);
     expect(formatErrors(output.errors)).toContain(
@@ -50,57 +43,40 @@ describe('update_rules_bulk_schema', () => {
     expect(output.schema).toEqual({});
   });
 
-  test.each([
-    ['Legacy', false],
-    ['RAC', true],
-  ])('single array element does validate - %s', (_, isRuleRegistryEnabled) => {
-    const payload = [getUpdateRulesSchemaMock(undefined, isRuleRegistryEnabled)];
-    const schema = isRuleRegistryEnabled ? racUpdateRulesBulkSchema : updateRulesBulkSchema;
+  test('single array element does validate', () => {
+    const payload: UpdateRulesBulkSchema = [getUpdateRulesSchemaMock()];
 
-    const decoded = schema.decode(payload);
+    const decoded = updateRulesBulkSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const output = foldLeftRight(checked);
     expect(formatErrors(output.errors)).toEqual([]);
     expect(output.schema).toEqual(payload);
   });
 
-  test.each([
-    ['Legacy', false],
-    ['RAC', true],
-  ])('two array elements do validate - %s', (_, isRuleRegistryEnabled) => {
-    const payload: UpdateRulesBulkSchema = [
-      getUpdateRulesSchemaMock(undefined, isRuleRegistryEnabled),
-      getUpdateRulesSchemaMock(undefined, isRuleRegistryEnabled),
-    ];
-    const schema = isRuleRegistryEnabled ? racUpdateRulesBulkSchema : updateRulesBulkSchema;
+  test('two array elements do validate', () => {
+    const payload: UpdateRulesBulkSchema = [getUpdateRulesSchemaMock(), getUpdateRulesSchemaMock()];
 
-    const decoded = schema.decode(payload);
+    const decoded = updateRulesBulkSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const output = foldLeftRight(checked);
     expect(formatErrors(output.errors)).toEqual([]);
     expect(output.schema).toEqual(payload);
   });
 
-  test.each([
-    ['Legacy', false],
-    ['RAC', true],
-  ])(
-    'single array element with a missing value (risk_score) will not validate - %s',
-    (_, isRuleRegistryEnabled) => {
-      const singleItem = getUpdateRulesSchemaMock(undefined, isRuleRegistryEnabled);
-      // @ts-expect-error
-      delete singleItem.risk_score;
-      const payload: UpdateRulesBulkSchema = [singleItem];
+  test('single array element with a missing value (risk_score) will not validate', () => {
+    const singleItem = getUpdateRulesSchemaMock();
+    // @ts-expect-error
+    delete singleItem.risk_score;
+    const payload: UpdateRulesBulkSchema = [singleItem];
 
-      const decoded = updateRulesBulkSchema.decode(payload);
-      const checked = exactCheck(payload, decoded);
-      const output = foldLeftRight(checked);
-      expect(formatErrors(output.errors)).toEqual([
-        'Invalid value "undefined" supplied to "risk_score"',
-      ]);
-      expect(output.schema).toEqual({});
-    }
-  );
+    const decoded = updateRulesBulkSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const output = foldLeftRight(checked);
+    expect(formatErrors(output.errors)).toEqual([
+      'Invalid value "undefined" supplied to "risk_score"',
+    ]);
+    expect(output.schema).toEqual({});
+  });
 
   test('two array elements where the first is valid but the second is invalid (risk_score) will not validate', () => {
     const singleItem = getUpdateRulesSchemaMock();
@@ -209,6 +185,18 @@ describe('update_rules_bulk_schema', () => {
     const output = foldLeftRight(checked);
     expect(formatErrors(output.errors)).toEqual(['Invalid value "madeup" supplied to "severity"']);
     expect(output.schema).toEqual({});
+  });
+
+  test('You can set "namespace" to a string', () => {
+    const payload: UpdateRulesBulkSchema = [
+      { ...getUpdateRulesSchemaMock(), namespace: 'a namespace' },
+    ];
+
+    const decoded = updateRulesBulkSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const output = foldLeftRight(checked);
+    expect(formatErrors(output.errors)).toEqual([]);
+    expect(output.schema).toEqual(payload);
   });
 
   test('You can set "note" to a string', () => {

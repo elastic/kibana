@@ -100,18 +100,18 @@ import {
   BuildingBlockTypeOrUndefined,
   RuleNameOverrideOrUndefined,
   EventCategoryOverrideOrUndefined,
+  NamespaceOrUndefined,
 } from '../../../../common/detection_engine/schemas/common/schemas';
 
 import { RulesClient, PartialAlert } from '../../../../../alerting/server';
 import { Alert, SanitizedAlert } from '../../../../../alerting/common';
 import { SIGNALS_ID } from '../../../../common/constants';
 import { PartialFilter } from '../types';
-import { RACRuleParams, RuleParams } from '../schemas/rule_schemas';
+import { RuleParams } from '../schemas/rule_schemas';
 import { IRuleExecutionLogClient } from '../rule_execution_log/types';
 import { ruleTypeMappings } from '../signals/utils';
 
 export type RuleAlertType = Alert<RuleParams>;
-export type RuleAlertTypeRAC = Alert<RACRuleParams>;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export interface IRuleStatusSOAttributes extends Record<string, any> {
@@ -199,10 +199,10 @@ export const isAlertTypes = (
   return partialAlert.every((rule) => isAlertType(isRuleRegistryEnabled, rule));
 };
 
-export const isAlertType = <TRuleParams extends RuleParams>(
+export const isAlertType = (
   isRuleRegistryEnabled: boolean,
   partialAlert: PartialAlert<RuleParams>
-): partialAlert is Alert<TRuleParams> => {
+): partialAlert is RuleAlertType => {
   return isRuleRegistryEnabled
     ? Object.values(ruleTypeMappings).includes(partialAlert.alertTypeId as string)
     : partialAlert.alertTypeId === SIGNALS_ID;
@@ -270,16 +270,17 @@ export interface CreateRulesOptions {
   version: Version;
   exceptionsList: ListArray;
   actions: RuleAlertAction[];
-  namespace?: string;
+  isRuleRegistryEnabled: boolean;
+  namespace?: NamespaceOrUndefined;
 }
 
-export interface UpdateRulesOptions<TSchema extends UpdateRulesSchema> {
+export interface UpdateRulesOptions {
   isRuleRegistryEnabled: boolean;
   spaceId: string;
   ruleStatusClient: IRuleExecutionLogClient;
   rulesClient: RulesClient;
   defaultOutputIndex: string;
-  ruleUpdate: TSchema;
+  ruleUpdate: UpdateRulesSchema;
 }
 
 export interface PatchRulesOptions {
@@ -332,8 +333,7 @@ export interface PatchRulesOptions {
   exceptionsList: ListArrayOrUndefined;
   actions: RuleAlertAction[] | undefined;
   rule: SanitizedAlert<RuleParams> | null;
-  isRuleRegistryEnabled: boolean;
-  namespace?: string;
+  namespace?: NamespaceOrUndefined;
 }
 
 export interface ReadRuleOptions {

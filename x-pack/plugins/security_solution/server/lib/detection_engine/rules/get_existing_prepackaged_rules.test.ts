@@ -31,9 +31,24 @@ describe('get_existing_prepackaged_rules', () => {
       ['RAC', true],
     ])('should return a single item in a single page - %s', async (_, isRuleRegistryEnabled) => {
       const rulesClient = rulesClientMock.create();
-      rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(isRuleRegistryEnabled));
+      rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
       const rules = await getExistingPrepackagedRules({ rulesClient, isRuleRegistryEnabled });
-      expect(rules).toEqual([getAlertMock(getQueryRuleParams(isRuleRegistryEnabled))]);
+      expect(rules).toEqual([getAlertMock(getQueryRuleParams())]);
+    });
+
+    test('should return a single item in a single page with namespace - RAC', async () => {
+      const isRuleRegistryEnabled = true;
+      const rulesClient = rulesClientMock.create();
+      const findResult = getFindResultWithSingleHit();
+      findResult.data[0].params.namespace = 'a namespace';
+      rulesClient.find.mockResolvedValue(findResult);
+      const rules = await getExistingPrepackagedRules({ rulesClient, isRuleRegistryEnabled });
+      expect(rules).toEqual([
+        getAlertMock({
+          ...getQueryRuleParams(),
+          namespace: 'a namespace',
+        }),
+      ]);
     });
 
     test.each([
@@ -44,15 +59,15 @@ describe('get_existing_prepackaged_rules', () => {
       async (_, isRuleRegistryEnabled) => {
         const rulesClient = rulesClientMock.create();
 
-        const result1 = getAlertMock(getQueryRuleParams(isRuleRegistryEnabled));
+        const result1 = getAlertMock(getQueryRuleParams());
         result1.params.immutable = true;
         result1.id = '4baa53f8-96da-44ee-ad58-41bccb7f9f3d';
 
-        const result2 = getAlertMock(getQueryRuleParams(isRuleRegistryEnabled));
+        const result2 = getAlertMock(getQueryRuleParams());
         result2.params.immutable = true;
         result2.id = '5baa53f8-96da-44ee-ad58-41bccb7f9f3d';
 
-        const result3 = getAlertMock(getQueryRuleParams(isRuleRegistryEnabled));
+        const result3 = getAlertMock(getQueryRuleParams());
         result3.params.immutable = true;
         result3.id = 'f3e1bf0b-b95f-43da-b1de-5d2f0af2287a';
 
@@ -88,9 +103,9 @@ describe('get_existing_prepackaged_rules', () => {
       ['RAC', true],
     ])('should return a single item in a single page - %s', async (_, isRuleRegistryEnabled) => {
       const rulesClient = rulesClientMock.create();
-      rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(isRuleRegistryEnabled));
+      rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
       const rules = await getNonPackagedRules({ rulesClient, isRuleRegistryEnabled });
-      expect(rules).toEqual([getAlertMock(getQueryRuleParams(isRuleRegistryEnabled))]);
+      expect(rules).toEqual([getAlertMock(getQueryRuleParams())]);
     });
 
     test.each([
@@ -99,10 +114,10 @@ describe('get_existing_prepackaged_rules', () => {
     ])('should return 2 items over 1 page - %s', async (_, isRuleRegistryEnabled) => {
       const rulesClient = rulesClientMock.create();
 
-      const result1 = getAlertMock(getQueryRuleParams(isRuleRegistryEnabled));
+      const result1 = getAlertMock(getQueryRuleParams());
       result1.id = '4baa53f8-96da-44ee-ad58-41bccb7f9f3d';
 
-      const result2 = getAlertMock(getQueryRuleParams(isRuleRegistryEnabled));
+      const result2 = getAlertMock(getQueryRuleParams());
       result2.id = '5baa53f8-96da-44ee-ad58-41bccb7f9f3d';
 
       // first result mock which is for returning the total
@@ -132,13 +147,13 @@ describe('get_existing_prepackaged_rules', () => {
       async (_, isRuleRegistryEnabled) => {
         const rulesClient = rulesClientMock.create();
 
-        const result1 = getAlertMock(getQueryRuleParams(isRuleRegistryEnabled));
+        const result1 = getAlertMock(getQueryRuleParams());
         result1.id = '4baa53f8-96da-44ee-ad58-41bccb7f9f3d';
 
-        const result2 = getAlertMock(getQueryRuleParams(isRuleRegistryEnabled));
+        const result2 = getAlertMock(getQueryRuleParams());
         result2.id = '5baa53f8-96da-44ee-ad58-41bccb7f9f3d';
 
-        const result3 = getAlertMock(getQueryRuleParams(isRuleRegistryEnabled));
+        const result3 = getAlertMock(getQueryRuleParams());
         result3.id = 'f3e1bf0b-b95f-43da-b1de-5d2f0af2287a';
 
         // first result mock which is for returning the total
@@ -173,9 +188,9 @@ describe('get_existing_prepackaged_rules', () => {
       ['RAC', true],
     ])('should return a single item in a single page - %s', async (_, isRuleRegistryEnabled) => {
       const rulesClient = rulesClientMock.create();
-      rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(isRuleRegistryEnabled));
+      rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
       const rules = await getRules({ rulesClient, filter: '', isRuleRegistryEnabled });
-      expect(rules).toEqual([getAlertMock(getQueryRuleParams(isRuleRegistryEnabled))]);
+      expect(rules).toEqual([getAlertMock(getQueryRuleParams())]);
     });
 
     test.each([
@@ -186,10 +201,10 @@ describe('get_existing_prepackaged_rules', () => {
       async (_, isRuleRegistryEnabled) => {
         const rulesClient = rulesClientMock.create();
 
-        const result1 = getAlertMock(getQueryRuleParams(isRuleRegistryEnabled));
+        const result1 = getAlertMock(getQueryRuleParams());
         result1.id = '4baa53f8-96da-44ee-ad58-41bccb7f9f3d';
 
-        const result2 = getAlertMock(getQueryRuleParams(isRuleRegistryEnabled));
+        const result2 = getAlertMock(getQueryRuleParams());
         result2.id = '5baa53f8-96da-44ee-ad58-41bccb7f9f3d';
 
         // first result mock which is for returning the total
@@ -219,7 +234,7 @@ describe('get_existing_prepackaged_rules', () => {
       ['RAC', true],
     ])('it returns a count - %s', async (_, isRuleRegistryEnabled) => {
       const rulesClient = rulesClientMock.create();
-      rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(isRuleRegistryEnabled));
+      rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
       const rules = await getRulesCount({ rulesClient, filter: '' });
       expect(rules).toEqual(1);
     });
@@ -231,7 +246,7 @@ describe('get_existing_prepackaged_rules', () => {
       ['RAC', true],
     ])('it returns a count - %s', async (_, isRuleRegistryEnabled) => {
       const rulesClient = rulesClientMock.create();
-      rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(isRuleRegistryEnabled));
+      rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
       const rules = await getNonPackagedRulesCount({ rulesClient });
       expect(rules).toEqual(1);
     });

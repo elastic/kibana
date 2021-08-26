@@ -10,66 +10,51 @@ import { updateRules } from './update_rules';
 import { getUpdateRulesOptionsMock, getUpdateMlRulesOptionsMock } from './update_rules.mock';
 import { RulesClientMock } from '../../../../../alerting/server/rules_client.mock';
 import { getMlRuleParams, getQueryRuleParams } from '../schemas/rule_schemas.mock';
-import { createRuleDataClientMock } from '../../../../../rule_registry/server/rule_data_client/rule_data_client.mock';
 
-describe('updateRules', () => {
-  const ruleDataClientMock = createRuleDataClientMock();
+describe.each([
+  ['Legacy', false],
+  ['RAC', true],
+])('updateRules - %s', (_, isRuleRegistryEnabled) => {
+  it('should call rulesClient.disable if the rule was enabled and enabled is false', async () => {
+    const rulesOptionsMock = getUpdateRulesOptionsMock(isRuleRegistryEnabled);
+    rulesOptionsMock.ruleUpdate.enabled = false;
+    ((rulesOptionsMock.rulesClient as unknown) as RulesClientMock).get.mockResolvedValue(
+      getAlertMock(getQueryRuleParams())
+    );
 
-  test.each([
-    ['Legacy', undefined],
-    ['RAC', ruleDataClientMock],
-  ])(
-    'should call rulesClient.disable if the rule was enabled and enabled is false - %s',
-    async (_, ruleDataClient) => {
-      const rulesOptionsMock = getUpdateRulesOptionsMock(ruleDataClient != null);
-      rulesOptionsMock.ruleUpdate.enabled = false;
-      ((rulesOptionsMock.rulesClient as unknown) as RulesClientMock).get.mockResolvedValue(
-        getAlertMock(getQueryRuleParams(ruleDataClient != null))
-      );
+    await updateRules(rulesOptionsMock);
 
-      await updateRules(rulesOptionsMock);
+    expect(rulesOptionsMock.rulesClient.disable).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: rulesOptionsMock.ruleUpdate.id,
+      })
+    );
+  });
 
-      expect(rulesOptionsMock.rulesClient.disable).toHaveBeenCalledWith(
-        expect.objectContaining({
-          id: rulesOptionsMock.ruleUpdate.id,
-        })
-      );
-    }
-  );
+  it('should call rulesClient.enable if the rule was disabled and enabled is true', async () => {
+    const rulesOptionsMock = getUpdateRulesOptionsMock(isRuleRegistryEnabled);
+    rulesOptionsMock.ruleUpdate.enabled = true;
 
-  test.each([
-    ['Legacy', undefined],
-    ['RAC', ruleDataClientMock],
-  ])(
-    'should call rulesClient.enable if the rule was disabled and enabled is true - %s',
-    async (_, ruleDataClient) => {
-      const rulesOptionsMock = getUpdateRulesOptionsMock(ruleDataClient != null);
-      rulesOptionsMock.ruleUpdate.enabled = true;
+    ((rulesOptionsMock.rulesClient as unknown) as RulesClientMock).get.mockResolvedValue({
+      ...getAlertMock(getQueryRuleParams()),
+      enabled: false,
+    });
 
-      ((rulesOptionsMock.rulesClient as unknown) as RulesClientMock).get.mockResolvedValue({
-        ...getAlertMock(getQueryRuleParams(ruleDataClient != null)),
-        enabled: false,
-      });
+    await updateRules(rulesOptionsMock);
 
-      await updateRules(rulesOptionsMock);
+    expect(rulesOptionsMock.rulesClient.enable).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: rulesOptionsMock.ruleUpdate.id,
+      })
+    );
+  });
 
-      expect(rulesOptionsMock.rulesClient.enable).toHaveBeenCalledWith(
-        expect.objectContaining({
-          id: rulesOptionsMock.ruleUpdate.id,
-        })
-      );
-    }
-  );
-
-  test.each([
-    ['Legacy', undefined],
-    ['RAC', ruleDataClientMock],
-  ])('calls the rulesClient with params - %s', async (_, ruleDataClient) => {
-    const rulesOptionsMock = getUpdateMlRulesOptionsMock(ruleDataClient != null);
+  it('calls the rulesClient with params', async () => {
+    const rulesOptionsMock = getUpdateMlRulesOptionsMock(isRuleRegistryEnabled);
     rulesOptionsMock.ruleUpdate.enabled = true;
 
     ((rulesOptionsMock.rulesClient as unknown) as RulesClientMock).get.mockResolvedValue(
-      getAlertMock(getMlRuleParams(ruleDataClient != null))
+      getAlertMock(getMlRuleParams())
     );
 
     await updateRules(rulesOptionsMock);

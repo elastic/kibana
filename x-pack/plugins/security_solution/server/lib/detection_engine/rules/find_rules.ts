@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { AlertTypeParams, FindResult } from '../../../../../alerting/server';
+import { FindResult } from '../../../../../alerting/server';
 import { SIGNALS_ID } from '../../../../common/constants';
+import { RuleParams } from '../schemas/rule_schemas';
 import { ruleTypeMappings } from '../signals/utils';
 import { FindRuleOptions } from './types';
 
@@ -26,8 +27,7 @@ export const getFilter = (
   }
 };
 
-export const findRules = <TRuleParams extends AlertTypeParams>({
-  isRuleRegistryEnabled,
+export const findRules = ({
   rulesClient,
   perPage,
   page,
@@ -35,10 +35,9 @@ export const findRules = <TRuleParams extends AlertTypeParams>({
   filter,
   sortField,
   sortOrder,
-}: FindRuleOptions): Promise<FindResult<TRuleParams>> => {
-  return rulesClient.find<TRuleParams>({
+}: FindRuleOptions): Promise<FindResult<RuleParams>> => {
+  return rulesClient.find({
     options: {
-      isRuleRegistryEnabled,
       fields,
       page,
       perPage,

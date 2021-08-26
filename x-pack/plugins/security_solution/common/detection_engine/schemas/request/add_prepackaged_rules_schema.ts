@@ -137,7 +137,7 @@ export const addPrepackagedRulesSchema = t.intersection([
       threat_indicator_path, // defaults "undefined" if not set during decode
       concurrent_searches, // defaults to "undefined" if not set during decode
       items_per_search, // defaults to "undefined" if not set during decode
-      namespace: DefaultToString, // defaults to "default" if not set during decode
+      namespace, // defaults to "undefined" if not set during decode
     })
   ),
 ]);
@@ -154,6 +154,7 @@ export type AddPrepackagedRulesSchemaDecoded = Omit<
   | 'from'
   | 'interval'
   | 'max_signals'
+  | 'namespace'
   | 'risk_score_mapping'
   | 'severity_mapping'
   | 'tags'

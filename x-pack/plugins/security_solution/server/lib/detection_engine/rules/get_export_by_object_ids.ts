@@ -15,7 +15,6 @@ import { transformAlertToRule } from '../routes/rules/utils';
 import { transformDataToNdjson } from '../../../utils/read_stream/create_stream_from_ndjson';
 import { INTERNAL_RULE_ID_KEY } from '../../../../common/constants';
 import { findRules } from './find_rules';
-import { RuleParams } from '../schemas/rule_schemas';
 
 interface ExportSuccessRule {
   statusCode: 200;
@@ -35,12 +34,13 @@ export interface RulesErrors {
 
 export const getExportByObjectIds = async (
   rulesClient: RulesClient,
-  objects: Array<{ rule_id: string }>
+  objects: Array<{ rule_id: string }>,
+  isRuleRegistryEnabled: boolean
 ): Promise<{
   rulesNdjson: string;
   exportDetails: string;
 }> => {
-  const rulesAndErrors = await getRulesFromObjects(rulesClient, objects);
+  const rulesAndErrors = await getRulesFromObjects(rulesClient, objects, isRuleRegistryEnabled);
   const rulesNdjson = transformDataToNdjson(rulesAndErrors.rules);
   const exportDetails = getExportDetailsNdjson(rulesAndErrors.rules, rulesAndErrors.missingRules);
   return { rulesNdjson, exportDetails };
@@ -48,7 +48,8 @@ export const getExportByObjectIds = async (
 
 export const getRulesFromObjects = async (
   rulesClient: RulesClient,
-  objects: Array<{ rule_id: string }>
+  objects: Array<{ rule_id: string }>,
+  isRuleRegistryEnabled: boolean
 ): Promise<RulesErrors> => {
   // If we put more than 1024 ids in one block like "alert.attributes.tags: (id1 OR id2 OR ... OR id1100)"
   // then the KQL -> ES DSL query generator still puts them all in the same "should" array, but ES defaults
@@ -65,8 +66,8 @@ export const getRulesFromObjects = async (
       return `alert.attributes.tags: (${joinedIds})`;
     })
     .join(' OR ');
-  const rules = await findRules<RuleParams>({
-    isRuleRegistryEnabled: false, // TODO: support RAC
+  const rules = await findRules({
+    isRuleRegistryEnabled,
     rulesClient,
     filter,
     page: 1,
@@ -79,7 +80,7 @@ export const getRulesFromObjects = async (
     const matchingRule = rules.data.find((rule) => rule.params.ruleId === ruleId);
     if (
       matchingRule != null &&
-      isAlertType(false, matchingRule) && // TODO: support RAC
+      isAlertType(isRuleRegistryEnabled, matchingRule) &&
       matchingRule.params.immutable !== true
     ) {
       return {

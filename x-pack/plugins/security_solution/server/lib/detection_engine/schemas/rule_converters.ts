@@ -12,19 +12,15 @@ import {
 } from '../../../../common/detection_engine/utils';
 import {
   InternalRuleCreate,
-  TypeSpecificRuleParams,
-  InternalRuleCreateBase,
-  InternalRACRuleCreate,
-  BaseRACRuleParams,
   RuleParams,
+  TypeSpecificRuleParams,
+  BaseRuleParams,
 } from './rule_schemas';
 import { assertUnreachable } from '../../../../common/utility_types';
 import {
   CreateRulesSchema,
   CreateTypeSpecific,
-  FullRACResponseSchema,
   FullResponseSchema,
-  RACCreateRulesSchema,
   ResponseTypeSpecific,
 } from '../../../../common/detection_engine/schemas/request';
 import { RuleActions } from '../rule_actions/types';
@@ -32,11 +28,10 @@ import { AppClient } from '../../../types';
 import { addTags } from '../rules/add_tags';
 import { DEFAULT_MAX_SIGNALS, SERVER_APP_ID, SIGNALS_ID } from '../../../../common/constants';
 import { transformRuleToAlertAction } from '../../../../common/detection_engine/transform_actions';
-import { AlertTypeParams, SanitizedAlert } from '../../../../../alerting/common';
+import { SanitizedAlert } from '../../../../../alerting/common';
 import { IRuleStatusSOAttributes } from '../rules/types';
 import { transformTags } from '../routes/rules/utils';
 import { RuleExecutionStatus } from '../../../../common/detection_engine/schemas/common/schemas';
-import { getRACRuleType } from '../signals/utils';
 
 // These functions provide conversions from the request API schema to the internal rule schema and from the internal rule schema
 // to the response API schema. This provides static type-check assurances that the internal schema is in sync with the API schema for
@@ -120,16 +115,16 @@ export const typeSpecificSnakeToCamel = (params: CreateTypeSpecific): TypeSpecif
   }
 };
 
-export const convertCreateAPIToInternalSchema = <TSchema extends CreateRulesSchema>(
-  input: TSchema,
-  siemClient: AppClient,
-  isRuleRegistryEnabled: boolean
-): InternalRuleCreateBase => {
+export const convertCreateAPIToInternalSchema = (
+  input: CreateRulesSchema,
+  siemClient: AppClient
+): InternalRuleCreate => {
   const typeSpecificParams = typeSpecificSnakeToCamel(input);
   const newRuleId = input.rule_id ?? uuid.v4();
-  const baseOutput: InternalRuleCreateBase = {
+  return {
     name: input.name,
     tags: addTags(input.tags ?? [], newRuleId, false),
+    alertTypeId: SIGNALS_ID,
     consumer: SERVER_APP_ID,
     params: {
       author: input.author ?? [],
@@ -154,6 +149,7 @@ export const convertCreateAPIToInternalSchema = <TSchema extends CreateRulesSche
       timestampOverride: input.timestamp_override,
       to: input.to ?? 'now',
       references: input.references ?? [],
+      namespace: input.namespace,
       note: input.note,
       version: input.version ?? 1,
       exceptionsList: input.exceptions_list ?? [],
@@ -165,22 +161,6 @@ export const convertCreateAPIToInternalSchema = <TSchema extends CreateRulesSche
     throttle: null,
     notifyWhen: null,
   };
-
-  if (isRuleRegistryEnabled) {
-    return {
-      ...baseOutput,
-      alertTypeId: getRACRuleType(input.type),
-      params: {
-        ...baseOutput.params,
-        namespace: (input as RACCreateRulesSchema).namespace,
-      },
-    } as InternalRACRuleCreate;
-  }
-
-  return {
-    ...baseOutput,
-    alertTypeId: SIGNALS_ID,
-  } as InternalRuleCreate;
 };
 
 // Converts the internal rule data structure to the response API schema
@@ -260,12 +240,13 @@ export const typeSpecificCamelToSnake = (params: TypeSpecificRuleParams): Respon
 
 // TODO: separate out security solution defined common params from Alerting framework common params
 // so we can explicitly specify the return type of this function
-export const commonParamsCamelToSnake = <TParams extends RuleParams>(params: TParams) => {
+export const commonParamsCamelToSnake = (params: BaseRuleParams) => {
   return {
     description: params.description,
     risk_score: params.riskScore,
     severity: params.severity,
     building_block_type: params.buildingBlockType,
+    namespace: params.namespace,
     note: params.note,
     license: params.license,
     output_index: params.outputIndex,
@@ -290,14 +271,13 @@ export const commonParamsCamelToSnake = <TParams extends RuleParams>(params: TPa
   };
 };
 
-export const internalRuleToAPIResponse = <TRuleParams extends RuleParams>(
-  rule: SanitizedAlert<TRuleParams>,
+export const internalRuleToAPIResponse = (
+  rule: SanitizedAlert<RuleParams>,
   ruleActions?: RuleActions | null,
-  ruleStatus?: IRuleStatusSOAttributes,
-  isRuleRegistryEnabled?: boolean
-): FullResponseSchema & { namespace?: string } => {
+  ruleStatus?: IRuleStatusSOAttributes
+): FullResponseSchema => {
   const mergedStatus = ruleStatus ? mergeAlertWithSidecarStatus(rule, ruleStatus) : undefined;
-  const response = {
+  return {
     // Alerting framework params
     id: rule.id,
     updated_at: rule.updatedAt.toISOString(),
@@ -311,7 +291,7 @@ export const internalRuleToAPIResponse = <TRuleParams extends RuleParams>(
     // Security solution shared rule params
     ...commonParamsCamelToSnake(rule.params),
     // Type specific security solution rule params
-    ...typeSpecificCamelToSnake((rule.params as unknown) as TypeSpecificRuleParams),
+    ...typeSpecificCamelToSnake(rule.params),
     // Actions
     throttle: ruleActions?.ruleThrottle || 'no_actions',
     actions: ruleActions?.actions ?? [],
@@ -323,19 +303,10 @@ export const internalRuleToAPIResponse = <TRuleParams extends RuleParams>(
     last_failure_message: mergedStatus?.lastFailureMessage ?? undefined,
     last_success_message: mergedStatus?.lastSuccessMessage ?? undefined,
   };
-
-  if (isRuleRegistryEnabled) {
-    return {
-      ...response,
-      namespace: ((rule.params as unknown) as BaseRACRuleParams).namespace,
-    } as FullRACResponseSchema;
-  }
-
-  return response as FullResponseSchema;
 };
 
 export const mergeAlertWithSidecarStatus = (
-  alert: SanitizedAlert<AlertTypeParams>,
+  alert: SanitizedAlert<RuleParams>,
   status: IRuleStatusSOAttributes
 ): IRuleStatusSOAttributes => {
   if (

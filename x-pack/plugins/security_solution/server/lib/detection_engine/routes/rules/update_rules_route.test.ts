@@ -21,116 +21,46 @@ import { updateRulesNotifications } from '../../rules/update_rules_notifications
 import { updateRulesRoute } from './update_rules_route';
 import { getUpdateRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/rule_schemas.mock';
 import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
-import { createRuleDataClientMock } from '../../../../../../rule_registry/server/rule_data_client/rule_data_client.mock';
-import { IRuleDataClient } from '../../../../../../rule_registry/server';
-import { SecuritySolutionRequestHandlerContext } from '../../../../types';
 
 jest.mock('../../../machine_learning/authz', () => mockMlAuthzFactory.create());
 jest.mock('../../rules/update_rules_notifications');
 
-describe('update_rules', () => {
+describe.each([
+  ['Legacy', false],
+  ['RAC', true],
+])('update_rules - %s', (_, isRuleRegistryEnabled) => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
   let ml: ReturnType<typeof mlServicesMock.createSetupContract>;
-  let ruleDataClientMock = createRuleDataClientMock();
-
-  const mockRulesClient = (ruleDataClient: IRuleDataClient | undefined) => {
-    clients.rulesClient.get.mockResolvedValue(
-      getAlertMock(getQueryRuleParams(ruleDataClient != null))
-    ); // existing rule
-    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(ruleDataClient != null)); // rule exists
-    clients.rulesClient.update.mockResolvedValue(
-      getAlertMock(getQueryRuleParams(ruleDataClient != null))
-    ); // successful update
-  };
 
   beforeEach(() => {
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
     ml = mlServicesMock.createSetupContract();
 
+    clients.rulesClient.get.mockResolvedValue(getAlertMock(getQueryRuleParams())); // existing rule
+    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit()); // rule exists
+    clients.rulesClient.update.mockResolvedValue(getAlertMock(getQueryRuleParams())); // successful update
     clients.ruleExecutionLogClient.find.mockResolvedValue([]); // successful transform: ;
-    ruleDataClientMock = createRuleDataClientMock();
+
+    updateRulesRoute(server.router, ml, isRuleRegistryEnabled);
   });
 
   describe('status codes with actionClient and alertClient', () => {
-    test.each([
-      ['Legacy', undefined],
-      ['RAC', ruleDataClientMock],
-    ])(
-      'returns 200 when updating a single rule with a valid actionClient and alertClient - %s',
-      async (_, ruleDataClient) => {
-        updateRulesRoute(server.router, ml, ruleDataClient);
-        mockRulesClient(ruleDataClient);
-        (updateRulesNotifications as jest.Mock).mockResolvedValue({
-          id: 'id',
-          actions: [],
-          alertThrottle: null,
-          ruleThrottle: 'no_actions',
-        });
-        const response = await server.inject(getUpdateRequest(ruleDataClient != null), context);
-        expect(response.status).toEqual(200);
-      }
-    );
-
-    test.each([
-      ['Legacy', undefined],
-      ['RAC', ruleDataClientMock],
-    ])(
-      'returns 404 when updating a single rule that does not exist - %s',
-      async (_, ruleDataClient) => {
-        updateRulesRoute(server.router, ml, ruleDataClient);
-        mockRulesClient(ruleDataClient);
-        clients.rulesClient.find.mockResolvedValue(getEmptyFindResult());
-        const response = await server.inject(getUpdateRequest(ruleDataClient != null), context);
-
-        expect(response.status).toEqual(404);
-        expect(response.body).toEqual({
-          message: 'rule_id: "rule-1" not found',
-          status_code: 404,
-        });
-      }
-    );
-
-    test.each([
-      ['Legacy', undefined],
-      ['RAC', ruleDataClientMock],
-    ])(
-      'returns 404 if alertClient is not available on the route - %s',
-      async (_, ruleDataClient) => {
-        updateRulesRoute(server.router, ml, ruleDataClient);
-        mockRulesClient(ruleDataClient);
-        context.alerting!.getRulesClient = jest.fn();
-        const response = await server.inject(getUpdateRequest(ruleDataClient != null), context);
-
-        expect(response.status).toEqual(404);
-        expect(response.body).toEqual({ message: 'Not Found', status_code: 404 });
-      }
-    );
-
-    test.each([
-      ['Legacy', undefined],
-      ['RAC', ruleDataClientMock],
-    ])('returns 404 if siem client is unavailable - %s', async (_, ruleDataClient) => {
-      updateRulesRoute(server.router, ml, ruleDataClient);
-      mockRulesClient(ruleDataClient);
-      const { securitySolution, ...contextWithoutSecuritySolution } = context;
-      const response = await server.inject(
-        getUpdateRequest(ruleDataClient != null),
-        (contextWithoutSecuritySolution as unknown) as SecuritySolutionRequestHandlerContext
-      );
-      expect(response.status).toEqual(404);
-      expect(response.body).toEqual({ message: 'Not Found', status_code: 404 });
+    test('returns 200 when updating a single rule with a valid actionClient and alertClient', async () => {
+      (updateRulesNotifications as jest.Mock).mockResolvedValue({
+        id: 'id',
+        actions: [],
+        alertThrottle: null,
+        ruleThrottle: 'no_actions',
+      });
+      const response = await server.inject(getUpdateRequest(), context);
+      expect(response.status).toEqual(200);
     });
 
-    test.each([
-      ['Legacy', undefined],
-      ['RAC', ruleDataClientMock],
-    ])('returns error when updating non-rule - %s', async (_, ruleDataClient) => {
-      updateRulesRoute(server.router, ml, ruleDataClient);
-      mockRulesClient(ruleDataClient);
-      clients.rulesClient.find.mockResolvedValue(nonRuleFindResult(ruleDataClient != null));
-      const response = await server.inject(getUpdateRequest(ruleDataClient != null), context);
+    test('returns 404 when updating a single rule that does not exist', async () => {
+      clients.rulesClient.find.mockResolvedValue(getEmptyFindResult());
+      const response = await server.inject(getUpdateRequest(), context);
 
       expect(response.status).toEqual(404);
       expect(response.body).toEqual({
@@ -139,16 +69,38 @@ describe('update_rules', () => {
       });
     });
 
-    test.each([
-      ['Legacy', undefined],
-      ['RAC', ruleDataClientMock],
-    ])('catches error if search throws error - %s', async (_, ruleDataClient) => {
-      updateRulesRoute(server.router, ml, ruleDataClient);
-      mockRulesClient(ruleDataClient);
+    test('returns 404 if alertClient is not available on the route', async () => {
+      context.alerting!.getRulesClient = jest.fn();
+      const response = await server.inject(getUpdateRequest(), context);
+
+      expect(response.status).toEqual(404);
+      expect(response.body).toEqual({ message: 'Not Found', status_code: 404 });
+    });
+
+    it('returns 404 if siem client is unavailable', async () => {
+      const { securitySolution, ...contextWithoutSecuritySolution } = context;
+      // @ts-expect-error
+      const response = await server.inject(getUpdateRequest(), contextWithoutSecuritySolution);
+      expect(response.status).toEqual(404);
+      expect(response.body).toEqual({ message: 'Not Found', status_code: 404 });
+    });
+
+    test('returns error when updating non-rule', async () => {
+      clients.rulesClient.find.mockResolvedValue(nonRuleFindResult());
+      const response = await server.inject(getUpdateRequest(), context);
+
+      expect(response.status).toEqual(404);
+      expect(response.body).toEqual({
+        message: 'rule_id: "rule-1" not found',
+        status_code: 404,
+      });
+    });
+
+    test('catches error if search throws error', async () => {
       clients.rulesClient.find.mockImplementation(async () => {
         throw new Error('Test error');
       });
-      const response = await server.inject(getUpdateRequest(ruleDataClient != null), context);
+      const response = await server.inject(getUpdateRequest(), context);
       expect(response.status).toEqual(500);
       expect(response.body).toEqual({
         message: 'Test error',
@@ -156,12 +108,7 @@ describe('update_rules', () => {
       });
     });
 
-    test.each([
-      ['Legacy', undefined],
-      ['RAC', ruleDataClientMock],
-    ])('returns a 403 if mlAuthz fails - %s', async (_, ruleDataClient) => {
-      updateRulesRoute(server.router, ml, ruleDataClient);
-      mockRulesClient(ruleDataClient);
+    it('returns a 403 if mlAuthz fails', async () => {
       (buildMlAuthz as jest.Mock).mockReturnValueOnce({
         validateRuleType: jest
           .fn()
@@ -170,7 +117,7 @@ describe('update_rules', () => {
       const request = requestMock.create({
         method: 'put',
         path: DETECTION_ENGINE_RULES_URL,
-        body: typicalMlRulePayload(ruleDataClient != null),
+        body: typicalMlRulePayload(),
       });
 
       const response = await server.inject(request, context);
@@ -183,17 +130,12 @@ describe('update_rules', () => {
   });
 
   describe('request validation', () => {
-    test.each([
-      ['Legacy', undefined],
-      ['RAC', ruleDataClientMock],
-    ])('rejects payloads with no ID - %s', async (_, ruleDataClient) => {
-      updateRulesRoute(server.router, ml, ruleDataClient);
-      mockRulesClient(ruleDataClient);
+    test('rejects payloads with no ID', async () => {
       const noIdRequest = requestMock.create({
         method: 'put',
         path: DETECTION_ENGINE_RULES_URL,
         body: {
-          ...getUpdateRulesSchemaMock(undefined, ruleDataClient != null),
+          ...getUpdateRulesSchemaMock(),
           id: undefined,
         },
       });
@@ -204,75 +146,47 @@ describe('update_rules', () => {
       });
     });
 
-    test.each([
-      ['Legacy', undefined],
-      ['RAC', ruleDataClientMock],
-    ])('allows query rule type - %s', async (_, ruleDataClient) => {
-      updateRulesRoute(server.router, ml, ruleDataClient);
-      mockRulesClient(ruleDataClient);
+    test('allows query rule type', async () => {
       const request = requestMock.create({
         method: 'put',
         path: DETECTION_ENGINE_RULES_URL,
-        body: { ...getUpdateRulesSchemaMock(undefined, ruleDataClient != null), type: 'query' },
+        body: { ...getUpdateRulesSchemaMock(), type: 'query' },
       });
       const result = await server.validate(request);
 
       expect(result.ok).toHaveBeenCalled();
     });
 
-    test.each([
-      ['Legacy', undefined],
-      ['RAC', ruleDataClientMock],
-    ])('rejects unknown rule type - %s', async (_, ruleDataClient) => {
-      updateRulesRoute(server.router, ml, ruleDataClient);
-      mockRulesClient(ruleDataClient);
+    test('rejects unknown rule type', async () => {
       const request = requestMock.create({
         method: 'put',
         path: DETECTION_ENGINE_RULES_URL,
-        body: {
-          ...getUpdateRulesSchemaMock(undefined, ruleDataClient != null),
-          type: 'unknown type',
-        },
+        body: { ...getUpdateRulesSchemaMock(), type: 'unknown type' },
       });
       const result = await server.validate(request);
 
       expect(result.badRequest).toHaveBeenCalled();
     });
 
-    test.each([
-      ['Legacy', undefined],
-      ['RAC', ruleDataClientMock],
-    ])('allows rule type of query and custom from and interval - %s', async (_, ruleDataClient) => {
-      updateRulesRoute(server.router, ml, ruleDataClient);
-      mockRulesClient(ruleDataClient);
+    test('allows rule type of query and custom from and interval', async () => {
       const request = requestMock.create({
         method: 'put',
         path: DETECTION_ENGINE_RULES_URL,
-        body: {
-          from: 'now-7m',
-          interval: '5m',
-          ...getUpdateRulesSchemaMock(undefined, ruleDataClient != null),
-          type: 'query',
-        },
+        body: { from: 'now-7m', interval: '5m', ...getUpdateRulesSchemaMock(), type: 'query' },
       });
       const result = server.validate(request);
 
       expect(result.ok).toHaveBeenCalled();
     });
 
-    test.each([
-      ['Legacy', undefined],
-      ['RAC', ruleDataClientMock],
-    ])('disallows invalid "from" param on rule - %s', async (_, ruleDataClient) => {
-      updateRulesRoute(server.router, ml, ruleDataClient);
-      mockRulesClient(ruleDataClient);
+    test('disallows invalid "from" param on rule', async () => {
       const request = requestMock.create({
         method: 'put',
         path: DETECTION_ENGINE_RULES_URL,
         body: {
           from: 'now-3755555555555555.67s',
           interval: '5m',
-          ...getUpdateRulesSchemaMock(undefined, ruleDataClient != null),
+          ...getUpdateRulesSchemaMock(),
           type: 'query',
         },
       });

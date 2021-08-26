@@ -9,7 +9,6 @@ import { getThreatMock } from '../../../../common/detection_engine/schemas/types
 import { getListArrayMock } from '../../../../common/detection_engine/schemas/types/lists.mock';
 import { getThreatMappingMock } from '../signals/threat_mapping/build_threat_mapping_filter.mock';
 import {
-  BaseRACRuleParams,
   BaseRuleParams,
   EqlRuleParams,
   MachineLearningRuleParams,
@@ -37,6 +36,7 @@ const getBaseRuleParams = (): BaseRuleParams => {
     riskScoreMapping: [],
     ruleNameOverride: undefined,
     maxSignals: 10000,
+    namespace: undefined,
     note: '# Investigative notes',
     timelineId: 'some-timeline-id',
     timelineTitle: 'some-timeline-title',
@@ -47,13 +47,6 @@ const getBaseRuleParams = (): BaseRuleParams => {
     threat: getThreatMock(),
     version: 1,
     exceptionsList: getListArrayMock(),
-  };
-};
-
-const getBaseRACRuleParams = (): BaseRACRuleParams => {
-  return {
-    ...getBaseRuleParams(),
-    namespace: 'default',
   };
 };
 
@@ -91,20 +84,18 @@ export const getEqlRuleParams = (): EqlRuleParams => {
   };
 };
 
-export const getMlRuleParams = <T extends MachineLearningRuleParams>(
-  isRuleRegistryEnabled: boolean
-) => {
+export const getMlRuleParams = (): MachineLearningRuleParams => {
   return {
-    ...(isRuleRegistryEnabled ? getBaseRACRuleParams() : getBaseRuleParams()),
+    ...getBaseRuleParams(),
     type: 'machine_learning',
     anomalyThreshold: 42,
     machineLearningJobId: ['my-job'],
-  } as T;
+  };
 };
 
-export const getQueryRuleParams = <T extends QueryRuleParams>(isRuleRegistryEnabled: boolean) => {
+export const getQueryRuleParams = (): QueryRuleParams => {
   return {
-    ...(isRuleRegistryEnabled ? getBaseRACRuleParams() : getBaseRuleParams()),
+    ...getBaseRuleParams(),
     type: 'query',
     language: 'kuery',
     query: 'user.name: root or user.name: admin',
@@ -119,7 +110,7 @@ export const getQueryRuleParams = <T extends QueryRuleParams>(isRuleRegistryEnab
       },
     ],
     savedId: undefined,
-  } as T;
+  };
 };
 
 export const getThreatRuleParams = (): ThreatRuleParams => {

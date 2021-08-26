@@ -355,6 +355,9 @@ export const timelines_not_updated = PositiveInteger;
 export const note = t.string;
 export type Note = t.TypeOf<typeof note>;
 
+export const namespaceOrUndefined = t.union([namespace, t.undefined]);
+export type NamespaceOrUndefined = t.TypeOf<typeof namespaceOrUndefined>;
+
 export const noteOrUndefined = t.union([note, t.undefined]);
 export type NoteOrUndefined = t.TypeOf<typeof noteOrUndefined>;
 

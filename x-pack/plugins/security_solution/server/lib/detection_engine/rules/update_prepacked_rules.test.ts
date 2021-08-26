@@ -11,10 +11,12 @@ import { updatePrepackagedRules } from './update_prepacked_rules';
 import { patchRules } from './patch_rules';
 import { getAddPrepackagedRulesSchemaDecodedMock } from '../../../../common/detection_engine/schemas/request/add_prepackaged_rules_schema.mock';
 import { ruleExecutionLogClientMock } from '../rule_execution_log/__mocks__/rule_execution_log_client';
-import { AddPrepackagedRulesSchemaDecoded } from '../../../../common/detection_engine/schemas/request';
 jest.mock('./patch_rules');
 
-describe('updatePrepackagedRules', () => {
+describe.each([
+  ['Legacy', false],
+  ['RAC', true],
+])('updatePrepackagedRules - %s', (_, isRuleRegistryEnabled) => {
   let rulesClient: ReturnType<typeof rulesClientMock.create>;
   let ruleStatusClient: ReturnType<typeof ruleExecutionLogClientMock.create>;
 
@@ -23,44 +25,38 @@ describe('updatePrepackagedRules', () => {
     ruleStatusClient = ruleExecutionLogClientMock.create();
   });
 
-  test.each([
-    ['Legacy', false],
-    ['RAC', true],
-  ])(
-    'should omit actions and enabled when calling patchRules - %s',
-    async (_, isRuleRegistryEnabled) => {
-      const actions = [
-        {
-          group: 'group',
-          id: 'id',
-          action_type_id: 'action_type_id',
-          params: {},
-        },
-      ];
-      const outputIndex = 'outputIndex';
-      const prepackagedRule = getAddPrepackagedRulesSchemaDecodedMock(isRuleRegistryEnabled);
-      rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(isRuleRegistryEnabled));
+  it('should omit actions and enabled when calling patchRules', async () => {
+    const actions = [
+      {
+        group: 'group',
+        id: 'id',
+        action_type_id: 'action_type_id',
+        params: {},
+      },
+    ];
+    const outputIndex = 'outputIndex';
+    const prepackagedRule = getAddPrepackagedRulesSchemaDecodedMock();
+    rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
 
-      await updatePrepackagedRules(
-        rulesClient,
-        'default',
-        ruleStatusClient,
-        [{ ...prepackagedRule, actions }] as AddPrepackagedRulesSchemaDecoded[],
-        outputIndex,
-        isRuleRegistryEnabled
-      );
+    await updatePrepackagedRules(
+      rulesClient,
+      'default',
+      ruleStatusClient,
+      [{ ...prepackagedRule, actions }],
+      outputIndex,
+      isRuleRegistryEnabled
+    );
 
-      expect(patchRules).toHaveBeenCalledWith(
-        expect.objectContaining({
-          actions: undefined,
-        })
-      );
+    expect(patchRules).toHaveBeenCalledWith(
+      expect.objectContaining({
+        actions: undefined,
+      })
+    );
 
-      expect(patchRules).toHaveBeenCalledWith(
-        expect.objectContaining({
-          enabled: undefined,
-        })
-      );
-    }
-  );
+    expect(patchRules).toHaveBeenCalledWith(
+      expect.objectContaining({
+        enabled: undefined,
+      })
+    );
+  });
 });

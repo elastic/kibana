@@ -16,20 +16,16 @@ import { addTags } from './add_tags';
 import { typeSpecificSnakeToCamel } from '../schemas/rule_converters';
 import { RuleParams } from '../schemas/rule_schemas';
 import { enableRule } from './enable_rule';
-import { UpdateRulesSchema } from '../../../../common/detection_engine/schemas/request';
 
-export const updateRules = async <
-  TRuleParams extends RuleParams,
-  TSchema extends UpdateRulesSchema
->({
+export const updateRules = async ({
   isRuleRegistryEnabled,
   spaceId,
   rulesClient,
   ruleStatusClient,
   defaultOutputIndex,
   ruleUpdate,
-}: UpdateRulesOptions<TSchema>): Promise<PartialAlert<RuleParams> | null> => {
-  const existingRule = await readRules<TRuleParams>({
+}: UpdateRulesOptions): Promise<PartialAlert<RuleParams> | null> => {
+  const existingRule = await readRules({
     isRuleRegistryEnabled,
     rulesClient,
     ruleId: ruleUpdate.rule_id,
@@ -68,6 +64,7 @@ export const updateRules = async <
       timestampOverride: ruleUpdate.timestamp_override,
       to: ruleUpdate.to ?? 'now',
       references: ruleUpdate.references ?? [],
+      namespace: ruleUpdate.namespace,
       note: ruleUpdate.note,
       // Always use the version from the request if specified. If it isn't specified, leave immutable rules alone and
       // increment the version of mutable rules by 1.

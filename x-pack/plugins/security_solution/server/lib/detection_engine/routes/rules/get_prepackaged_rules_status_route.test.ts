@@ -51,7 +51,10 @@ jest.mock('../../../timeline/utils/check_timelines_status', () => {
   };
 });
 
-describe('get_prepackaged_rule_status_route', () => {
+describe.each([
+  ['Legacy', false],
+  ['RAC', true],
+])('get_prepackaged_rule_status_route - %s', (_, isRuleRegistryEnabled) => {
   const mockGetCurrentUser = {
     user: {
       username: 'mockUser',
@@ -75,7 +78,12 @@ describe('get_prepackaged_rule_status_route', () => {
 
     clients.rulesClient.find.mockResolvedValue(getEmptyFindResult());
 
-    getPrepackagedRulesStatusRoute(server.router, createMockConfig(), securitySetup);
+    getPrepackagedRulesStatusRoute(
+      server.router,
+      createMockConfig(),
+      securitySetup,
+      isRuleRegistryEnabled
+    );
   });
 
   describe('status codes with actionClient and alertClient', () => {
@@ -123,7 +131,7 @@ describe('get_prepackaged_rule_status_route', () => {
     });
 
     test('1 rule installed, 1 custom rules, 0 rules not installed, and 1 rule to not updated', async () => {
-      clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(false));
+      clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
       const request = getPrepackagedRulesStatusRequest();
       const response = await server.inject(request, context);
 

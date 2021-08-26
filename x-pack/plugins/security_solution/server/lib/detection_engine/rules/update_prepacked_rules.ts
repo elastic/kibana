@@ -197,7 +197,6 @@ export const createPromises = (
       machineLearningJobId,
       exceptionsList,
       actions: undefined,
-      isRuleRegistryEnabled,
     });
   });
 };

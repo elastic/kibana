@@ -20,14 +20,12 @@ import { transformValidateBulkError } from './validate';
 import { transformBulkError, buildSiemResponse, createBulkErrorObject } from '../utils';
 import { updateRules } from '../../rules/update_rules';
 import { updateRulesNotifications } from '../../rules/update_rules_notifications';
-import { IRuleDataClient } from '../../../../../../rule_registry/server';
 
 export const updateRulesBulkRoute = (
   router: SecuritySolutionPluginRouter,
   ml: SetupPlugins['ml'],
-  ruleDataClient?: IRuleDataClient | null
+  isRuleRegistryEnabled: boolean
 ) => {
-  const isRuleRegistryEnabled = ruleDataClient != null;
   router.put(
     {
       path: `${DETECTION_ENGINE_RULES_URL}/_bulk_update`,
@@ -95,7 +93,13 @@ export const updateRulesBulkRoute = (
                 ruleId: rule.id,
                 spaceId: context.securitySolution.getSpaceId(),
               });
-              return transformValidateBulkError(rule.id, rule, ruleActions, ruleStatuses);
+              return transformValidateBulkError(
+                rule.id,
+                rule,
+                ruleActions,
+                ruleStatuses,
+                isRuleRegistryEnabled
+              );
             } else {
               return getIdBulkError({ id: payloadRule.id, ruleId: payloadRule.rule_id });
             }

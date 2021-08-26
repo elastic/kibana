@@ -24,35 +24,27 @@ import { DEFAULT_MAX_SIGNALS } from '../../../constants';
 import { getListArrayMock } from '../types/lists.mock';
 
 describe('add prepackaged rules schema', () => {
-  test.each([
-    ['Legacy', false],
-    ['RAC', true],
-  ])('empty objects do not validate - %s', (_, isRuleRegistryEnabled) => {
+  test('empty objects do not validate', () => {
     const payload: Partial<AddPrepackagedRulesSchema> = {};
 
     const decoded = addPrepackagedRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual(
-      [
-        'Invalid value "undefined" supplied to "description"',
-        'Invalid value "undefined" supplied to "risk_score"',
-        'Invalid value "undefined" supplied to "name"',
-        'Invalid value "undefined" supplied to "severity"',
-        'Invalid value "undefined" supplied to "type"',
-        'Invalid value "undefined" supplied to "rule_id"',
-        'Invalid value "undefined" supplied to "version"',
-      ].concat(isRuleRegistryEnabled ? ['Invalid value "undefined" supplied to "namespace"'] : [])
-    );
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "undefined" supplied to "description"',
+      'Invalid value "undefined" supplied to "risk_score"',
+      'Invalid value "undefined" supplied to "name"',
+      'Invalid value "undefined" supplied to "severity"',
+      'Invalid value "undefined" supplied to "type"',
+      'Invalid value "undefined" supplied to "rule_id"',
+      'Invalid value "undefined" supplied to "version"',
+    ]);
     expect(message.schema).toEqual({});
   });
 
-  test.each([
-    ['Legacy', false],
-    ['RAC', true],
-  ])('made up values do not validate - %s', (_, isRuleRegistryEnabled) => {
-    const payload = {
-      ...getAddPrepackagedRulesSchemaMock(isRuleRegistryEnabled),
+  test('made up values do not validate', () => {
+    const payload: AddPrepackagedRulesSchema & { madeUp: string } = {
+      ...getAddPrepackagedRulesSchemaMock(),
       madeUp: 'hi',
     };
 
@@ -63,10 +55,7 @@ describe('add prepackaged rules schema', () => {
     expect(message.schema).toEqual({});
   });
 
-  test.each([
-    ['Legacy', false],
-    ['RAC', true],
-  ])('[rule_id] does not validate - %s', (_, isRuleRegistryEnabled) => {
+  test('[rule_id] does not validate', () => {
     const payload: Partial<AddPrepackagedRulesSchema> = {
       rule_id: 'rule-1',
     };
@@ -74,23 +63,18 @@ describe('add prepackaged rules schema', () => {
     const decoded = addPrepackagedRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual(
-      [
-        'Invalid value "undefined" supplied to "description"',
-        'Invalid value "undefined" supplied to "risk_score"',
-        'Invalid value "undefined" supplied to "name"',
-        'Invalid value "undefined" supplied to "severity"',
-        'Invalid value "undefined" supplied to "type"',
-        'Invalid value "undefined" supplied to "version"',
-      ].concat(isRuleRegistryEnabled ? ['Invalid value "undefined" supplied to "namespace"'] : [])
-    );
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "undefined" supplied to "description"',
+      'Invalid value "undefined" supplied to "risk_score"',
+      'Invalid value "undefined" supplied to "name"',
+      'Invalid value "undefined" supplied to "severity"',
+      'Invalid value "undefined" supplied to "type"',
+      'Invalid value "undefined" supplied to "version"',
+    ]);
     expect(message.schema).toEqual({});
   });
 
-  test.each([
-    ['Legacy', false],
-    ['RAC', true],
-  ])('[rule_id, description] does not validate - %s', (_, isRuleRegistryEnabled) => {
+  test('[rule_id, description] does not validate', () => {
     const payload: Partial<AddPrepackagedRulesSchema> = {
       rule_id: 'rule-1',
       description: 'some description',
@@ -99,22 +83,17 @@ describe('add prepackaged rules schema', () => {
     const decoded = addPrepackagedRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual(
-      [
-        'Invalid value "undefined" supplied to "risk_score"',
-        'Invalid value "undefined" supplied to "name"',
-        'Invalid value "undefined" supplied to "severity"',
-        'Invalid value "undefined" supplied to "type"',
-        'Invalid value "undefined" supplied to "version"',
-      ].concat(isRuleRegistryEnabled ? ['Invalid value "undefined" supplied to "namespace"'] : [])
-    );
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "undefined" supplied to "risk_score"',
+      'Invalid value "undefined" supplied to "name"',
+      'Invalid value "undefined" supplied to "severity"',
+      'Invalid value "undefined" supplied to "type"',
+      'Invalid value "undefined" supplied to "version"',
+    ]);
     expect(message.schema).toEqual({});
   });
 
-  test.each([
-    ['Legacy', false],
-    ['RAC', true],
-  ])('[rule_id, description, from] does not validate - %s', (_, isRuleRegistryEnabled) => {
+  test('[rule_id, description, from] does not validate', () => {
     const payload: Partial<AddPrepackagedRulesSchema> = {
       rule_id: 'rule-1',
       description: 'some description',
@@ -124,22 +103,17 @@ describe('add prepackaged rules schema', () => {
     const decoded = addPrepackagedRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual(
-      [
-        'Invalid value "undefined" supplied to "risk_score"',
-        'Invalid value "undefined" supplied to "name"',
-        'Invalid value "undefined" supplied to "severity"',
-        'Invalid value "undefined" supplied to "type"',
-        'Invalid value "undefined" supplied to "version"',
-      ].concat(isRuleRegistryEnabled ? ['Invalid value "undefined" supplied to "namespace"'] : [])
-    );
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "undefined" supplied to "risk_score"',
+      'Invalid value "undefined" supplied to "name"',
+      'Invalid value "undefined" supplied to "severity"',
+      'Invalid value "undefined" supplied to "type"',
+      'Invalid value "undefined" supplied to "version"',
+    ]);
     expect(message.schema).toEqual({});
   });
 
-  test.each([
-    ['Legacy', false],
-    ['RAC', true],
-  ])('[rule_id, description, from, to] does not validate - %s', (_, isRuleRegistryEnabled) => {
+  test('[rule_id, description, from, to] does not validate', () => {
     const payload: Partial<AddPrepackagedRulesSchema> = {
       rule_id: 'rule-1',
       description: 'some description',
@@ -150,442 +124,367 @@ describe('add prepackaged rules schema', () => {
     const decoded = addPrepackagedRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual(
-      [
-        'Invalid value "undefined" supplied to "risk_score"',
-        'Invalid value "undefined" supplied to "name"',
-        'Invalid value "undefined" supplied to "severity"',
-        'Invalid value "undefined" supplied to "type"',
-        'Invalid value "undefined" supplied to "version"',
-      ].concat(isRuleRegistryEnabled ? ['Invalid value "undefined" supplied to "namespace"'] : [])
-    );
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "undefined" supplied to "risk_score"',
+      'Invalid value "undefined" supplied to "name"',
+      'Invalid value "undefined" supplied to "severity"',
+      'Invalid value "undefined" supplied to "type"',
+      'Invalid value "undefined" supplied to "version"',
+    ]);
     expect(message.schema).toEqual({});
   });
 
-  test.each([
-    ['Legacy', false],
-    ['RAC', true],
-  ])(
-    '[rule_id, description, from, to, name] does not validate - %s',
-    (_, isRuleRegistryEnabled) => {
-      const payload: Partial<AddPrepackagedRulesSchema> = {
-        rule_id: 'rule-1',
-        description: 'some description',
-        from: 'now-5m',
-        to: 'now',
-        name: 'some-name',
-      };
+  test('[rule_id, description, from, to, name] does not validate', () => {
+    const payload: Partial<AddPrepackagedRulesSchema> = {
+      rule_id: 'rule-1',
+      description: 'some description',
+      from: 'now-5m',
+      to: 'now',
+      name: 'some-name',
+    };
 
-      const decoded = addPrepackagedRulesSchema.decode(payload);
-      const checked = exactCheck(payload, decoded);
-      const message = pipe(checked, foldLeftRight);
-      expect(getPaths(left(message.errors))).toEqual(
-        [
-          'Invalid value "undefined" supplied to "risk_score"',
-          'Invalid value "undefined" supplied to "severity"',
-          'Invalid value "undefined" supplied to "type"',
-          'Invalid value "undefined" supplied to "version"',
-        ].concat(isRuleRegistryEnabled ? ['Invalid value "undefined" supplied to "namespace"'] : [])
-      );
-      expect(message.schema).toEqual({});
-    }
-  );
+    const decoded = addPrepackagedRulesSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "undefined" supplied to "risk_score"',
+      'Invalid value "undefined" supplied to "severity"',
+      'Invalid value "undefined" supplied to "type"',
+      'Invalid value "undefined" supplied to "version"',
+    ]);
+    expect(message.schema).toEqual({});
+  });
 
-  test.each([
-    ['Legacy', false],
-    ['RAC', true],
-  ])(
-    '[rule_id, description, from, to, name, severity] does not validate - %s',
-    (_, isRuleRegistryEnabled) => {
-      const payload: Partial<AddPrepackagedRulesSchema> = {
-        rule_id: 'rule-1',
-        description: 'some description',
-        from: 'now-5m',
-        to: 'now',
-        name: 'some-name',
-        severity: 'low',
-      };
+  test('[rule_id, description, from, to, name, severity] does not validate', () => {
+    const payload: Partial<AddPrepackagedRulesSchema> = {
+      rule_id: 'rule-1',
+      description: 'some description',
+      from: 'now-5m',
+      to: 'now',
+      name: 'some-name',
+      severity: 'low',
+    };
 
-      const decoded = addPrepackagedRulesSchema.decode(payload);
-      const checked = exactCheck(payload, decoded);
-      const message = pipe(checked, foldLeftRight);
-      expect(getPaths(left(message.errors))).toEqual(
-        [
-          'Invalid value "undefined" supplied to "risk_score"',
-          'Invalid value "undefined" supplied to "type"',
-          'Invalid value "undefined" supplied to "version"',
-        ].concat(isRuleRegistryEnabled ? ['Invalid value "undefined" supplied to "namespace"'] : [])
-      );
-      expect(message.schema).toEqual({});
-    }
-  );
+    const decoded = addPrepackagedRulesSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "undefined" supplied to "risk_score"',
+      'Invalid value "undefined" supplied to "type"',
+      'Invalid value "undefined" supplied to "version"',
+    ]);
+    expect(message.schema).toEqual({});
+  });
 
-  test.each([
-    ['Legacy', false],
-    ['RAC', true],
-  ])(
-    '[rule_id, description, from, to, name, severity, type] does not validate - %s',
-    (_, isRuleRegistryEnabled) => {
-      const payload: Partial<AddPrepackagedRulesSchema> = {
-        rule_id: 'rule-1',
-        description: 'some description',
-        from: 'now-5m',
-        to: 'now',
-        name: 'some-name',
-        severity: 'low',
-        type: 'query',
-      };
+  test('[rule_id, description, from, to, name, severity, type] does not validate', () => {
+    const payload: Partial<AddPrepackagedRulesSchema> = {
+      rule_id: 'rule-1',
+      description: 'some description',
+      from: 'now-5m',
+      to: 'now',
+      name: 'some-name',
+      severity: 'low',
+      type: 'query',
+    };
 
-      const decoded = addPrepackagedRulesSchema.decode(payload);
-      const checked = exactCheck(payload, decoded);
-      const message = pipe(checked, foldLeftRight);
-      expect(getPaths(left(message.errors))).toEqual(
-        [
-          'Invalid value "undefined" supplied to "risk_score"',
-          'Invalid value "undefined" supplied to "version"',
-        ].concat(isRuleRegistryEnabled ? ['Invalid value "undefined" supplied to "namespace"'] : [])
-      );
-      expect(message.schema).toEqual({});
-    }
-  );
+    const decoded = addPrepackagedRulesSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "undefined" supplied to "risk_score"',
+      'Invalid value "undefined" supplied to "version"',
+    ]);
+    expect(message.schema).toEqual({});
+  });
 
-  test.each([
-    ['Legacy', false],
-    ['RAC', true],
-  ])(
-    '[rule_id, description, from, to, name, severity, type, interval] does not validate - %s',
-    (_, isRuleRegistryEnabled) => {
-      const payload: Partial<AddPrepackagedRulesSchema> = {
-        rule_id: 'rule-1',
-        description: 'some description',
-        from: 'now-5m',
-        to: 'now',
-        name: 'some-name',
-        severity: 'low',
-        interval: '5m',
-        type: 'query',
-      };
+  test('[rule_id, description, from, to, name, severity, type, interval] does not validate', () => {
+    const payload: Partial<AddPrepackagedRulesSchema> = {
+      rule_id: 'rule-1',
+      description: 'some description',
+      from: 'now-5m',
+      to: 'now',
+      name: 'some-name',
+      severity: 'low',
+      interval: '5m',
+      type: 'query',
+    };
 
-      const decoded = addPrepackagedRulesSchema.decode(payload);
-      const checked = exactCheck(payload, decoded);
-      const message = pipe(checked, foldLeftRight);
-      expect(getPaths(left(message.errors))).toEqual(
-        [
-          'Invalid value "undefined" supplied to "risk_score"',
-          'Invalid value "undefined" supplied to "version"',
-        ].concat(isRuleRegistryEnabled ? ['Invalid value "undefined" supplied to "namespace"'] : [])
-      );
-      expect(message.schema).toEqual({});
-    }
-  );
+    const decoded = addPrepackagedRulesSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "undefined" supplied to "risk_score"',
+      'Invalid value "undefined" supplied to "version"',
+    ]);
+    expect(message.schema).toEqual({});
+  });
 
-  test.each([
-    ['Legacy', false],
-    ['RAC', true],
-  ])(
-    '[rule_id, description, from, to, name, severity, type, interval, index] does not validate - %s',
-    (_, isRuleRegistryEnabled) => {
-      const payload: Partial<AddPrepackagedRulesSchema> = {
-        rule_id: 'rule-1',
-        description: 'some description',
-        from: 'now-5m',
-        to: 'now',
-        name: 'some-name',
-        severity: 'low',
-        type: 'query',
-        interval: '5m',
-        index: ['index-1'],
-      };
+  test('[rule_id, description, from, to, name, severity, type, interval, index] does not validate', () => {
+    const payload: Partial<AddPrepackagedRulesSchema> = {
+      rule_id: 'rule-1',
+      description: 'some description',
+      from: 'now-5m',
+      to: 'now',
+      name: 'some-name',
+      severity: 'low',
+      type: 'query',
+      interval: '5m',
+      index: ['index-1'],
+    };
 
-      const decoded = addPrepackagedRulesSchema.decode(payload);
-      const checked = exactCheck(payload, decoded);
-      const message = pipe(checked, foldLeftRight);
-      expect(getPaths(left(message.errors))).toEqual(
-        [
-          'Invalid value "undefined" supplied to "risk_score"',
-          'Invalid value "undefined" supplied to "version"',
-        ].concat(isRuleRegistryEnabled ? ['Invalid value "undefined" supplied to "namespace"'] : [])
-      );
-      expect(message.schema).toEqual({});
-    }
-  );
+    const decoded = addPrepackagedRulesSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "undefined" supplied to "risk_score"',
+      'Invalid value "undefined" supplied to "version"',
+    ]);
+    expect(message.schema).toEqual({});
+  });
 
-  test.each([
-    ['Legacy', false],
-    ['RAC', true],
-  ])(
-    '[rule_id, description, from, to, name, severity, type, query, index, interval, version] does validate - %s',
-    (_, isRuleRegistryEnabled) => {
-      const payload = {
-        rule_id: 'rule-1',
-        risk_score: 50,
-        description: 'some description',
-        from: 'now-5m',
-        to: 'now',
-        name: 'some-name',
-        severity: 'low',
-        type: 'query',
-        query: 'some query',
-        index: ['index-1'],
-        interval: '5m',
-        version: 1,
-        ...(isRuleRegistryEnabled ? { namespace: 'default' } : {}),
-      };
+  test('[rule_id, description, from, to, name, severity, type, query, index, interval, version] does validate', () => {
+    const payload: AddPrepackagedRulesSchema = {
+      rule_id: 'rule-1',
+      risk_score: 50,
+      description: 'some description',
+      from: 'now-5m',
+      to: 'now',
+      name: 'some-name',
+      severity: 'low',
+      type: 'query',
+      query: 'some query',
+      index: ['index-1'],
+      interval: '5m',
+      version: 1,
+    };
 
-      const decoded = addPrepackagedRulesSchema.decode(payload);
-      const checked = exactCheck(payload, decoded);
-      const message = pipe(checked, foldLeftRight);
-      expect(getPaths(left(message.errors))).toEqual([]);
-      const expected = {
-        author: [],
-        severity_mapping: [],
-        risk_score_mapping: [],
-        rule_id: 'rule-1',
-        risk_score: 50,
-        description: 'some description',
-        from: 'now-5m',
-        to: 'now',
-        name: 'some-name',
-        severity: 'low',
-        type: 'query',
-        query: 'some query',
-        index: ['index-1'],
-        interval: '5m',
-        references: [],
-        actions: [],
-        enabled: false,
-        false_positives: [],
-        max_signals: DEFAULT_MAX_SIGNALS,
-        tags: [],
-        threat: [],
-        throttle: null,
-        version: 1,
-        exceptions_list: [],
-        ...(isRuleRegistryEnabled ? { namespace: 'default' } : {}),
-      };
-      expect(message.schema).toEqual(expected);
-    }
-  );
+    const decoded = addPrepackagedRulesSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([]);
+    const expected: AddPrepackagedRulesSchemaDecoded = {
+      author: [],
+      severity_mapping: [],
+      risk_score_mapping: [],
+      rule_id: 'rule-1',
+      risk_score: 50,
+      description: 'some description',
+      from: 'now-5m',
+      to: 'now',
+      name: 'some-name',
+      severity: 'low',
+      type: 'query',
+      query: 'some query',
+      index: ['index-1'],
+      interval: '5m',
+      references: [],
+      actions: [],
+      enabled: false,
+      false_positives: [],
+      max_signals: DEFAULT_MAX_SIGNALS,
+      tags: [],
+      threat: [],
+      throttle: null,
+      version: 1,
+      exceptions_list: [],
+    };
+    expect(message.schema).toEqual(expected);
+  });
 
-  test.each([
-    ['Legacy', false],
-    ['RAC', true],
-  ])(
-    '[rule_id, description, from, to, index, name, severity, interval, type, query, language] does not validate - %s',
-    (_, isRuleRegistryEnabled) => {
-      const payload: Partial<AddPrepackagedRulesSchema> = {
-        rule_id: 'rule-1',
-        description: 'some description',
-        from: 'now-5m',
-        to: 'now',
-        index: ['index-1'],
-        name: 'some-name',
-        severity: 'low',
-        interval: '5m',
-        type: 'query',
-        query: 'some query',
-        language: 'kuery',
-        risk_score: 50,
-      };
+  test('[rule_id, description, from, to, index, name, severity, interval, type, query, language] does not validate', () => {
+    const payload: Partial<AddPrepackagedRulesSchema> = {
+      rule_id: 'rule-1',
+      description: 'some description',
+      from: 'now-5m',
+      to: 'now',
+      index: ['index-1'],
+      name: 'some-name',
+      severity: 'low',
+      interval: '5m',
+      type: 'query',
+      query: 'some query',
+      language: 'kuery',
+      risk_score: 50,
+    };
 
-      const decoded = addPrepackagedRulesSchema.decode(payload);
-      const checked = exactCheck(payload, decoded);
-      const message = pipe(checked, foldLeftRight);
-      expect(getPaths(left(message.errors))).toEqual(
-        ['Invalid value "undefined" supplied to "version"'].concat(
-          isRuleRegistryEnabled ? ['Invalid value "undefined" supplied to "namespace"'] : []
-        )
-      );
-      expect(message.schema).toEqual({});
-    }
-  );
+    const decoded = addPrepackagedRulesSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "undefined" supplied to "version"',
+    ]);
+    expect(message.schema).toEqual({});
+  });
 
-  test.each([
-    ['Legacy', false],
-    ['RAC', true],
-  ])(
-    '[rule_id, description, from, to, index, name, severity, interval, type, query, language, version] does validate - %s',
-    (_, isRuleRegistryEnabled) => {
-      const payload: Partial<AddPrepackagedRulesSchema> = {
-        rule_id: 'rule-1',
-        description: 'some description',
-        from: 'now-5m',
-        to: 'now',
-        index: ['index-1'],
-        name: 'some-name',
-        severity: 'low',
-        interval: '5m',
-        type: 'query',
-        query: 'some query',
-        language: 'kuery',
-        risk_score: 50,
-        version: 1,
-        ...(isRuleRegistryEnabled ? { namespace: 'default' } : {}),
-      };
+  test('[rule_id, description, from, to, index, name, severity, interval, type, query, language, version] does validate', () => {
+    const payload: Partial<AddPrepackagedRulesSchema> = {
+      rule_id: 'rule-1',
+      description: 'some description',
+      from: 'now-5m',
+      to: 'now',
+      index: ['index-1'],
+      name: 'some-name',
+      severity: 'low',
+      interval: '5m',
+      type: 'query',
+      query: 'some query',
+      language: 'kuery',
+      risk_score: 50,
+      version: 1,
+    };
 
-      const decoded = addPrepackagedRulesSchema.decode(payload);
-      const checked = exactCheck(payload, decoded);
-      const message = pipe(checked, foldLeftRight);
-      expect(getPaths(left(message.errors))).toEqual([]);
-      const expected = {
-        author: [],
-        severity_mapping: [],
-        risk_score_mapping: [],
-        rule_id: 'rule-1',
-        risk_score: 50,
-        description: 'some description',
-        from: 'now-5m',
-        to: 'now',
-        index: ['index-1'],
-        name: 'some-name',
-        severity: 'low',
-        interval: '5m',
-        type: 'query',
-        query: 'some query',
-        language: 'kuery',
-        references: [],
-        actions: [],
-        enabled: false,
-        false_positives: [],
-        max_signals: DEFAULT_MAX_SIGNALS,
-        tags: [],
-        threat: [],
-        throttle: null,
-        version: 1,
-        exceptions_list: [],
-        ...(isRuleRegistryEnabled ? { namespace: 'default' } : {}),
-      };
-      expect(message.schema).toEqual(expected);
-    }
-  );
+    const decoded = addPrepackagedRulesSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([]);
+    const expected: AddPrepackagedRulesSchemaDecoded = {
+      author: [],
+      severity_mapping: [],
+      risk_score_mapping: [],
+      rule_id: 'rule-1',
+      risk_score: 50,
+      description: 'some description',
+      from: 'now-5m',
+      to: 'now',
+      index: ['index-1'],
+      name: 'some-name',
+      severity: 'low',
+      interval: '5m',
+      type: 'query',
+      query: 'some query',
+      language: 'kuery',
+      references: [],
+      actions: [],
+      enabled: false,
+      false_positives: [],
+      max_signals: DEFAULT_MAX_SIGNALS,
+      tags: [],
+      threat: [],
+      throttle: null,
+      version: 1,
+      exceptions_list: [],
+    };
+    expect(message.schema).toEqual(expected);
+  });
 
-  test.each([
-    ['Legacy', false],
-    ['RAC', true],
-  ])(
-    '[rule_id, description, from, to, index, name, severity, interval, type, query, language, risk_score, output_index] does not validate - %s',
-    (_, isRuleRegistryEnabled) => {
-      const payload: Partial<AddPrepackagedRulesSchema> & { output_index: string } = {
-        rule_id: 'rule-1',
-        output_index: '.siem-signals',
-        risk_score: 50,
-        description: 'some description',
-        from: 'now-5m',
-        to: 'now',
-        index: ['index-1'],
-        name: 'some-name',
-        severity: 'low',
-        interval: '5m',
-        type: 'query',
-        query: 'some query',
-        language: 'kuery',
-      };
+  test('[rule_id, description, from, to, index, name, severity, interval, type, query, language, risk_score, output_index] does not validate', () => {
+    const payload: Partial<AddPrepackagedRulesSchema> & { output_index: string } = {
+      rule_id: 'rule-1',
+      output_index: '.siem-signals',
+      risk_score: 50,
+      description: 'some description',
+      from: 'now-5m',
+      to: 'now',
+      index: ['index-1'],
+      name: 'some-name',
+      severity: 'low',
+      interval: '5m',
+      type: 'query',
+      query: 'some query',
+      language: 'kuery',
+    };
 
-      const decoded = addPrepackagedRulesSchema.decode(payload);
-      const checked = exactCheck(payload, decoded);
-      const message = pipe(checked, foldLeftRight);
-      expect(getPaths(left(message.errors))).toEqual(
-        ['Invalid value "undefined" supplied to "version"'].concat(
-          isRuleRegistryEnabled ? ['Invalid value "undefined" supplied to "namespace"'] : []
-        )
-      );
-      expect(message.schema).toEqual({});
-    }
-  );
+    const decoded = addPrepackagedRulesSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "undefined" supplied to "version"',
+    ]);
+    expect(message.schema).toEqual({});
+  });
 
-  test.each([
-    ['Legacy', false],
-    ['RAC', true],
-  ])(
-    '[rule_id, description, from, to, index, name, severity, interval, type, query, language, risk_score, output_index, version] does not validate because output_index is not allowed - %s',
-    (_, isRuleRegistryEnabled) => {
-      const payload: Partial<AddPrepackagedRulesSchema> & { output_index: string } = {
-        rule_id: 'rule-1',
-        output_index: '.siem-signals',
-        risk_score: 50,
-        description: 'some description',
-        from: 'now-5m',
-        to: 'now',
-        index: ['index-1'],
-        name: 'some-name',
-        severity: 'low',
-        interval: '5m',
-        type: 'query',
-        query: 'some query',
-        language: 'kuery',
-        version: 1,
-        ...(isRuleRegistryEnabled ? { namespace: 'default' } : {}),
-      };
+  test('[rule_id, description, from, to, index, name, severity, interval, type, query, language, risk_score, output_index, version] does not validate because output_index is not allowed', () => {
+    const payload: Partial<AddPrepackagedRulesSchema> & { output_index: string } = {
+      rule_id: 'rule-1',
+      output_index: '.siem-signals',
+      risk_score: 50,
+      description: 'some description',
+      from: 'now-5m',
+      to: 'now',
+      index: ['index-1'],
+      name: 'some-name',
+      severity: 'low',
+      interval: '5m',
+      type: 'query',
+      query: 'some query',
+      language: 'kuery',
+      version: 1,
+    };
 
-      const decoded = addPrepackagedRulesSchema.decode(payload);
-      const checked = exactCheck(payload, decoded);
-      const message = pipe(checked, foldLeftRight);
-      expect(getPaths(left(message.errors))).toEqual(['invalid keys "output_index"']);
-      expect(message.schema).toEqual({});
-    }
-  );
+    const decoded = addPrepackagedRulesSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual(['invalid keys "output_index"']);
+    expect(message.schema).toEqual({});
+  });
 
-  test.each([
-    ['Legacy', false],
-    ['RAC', true],
-  ])(
-    '[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, version] does validate - %s',
-    (_, isRuleRegistryEnabled) => {
-      const payload: Partial<AddPrepackagedRulesSchema> = {
-        rule_id: 'rule-1',
-        description: 'some description',
-        from: 'now-5m',
-        to: 'now',
-        index: ['index-1'],
-        name: 'some-name',
-        severity: 'low',
-        interval: '5m',
-        type: 'query',
-        risk_score: 50,
-        version: 1,
-        ...(isRuleRegistryEnabled ? { namespace: 'default' } : {}),
-      };
+  test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, version] does validate', () => {
+    const payload: Partial<AddPrepackagedRulesSchema> = {
+      rule_id: 'rule-1',
+      description: 'some description',
+      from: 'now-5m',
+      to: 'now',
+      index: ['index-1'],
+      name: 'some-name',
+      severity: 'low',
+      interval: '5m',
+      type: 'query',
+      risk_score: 50,
+      version: 1,
+    };
 
-      const decoded = addPrepackagedRulesSchema.decode(payload);
-      const checked = exactCheck(payload, decoded);
-      const message = pipe(checked, foldLeftRight);
-      expect(getPaths(left(message.errors))).toEqual([]);
-      const expected = {
-        author: [],
-        severity_mapping: [],
-        risk_score_mapping: [],
-        rule_id: 'rule-1',
-        description: 'some description',
-        from: 'now-5m',
-        to: 'now',
-        index: ['index-1'],
-        name: 'some-name',
-        severity: 'low',
-        interval: '5m',
-        type: 'query',
-        risk_score: 50,
-        version: 1,
-        actions: [],
-        enabled: false,
-        exceptions_list: [],
-        false_positives: [],
-        max_signals: 100,
-        references: [],
-        tags: [],
-        threat: [],
-        throttle: null,
-        ...(isRuleRegistryEnabled ? { namespace: 'default' } : {}),
-      };
-      expect(message.schema).toEqual(expected);
-    }
-  );
+    const decoded = addPrepackagedRulesSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([]);
+    const expected: AddPrepackagedRulesSchemaDecoded = {
+      author: [],
+      severity_mapping: [],
+      risk_score_mapping: [],
+      rule_id: 'rule-1',
+      description: 'some description',
+      from: 'now-5m',
+      to: 'now',
+      index: ['index-1'],
+      name: 'some-name',
+      severity: 'low',
+      interval: '5m',
+      type: 'query',
+      risk_score: 50,
+      version: 1,
+      actions: [],
+      enabled: false,
+      exceptions_list: [],
+      false_positives: [],
+      max_signals: 100,
+      references: [],
+      tags: [],
+      threat: [],
+      throttle: null,
+    };
+    expect(message.schema).toEqual(expected);
+  });
 
-  test.each([
-    ['Legacy', false],
-    ['RAC', true],
-  ])('You can send in an empty array to threat - %s', (_, isRuleRegistryEnabled) => {
-    const payload = {
-      ...getAddPrepackagedRulesSchemaMock(isRuleRegistryEnabled),
+  test('You can send in a namespace', () => {
+    const payload: AddPrepackagedRulesSchema = {
+      ...getAddPrepackagedRulesSchemaMock(),
+      namespace: 'a namespace',
+    };
+
+    const decoded = addPrepackagedRulesSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([]);
+    const expected: AddPrepackagedRulesSchemaDecoded = {
+      ...getAddPrepackagedRulesSchemaDecodedMock(),
+      namespace: 'a namespace',
+    };
+    expect(message.schema).toEqual(expected);
+  });
+
+  test('You can send in an empty array to threat', () => {
+    const payload: AddPrepackagedRulesSchema = {
+      ...getAddPrepackagedRulesSchemaMock(),
       threat: [],
     };
 
@@ -593,107 +492,96 @@ describe('add prepackaged rules schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    const expected = {
-      ...getAddPrepackagedRulesSchemaDecodedMock(isRuleRegistryEnabled),
+    const expected: AddPrepackagedRulesSchemaDecoded = {
+      ...getAddPrepackagedRulesSchemaDecodedMock(),
       threat: [],
     };
     expect(message.schema).toEqual(expected);
   });
 
-  test.each([
-    ['Legacy', false],
-    ['RAC', true],
-  ])(
-    '[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, output_index, threat] does validate - %s',
-    (_, isRuleRegistryEnabled) => {
-      const payload = {
-        rule_id: 'rule-1',
-        risk_score: 50,
-        description: 'some description',
-        from: 'now-5m',
-        to: 'now',
-        index: ['index-1'],
-        name: 'some-name',
-        severity: 'low',
-        interval: '5m',
-        type: 'query',
-        threat: [
-          {
-            framework: 'someFramework',
-            tactic: {
-              id: 'fakeId',
-              name: 'fakeName',
-              reference: 'fakeRef',
-            },
-            technique: [
-              {
-                id: 'techniqueId',
-                name: 'techniqueName',
-                reference: 'techniqueRef',
-              },
-            ],
+  test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, output_index, threat] does validate', () => {
+    const payload: AddPrepackagedRulesSchema = {
+      rule_id: 'rule-1',
+      risk_score: 50,
+      description: 'some description',
+      from: 'now-5m',
+      to: 'now',
+      index: ['index-1'],
+      name: 'some-name',
+      severity: 'low',
+      interval: '5m',
+      type: 'query',
+      threat: [
+        {
+          framework: 'someFramework',
+          tactic: {
+            id: 'fakeId',
+            name: 'fakeName',
+            reference: 'fakeRef',
           },
-        ],
-        version: 1,
-        ...(isRuleRegistryEnabled ? { namespace: 'default' } : {}),
-      };
-
-      const decoded = addPrepackagedRulesSchema.decode(payload);
-      const checked = exactCheck(payload, decoded);
-      const message = pipe(checked, foldLeftRight);
-      expect(getPaths(left(message.errors))).toEqual([]);
-      const expected = {
-        author: [],
-        severity_mapping: [],
-        risk_score_mapping: [],
-        rule_id: 'rule-1',
-        risk_score: 50,
-        description: 'some description',
-        from: 'now-5m',
-        to: 'now',
-        index: ['index-1'],
-        name: 'some-name',
-        severity: 'low',
-        interval: '5m',
-        type: 'query',
-        threat: [
-          {
-            framework: 'someFramework',
-            tactic: {
-              id: 'fakeId',
-              name: 'fakeName',
-              reference: 'fakeRef',
+          technique: [
+            {
+              id: 'techniqueId',
+              name: 'techniqueName',
+              reference: 'techniqueRef',
             },
-            technique: [
-              {
-                id: 'techniqueId',
-                name: 'techniqueName',
-                reference: 'techniqueRef',
-              },
-            ],
-          },
-        ],
-        references: [],
-        actions: [],
-        enabled: false,
-        false_positives: [],
-        max_signals: DEFAULT_MAX_SIGNALS,
-        tags: [],
-        throttle: null,
-        version: 1,
-        exceptions_list: [],
-        ...(isRuleRegistryEnabled ? { namespace: 'default' } : {}),
-      };
-      expect(message.schema).toEqual(expected);
-    }
-  );
+          ],
+        },
+      ],
+      version: 1,
+    };
 
-  test.each([
-    ['Legacy', false],
-    ['RAC', true],
-  ])('allows references to be sent as valid - %s', (_, isRuleRegistryEnabled) => {
-    const payload = {
-      ...getAddPrepackagedRulesSchemaMock(isRuleRegistryEnabled),
+    const decoded = addPrepackagedRulesSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([]);
+    const expected: AddPrepackagedRulesSchemaDecoded = {
+      author: [],
+      severity_mapping: [],
+      risk_score_mapping: [],
+      rule_id: 'rule-1',
+      risk_score: 50,
+      description: 'some description',
+      from: 'now-5m',
+      to: 'now',
+      index: ['index-1'],
+      name: 'some-name',
+      severity: 'low',
+      interval: '5m',
+      type: 'query',
+      threat: [
+        {
+          framework: 'someFramework',
+          tactic: {
+            id: 'fakeId',
+            name: 'fakeName',
+            reference: 'fakeRef',
+          },
+          technique: [
+            {
+              id: 'techniqueId',
+              name: 'techniqueName',
+              reference: 'techniqueRef',
+            },
+          ],
+        },
+      ],
+      references: [],
+      actions: [],
+      enabled: false,
+      false_positives: [],
+      max_signals: DEFAULT_MAX_SIGNALS,
+      tags: [],
+      throttle: null,
+      version: 1,
+      exceptions_list: [],
+    };
+    expect(message.schema).toEqual(expected);
+  });
+
+  test('allows references to be sent as valid', () => {
+    const payload: AddPrepackagedRulesSchema = {
+      ...getAddPrepackagedRulesSchemaMock(),
       references: ['index-1'],
     };
 
@@ -701,37 +589,29 @@ describe('add prepackaged rules schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    const expected = {
-      ...getAddPrepackagedRulesSchemaDecodedMock(isRuleRegistryEnabled),
+    const expected: AddPrepackagedRulesSchemaDecoded = {
+      ...getAddPrepackagedRulesSchemaDecodedMock(),
       references: ['index-1'],
     };
     expect(message.schema).toEqual(expected);
   });
 
-  test.each([
-    ['Legacy', false],
-    ['RAC', true],
-  ])('defaults references to an array if it is not sent in - %s', (_, isRuleRegistryEnabled) => {
-    const { references, ...noReferences } = getAddPrepackagedRulesSchemaMock(
-      isRuleRegistryEnabled
-    ) as AddPrepackagedRulesSchema;
+  test('defaults references to an array if it is not sent in', () => {
+    const { references, ...noReferences } = getAddPrepackagedRulesSchemaMock();
     const decoded = addPrepackagedRulesSchema.decode(noReferences);
     const checked = exactCheck(noReferences, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    const expected = {
-      ...getAddPrepackagedRulesSchemaDecodedMock(isRuleRegistryEnabled),
+    const expected: AddPrepackagedRulesSchemaDecoded = {
+      ...getAddPrepackagedRulesSchemaDecodedMock(),
       references: [],
     };
     expect(message.schema).toEqual(expected);
   });
 
-  test.each([
-    ['Legacy', false],
-    ['RAC', true],
-  ])('immutable cannot be set in a pre-packaged rule - %s', (_, isRuleRegistryEnabled) => {
-    const payload = {
-      ...getAddPrepackagedRulesSchemaMock(isRuleRegistryEnabled),
+  test('immutable cannot be set in a pre-packaged rule', () => {
+    const payload: AddPrepackagedRulesSchema & { immutable: boolean } = {
+      ...getAddPrepackagedRulesSchemaMock(),
       immutable: true,
     };
 
@@ -742,13 +622,8 @@ describe('add prepackaged rules schema', () => {
     expect(message.schema).toEqual({});
   });
 
-  test.each([
-    ['Legacy', false],
-    ['RAC', true],
-  ])('defaults enabled to false - %s', (_, isRuleRegistryEnabled) => {
-    const payload = getAddPrepackagedRulesSchemaMock(
-      isRuleRegistryEnabled
-    ) as AddPrepackagedRulesSchema;
+  test('defaults enabled to false', () => {
+    const payload: AddPrepackagedRulesSchema = getAddPrepackagedRulesSchemaMock();
     delete payload.enabled;
 
     const decoded = addPrepackagedRulesSchema.decode(payload);
@@ -760,11 +635,8 @@ describe('add prepackaged rules schema', () => {
     );
   });
 
-  test.each([
-    ['Legacy', false],
-    ['RAC', true],
-  ])('rule_id is required - %s', (_, isRuleRegistryEnabled) => {
-    const payload = getAddPrepackagedRulesSchemaMock(isRuleRegistryEnabled);
+  test('rule_id is required', () => {
+    const payload: AddPrepackagedRulesSchema = getAddPrepackagedRulesSchemaMock();
     // @ts-expect-error
     delete payload.rule_id;
 
@@ -777,12 +649,9 @@ describe('add prepackaged rules schema', () => {
     expect(message.schema).toEqual({});
   });
 
-  test.each([
-    ['Legacy', false],
-    ['RAC', true],
-  ])('references cannot be numbers - %s', (_, isRuleRegistryEnabled) => {
-    const payload = {
-      ...getAddPrepackagedRulesSchemaMock(isRuleRegistryEnabled),
+  test('references cannot be numbers', () => {
+    const payload: Omit<AddPrepackagedRulesSchema, 'references'> & { references: number[] } = {
+      ...getAddPrepackagedRulesSchemaMock(),
       references: [5],
     };
 
@@ -793,12 +662,9 @@ describe('add prepackaged rules schema', () => {
     expect(message.schema).toEqual({});
   });
 
-  test.each([
-    ['Legacy', false],
-    ['RAC', true],
-  ])('indexes cannot be numbers - %s', (_, isRuleRegistryEnabled) => {
-    const payload = {
-      ...getAddPrepackagedRulesSchemaMock(isRuleRegistryEnabled),
+  test('indexes cannot be numbers', () => {
+    const payload: Omit<AddPrepackagedRulesSchema, 'index'> & { index: number[] } = {
+      ...getAddPrepackagedRulesSchemaMock(),
       index: [5],
     };
 
@@ -809,14 +675,9 @@ describe('add prepackaged rules schema', () => {
     expect(message.schema).toEqual({});
   });
 
-  test.each([
-    ['Legacy', false],
-    ['RAC', true],
-  ])('defaults interval to 5 min - %s', (_, isRuleRegistryEnabled) => {
-    const { interval, ...noInterval } = getAddPrepackagedRulesSchemaMock(
-      isRuleRegistryEnabled
-    ) as AddPrepackagedRulesSchema;
-    const payload = {
+  test('defaults interval to 5 min', () => {
+    const { interval, ...noInterval } = getAddPrepackagedRulesSchemaMock();
+    const payload: AddPrepackagedRulesSchema = {
       ...noInterval,
     };
 
@@ -828,23 +689,18 @@ describe('add prepackaged rules schema', () => {
     const {
       interval: expectedInterval,
       ...expectedNoInterval
-    } = getAddPrepackagedRulesSchemaDecodedMock(isRuleRegistryEnabled);
-    const expected = {
+    } = getAddPrepackagedRulesSchemaDecodedMock();
+    const expected: AddPrepackagedRulesSchemaDecoded = {
       ...expectedNoInterval,
       interval: '5m',
     };
     expect(message.schema).toEqual(expected);
   });
 
-  test.each([
-    ['Legacy', false],
-    ['RAC', true],
-  ])('defaults max signals to 100 - %s', (_, isRuleRegistryEnabled) => {
+  test('defaults max signals to 100', () => {
     // eslint-disable-next-line @typescript-eslint/naming-convention
-    const { max_signals, ...noMaxSignals } = getAddPrepackagedRulesSchemaMock(
-      isRuleRegistryEnabled
-    ) as AddPrepackagedRulesSchema;
-    const payload = {
+    const { max_signals, ...noMaxSignals } = getAddPrepackagedRulesSchemaMock();
+    const payload: AddPrepackagedRulesSchema = {
       ...noMaxSignals,
     };
 
@@ -856,20 +712,17 @@ describe('add prepackaged rules schema', () => {
     const {
       max_signals: expectedMaxSignals,
       ...expectedNoMaxSignals
-    } = getAddPrepackagedRulesSchemaDecodedMock(isRuleRegistryEnabled);
-    const expected = {
+    } = getAddPrepackagedRulesSchemaDecodedMock();
+    const expected: AddPrepackagedRulesSchemaDecoded = {
       ...expectedNoMaxSignals,
       max_signals: 100,
     };
     expect(message.schema).toEqual(expected);
   });
 
-  test.each([
-    ['Legacy', false],
-    ['RAC', true],
-  ])('saved_query type can have filters with it - %s', (_, isRuleRegistryEnabled) => {
-    const payload = {
-      ...getAddPrepackagedRulesSchemaMock(isRuleRegistryEnabled),
+  test('saved_query type can have filters with it', () => {
+    const payload: AddPrepackagedRulesSchema = {
+      ...getAddPrepackagedRulesSchemaMock(),
       filters: [],
     };
 
@@ -877,19 +730,16 @@ describe('add prepackaged rules schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    const expected = {
-      ...getAddPrepackagedRulesSchemaDecodedMock(isRuleRegistryEnabled),
+    const expected: AddPrepackagedRulesSchemaDecoded = {
+      ...getAddPrepackagedRulesSchemaDecodedMock(),
       filters: [],
     };
     expect(message.schema).toEqual(expected);
   });
 
-  test.each([
-    ['Legacy', false],
-    ['RAC', true],
-  ])('filters cannot be a string - %s', (_, isRuleRegistryEnabled) => {
-    const payload = {
-      ...getAddPrepackagedRulesSchemaMock(isRuleRegistryEnabled),
+  test('filters cannot be a string', () => {
+    const payload: Omit<AddPrepackagedRulesSchema, 'filters'> & { filters: string } = {
+      ...getAddPrepackagedRulesSchemaMock(),
       filters: 'some string',
     };
 
@@ -902,12 +752,9 @@ describe('add prepackaged rules schema', () => {
     expect(message.schema).toEqual({});
   });
 
-  test.each([
-    ['Legacy', false],
-    ['RAC', true],
-  ])('language validates with kuery - %s', (_, isRuleRegistryEnabled) => {
-    const payload = {
-      ...getAddPrepackagedRulesSchemaMock(isRuleRegistryEnabled),
+  test('language validates with kuery', () => {
+    const payload: AddPrepackagedRulesSchema = {
+      ...getAddPrepackagedRulesSchemaMock(),
       language: 'kuery',
     };
 
@@ -915,19 +762,16 @@ describe('add prepackaged rules schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    const expected = {
-      ...getAddPrepackagedRulesSchemaDecodedMock(isRuleRegistryEnabled),
+    const expected: AddPrepackagedRulesSchemaDecoded = {
+      ...getAddPrepackagedRulesSchemaDecodedMock(),
       language: 'kuery',
     };
     expect(message.schema).toEqual(expected);
   });
 
-  test.each([
-    ['Legacy', false],
-    ['RAC', true],
-  ])('language validates with lucene - %s', (_, isRuleRegistryEnabled) => {
-    const payload = {
-      ...getAddPrepackagedRulesSchemaMock(isRuleRegistryEnabled),
+  test('language validates with lucene', () => {
+    const payload: AddPrepackagedRulesSchema = {
+      ...getAddPrepackagedRulesSchemaMock(),
       language: 'lucene',
     };
 
@@ -935,19 +779,16 @@ describe('add prepackaged rules schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    const expected = {
-      ...getAddPrepackagedRulesSchemaDecodedMock(isRuleRegistryEnabled),
+    const expected: AddPrepackagedRulesSchemaDecoded = {
+      ...getAddPrepackagedRulesSchemaDecodedMock(),
       language: 'lucene',
     };
     expect(message.schema).toEqual(expected);
   });
 
-  test.each([
-    ['Legacy', false],
-    ['RAC', true],
-  ])('language does not validate with something made up - %s', (_, isRuleRegistryEnabled) => {
-    const payload = {
-      ...getAddPrepackagedRulesSchemaMock(isRuleRegistryEnabled),
+  test('language does not validate with something made up', () => {
+    const payload: Omit<AddPrepackagedRulesSchema, 'language'> & { language: string } = {
+      ...getAddPrepackagedRulesSchemaMock(),
       language: 'something-made-up',
     };
 
@@ -960,12 +801,9 @@ describe('add prepackaged rules schema', () => {
     expect(message.schema).toEqual({});
   });
 
-  test.each([
-    ['Legacy', false],
-    ['RAC', true],
-  ])('max_signals cannot be negative - %s', (_, isRuleRegistryEnabled) => {
-    const payload = {
-      ...getAddPrepackagedRulesSchemaMock(isRuleRegistryEnabled),
+  test('max_signals cannot be negative', () => {
+    const payload: AddPrepackagedRulesSchema = {
+      ...getAddPrepackagedRulesSchemaMock(),
       max_signals: -1,
     };
 
@@ -978,12 +816,9 @@ describe('add prepackaged rules schema', () => {
     expect(message.schema).toEqual({});
   });
 
-  test.each([
-    ['Legacy', false],
-    ['RAC', true],
-  ])('max_signals cannot be zero - %s', (_, isRuleRegistryEnabled) => {
-    const payload = {
-      ...getAddPrepackagedRulesSchemaMock(isRuleRegistryEnabled),
+  test('max_signals cannot be zero', () => {
+    const payload: AddPrepackagedRulesSchema = {
+      ...getAddPrepackagedRulesSchemaMock(),
       max_signals: 0,
     };
 
@@ -994,12 +829,9 @@ describe('add prepackaged rules schema', () => {
     expect(message.schema).toEqual({});
   });
 
-  test.each([
-    ['Legacy', false],
-    ['RAC', true],
-  ])('max_signals can be 1 - %s', (_, isRuleRegistryEnabled) => {
-    const payload = {
-      ...getAddPrepackagedRulesSchemaMock(isRuleRegistryEnabled),
+  test('max_signals can be 1', () => {
+    const payload: AddPrepackagedRulesSchema = {
+      ...getAddPrepackagedRulesSchemaMock(),
       max_signals: 1,
     };
 
@@ -1007,19 +839,16 @@ describe('add prepackaged rules schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    const expected = {
-      ...getAddPrepackagedRulesSchemaDecodedMock(isRuleRegistryEnabled),
+    const expected: AddPrepackagedRulesSchemaDecoded = {
+      ...getAddPrepackagedRulesSchemaDecodedMock(),
       max_signals: 1,
     };
     expect(message.schema).toEqual(expected);
   });
 
-  test.each([
-    ['Legacy', false],
-    ['RAC', true],
-  ])('You can optionally send in an array of tags - %s', (_, isRuleRegistryEnabled) => {
-    const payload = {
-      ...getAddPrepackagedRulesSchemaMock(isRuleRegistryEnabled),
+  test('You can optionally send in an array of tags', () => {
+    const payload: AddPrepackagedRulesSchema = {
+      ...getAddPrepackagedRulesSchemaMock(),
       tags: ['tag_1', 'tag_2'],
     };
 
@@ -1027,19 +856,16 @@ describe('add prepackaged rules schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    const expected = {
-      ...getAddPrepackagedRulesSchemaDecodedMock(isRuleRegistryEnabled),
+    const expected: AddPrepackagedRulesSchemaDecoded = {
+      ...getAddPrepackagedRulesSchemaDecodedMock(),
       tags: ['tag_1', 'tag_2'],
     };
     expect(message.schema).toEqual(expected);
   });
 
-  test.each([
-    ['Legacy', false],
-    ['RAC', true],
-  ])('You cannot send in an array of tags that are numbers - %s', (_, isRuleRegistryEnabled) => {
-    const payload = {
-      ...getAddPrepackagedRulesSchemaMock(isRuleRegistryEnabled),
+  test('You cannot send in an array of tags that are numbers', () => {
+    const payload: Omit<AddPrepackagedRulesSchema, 'tags'> & { tags: number[] } = {
+      ...getAddPrepackagedRulesSchemaMock(),
       tags: [0, 1, 2],
     };
 
@@ -1054,121 +880,106 @@ describe('add prepackaged rules schema', () => {
     expect(message.schema).toEqual({});
   });
 
-  test.each([
-    ['Legacy', false],
-    ['RAC', true],
-  ])(
-    'You cannot send in an array of threat that are missing "framework" - %s',
-    (_, isRuleRegistryEnabled) => {
-      const payload = {
-        ...getAddPrepackagedRulesSchemaMock(isRuleRegistryEnabled),
-        threat: [
-          {
-            tactic: {
-              id: 'fakeId',
-              name: 'fakeName',
-              reference: 'fakeRef',
+  test('You cannot send in an array of threat that are missing "framework"', () => {
+    const payload: Omit<AddPrepackagedRulesSchema, 'threat'> & {
+      threat: Array<Partial<Omit<AddPrepackagedRulesSchema['threat'], 'framework'>>>;
+    } = {
+      ...getAddPrepackagedRulesSchemaMock(),
+      threat: [
+        {
+          tactic: {
+            id: 'fakeId',
+            name: 'fakeName',
+            reference: 'fakeRef',
+          },
+          technique: [
+            {
+              id: 'techniqueId',
+              name: 'techniqueName',
+              reference: 'techniqueRef',
             },
-            technique: [
-              {
-                id: 'techniqueId',
-                name: 'techniqueName',
-                reference: 'techniqueRef',
-              },
-            ],
-          },
-        ],
-      };
+          ],
+        },
+      ],
+    };
 
-      const decoded = addPrepackagedRulesSchema.decode(payload);
-      const checked = exactCheck(payload, decoded);
-      const message = pipe(checked, foldLeftRight);
-      expect(getPaths(left(message.errors))).toEqual([
-        'Invalid value "undefined" supplied to "threat,framework"',
-      ]);
-      expect(message.schema).toEqual({});
-    }
-  );
+    const decoded = addPrepackagedRulesSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "undefined" supplied to "threat,framework"',
+    ]);
+    expect(message.schema).toEqual({});
+  });
 
-  test.each([
-    ['Legacy', false],
-    ['RAC', true],
-  ])(
-    'You cannot send in an array of threat that are missing "tactic" - %s',
-    (_, isRuleRegistryEnabled) => {
-      const payload = {
-        ...getAddPrepackagedRulesSchemaMock(isRuleRegistryEnabled),
-        threat: [
-          {
-            framework: 'fake',
-            technique: [
-              {
-                id: 'techniqueId',
-                name: 'techniqueName',
-                reference: 'techniqueRef',
-              },
-            ],
-          },
-        ],
-      };
-
-      const decoded = addPrepackagedRulesSchema.decode(payload);
-      const checked = exactCheck(payload, decoded);
-      const message = pipe(checked, foldLeftRight);
-      expect(getPaths(left(message.errors))).toEqual([
-        'Invalid value "undefined" supplied to "threat,tactic"',
-      ]);
-      expect(message.schema).toEqual({});
-    }
-  );
-
-  test.each([
-    ['Legacy', false],
-    ['RAC', true],
-  ])(
-    'You can send in an array of threat that are missing "technique" - %s',
-    (_, isRuleRegistryEnabled) => {
-      const payload = {
-        ...getAddPrepackagedRulesSchemaMock(isRuleRegistryEnabled),
-        threat: [
-          {
-            framework: 'fake',
-            tactic: {
-              id: 'fakeId',
-              name: 'fakeName',
-              reference: 'fakeRef',
+  test('You cannot send in an array of threat that are missing "tactic"', () => {
+    const payload: Omit<AddPrepackagedRulesSchema, 'threat'> & {
+      threat: Array<Partial<Omit<AddPrepackagedRulesSchema['threat'], 'tactic'>>>;
+    } = {
+      ...getAddPrepackagedRulesSchemaMock(),
+      threat: [
+        {
+          framework: 'fake',
+          technique: [
+            {
+              id: 'techniqueId',
+              name: 'techniqueName',
+              reference: 'techniqueRef',
             },
-          },
-        ],
-      };
+          ],
+        },
+      ],
+    };
 
-      const decoded = addPrepackagedRulesSchema.decode(payload);
-      const checked = exactCheck(payload, decoded);
-      const message = pipe(checked, foldLeftRight);
-      expect(getPaths(left(message.errors))).toEqual([]);
-      const expected = {
-        ...getAddPrepackagedRulesSchemaDecodedMock(isRuleRegistryEnabled),
-        threat: [
-          {
-            framework: 'fake',
-            tactic: {
-              id: 'fakeId',
-              name: 'fakeName',
-              reference: 'fakeRef',
-            },
-          },
-        ],
-      };
-      expect(message.schema).toEqual(expected);
-    }
-  );
+    const decoded = addPrepackagedRulesSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "undefined" supplied to "threat,tactic"',
+    ]);
+    expect(message.schema).toEqual({});
+  });
 
-  test.each([
-    ['Legacy', false],
-    ['RAC', true],
-  ])('You can optionally send in an array of false positives - %s', (_, isRuleRegistryEnabled) => {
-    const payload = {
-      ...getAddPrepackagedRulesSchemaMock(isRuleRegistryEnabled),
+  test('You can send in an array of threat that are missing "technique"', () => {
+    const payload: Omit<AddPrepackagedRulesSchema, 'threat'> & {
+      threat: Array<Partial<Omit<AddPrepackagedRulesSchema['threat'], 'technique'>>>;
+    } = {
+      ...getAddPrepackagedRulesSchemaMock(),
+      threat: [
+        {
+          framework: 'fake',
+          tactic: {
+            id: 'fakeId',
+            name: 'fakeName',
+            reference: 'fakeRef',
+          },
+        },
+      ],
+    };
+
+    const decoded = addPrepackagedRulesSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([]);
+    const expected: AddPrepackagedRulesSchemaDecoded = {
+      ...getAddPrepackagedRulesSchemaDecodedMock(),
+      threat: [
+        {
+          framework: 'fake',
+          tactic: {
+            id: 'fakeId',
+            name: 'fakeName',
+            reference: 'fakeRef',
+          },
+        },
+      ],
+    };
+    expect(message.schema).toEqual(expected);
+  });
+
+  test('You can optionally send in an array of false positives', () => {
+    const payload: AddPrepackagedRulesSchema = {
+      ...getAddPrepackagedRulesSchemaMock(),
       false_positives: ['false_1', 'false_2'],
     };
 
@@ -1176,40 +987,33 @@ describe('add prepackaged rules schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    const expected = {
-      ...getAddPrepackagedRulesSchemaDecodedMock(isRuleRegistryEnabled),
+    const expected: AddPrepackagedRulesSchemaDecoded = {
+      ...getAddPrepackagedRulesSchemaDecodedMock(),
       false_positives: ['false_1', 'false_2'],
     };
     expect(message.schema).toEqual(expected);
   });
 
-  test.each([
-    ['Legacy', false],
-    ['RAC', true],
-  ])(
-    'You cannot send in an array of false positives that are numbers - %s',
-    (_, isRuleRegistryEnabled) => {
-      const payload = {
-        ...getAddPrepackagedRulesSchemaMock(isRuleRegistryEnabled),
-        false_positives: [5, 4],
-      };
+  test('You cannot send in an array of false positives that are numbers', () => {
+    const payload: Omit<AddPrepackagedRulesSchema, 'false_positives'> & {
+      false_positives: number[];
+    } = {
+      ...getAddPrepackagedRulesSchemaMock(),
+      false_positives: [5, 4],
+    };
 
-      const decoded = addPrepackagedRulesSchema.decode(payload);
-      const checked = exactCheck(payload, decoded);
-      const message = pipe(checked, foldLeftRight);
-      expect(getPaths(left(message.errors))).toEqual([
-        'Invalid value "5" supplied to "false_positives"',
-        'Invalid value "4" supplied to "false_positives"',
-      ]);
-      expect(message.schema).toEqual({});
-    }
-  );
-  test.each([
-    ['Legacy', false],
-    ['RAC', true],
-  ])('You cannot set the risk_score to 101 - %s', (_, isRuleRegistryEnabled) => {
-    const payload = {
-      ...getAddPrepackagedRulesSchemaMock(isRuleRegistryEnabled),
+    const decoded = addPrepackagedRulesSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "5" supplied to "false_positives"',
+      'Invalid value "4" supplied to "false_positives"',
+    ]);
+    expect(message.schema).toEqual({});
+  });
+  test('You cannot set the risk_score to 101', () => {
+    const payload: AddPrepackagedRulesSchema = {
+      ...getAddPrepackagedRulesSchemaMock(),
       risk_score: 101,
     };
 
@@ -1222,12 +1026,9 @@ describe('add prepackaged rules schema', () => {
     expect(message.schema).toEqual({});
   });
 
-  test.each([
-    ['Legacy', false],
-    ['RAC', true],
-  ])('You cannot set the risk_score to -1 - %s', (_, isRuleRegistryEnabled) => {
-    const payload = {
-      ...getAddPrepackagedRulesSchemaMock(isRuleRegistryEnabled),
+  test('You cannot set the risk_score to -1', () => {
+    const payload: AddPrepackagedRulesSchema = {
+      ...getAddPrepackagedRulesSchemaMock(),
       risk_score: -1,
     };
 
@@ -1238,12 +1039,9 @@ describe('add prepackaged rules schema', () => {
     expect(message.schema).toEqual({});
   });
 
-  test.each([
-    ['Legacy', false],
-    ['RAC', true],
-  ])('You can set the risk_score to 0 - %s', (_, isRuleRegistryEnabled) => {
-    const payload = {
-      ...getAddPrepackagedRulesSchemaMock(isRuleRegistryEnabled),
+  test('You can set the risk_score to 0', () => {
+    const payload: AddPrepackagedRulesSchema = {
+      ...getAddPrepackagedRulesSchemaMock(),
       risk_score: 0,
     };
 
@@ -1251,19 +1049,16 @@ describe('add prepackaged rules schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    const expected = {
-      ...getAddPrepackagedRulesSchemaDecodedMock(isRuleRegistryEnabled),
+    const expected: AddPrepackagedRulesSchemaDecoded = {
+      ...getAddPrepackagedRulesSchemaDecodedMock(),
       risk_score: 0,
     };
     expect(message.schema).toEqual(expected);
   });
 
-  test.each([
-    ['Legacy', false],
-    ['RAC', true],
-  ])('You can set the risk_score to 100 - %s', (_, isRuleRegistryEnabled) => {
-    const payload = {
-      ...getAddPrepackagedRulesSchemaMock(isRuleRegistryEnabled),
+  test('You can set the risk_score to 100', () => {
+    const payload: AddPrepackagedRulesSchema = {
+      ...getAddPrepackagedRulesSchemaMock(),
       risk_score: 100,
     };
 
@@ -1271,19 +1066,16 @@ describe('add prepackaged rules schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    const expected = {
-      ...getAddPrepackagedRulesSchemaDecodedMock(isRuleRegistryEnabled),
+    const expected: AddPrepackagedRulesSchemaDecoded = {
+      ...getAddPrepackagedRulesSchemaDecodedMock(),
       risk_score: 100,
     };
     expect(message.schema).toEqual(expected);
   });
 
-  test.each([
-    ['Legacy', false],
-    ['RAC', true],
-  ])('You can set meta to any object you want - %s', (_, isRuleRegistryEnabled) => {
-    const payload = {
-      ...getAddPrepackagedRulesSchemaMock(isRuleRegistryEnabled),
+  test('You can set meta to any object you want', () => {
+    const payload: AddPrepackagedRulesSchema = {
+      ...getAddPrepackagedRulesSchemaMock(),
       meta: {
         somethingMadeUp: { somethingElse: true },
       },
@@ -1293,8 +1085,8 @@ describe('add prepackaged rules schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    const expected = {
-      ...getAddPrepackagedRulesSchemaDecodedMock(isRuleRegistryEnabled),
+    const expected: AddPrepackagedRulesSchemaDecoded = {
+      ...getAddPrepackagedRulesSchemaDecodedMock(),
       meta: {
         somethingMadeUp: { somethingElse: true },
       },
@@ -1302,12 +1094,9 @@ describe('add prepackaged rules schema', () => {
     expect(message.schema).toEqual(expected);
   });
 
-  test.each([
-    ['Legacy', false],
-    ['RAC', true],
-  ])('You cannot create meta as a string - %s', (_, isRuleRegistryEnabled) => {
-    const payload = {
-      ...getAddPrepackagedRulesSchemaMock(isRuleRegistryEnabled),
+  test('You cannot create meta as a string', () => {
+    const payload: Omit<AddPrepackagedRulesSchema, 'meta'> & { meta: string } = {
+      ...getAddPrepackagedRulesSchemaMock(),
       meta: 'should not work',
     };
 
@@ -1320,12 +1109,9 @@ describe('add prepackaged rules schema', () => {
     expect(message.schema).toEqual({});
   });
 
-  test.each([
-    ['Legacy', false],
-    ['RAC', true],
-  ])('You can omit the query string when filters are present - %s', (_, isRuleRegistryEnabled) => {
-    const { query, ...noQuery } = getAddPrepackagedRulesSchemaMock(isRuleRegistryEnabled);
-    const payload = {
+  test('You can omit the query string when filters are present', () => {
+    const { query, ...noQuery } = getAddPrepackagedRulesSchemaMock();
+    const payload: AddPrepackagedRulesSchema = {
       ...noQuery,
       filters: [],
     };
@@ -1335,22 +1121,17 @@ describe('add prepackaged rules schema', () => {
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
 
-    const { query: expectedQuery, ...expectedNoQuery } = getAddPrepackagedRulesSchemaDecodedMock(
-      isRuleRegistryEnabled
-    );
-    const expected = {
+    const { query: expectedQuery, ...expectedNoQuery } = getAddPrepackagedRulesSchemaDecodedMock();
+    const expected: AddPrepackagedRulesSchemaDecoded = {
       ...expectedNoQuery,
       filters: [],
     };
     expect(message.schema).toEqual(expected);
   });
 
-  test.each([
-    ['Legacy', false],
-    ['RAC', true],
-  ])('validates with timeline_id and timeline_title - %s', (_, isRuleRegistryEnabled) => {
-    const payload = {
-      ...getAddPrepackagedRulesSchemaMock(isRuleRegistryEnabled),
+  test('validates with timeline_id and timeline_title', () => {
+    const payload: AddPrepackagedRulesSchema = {
+      ...getAddPrepackagedRulesSchemaMock(),
       timeline_id: 'timeline-id',
       timeline_title: 'timeline-title',
     };
@@ -1359,22 +1140,17 @@ describe('add prepackaged rules schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    const expected = {
-      ...getAddPrepackagedRulesSchemaDecodedMock(isRuleRegistryEnabled),
+    const expected: AddPrepackagedRulesSchemaDecoded = {
+      ...getAddPrepackagedRulesSchemaDecodedMock(),
       timeline_id: 'timeline-id',
       timeline_title: 'timeline-title',
     };
     expect(message.schema).toEqual(expected);
   });
 
-  test.each([
-    ['Legacy', false],
-    ['RAC', true],
-  ])('The default for "from" will be "now-6m" - %s', (_, isRuleRegistryEnabled) => {
-    const { from, ...noFrom } = getAddPrepackagedRulesSchemaMock(
-      isRuleRegistryEnabled
-    ) as AddPrepackagedRulesSchema;
-    const payload = {
+  test('The default for "from" will be "now-6m"', () => {
+    const { from, ...noFrom } = getAddPrepackagedRulesSchemaMock();
+    const payload: AddPrepackagedRulesSchema = {
       ...noFrom,
     };
 
@@ -1383,24 +1159,17 @@ describe('add prepackaged rules schema', () => {
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
 
-    const { from: expectedFrom, ...expectedNoFrom } = getAddPrepackagedRulesSchemaDecodedMock(
-      isRuleRegistryEnabled
-    );
-    const expected = {
+    const { from: expectedFrom, ...expectedNoFrom } = getAddPrepackagedRulesSchemaDecodedMock();
+    const expected: AddPrepackagedRulesSchemaDecoded = {
       ...expectedNoFrom,
       from: 'now-6m',
     };
     expect(message.schema).toEqual(expected);
   });
 
-  test.each([
-    ['Legacy', false],
-    ['RAC', true],
-  ])('The default for "to" will be "now" - %s', (_, isRuleRegistryEnabled) => {
-    const { to, ...noTo } = getAddPrepackagedRulesSchemaMock(
-      isRuleRegistryEnabled
-    ) as AddPrepackagedRulesSchema;
-    const payload = {
+  test('The default for "to" will be "now"', () => {
+    const { to, ...noTo } = getAddPrepackagedRulesSchemaMock();
+    const payload: AddPrepackagedRulesSchema = {
       ...noTo,
     };
 
@@ -1409,45 +1178,30 @@ describe('add prepackaged rules schema', () => {
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
 
-    const { to: expectedTo, ...expectedNoTo } = getAddPrepackagedRulesSchemaDecodedMock(
-      isRuleRegistryEnabled
-    );
-    const expected = {
+    const { to: expectedTo, ...expectedNoTo } = getAddPrepackagedRulesSchemaDecodedMock();
+    const expected: AddPrepackagedRulesSchemaDecoded = {
       ...expectedNoTo,
       to: 'now',
     };
     expect(message.schema).toEqual(expected);
   });
 
-  test.each([
-    ['Legacy', false],
-    ['RAC', true],
-  ])(
-    'You cannot set the severity to a value other than low, medium, high, or critical - %s',
-    (_, isRuleRegistryEnabled) => {
-      const payload = {
-        ...getAddPrepackagedRulesSchemaMock(isRuleRegistryEnabled),
-        severity: 'junk',
-      };
+  test('You cannot set the severity to a value other than low, medium, high, or critical', () => {
+    const payload: Omit<AddPrepackagedRulesSchema, 'severity'> & { severity: string } = {
+      ...getAddPrepackagedRulesSchemaMock(),
+      severity: 'junk',
+    };
 
-      const decoded = addPrepackagedRulesSchema.decode(payload);
-      const checked = exactCheck(payload, decoded);
-      const message = pipe(checked, foldLeftRight);
-      expect(getPaths(left(message.errors))).toEqual([
-        'Invalid value "junk" supplied to "severity"',
-      ]);
-      expect(message.schema).toEqual({});
-    }
-  );
+    const decoded = addPrepackagedRulesSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual(['Invalid value "junk" supplied to "severity"']);
+    expect(message.schema).toEqual({});
+  });
 
-  test.each([
-    ['Legacy', false],
-    ['RAC', true],
-  ])('The default for "actions" will be an empty array - %s', (_, isRuleRegistryEnabled) => {
-    const { actions, ...noActions } = getAddPrepackagedRulesSchemaMock(
-      isRuleRegistryEnabled
-    ) as AddPrepackagedRulesSchema;
-    const payload = {
+  test('The default for "actions" will be an empty array', () => {
+    const { actions, ...noActions } = getAddPrepackagedRulesSchemaMock();
+    const payload: AddPrepackagedRulesSchema = {
       ...noActions,
     };
 
@@ -1459,134 +1213,99 @@ describe('add prepackaged rules schema', () => {
     const {
       actions: expectedActions,
       ...expectedNoActions
-    } = getAddPrepackagedRulesSchemaDecodedMock(isRuleRegistryEnabled);
-    const expected = {
+    } = getAddPrepackagedRulesSchemaDecodedMock();
+    const expected: AddPrepackagedRulesSchemaDecoded = {
       ...expectedNoActions,
       actions: [],
     };
     expect(message.schema).toEqual(expected);
   });
 
-  test.each([
-    ['Legacy', false],
-    ['RAC', true],
-  ])(
-    'You cannot send in an array of actions that are missing "group" - %s',
-    (_, isRuleRegistryEnabled) => {
-      const payload: Omit<AddPrepackagedRulesSchema['actions'], 'group'> = {
-        ...getAddPrepackagedRulesSchemaMock(isRuleRegistryEnabled),
-        actions: [{ id: 'id', action_type_id: 'action_type_id', params: {} }],
-      };
+  test('You cannot send in an array of actions that are missing "group"', () => {
+    const payload: Omit<AddPrepackagedRulesSchema['actions'], 'group'> = {
+      ...getAddPrepackagedRulesSchemaMock(),
+      actions: [{ id: 'id', action_type_id: 'action_type_id', params: {} }],
+    };
 
-      const decoded = addPrepackagedRulesSchema.decode(payload);
-      const checked = exactCheck(payload, decoded);
-      const message = pipe(checked, foldLeftRight);
-      expect(getPaths(left(message.errors))).toEqual([
-        'Invalid value "undefined" supplied to "actions,group"',
-      ]);
-      expect(message.schema).toEqual({});
-    }
-  );
+    const decoded = addPrepackagedRulesSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "undefined" supplied to "actions,group"',
+    ]);
+    expect(message.schema).toEqual({});
+  });
 
-  test.each([
-    ['Legacy', false],
-    ['RAC', true],
-  ])(
-    'You cannot send in an array of actions that are missing "id" - %s',
-    (_, isRuleRegistryEnabled) => {
-      const payload: Omit<AddPrepackagedRulesSchema['actions'], 'id'> = {
-        ...getAddPrepackagedRulesSchemaMock(isRuleRegistryEnabled),
-        actions: [{ group: 'group', action_type_id: 'action_type_id', params: {} }],
-      };
+  test('You cannot send in an array of actions that are missing "id"', () => {
+    const payload: Omit<AddPrepackagedRulesSchema['actions'], 'id'> = {
+      ...getAddPrepackagedRulesSchemaMock(),
+      actions: [{ group: 'group', action_type_id: 'action_type_id', params: {} }],
+    };
 
-      const decoded = addPrepackagedRulesSchema.decode(payload);
-      const checked = exactCheck(payload, decoded);
-      const message = pipe(checked, foldLeftRight);
-      expect(getPaths(left(message.errors))).toEqual([
-        'Invalid value "undefined" supplied to "actions,id"',
-      ]);
-      expect(message.schema).toEqual({});
-    }
-  );
+    const decoded = addPrepackagedRulesSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "undefined" supplied to "actions,id"',
+    ]);
+    expect(message.schema).toEqual({});
+  });
 
-  test.each([
-    ['Legacy', false],
-    ['RAC', true],
-  ])(
-    'You cannot send in an array of actions that are missing "action_type_id" - %s',
-    (_, isRuleRegistryEnabled) => {
-      const payload: Omit<AddPrepackagedRulesSchema['actions'], 'action_type_id'> = {
-        ...getAddPrepackagedRulesSchemaMock(isRuleRegistryEnabled),
-        actions: [{ group: 'group', id: 'id', params: {} }],
-      };
+  test('You cannot send in an array of actions that are missing "action_type_id"', () => {
+    const payload: Omit<AddPrepackagedRulesSchema['actions'], 'action_type_id'> = {
+      ...getAddPrepackagedRulesSchemaMock(),
+      actions: [{ group: 'group', id: 'id', params: {} }],
+    };
 
-      const decoded = addPrepackagedRulesSchema.decode(payload);
-      const checked = exactCheck(payload, decoded);
-      const message = pipe(checked, foldLeftRight);
-      expect(getPaths(left(message.errors))).toEqual([
-        'Invalid value "undefined" supplied to "actions,action_type_id"',
-      ]);
-      expect(message.schema).toEqual({});
-    }
-  );
+    const decoded = addPrepackagedRulesSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "undefined" supplied to "actions,action_type_id"',
+    ]);
+    expect(message.schema).toEqual({});
+  });
 
-  test.each([
-    ['Legacy', false],
-    ['RAC', true],
-  ])(
-    'You cannot send in an array of actions that are missing "params" - %s',
-    (_, isRuleRegistryEnabled) => {
-      const payload: Omit<AddPrepackagedRulesSchema['actions'], 'params'> = {
-        ...getAddPrepackagedRulesSchemaMock(isRuleRegistryEnabled),
-        actions: [{ group: 'group', id: 'id', action_type_id: 'action_type_id' }],
-      };
+  test('You cannot send in an array of actions that are missing "params"', () => {
+    const payload: Omit<AddPrepackagedRulesSchema['actions'], 'params'> = {
+      ...getAddPrepackagedRulesSchemaMock(),
+      actions: [{ group: 'group', id: 'id', action_type_id: 'action_type_id' }],
+    };
 
-      const decoded = addPrepackagedRulesSchema.decode(payload);
-      const checked = exactCheck(payload, decoded);
-      const message = pipe(checked, foldLeftRight);
-      expect(getPaths(left(message.errors))).toEqual([
-        'Invalid value "undefined" supplied to "actions,params"',
-      ]);
-      expect(message.schema).toEqual({});
-    }
-  );
+    const decoded = addPrepackagedRulesSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "undefined" supplied to "actions,params"',
+    ]);
+    expect(message.schema).toEqual({});
+  });
 
-  test.each([
-    ['Legacy', false],
-    ['RAC', true],
-  ])(
-    'You cannot send in an array of actions that are including "actionTypeId" - %s',
-    (_, isRuleRegistryEnabled) => {
-      const payload: Omit<AddPrepackagedRulesSchema['actions'], 'actions'> = {
-        ...getAddPrepackagedRulesSchemaMock(isRuleRegistryEnabled),
-        actions: [
-          {
-            group: 'group',
-            id: 'id',
-            actionTypeId: 'actionTypeId',
-            params: {},
-          },
-        ],
-      };
+  test('You cannot send in an array of actions that are including "actionTypeId"', () => {
+    const payload: Omit<AddPrepackagedRulesSchema['actions'], 'actions'> = {
+      ...getAddPrepackagedRulesSchemaMock(),
+      actions: [
+        {
+          group: 'group',
+          id: 'id',
+          actionTypeId: 'actionTypeId',
+          params: {},
+        },
+      ],
+    };
 
-      const decoded = addPrepackagedRulesSchema.decode(payload);
-      const checked = exactCheck(payload, decoded);
-      const message = pipe(checked, foldLeftRight);
-      expect(getPaths(left(message.errors))).toEqual([
-        'Invalid value "undefined" supplied to "actions,action_type_id"',
-      ]);
-      expect(message.schema).toEqual({});
-    }
-  );
+    const decoded = addPrepackagedRulesSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "undefined" supplied to "actions,action_type_id"',
+    ]);
+    expect(message.schema).toEqual({});
+  });
 
-  test.each([
-    ['Legacy', false],
-    ['RAC', true],
-  ])('The default for "throttle" will be null - %s', (_, isRuleRegistryEnabled) => {
-    const { throttle, ...noThrottle } = getAddPrepackagedRulesSchemaMock(
-      isRuleRegistryEnabled
-    ) as AddPrepackagedRulesSchema;
-    const payload = {
+  test('The default for "throttle" will be null', () => {
+    const { throttle, ...noThrottle } = getAddPrepackagedRulesSchemaMock();
+    const payload: AddPrepackagedRulesSchema = {
       ...noThrottle,
     };
 
@@ -1598,8 +1317,8 @@ describe('add prepackaged rules schema', () => {
     const {
       throttle: expectedThrottle,
       ...expectedNoThrottle
-    } = getAddPrepackagedRulesSchemaDecodedMock(isRuleRegistryEnabled);
-    const expected = {
+    } = getAddPrepackagedRulesSchemaDecodedMock();
+    const expected: AddPrepackagedRulesSchemaDecoded = {
       ...expectedNoThrottle,
       throttle: null,
     };
@@ -1607,12 +1326,9 @@ describe('add prepackaged rules schema', () => {
   });
 
   describe('note', () => {
-    test.each([
-      ['Legacy', false],
-      ['RAC', true],
-    ])('You can set note to a string - %s', (_, isRuleRegistryEnabled) => {
-      const payload = {
-        ...getAddPrepackagedRulesSchemaMock(isRuleRegistryEnabled),
+    test('You can set note to a string', () => {
+      const payload: AddPrepackagedRulesSchema = {
+        ...getAddPrepackagedRulesSchemaMock(),
         note: '# documentation markdown here',
       };
 
@@ -1620,19 +1336,16 @@ describe('add prepackaged rules schema', () => {
       const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
       expect(getPaths(left(message.errors))).toEqual([]);
-      const expected = {
-        ...getAddPrepackagedRulesSchemaDecodedMock(isRuleRegistryEnabled),
+      const expected: AddPrepackagedRulesSchemaDecoded = {
+        ...getAddPrepackagedRulesSchemaDecodedMock(),
         note: '# documentation markdown here',
       };
       expect(message.schema).toEqual(expected);
     });
 
-    test.each([
-      ['Legacy', false],
-      ['RAC', true],
-    ])('You can set note to an empty string - %s', (_, isRuleRegistryEnabled) => {
-      const payload = {
-        ...getAddPrepackagedRulesSchemaMock(isRuleRegistryEnabled),
+    test('You can set note to an empty string', () => {
+      const payload: AddPrepackagedRulesSchema = {
+        ...getAddPrepackagedRulesSchemaMock(),
         note: '',
       };
 
@@ -1640,19 +1353,16 @@ describe('add prepackaged rules schema', () => {
       const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
       expect(getPaths(left(message.errors))).toEqual([]);
-      const expected = {
-        ...getAddPrepackagedRulesSchemaDecodedMock(isRuleRegistryEnabled),
+      const expected: AddPrepackagedRulesSchema = {
+        ...getAddPrepackagedRulesSchemaDecodedMock(),
         note: '',
       };
       expect(message.schema).toEqual(expected);
     });
 
-    test.each([
-      ['Legacy', false],
-      ['RAC', true],
-    ])('You cannot create note as an object - %s', (_, isRuleRegistryEnabled) => {
-      const payload = {
-        ...getAddPrepackagedRulesSchemaMock(isRuleRegistryEnabled),
+    test('You cannot create note as an object', () => {
+      const payload: Omit<AddPrepackagedRulesSchema, 'note'> & { note: {} } = {
+        ...getAddPrepackagedRulesSchemaMock(),
         note: {
           somethingHere: 'something else',
         },
@@ -1667,311 +1377,266 @@ describe('add prepackaged rules schema', () => {
       expect(message.schema).toEqual({});
     });
 
-    test.each([
-      ['Legacy', false],
-      ['RAC', true],
-    ])(
-      '[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, note] does validate - %s',
-      (_, isRuleRegistryEnabled) => {
-        const payload = {
-          rule_id: 'rule-1',
-          description: 'some description',
-          from: 'now-5m',
-          to: 'now',
-          index: ['index-1'],
-          name: 'some-name',
-          severity: 'low',
-          interval: '5m',
-          type: 'query',
-          risk_score: 50,
-          note: '# some markdown',
-          version: 1,
-          ...(isRuleRegistryEnabled ? { namespace: 'default' } : {}),
-        };
+    test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, note] does validate', () => {
+      const payload: AddPrepackagedRulesSchema = {
+        rule_id: 'rule-1',
+        description: 'some description',
+        from: 'now-5m',
+        to: 'now',
+        index: ['index-1'],
+        name: 'some-name',
+        severity: 'low',
+        interval: '5m',
+        type: 'query',
+        risk_score: 50,
+        note: '# some markdown',
+        version: 1,
+      };
 
-        const decoded = addPrepackagedRulesSchema.decode(payload);
-        const checked = exactCheck(payload, decoded);
-        const message = pipe(checked, foldLeftRight);
-        expect(getPaths(left(message.errors))).toEqual([]);
-        const expected = {
-          author: [],
-          severity_mapping: [],
-          risk_score_mapping: [],
-          rule_id: 'rule-1',
-          description: 'some description',
-          from: 'now-5m',
-          to: 'now',
-          index: ['index-1'],
-          name: 'some-name',
-          severity: 'low',
-          interval: '5m',
-          type: 'query',
-          risk_score: 50,
-          note: '# some markdown',
-          references: [],
-          actions: [],
-          enabled: false,
-          false_positives: [],
-          max_signals: DEFAULT_MAX_SIGNALS,
-          tags: [],
-          threat: [],
-          throttle: null,
-          version: 1,
-          exceptions_list: [],
-          ...(isRuleRegistryEnabled ? { namespace: 'default' } : {}),
-        };
-        expect(message.schema).toEqual(expected);
-      }
-    );
+      const decoded = addPrepackagedRulesSchema.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+      expect(getPaths(left(message.errors))).toEqual([]);
+      const expected: AddPrepackagedRulesSchemaDecoded = {
+        author: [],
+        severity_mapping: [],
+        risk_score_mapping: [],
+        rule_id: 'rule-1',
+        description: 'some description',
+        from: 'now-5m',
+        to: 'now',
+        index: ['index-1'],
+        name: 'some-name',
+        severity: 'low',
+        interval: '5m',
+        type: 'query',
+        risk_score: 50,
+        note: '# some markdown',
+        references: [],
+        actions: [],
+        enabled: false,
+        false_positives: [],
+        max_signals: DEFAULT_MAX_SIGNALS,
+        tags: [],
+        threat: [],
+        throttle: null,
+        version: 1,
+        exceptions_list: [],
+      };
+      expect(message.schema).toEqual(expected);
+    });
   });
 
   describe('exception_list', () => {
-    test.each([
-      ['Legacy', false],
-      ['RAC', true],
-    ])(
-      '[rule_id, description, from, to, index, name, severity, interval, type, filters, risk_score, note, version, and exceptions_list] does validate - %s',
-      (_, isRuleRegistryEnabled) => {
-        const payload = {
-          rule_id: 'rule-1',
-          description: 'some description',
-          from: 'now-5m',
-          to: 'now',
-          index: ['index-1'],
-          name: 'some-name',
-          severity: 'low',
-          interval: '5m',
-          type: 'query',
-          filters: [],
-          risk_score: 50,
-          note: '# some markdown',
-          version: 1,
-          exceptions_list: getListArrayMock(),
-          ...(isRuleRegistryEnabled ? { namespace: 'default' } : {}),
-        };
+    test('[rule_id, description, from, to, index, name, severity, interval, type, filters, risk_score, note, version, and exceptions_list] does validate', () => {
+      const payload: AddPrepackagedRulesSchema = {
+        rule_id: 'rule-1',
+        description: 'some description',
+        from: 'now-5m',
+        to: 'now',
+        index: ['index-1'],
+        name: 'some-name',
+        severity: 'low',
+        interval: '5m',
+        type: 'query',
+        filters: [],
+        risk_score: 50,
+        note: '# some markdown',
+        version: 1,
+        exceptions_list: getListArrayMock(),
+      };
 
-        const decoded = addPrepackagedRulesSchema.decode(payload);
-        const checked = exactCheck(payload, decoded);
-        const message = pipe(checked, foldLeftRight);
-        expect(getPaths(left(message.errors))).toEqual([]);
-        const expected = {
-          author: [],
-          severity_mapping: [],
-          risk_score_mapping: [],
-          rule_id: 'rule-1',
-          description: 'some description',
-          from: 'now-5m',
-          to: 'now',
-          index: ['index-1'],
-          name: 'some-name',
-          severity: 'low',
-          interval: '5m',
-          type: 'query',
-          risk_score: 50,
-          note: '# some markdown',
-          references: [],
-          actions: [],
-          enabled: false,
-          false_positives: [],
-          max_signals: DEFAULT_MAX_SIGNALS,
-          tags: [],
-          threat: [],
-          throttle: null,
-          version: 1,
-          filters: [],
-          exceptions_list: [
-            {
-              id: 'some_uuid',
-              list_id: 'list_id_single',
-              namespace_type: 'single',
-              type: 'detection',
-            },
-            {
-              id: 'endpoint_list',
-              list_id: 'endpoint_list',
-              namespace_type: 'agnostic',
-              type: 'endpoint',
-            },
-          ],
-          ...(isRuleRegistryEnabled ? { namespace: 'default' } : {}),
-        };
-        expect(message.schema).toEqual(expected);
-      }
-    );
+      const decoded = addPrepackagedRulesSchema.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+      expect(getPaths(left(message.errors))).toEqual([]);
+      const expected: AddPrepackagedRulesSchemaDecoded = {
+        author: [],
+        severity_mapping: [],
+        risk_score_mapping: [],
+        rule_id: 'rule-1',
+        description: 'some description',
+        from: 'now-5m',
+        to: 'now',
+        index: ['index-1'],
+        name: 'some-name',
+        severity: 'low',
+        interval: '5m',
+        type: 'query',
+        risk_score: 50,
+        note: '# some markdown',
+        references: [],
+        actions: [],
+        enabled: false,
+        false_positives: [],
+        max_signals: DEFAULT_MAX_SIGNALS,
+        tags: [],
+        threat: [],
+        throttle: null,
+        version: 1,
+        filters: [],
+        exceptions_list: [
+          {
+            id: 'some_uuid',
+            list_id: 'list_id_single',
+            namespace_type: 'single',
+            type: 'detection',
+          },
+          {
+            id: 'endpoint_list',
+            list_id: 'endpoint_list',
+            namespace_type: 'agnostic',
+            type: 'endpoint',
+          },
+        ],
+      };
+      expect(message.schema).toEqual(expected);
+    });
 
-    test.each([
-      ['Legacy', false],
-      ['RAC', true],
-    ])(
-      '[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, note, version, and empty exceptions_list] does validate - %s',
-      (_, isRuleRegistryEnabled) => {
-        const payload = {
-          rule_id: 'rule-1',
-          description: 'some description',
-          from: 'now-5m',
-          to: 'now',
-          index: ['index-1'],
-          name: 'some-name',
-          severity: 'low',
-          interval: '5m',
-          type: 'query',
-          filters: [],
-          risk_score: 50,
-          version: 1,
-          note: '# some markdown',
-          exceptions_list: [],
-          ...(isRuleRegistryEnabled ? { namespace: 'default' } : {}),
-        };
+    test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, note, version, and empty exceptions_list] does validate', () => {
+      const payload: AddPrepackagedRulesSchema = {
+        rule_id: 'rule-1',
+        description: 'some description',
+        from: 'now-5m',
+        to: 'now',
+        index: ['index-1'],
+        name: 'some-name',
+        severity: 'low',
+        interval: '5m',
+        type: 'query',
+        filters: [],
+        risk_score: 50,
+        version: 1,
+        note: '# some markdown',
+        exceptions_list: [],
+      };
 
-        const decoded = addPrepackagedRulesSchema.decode(payload);
-        const checked = exactCheck(payload, decoded);
-        const message = pipe(checked, foldLeftRight);
-        expect(getPaths(left(message.errors))).toEqual([]);
-        const expected = {
-          author: [],
-          severity_mapping: [],
-          risk_score_mapping: [],
-          rule_id: 'rule-1',
-          description: 'some description',
-          from: 'now-5m',
-          to: 'now',
-          index: ['index-1'],
-          name: 'some-name',
-          severity: 'low',
-          interval: '5m',
-          type: 'query',
-          risk_score: 50,
-          note: '# some markdown',
-          references: [],
-          actions: [],
-          enabled: false,
-          false_positives: [],
-          max_signals: DEFAULT_MAX_SIGNALS,
-          tags: [],
-          threat: [],
-          throttle: null,
-          version: 1,
-          filters: [],
-          exceptions_list: [],
-          ...(isRuleRegistryEnabled ? { namespace: 'default' } : {}),
-        };
-        expect(message.schema).toEqual(expected);
-      }
-    );
+      const decoded = addPrepackagedRulesSchema.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+      expect(getPaths(left(message.errors))).toEqual([]);
+      const expected: AddPrepackagedRulesSchemaDecoded = {
+        author: [],
+        severity_mapping: [],
+        risk_score_mapping: [],
+        rule_id: 'rule-1',
+        description: 'some description',
+        from: 'now-5m',
+        to: 'now',
+        index: ['index-1'],
+        name: 'some-name',
+        severity: 'low',
+        interval: '5m',
+        type: 'query',
+        risk_score: 50,
+        note: '# some markdown',
+        references: [],
+        actions: [],
+        enabled: false,
+        false_positives: [],
+        max_signals: DEFAULT_MAX_SIGNALS,
+        tags: [],
+        threat: [],
+        throttle: null,
+        version: 1,
+        filters: [],
+        exceptions_list: [],
+      };
+      expect(message.schema).toEqual(expected);
+    });
 
-    test.each([
-      ['Legacy', false],
-      ['RAC', true],
-    ])(
-      'rule_id, description, from, to, index, name, severity, interval, type, filters, risk_score, note, version, and invalid exceptions_list] does NOT validate - %s',
-      (_, isRuleRegistryEnabled) => {
-        const payload: Omit<AddPrepackagedRulesSchema, 'exceptions_list'> & {
-          exceptions_list: Array<{ id: string; namespace_type: string }>;
-        } = {
-          rule_id: 'rule-1',
-          description: 'some description',
-          from: 'now-5m',
-          to: 'now',
-          index: ['index-1'],
-          name: 'some-name',
-          severity: 'low',
-          interval: '5m',
-          type: 'query',
-          filters: [],
-          risk_score: 50,
-          version: 1,
-          note: '# some markdown',
-          exceptions_list: [{ id: 'uuid_here', namespace_type: 'not a namespace type' }],
-          ...(isRuleRegistryEnabled ? { namespace: 'default' } : {}),
-        };
+    test('rule_id, description, from, to, index, name, severity, interval, type, filters, risk_score, note, version, and invalid exceptions_list] does NOT validate', () => {
+      const payload: Omit<AddPrepackagedRulesSchema, 'exceptions_list'> & {
+        exceptions_list: Array<{ id: string; namespace_type: string }>;
+      } = {
+        rule_id: 'rule-1',
+        description: 'some description',
+        from: 'now-5m',
+        to: 'now',
+        index: ['index-1'],
+        name: 'some-name',
+        severity: 'low',
+        interval: '5m',
+        type: 'query',
+        filters: [],
+        risk_score: 50,
+        version: 1,
+        note: '# some markdown',
+        exceptions_list: [{ id: 'uuid_here', namespace_type: 'not a namespace type' }],
+      };
 
-        const decoded = addPrepackagedRulesSchema.decode(payload);
-        const checked = exactCheck(payload, decoded);
-        const message = pipe(checked, foldLeftRight);
-        expect(getPaths(left(message.errors))).toEqual([
-          'Invalid value "undefined" supplied to "exceptions_list,list_id"',
-          'Invalid value "undefined" supplied to "exceptions_list,type"',
-          'Invalid value "not a namespace type" supplied to "exceptions_list,namespace_type"',
-        ]);
-        expect(message.schema).toEqual({});
-      }
-    );
+      const decoded = addPrepackagedRulesSchema.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+      expect(getPaths(left(message.errors))).toEqual([
+        'Invalid value "undefined" supplied to "exceptions_list,list_id"',
+        'Invalid value "undefined" supplied to "exceptions_list,type"',
+        'Invalid value "not a namespace type" supplied to "exceptions_list,namespace_type"',
+      ]);
+      expect(message.schema).toEqual({});
+    });
 
-    test.each([
-      ['Legacy', false],
-      ['RAC', true],
-    ])(
-      '[rule_id, description, from, to, index, name, severity, interval, type, filters, risk_score, note, version, and non-existent exceptions_list] does validate with empty exceptions_list - %s',
-      (_, isRuleRegistryEnabled) => {
-        const payload = {
-          rule_id: 'rule-1',
-          description: 'some description',
-          from: 'now-5m',
-          to: 'now',
-          index: ['index-1'],
-          name: 'some-name',
-          severity: 'low',
-          interval: '5m',
-          type: 'query',
-          filters: [],
-          risk_score: 50,
-          version: 1,
-          note: '# some markdown',
-          ...(isRuleRegistryEnabled ? { namespace: 'default' } : {}),
-        };
+    test('[rule_id, description, from, to, index, name, severity, interval, type, filters, risk_score, note, version, and non-existent exceptions_list] does validate with empty exceptions_list', () => {
+      const payload: AddPrepackagedRulesSchema = {
+        rule_id: 'rule-1',
+        description: 'some description',
+        from: 'now-5m',
+        to: 'now',
+        index: ['index-1'],
+        name: 'some-name',
+        severity: 'low',
+        interval: '5m',
+        type: 'query',
+        filters: [],
+        risk_score: 50,
+        version: 1,
+        note: '# some markdown',
+      };
 
-        const decoded = addPrepackagedRulesSchema.decode(payload);
-        const checked = exactCheck(payload, decoded);
-        const message = pipe(checked, foldLeftRight);
-        expect(getPaths(left(message.errors))).toEqual([]);
-        const expected = {
-          author: [],
-          severity_mapping: [],
-          risk_score_mapping: [],
-          rule_id: 'rule-1',
-          description: 'some description',
-          from: 'now-5m',
-          to: 'now',
-          index: ['index-1'],
-          name: 'some-name',
-          severity: 'low',
-          interval: '5m',
-          type: 'query',
-          risk_score: 50,
-          note: '# some markdown',
-          references: [],
-          actions: [],
-          enabled: false,
-          false_positives: [],
-          max_signals: DEFAULT_MAX_SIGNALS,
-          tags: [],
-          threat: [],
-          throttle: null,
-          version: 1,
-          exceptions_list: [],
-          filters: [],
-          ...(isRuleRegistryEnabled ? { namespace: 'default' } : {}),
-        };
-        expect(message.schema).toEqual(expected);
-      }
-    );
+      const decoded = addPrepackagedRulesSchema.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+      expect(getPaths(left(message.errors))).toEqual([]);
+      const expected: AddPrepackagedRulesSchemaDecoded = {
+        author: [],
+        severity_mapping: [],
+        risk_score_mapping: [],
+        rule_id: 'rule-1',
+        description: 'some description',
+        from: 'now-5m',
+        to: 'now',
+        index: ['index-1'],
+        name: 'some-name',
+        severity: 'low',
+        interval: '5m',
+        type: 'query',
+        risk_score: 50,
+        note: '# some markdown',
+        references: [],
+        actions: [],
+        enabled: false,
+        false_positives: [],
+        max_signals: DEFAULT_MAX_SIGNALS,
+        tags: [],
+        threat: [],
+        throttle: null,
+        version: 1,
+        exceptions_list: [],
+        filters: [],
+      };
+      expect(message.schema).toEqual(expected);
+    });
   });
 
   describe('threat_mapping', () => {
-    test.each([
-      ['Legacy', false],
-      ['RAC', true],
-    ])(
-      'You can set a threat query, index, mapping, filters on a pre-packaged rule - %s',
-      (_, isRuleRegistryEnabled) => {
-        const payload = getAddPrepackagedThreatMatchRulesSchemaMock(isRuleRegistryEnabled);
-        const decoded = addPrepackagedRulesSchema.decode(payload);
-        const checked = exactCheck(payload, decoded);
-        const message = pipe(checked, foldLeftRight);
-        const expected = getAddPrepackagedThreatMatchRulesSchemaDecodedMock(isRuleRegistryEnabled);
-        expect(getPaths(left(message.errors))).toEqual([]);
-        expect(message.schema).toEqual(expected);
-      }
-    );
+    test('You can set a threat query, index, mapping, filters on a pre-packaged rule', () => {
+      const payload = getAddPrepackagedThreatMatchRulesSchemaMock();
+      const decoded = addPrepackagedRulesSchema.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+      const expected = getAddPrepackagedThreatMatchRulesSchemaDecodedMock();
+      expect(getPaths(left(message.errors))).toEqual([]);
+      expect(message.schema).toEqual(expected);
+    });
   });
 });

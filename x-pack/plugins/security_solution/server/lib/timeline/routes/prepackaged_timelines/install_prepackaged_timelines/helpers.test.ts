@@ -46,7 +46,7 @@ describe('installPrepackagedTimelines', () => {
       authz: {},
     } as unknown) as SecurityPluginSetup;
 
-    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(false));
+    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
 
     jest.doMock('./helpers', () => {
       return {

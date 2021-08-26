@@ -15,12 +15,9 @@ import { RuleAlertType } from './types';
  * @param rulesFromFileSystem The rules on the file system to check against installed
  * @param installedRules The installed rules
  */
-export const getRulesToUpdate = <
-  TSchemaDecoded extends AddPrepackagedRulesSchemaDecoded,
-  TAlertType extends RuleAlertType
->(
-  rulesFromFileSystem: TSchemaDecoded[],
-  installedRules: TAlertType[]
+export const getRulesToUpdate = (
+  rulesFromFileSystem: AddPrepackagedRulesSchemaDecoded[],
+  installedRules: RuleAlertType[]
 ) => {
   return rulesFromFileSystem
     .filter((ruleFromFileSystem) => filterInstalledRules(ruleFromFileSystem, installedRules))

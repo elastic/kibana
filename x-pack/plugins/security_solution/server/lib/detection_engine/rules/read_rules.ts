@@ -19,7 +19,7 @@ import { isAlertType, ReadRuleOptions } from './types';
  * @param ruleId - This is a close second to being fast as long as it can find the rule_id from
  * a filter query against the tags using `alert.attributes.tags: "__internal:${ruleId}"]`
  */
-export const readRules = async <TRuleParams extends RuleParams>({
+export const readRules = async ({
   isRuleRegistryEnabled,
   rulesClient,
   id,
@@ -42,7 +42,7 @@ export const readRules = async <TRuleParams extends RuleParams>({
       }
     }
   } else if (ruleId != null) {
-    const ruleFromFind = await findRules<TRuleParams>({
+    const ruleFromFind = await findRules({
       isRuleRegistryEnabled,
       rulesClient,
       filter: `alert.attributes.tags: "${INTERNAL_RULE_ID_KEY}:${ruleId}"`,

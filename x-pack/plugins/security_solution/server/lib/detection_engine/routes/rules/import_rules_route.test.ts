@@ -29,7 +29,10 @@ import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
 
 jest.mock('../../../machine_learning/authz', () => mockMlAuthzFactory.create());
 
-describe('import_rules_route', () => {
+describe.each([
+  ['Legacy', false],
+  ['RAC', true],
+])('import_rules_route - %s', (_, isRuleRegistryEnabled) => {
   let config: ReturnType<typeof createMockConfig>;
   let server: ReturnType<typeof serverMock.create>;
   let request: ReturnType<typeof requestMock.create>;
@@ -49,7 +52,7 @@ describe('import_rules_route', () => {
     context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue(
       elasticsearchClientMock.createSuccessTransportRequestPromise({ _shards: { total: 1 } })
     );
-    importRulesRoute(server.router, config, ml);
+    importRulesRoute(server.router, config, ml, isRuleRegistryEnabled);
   });
 
   describe('status codes', () => {
@@ -60,7 +63,7 @@ describe('import_rules_route', () => {
     });
 
     test('returns 500 if more than 10,000 rules are imported', async () => {
-      const ruleIds = new Array(10001).fill(undefined).map((_, index) => `rule-${index}`);
+      const ruleIds = new Array(10001).fill(undefined).map((__, index) => `rule-${index}`);
       const multiRequest = getImportRulesRequest(buildHapiStream(ruleIdsToNdJsonString(ruleIds)));
       const response = await server.inject(multiRequest, context);
 
@@ -166,7 +169,7 @@ describe('import_rules_route', () => {
 
   describe('single rule import', () => {
     test('returns 200 if rule imported successfully', async () => {
-      clients.rulesClient.create.mockResolvedValue(getAlertMock(getQueryRuleParams(false)));
+      clients.rulesClient.create.mockResolvedValue(getAlertMock(getQueryRuleParams()));
       const response = await server.inject(request, context);
       expect(response.status).toEqual(200);
       expect(response.body).toEqual({
@@ -199,7 +202,7 @@ describe('import_rules_route', () => {
 
     describe('rule with existing rule_id', () => {
       test('returns with reported conflict if `overwrite` is set to `false`', async () => {
-        clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(false)); // extant rule
+        clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit()); // extant rule
         const response = await server.inject(request, context);
 
         expect(response.status).toEqual(200);
@@ -219,7 +222,7 @@ describe('import_rules_route', () => {
       });
 
       test('returns with NO reported conflict if `overwrite` is set to `true`', async () => {
-        clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(false)); // extant rule
+        clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit()); // extant rule
         const overwriteRequest = getImportRulesRequestOverwriteTrue(
           buildHapiStream(ruleIdsToNdJsonString(['rule-1']))
         );
@@ -251,7 +254,7 @@ describe('import_rules_route', () => {
     });
 
     test('returns 200 if many rules are imported successfully', async () => {
-      const ruleIds = new Array(9999).fill(undefined).map((_, index) => `rule-${index}`);
+      const ruleIds = new Array(9999).fill(undefined).map((__, index) => `rule-${index}`);
       const multiRequest = getImportRulesRequest(buildHapiStream(ruleIdsToNdJsonString(ruleIds)));
       const response = await server.inject(multiRequest, context);
 
@@ -339,7 +342,7 @@ describe('import_rules_route', () => {
 
     describe('rules with existing rule_id', () => {
       beforeEach(() => {
-        clients.rulesClient.find.mockResolvedValueOnce(getFindResultWithSingleHit(false)); // extant rule
+        clients.rulesClient.find.mockResolvedValueOnce(getFindResultWithSingleHit()); // extant rule
       });
 
       test('returns with reported conflict if `overwrite` is set to `false`', async () => {

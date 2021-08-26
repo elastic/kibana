@@ -15,10 +15,11 @@ import {
   getEmptySavedObjectsResponse,
 } from '../__mocks__/request_responses';
 import { requestMock, requestContextMock, serverMock } from '../__mocks__';
-import { createRuleDataClientMock } from '../../../../../../rule_registry/server/rule_data_client/rule_data_client.mock';
 
-describe('read_signals', () => {
-  let ruleDataClientMock = createRuleDataClientMock();
+describe.each([
+  ['Legacy', false],
+  ['RAC', true],
+])('read_rules - %s', (_, isRuleRegistryEnabled) => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
 
@@ -26,53 +27,28 @@ describe('read_signals', () => {
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
 
+    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit()); // rule exists
     clients.savedObjectsClient.find.mockResolvedValue(getEmptySavedObjectsResponse()); // successful transform
     clients.ruleExecutionLogClient.find.mockResolvedValue([]);
-    ruleDataClientMock = createRuleDataClientMock();
+
+    readRulesRoute(server.router, isRuleRegistryEnabled);
   });
 
   describe('status codes with actionClient and alertClient', () => {
-    test.each([
-      ['Legacy', undefined],
-      ['RAC', ruleDataClientMock],
-    ])(
-      'returns 200 when reading a single rule with a valid actionClient and alertClient - %s',
-      async (_, ruleDataClient) => {
-        clients.rulesClient.find.mockResolvedValue(
-          getFindResultWithSingleHit(ruleDataClient != null)
-        ); // rule exists
-        readRulesRoute(server.router, ruleDataClient);
-        const response = await server.inject(getReadRequest(), context);
-        expect(response.status).toEqual(200);
-      }
-    );
+    test('returns 200 when reading a single rule with a valid actionClient and alertClient', async () => {
+      const response = await server.inject(getReadRequest(), context);
+      expect(response.status).toEqual(200);
+    });
 
-    test.each([
-      ['Legacy', undefined],
-      ['RAC', ruleDataClientMock],
-    ])(
-      'returns 404 if alertClient is not available on the route - %s',
-      async (_, ruleDataClient) => {
-        clients.rulesClient.find.mockResolvedValue(
-          getFindResultWithSingleHit(ruleDataClient != null)
-        ); // rule exists
-        readRulesRoute(server.router, ruleDataClient);
-        context.alerting!.getRulesClient = jest.fn();
-        const response = await server.inject(getReadRequest(), context);
-        expect(response.status).toEqual(404);
-        expect(response.body).toEqual({ message: 'Not Found', status_code: 404 });
-      }
-    );
+    test('returns 404 if alertClient is not available on the route', async () => {
+      context.alerting!.getRulesClient = jest.fn();
+      const response = await server.inject(getReadRequest(), context);
+      expect(response.status).toEqual(404);
+      expect(response.body).toEqual({ message: 'Not Found', status_code: 404 });
+    });
 
-    test.each([
-      ['Legacy', undefined],
-      ['RAC', ruleDataClientMock],
-    ])('returns error if requesting a non-rule - %s', async (_, ruleDataClient) => {
-      clients.rulesClient.find.mockResolvedValue(
-        getFindResultWithSingleHit(ruleDataClient != null)
-      ); // rule exists
-      readRulesRoute(server.router, ruleDataClient);
-      clients.rulesClient.find.mockResolvedValue(nonRuleFindResult(ruleDataClient != null));
+    test('returns error if requesting a non-rule', async () => {
+      clients.rulesClient.find.mockResolvedValue(nonRuleFindResult());
       const response = await server.inject(getReadRequest(), context);
       expect(response.status).toEqual(404);
       expect(response.body).toEqual({
@@ -81,14 +57,7 @@ describe('read_signals', () => {
       });
     });
 
-    test.each([
-      ['Legacy', undefined],
-      ['RAC', ruleDataClientMock],
-    ])('catches error if search throws error -%s', async (_, ruleDataClient) => {
-      clients.rulesClient.find.mockResolvedValue(
-        getFindResultWithSingleHit(ruleDataClient != null)
-      ); // rule exists
-      readRulesRoute(server.router, ruleDataClient);
+    test('catches error if search throws error', async () => {
       clients.rulesClient.find.mockImplementation(async () => {
         throw new Error('Test error');
       });
@@ -102,14 +71,7 @@ describe('read_signals', () => {
   });
 
   describe('data validation', () => {
-    test.each([
-      ['Legacy', undefined],
-      ['RAC', ruleDataClientMock],
-    ])('returns 404 if given a non-existent id - %s', async (_, ruleDataClient) => {
-      clients.rulesClient.find.mockResolvedValue(
-        getFindResultWithSingleHit(ruleDataClient != null)
-      ); // rule exists
-      readRulesRoute(server.router, ruleDataClient);
+    test('returns 404 if given a non-existent id', async () => {
       clients.rulesClient.find.mockResolvedValue(getEmptyFindResult());
       const request = requestMock.create({
         method: 'get',

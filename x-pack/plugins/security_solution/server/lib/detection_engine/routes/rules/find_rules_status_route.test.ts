@@ -25,7 +25,7 @@ describe('find_statuses', () => {
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
     clients.ruleExecutionLogClient.findBulk.mockResolvedValue(getFindBulkResultStatus()); // successful status search
-    clients.rulesClient.get.mockResolvedValue(getAlertMock(getQueryRuleParams(false)));
+    clients.rulesClient.get.mockResolvedValue(getAlertMock(getQueryRuleParams()));
     findRulesStatusesRoute(server.router);
   });
 
@@ -57,7 +57,7 @@ describe('find_statuses', () => {
     test('returns success if rule status client writes an error status', async () => {
       // 0. task manager tried to run the rule but couldn't, so the alerting framework
       // wrote an error to the executionStatus.
-      const failingExecutionRule = getAlertMock(getQueryRuleParams(false));
+      const failingExecutionRule = getAlertMock(getQueryRuleParams());
       failingExecutionRule.executionStatus = {
         status: 'error',
         lastExecutionDate: failingExecutionRule.executionStatus.lastExecutionDate,

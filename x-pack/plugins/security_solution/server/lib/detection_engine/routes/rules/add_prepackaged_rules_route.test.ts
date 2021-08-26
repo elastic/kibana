@@ -21,7 +21,6 @@ import { ExceptionListClient } from '../../../../../../lists/server';
 import { installPrepackagedTimelines } from '../../../timeline/routes/prepackaged_timelines/install_prepackaged_timelines';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
-import { createRuleDataClientMock } from '../../../../../../rule_registry/server/rule_data_client/rule_data_client.mock';
 
 jest.mock('../../rules/get_prepackaged_rules', () => {
   return {
@@ -71,13 +70,15 @@ jest.mock('../../../timeline/routes/prepackaged_timelines/install_prepackaged_ti
   };
 });
 
-describe('add_prepackaged_rules_route', () => {
+describe.each([
+  ['Legacy', false],
+  ['RAC', true],
+])('add_prepackaged_rules_route - %s', (_, isRuleRegistryEnabled) => {
   const siemMockClient = siemMock.createClient();
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
   let securitySetup: SecurityPluginSetup;
   let mockExceptionsClient: ExceptionListClient;
-  let ruleDataClientMock = createRuleDataClientMock();
 
   beforeEach(() => {
     server = serverMock.create();
@@ -88,11 +89,10 @@ describe('add_prepackaged_rules_route', () => {
       },
       authz: {},
     } as unknown) as SecurityPluginSetup;
-    ruleDataClientMock = createRuleDataClientMock();
 
     mockExceptionsClient = listMock.getExceptionListClient();
 
-    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(false));
+    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
 
     (installPrepackagedTimelines as jest.Mock).mockReset();
     (installPrepackagedTimelines as jest.Mock).mockResolvedValue({
@@ -106,7 +106,7 @@ describe('add_prepackaged_rules_route', () => {
     context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue(
       elasticsearchClientMock.createSuccessTransportRequestPromise({ _shards: { total: 1 } })
     );
-    addPrepackedRulesRoute(server.router, createMockConfig(), securitySetup);
+    addPrepackedRulesRoute(server.router, createMockConfig(), securitySetup, isRuleRegistryEnabled);
   });
 
   describe('status codes', () => {
@@ -145,7 +145,7 @@ describe('add_prepackaged_rules_route', () => {
       });
     });
 
-    it('returns 404 if siem client is unavailable', async () => {
+    test('returns 404 if siem client is unavailable', async () => {
       const { securitySolution, ...contextWithoutSecuritySolution } = context;
       const response = await server.inject(
         addPrepackagedRulesRequest(),
@@ -290,58 +290,44 @@ describe('add_prepackaged_rules_route', () => {
   });
 
   describe('createPrepackagedRules', () => {
-    test.each([
-      ['Legacy', undefined],
-      ['RAC', ruleDataClientMock],
-    ])(
-      'uses exception lists client from context when available - %s',
-      async (_, ruleDataClient) => {
-        context.lists = {
-          getExceptionListClient: jest.fn(),
-          getListClient: jest.fn(),
-        };
-        const config = createMockConfig();
+    test('uses exception lists client from context when available', async () => {
+      context.lists = {
+        getExceptionListClient: jest.fn(),
+        getListClient: jest.fn(),
+      };
+      const config = createMockConfig();
 
-        await createPrepackagedRules(
-          context,
-          siemMockClient,
-          clients.rulesClient,
-          {} as FrameworkRequest,
-          1200,
-          config.prebuiltRulesFromFileSystem,
-          config.prebuiltRulesFromSavedObjects,
-          mockExceptionsClient,
-          ruleDataClient != null
-        );
+      await createPrepackagedRules(
+        context,
+        siemMockClient,
+        clients.rulesClient,
+        {} as FrameworkRequest,
+        1200,
+        config.prebuiltRulesFromFileSystem,
+        config.prebuiltRulesFromSavedObjects,
+        mockExceptionsClient
+      );
 
-        expect(mockExceptionsClient.createEndpointList).not.toHaveBeenCalled();
-        expect(context.lists?.getExceptionListClient).toHaveBeenCalled();
-      }
-    );
+      expect(mockExceptionsClient.createEndpointList).not.toHaveBeenCalled();
+      expect(context.lists?.getExceptionListClient).toHaveBeenCalled();
+    });
 
-    test.each([
-      ['Legacy', undefined],
-      ['RAC', ruleDataClientMock],
-    ])(
-      'uses passed in exceptions list client when lists client not available in context - %s',
-      async (_, ruleDataClient) => {
-        const { lists, ...myContext } = context;
-        const config = createMockConfig();
+    test('uses passed in exceptions list client when lists client not available in context', async () => {
+      const { lists, ...myContext } = context;
+      const config = createMockConfig();
 
-        await createPrepackagedRules(
-          myContext,
-          siemMockClient,
-          clients.rulesClient,
-          {} as FrameworkRequest,
-          1200,
-          config.prebuiltRulesFromFileSystem,
-          config.prebuiltRulesFromSavedObjects,
-          mockExceptionsClient,
-          ruleDataClient != null
-        );
+      await createPrepackagedRules(
+        myContext,
+        siemMockClient,
+        clients.rulesClient,
+        {} as FrameworkRequest,
+        1200,
+        config.prebuiltRulesFromFileSystem,
+        config.prebuiltRulesFromSavedObjects,
+        mockExceptionsClient
+      );
 
-        expect(mockExceptionsClient.createEndpointList).toHaveBeenCalled();
-      }
-    );
+      expect(mockExceptionsClient.createEndpointList).toHaveBeenCalled();
+    });
   });
 });

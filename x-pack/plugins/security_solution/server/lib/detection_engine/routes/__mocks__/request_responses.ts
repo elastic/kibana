@@ -40,7 +40,6 @@ import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
 import { getPerformBulkActionSchemaMock } from '../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema.mock';
 import { RuleExecutionStatus } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { FindBulkExecutionLogResponse } from '../../rule_execution_log/types';
-import { ruleTypeMappings } from '../../signals/utils';
 
 export const typicalSetStatusSignalByIdsPayload = (): SetSignalsStatusSchemaDecoded => ({
   signal_ids: ['somefakeid1', 'somefakeid2'],
@@ -65,14 +64,11 @@ export const setStatusSignalMissingIdsAndQueryPayload = (): SetSignalsStatusSche
   status: 'closed',
 });
 
-export const getUpdateRequest = (isRuleRegistryEnabled: boolean) =>
+export const getUpdateRequest = () =>
   requestMock.create({
     method: 'put',
     path: DETECTION_ENGINE_RULES_URL,
-    body: {
-      ...getCreateRulesSchemaMock(),
-      ...(isRuleRegistryEnabled ? { namespace: 'default' } : {}),
-    },
+    body: getCreateRulesSchemaMock(),
   });
 
 export const getPatchRequest = () =>
@@ -184,18 +180,18 @@ export const getEmptyFindResult = (): FindHit => ({
   data: [],
 });
 
-export const getFindResultWithSingleHit = (isRuleRegistryEnabled: boolean): FindHit => ({
+export const getFindResultWithSingleHit = (): FindHit => ({
   page: 1,
   perPage: 1,
   total: 1,
-  data: [getAlertMock(getQueryRuleParams(isRuleRegistryEnabled))],
+  data: [getAlertMock(getQueryRuleParams())],
 });
 
-export const nonRuleFindResult = (isRuleRegistryEnabled: boolean): FindHit => ({
+export const nonRuleFindResult = (): FindHit => ({
   page: 1,
   perPage: 1,
   total: 1,
-  data: [nonRuleAlert(isRuleRegistryEnabled)],
+  data: [nonRuleAlert()],
 });
 
 export const getFindResultWithMultiHits = ({
@@ -253,18 +249,15 @@ export const getDeleteRequestById = () =>
     query: { id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd' },
   });
 
-export const getCreateRequest = (isRuleRegistryEnabled: boolean = false) =>
+export const getCreateRequest = () =>
   requestMock.create({
     method: 'post',
     path: DETECTION_ENGINE_RULES_URL,
-    body: {
-      ...getCreateRulesSchemaMock(),
-      ...(isRuleRegistryEnabled ? { namespace: 'default' } : {}),
-    },
+    body: getCreateRulesSchemaMock(),
   });
 
 // TODO: Replace this with the mocks version from the mocks file
-export const typicalMlRulePayload = (isRuleRegistryEnabled: boolean) => {
+export const typicalMlRulePayload = () => {
   const { query, language, index, ...mlParams } = getCreateRulesSchemaMock();
 
   return {
@@ -272,26 +265,22 @@ export const typicalMlRulePayload = (isRuleRegistryEnabled: boolean) => {
     type: 'machine_learning',
     anomaly_threshold: 58,
     machine_learning_job_id: 'typical-ml-job-id',
-    ...(isRuleRegistryEnabled ? { namespace: 'default' } : {}),
   };
 };
 
-export const createMlRuleRequest = (isRuleRegistryEnabled: boolean = false) => {
+export const createMlRuleRequest = () => {
   return requestMock.create({
     method: 'post',
     path: DETECTION_ENGINE_RULES_URL,
-    body: {
-      ...typicalMlRulePayload(isRuleRegistryEnabled),
-      ...(isRuleRegistryEnabled ? { namespace: 'default' } : {}),
-    },
+    body: typicalMlRulePayload(),
   });
 };
 
-export const createBulkMlRuleRequest = (isRuleRegistryEnabled: boolean = false) => {
+export const createBulkMlRuleRequest = () => {
   return requestMock.create({
     method: 'post',
     path: DETECTION_ENGINE_RULES_URL,
-    body: [typicalMlRulePayload(isRuleRegistryEnabled)],
+    body: [typicalMlRulePayload()],
   });
 };
 
@@ -360,9 +349,9 @@ export const createActionResult = (): ActionResult => ({
   isPreconfigured: false,
 });
 
-export const nonRuleAlert = (isRuleRegistryEnabled: boolean) => ({
+export const nonRuleAlert = () => ({
   // Defaulting to QueryRuleParams because ts doesn't like empty objects
-  ...getAlertMock(getQueryRuleParams(isRuleRegistryEnabled)),
+  ...getAlertMock(getQueryRuleParams()),
   id: '04128c15-0d1b-4716-a4c5-46997ac7f3bc',
   name: 'Non-Rule Alert',
   alertTypeId: 'something',
@@ -372,7 +361,7 @@ export const getAlertMock = <T extends RuleParams>(params: T): Alert<T> => ({
   id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
   name: 'Detect Root/Admin Users',
   tags: [`${INTERNAL_RULE_ID_KEY}:rule-1`, `${INTERNAL_IMMUTABLE_KEY}:false`],
-  alertTypeId: 'namespace' in params ? ruleTypeMappings[(params as T).type] : 'siem.signals',
+  alertTypeId: 'siem.signals',
   consumer: 'siem',
   params,
   createdAt: new Date('2019-12-13T16:40:33.400Z'),
