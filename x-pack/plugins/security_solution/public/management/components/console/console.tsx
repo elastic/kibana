@@ -10,7 +10,6 @@ import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
 import styled from 'styled-components';
 import { OutputHistory } from './components/output_history';
 import { CommandInput, CommandInputProps } from './components/command_input';
-import { EuiThemeProvider } from '../../../../../../../src/plugins/kibana_react/common';
 import { useConsoleService } from './components/console_provider';
 import { HistoryItemComponent, HistoryItem } from './components/history_item';
 import { HelpOutput } from './components/help_output';
@@ -19,7 +18,7 @@ import { CommandExecutionOutput } from './components/command_execution_output';
 import { parseCommandInput } from './service/parsed_command_input';
 import { BadArgument } from './components/bad_argument';
 
-// FIXME:PT implement dark mode for the console
+// FIXME:PT implement dark mode for the console or light mode switch
 
 const ConsoleWindow = styled(EuiPanel)`
   min-width: ${({ theme }) => theme.eui.euiBreakpoints.s};
@@ -27,8 +26,9 @@ const ConsoleWindow = styled(EuiPanel)`
   max-height: 100%;
   overflow-y: auto;
 
-  background-color: ${({ theme }) => theme.eui.euiCodeBlockBackgroundColor} !important;
-  color: ${({ theme }) => theme.eui.euiCodeBlockColor} !important;
+  // FIXME: IMPORTANT - this should NOT be used in production
+  // dark mode on light theme / light mode on dark theme
+  filter: invert(100%);
 `;
 
 // FIXME: PT add CommonProps to the type below
@@ -44,7 +44,9 @@ export const Console = memo<ConsoleProps>(({ prompt }) => {
   const inputFocusRef: CommandInputProps['focusRef'] = useRef(null);
 
   const handleConsoleClick = useCallback(() => {
-    inputFocusRef?.current();
+    if (inputFocusRef.current) {
+      inputFocusRef.current();
+    }
   }, []);
 
   const handleOnExecute = useCallback<CommandInputProps['onExecute']>(
@@ -175,6 +177,19 @@ export const Console = memo<ConsoleProps>(({ prompt }) => {
 
           // FIXME:PT Implement calling validator
         }
+      } else if (commandDefinition.mustHaveArgs) {
+        setHistoryItems((prevState) => {
+          return [
+            ...prevState,
+            <HistoryItem>
+              <BadArgument parsedInput={parsedInput} commandDefinition={commandDefinition}>
+                {'at least 1 argument must be used'}
+              </BadArgument>
+            </HistoryItem>,
+          ];
+        });
+
+        return;
       }
 
       setHistoryItems((prevState) => {
@@ -203,20 +218,18 @@ export const Console = memo<ConsoleProps>(({ prompt }) => {
   }, [historyItems.length]);
 
   return (
-    <EuiThemeProvider darkMode={true}>
-      <div onClick={handleConsoleClick}>
-        <ConsoleWindow panelRef={consoleWindowRef}>
-          <EuiFlexGroup direction="column">
-            <EuiFlexItem grow={true}>
-              <OutputHistory>{historyItems}</OutputHistory>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <CommandInput onExecute={handleOnExecute} prompt={prompt} focusRef={inputFocusRef} />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </ConsoleWindow>
-      </div>
-    </EuiThemeProvider>
+    <div onClick={handleConsoleClick}>
+      <ConsoleWindow panelRef={consoleWindowRef}>
+        <EuiFlexGroup direction="column">
+          <EuiFlexItem grow={true}>
+            <OutputHistory>{historyItems}</OutputHistory>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <CommandInput onExecute={handleOnExecute} prompt={prompt} focusRef={inputFocusRef} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </ConsoleWindow>
+    </div>
   );
 });
 

@@ -34,7 +34,6 @@ const KeyCaptureContainer = styled.span`
       -moz-box-shadow: none;
       box-shadow: none;
       animation: none !important;
-      color: ${({ theme }) => theme.eui.euiCodeBlockBackgroundColor};
       width: 1ch !important;
       position: absolute;
       left: -100px;

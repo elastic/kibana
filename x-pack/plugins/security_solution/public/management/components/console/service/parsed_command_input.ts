@@ -12,6 +12,8 @@ import argsplit from 'argsplit';
 // FIXME:PT use a 3rd party lib for arguments parsing
 //        For now, just using what I found in kibana package.json devDependencies, so this will NOT work for production
 
+// FIXME:PT Type `ParsedCommandInput` should be a generic that allows for the args's keys to be defined
+
 export interface ParsedCommandInput {
   input: string;
   name: string;
@@ -25,11 +27,16 @@ export interface ParsedCommandInput {
   };
   unknownArgs: undefined | string[]; // might rename it `unknownArgs`
   hasArgs(): boolean;
+  hasArg(argName: string): boolean;
 }
 
 const PARSED_COMMAND_INPUT_PROTOTYPE: Pick<ParsedCommandInput, 'hasArgs'> = Object.freeze({
   hasArgs(this: ParsedCommandInput) {
     return Object.keys(this.args).length > 0 || Array.isArray(this.unknownArgs);
+  },
+
+  hasArg(argName: string): boolean {
+    return Object.prototype.hasOwnProperty.call(this.args, argName);
   },
 });
 

@@ -24,7 +24,7 @@ const CommandInputContainer = styled.div`
     display: inline-block;
     width: 0.5em;
     height: 1em;
-    background-color: ${({ theme }) => theme.eui.euiCodeBlockColor};
+    background-color: ${({ theme }) => theme.eui.euiTextColors.default};
 
     animation: cursor-blink-animation 1s steps(5, start) infinite;
     -webkit-animation: cursor-blink-animation 1s steps(5, start) infinite;
@@ -40,7 +40,7 @@ const CommandInputContainer = styled.div`
     }
 
     &.inactive {
-      background-color: transparent;
+      background-color: transparent !important;
     }
   }
 `;
@@ -63,12 +63,11 @@ export const CommandInput = memo<CommandInputProps>(
 
     const keyCaptureFocusRef = focusRef || _focusRef;
 
-    const handleKeyCaptureOnStateChange = useCallback<KeyCaptureProps['onStateChange']>(
-      (isCapturing) => {
-        setIsKeyInputBeingCaptured(isCapturing);
-      },
-      []
-    );
+    const handleKeyCaptureOnStateChange = useCallback<
+      NonNullable<KeyCaptureProps['onStateChange']>
+    >((isCapturing) => {
+      setIsKeyInputBeingCaptured(isCapturing);
+    }, []);
 
     const handleTypingAreaClick = useCallback<MouseEventHandler>(
       (ev) => {

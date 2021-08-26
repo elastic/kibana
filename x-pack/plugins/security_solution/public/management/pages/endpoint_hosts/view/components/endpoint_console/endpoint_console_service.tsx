@@ -7,7 +7,14 @@
 
 import React, { ReactNode } from 'react';
 
-import { EuiCard, EuiCodeBlock, EuiDescriptionList, EuiIcon, EuiText } from '@elastic/eui';
+import {
+  EuiCard,
+  EuiCodeBlock,
+  EuiDescriptionList,
+  EuiFlexGroup,
+  EuiIcon,
+  EuiText,
+} from '@elastic/eui';
 import { EuiDescriptionListProps } from '@elastic/eui/src/components/description_list/description_list';
 import styled from 'styled-components';
 import {
@@ -84,7 +91,19 @@ export class EndpointConsoleService implements ConsoleServiceInterface {
       {
         name: 'get-file',
         about: 'Retrieve a file from the host machine',
-        args: undefined,
+        mustHaveArgs: true,
+        args: {
+          'endpoint-log': {
+            required: false,
+            allowMultiples: false,
+            about: 'Retrieve the elastic-endpoint log file from the host',
+          },
+          'agent-log': {
+            required: false,
+            allowMultiples: false,
+            about: 'Retrieve the elastic-agent log file from the host',
+          },
+        },
       },
       {
         name: 'get-process',
@@ -106,7 +125,7 @@ export class EndpointConsoleService implements ConsoleServiceInterface {
       case 'get-process':
         return { result: await this.sendGetProcessList() };
       case 'get-file':
-        return { result: await this.sendGetFile() };
+        return { result: await this.sendGetFile(command) };
       default:
         await delay();
         return {
@@ -416,28 +435,50 @@ Handles  NPM(K)    PM(K)      WS(K)     CPU(s)     Id  SI ProcessName
     );
   }
 
-  private async sendGetFile(): Promise<ReactNode> {
+  private async sendGetFile(command: Command): Promise<ReactNode> {
     await delay(6000);
 
+    const files: Array<{ title: string; path: string }> = [];
+
+    if (command.args.hasArg('endpoint-log')) {
+      files.push({
+        title: 'endpoint-0000.log',
+        path: 'C:\\Program Files\\Elastic\\Endpoint\\state\\log\\',
+      });
+    }
+
+    if (command.args.hasArg('agent-log')) {
+      files.push({
+        title: 'agent-0000.log',
+        path: 'C:\\Program Files\\Elastic\\agent\\state\\log\\',
+      });
+    }
+
     return (
-      <EuiCard
-        title="endpoint-0000.log"
-        onClick={() => {}}
-        layout="horizontal"
-        display="plain"
-        icon={<EuiIcon type="document" size="xl" color="primary" />}
-        description={
-          <>
-            <EuiText className="eui-textBreakAll" color="ButtonText">
-              {'Retrieved from: C:\\Program Files\\Elastic\\Endpoint\\state\\log\\'}
-            </EuiText>
-          </>
-        }
-        style={{
-          marginTop: '1em',
-          width: '32%',
-        }}
-      />
+      <EuiFlexGroup wrap={true}>
+        {files.map(({ title, path }) => {
+          return (
+            <EuiCard
+              title={title}
+              onClick={() => {}}
+              layout="horizontal"
+              display="plain"
+              icon={<EuiIcon type="document" size="xl" color="primary" />}
+              description={
+                <>
+                  <EuiText className="eui-textBreakAll" color="ButtonText">
+                    {`Retrieved from: ${path}`}
+                  </EuiText>
+                </>
+              }
+              style={{
+                marginTop: '1em',
+                width: '32%',
+              }}
+            />
+          );
+        })}
+      </EuiFlexGroup>
     );
   }
 }

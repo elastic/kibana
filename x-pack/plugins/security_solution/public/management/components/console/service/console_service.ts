@@ -14,6 +14,8 @@ export interface CommandDefinition {
   name: string;
   about: string;
   validator?: () => Promise<boolean>;
+  /** If all args are optional, but at least one must be defined, set to true */
+  mustHaveArgs?: boolean;
   args?: {
     [longName: string]: {
       required: boolean;
@@ -31,6 +33,7 @@ export interface CommandDefinition {
  * A command to be executed (as entered by the user)
  */
 export interface Command {
+  // FIXME:PT this should be a generic that allows for the arguments type to be used
   input: string;
   args: ParsedCommandInput;
   commandDefinition: CommandDefinition;

@@ -36,13 +36,15 @@ export const CommandExecutionOutput = memo<CommandExecutionOutputProps>(({ comma
 
   return (
     <div>
-      <UserCommandInput input={command.input} />
-      {isRunning && (
-        <>
-          <EuiLoadingChart size="m" mono style={{ marginLeft: '0.5em' }} />
-        </>
-      )}
-      {output}
+      <div>
+        <UserCommandInput input={command.input} />
+        {isRunning && (
+          <>
+            <EuiLoadingChart size="m" mono style={{ marginLeft: '0.5em' }} />
+          </>
+        )}
+      </div>
+      <div>{output}</div>
     </div>
   );
 });
