@@ -48,6 +48,7 @@ export {
   skipFocusInContainerTo,
   stopPropagationAndPreventDefault,
 } from '../common/utils/accessibility';
+export { getPageRowIndex } from '../common/utils/pagination';
 export {
   addFieldToTimelineColumns,
   getTimelineIdFromColumnDroppableId,
