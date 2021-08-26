@@ -38,7 +38,7 @@ export const SwitchModePopover = ({ onModeChange, useKibanaIndices }: PopoverPro
           aria-label={i18n.translate(
             'visTypeTimeseries.indexPatternSelect.switchModePopover.areaLabel',
             {
-              defaultMessage: 'Configure index pattern selection mode',
+              defaultMessage: 'Configure data view selection mode',
             }
           )}
           onClick={onButtonClick}
@@ -52,14 +52,14 @@ export const SwitchModePopover = ({ onModeChange, useKibanaIndices }: PopoverPro
       <div style={{ width: '360px' }}>
         <EuiPopoverTitle>
           {i18n.translate('visTypeTimeseries.indexPatternSelect.switchModePopover.title', {
-            defaultMessage: 'Index pattern selection mode',
+            defaultMessage: 'Data view mode',
           })}
         </EuiPopoverTitle>
         <EuiText>
           <FormattedMessage
             id="visTypeTimeseries.indexPatternSelect.switchModePopover.text"
-            defaultMessage="An index pattern identifies one or more Elasticsearch indices that you want to explore.
-            You can use Elasticsearch indices or Kibana index patterns (recommended)."
+            defaultMessage="Data view identifies one or more Elasticsearch indices that you want to explore.
+            You can use Elasticsearch indices or Kibana data views (recommended)."
           />
         </EuiText>
         <EuiSpacer />
@@ -68,7 +68,7 @@ export const SwitchModePopover = ({ onModeChange, useKibanaIndices }: PopoverPro
           label={i18n.translate(
             'visTypeTimeseries.indexPatternSelect.switchModePopover.useKibanaIndices',
             {
-              defaultMessage: 'Use only Kibana index patterns',
+              defaultMessage: 'Use Kibana data views',
             }
           )}
           onChange={switchMode}

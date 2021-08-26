@@ -34,9 +34,9 @@ export interface IndexPatternSelectProps {
 }
 
 const defaultIndexPatternHelpText = i18n.translate(
-  'visTypeTimeseries.indexPatternSelect.defaultIndexPatternText',
+  'visTypeTimeseries.indexPatternSelect.defaultDataViewText',
   {
-    defaultMessage: 'Default index pattern is used.',
+    defaultMessage: 'Default data view is used.',
   }
 );
 
@@ -48,7 +48,7 @@ const queryAllIndexesHelpText = i18n.translate(
 );
 
 const indexPatternLabel = i18n.translate('visTypeTimeseries.indexPatternSelect.label', {
-  defaultMessage: 'Index pattern',
+  defaultMessage: 'Data view',
 });
 
 export const IndexPatternSelect = ({
@@ -112,8 +112,8 @@ export const IndexPatternSelect = ({
           <EuiLink onClick={navigateToCreateIndexPatternPage}>
             <EuiText size="xs">
               <FormattedMessage
-                id="visTypeTimeseries.indexPatternSelect.createIndexPatternText"
-                defaultMessage="Create index pattern"
+                id="visTypeTimeseries.indexPatternSelect.createDataViewText"
+                defaultMessage="Create data view"
               />
             </EuiText>
           </EuiLink>
