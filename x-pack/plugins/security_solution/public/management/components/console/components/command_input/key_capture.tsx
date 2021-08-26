@@ -51,11 +51,23 @@ export interface KeyCaptureProps {
       'key' | 'altKey' | 'ctrlKey' | 'keyCode' | 'metaKey' | 'repeat' | 'shiftKey'
     >;
   }) => void;
+  onStateChange?: (isCapturing: boolean) => void;
   focusRef?: MutableRefObject<((force?: boolean) => void) | null>;
 }
 
-export const KeyCapture = memo<KeyCaptureProps>(({ onCapture, focusRef }) => {
+export const KeyCapture = memo<KeyCaptureProps>(({ onCapture, focusRef, onStateChange }) => {
   const [, setLastInput] = useState('');
+
+  const handleBlurAndFocus = useCallback<FormEventHandler>(
+    (ev) => {
+      if (!onStateChange) {
+        return;
+      }
+
+      onStateChange(ev.type === 'focus');
+    },
+    [onStateChange]
+  );
 
   const handleOnKeyUp = useCallback<KeyboardEventHandler<HTMLInputElement>>(
     (ev) => {
@@ -114,6 +126,8 @@ export const KeyCapture = memo<KeyCaptureProps>(({ onCapture, focusRef }) => {
         value=""
         onInput={handleOnInput}
         onKeyUp={handleOnKeyUp}
+        onBlur={handleBlurAndFocus}
+        onFocus={handleBlurAndFocus}
         ref={inputRef}
       />
     </KeyCaptureContainer>

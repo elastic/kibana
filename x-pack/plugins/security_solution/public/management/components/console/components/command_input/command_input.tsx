@@ -8,6 +8,7 @@
 import React, { memo, MouseEventHandler, useCallback, useRef, useState } from 'react';
 import { CommonProps, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
+import classNames from 'classnames';
 import { KeyCapture, KeyCaptureProps } from './key_capture';
 
 const CommandInputContainer = styled.div`
@@ -37,6 +38,10 @@ const CommandInputContainer = styled.div`
         visibility: hidden;
       }
     }
+
+    &.inactive {
+      background-color: transparent;
+    }
   }
 `;
 
@@ -52,18 +57,29 @@ export const CommandInput = memo<CommandInputProps>(
     // TODO:PT Support having a "console not focused" mode where the cursor will not blink
 
     const [textEntered, setTextEntered] = useState<string>('');
+    const [isKeyInputBeingCaptured, setIsKeyInputBeingCaptured] = useState(false);
     const _focusRef: KeyCaptureProps['focusRef'] = useRef(null);
     const textDisplayRef = useRef<HTMLDivElement | null>(null);
 
     const keyCaptureFocusRef = focusRef || _focusRef;
 
-    const handleTypingAreaClick = useCallback<MouseEventHandler>((ev) => {
-      // FIXME:PT move this to the entire console window, so that clicking it focuses the cursor
+    const handleKeyCaptureOnStateChange = useCallback<KeyCaptureProps['onStateChange']>(
+      (isCapturing) => {
+        setIsKeyInputBeingCaptured(isCapturing);
+      },
+      []
+    );
 
-      if (keyCaptureFocusRef.current) {
-        keyCaptureFocusRef.current();
-      }
-    }, []);
+    const handleTypingAreaClick = useCallback<MouseEventHandler>(
+      (ev) => {
+        // FIXME:PT move this to the entire console window, so that clicking it focuses the cursor
+
+        if (keyCaptureFocusRef.current) {
+          keyCaptureFocusRef.current();
+        }
+      },
+      [keyCaptureFocusRef]
+    );
 
     const handleKeyCapture = useCallback<KeyCaptureProps['onCapture']>(
       ({ value, eventDetails }) => {
@@ -109,10 +125,14 @@ export const CommandInput = memo<CommandInputProps>(
             {textEntered}
           </EuiFlexItem>
           <EuiFlexItem grow>
-            <span className="cursor" />
+            <span className={classNames({ cursor: true, inactive: !isKeyInputBeingCaptured })} />
           </EuiFlexItem>
         </EuiFlexGroup>
-        <KeyCapture onCapture={handleKeyCapture} focusRef={keyCaptureFocusRef} />
+        <KeyCapture
+          onCapture={handleKeyCapture}
+          focusRef={keyCaptureFocusRef}
+          onStateChange={handleKeyCaptureOnStateChange}
+        />
       </CommandInputContainer>
     );
   }
