@@ -224,9 +224,9 @@ export class IndexPattern implements IIndexPattern {
    */
   private getComputedRuntimeFields(): Record<string, RuntimeField> {
     return Object.entries(this.runtimeFieldMap).reduce((acc, [name, field]) => {
-      const { type, script, parent } = field;
+      const { type, script, parentComposite } = field;
 
-      if (parent !== undefined) {
+      if (parentComposite !== undefined) {
         return acc;
       }
 
@@ -473,9 +473,9 @@ export class IndexPattern implements IIndexPattern {
    * @param runtimeField Runtime field definition
    */
   addRuntimeField(name: string, enhancedRuntimeField: EnhancedRuntimeField): IndexPatternField {
-    const { type, script, parent, customLabel, format, popularity } = enhancedRuntimeField;
+    const { type, script, parentComposite, customLabel, format, popularity } = enhancedRuntimeField;
 
-    const runtimeField: RuntimeField = { type, script, parent };
+    const runtimeField: RuntimeField = { type, script, parentComposite };
 
     let fieldCreated: IndexPatternField;
     const existingField = this.getFieldByName(name);
@@ -544,7 +544,14 @@ export class IndexPattern implements IIndexPattern {
    */
   removeRuntimeField(name: string) {
     const existingField = this.getFieldByName(name);
+
     if (existingField) {
+      if (existingField.runtimeField?.parentComposite !== undefined) {
+        throw new Error(
+          `Can't remove runtime field ["${name}"] as it belongs to the composite runtime ["${existingField.runtimeField.parentComposite}"]`
+        );
+      }
+
       if (existingField.isMapped) {
         // mapped field, remove runtimeField def
         existingField.runtimeField = undefined;
@@ -575,7 +582,10 @@ export class IndexPattern implements IIndexPattern {
     const fieldsCreated: IndexPatternField[] = [];
 
     for (const [subFieldName, subField] of Object.entries(subFields)) {
-      const field = this.addRuntimeField(`${name}.${subFieldName}`, { ...subField, parent: name });
+      const field = this.addRuntimeField(`${name}.${subFieldName}`, {
+        ...subField,
+        parentComposite: name,
+      });
       fieldsCreated.push(field);
     }
 
@@ -620,7 +630,7 @@ export class IndexPattern implements IIndexPattern {
         type: field.type as RuntimeType,
         customLabel: field.customLabel,
         popularity: field.count,
-        parent: name,
+        parentComposite: name,
         format: this.getFormatterForFieldNoDefault(field.name)?.toJSON(),
       };
 

@@ -25,7 +25,7 @@ export interface RuntimeField {
   script?: {
     source: string;
   };
-  parent?: string;
+  parentComposite?: string;
   fields?: Record<
     string,
     {
