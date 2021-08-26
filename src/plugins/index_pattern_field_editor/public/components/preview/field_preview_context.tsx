@@ -601,7 +601,7 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
     setPreviewResponse((prev) => {
       const { fields } = prev;
 
-      const updatedFields = fields.map((field) => {
+      let updatedFields: Context['fields'] = fields.map((field) => {
         let key: string = name ?? '';
 
         if (type === 'composite') {
@@ -614,6 +614,14 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
           key,
         };
       });
+
+      // If the user has entered a name but not yet any script we will display
+      // the field in the preview with just the name (and a "-" for the value)
+      if (updatedFields.length === 0 && name !== null) {
+        updatedFields = [
+          { key: name, value: undefined, formattedValue: defaultValueFormatter(undefined) },
+        ];
+      }
 
       return {
         ...prev,
@@ -631,11 +639,10 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
 
       return {
         ...prev,
-        // fields: [{ ...field, key: name ?? '', value: nextValue, formattedValue }],
         fields: fields.map((field) => {
           const nextValue =
             script === null && Boolean(document)
-              ? get(document, name ?? '') // When there is no script we read the value from _source
+              ? get(document, name ?? '') // When there is no script we try to read the value from _source
               : field?.value;
 
           const formattedValue = valueFormatter(nextValue);
