@@ -43,7 +43,7 @@ export const DocumentCreationButtons: React.FC<Props> = ({ disabled = false }) =
         <p>
           <FormattedMessage
             id="xpack.enterpriseSearch.appSearch.documentCreation.description"
-            defaultMessage="There are four ways to send documents to your engine for indexing. You can paste raw JSON, upload a {jsonCode} file, {postCode} to the {documentsApiLink} endpoint, or test drive the new Elastic Crawler (beta) to automatically index documents from a URL. Click on your choice below."
+            defaultMessage="How do you want to send documents to your engine for indexing?"
             values={{
               jsonCode: <EuiCode>.json</EuiCode>,
               postCode: <EuiCode>POST</EuiCode>,
@@ -60,13 +60,21 @@ export const DocumentCreationButtons: React.FC<Props> = ({ disabled = false }) =
       <EuiFlexGrid columns={2}>
         <EuiFlexItem>
           <EuiCard
+            layout="horizontal"
             display="subdued"
+            titleSize="xs"
             title={i18n.translate(
               'xpack.enterpriseSearch.appSearch.documentCreation.buttons.text',
               { defaultMessage: 'Paste JSON' }
             )}
-            description=""
-            icon={<EuiIcon type="indexEdit" size="xxl" color="primary" />}
+            description={i18n.translate(
+              'xpack.enterpriseSearch.appSearch.documentCreation.paste.description',
+              {
+                defaultMessage:
+                  'Paste a valid raw JSON array. Each document object must be less than 102400 bytes.',
+              }
+            )}
+            icon={<EuiIcon type="indexEdit" size="l" color="primary" />}
             data-test-subj="IndexingPasteJSONButton"
             onClick={() => openDocumentCreation('text')}
             isDisabled={disabled}
@@ -74,38 +82,61 @@ export const DocumentCreationButtons: React.FC<Props> = ({ disabled = false }) =
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiCard
+            layout="horizontal"
             display="subdued"
+            titleSize="xs"
             title={i18n.translate(
               'xpack.enterpriseSearch.appSearch.documentCreation.buttons.file',
-              { defaultMessage: 'Upload a JSON file' }
+              { defaultMessage: 'Upload JSON' }
             )}
-            description=""
-            icon={<EuiIcon type="exportAction" size="xxl" color="primary" />}
+            description={i18n.translate(
+              'xpack.enterpriseSearch.appSearch.documentCreation.upload.description',
+              {
+                defaultMessage:
+                  'Select a valid JSON file from your computer. Each document object must less than 102400 bytes.',
+              }
+            )}
+            icon={<EuiIcon type="exportAction" size="l" color="primary" />}
             onClick={() => openDocumentCreation('file')}
             isDisabled={disabled}
           />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiCard
+            layout="horizontal"
             display="subdued"
+            titleSize="xs"
             title={i18n.translate('xpack.enterpriseSearch.appSearch.documentCreation.buttons.api', {
               defaultMessage: 'Index from API',
             })}
-            description=""
-            icon={<EuiIcon type="editorCodeBlock" size="xxl" color="primary" />}
+            description={i18n.translate(
+              'xpack.enterpriseSearch.appSearch.documentCreation.api.description',
+              {
+                defaultMessage: 'Send a POST request to your documents API endpoint.',
+              }
+            )}
+            icon={<EuiIcon type="editorCodeBlock" size="l" color="primary" />}
             onClick={() => openDocumentCreation('api')}
             isDisabled={disabled}
           />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiCardTo
+            layout="horizontal"
             display="subdued"
+            titleSize="xs"
             title={i18n.translate(
               'xpack.enterpriseSearch.appSearch.documentCreation.buttons.crawl',
-              { defaultMessage: 'Use the Crawler' }
+              { defaultMessage: 'Web crawler' }
             )}
-            description=""
-            icon={<EuiIcon type="globe" size="xxl" color="primary" />}
+            description={i18n.translate(
+              'xpack.enterpriseSearch.appSearch.documentCreation.webCrawler.description',
+              {
+                defaultMessage:
+                  'Use the web crawler to discover, extract, and index your web content into your App Search engines.',
+              }
+            )}
+            icon={<EuiIcon type="globe" size="l" color="primary" />}
             betaBadgeLabel={i18n.translate(
               'xpack.enterpriseSearch.appSearch.documentCreation.buttons.betaTitle',
               { defaultMessage: 'Beta' }
