@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { maybe } from '../../../../common/utils/maybe';
 import awsIcon from './icons/aws.svg';
 import darkAwsIcon from './icons/aws_dark.svg';
 import azureIcon from './icons/azure.svg';
@@ -36,7 +35,7 @@ import websocketIcon from './icons/websocket.svg';
 import darkWebsocketIcon from './icons/websocket_dark.svg';
 import javaIcon from '../../shared/agent_icon/icons/java.svg';
 
-const defaultSpanTypeIcons: { [key: string]: string } = {
+export const defaultSpanTypeIcons: { [key: string]: string } = {
   cache: databaseIcon,
   db: databaseIcon,
   ext: globeIcon,
@@ -124,23 +123,24 @@ export const darkSpanTypeIcons: {
   },
 };
 
-export function getSpanIcon(
-  isDarkMode: boolean,
-  type?: string | undefined,
-  subtype?: string | undefined
-) {
+export function getSpanIcon({
+  type,
+  subtype,
+  isDarkMode = false,
+}: { type?: string; subtype?: string; isDarkMode?: boolean } = {}) {
   if (!type) {
     return defaultIcon;
   }
 
-  const types = maybe(spanTypeIcons[type]);
+  const defaultDarkIcon = defaultDarkSpanTypeIcons[type] ?? defaultIcon;
+  const defaultLightIcon = defaultSpanTypeIcons[type] ?? defaultIcon;
 
-  if (subtype && types && subtype in types) {
-    return types[subtype];
+  if (!subtype) {
+    return isDarkMode ? defaultDarkIcon : defaultLightIcon;
   }
-  return (
-    (isDarkMode
-      ? defaultDarkSpanTypeIcons[type]
-      : defaultSpanTypeIcons[type]) ?? defaultIcon
-  );
+
+  const lightModeIcon = spanTypeIcons?.[type]?.[subtype];
+  const darkModeIcon = darkSpanTypeIcons?.[type]?.[subtype] ?? lightModeIcon;
+
+  return isDarkMode ? darkModeIcon : lightModeIcon ?? defaultLightIcon;
 }
