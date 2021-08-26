@@ -43,13 +43,9 @@ export class Plugin implements PluginType {
       componentTemplates: [
         {
           name: 'mappings',
-          version: 0,
           mappings: mappingFromFieldMap(uptimeRuleFieldMap, 'strict'),
         },
       ],
-      indexTemplate: {
-        version: 0,
-      },
     });
 
     initServerWithKibana(
