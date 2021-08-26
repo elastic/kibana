@@ -18,8 +18,10 @@ export function iconForNode(node: cytoscape.NodeSingular) {
   const agentName = node.data(AGENT_NAME);
   const subtype = node.data(SPAN_SUBTYPE);
   const type = node.data(SPAN_TYPE);
+  // TODO: Should be made variable in the future
+  const isDarkMode = false;
 
   return agentName
-    ? getAgentIcon(agentName, false)
-    : getSpanIcon(type, subtype);
+    ? getAgentIcon(agentName, isDarkMode)
+    : getSpanIcon({ type, subtype, isDarkMode });
 }
