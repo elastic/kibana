@@ -104,7 +104,7 @@ export const getFieldEditorOpener = ({
     const fieldTypeToProcess: InternalFieldType =
       isNewRuntimeField || isExistingRuntimeField ? 'runtime' : 'concrete';
 
-    if (field?.runtimeField?.parent !== undefined) {
+    if (field?.runtimeField?.parentComposite !== undefined) {
       console.log( // eslint-disable-line
         'TODO: display a modal to indicate that this field needs to be edited through its parent.'
       );

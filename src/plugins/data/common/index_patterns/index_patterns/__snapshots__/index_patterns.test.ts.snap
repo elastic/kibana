@@ -37,6 +37,7 @@ Object {
   "fields": Object {},
   "id": "id",
   "intervalName": undefined,
+  "runtimeCompositeMap": Object {},
   "runtimeFieldMap": Object {
     "aRuntimeField": Object {
       "script": Object {

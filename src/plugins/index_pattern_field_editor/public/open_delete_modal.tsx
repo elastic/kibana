@@ -42,9 +42,11 @@ export const getFieldDeleteModalOpener = ({
 }: Dependencies) => (options: OpenFieldDeleteModalOptions): CloseEditor => {
   if (typeof options.fieldName === 'string') {
     const fieldToDelete = options.ctx.indexPattern.getFieldByName(options.fieldName);
-    const parent = fieldToDelete?.runtimeField?.parent;
+    const parentComposite = fieldToDelete?.runtimeField?.parentComposite;
     const doesBelongToCompositeField =
-      parent === undefined ? false : options.ctx.indexPattern.getRuntimeComposite(parent) !== null;
+      parentComposite === undefined
+        ? false
+        : options.ctx.indexPattern.getRuntimeComposite(parentComposite) !== null;
 
     if (doesBelongToCompositeField) {
       console.log( // eslint-disable-line
