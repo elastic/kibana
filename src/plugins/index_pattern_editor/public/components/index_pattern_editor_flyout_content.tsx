@@ -120,6 +120,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
 
   const [timestampFieldOptions, setTimestampFieldOptions] = useState<TimestampOption[]>([]);
   const [isLoadingTimestampFields, setIsLoadingTimestampFields] = useState<boolean>(false);
+  const currentLoadingTimestampFieldsRef = useRef(0);
   const [isLoadingMatchedIndices, setIsLoadingMatchedIndices] = useState<boolean>(false);
   const currentLoadingMatchedIndicesRef = useRef(0);
   const [allSources, setAllSources] = useState<MatchedItem[]>([]);
@@ -192,9 +193,12 @@ const IndexPatternEditorFlyoutContentComponent = ({
 
   const loadTimestampFieldOptions = useCallback(
     async (query: string) => {
+      const currentLoadingTimestampFieldsIdx = ++currentLoadingTimestampFieldsRef.current;
       let timestampOptions: TimestampOption[] = [];
       const isValidResult =
-        !existingIndexPatterns.includes(query) && matchedIndices.exactMatchedIndices.length > 0;
+        !existingIndexPatterns.includes(query) &&
+        matchedIndices.exactMatchedIndices.length > 0 &&
+        !isLoadingMatchedIndices;
       if (isValidResult) {
         setIsLoadingTimestampFields(true);
         const getFieldsOptions: GetFieldsOptions = {
@@ -210,7 +214,10 @@ const IndexPatternEditorFlyoutContentComponent = ({
         );
         timestampOptions = extractTimeFields(fields, requireTimestampField);
       }
-      if (isMounted.current) {
+      if (
+        isMounted.current &&
+        currentLoadingTimestampFieldsIdx === currentLoadingTimestampFieldsRef.current
+      ) {
         setIsLoadingTimestampFields(false);
         setTimestampFieldOptions(timestampOptions);
       }
@@ -223,13 +230,14 @@ const IndexPatternEditorFlyoutContentComponent = ({
       rollupIndex,
       type,
       matchedIndices.exactMatchedIndices,
+      isLoadingMatchedIndices,
     ]
   );
 
   useEffect(() => {
     loadTimestampFieldOptions(title);
     getFields().timestampField?.setValue('');
-  }, [matchedIndices, loadTimestampFieldOptions, title, getFields]);
+  }, [loadTimestampFieldOptions, title, getFields]);
 
   const reloadMatchedIndices = useCallback(
     async (newTitle: string) => {
