@@ -32,7 +32,9 @@ export interface Params {
 
 export class DashboardToDiscoverDrilldown
   implements Drilldown<Config, ApplyGlobalFilterActionContext> {
-  constructor(protected readonly params: Params) {}
+  constructor(protected readonly params: Params) {
+    this.ReactCollectConfig = (props) => <CollectConfigContainer {...props} params={this.params} />;
+  }
 
   public readonly id = SAMPLE_DASHBOARD_TO_DISCOVER_DRILLDOWN;
 
@@ -46,9 +48,7 @@ export class DashboardToDiscoverDrilldown
     return [APPLY_FILTER_TRIGGER];
   }
 
-  private readonly ReactCollectConfig: React.FC<CollectConfigProps> = (props) => (
-    <CollectConfigContainer {...props} params={this.params} />
-  );
+  private readonly ReactCollectConfig: React.FC<CollectConfigProps>;
 
   public readonly CollectConfig = reactToUiComponent(this.ReactCollectConfig);
 
