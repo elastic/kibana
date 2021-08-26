@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Filter } from 'src/plugins/data/public';
+import { Filter } from '@kbn/es-query';
 import { SavedObjectReference } from 'kibana/public';
 import { PersistableFilter } from '../../common';
 

@@ -89,9 +89,7 @@
                 "section": "def-public.CoreStart",
                 "text": "CoreStart"
               },
-              ", { kibanaLegacy }: { kibanaLegacy: { dashboardConfig: ",
-              "DashboardConfig",
-              "; loadFontAwesome: () => Promise<void>; loadAngularBootstrap: () => Promise<void>; config: Readonly<{} & { defaultAppId: string; }>; }; }) => { navigateToDefaultApp: ({ overwriteHash }?: { overwriteHash: boolean; }) => void; navigateToLegacyKibanaUrl: (hash: string) => { navigated: boolean; }; getForwards: () => ",
+              ", { kibanaLegacy }: { kibanaLegacy: { loadFontAwesome: () => Promise<void>; loadAngularBootstrap: () => Promise<void>; config: Readonly<{} & { defaultAppId: string; }>; }; }) => { navigateToDefaultApp: ({ overwriteHash }?: { overwriteHash: boolean; }) => void; navigateToLegacyKibanaUrl: (hash: string) => { navigated: boolean; }; getForwards: () => ",
               {
                 "pluginId": "urlForwarding",
                 "scope": "public",
@@ -142,9 +140,7 @@
                     "label": "kibanaLegacy",
                     "description": [],
                     "signature": [
-                      "{ dashboardConfig: ",
-                      "DashboardConfig",
-                      "; loadFontAwesome: () => Promise<void>; loadAngularBootstrap: () => Promise<void>; config: Readonly<{} & { defaultAppId: string; }>; }"
+                      "{ loadFontAwesome: () => Promise<void>; loadAngularBootstrap: () => Promise<void>; config: Readonly<{} & { defaultAppId: string; }>; }"
                     ],
                     "path": "src/plugins/url_forwarding/public/plugin.ts",
                     "deprecated": false

@@ -47,6 +47,17 @@ export const SourcesRouter: React.FC = () => {
     resetSourcesState();
   }, [pathname]);
 
+  /**
+   * When opening `workplace_search/p/sources/add` as a bookmark or reloading this page,
+   * Sources router first get rendered *before* it receives the canCreatePersonalSources value.
+   * This results in canCreatePersonalSources always being undefined on the first render,
+   * and user always getting redirected to `workplace_search/p/sources`.
+   * Here we check for this value being present before we render any routes.
+   */
+  if (canCreatePersonalSources === undefined) {
+    return null;
+  }
+
   return (
     <Switch>
       <Route exact path={PERSONAL_SOURCES_PATH}>

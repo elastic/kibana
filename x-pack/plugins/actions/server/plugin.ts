@@ -153,7 +153,6 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
   private readonly telemetryLogger: Logger;
   private readonly preconfiguredActions: PreConfiguredAction[];
   private readonly kibanaIndexConfig: { kibana: { index: string } };
-  private readonly kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
 
   constructor(initContext: PluginInitializerContext) {
     this.logger = initContext.logger.get();
@@ -164,7 +163,6 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
     this.telemetryLogger = initContext.logger.get('usage');
     this.preconfiguredActions = [];
     this.kibanaIndexConfig = initContext.config.legacy.get();
-    this.kibanaVersion = initContext.env.packageInfo.version;
   }
 
   public setup(
@@ -232,7 +230,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       plugins.encryptedSavedObjects,
       this.actionTypeRegistry!,
       plugins.taskManager.index,
-      this.kibanaVersion
+      this.preconfiguredActions
     );
 
     registerBuiltInActionTypes({
