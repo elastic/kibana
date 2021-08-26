@@ -83,7 +83,7 @@ export default function ({ getService }: FtrProviderContext) {
         const latestTransformDestinationIndex = `user-${latestTransformId}`;
 
         before(async () => {
-          await esArchiver.loadIfNeeded('ml/ecommerce');
+          await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ecommerce');
           await transform.testResources.createIndexPatternIfNeeded(ecIndexPattern, 'order_date');
           await transform.testResources.setKibanaTimeZoneToUTC();
         });
@@ -95,7 +95,7 @@ export default function ({ getService }: FtrProviderContext) {
           await transform.testResources.deleteIndexPatternByTitle(pivotTransformDestinationIndex);
           await transform.testResources.deleteIndexPatternByTitle(latestTransformDestinationIndex);
           await transform.testResources.deleteIndexPatternByTitle(ecIndexPattern);
-          await esArchiver.unload('ml/ecommerce');
+          await esArchiver.unload('x-pack/test/functional/es_archives/ml/ecommerce');
           await transform.testResources.resetKibanaTimeZone();
         });
 

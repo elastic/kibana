@@ -61,6 +61,7 @@ export function InstancesLatencyDistributionChart({
   const latencyFormatter = getDurationFormatter(maxLatency);
 
   const tooltip: TooltipProps = {
+    stickTo: 'center',
     type: TooltipType.Follow,
     snap: false,
     customTooltip: (props: TooltipInfo) => (
@@ -104,7 +105,7 @@ export function InstancesLatencyDistributionChart({
   };
 
   return (
-    <EuiPanel>
+    <EuiPanel hasBorder={true}>
       <EuiTitle size="xs">
         <h2>
           {i18n.translate('xpack.apm.instancesLatencyDistributionChartTitle', {

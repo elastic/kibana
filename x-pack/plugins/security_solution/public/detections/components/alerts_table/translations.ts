@@ -18,6 +18,12 @@ export const ALERTS_DOCUMENT_TYPE = i18n.translate(
   }
 );
 
+export const ALERTS_UNIT = (totalCount: number) =>
+  i18n.translate('xpack.securitySolution.detectionEngine.alerts.alertsUnit', {
+    values: { totalCount },
+    defaultMessage: `{totalCount, plural, =1 {alert} other {alerts}}`,
+  });
+
 export const OPEN_ALERTS = i18n.translate(
   'xpack.securitySolution.detectionEngine.alerts.openAlertsTitle',
   {
@@ -32,10 +38,10 @@ export const CLOSED_ALERTS = i18n.translate(
   }
 );
 
-export const IN_PROGRESS_ALERTS = i18n.translate(
-  'xpack.securitySolution.detectionEngine.alerts.inProgressAlertsTitle',
+export const ACKNOWLEDGED_ALERTS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.acknowledgedAlertsTitle',
   {
-    defaultMessage: 'In progress',
+    defaultMessage: 'Acknowledged',
   }
 );
 
@@ -123,6 +129,13 @@ export const ALERTS_HEADERS_THRESHOLD_CARDINALITY = i18n.translate(
   }
 );
 
+export const ALERTS_HEADERS_TARGET_IMPORT_HASH = i18n.translate(
+  'xpack.securitySolution.eventsViewer.alerts.overviewTable.targetImportHash',
+  {
+    defaultMessage: 'Import Hash',
+  }
+);
+
 export const ACTION_OPEN_ALERT = i18n.translate(
   'xpack.securitySolution.detectionEngine.alerts.actions.openAlertTitle',
   {
@@ -137,10 +150,10 @@ export const ACTION_CLOSE_ALERT = i18n.translate(
   }
 );
 
-export const ACTION_IN_PROGRESS_ALERT = i18n.translate(
-  'xpack.securitySolution.detectionEngine.alerts.actions.inProgressAlertTitle',
+export const ACTION_ACKNOWLEDGED_ALERT = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.actions.acknowledgedAlertTitle',
   {
-    defaultMessage: 'Mark in progress',
+    defaultMessage: 'Mark as acknowledged',
   }
 );
 
@@ -165,10 +178,10 @@ export const ACTION_ADD_EXCEPTION = i18n.translate(
   }
 );
 
-export const ACTION_ADD_EVENT_EXCEPTION = i18n.translate(
-  'xpack.securitySolution.detectionEngine.alerts.actions.addEventException',
+export const ACTION_ADD_EVENT_FILTER = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.actions.addEventFilter',
   {
-    defaultMessage: 'Add Endpoint event exception',
+    defaultMessage: 'Add Endpoint event filter',
   }
 );
 
@@ -200,13 +213,13 @@ export const OPENED_ALERT_SUCCESS_TOAST = (totalAlerts: number) =>
       'Successfully opened {totalAlerts} {totalAlerts, plural, =1 {alert} other {alerts}}.',
   });
 
-export const IN_PROGRESS_ALERT_SUCCESS_TOAST = (totalAlerts: number) =>
+export const ACKNOWLEDGED_ALERT_SUCCESS_TOAST = (totalAlerts: number) =>
   i18n.translate(
-    'xpack.securitySolution.detectionEngine.alerts.inProgressAlertSuccessToastMessage',
+    'xpack.securitySolution.detectionEngine.alerts.acknowledgedAlertSuccessToastMessage',
     {
       values: { totalAlerts },
       defaultMessage:
-        'Successfully marked {totalAlerts} {totalAlerts, plural, =1 {alert} other {alerts}} as in progress.',
+        'Successfully marked {totalAlerts} {totalAlerts, plural, =1 {alert} other {alerts}} as acknowledged.',
     }
   );
 
@@ -224,10 +237,10 @@ export const OPENED_ALERT_FAILED_TOAST = i18n.translate(
   }
 );
 
-export const IN_PROGRESS_ALERT_FAILED_TOAST = i18n.translate(
-  'xpack.securitySolution.detectionEngine.alerts.inProgressAlertFailedToastMessage',
+export const ACKNOWLEDGED_ALERT_FAILED_TOAST = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.acknowledgedAlertFailedToastMessage',
   {
-    defaultMessage: 'Failed to mark alert(s) as in progress',
+    defaultMessage: 'Failed to mark alert(s) as acknowledged',
   }
 );
 
@@ -245,9 +258,23 @@ export const STATUS = i18n.translate(
   }
 );
 
+export const SIGNAL_STATUS = i18n.translate(
+  'xpack.securitySolution.eventsViewer.alerts.overviewTable.signalStatusTitle',
+  {
+    defaultMessage: 'Status',
+  }
+);
+
 export const TRIGGERED = i18n.translate(
   'xpack.securitySolution.eventsViewer.alerts.defaultHeaders.triggeredTitle',
   {
     defaultMessage: 'Triggered',
+  }
+);
+
+export const TIMESTAMP = i18n.translate(
+  'xpack.securitySolution.eventsViewer.alerts.overviewTable.timestampTitle',
+  {
+    defaultMessage: 'Timestamp',
   }
 );

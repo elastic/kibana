@@ -15,5 +15,6 @@ export * from './find_exception_list_item';
 export * from './find_exception_list_items';
 export * from './get_exception_list';
 export * from './get_exception_list_item';
+export * from './get_exception_list_summary';
 export * from './update_exception_list';
 export * from './update_exception_list_item';

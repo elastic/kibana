@@ -6,9 +6,10 @@
  */
 
 import { isEmpty } from 'lodash/fp';
+import { matchPath } from 'react-router-dom';
 
 import { CoreStart } from '../../../../src/core/public';
-import { APP_ID } from '../common/constants';
+import { ALERTS_PATH, APP_ID, EXCEPTIONS_PATH, RULES_PATH, UEBA_PATH } from '../common/constants';
 import {
   FactoryQueryTypes,
   StrategyResponseType,
@@ -47,61 +48,85 @@ export const parseRoute = (location: Pick<Location, 'hash' | 'pathname' | 'searc
 
 export const manageOldSiemRoutes = async (coreStart: CoreStart) => {
   const { application } = coreStart;
-  const { pageName, path, search } = parseRoute(window.location);
+  const { pageName, path } = parseRoute(window.location);
 
   switch (pageName) {
     case SecurityPageName.overview:
-      application.navigateToApp(`${APP_ID}:${SecurityPageName.overview}`, {
+      application.navigateToApp(APP_ID, {
+        deepLinkId: SecurityPageName.overview,
         replace: true,
         path,
       });
       break;
     case 'ml-hosts':
-      application.navigateToApp(`${APP_ID}:${SecurityPageName.hosts}`, {
+      application.navigateToApp(APP_ID, {
+        deepLinkId: SecurityPageName.hosts,
         replace: true,
         path: `/ml-hosts${path}`,
       });
       break;
     case SecurityPageName.hosts:
-      application.navigateToApp(`${APP_ID}:${SecurityPageName.hosts}`, {
+      application.navigateToApp(APP_ID, {
+        deepLinkId: SecurityPageName.hosts,
         replace: true,
         path,
       });
       break;
     case 'ml-network':
-      application.navigateToApp(`${APP_ID}:${SecurityPageName.network}`, {
+      application.navigateToApp(APP_ID, {
+        deepLinkId: SecurityPageName.network,
         replace: true,
         path: `/ml-network${path}`,
       });
       break;
     case SecurityPageName.network:
-      application.navigateToApp(`${APP_ID}:${SecurityPageName.network}`, {
+      application.navigateToApp(APP_ID, {
+        deepLinkId: SecurityPageName.network,
         replace: true,
         path,
       });
       break;
     case SecurityPageName.timelines:
-      application.navigateToApp(`${APP_ID}:${SecurityPageName.timelines}`, {
+      application.navigateToApp(APP_ID, {
+        deepLinkId: SecurityPageName.timelines,
         replace: true,
         path,
       });
       break;
     case SecurityPageName.case:
-      application.navigateToApp(`${APP_ID}:${SecurityPageName.case}`, {
+      application.navigateToApp(APP_ID, {
+        deepLinkId: SecurityPageName.case,
         replace: true,
         path,
       });
       break;
-    case 'detections':
-      application.navigateToApp(`${APP_ID}:${SecurityPageName.detections}`, {
+    case SecurityPageName.detections:
+    case SecurityPageName.alerts:
+      application.navigateToApp(APP_ID, {
+        deepLinkId: SecurityPageName.alerts,
+        replace: true,
+        path,
+      });
+      break;
+    case SecurityPageName.rules:
+      application.navigateToApp(APP_ID, {
+        deepLinkId: SecurityPageName.rules,
+        replace: true,
+        path,
+      });
+      break;
+    case SecurityPageName.exceptions:
+      application.navigateToApp(APP_ID, {
+        deepLinkId: SecurityPageName.exceptions,
         replace: true,
         path,
       });
       break;
     default:
-      application.navigateToApp(`${APP_ID}:${SecurityPageName.overview}`, {
+      application.navigateToApp(APP_ID, {
+        deepLinkId: SecurityPageName.overview,
         replace: true,
-        path: `${search}`,
+        path,
       });
       break;
   }
@@ -115,3 +140,10 @@ export const getInspectResponse = <T extends FactoryQueryTypes>(
   response:
     response != null ? [JSON.stringify(response.rawResponse, null, 2)] : prevResponse?.response,
 });
+
+export const isDetectionsPath = (pathname: string): boolean => {
+  return !!matchPath(pathname, {
+    path: `(${ALERTS_PATH}|${RULES_PATH}|${UEBA_PATH}|${EXCEPTIONS_PATH})`,
+    strict: false,
+  });
+};

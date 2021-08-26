@@ -11,7 +11,7 @@
   "language": "kuery",
   "license": "Elastic License v2",
   "name": "Attempt to Enable the Root Account",
-  "query": "event.category:process and event.type:(start or process_started) and process.name:dsenableroot and not process.args:\"-d\"",
+  "query": "event.category:process and event.type:(start or process_started) and\n process.name:dsenableroot and not process.args:\"-d\"\n",
   "references": [
     "https://ss64.com/osx/dsenableroot.html"
   ],

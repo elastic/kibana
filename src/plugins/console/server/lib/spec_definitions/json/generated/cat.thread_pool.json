@@ -2,13 +2,14 @@
   "cat.thread_pool": {
     "url_params": {
       "format": "",
-      "size": [
-        "",
-        "k",
+      "time": [
+        "d",
+        "h",
         "m",
-        "g",
-        "t",
-        "p"
+        "s",
+        "ms",
+        "micros",
+        "nanos"
       ],
       "local": "__flag__",
       "master_timeout": "",

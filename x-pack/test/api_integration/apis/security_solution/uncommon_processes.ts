@@ -29,8 +29,12 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
   describe('uncommon_processes', () => {
-    before(() => esArchiver.load('auditbeat/uncommon_processes'));
-    after(() => esArchiver.unload('auditbeat/uncommon_processes'));
+    before(() =>
+      esArchiver.load('x-pack/test/functional/es_archives/auditbeat/uncommon_processes')
+    );
+    after(() =>
+      esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/uncommon_processes')
+    );
 
     it('should return an edge of length 1 when given a pagination of length 1', async () => {
       await retry.try(async () => {

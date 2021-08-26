@@ -19,12 +19,12 @@ export function MachineLearningDataVisualizerIndexBasedProvider({
 
   return {
     async assertTimeRangeSelectorSectionExists() {
-      await testSubjects.existOrFail('mlDataVisualizerTimeRangeSelectorSection');
+      await testSubjects.existOrFail('dataVisualizerTimeRangeSelectorSection');
     },
 
     async assertTotalDocumentCount(expectedFormattedTotalDocCount: string) {
       await retry.tryForTime(5000, async () => {
-        const docCount = await testSubjects.getVisibleText('mlDataVisualizerTotalDocCount');
+        const docCount = await testSubjects.getVisibleText('dataVisualizerTotalDocCount');
         expect(docCount).to.eql(
           expectedFormattedTotalDocCount,
           `Expected total document count to be '${expectedFormattedTotalDocCount}' (got '${docCount}')`
@@ -33,40 +33,40 @@ export function MachineLearningDataVisualizerIndexBasedProvider({
     },
 
     async clickUseFullDataButton(expectedFormattedTotalDocCount: string) {
-      await testSubjects.clickWhenNotDisabled('mlButtonUseFullData');
+      await testSubjects.clickWhenNotDisabled('dataVisualizerButtonUseFullData');
       await this.assertTotalDocumentCount(expectedFormattedTotalDocCount);
     },
 
     async assertTotalDocCountHeaderExist() {
       await retry.tryForTime(5000, async () => {
-        await testSubjects.existOrFail(`mlDataVisualizerTotalDocCountHeader`);
+        await testSubjects.existOrFail(`dataVisualizerTotalDocCountHeader`);
       });
     },
 
     async assertTotalDocCountChartExist() {
       await retry.tryForTime(5000, async () => {
-        await testSubjects.existOrFail(`mlFieldDataDocumentCountChart`);
+        await testSubjects.existOrFail(`dataVisualizerDocumentCountChart`);
       });
     },
 
     async assertFieldCountPanelExist() {
       await retry.tryForTime(5000, async () => {
-        await testSubjects.existOrFail(`mlDataVisualizerFieldCountPanel`);
+        await testSubjects.existOrFail(`dataVisualizerFieldCountPanel`);
       });
     },
 
     async assertMetricFieldsSummaryExist() {
       await retry.tryForTime(5000, async () => {
-        await testSubjects.existOrFail(`mlDataVisualizerMetricFieldsSummary`);
+        await testSubjects.existOrFail(`dataVisualizerMetricFieldsSummary`);
       });
     },
 
     async assertVisibleMetricFieldsCount(count: number) {
       const expectedCount = count.toString();
       await retry.tryForTime(5000, async () => {
-        await testSubjects.existOrFail('mlDataVisualizerVisibleMetricFieldsCount');
+        await testSubjects.existOrFail('dataVisualizerVisibleMetricFieldsCount');
         const actualCount = await testSubjects.getVisibleText(
-          'mlDataVisualizerVisibleMetricFieldsCount'
+          'dataVisualizerVisibleMetricFieldsCount'
         );
         expect(expectedCount).to.eql(
           expectedCount,
@@ -78,9 +78,9 @@ export function MachineLearningDataVisualizerIndexBasedProvider({
     async assertTotalMetricFieldsCount(count: number) {
       const expectedCount = count.toString();
       await retry.tryForTime(5000, async () => {
-        await testSubjects.existOrFail('mlDataVisualizerMetricFieldsCount');
+        await testSubjects.existOrFail('dataVisualizerMetricFieldsCount');
         const actualCount = await testSubjects.getVisibleText(
-          'mlDataVisualizerVisibleMetricFieldsCount'
+          'dataVisualizerVisibleMetricFieldsCount'
         );
         expect(expectedCount).to.contain(
           expectedCount,
@@ -92,8 +92,8 @@ export function MachineLearningDataVisualizerIndexBasedProvider({
     async assertVisibleFieldsCount(count: number) {
       const expectedCount = count.toString();
       await retry.tryForTime(5000, async () => {
-        await testSubjects.existOrFail('mlDataVisualizerVisibleFieldsCount');
-        const actualCount = await testSubjects.getVisibleText('mlDataVisualizerVisibleFieldsCount');
+        await testSubjects.existOrFail('dataVisualizerVisibleFieldsCount');
+        const actualCount = await testSubjects.getVisibleText('dataVisualizerVisibleFieldsCount');
         expect(expectedCount).to.eql(
           expectedCount,
           `Expected fields count to be '${expectedCount}' (got '${actualCount}')`
@@ -104,8 +104,8 @@ export function MachineLearningDataVisualizerIndexBasedProvider({
     async assertTotalFieldsCount(count: number) {
       const expectedCount = count.toString();
       await retry.tryForTime(5000, async () => {
-        await testSubjects.existOrFail('mlDataVisualizerTotalFieldsCount');
-        const actualCount = await testSubjects.getVisibleText('mlDataVisualizerTotalFieldsCount');
+        await testSubjects.existOrFail('dataVisualizerTotalFieldsCount');
+        const actualCount = await testSubjects.getVisibleText('dataVisualizerTotalFieldsCount');
         expect(expectedCount).to.contain(
           expectedCount,
           `Expected total fields count to be '${expectedCount}' (got '${actualCount}')`
@@ -115,30 +115,30 @@ export function MachineLearningDataVisualizerIndexBasedProvider({
 
     async assertFieldsSummaryExist() {
       await retry.tryForTime(5000, async () => {
-        await testSubjects.existOrFail(`mlDataVisualizerFieldsSummary`);
+        await testSubjects.existOrFail(`dataVisualizerFieldsSummary`);
       });
     },
 
     async assertDataVisualizerTableExist() {
       await retry.tryForTime(5000, async () => {
-        await testSubjects.existOrFail(`mlDataVisualizerTable`);
+        await testSubjects.existOrFail(`dataVisualizerTable`);
       });
     },
 
     async assertActionsPanelExists() {
-      await testSubjects.existOrFail('mlDataVisualizerActionsPanel');
+      await testSubjects.existOrFail('dataVisualizerActionsPanel');
     },
 
     async assertActionsPanelNotExists() {
-      await testSubjects.missingOrFail('mlDataVisualizerActionsPanel');
+      await testSubjects.missingOrFail('dataVisualizerActionsPanel');
     },
 
     async assertCreateAdvancedJobCardExists() {
-      await testSubjects.existOrFail('mlDataVisualizerCreateAdvancedJobCard');
+      await testSubjects.existOrFail('dataVisualizerCreateAdvancedJobCard');
     },
 
     async assertCreateAdvancedJobCardNotExists() {
-      await testSubjects.missingOrFail('mlDataVisualizerCreateAdvancedJobCard');
+      await testSubjects.missingOrFail('dataVisualizerCreateAdvancedJobCard');
     },
 
     async assertRecognizerCardExists(moduleId: string) {
@@ -150,15 +150,15 @@ export function MachineLearningDataVisualizerIndexBasedProvider({
     },
 
     async clickCreateAdvancedJobButton() {
-      await testSubjects.clickWhenNotDisabled('mlDataVisualizerCreateAdvancedJobCard');
+      await testSubjects.clickWhenNotDisabled('dataVisualizerCreateAdvancedJobCard');
     },
 
     async assertCreateDataFrameAnalyticsCardExists() {
-      await testSubjects.existOrFail('mlDataVisualizerCreateDataFrameAnalyticsCard');
+      await testSubjects.existOrFail('dataVisualizerCreateDataFrameAnalyticsCard');
     },
 
     async assertCreateDataFrameAnalyticsCardNotExists() {
-      await testSubjects.missingOrFail('mlDataVisualizerCreateDataFrameAnalyticsCard');
+      await testSubjects.missingOrFail('dataVisualizerCreateDataFrameAnalyticsCard');
     },
 
     async assertViewInDiscoverCard(shouldExist: boolean) {
@@ -170,16 +170,16 @@ export function MachineLearningDataVisualizerIndexBasedProvider({
     },
 
     async assertViewInDiscoverCardExists() {
-      await testSubjects.existOrFail('mlDataVisualizerViewInDiscoverCard');
+      await testSubjects.existOrFail('dataVisualizerViewInDiscoverCard');
     },
 
     async assertViewInDiscoverCardNotExists() {
-      await testSubjects.missingOrFail('mlDataVisualizerViewInDiscoverCard');
+      await testSubjects.missingOrFail('dataVisualizerViewInDiscoverCard');
     },
 
     async clickViewInDiscoverButton() {
       await retry.tryForTime(5000, async () => {
-        await testSubjects.clickWhenNotDisabled('mlDataVisualizerViewInDiscoverCard');
+        await testSubjects.clickWhenNotDisabled('dataVisualizerViewInDiscoverCard');
         await PageObjects.discover.waitForDiscoverAppOnScreen();
       });
     },

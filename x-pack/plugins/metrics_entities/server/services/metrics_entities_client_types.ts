@@ -21,7 +21,7 @@ export interface PostTransformsOptions {
   autoStart: boolean;
   frequency: string;
   indices: string[];
-  docsPerSecond: number | null;
+  docsPerSecond: number | undefined;
   maxPageSearchSize: number;
   prefix: string;
   query: object;

@@ -23,6 +23,7 @@ describe('Sourcerer selectors', () => {
         'filebeat-*',
         'logs-*',
         'packetbeat-*',
+        'traces-apm*',
         'winlogbeat-*',
         '-*elastic-cloud-logs-*',
       ]);
@@ -42,6 +43,7 @@ describe('Sourcerer selectors', () => {
         'endgame-*',
         'filebeat-*',
         'packetbeat-*',
+        'traces-apm*',
         'winlogbeat-*',
       ]);
     });
@@ -64,6 +66,7 @@ describe('Sourcerer selectors', () => {
         'filebeat-*',
         'logs-endpoint.event-*',
         'packetbeat-*',
+        'traces-apm*',
         'winlogbeat-*',
       ]);
     });

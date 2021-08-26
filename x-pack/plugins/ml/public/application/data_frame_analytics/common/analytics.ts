@@ -65,6 +65,12 @@ export interface LoadExploreDataArg {
   searchQuery: SavedSearchQuery;
 }
 
+export interface ClassificationMetricItem {
+  className: string;
+  accuracy?: number;
+  recall?: number;
+}
+
 export const SEARCH_SIZE = 1000;
 
 export const TRAINING_PERCENT_MIN = 1;
@@ -102,7 +108,7 @@ export enum INDEX_STATUS {
 
 export interface FieldSelectionItem {
   name: string;
-  mappings_types: string[];
+  mappings_types?: string[];
   is_included: boolean;
   is_required: boolean;
   feature_type?: string;

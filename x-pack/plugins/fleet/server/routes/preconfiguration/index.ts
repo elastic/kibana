@@ -15,7 +15,7 @@ import { PutPreconfigurationSchema } from '../../types';
 import { defaultIngestErrorHandler } from '../../errors';
 import { ensurePreconfiguredPackagesAndPolicies, outputService } from '../../services';
 
-export const putPreconfigurationHandler: RequestHandler<
+export const updatePreconfigurationHandler: RequestHandler<
   undefined,
   undefined,
   TypeOf<typeof PutPreconfigurationSchema.body>
@@ -43,10 +43,10 @@ export const putPreconfigurationHandler: RequestHandler<
 export const registerRoutes = (router: IRouter) => {
   router.put(
     {
-      path: PRECONFIGURATION_API_ROUTES.PUT_PRECONFIG,
+      path: PRECONFIGURATION_API_ROUTES.UPDATE_PATTERN,
       validate: PutPreconfigurationSchema,
       options: { tags: [`access:${PLUGIN_ID}-all`] },
     },
-    putPreconfigurationHandler
+    updatePreconfigurationHandler
   );
 };

@@ -5,6 +5,21 @@
  * 2.0.
  */
 
+import type {
+  EntryMatchAny,
+  ExceptionListItemSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
+import {
+  buildExceptionFilter,
+  buildExceptionItemFilter,
+  buildExclusionClause,
+  buildExistsClause,
+  buildMatchAnyClause,
+  buildMatchClause,
+  buildNestedClause,
+  createOrClauses,
+} from '@kbn/securitysolution-list-utils';
+
 import { getEntryMatchExcludeMock, getEntryMatchMock } from '../schemas/types/entry_match.mock';
 import {
   getEntryMatchAnyExcludeMock,
@@ -16,38 +31,15 @@ import {
   getEntryNestedMixedEntries,
   getEntryNestedMock,
 } from '../schemas/types/entry_nested.mock';
-import {
-  getExceptionListItemSchemaMock,
-  getExceptionListItemSchemaXMock,
-} from '../schemas/response/exception_list_item_schema.mock';
-import { EntryMatchAny, ExceptionListItemSchema } from '../schemas';
+import { getExceptionListItemSchemaMock } from '../schemas/response/exception_list_item_schema.mock';
 
-import {
-  ExceptionItemSansLargeValueLists,
-  buildExceptionFilter,
-  buildExceptionItemFilter,
-  buildExclusionClause,
-  buildExistsClause,
-  buildMatchAnyClause,
-  buildMatchClause,
-  buildNestedClause,
-  chunkExceptions,
-  createOrClauses,
-} from './build_exceptions_filter';
-import { hasLargeValueList } from './utils';
+// TODO: Port the test over to packages/kbn-securitysolution-list-utils/src/build_exception_filter/index.test.ts once the mocks are ported to kbn
 
 const modifiedGetEntryMatchAnyMock = (): EntryMatchAny => ({
   ...getEntryMatchAnyMock(),
   operator: 'included',
   value: ['some "host" name', 'some other host name'],
 });
-
-const getExceptionListItemsWoValueLists = (num: number): ExceptionItemSansLargeValueLists[] => {
-  const items = getExceptionListItemSchemaXMock(num);
-  return items.filter(
-    ({ entries }) => !hasLargeValueList(entries)
-  ) as ExceptionItemSansLargeValueLists[];
-};
 
 describe('build_exceptions_filter', () => {
   describe('buildExceptionFilter', () => {
@@ -431,55 +423,6 @@ describe('build_exceptions_filter', () => {
     });
   });
 
-  describe('chunkExceptions', () => {
-    test('it should NOT split a single should clause as there is nothing to split on with chunkSize 1', () => {
-      const exceptions = getExceptionListItemsWoValueLists(1);
-      const chunks = chunkExceptions(exceptions, 1);
-      expect(chunks).toHaveLength(1);
-    });
-
-    test('it should NOT split a single should clause as there is nothing to split on with chunkSize 2', () => {
-      const exceptions = getExceptionListItemsWoValueLists(1) as ExceptionItemSansLargeValueLists[];
-      const chunks = chunkExceptions(exceptions, 2);
-      expect(chunks).toHaveLength(1);
-    });
-
-    test('it should return an empty array if no exception items passed in', () => {
-      const chunks = chunkExceptions([], 2);
-      expect(chunks).toEqual([]);
-    });
-
-    test('it should split an array of size 2 into a length 2 array with chunks on "chunkSize: 1"', () => {
-      const exceptions = getExceptionListItemsWoValueLists(2);
-      const chunks = chunkExceptions(exceptions, 1);
-      expect(chunks).toHaveLength(2);
-    });
-
-    test('it should split an array of size 2 into a length 4 array with chunks on "chunkSize: 1"', () => {
-      const exceptions = getExceptionListItemsWoValueLists(4);
-      const chunks = chunkExceptions(exceptions, 1);
-      expect(chunks).toHaveLength(4);
-    });
-
-    test('it should split an array of size 4 into a length 2 array with chunks on "chunkSize: 2"', () => {
-      const exceptions = getExceptionListItemsWoValueLists(4);
-      const chunks = chunkExceptions(exceptions, 2);
-      expect(chunks).toHaveLength(2);
-    });
-
-    test('it should NOT split an array of size 4 into any groups on "chunkSize: 5"', () => {
-      const exceptions = getExceptionListItemsWoValueLists(4);
-      const chunks = chunkExceptions(exceptions, 5);
-      expect(chunks).toHaveLength(1);
-    });
-
-    test('it should split an array of size 4 into 2 groups on "chunkSize: 3"', () => {
-      const exceptions = getExceptionListItemsWoValueLists(4);
-      const chunks = chunkExceptions(exceptions, 3);
-      expect(chunks).toHaveLength(2);
-    });
-  });
-
   describe('createOrClauses', () => {
     test('it should create filter with one item if only one exception item exists', () => {
       const booleanFilter = createOrClauses([
@@ -668,114 +611,115 @@ describe('build_exceptions_filter', () => {
           getEntryExistsExcludedMock(),
         ],
       });
-
-      expect(exceptionItemFilter).toEqual({
-        bool: {
-          filter: [
-            {
-              nested: {
-                path: 'parent.field',
-                query: {
-                  bool: {
-                    filter: [
-                      {
-                        bool: {
-                          minimum_should_match: 1,
-                          should: [
-                            {
-                              match_phrase: {
-                                'parent.field.host.name': 'some host name',
+      expect(exceptionItemFilter).toEqual([
+        {
+          bool: {
+            filter: [
+              {
+                nested: {
+                  path: 'parent.field',
+                  query: {
+                    bool: {
+                      filter: [
+                        {
+                          bool: {
+                            minimum_should_match: 1,
+                            should: [
+                              {
+                                match_phrase: {
+                                  'parent.field.host.name': 'some host name',
+                                },
                               },
-                            },
-                          ],
+                            ],
+                          },
                         },
-                      },
-                      {
-                        bool: {
-                          must_not: {
-                            bool: {
-                              minimum_should_match: 1,
-                              should: [
-                                {
-                                  bool: {
-                                    minimum_should_match: 1,
-                                    should: [
-                                      {
-                                        match_phrase: {
-                                          'parent.field.host.name': 'some host name',
+                        {
+                          bool: {
+                            must_not: {
+                              bool: {
+                                minimum_should_match: 1,
+                                should: [
+                                  {
+                                    bool: {
+                                      minimum_should_match: 1,
+                                      should: [
+                                        {
+                                          match_phrase: {
+                                            'parent.field.host.name': 'some host name',
+                                          },
                                         },
-                                      },
-                                    ],
+                                      ],
+                                    },
                                   },
-                                },
-                                {
-                                  bool: {
-                                    minimum_should_match: 1,
-                                    should: [
-                                      {
-                                        match_phrase: {
-                                          'parent.field.host.name': 'some other host name',
+                                  {
+                                    bool: {
+                                      minimum_should_match: 1,
+                                      should: [
+                                        {
+                                          match_phrase: {
+                                            'parent.field.host.name': 'some other host name',
+                                          },
                                         },
-                                      },
-                                    ],
+                                      ],
+                                    },
                                   },
-                                },
-                              ],
+                                ],
+                              },
                             },
                           },
                         },
-                      },
-                      {
-                        bool: {
-                          minimum_should_match: 1,
-                          should: [{ exists: { field: 'parent.field.host.name' } }],
+                        {
+                          bool: {
+                            minimum_should_match: 1,
+                            should: [{ exists: { field: 'parent.field.host.name' } }],
+                          },
                         },
+                      ],
+                    },
+                  },
+                  score_mode: 'none',
+                },
+              },
+              {
+                bool: {
+                  minimum_should_match: 1,
+                  should: [
+                    {
+                      bool: {
+                        minimum_should_match: 1,
+                        should: [{ match_phrase: { 'host.name': 'some "host" name' } }],
                       },
-                    ],
-                  },
+                    },
+                    {
+                      bool: {
+                        minimum_should_match: 1,
+                        should: [{ match_phrase: { 'host.name': 'some other host name' } }],
+                      },
+                    },
+                  ],
                 },
-                score_mode: 'none',
               },
-            },
-            {
-              bool: {
-                minimum_should_match: 1,
-                should: [
-                  {
+              {
+                bool: {
+                  must_not: {
                     bool: {
                       minimum_should_match: 1,
-                      should: [{ match_phrase: { 'host.name': 'some "host" name' } }],
+                      should: [{ match_phrase: { 'host.name': 'some host name' } }],
                     },
-                  },
-                  {
-                    bool: {
-                      minimum_should_match: 1,
-                      should: [{ match_phrase: { 'host.name': 'some other host name' } }],
-                    },
-                  },
-                ],
-              },
-            },
-            {
-              bool: {
-                must_not: {
-                  bool: {
-                    minimum_should_match: 1,
-                    should: [{ match_phrase: { 'host.name': 'some host name' } }],
                   },
                 },
               },
-            },
-            {
-              bool: {
-                must_not: {
-                  bool: { minimum_should_match: 1, should: [{ exists: { field: 'host.name' } }] },
+              {
+                bool: {
+                  must_not: {
+                    bool: { minimum_should_match: 1, should: [{ exists: { field: 'host.name' } }] },
+                  },
                 },
               },
-            },
-          ],
+            ],
+          },
         },
-      });
+      ]);
     });
   });
 

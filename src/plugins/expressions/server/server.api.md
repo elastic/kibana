@@ -8,11 +8,13 @@ import { CoreSetup } from 'src/core/server';
 import { CoreStart } from 'src/core/server';
 import { Ensure } from '@kbn/utility-types';
 import { EventEmitter } from 'events';
+import { KibanaExecutionContext } from 'src/core/public';
 import { KibanaRequest } from 'src/core/server';
 import { Observable } from 'rxjs';
 import { ObservableLike } from '@kbn/utility-types';
 import { Plugin as Plugin_2 } from 'src/core/server';
 import { PluginInitializerContext } from 'src/core/server';
+import { SerializableRecord } from '@kbn/utility-types';
 import { UnwrapObservable } from '@kbn/utility-types';
 import { UnwrapPromiseOrReturn } from '@kbn/utility-types';
 
@@ -47,7 +49,7 @@ export function buildExpression(initialState?: ExpressionAstFunctionBuilder[] | 
 // @public
 export function buildExpressionFunction<FnDef extends AnyExpressionFunctionDefinition = AnyExpressionFunctionDefinition>(fnName: InferFunctionDefinition<FnDef>['name'],
 initialArgs: {
-    [K in keyof FunctionArgs<FnDef>]: FunctionArgs<FnDef>[K] | ExpressionAstExpressionBuilder | ExpressionAstExpressionBuilder[];
+    [K in keyof FunctionArgs<FnDef>]: FunctionArgs<FnDef>[K] | ExpressionAstExpressionBuilder | ExpressionAstExpressionBuilder[] | ExpressionAstExpression | ExpressionAstExpression[];
 }): ExpressionAstFunctionBuilder<FnDef>;
 
 // Warning: (ae-missing-release-tag) "Datatable" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
@@ -110,16 +112,17 @@ export class Execution<Input = unknown, Output = unknown, InspectorAdapters exte
     // (undocumented)
     get inspectorAdapters(): InspectorAdapters;
     // (undocumented)
-    interpret<T>(ast: ExpressionAstNode, input: T): Observable<unknown>;
+    interpret<T>(ast: ExpressionAstNode, input: T): Observable<ExecutionResult<unknown>>;
     // (undocumented)
     invokeChain(chainArr: ExpressionAstFunction[], input: unknown): Observable<any>;
     // (undocumented)
     invokeFunction(fn: ExpressionFunction, input: unknown, args: Record<string, unknown>): Observable<any>;
     // (undocumented)
     resolveArgs(fnDef: ExpressionFunction, input: unknown, argAsts: any): Observable<any>;
-    readonly result: Observable<Output | ExpressionValueError>;
-    start(input?: Input): Observable<Output | ExpressionValueError>;
-    readonly state: ExecutionContainer<Output | ExpressionValueError>;
+    readonly result: Observable<ExecutionResult<Output | ExpressionValueError>>;
+    start(input?: Input, isSubExpression?: boolean): Observable<ExecutionResult<Output | ExpressionValueError>>;
+    // Warning: (ae-forgotten-export) The symbol "ExecutionResult" needs to be exported by the entry point index.d.ts
+    readonly state: ExecutionContainer<ExecutionResult<Output | ExpressionValueError>>;
 }
 
 // Warning: (ae-forgotten-export) The symbol "StateContainer" needs to be exported by the entry point index.d.ts
@@ -129,12 +132,12 @@ export class Execution<Input = unknown, Output = unknown, InspectorAdapters exte
 // @public (undocumented)
 export type ExecutionContainer<Output = ExpressionValue> = StateContainer<ExecutionState<Output>, ExecutionPureTransitions<Output>>;
 
-// Warning: (ae-forgotten-export) The symbol "SerializableState" needs to be exported by the entry point index.d.ts
 // Warning: (ae-missing-release-tag) "ExecutionContext" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public
-export interface ExecutionContext<InspectorAdapters extends Adapters = Adapters, ExecutionContextSearch extends SerializableState_2 = SerializableState_2> {
+export interface ExecutionContext<InspectorAdapters extends Adapters = Adapters, ExecutionContextSearch extends SerializableRecord = SerializableRecord> {
     abortSignal: AbortSignal;
+    getExecutionContext: () => KibanaExecutionContext | undefined;
     getKibanaRequest?: () => KibanaRequest;
     getSearchContext: () => ExecutionContextSearch;
     getSearchSessionId: () => string | undefined;
@@ -192,6 +195,10 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
     fork(): Executor<Context>;
     // @deprecated (undocumented)
     readonly functions: FunctionsRegistry;
+    // Warning: (ae-forgotten-export) The symbol "MigrateFunctionsObject" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    getAllMigrations(): MigrateFunctionsObject;
     // (undocumented)
     getFunction(name: string): ExpressionFunction | undefined;
     // (undocumented)
@@ -204,15 +211,15 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
     //
     // (undocumented)
     inject(ast: ExpressionAstExpression, references: SavedObjectReference[]): ExpressionAstExpression;
-    // Warning: (ae-forgotten-export) The symbol "SerializableState" needs to be exported by the entry point index.d.ts
+    // Warning: (ae-forgotten-export) The symbol "VersionedState" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
-    migrate(ast: SerializableState, version: string): ExpressionAstExpression;
+    migrateToLatest(state: VersionedState): ExpressionAstExpression;
     // (undocumented)
     registerFunction(functionDefinition: AnyExpressionFunctionDefinition | (() => AnyExpressionFunctionDefinition)): void;
     // (undocumented)
     registerType(typeDefinition: AnyExpressionTypeDefinition | (() => AnyExpressionTypeDefinition)): void;
-    run<Input, Output>(ast: string | ExpressionAstExpression, input: Input, params?: ExpressionExecutionParams): Observable<Output | ExpressionValueError>;
+    run<Input, Output>(ast: string | ExpressionAstExpression, input: Input, params?: ExpressionExecutionParams): Observable<ExecutionResult<Output | ExpressionValueError>>;
     // (undocumented)
     readonly state: ExecutorContainer<Context>;
     // (undocumented)
@@ -321,7 +328,7 @@ export class ExpressionFunction implements PersistableState<ExpressionAstFunctio
     inputTypes: string[] | undefined;
     // (undocumented)
     migrations: {
-        [key: string]: (state: SerializableState) => SerializableState;
+        [key: string]: (state: SerializableRecord) => SerializableRecord;
     };
     name: string;
     // (undocumented)
@@ -347,7 +354,7 @@ export interface ExpressionFunctionDefinition<Name extends string, Input, Argume
     help: string;
     inputTypes?: Array<TypeToString<Input>>;
     name: Name;
-    type?: TypeToString<UnwrapPromiseOrReturn<Output>>;
+    type?: TypeString<Output> | UnmappedTypeStrings;
 }
 
 // @public
@@ -372,6 +379,10 @@ export interface ExpressionFunctionDefinitions {
     //
     // (undocumented)
     moving_average: ExpressionFunctionMovingAverage;
+    // Warning: (ae-forgotten-export) The symbol "ExpressionFunctionOverallMetric" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    overall_metric: ExpressionFunctionOverallMetric;
     // Warning: (ae-forgotten-export) The symbol "ExpressionFunctionTheme" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
@@ -593,7 +604,7 @@ export type ExpressionValueConverter<I extends ExpressionValue, O extends Expres
 // @public (undocumented)
 export type ExpressionValueError = ExpressionValueBoxed<'error', {
     error: ErrorLike;
-    info?: SerializableState;
+    info?: SerializableRecord;
 }>;
 
 // Warning: (ae-missing-release-tag) "ExpressionValueFilter" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)

@@ -7,34 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const SERVICENOW_ITSM_DESC = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.serviceNowITSM.selectMessageText',
-  {
-    defaultMessage: 'Create an incident in ServiceNow ITSM.',
-  }
-);
-
-export const SERVICENOW_SIR_DESC = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.serviceNowSIR.selectMessageText',
-  {
-    defaultMessage: 'Create an incident in ServiceNow SecOps.',
-  }
-);
-
-export const SERVICENOW_ITSM_TITLE = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.serviceNowITSM.actionTypeTitle',
-  {
-    defaultMessage: 'ServiceNow ITSM',
-  }
-);
-
-export const SERVICENOW_SIR_TITLE = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.serviceNowSIR.actionTypeTitle',
-  {
-    defaultMessage: 'ServiceNow SecOps',
-  }
-);
-
 export const API_URL_LABEL = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.apiUrlTextFieldLabel',
   {

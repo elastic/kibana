@@ -15,7 +15,7 @@ import { RouteDependencies } from '../../../types';
 export const registerUnfollowRoute = ({
   router,
   license,
-  lib: { isEsError, formatEsError },
+  lib: { handleEsError },
 }: RouteDependencies) => {
   const paramsSchema = schema.object({ id: schema.string() });
 
@@ -27,6 +27,7 @@ export const registerUnfollowRoute = ({
       },
     },
     license.guardApiRoute(async (context, request, response) => {
+      const { client } = context.core.elasticsearch;
       const { id } = request.params;
       const ids = id.split(',');
 
@@ -34,52 +35,34 @@ export const registerUnfollowRoute = ({
       const itemsNotOpen: string[] = [];
       const errors: Array<{ id: string; error: any }> = [];
 
-      const formatError = (err: any) => {
-        if (isEsError(err)) {
-          return response.customError(formatEsError(err));
-        }
-        // Case: default
-        return response.customError({ statusCode: 500, body: err });
-      };
-
       await Promise.all(
         ids.map(async (_id: string) => {
           try {
             // Try to pause follower, let it fail silently since it may already be paused
             try {
-              await context.crossClusterReplication!.client.callAsCurrentUser(
-                'ccr.pauseFollowerIndex',
-                { id: _id }
-              );
+              await client.asCurrentUser.ccr.pauseFollow({ index: _id });
             } catch (e) {
               // Swallow errors
             }
 
             // Close index
-            await context.crossClusterReplication!.client.callAsCurrentUser('indices.close', {
-              index: _id,
-            });
+            await client.asCurrentUser.indices.close({ index: _id });
 
             // Unfollow leader
-            await context.crossClusterReplication!.client.callAsCurrentUser(
-              'ccr.unfollowLeaderIndex',
-              { id: _id }
-            );
+            await client.asCurrentUser.ccr.unfollow({ index: _id });
 
             // Try to re-open the index, store failures in a separate array to surface warnings in the UI
             // This will allow users to query their index normally after unfollowing
             try {
-              await context.crossClusterReplication!.client.callAsCurrentUser('indices.open', {
-                index: _id,
-              });
+              await client.asCurrentUser.indices.open({ index: _id });
             } catch (e) {
               itemsNotOpen.push(_id);
             }
 
             // Push success
             itemsUnfollowed.push(_id);
-          } catch (err) {
-            errors.push({ id: _id, error: formatError(err) });
+          } catch (error) {
+            errors.push({ id: _id, error: handleEsError({ error, response }) });
           }
         })
       );

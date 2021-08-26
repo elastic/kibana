@@ -27,6 +27,7 @@ exports[`UptimeDatePicker component renders properly with mock data 1`] = `
             >
               <span
                 class="euiButtonContent__icon"
+                color="inherit"
                 data-euiicon-type="arrowDown"
               />
               <span
@@ -77,6 +78,7 @@ exports[`UptimeDatePicker component renders properly with mock data 1`] = `
         >
           <span
             class="euiButtonContent__icon"
+            color="inherit"
             data-euiicon-type="refresh"
           />
           <span

@@ -22,6 +22,8 @@ import type {
   Logger,
 } from '../../../core/server';
 import type { UsageCollectionSetup } from '../../usage_collection/server';
+import type { EmbeddableSetup } from '../../embeddable/server';
+import { visualizeEmbeddableFactory } from './embeddable/visualize_embeddable_factory';
 
 export class VisualizationsPlugin
   implements Plugin<VisualizationsPluginSetup, VisualizationsPluginStart> {
@@ -31,7 +33,10 @@ export class VisualizationsPlugin
     this.logger = initializerContext.logger.get();
   }
 
-  public setup(core: CoreSetup, plugins: { usageCollection?: UsageCollectionSetup }) {
+  public setup(
+    core: CoreSetup,
+    plugins: { usageCollection?: UsageCollectionSetup; embeddable: EmbeddableSetup }
+  ) {
     this.logger.debug('visualizations: Setup');
 
     core.savedObjects.registerType(visualizationSavedObjectType);
@@ -54,6 +59,8 @@ export class VisualizationsPlugin
     if (plugins.usageCollection) {
       registerVisualizationsCollector(plugins.usageCollection);
     }
+
+    plugins.embeddable.registerEmbeddableFactory(visualizeEmbeddableFactory());
 
     return {};
   }

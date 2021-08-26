@@ -38,7 +38,10 @@ import { ActionsConfig, getValidatedConfig } from './config';
 import { resolveCustomHosts } from './lib/custom_host_settings';
 import { ActionsClient } from './actions_client';
 import { ActionTypeRegistry } from './action_type_registry';
-import { createExecutionEnqueuerFunction } from './create_execute_function';
+import {
+  createExecutionEnqueuerFunction,
+  createEphemeralExecutionEnqueuerFunction,
+} from './create_execute_function';
 import { registerBuiltInActionTypes } from './builtin_action_types';
 import { registerActionsUsageCollector } from './usage';
 import {
@@ -64,11 +67,11 @@ import { defineRoutes } from './routes';
 import { IEventLogger, IEventLogService } from '../../event_log/server';
 import { initializeActionsTelemetry, scheduleActionsTelemetry } from './usage/task';
 import {
-  setupSavedObjects,
   ACTION_SAVED_OBJECT_TYPE,
   ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
   ALERT_SAVED_OBJECT_TYPE,
-} from './saved_objects';
+} from './constants/saved_objects';
+import { setupSavedObjects } from './saved_objects';
 import { ACTIONS_FEATURE } from './feature';
 import { ActionsAuthorization } from './authorization/actions_authorization';
 import { ActionsAuthorizationAuditLogger } from './authorization/audit_logger';
@@ -82,12 +85,7 @@ import { renderMustacheObject } from './lib/mustache_renderer';
 import { getAlertHistoryEsIndex } from './preconfigured_connectors/alert_history_es_index/alert_history_es_index';
 import { createAlertHistoryIndexTemplate } from './preconfigured_connectors/alert_history_es_index/create_alert_history_index_template';
 import { AlertHistoryEsIndexConnectorId } from '../common';
-
-const EVENT_LOG_PROVIDER = 'actions';
-export const EVENT_LOG_ACTIONS = {
-  execute: 'execute',
-  executeViaHttp: 'execute-via-http',
-};
+import { EVENT_LOG_ACTIONS, EVENT_LOG_PROVIDER } from './constants/event_log';
 
 export interface PluginSetupContract {
   registerType<
@@ -157,7 +155,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
   private readonly kibanaIndexConfig: { kibana: { index: string } };
 
   constructor(initContext: PluginInitializerContext) {
-    this.logger = initContext.logger.get('actions');
+    this.logger = initContext.logger.get();
     this.actionsConfig = getValidatedConfig(
       this.logger,
       resolveCustomHosts(this.logger, initContext.config.get<ActionsConfig>())
@@ -181,7 +179,6 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
     }
 
     plugins.features.registerKibanaFeature(ACTIONS_FEATURE);
-    setupSavedObjects(core.savedObjects, plugins.encryptedSavedObjects);
 
     this.eventLogService = plugins.eventLog;
     plugins.eventLog.registerProviderActions(EVENT_LOG_PROVIDER, Object.values(EVENT_LOG_ACTIONS));
@@ -227,6 +224,14 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
     this.actionTypeRegistry = actionTypeRegistry;
     this.actionExecutor = actionExecutor;
     this.security = plugins.security;
+
+    setupSavedObjects(
+      core.savedObjects,
+      plugins.encryptedSavedObjects,
+      this.actionTypeRegistry!,
+      plugins.taskManager.index,
+      this.preconfiguredActions
+    );
 
     registerBuiltInActionTypes({
       logger: this.logger,
@@ -336,6 +341,12 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
           await getAuthorizationModeBySource(unsecuredSavedObjectsClient, authorizationContext)
         ),
         actionExecutor: actionExecutor!,
+        ephemeralExecutionEnqueuer: createEphemeralExecutionEnqueuerFunction({
+          taskManager: plugins.taskManager,
+          actionTypeRegistry: actionTypeRegistry!,
+          isESOCanEncrypt: isESOCanEncrypt!,
+          preconfiguredActions,
+        }),
         executionEnqueuer: createExecutionEnqueuerFunction({
           taskManager: plugins.taskManager,
           actionTypeRegistry: actionTypeRegistry!,
@@ -496,6 +507,12 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
             request,
             authorization: instantiateAuthorization(request),
             actionExecutor: actionExecutor!,
+            ephemeralExecutionEnqueuer: createEphemeralExecutionEnqueuerFunction({
+              taskManager,
+              actionTypeRegistry: actionTypeRegistry!,
+              isESOCanEncrypt: isESOCanEncrypt!,
+              preconfiguredActions,
+            }),
             executionEnqueuer: createExecutionEnqueuerFunction({
               taskManager,
               actionTypeRegistry: actionTypeRegistry!,

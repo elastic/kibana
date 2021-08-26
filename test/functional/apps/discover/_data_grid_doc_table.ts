@@ -28,8 +28,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     before(async function () {
       log.debug('load kibana index with default index pattern');
       await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
-      await kibanaServer.importExport.load('discover');
-      await esArchiver.loadIfNeeded('logstash_functional');
+      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover.json');
+      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.uiSettings.replace(defaultSettings);
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await PageObjects.common.navigateToApp('discover');
@@ -161,7 +161,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await PageObjects.header.waitUntilLoadingHasFinished();
         }
         // remove the second column
-        await PageObjects.discover.clickFieldListItemAdd(extraColumns[1]);
+        await PageObjects.discover.clickFieldListItemRemove(extraColumns[1]);
         await PageObjects.header.waitUntilLoadingHasFinished();
         // test that the second column is no longer there
         const header = await dataGrid.getHeaderFields();

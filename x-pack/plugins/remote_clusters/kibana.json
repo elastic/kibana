@@ -1,24 +1,14 @@
 {
   "id": "remoteClusters",
   "version": "kibana",
-  "configPath": [
-    "xpack",
-    "remote_clusters"
-  ],
-  "requiredPlugins": [
-    "licensing",
-    "management",
-    "indexManagement",
-    "features"
-  ],
-  "optionalPlugins": [
-    "usageCollection",
-    "cloud"
-  ],
+  "configPath": ["xpack", "remote_clusters"],
+  "owner": {
+    "name": "Stack Management",
+    "githubTeam": "kibana-stack-management"
+  },
+  "requiredPlugins": ["licensing", "management", "indexManagement", "features"],
+  "optionalPlugins": ["usageCollection", "cloud"],
   "server": true,
   "ui": true,
-  "requiredBundles": [
-    "kibanaReact",
-    "esUiShared"
-  ]
+  "requiredBundles": ["kibanaReact", "esUiShared"]
 }

@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { EventFiltersListPageState } from '../state';
 import { MANAGEMENT_DEFAULT_PAGE, MANAGEMENT_DEFAULT_PAGE_SIZE } from '../../../common/constants';
+import { EventFiltersListPageState } from '../types';
+import { createUninitialisedResourceState } from '../../../state';
 
 export const initialEventFiltersPageState = (): EventFiltersListPageState => ({
   entries: [],
@@ -15,7 +16,8 @@ export const initialEventFiltersPageState = (): EventFiltersListPageState => ({
     hasNameError: false,
     hasItemsError: false,
     hasOSError: false,
-    submissionResourceState: { type: 'UninitialisedResourceState' },
+    newComment: '',
+    submissionResourceState: createUninitialisedResourceState(),
   },
   location: {
     page_index: MANAGEMENT_DEFAULT_PAGE,
@@ -25,8 +27,11 @@ export const initialEventFiltersPageState = (): EventFiltersListPageState => ({
   listPage: {
     active: false,
     forceRefresh: false,
-    data: { type: 'UninitialisedResourceState' },
-    /** We started off assuming data exists, until we can confirm othewise */
-    dataExist: { type: 'LoadedResourceState', data: true },
+    data: createUninitialisedResourceState(),
+    dataExist: createUninitialisedResourceState(),
+    deletion: {
+      item: undefined,
+      status: createUninitialisedResourceState(),
+    },
   },
 });

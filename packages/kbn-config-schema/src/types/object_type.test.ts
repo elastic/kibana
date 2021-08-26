@@ -181,14 +181,15 @@ test('called with wrong type', () => {
 
 test('handles oneOf', () => {
   const type = schema.object({
-    key: schema.oneOf([schema.string()]),
+    key: schema.oneOf([schema.string(), schema.arrayOf(schema.string())]),
   });
 
   expect(type.validate({ key: 'foo' })).toEqual({ key: 'foo' });
   expect(() => type.validate({ key: 123 })).toThrowErrorMatchingInlineSnapshot(`
-"[key]: types that failed validation:
-- [key.0]: expected value of type [string] but got [number]"
-`);
+    "[key]: types that failed validation:
+    - [key.0]: expected value of type [string] but got [number]
+    - [key.1]: expected value of type [array] but got [number]"
+  `);
 });
 
 test('handles references', () => {

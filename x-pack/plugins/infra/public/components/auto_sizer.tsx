@@ -56,7 +56,7 @@ export class AutoSizer extends React.PureComponent<AutoSizerProps, AutoSizerStat
     if (this.props.detectAnyWindowResize) {
       window.addEventListener('resize', this.updateMeasurement);
     }
-    this.resizeObserver = new ResizeObserver((entries) => {
+    this.resizeObserver = new ResizeObserver((entries: ResizeObserverEntry[]) => {
       entries.forEach((entry) => {
         if (entry.target === this.element) {
           this.measure(entry);

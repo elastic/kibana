@@ -18,7 +18,7 @@ export async function getSearchStatus(
 ): Promise<Pick<SearchSessionRequestInfo, 'status' | 'error'>> {
   // TODO: Handle strategies other than the default one
   try {
-    // @ts-expect-error @elastic/elasticsearch status method is not defined
+    // @ts-expect-error start_time_in_millis: EpochMillis is string | number
     const apiResponse: ApiResponse<AsyncSearchStatusResponse> = await client.asyncSearch.status({
       id: asyncId,
     });

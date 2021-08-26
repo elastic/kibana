@@ -62,6 +62,7 @@ export const CleanExtraFilesFromModules: Task = {
       // tests
       '**/test',
       '**/tests',
+      '**/jest.config.js',
       '**/__tests__',
       '**/*.test.js',
       '**/*.snap',
@@ -150,6 +151,9 @@ export const CleanExtraFilesFromModules: Task = {
       '**/.DS_Store',
       '**/Dockerfile',
       '**/docker-compose.yml',
+
+      // https://github.com/elastic/kibana/issues/107617
+      '**/png-js/images/*.png',
     ]);
 
     log.info(

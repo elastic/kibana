@@ -559,6 +559,7 @@ describe('sources routes', () => {
     it('creates a request handler', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
         path: '/ws/sources/:sourceId/download_diagnostics',
+        hasJsonResponse: false,
       });
     });
   });
@@ -1057,6 +1058,7 @@ describe('sources routes', () => {
     it('creates a request handler', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
         path: '/ws/org/sources/:sourceId/download_diagnostics',
+        hasJsonResponse: false,
       });
     });
   });

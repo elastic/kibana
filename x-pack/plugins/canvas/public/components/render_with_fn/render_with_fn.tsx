@@ -84,12 +84,12 @@ export const RenderWithFn: FC<Props> = ({
     []
   );
 
-  const render = useCallback(() => {
+  const render = useCallback(async () => {
     if (!isEqual(handlers.current, incomingHandlers)) {
       handlers.current = incomingHandlers;
     }
 
-    renderFn(renderTarget.current!, config, handlers.current);
+    await renderFn(renderTarget.current!, config, handlers.current);
   }, [renderTarget, config, renderFn, incomingHandlers]);
 
   useEffect(() => {
@@ -101,12 +101,13 @@ export const RenderWithFn: FC<Props> = ({
       resetRenderTarget();
     }
 
-    try {
-      render();
-      firstRender.current = false;
-    } catch (err) {
-      onError(err, { title: strings.getRenderErrorMessage(functionName) });
-    }
+    render()
+      .then(() => {
+        firstRender.current = false;
+      })
+      .catch((err) => {
+        onError(err, { title: strings.getRenderErrorMessage(functionName) });
+      });
   }, [domNode, functionName, onError, render, resetRenderTarget, reuseNode]);
 
   return (

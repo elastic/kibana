@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { skip, take, takeUntil } from 'rxjs/operators';
+import { distinctUntilChanged, filter, map, skip, take, takeUntil } from 'rxjs/operators';
 import { Subject } from 'rxjs';
 import { Action } from '../../../../../../../../src/plugins/ui_actions/public';
 import {
@@ -95,5 +95,19 @@ export class FlyoutEditDrilldownAction implements Action<EmbeddableContext> {
     core.application.currentAppId$.pipe(takeUntil(closed$), skip(1), take(1)).subscribe(() => {
       close();
     });
+
+    // Close flyout on dashboard switch to "view" mode.
+    embeddable
+      .getInput$()
+      .pipe(
+        takeUntil(closed$),
+        map((input) => input.viewMode),
+        distinctUntilChanged(),
+        filter((mode) => mode !== ViewMode.EDIT),
+        take(1)
+      )
+      .subscribe(() => {
+        close();
+      });
   }
 }

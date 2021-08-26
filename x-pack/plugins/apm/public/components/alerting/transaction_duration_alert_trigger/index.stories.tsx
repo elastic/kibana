@@ -5,66 +5,52 @@
  * 2.0.
  */
 
-import { cloneDeep, merge } from 'lodash';
-import React, { ComponentType } from 'react';
-import { MemoryRouter, Route } from 'react-router-dom';
-import { TransactionDurationAlertTrigger } from '.';
-import { ApmPluginContextValue } from '../../../context/apm_plugin/apm_plugin_context';
-import {
-  mockApmPluginContextValue,
-  MockApmPluginContextWrapper,
-} from '../../../context/apm_plugin/mock_apm_plugin_context';
-import { MockUrlParamsContextProvider } from '../../../context/url_params_context/mock_url_params_context_provider';
+import { Story } from '@storybook/react';
+import React, { ComponentType, useState } from 'react';
+import { AlertParams, TransactionDurationAlertTrigger } from '.';
+import { CoreStart } from '../../../../../../../src/core/public';
+import { createKibanaReactContext } from '../../../../../../../src/plugins/kibana_react/public';
+
+const KibanaReactContext = createKibanaReactContext(({
+  notifications: { toasts: { add: () => {} } },
+} as unknown) as Partial<CoreStart>);
 
 export default {
-  title: 'app/TransactionDurationAlertTrigger',
+  title: 'alerting/TransactionDurationAlertTrigger',
   component: TransactionDurationAlertTrigger,
   decorators: [
-    (Story: ComponentType) => {
-      const contextMock = (merge(cloneDeep(mockApmPluginContextValue), {
-        core: {
-          http: {
-            get: (endpoint: string) => {
-              if (endpoint === '/api/apm/environments') {
-                return Promise.resolve(['production']);
-              } else {
-                return Promise.resolve({
-                  transactionTypes: ['request'],
-                });
-              }
-            },
-          },
-        },
-      }) as unknown) as ApmPluginContextValue;
-
+    (StoryComponent: ComponentType) => {
       return (
-        <div style={{ width: 400 }}>
-          <MemoryRouter initialEntries={['/transactions/test-service-name']}>
-            <Route path="/transactions/:serviceName">
-              <MockApmPluginContextWrapper value={contextMock}>
-                <MockUrlParamsContextProvider>
-                  <Story />
-                </MockUrlParamsContextProvider>
-              </MockApmPluginContextWrapper>
-            </Route>
-          </MemoryRouter>
-        </div>
+        <KibanaReactContext.Provider>
+          <div style={{ width: 400 }}>
+            <StoryComponent />
+          </div>
+        </KibanaReactContext.Provider>
       );
     },
   ],
 };
 
-export function Example() {
-  const params = {
-    threshold: 1500,
+export const Example: Story = () => {
+  const [params, setParams] = useState<AlertParams>({
     aggregationType: 'avg' as const,
-    window: '5m',
-  };
+    environment: 'testEnvironment',
+    serviceName: 'testServiceName',
+    threshold: 1500,
+    transactionType: 'testTransactionType',
+    windowSize: 5,
+    windowUnit: 'm',
+  });
+
+  function setAlertParams(property: string, value: any) {
+    setParams({ ...params, [property]: value });
+  }
+
   return (
     <TransactionDurationAlertTrigger
-      alertParams={params as any}
-      setAlertParams={() => undefined}
-      setAlertProperty={() => undefined}
+      alertParams={params}
+      setAlertParams={setAlertParams}
+      setAlertProperty={() => {}}
     />
   );
-}
+};

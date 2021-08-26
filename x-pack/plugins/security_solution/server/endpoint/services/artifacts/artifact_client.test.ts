@@ -29,7 +29,7 @@ describe('artifact_client', () => {
     });
 
     test('can create artifact', async () => {
-      const artifact = await getInternalArtifactMock('linux', 'v1', { compress: true });
+      const artifact = await getInternalArtifactMock('linux', 'v1');
       await artifactClient.createArtifact(artifact);
       expect(fleetArtifactClient.createArtifact).toHaveBeenCalledWith({
         identifier: artifact.identifier,

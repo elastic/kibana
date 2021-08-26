@@ -18,6 +18,12 @@ const deprecations: ConfigDeprecationProvider = () => [
       addDeprecation({
         message: `"kibana.index" is deprecated. Multitenancy by changing "kibana.index" will not be supported starting in 8.0. See https://ela.st/kbn-remove-legacy-multitenancy for more details`,
         documentationUrl: 'https://ela.st/kbn-remove-legacy-multitenancy',
+        correctiveActions: {
+          manualSteps: [
+            `If you rely on this setting to achieve multitenancy you should use Spaces, cross-cluster replication, or cross-cluster search instead.`,
+            `To migrate to Spaces, we encourage using saved object management to export your saved objects from a tenant into the default tenant in a space.`,
+          ],
+        },
       });
     }
     return settings;
@@ -29,12 +35,6 @@ export const config = {
   schema: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
     index: schema.string({ defaultValue: '.kibana' }),
-    autocompleteTerminateAfter: schema.duration({ defaultValue: 100000 }),
-    autocompleteTimeout: schema.duration({ defaultValue: 1000 }),
   }),
   deprecations,
-  exposeToUsage: {
-    autocompleteTerminateAfter: true,
-    autocompleteTimeout: true,
-  },
 };

@@ -6,10 +6,12 @@
  */
 
 import React from 'react';
+import { isString } from 'lodash';
 import { EuiBetaBadge, EuiBadge, EuiTitle } from '@elastic/eui';
 import styled from 'styled-components';
 
 import { BadgeOptions, TitleProp } from './types';
+import { TruncatedText } from '../truncated_text';
 
 const StyledEuiBetaBadge = styled(EuiBetaBadge)`
   vertical-align: middle;
@@ -30,7 +32,7 @@ interface Props {
 const TitleComponent: React.FC<Props> = ({ title, badgeOptions }) => (
   <EuiTitle size="l">
     <h1 data-test-subj="header-page-title">
-      {title}
+      {isString(title) ? <TruncatedText text={title} /> : title}
       {badgeOptions && (
         <>
           {' '}

@@ -34,12 +34,13 @@ export declare class Executor<Context extends Record<string, unknown> = Record<s
 |  [extendContext(extraContext)](./kibana-plugin-plugins-expressions-server.executor.extendcontext.md) |  |  |
 |  [extract(ast)](./kibana-plugin-plugins-expressions-server.executor.extract.md) |  |  |
 |  [fork()](./kibana-plugin-plugins-expressions-server.executor.fork.md) |  |  |
+|  [getAllMigrations()](./kibana-plugin-plugins-expressions-server.executor.getallmigrations.md) |  |  |
 |  [getFunction(name)](./kibana-plugin-plugins-expressions-server.executor.getfunction.md) |  |  |
 |  [getFunctions()](./kibana-plugin-plugins-expressions-server.executor.getfunctions.md) |  |  |
 |  [getType(name)](./kibana-plugin-plugins-expressions-server.executor.gettype.md) |  |  |
 |  [getTypes()](./kibana-plugin-plugins-expressions-server.executor.gettypes.md) |  |  |
 |  [inject(ast, references)](./kibana-plugin-plugins-expressions-server.executor.inject.md) |  |  |
-|  [migrate(ast, version)](./kibana-plugin-plugins-expressions-server.executor.migrate.md) |  |  |
+|  [migrateToLatest(state)](./kibana-plugin-plugins-expressions-server.executor.migratetolatest.md) |  |  |
 |  [registerFunction(functionDefinition)](./kibana-plugin-plugins-expressions-server.executor.registerfunction.md) |  |  |
 |  [registerType(typeDefinition)](./kibana-plugin-plugins-expressions-server.executor.registertype.md) |  |  |
 |  [run(ast, input, params)](./kibana-plugin-plugins-expressions-server.executor.run.md) |  | Execute expression and return result. |

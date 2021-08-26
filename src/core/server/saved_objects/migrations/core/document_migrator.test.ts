@@ -6,11 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { mockUuidv5 } from './__mocks__';
+import { mockGetConvertedObjectId } from './document_migrator.test.mock';
 import { set } from '@elastic/safer-lodash-set';
 import _ from 'lodash';
 import { SavedObjectUnsanitizedDoc } from '../../serialization';
 import { DocumentMigrator } from './document_migrator';
+import { TransformSavedObjectDocumentError } from './transform_saved_object_document_error';
 import { loggingSystemMock } from '../../../logging/logging_system.mock';
 import { SavedObjectsType } from '../../types';
 import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
@@ -36,7 +37,7 @@ const createRegistry = (...types: Array<Partial<SavedObjectsType>>) => {
 };
 
 beforeEach(() => {
-  mockUuidv5.mockClear();
+  mockGetConvertedObjectId.mockClear();
 });
 
 describe('DocumentMigrator', () => {
@@ -724,6 +725,12 @@ describe('DocumentMigrator', () => {
 
     it('logs the original error and throws a transform error if a document transform fails', () => {
       const log = mockLogger;
+      const failedDoc = {
+        id: 'smelly',
+        type: 'dog',
+        attributes: {},
+        migrationVersion: {},
+      };
       const migrator = new DocumentMigrator({
         ...testOpts(),
         typeRegistry: createRegistry({
@@ -737,23 +744,13 @@ describe('DocumentMigrator', () => {
         log,
       });
       migrator.prepareMigrations();
-      const failedDoc = {
-        id: 'smelly',
-        type: 'dog',
-        attributes: {},
-        migrationVersion: {},
-      };
       try {
         migrator.migrate(_.cloneDeep(failedDoc));
         expect('Did not throw').toEqual('But it should have!');
       } catch (error) {
-        expect(error.message).toMatchInlineSnapshot(`
-          "Failed to transform document smelly. Transform: dog:1.2.3
-          Doc: {\\"id\\":\\"smelly\\",\\"type\\":\\"dog\\",\\"attributes\\":{},\\"migrationVersion\\":{}}"
-        `);
-        expect(loggingSystemMock.collect(mockLoggerFactory).error[0][0]).toMatchInlineSnapshot(
-          `[Error: Dang diggity!]`
-        );
+        expect(error.message).toEqual('Migration function for version 1.2.3 threw an error');
+        expect(error.stack.includes(`Caused by:\nError: Dang diggity!`)).toBe(true);
+        expect(error).toBeInstanceOf(TransformSavedObjectDocumentError);
       }
     });
 
@@ -869,7 +866,7 @@ describe('DocumentMigrator', () => {
           namespace: 'foo-namespace',
         };
         const actual = migrator.migrate(obj);
-        expect(mockUuidv5).not.toHaveBeenCalled();
+        expect(mockGetConvertedObjectId).not.toHaveBeenCalled();
         expect(actual).toEqual({
           id: 'cowardly',
           type: 'dog',
@@ -901,7 +898,7 @@ describe('DocumentMigrator', () => {
 
         it('in the default space', () => {
           const actual = migrator.migrateAndConvert(obj);
-          expect(mockUuidv5).not.toHaveBeenCalled();
+          expect(mockGetConvertedObjectId).not.toHaveBeenCalled();
           expect(actual).toEqual([
             {
               id: 'bad',
@@ -915,8 +912,8 @@ describe('DocumentMigrator', () => {
 
         it('in a non-default space', () => {
           const actual = migrator.migrateAndConvert({ ...obj, namespace: 'foo-namespace' });
-          expect(mockUuidv5).toHaveBeenCalledTimes(1);
-          expect(mockUuidv5).toHaveBeenCalledWith('foo-namespace:toy:favorite', 'DNSUUID');
+          expect(mockGetConvertedObjectId).toHaveBeenCalledTimes(1);
+          expect(mockGetConvertedObjectId).toHaveBeenCalledWith('foo-namespace', 'toy', 'favorite');
           expect(actual).toEqual([
             {
               id: 'bad',
@@ -949,7 +946,7 @@ describe('DocumentMigrator', () => {
 
         it('in the default space', () => {
           const actual = migrator.migrateAndConvert(obj);
-          expect(mockUuidv5).not.toHaveBeenCalled();
+          expect(mockGetConvertedObjectId).not.toHaveBeenCalled();
           expect(actual).toEqual([
             {
               id: 'loud',
@@ -964,8 +961,8 @@ describe('DocumentMigrator', () => {
 
         it('in a non-default space', () => {
           const actual = migrator.migrateAndConvert({ ...obj, namespace: 'foo-namespace' });
-          expect(mockUuidv5).toHaveBeenCalledTimes(1);
-          expect(mockUuidv5).toHaveBeenCalledWith('foo-namespace:dog:loud', 'DNSUUID');
+          expect(mockGetConvertedObjectId).toHaveBeenCalledTimes(1);
+          expect(mockGetConvertedObjectId).toHaveBeenCalledWith('foo-namespace', 'dog', 'loud');
           expect(actual).toEqual([
             {
               id: 'uuidv5',
@@ -980,6 +977,7 @@ describe('DocumentMigrator', () => {
               id: 'foo-namespace:dog:loud',
               type: LEGACY_URL_ALIAS_TYPE,
               attributes: {
+                sourceId: 'loud',
                 targetNamespace: 'foo-namespace',
                 targetType: 'dog',
                 targetId: 'uuidv5',
@@ -1010,7 +1008,7 @@ describe('DocumentMigrator', () => {
 
         it('in the default space', () => {
           const actual = migrator.migrateAndConvert(obj);
-          expect(mockUuidv5).not.toHaveBeenCalled();
+          expect(mockGetConvertedObjectId).not.toHaveBeenCalled();
           expect(actual).toEqual([
             {
               id: 'cute',
@@ -1026,9 +1024,19 @@ describe('DocumentMigrator', () => {
 
         it('in a non-default space', () => {
           const actual = migrator.migrateAndConvert({ ...obj, namespace: 'foo-namespace' });
-          expect(mockUuidv5).toHaveBeenCalledTimes(2);
-          expect(mockUuidv5).toHaveBeenNthCalledWith(1, 'foo-namespace:toy:favorite', 'DNSUUID');
-          expect(mockUuidv5).toHaveBeenNthCalledWith(2, 'foo-namespace:dog:cute', 'DNSUUID');
+          expect(mockGetConvertedObjectId).toHaveBeenCalledTimes(2);
+          expect(mockGetConvertedObjectId).toHaveBeenNthCalledWith(
+            1,
+            'foo-namespace',
+            'toy',
+            'favorite'
+          );
+          expect(mockGetConvertedObjectId).toHaveBeenNthCalledWith(
+            2,
+            'foo-namespace',
+            'dog',
+            'cute'
+          );
           expect(actual).toEqual([
             {
               id: 'uuidv5',
@@ -1044,6 +1052,7 @@ describe('DocumentMigrator', () => {
               id: 'foo-namespace:dog:cute',
               type: LEGACY_URL_ALIAS_TYPE,
               attributes: {
+                sourceId: 'cute',
                 targetNamespace: 'foo-namespace',
                 targetType: 'dog',
                 targetId: 'uuidv5',
@@ -1081,7 +1090,7 @@ describe('DocumentMigrator', () => {
 
         it('in the default space', () => {
           const actual = migrator.migrateAndConvert(obj);
-          expect(mockUuidv5).not.toHaveBeenCalled();
+          expect(mockGetConvertedObjectId).not.toHaveBeenCalled();
           expect(actual).toEqual([
             {
               id: 'sleepy',
@@ -1096,8 +1105,8 @@ describe('DocumentMigrator', () => {
 
         it('in a non-default space', () => {
           const actual = migrator.migrateAndConvert({ ...obj, namespace: 'foo-namespace' });
-          expect(mockUuidv5).toHaveBeenCalledTimes(1);
-          expect(mockUuidv5).toHaveBeenCalledWith('foo-namespace:toy:favorite', 'DNSUUID');
+          expect(mockGetConvertedObjectId).toHaveBeenCalledTimes(1);
+          expect(mockGetConvertedObjectId).toHaveBeenCalledWith('foo-namespace', 'toy', 'favorite');
           expect(actual).toEqual([
             {
               id: 'sleepy',
@@ -1135,7 +1144,7 @@ describe('DocumentMigrator', () => {
 
         it('in the default space', () => {
           const actual = migrator.migrateAndConvert(obj);
-          expect(mockUuidv5).not.toHaveBeenCalled();
+          expect(mockGetConvertedObjectId).not.toHaveBeenCalled();
           expect(actual).toEqual([
             {
               id: 'hungry',
@@ -1150,8 +1159,8 @@ describe('DocumentMigrator', () => {
 
         it('in a non-default space', () => {
           const actual = migrator.migrateAndConvert({ ...obj, namespace: 'foo-namespace' });
-          expect(mockUuidv5).toHaveBeenCalledTimes(1);
-          expect(mockUuidv5).toHaveBeenCalledWith('foo-namespace:dog:hungry', 'DNSUUID');
+          expect(mockGetConvertedObjectId).toHaveBeenCalledTimes(1);
+          expect(mockGetConvertedObjectId).toHaveBeenCalledWith('foo-namespace', 'dog', 'hungry');
           expect(actual).toEqual([
             {
               id: 'uuidv5',
@@ -1166,6 +1175,7 @@ describe('DocumentMigrator', () => {
               id: 'foo-namespace:dog:hungry',
               type: LEGACY_URL_ALIAS_TYPE,
               attributes: {
+                sourceId: 'hungry',
                 targetNamespace: 'foo-namespace',
                 targetType: 'dog',
                 targetId: 'uuidv5',
@@ -1204,7 +1214,7 @@ describe('DocumentMigrator', () => {
 
         it('in the default space', () => {
           const actual = migrator.migrateAndConvert(obj);
-          expect(mockUuidv5).not.toHaveBeenCalled();
+          expect(mockGetConvertedObjectId).not.toHaveBeenCalled();
           expect(actual).toEqual([
             {
               id: 'pretty',
@@ -1220,9 +1230,19 @@ describe('DocumentMigrator', () => {
 
         it('in a non-default space', () => {
           const actual = migrator.migrateAndConvert({ ...obj, namespace: 'foo-namespace' });
-          expect(mockUuidv5).toHaveBeenCalledTimes(2);
-          expect(mockUuidv5).toHaveBeenNthCalledWith(1, 'foo-namespace:toy:favorite', 'DNSUUID');
-          expect(mockUuidv5).toHaveBeenNthCalledWith(2, 'foo-namespace:dog:pretty', 'DNSUUID');
+          expect(mockGetConvertedObjectId).toHaveBeenCalledTimes(2);
+          expect(mockGetConvertedObjectId).toHaveBeenNthCalledWith(
+            1,
+            'foo-namespace',
+            'toy',
+            'favorite'
+          );
+          expect(mockGetConvertedObjectId).toHaveBeenNthCalledWith(
+            2,
+            'foo-namespace',
+            'dog',
+            'pretty'
+          );
           expect(actual).toEqual([
             {
               id: 'uuidv5',
@@ -1238,6 +1258,7 @@ describe('DocumentMigrator', () => {
               id: 'foo-namespace:dog:pretty',
               type: LEGACY_URL_ALIAS_TYPE,
               attributes: {
+                sourceId: 'pretty',
                 targetNamespace: 'foo-namespace',
                 targetType: 'dog',
                 targetId: 'uuidv5',

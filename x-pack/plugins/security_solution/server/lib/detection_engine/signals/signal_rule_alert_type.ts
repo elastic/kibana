@@ -12,8 +12,8 @@ import { chain, tryCatch } from 'fp-ts/lib/TaskEither';
 import { flow } from 'fp-ts/lib/function';
 
 import * as t from 'io-ts';
-import { validateNonExact } from '../../../../common/validate';
-import { toError, toPromise } from '../../../../common/fp_utils';
+import { validateNonExact, parseScheduleDates } from '@kbn/securitysolution-io-ts-utils';
+import { toError, toPromise } from '@kbn/securitysolution-list-api';
 
 import {
   SIGNALS_ID,
@@ -27,7 +27,6 @@ import {
   isThreatMatchRule,
   isQueryRule,
 } from '../../../../common/detection_engine/utils';
-import { parseScheduleDates } from '../../../../common/detection_engine/parse_schedule_dates';
 import { SetupPlugins } from '../../../plugin';
 import { getInputIndex } from './get_input_output_index';
 import { AlertAttributes, SignalRuleAlertTypeDefinition } from './types';
@@ -46,9 +45,7 @@ import {
   scheduleNotificationActions,
   NotificationRuleTypeParams,
 } from '../notifications/schedule_notification_actions';
-import { ruleStatusServiceFactory } from './rule_status_service';
 import { buildRuleMessageFactory } from './rule_messages';
-import { ruleStatusSavedObjectsClientFactory } from './rule_status_saved_objects_client';
 import { getNotificationResultsLink } from '../notifications/utils';
 import { TelemetryEventsSender } from '../../telemetry/sender';
 import { eqlExecutor } from './executors/eql';
@@ -66,25 +63,45 @@ import {
   RuleParams,
   savedQueryRuleParams,
 } from '../schemas/rule_schemas';
+import { bulkCreateFactory } from './bulk_create_factory';
+import { wrapHitsFactory } from './wrap_hits_factory';
+import { wrapSequencesFactory } from './wrap_sequences_factory';
+import { ConfigType } from '../../../config';
+import { ExperimentalFeatures } from '../../../../common/experimental_features';
+import { injectReferences, extractReferences } from './saved_object_references';
+import { RuleExecutionLogClient } from '../rule_execution_log/rule_execution_log_client';
+import { IRuleDataPluginService } from '../rule_execution_log/types';
+import { RuleExecutionStatus } from '../../../../common/detection_engine/schemas/common/schemas';
 
 export const signalRulesAlertType = ({
   logger,
   eventsTelemetry,
+  experimentalFeatures,
   version,
   ml,
   lists,
+  mergeStrategy,
+  ruleDataService,
 }: {
   logger: Logger;
   eventsTelemetry: TelemetryEventsSender | undefined;
+  experimentalFeatures: ExperimentalFeatures;
   version: string;
   ml: SetupPlugins['ml'];
   lists: SetupPlugins['lists'] | undefined;
+  mergeStrategy: ConfigType['alertMergeStrategy'];
+  ruleDataService: IRuleDataPluginService;
 }): SignalRuleAlertTypeDefinition => {
   return {
     id: SIGNALS_ID,
     name: 'SIEM signal',
     actionGroups: siemRuleActionGroups,
     defaultActionGroupId: 'default',
+    useSavedObjectReferences: {
+      extractReferences: (params) => extractReferences({ logger, params }),
+      injectReferences: (params, savedObjectReferences) =>
+        injectReferences({ logger, params, savedObjectReferences }),
+    },
     validate: {
       params: {
         validate: (object: unknown): RuleParams => {
@@ -101,6 +118,7 @@ export const signalRulesAlertType = ({
     },
     producer: SERVER_APP_ID,
     minimumLicenseRequired: 'basic',
+    isExportable: false,
     async executor({
       previousStartedAt,
       startedAt,
@@ -115,10 +133,9 @@ export const signalRulesAlertType = ({
       const searchAfterSize = Math.min(maxSignals, DEFAULT_SEARCH_AFTER_PAGE_SIZE);
       let hasError: boolean = false;
       let result = createSearchAfterReturnType();
-      const ruleStatusClient = ruleStatusSavedObjectsClientFactory(services.savedObjectsClient);
-      const ruleStatusService = await ruleStatusServiceFactory({
-        alertId,
-        ruleStatusClient,
+      const ruleStatusClient = new RuleExecutionLogClient({
+        ruleDataService,
+        savedObjectsClient: services.savedObjectsClient,
       });
 
       const savedObject = await services.savedObjectsClient.get<AlertAttributes>('alert', alertId);
@@ -138,7 +155,11 @@ export const signalRulesAlertType = ({
       logger.debug(buildRuleMessage('[+] Starting Signal Rule execution'));
       logger.debug(buildRuleMessage(`interval: ${interval}`));
       let wroteWarningStatus = false;
-      await ruleStatusService.goingToRun();
+      await ruleStatusClient.logStatusChange({
+        ruleId: alertId,
+        newStatus: RuleExecutionStatus['going to run'],
+        spaceId,
+      });
 
       // check if rule has permissions to access given index pattern
       // move this collection of lines into a function in utils
@@ -147,7 +168,12 @@ export const signalRulesAlertType = ({
         if (!isMachineLearningParams(params)) {
           const index = params.index;
           const hasTimestampOverride = timestampOverride != null && !isEmpty(timestampOverride);
-          const inputIndices = await getInputIndex(services, version, index);
+          const inputIndices = await getInputIndex({
+            services,
+            version,
+            index,
+            experimentalFeatures,
+          });
           const [privileges, timestampFieldCaps] = await Promise.all([
             checkPrivileges(services, inputIndices),
             services.scopedClusterClient.asCurrentUser.fieldCaps({
@@ -163,22 +189,33 @@ export const signalRulesAlertType = ({
             () =>
               tryCatch(
                 () =>
-                  hasReadIndexPrivileges(privileges, logger, buildRuleMessage, ruleStatusService),
+                  hasReadIndexPrivileges({
+                    spaceId,
+                    ruleId: alertId,
+                    privileges,
+                    logger,
+                    buildRuleMessage,
+                    ruleStatusClient,
+                  }),
                 toError
               ),
             chain((wroteStatus) =>
               tryCatch(
                 () =>
-                  hasTimestampFields(
-                    wroteStatus,
-                    hasTimestampOverride ? (timestampOverride as string) : '@timestamp',
-                    name,
-                    timestampFieldCaps,
+                  hasTimestampFields({
+                    spaceId,
+                    ruleId: alertId,
+                    wroteStatus: wroteStatus as boolean,
+                    timestampField: hasTimestampOverride
+                      ? (timestampOverride as string)
+                      : '@timestamp',
+                    ruleName: name,
+                    timestampFieldCapsResponse: timestampFieldCaps,
                     inputIndices,
-                    ruleStatusService,
+                    ruleStatusClient,
                     logger,
-                    buildRuleMessage
-                  ),
+                    buildRuleMessage,
+                  }),
                 toError
               )
             ),
@@ -205,7 +242,13 @@ export const signalRulesAlertType = ({
         );
         logger.warn(gapMessage);
         hasError = true;
-        await ruleStatusService.error(gapMessage, { gap: gapString });
+        await ruleStatusClient.logStatusChange({
+          spaceId,
+          ruleId: alertId,
+          newStatus: RuleExecutionStatus.failed,
+          message: gapMessage,
+          metrics: { gap: gapString },
+        });
       }
       try {
         const { listClient, exceptionsClient } = getListsClient({
@@ -219,78 +262,127 @@ export const signalRulesAlertType = ({
           client: exceptionsClient,
           lists: params.exceptionsList ?? [],
         });
+
+        const bulkCreate = bulkCreateFactory(
+          logger,
+          services.scopedClusterClient.asCurrentUser,
+          buildRuleMessage,
+          refresh
+        );
+
+        const wrapHits = wrapHitsFactory({
+          ruleSO: savedObject,
+          signalsIndex: params.outputIndex,
+          mergeStrategy,
+        });
+
+        const wrapSequences = wrapSequencesFactory({
+          ruleSO: savedObject,
+          signalsIndex: params.outputIndex,
+          mergeStrategy,
+        });
+
         if (isMlRule(type)) {
           const mlRuleSO = asTypeSpecificSO(savedObject, machineLearningRuleParams);
-          result = await mlExecutor({
-            rule: mlRuleSO,
-            ml,
-            listClient,
-            exceptionItems,
-            ruleStatusService,
-            services,
-            logger,
-            refresh,
-            buildRuleMessage,
-          });
+          for (const tuple of tuples) {
+            result = await mlExecutor({
+              rule: mlRuleSO,
+              tuple,
+              ml,
+              listClient,
+              exceptionItems,
+              services,
+              logger,
+              buildRuleMessage,
+              bulkCreate,
+              wrapHits,
+            });
+          }
         } else if (isThresholdRule(type)) {
           const thresholdRuleSO = asTypeSpecificSO(savedObject, thresholdRuleParams);
-          result = await thresholdExecutor({
-            rule: thresholdRuleSO,
-            tuples,
-            exceptionItems,
-            ruleStatusService,
-            services,
-            version,
-            logger,
-            refresh,
-            buildRuleMessage,
-            startedAt,
-          });
+          for (const tuple of tuples) {
+            result = await thresholdExecutor({
+              rule: thresholdRuleSO,
+              tuple,
+              exceptionItems,
+              experimentalFeatures,
+              services,
+              version,
+              logger,
+              buildRuleMessage,
+              startedAt,
+              bulkCreate,
+              wrapHits,
+            });
+          }
         } else if (isThreatMatchRule(type)) {
           const threatRuleSO = asTypeSpecificSO(savedObject, threatRuleParams);
-          result = await threatMatchExecutor({
-            rule: threatRuleSO,
-            tuples,
-            listClient,
-            exceptionItems,
-            services,
-            version,
-            searchAfterSize,
-            logger,
-            refresh,
-            eventsTelemetry,
-            buildRuleMessage,
-          });
+          for (const tuple of tuples) {
+            result = await threatMatchExecutor({
+              rule: threatRuleSO,
+              tuple,
+              listClient,
+              exceptionItems,
+              experimentalFeatures,
+              services,
+              version,
+              searchAfterSize,
+              logger,
+              eventsTelemetry,
+              buildRuleMessage,
+              bulkCreate,
+              wrapHits,
+            });
+          }
         } else if (isQueryRule(type)) {
           const queryRuleSO = validateQueryRuleTypes(savedObject);
-          result = await queryExecutor({
-            rule: queryRuleSO,
-            tuples,
-            listClient,
-            exceptionItems,
-            services,
-            version,
-            searchAfterSize,
-            logger,
-            refresh,
-            eventsTelemetry,
-            buildRuleMessage,
-          });
+          for (const tuple of tuples) {
+            result = await queryExecutor({
+              rule: queryRuleSO,
+              tuple,
+              listClient,
+              exceptionItems,
+              experimentalFeatures,
+              services,
+              version,
+              searchAfterSize,
+              logger,
+              eventsTelemetry,
+              buildRuleMessage,
+              bulkCreate,
+              wrapHits,
+            });
+          }
         } else if (isEqlRule(type)) {
           const eqlRuleSO = asTypeSpecificSO(savedObject, eqlRuleParams);
-          result = await eqlExecutor({
-            rule: eqlRuleSO,
-            exceptionItems,
-            ruleStatusService,
-            services,
-            version,
-            searchAfterSize,
-            logger,
-            refresh,
-          });
+          for (const tuple of tuples) {
+            result = await eqlExecutor({
+              rule: eqlRuleSO,
+              tuple,
+              exceptionItems,
+              experimentalFeatures,
+              services,
+              version,
+              searchAfterSize,
+              bulkCreate,
+              logger,
+              wrapHits,
+              wrapSequences,
+            });
+          }
         } else {
           throw new Error(`unknown rule type ${type}`);
         }
+        if (result.warningMessages.length) {
+          const warningMessage = buildRuleMessage(result.warningMessages.join());
+          await ruleStatusClient.logStatusChange({
+            spaceId,
+            ruleId: alertId,
+            newStatus: RuleExecutionStatus['partial failure'],
+            message: warningMessage,
+          });
+        }
+
         if (result.success) {
           if (actions.length) {
             const notificationRuleParams: NotificationRuleTypeParams = {
@@ -332,10 +424,16 @@ export const signalRulesAlertType = ({
             )
           );
           if (!hasError && !wroteWarningStatus && !result.warning) {
-            await ruleStatusService.success('succeeded', {
-              bulkCreateTimeDurations: result.bulkCreateTimes,
-              searchAfterTimeDurations: result.searchAfterTimes,
-              lastLookBackDate: result.lastLookBackDate?.toISOString(),
+            await ruleStatusClient.logStatusChange({
+              spaceId,
+              ruleId: alertId,
+              newStatus: RuleExecutionStatus.succeeded,
+              message: 'succeeded',
+              metrics: {
+                bulkCreateTimeDurations: result.bulkCreateTimes,
+                searchAfterTimeDurations: result.searchAfterTimes,
+                lastLookBackDate: result.lastLookBackDate?.toISOString(),
+              },
             });
           }
 
@@ -343,12 +441,8 @@ export const signalRulesAlertType = ({
           logger.info(
             buildRuleMessage(
               `[+] Finished indexing ${result.createdSignalsCount}  ${
-                !isEmpty(result.totalToFromTuples)
-                  ? `signals searched between date ranges ${JSON.stringify(
-                      result.totalToFromTuples,
-                      null,
-                      2
-                    )}`
+                !isEmpty(tuples)
+                  ? `signals searched between date ranges ${JSON.stringify(tuples, null, 2)}`
                   : ''
               }`
             )
@@ -359,10 +453,16 @@ export const signalRulesAlertType = ({
             result.errors.join()
           );
           logger.error(errorMessage);
-          await ruleStatusService.error(errorMessage, {
-            bulkCreateTimeDurations: result.bulkCreateTimes,
-            searchAfterTimeDurations: result.searchAfterTimes,
-            lastLookBackDate: result.lastLookBackDate?.toISOString(),
+          await ruleStatusClient.logStatusChange({
+            spaceId,
+            ruleId: alertId,
+            newStatus: RuleExecutionStatus.failed,
+            message: errorMessage,
+            metrics: {
+              bulkCreateTimeDurations: result.bulkCreateTimes,
+              searchAfterTimeDurations: result.searchAfterTimes,
+              lastLookBackDate: result.lastLookBackDate?.toISOString(),
+            },
           });
         }
       } catch (error) {
@@ -373,10 +473,16 @@ export const signalRulesAlertType = ({
         );
 
         logger.error(message);
-        await ruleStatusService.error(message, {
-          bulkCreateTimeDurations: result.bulkCreateTimes,
-          searchAfterTimeDurations: result.searchAfterTimes,
-          lastLookBackDate: result.lastLookBackDate?.toISOString(),
+        await ruleStatusClient.logStatusChange({
+          spaceId,
+          ruleId: alertId,
+          newStatus: RuleExecutionStatus.failed,
+          message,
+          metrics: {
+            bulkCreateTimeDurations: result.bulkCreateTimes,
+            searchAfterTimeDurations: result.searchAfterTimes,
+            lastLookBackDate: result.lastLookBackDate?.toISOString(),
+          },
         });
       }
     },

@@ -17,6 +17,7 @@ import {
   EuiTextColor,
   EuiToolTip,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import { useNotifyService } from '../../services';
 
@@ -25,9 +26,40 @@ import { Clipboard } from '../clipboard';
 import { Download } from '../download';
 import { AssetType } from '../../../types';
 
-import { ComponentStrings } from '../../../i18n';
-
-const { Asset: strings } = ComponentStrings;
+const strings = {
+  getCopyAssetTooltip: () =>
+    i18n.translate('xpack.canvas.asset.copyAssetTooltip', {
+      defaultMessage: 'Copy id to clipboard',
+    }),
+  getCreateImageTooltip: () =>
+    i18n.translate('xpack.canvas.asset.createImageTooltip', {
+      defaultMessage: 'Create image element',
+    }),
+  getDeleteAssetTooltip: () =>
+    i18n.translate('xpack.canvas.asset.deleteAssetTooltip', {
+      defaultMessage: 'Delete',
+    }),
+  getDownloadAssetTooltip: () =>
+    i18n.translate('xpack.canvas.asset.downloadAssetTooltip', {
+      defaultMessage: 'Download',
+    }),
+  getThumbnailAltText: () =>
+    i18n.translate('xpack.canvas.asset.thumbnailAltText', {
+      defaultMessage: 'Asset thumbnail',
+    }),
+  getConfirmModalButtonLabel: () =>
+    i18n.translate('xpack.canvas.asset.confirmModalButtonLabel', {
+      defaultMessage: 'Remove',
+    }),
+  getConfirmModalMessageText: () =>
+    i18n.translate('xpack.canvas.asset.confirmModalDetail', {
+      defaultMessage: 'Are you sure you want to remove this asset?',
+    }),
+  getConfirmModalTitle: () =>
+    i18n.translate('xpack.canvas.asset.confirmModalTitle', {
+      defaultMessage: 'Remove Asset',
+    }),
+};
 
 export interface Props {
   /** The asset to be rendered */

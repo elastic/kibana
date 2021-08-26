@@ -9,6 +9,7 @@ export type ElasticAgentName =
   | 'go'
   | 'java'
   | 'js-base'
+  | 'iOS/swift'
   | 'rum-js'
   | 'nodejs'
   | 'python'
@@ -27,6 +28,7 @@ export type OpenTelemetryAgentName =
   | 'opentelemetry/php'
   | 'opentelemetry/python'
   | 'opentelemetry/ruby'
+  | 'opentelemetry/swift'
   | 'opentelemetry/webjs';
 
 /*

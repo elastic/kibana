@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { pick } from '@kbn/std';
 import { AppCategory } from '../../';
 
 /**
@@ -34,10 +33,9 @@ export interface ChromeNavLink {
   readonly baseUrl: string;
 
   /**
-   * The route used to open the {@link AppBase.defaultPath | default path } of an application.
-   * If unset, `baseUrl` will be used instead.
+   * The route used to open the default path and the deep links of an application.
    */
-  readonly url?: string;
+  readonly url: string;
 
   /**
    * An ordinal used to sort nav links relative to one another for display.
@@ -81,11 +79,6 @@ export interface ChromeNavLink {
   readonly hidden?: boolean;
 }
 
-/** @public */
-export type ChromeNavLinkUpdateableFields = Partial<
-  Pick<ChromeNavLink, 'disabled' | 'hidden' | 'url' | 'href'>
->;
-
 export class NavLinkWrapper {
   public readonly id: string;
   public readonly properties: Readonly<ChromeNavLink>;
@@ -97,11 +90,5 @@ export class NavLinkWrapper {
 
     this.id = properties.id;
     this.properties = Object.freeze(properties);
-  }
-
-  public update(newProps: ChromeNavLinkUpdateableFields) {
-    // Enforce limited properties at runtime for JS code
-    newProps = pick(newProps, ['disabled', 'hidden', 'url', 'href']);
-    return new NavLinkWrapper({ ...this.properties, ...newProps });
   }
 }

@@ -9,7 +9,7 @@ Script field language
 <b>Signature:</b>
 
 ```typescript
-get lang(): string | undefined;
+get lang(): "painless" | "expression" | "mustache" | "java" | undefined;
 
-set lang(lang: string | undefined);
+set lang(lang: "painless" | "expression" | "mustache" | "java" | undefined);
 ```

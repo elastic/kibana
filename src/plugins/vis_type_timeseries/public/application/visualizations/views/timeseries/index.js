@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useRef, useCallback } from 'react';
+import React, { useRef, useCallback, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { labelDateFormatter } from '../../../components/lib/label_date_formatter';
@@ -23,16 +23,16 @@ import {
 } from '@elastic/charts';
 import { EuiIcon } from '@elastic/eui';
 import { getTimezone } from '../../../lib/get_timezone';
-import { activeCursor$ } from '../../lib/active_cursor';
-import { getUISettings, getChartsSetup } from '../../../../services';
+import { getUISettings, getCharts } from '../../../../services';
 import { GRID_LINE_CONFIG, ICON_TYPES_MAP, STACKED_OPTIONS } from '../../constants';
 import { AreaSeriesDecorator } from './decorators/area_decorator';
 import { BarSeriesDecorator } from './decorators/bar_decorator';
 import { getStackAccessors } from './utils/stack_format';
 import { getBaseTheme, getChartClasses } from './utils/theme';
-import { emptyLabel } from '../../../../../common/empty_label';
+import { TOOLTIP_MODES } from '../../../../../common/enums';
+import { getValueOrEmpty } from '../../../../../common/empty_label';
 import { getSplitByTermsColor } from '../../../lib/get_split_by_terms_color';
-import { renderEndzoneTooltip } from '../../../../../../charts/public';
+import { renderEndzoneTooltip, useActiveCursor } from '../../../../../../charts/public';
 import { getAxisLabelString } from '../../../components/lib/get_axis_label_string';
 import { calculateDomainForSeries } from './utils/series_domain_calculation';
 
@@ -47,19 +47,22 @@ const generateAnnotationData = (values, formatter) =>
 
 const decorateFormatter = (formatter) => ({ value }) => formatter(value);
 
-const handleCursorUpdate = (cursor) => {
-  activeCursor$.next(cursor);
-};
+/** When displaying the annotation, we must slightly shift the labels for
+ * the x-axis so that they do not overlap the annotations. **/
+const TICK_LABEL_WITH_ANNOTATIONS_PADDING = 19;
 
 export const TimeSeries = ({
   backgroundColor,
   showGrid,
   legend,
   legendPosition,
+  truncateLegend,
+  maxLegendLines,
   tooltipMode,
   series,
   yAxis,
   onBrush,
+  onFilterClick,
   xAxisFormatter,
   annotations,
   syncColors,
@@ -67,22 +70,22 @@ export const TimeSeries = ({
   interval,
   isLastBucketDropped,
 }) => {
+  // If the color isn't configured by the user, use the color mapping service
+  // to assign a color from the Kibana palette. Colors will be shared across the
+  // session, including dashboards.
+  const { theme: themeService, activeCursor: activeCursorService } = getCharts();
+
   const chartRef = useRef();
-  // const [palettesRegistry, setPalettesRegistry] = useState(null);
+  const chartTheme = themeService.useChartsTheme();
 
-  useEffect(() => {
-    const updateCursor = (cursor) => {
-      if (chartRef.current) {
-        chartRef.current.dispatchExternalPointerEvent(cursor);
-      }
-    };
+  const handleCursorUpdate = useActiveCursor(activeCursorService, chartRef, {
+    isDateHistogram: true,
+  });
 
-    const subscription = activeCursor$.subscribe(updateCursor);
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, []);
+  const hasVisibleAnnotations = useMemo(
+    () => (annotations ?? []).some((annotation) => Boolean(annotation.data?.length)),
+    [annotations]
+  );
 
   let tooltipFormatter = decorateFormatter(xAxisFormatter);
   if (!isLastBucketDropped) {
@@ -102,11 +105,6 @@ export const TimeSeries = ({
   // apply legend style change if bgColor is configured
   const classes = classNames(getChartClasses(backgroundColor));
 
-  // If the color isn't configured by the user, use the color mapping service
-  // to assign a color from the Kibana palette. Colors will be shared across the
-  // session, including dashboards.
-  const { theme: themeService } = getChartsSetup();
-
   const baseTheme = getBaseTheme(themeService.useChartsBaseTheme(), backgroundColor);
 
   const onBrushEndListener = ({ x }) => {
@@ -115,6 +113,10 @@ export const TimeSeries = ({
     }
     const [min, max] = x;
     onBrush(min, max, series);
+  };
+
+  const handleElementClick = (points) => {
+    onFilterClick(series, points);
   };
 
   const getSeriesColor = useCallback(
@@ -133,17 +135,32 @@ export const TimeSeries = ({
     },
     [palettesService, series, syncColors]
   );
-
   return (
     <Chart ref={chartRef} renderer="canvas" className={classes}>
       <Settings
+        debugState={window._echDebugStateFlag ?? false}
         showLegend={legend}
         showLegendExtra={true}
         legendPosition={legendPosition}
         onBrushEnd={onBrushEndListener}
+        onElementClick={(args) => handleElementClick(args)}
         animateData={false}
         onPointerUpdate={handleCursorUpdate}
         theme={[
+          {
+            crosshair: {
+              ...chartTheme.crosshair,
+            },
+            axes: {
+              tickLabel: {
+                padding: {
+                  inner: hasVisibleAnnotations
+                    ? TICK_LABEL_WITH_ANNOTATIONS_PADDING
+                    : chartTheme.axes.tickLabel.padding.inner,
+                },
+              },
+            },
+          },
           hasBarChart
             ? {}
             : {
@@ -157,12 +174,19 @@ export const TimeSeries = ({
             background: {
               color: backgroundColor,
             },
+            legend: {
+              labelOptions: { maxLines: truncateLegend ? maxLegendLines ?? 1 : 0 },
+            },
           },
+          chartTheme,
         ]}
         baseTheme={baseTheme}
         tooltip={{
           snap: true,
-          type: tooltipMode === 'show_focused' ? TooltipType.Follow : TooltipType.VerticalCursor,
+          type:
+            tooltipMode === TOOLTIP_MODES.SHOW_FOCUSED
+              ? TooltipType.Follow
+              : TooltipType.VerticalCursor,
           boundary: document.getElementById('app-fixed-viewport') ?? undefined,
           headerFormatter: tooltipFormatter,
         }}
@@ -197,6 +221,7 @@ export const TimeSeries = ({
             lines,
             data,
             hideInLegend,
+            truncateLegend,
             xScaleType,
             yScaleType,
             groupId,
@@ -227,9 +252,10 @@ export const TimeSeries = ({
                 key={key}
                 seriesId={id}
                 seriesGroupId={groupId}
-                name={seriesName || emptyLabel}
+                name={getValueOrEmpty(seriesName)}
                 data={data}
                 hideInLegend={hideInLegend}
+                truncateLegend={truncateLegend}
                 bars={bars}
                 color={finalColor}
                 stackAccessors={stackAccessors}
@@ -252,9 +278,10 @@ export const TimeSeries = ({
                 key={key}
                 seriesId={id}
                 seriesGroupId={groupId}
-                name={seriesName || emptyLabel}
+                name={getValueOrEmpty(seriesName)}
                 data={data}
                 hideInLegend={hideInLegend}
+                truncateLegend={truncateLegend}
                 lines={lines}
                 color={finalColor}
                 stackAccessors={stackAccessors}
@@ -317,6 +344,8 @@ TimeSeries.propTypes = {
   showGrid: PropTypes.bool,
   legend: PropTypes.bool,
   legendPosition: PropTypes.string,
+  truncateLegend: PropTypes.bool,
+  maxLegendLines: PropTypes.number,
   series: PropTypes.array,
   yAxis: PropTypes.array,
   onBrush: PropTypes.func,

@@ -21,7 +21,7 @@ import { ImportModal } from './import_modal';
 import { ml } from '../../../services/ml_api_service';
 import { withKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { GLOBAL_CALENDAR } from '../../../../../common/constants/calendars';
-import { ML_PAGES } from '../../../../../common/constants/ml_url_generator';
+import { ML_PAGES } from '../../../../../common/constants/locator';
 import { getDocLinks } from '../../../util/dependency_cache';
 import { HelpMenu } from '../../../components/help_menu';
 
@@ -325,6 +325,7 @@ class NewCalendarUI extends Component {
       groupIdOptions,
       jobIdOptions,
       saving,
+      loading,
       selectedCalendar,
       selectedJobOptions,
       selectedGroupOptions,
@@ -377,6 +378,7 @@ class NewCalendarUI extends Component {
                 showImportModal={this.showImportModal}
                 onJobSelection={this.onJobSelection}
                 saving={saving}
+                loading={loading}
                 selectedGroupOptions={selectedGroupOptions}
                 selectedJobOptions={selectedJobOptions}
                 onCreateGroupOption={this.onCreateGroupOption}

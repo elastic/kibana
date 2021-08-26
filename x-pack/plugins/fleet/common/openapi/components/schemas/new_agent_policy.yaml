@@ -1,4 +1,4 @@
-title: NewAgentPolicy
+title: New agent policy
 type: object
 properties:
   name:

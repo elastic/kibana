@@ -10,7 +10,7 @@ import { calculateTextWidth } from './string_utils';
 import { MULTI_BUCKET_IMPACT } from '../../../common/constants/multi_bucket_impact';
 import moment from 'moment';
 import { CHART_TYPE } from '../explorer/explorer_constants';
-import { ML_PAGES } from '../../../common/constants/ml_url_generator';
+import { ML_PAGES } from '../../../common/constants/locator';
 
 export const LINE_CHART_ANOMALY_RADIUS = 7;
 export const MULTI_BUCKET_SYMBOL_SIZE = 100; // In square pixels for use with d3 symbol.size
@@ -144,7 +144,7 @@ export function drawLineChartDots(data, lineChartGroup, lineChartValuesLine, rad
 }
 
 // this replicates Kibana's filterAxisLabels() behavior
-// which can be found in src/plugins/vis_type_vislib/public/vislib/lib/axis/axis_labels.js
+// which can be found in src/plugins/vis_types/vislib/public/vislib/lib/axis/axis_labels.js
 // axis labels which overflow the chart's boundaries will be removed
 export function filterAxisLabels(selection, chartWidth) {
   if (selection === undefined || selection.selectAll === undefined) {
@@ -219,7 +219,7 @@ export function getChartType(config) {
   return chartType;
 }
 
-export async function getExploreSeriesLink(mlUrlGenerator, series, timefilter) {
+export async function getExploreSeriesLink(mlLocator, series, timefilter) {
   // Open the Single Metric dashboard over the same overall bounds and
   // zoomed in to the same time as the current chart.
   const bounds = timefilter.getActiveBounds();
@@ -241,35 +241,37 @@ export async function getExploreSeriesLink(mlUrlGenerator, series, timefilter) {
     });
   }
 
-  const url = await mlUrlGenerator.createUrl({
-    page: ML_PAGES.SINGLE_METRIC_VIEWER,
-    pageState: {
-      jobIds: [series.jobId],
-      refreshInterval: {
-        display: 'Off',
-        pause: true,
-        value: 0,
-      },
-      timeRange: {
-        from: from,
-        to: to,
-        mode: 'absolute',
-      },
-      zoom: {
-        from: zoomFrom,
-        to: zoomTo,
-      },
-      detectorIndex: series.detectorIndex,
-      entities: entityCondition,
-      query: {
-        query_string: {
-          analyze_wildcard: true,
-          query: '*',
+  const url = await mlLocator.getUrl(
+    {
+      page: ML_PAGES.SINGLE_METRIC_VIEWER,
+      pageState: {
+        jobIds: [series.jobId],
+        refreshInterval: {
+          display: 'Off',
+          pause: true,
+          value: 0,
+        },
+        timeRange: {
+          from: from,
+          to: to,
+          mode: 'absolute',
+        },
+        zoom: {
+          from: zoomFrom,
+          to: zoomTo,
+        },
+        detectorIndex: series.detectorIndex,
+        entities: entityCondition,
+        query: {
+          query_string: {
+            analyze_wildcard: true,
+            query: '*',
+          },
         },
       },
     },
-    excludeBasePath: true,
-  });
+    { absolute: true }
+  );
   return url;
 }
 

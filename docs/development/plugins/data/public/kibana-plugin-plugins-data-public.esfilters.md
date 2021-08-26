@@ -4,55 +4,69 @@
 
 ## esFilters variable
 
+> Warning: This API is now obsolete.
+> 
+> Import helpers from the "<!-- -->@<!-- -->kbn/es-query" package directly instead.  8.1
+> 
+
+Filter helpers namespace:
+
 <b>Signature:</b>
 
 ```typescript
 esFilters: {
     FilterLabel: (props: import("./ui/filter_bar/filter_editor/lib/filter_label").FilterLabelProps) => JSX.Element;
     FilterItem: (props: import("./ui/filter_bar/filter_item").FilterItemProps) => JSX.Element;
-    FILTERS: typeof FILTERS;
+    FILTERS: typeof import("@kbn/es-query").FILTERS;
     FilterStateStore: typeof FilterStateStore;
-    buildEmptyFilter: (isPinned: boolean, index?: string | undefined) => import("../common").Filter;
-    buildPhrasesFilter: (field: import("../common").IFieldType, params: any[], indexPattern: import("../common").IIndexPattern) => import("../common").PhrasesFilter;
-    buildExistsFilter: (field: import("../common").IFieldType, indexPattern: import("../common").IIndexPattern) => import("../common").ExistsFilter;
-    buildPhraseFilter: (field: import("../common").IFieldType, value: any, indexPattern: import("../common").IIndexPattern) => import("../common").PhraseFilter;
-    buildQueryFilter: (query: any, index: string, alias: string) => import("../common").QueryStringFilter;
-    buildRangeFilter: (field: import("../common").IFieldType, params: import("../common").RangeFilterParams, indexPattern: import("../common").IIndexPattern, formattedValue?: string | undefined) => import("../common").RangeFilter;
-    isPhraseFilter: (filter: any) => filter is import("../common").PhraseFilter;
-    isExistsFilter: (filter: any) => filter is import("../common").ExistsFilter;
-    isPhrasesFilter: (filter: any) => filter is import("../common").PhrasesFilter;
-    isRangeFilter: (filter: any) => filter is import("../common").RangeFilter;
-    isMatchAllFilter: (filter: any) => filter is import("../common").MatchAllFilter;
-    isMissingFilter: (filter: any) => filter is import("../common").MissingFilter;
-    isQueryStringFilter: (filter: any) => filter is import("../common").QueryStringFilter;
-    isFilterPinned: (filter: import("../common").Filter) => boolean | undefined;
-    toggleFilterNegated: (filter: import("../common").Filter) => {
+    buildEmptyFilter: (isPinned: boolean, index?: string | undefined) => import("@kbn/es-query").Filter;
+    buildPhrasesFilter: (field: import("@kbn/es-query").IndexPatternFieldBase, params: (string | number | boolean)[], indexPattern: import("@kbn/es-query").IndexPatternBase) => import("@kbn/es-query").PhrasesFilter;
+    buildExistsFilter: (field: import("@kbn/es-query").IndexPatternFieldBase, indexPattern: import("@kbn/es-query").IndexPatternBase) => import("@kbn/es-query").ExistsFilter;
+    buildPhraseFilter: (field: import("@kbn/es-query").IndexPatternFieldBase, value: string | number | boolean, indexPattern: import("@kbn/es-query").IndexPatternBase) => import("@kbn/es-query").PhraseFilter | import("@kbn/es-query").ScriptedPhraseFilter;
+    buildQueryFilter: (query: (Record<string, any> & {
+        query_string?: {
+            query: string;
+        } | undefined;
+    }) | undefined, index: string, alias: string) => import("@kbn/es-query").QueryStringFilter;
+    buildRangeFilter: (field: import("@kbn/es-query").IndexPatternFieldBase, params: import("@kbn/es-query").RangeFilterParams, indexPattern: import("@kbn/es-query").IndexPatternBase, formattedValue?: string | undefined) => import("@kbn/es-query").RangeFilter | import("@kbn/es-query").ScriptedRangeFilter | import("@kbn/es-query/target_types/filters/build_filters").MatchAllRangeFilter;
+    isPhraseFilter: (filter: import("@kbn/es-query").Filter) => filter is import("@kbn/es-query").PhraseFilter;
+    isExistsFilter: (filter: import("@kbn/es-query").Filter) => filter is import("@kbn/es-query").ExistsFilter;
+    isPhrasesFilter: (filter: import("@kbn/es-query").Filter) => filter is import("@kbn/es-query").PhrasesFilter;
+    isRangeFilter: (filter?: import("@kbn/es-query").Filter | undefined) => filter is import("@kbn/es-query").RangeFilter;
+    isMatchAllFilter: (filter: import("@kbn/es-query").Filter) => filter is import("@kbn/es-query").MatchAllFilter;
+    isMissingFilter: (filter: import("@kbn/es-query").Filter) => filter is import("@kbn/es-query").MissingFilter;
+    isQueryStringFilter: (filter: import("@kbn/es-query").Filter) => filter is import("@kbn/es-query").QueryStringFilter;
+    isFilterPinned: (filter: import("@kbn/es-query").Filter) => boolean | undefined;
+    toggleFilterNegated: (filter: import("@kbn/es-query").Filter) => {
         meta: {
             negate: boolean;
-            alias: string | null;
-            disabled: boolean;
+            alias?: string | null | undefined;
+            disabled?: boolean | undefined;
             controlledBy?: string | undefined;
             index?: string | undefined;
+            isMultiIndex?: boolean | undefined;
             type?: string | undefined;
             key?: string | undefined;
             params?: any;
             value?: string | undefined;
         };
-        $state?: import("../common").FilterState | undefined;
-        query?: any;
+        $state?: {
+            store: FilterStateStore;
+        } | undefined;
+        query?: Record<string, any> | undefined;
     };
-    disableFilter: (filter: import("../common").Filter) => import("../common").Filter;
-    getPhraseFilterField: (filter: import("../common").PhraseFilter) => string;
-    getPhraseFilterValue: (filter: import("../common").PhraseFilter) => string | number | boolean;
+    disableFilter: (filter: import("@kbn/es-query").Filter) => import("@kbn/es-query").Filter;
+    getPhraseFilterField: (filter: import("@kbn/es-query").PhraseFilter) => string;
+    getPhraseFilterValue: (filter: import("@kbn/es-query").PhraseFilter | import("@kbn/es-query").ScriptedPhraseFilter) => string | number | boolean;
     getDisplayValueFromFilter: typeof getDisplayValueFromFilter;
-    compareFilters: (first: import("../common").Filter | import("../common").Filter[], second: import("../common").Filter | import("../common").Filter[], comparatorOptions?: import("../common").FilterCompareOptions) => boolean;
-    COMPARE_ALL_OPTIONS: import("../common").FilterCompareOptions;
+    compareFilters: (first: import("@kbn/es-query").Filter | import("@kbn/es-query").Filter[], second: import("@kbn/es-query").Filter | import("@kbn/es-query").Filter[], comparatorOptions?: import("@kbn/es-query").FilterCompareOptions | undefined) => boolean;
+    COMPARE_ALL_OPTIONS: import("@kbn/es-query").FilterCompareOptions;
     generateFilters: typeof generateFilters;
-    onlyDisabledFiltersChanged: (newFilters?: import("../common").Filter[] | undefined, oldFilters?: import("../common").Filter[] | undefined) => boolean;
-    changeTimeFilter: typeof changeTimeFilter;
-    convertRangeFilterToTimeRangeString: typeof convertRangeFilterToTimeRangeString;
-    mapAndFlattenFilters: (filters: import("../common").Filter[]) => import("../common").Filter[];
-    extractTimeFilter: typeof extractTimeFilter;
+    onlyDisabledFiltersChanged: (newFilters?: import("@kbn/es-query").Filter[] | undefined, oldFilters?: import("@kbn/es-query").Filter[] | undefined) => boolean;
+    changeTimeFilter: typeof oldChangeTimeFilter;
+    convertRangeFilterToTimeRangeString: typeof oldConvertRangeFilterToTimeRangeString;
+    mapAndFlattenFilters: (filters: import("@kbn/es-query").Filter[]) => import("@kbn/es-query").Filter[];
+    extractTimeFilter: typeof oldExtractTimeFilter;
     extractTimeRange: typeof extractTimeRange;
 }
 ```

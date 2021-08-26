@@ -7,11 +7,12 @@
 
 import uuid from 'uuid';
 import { merge, flattenDeep } from 'lodash';
+import { KibanaClient } from '@elastic/elasticsearch/api/kibana';
 import { makePing } from './make_ping';
 import { TlsProps } from './make_tls';
 
 interface CheckProps {
-  es: any;
+  es: KibanaClient;
   monitorId?: string;
   numIps?: number;
   fields?: { [key: string]: any };
@@ -76,7 +77,7 @@ export const makeCheck = async ({
 };
 
 export const makeChecks = async (
-  es: any,
+  es: KibanaClient,
   monitorId: string,
   numChecks: number = 1,
   numIps: number = 1,
@@ -121,7 +122,7 @@ export const makeChecks = async (
 };
 
 export const makeChecksWithStatus = async (
-  es: any,
+  es: KibanaClient,
   monitorId: string,
   numChecks: number,
   numIps: number,

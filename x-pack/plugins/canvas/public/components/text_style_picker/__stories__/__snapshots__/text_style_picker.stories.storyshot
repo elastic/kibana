@@ -241,6 +241,7 @@ exports[`Storyshots components/TextStylePicker default 1`] = `
               >
                 <span
                   className="euiButtonContent__icon"
+                  color="inherit"
                   data-euiicon-type="editorBold"
                   size="m"
                 />
@@ -270,6 +271,7 @@ exports[`Storyshots components/TextStylePicker default 1`] = `
               >
                 <span
                   className="euiButtonContent__icon"
+                  color="inherit"
                   data-euiicon-type="editorItalic"
                   size="m"
                 />
@@ -299,6 +301,7 @@ exports[`Storyshots components/TextStylePicker default 1`] = `
               >
                 <span
                   className="euiButtonContent__icon"
+                  color="inherit"
                   data-euiicon-type="editorUnderline"
                   size="m"
                 />
@@ -331,7 +334,6 @@ exports[`Storyshots components/TextStylePicker default 1`] = `
               className="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small euiButtonGroupButton-isSelected euiButtonGroupButton-isIconOnly"
               disabled={false}
               htmlFor="generated-id"
-              onClick={[Function]}
               style={
                 Object {
                   "minWidth": undefined,
@@ -343,6 +345,7 @@ exports[`Storyshots components/TextStylePicker default 1`] = `
               >
                 <span
                   className="euiButtonContent__icon"
+                  color="inherit"
                   data-euiicon-type="editorAlignLeft"
                   size="m"
                 />
@@ -367,7 +370,6 @@ exports[`Storyshots components/TextStylePicker default 1`] = `
               className="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small euiButtonGroupButton-isIconOnly"
               disabled={false}
               htmlFor="generated-id"
-              onClick={[Function]}
               style={
                 Object {
                   "minWidth": undefined,
@@ -379,6 +381,7 @@ exports[`Storyshots components/TextStylePicker default 1`] = `
               >
                 <span
                   className="euiButtonContent__icon"
+                  color="inherit"
                   data-euiicon-type="editorAlignCenter"
                   size="m"
                 />
@@ -403,7 +406,6 @@ exports[`Storyshots components/TextStylePicker default 1`] = `
               className="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small euiButtonGroupButton-isIconOnly"
               disabled={false}
               htmlFor="generated-id"
-              onClick={[Function]}
               style={
                 Object {
                   "minWidth": undefined,
@@ -415,6 +417,7 @@ exports[`Storyshots components/TextStylePicker default 1`] = `
               >
                 <span
                   className="euiButtonContent__icon"
+                  color="inherit"
                   data-euiicon-type="editorAlignRight"
                   size="m"
                 />
@@ -684,6 +687,7 @@ exports[`Storyshots components/TextStylePicker interactive 1`] = `
               >
                 <span
                   className="euiButtonContent__icon"
+                  color="inherit"
                   data-euiicon-type="editorBold"
                   size="m"
                 />
@@ -713,6 +717,7 @@ exports[`Storyshots components/TextStylePicker interactive 1`] = `
               >
                 <span
                   className="euiButtonContent__icon"
+                  color="inherit"
                   data-euiicon-type="editorItalic"
                   size="m"
                 />
@@ -742,6 +747,7 @@ exports[`Storyshots components/TextStylePicker interactive 1`] = `
               >
                 <span
                   className="euiButtonContent__icon"
+                  color="inherit"
                   data-euiicon-type="editorUnderline"
                   size="m"
                 />
@@ -774,7 +780,6 @@ exports[`Storyshots components/TextStylePicker interactive 1`] = `
               className="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small euiButtonGroupButton-isSelected euiButtonGroupButton-isIconOnly"
               disabled={false}
               htmlFor="generated-id"
-              onClick={[Function]}
               style={
                 Object {
                   "minWidth": undefined,
@@ -786,6 +791,7 @@ exports[`Storyshots components/TextStylePicker interactive 1`] = `
               >
                 <span
                   className="euiButtonContent__icon"
+                  color="inherit"
                   data-euiicon-type="editorAlignLeft"
                   size="m"
                 />
@@ -810,7 +816,6 @@ exports[`Storyshots components/TextStylePicker interactive 1`] = `
               className="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small euiButtonGroupButton-isIconOnly"
               disabled={false}
               htmlFor="generated-id"
-              onClick={[Function]}
               style={
                 Object {
                   "minWidth": undefined,
@@ -822,6 +827,7 @@ exports[`Storyshots components/TextStylePicker interactive 1`] = `
               >
                 <span
                   className="euiButtonContent__icon"
+                  color="inherit"
                   data-euiicon-type="editorAlignCenter"
                   size="m"
                 />
@@ -846,7 +852,6 @@ exports[`Storyshots components/TextStylePicker interactive 1`] = `
               className="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small euiButtonGroupButton-isIconOnly"
               disabled={false}
               htmlFor="generated-id"
-              onClick={[Function]}
               style={
                 Object {
                   "minWidth": undefined,
@@ -858,6 +863,7 @@ exports[`Storyshots components/TextStylePicker interactive 1`] = `
               >
                 <span
                   className="euiButtonContent__icon"
+                  color="inherit"
                   data-euiicon-type="editorAlignRight"
                   size="m"
                 />

@@ -6,21 +6,23 @@
  */
 
 import { act, renderHook, RenderHookResult } from '@testing-library/react-hooks';
+import type { estypes } from '@elastic/elasticsearch';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { KibanaServices } from '../../../common/lib/kibana';
 
 import * as alertsApi from '../../../detections/containers/detection_engine/alerts/api';
-import * as listsApi from '../../../../../lists/public/exceptions/api';
+import * as listsApi from '@kbn/securitysolution-list-api';
 import * as getQueryFilterHelper from '../../../../common/detection_engine/get_query_filter';
 import * as buildFilterHelpers from '../../../detections/components/alerts_table/default_config';
 import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
 import { getCreateExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/request/create_exception_list_item_schema.mock';
 import { getUpdateExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/request/update_exception_list_item_schema.mock';
-import {
+import type {
   ExceptionListItemSchema,
   CreateExceptionListItemSchema,
   UpdateExceptionListItemSchema,
-} from '../../../lists_plugin_deps';
+} from '@kbn/securitysolution-io-ts-list-types';
+import { TestProviders } from '../../mock';
 import {
   useAddOrUpdateException,
   UseAddOrUpdateExceptionProps,
@@ -31,16 +33,15 @@ import {
 const mockKibanaHttpService = coreMock.createStart().http;
 const mockKibanaServices = KibanaServices.get as jest.Mock;
 jest.mock('../../../common/lib/kibana');
+jest.mock('@kbn/securitysolution-list-api');
 
 const fetchMock = jest.fn();
 mockKibanaServices.mockReturnValue({ http: { fetch: fetchMock } });
 
 describe('useAddOrUpdateException', () => {
-  let updateAlertStatus: jest.SpyInstance<ReturnType<typeof alertsApi.updateAlertStatus>>;
-  let addExceptionListItem: jest.SpyInstance<ReturnType<typeof listsApi.addExceptionListItem>>;
-  let updateExceptionListItem: jest.SpyInstance<
-    ReturnType<typeof listsApi.updateExceptionListItem>
-  >;
+  let updateAlertStatus: jest.SpyInstance<Promise<estypes.UpdateByQueryResponse>>;
+  let addExceptionListItem: jest.SpyInstance<Promise<ExceptionListItemSchema>>;
+  let updateExceptionListItem: jest.SpyInstance<Promise<ExceptionListItemSchema>>;
   let getQueryFilter: jest.SpyInstance<ReturnType<typeof getQueryFilterHelper.getQueryFilter>>;
   let buildAlertStatusFilter: jest.SpyInstance<
     ReturnType<typeof buildFilterHelpers.buildAlertStatusFilter>
@@ -133,12 +134,16 @@ describe('useAddOrUpdateException', () => {
 
     addOrUpdateItemsArgs = [ruleId, itemsToAddOrUpdate];
     render = () =>
-      renderHook<UseAddOrUpdateExceptionProps, ReturnUseAddOrUpdateException>(() =>
-        useAddOrUpdateException({
-          http: mockKibanaHttpService,
-          onError,
-          onSuccess,
-        })
+      renderHook<UseAddOrUpdateExceptionProps, ReturnUseAddOrUpdateException>(
+        () =>
+          useAddOrUpdateException({
+            http: mockKibanaHttpService,
+            onError,
+            onSuccess,
+          }),
+        {
+          wrapper: TestProviders,
+        }
       );
   });
 

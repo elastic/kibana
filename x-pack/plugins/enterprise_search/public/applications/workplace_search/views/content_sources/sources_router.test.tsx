@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import '../../../__mocks__/react_router';
 import '../../../__mocks__/shallow_useeffect.mock';
-
-import { setMockValues, setMockActions } from '../../../__mocks__';
+import { setMockValues, setMockActions } from '../../../__mocks__/kea_logic';
 
 import React from 'react';
 import { Route, Switch, Redirect } from 'react-router-dom';
@@ -57,5 +57,12 @@ describe('SourcesRouter', () => {
       getSourcesPath(ADD_SOURCE_PATH, false)
     );
     expect(wrapper.find(Redirect).last().prop('to')).toEqual(PERSONAL_SOURCES_PATH);
+  });
+
+  it('does not render the router until canCreatePersonalSources is fetched', () => {
+    setMockValues({ ...mockValues, account: {} }); // canCreatePersonalSources is undefined
+    const wrapper = shallow(<SourcesRouter />);
+
+    expect(wrapper.html()).toEqual(null);
   });
 });

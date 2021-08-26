@@ -26,7 +26,7 @@ import { TelemetryLogic } from '../../../shared/telemetry';
 import { AppLogic } from '../../app_logic';
 import sharedSourcesIcon from '../../components/shared/assets/source_icons/share_circle.svg';
 import { ContentSection } from '../../components/shared/content_section';
-import { SOURCES_PATH, USERS_PATH, ORG_SETTINGS_PATH } from '../../routes';
+import { ADD_SOURCE_PATH, USERS_AND_ROLES_PATH, ORG_SETTINGS_PATH } from '../../routes';
 
 import { OnboardingCard } from './onboarding_card';
 import { OverviewLogic } from './overview_logic';
@@ -58,22 +58,10 @@ const ONBOARDING_USERS_CARD_DESCRIPTION = i18n.translate(
 
 export const OnboardingSteps: React.FC = () => {
   const {
-    isFederatedAuth,
     organization: { name, defaultOrgName },
-    account: { isCurated, canCreateInvitations },
   } = useValues(AppLogic);
 
-  const {
-    hasUsers,
-    hasOrgSources,
-    canCreateContentSources,
-    accountsCount,
-    sourcesCount,
-  } = useValues(OverviewLogic);
-
-  const accountsPath =
-    !isFederatedAuth && (canCreateInvitations || isCurated) ? USERS_PATH : undefined;
-  const sourcesPath = canCreateContentSources || isCurated ? SOURCES_PATH : undefined;
+  const { hasUsers, hasOrgSources, accountsCount, sourcesCount } = useValues(OverviewLogic);
 
   const SOURCES_CARD_DESCRIPTION = i18n.translate(
     'xpack.enterpriseSearch.workplaceSearch.sourcesOnboardingCard.description',
@@ -86,7 +74,7 @@ export const OnboardingSteps: React.FC = () => {
 
   return (
     <ContentSection>
-      <EuiFlexGrid columns={isFederatedAuth ? 1 : 2}>
+      <EuiFlexGrid columns={2}>
         <OnboardingCard
           title={SOURCES_TITLE}
           testSubj="sharedSourcesButton"
@@ -101,26 +89,24 @@ export const OnboardingSteps: React.FC = () => {
               values: { label: sourcesCount > 0 ? 'more' : '' },
             }
           )}
-          actionPath={sourcesPath}
+          actionPath={ADD_SOURCE_PATH}
           complete={hasOrgSources}
         />
-        {!isFederatedAuth && (
-          <OnboardingCard
-            title={USERS_TITLE}
-            testSubj="usersButton"
-            icon="user"
-            description={hasUsers ? USERS_CARD_DESCRIPTION : ONBOARDING_USERS_CARD_DESCRIPTION}
-            actionTitle={i18n.translate(
-              'xpack.enterpriseSearch.workplaceSearch.usersOnboardingCard.buttonLabel',
-              {
-                defaultMessage: 'Invite {label} users',
-                values: { label: accountsCount > 0 ? 'more' : '' },
-              }
-            )}
-            actionPath={accountsPath}
-            complete={hasUsers}
-          />
-        )}
+        <OnboardingCard
+          title={USERS_TITLE}
+          testSubj="usersButton"
+          icon="user"
+          description={hasUsers ? USERS_CARD_DESCRIPTION : ONBOARDING_USERS_CARD_DESCRIPTION}
+          actionTitle={i18n.translate(
+            'xpack.enterpriseSearch.workplaceSearch.usersOnboardingCard.buttonLabel',
+            {
+              defaultMessage: 'Invite {label} users',
+              values: { label: accountsCount > 0 ? 'more' : '' },
+            }
+          )}
+          actionPath={USERS_AND_ROLES_PATH}
+          complete={hasUsers}
+        />
       </EuiFlexGrid>
       {name === defaultOrgName && (
         <>
@@ -149,12 +135,12 @@ export const OrgNameOnboarding: React.FC = () => {
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiTitle size="xs">
-            <h4>
+            <h3>
               <FormattedMessage
                 id="xpack.enterpriseSearch.workplaceSearch.orgNameOnboarding.description"
                 defaultMessage="Before inviting your colleagues, name your organization to improve recognition."
               />
-            </h4>
+            </h3>
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>

@@ -4,6 +4,11 @@
 
 ## IndexPattern.removeScriptedField() method
 
+> Warning: This API is now obsolete.
+> 
+> use runtime field instead  8.1
+> 
+
 Remove scripted field from field list
 
 <b>Signature:</b>

@@ -9,7 +9,6 @@ import { ReactWrapper, mount } from 'enzyme';
 import React from 'react';
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import { waitFor } from '@testing-library/dom';
-
 import {
   doesNotExistOperator,
   existsOperator,
@@ -19,7 +18,10 @@ import {
   isNotOperator,
   isOneOfOperator,
   isOperator,
-} from '../autocomplete/operators';
+} from '@kbn/securitysolution-list-utils';
+import { useFindLists } from '@kbn/securitysolution-list-hooks';
+import { FieldSpec } from 'src/plugins/data/common';
+
 import {
   fields,
   getField,
@@ -27,11 +29,10 @@ import {
 import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { getFoundListSchemaMock } from '../../../../common/schemas/response/found_list_schema.mock';
-import { useFindLists } from '../../../lists/hooks/use_find_lists';
 
 import { BuilderEntryItem } from './entry_renderer';
 
-jest.mock('../../../lists/hooks/use_find_lists');
+jest.mock('@kbn/securitysolution-list-hooks');
 
 const mockKibanaHttpService = coreMock.createStart().http;
 const { autocomplete: autocompleteStartMock } = dataPluginMock.createStartContract();
@@ -228,6 +229,7 @@ describe('BuilderEntryItem', () => {
   test('it renders field values correctly when operator is "isInListOperator"', () => {
     wrapper = mount(
       <BuilderEntryItem
+        allowLargeValueLists
         autocompleteService={autocompleteStartMock}
         entry={{
           correspondingKeywordField: undefined,
@@ -264,6 +266,7 @@ describe('BuilderEntryItem', () => {
   test('it renders field values correctly when operator is "isNotInListOperator"', () => {
     wrapper = mount(
       <BuilderEntryItem
+        allowLargeValueLists
         autocompleteService={autocompleteStartMock}
         entry={{
           correspondingKeywordField: undefined,
@@ -372,31 +375,33 @@ describe('BuilderEntryItem', () => {
   });
 
   test('it uses "correspondingKeywordField" if it exists', () => {
+    const correspondingKeywordField: FieldSpec = {
+      aggregatable: true,
+      count: 0,
+      esTypes: ['keyword'],
+      name: 'extension',
+      readFromDocValues: true,
+      scripted: false,
+      searchable: true,
+      type: 'string',
+    };
+    const field: FieldSpec = {
+      aggregatable: false,
+      count: 0,
+      esTypes: ['text'],
+      name: 'extension.text',
+      readFromDocValues: true,
+      scripted: false,
+      searchable: false,
+      type: 'string',
+    };
     wrapper = mount(
       <BuilderEntryItem
         autocompleteService={autocompleteStartMock}
         entry={{
-          correspondingKeywordField: {
-            aggregatable: true,
-            count: 0,
-            esTypes: ['keyword'],
-            name: 'extension',
-            readFromDocValues: true,
-            scripted: false,
-            searchable: true,
-            type: 'string',
-          },
+          correspondingKeywordField,
           entryIndex: 0,
-          field: {
-            aggregatable: false,
-            count: 0,
-            esTypes: ['text'],
-            name: 'extension.text',
-            readFromDocValues: true,
-            scripted: false,
-            searchable: false,
-            type: 'string',
-          },
+          field,
           id: '123',
           nested: undefined,
           operator: isOneOfOperator,
@@ -536,10 +541,10 @@ describe('BuilderEntryItem', () => {
 
     ((wrapper.find(EuiComboBox).at(2).props() as unknown) as {
       onCreateOption: (a: string) => void;
-    }).onCreateOption('126.45.211.34');
+    }).onCreateOption('127.0.0.1');
 
     expect(mockOnChange).toHaveBeenCalledWith(
-      { field: 'ip', id: '123', operator: 'excluded', type: 'match', value: '126.45.211.34' },
+      { field: 'ip', id: '123', operator: 'excluded', type: 'match', value: '127.0.0.1' },
       0
     );
   });
@@ -574,10 +579,10 @@ describe('BuilderEntryItem', () => {
 
     ((wrapper.find(EuiComboBox).at(2).props() as unknown) as {
       onCreateOption: (a: string) => void;
-    }).onCreateOption('126.45.211.34');
+    }).onCreateOption('127.0.0.1');
 
     expect(mockOnChange).toHaveBeenCalledWith(
-      { field: 'ip', id: '123', operator: 'included', type: 'match_any', value: ['126.45.211.34'] },
+      { field: 'ip', id: '123', operator: 'included', type: 'match_any', value: ['127.0.0.1'] },
       0
     );
   });

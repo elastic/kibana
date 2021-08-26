@@ -12,12 +12,13 @@ import { makeChecksWithStatus } from './helper/make_checks';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const es = getService('legacyEs');
   const client = getService('es');
 
   describe('telemetry collectors fleet', () => {
     before('generating data', async () => {
-      await getService('esArchiver').load('uptime/blank_data_stream');
+      await getService('esArchiver').load(
+        'x-pack/test/functional/es_archives/uptime/blank_data_stream'
+      );
 
       const observer = {
         geo: {
@@ -34,7 +35,7 @@ export default function ({ getService }: FtrProviderContext) {
       };
 
       await makeChecksWithStatus(
-        es,
+        client,
         'upMonitorId',
         1,
         1,
@@ -53,7 +54,7 @@ export default function ({ getService }: FtrProviderContext) {
       );
 
       await makeChecksWithStatus(
-        es,
+        client,
         'downMonitorId',
         1,
         1,
@@ -72,7 +73,7 @@ export default function ({ getService }: FtrProviderContext) {
       );
 
       await makeChecksWithStatus(
-        es,
+        client,
         'noGeoNameMonitor',
         1,
         1,
@@ -89,7 +90,7 @@ export default function ({ getService }: FtrProviderContext) {
         true
       );
       await makeChecksWithStatus(
-        es,
+        client,
         'downMonitorId',
         1,
         1,
@@ -108,7 +109,7 @@ export default function ({ getService }: FtrProviderContext) {
       );
 
       await makeChecksWithStatus(
-        es,
+        client,
         'mixMonitorId',
         1,
         1,
@@ -119,11 +120,13 @@ export default function ({ getService }: FtrProviderContext) {
         undefined,
         true
       );
-      await es.indices.refresh();
+      await client.indices.refresh();
     });
 
     after('unload heartbeat index', () => {
-      getService('esArchiver').unload('uptime/blank_data_stream');
+      getService('esArchiver').unload(
+        'x-pack/test/functional/es_archives/uptime/blank_data_stream'
+      );
       /**
        * Data streams aren't included in the javascript elasticsearch client in kibana yet so we
        * need to do raw requests here. Delete a data stream is slightly different than that of a regular index which
@@ -136,7 +139,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     beforeEach(async () => {
-      await es.indices.refresh();
+      await client.indices.refresh();
     });
 
     it('should receive expected results for fleet managed monitors after calling monitor logging', async () => {

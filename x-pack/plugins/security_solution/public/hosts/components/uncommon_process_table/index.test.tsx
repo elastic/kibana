@@ -20,6 +20,8 @@ import { mockData } from './mock';
 import { HostsType } from '../../store/model';
 import * as i18n from './translations';
 
+jest.mock('../../../common/lib/kibana');
+
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
   return {

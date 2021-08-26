@@ -26,3 +26,6 @@ export type {
   TutorialDirectoryHeaderLinkComponent,
   TutorialModuleNoticeComponent,
 } from './tutorials';
+
+export { AddDataService } from './add_data';
+export type { AddDataServiceSetup, AddDataTab } from './add_data';

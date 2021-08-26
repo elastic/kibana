@@ -9,7 +9,7 @@ Execute expression and return result.
 <b>Signature:</b>
 
 ```typescript
-run<Input, Output>(ast: string | ExpressionAstExpression, input: Input, params?: ExpressionExecutionParams): Observable<Output | ExpressionValueError>;
+run<Input, Output>(ast: string | ExpressionAstExpression, input: Input, params?: ExpressionExecutionParams): Observable<ExecutionResult<Output | ExpressionValueError>>;
 ```
 
 ## Parameters
@@ -22,5 +22,5 @@ run<Input, Output>(ast: string | ExpressionAstExpression, input: Input, params?:
 
 <b>Returns:</b>
 
-`Observable<Output | ExpressionValueError>`
+`Observable<ExecutionResult<Output | ExpressionValueError>>`
 

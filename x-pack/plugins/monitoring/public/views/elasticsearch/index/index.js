@@ -21,7 +21,7 @@ import { Index } from '../../../components/elasticsearch/index/index';
 import { MonitoringViewBaseController } from '../../base_controller';
 import {
   CODE_PATH_ELASTICSEARCH,
-  ALERT_LARGE_SHARD_SIZE,
+  RULE_LARGE_SHARD_SIZE,
   ELASTICSEARCH_SYSTEM_ID,
 } from '../../../../common/constants';
 import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
@@ -88,7 +88,7 @@ uiRoutes.when('/elasticsearch/indices/:index', {
         alerts: {
           shouldFetch: true,
           options: {
-            alertTypeIds: [ALERT_LARGE_SHARD_SIZE],
+            alertTypeIds: [RULE_LARGE_SHARD_SIZE],
             filters: [
               {
                 shardIndex: $route.current.pathParams.index,

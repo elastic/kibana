@@ -27,7 +27,7 @@ exports[`StatusTable renders when statuses is provided 1`] = `
       Object {
         "id": "plugin:1",
         "state": Object {
-          "id": "green",
+          "id": "available",
           "message": "Ready",
           "title": "green",
           "uiColor": "secondary",

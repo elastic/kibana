@@ -17,7 +17,7 @@ import {
   getRecentCasesLazy,
   getAllCasesSelectorModalLazy,
 } from './methods';
-import { ENABLE_CASE_CONNECTOR } from '../common';
+import { CasesUiConfigType, ENABLE_CASE_CONNECTOR } from '../common';
 
 /**
  * @public
@@ -26,7 +26,7 @@ import { ENABLE_CASE_CONNECTOR } from '../common';
 export class CasesUiPlugin implements Plugin<void, CasesUiStart, SetupPlugins, StartPlugins> {
   private kibanaVersion: string;
 
-  constructor(initializerContext: PluginInitializerContext) {
+  constructor(private readonly initializerContext: PluginInitializerContext) {
     this.kibanaVersion = initializerContext.env.packageInfo.version;
   }
   public setup(core: CoreSetup, plugins: SetupPlugins) {
@@ -36,56 +36,45 @@ export class CasesUiPlugin implements Plugin<void, CasesUiStart, SetupPlugins, S
   }
 
   public start(core: CoreStart, plugins: StartPlugins): CasesUiStart {
-    KibanaServices.init({ ...core, ...plugins, kibanaVersion: this.kibanaVersion });
+    const config = this.initializerContext.config.get<CasesUiConfigType>();
+    KibanaServices.init({ ...core, ...plugins, kibanaVersion: this.kibanaVersion, config });
     return {
       /**
        * Get the all cases table
        * @param props AllCasesProps
        * @return {ReactElement<AllCasesProps>}
        */
-      getAllCases: (props) => {
-        return getAllCasesLazy(props);
-      },
+      getAllCases: getAllCasesLazy,
       /**
        * Get the case view component
        * @param props CaseViewProps
        * @return {ReactElement<CaseViewProps>}
        */
-      getCaseView: (props) => {
-        return getCaseViewLazy(props);
-      },
+      getCaseView: getCaseViewLazy,
       /**
        * Get the configure case component
        * @param props ConfigureCasesProps
        * @return {ReactElement<ConfigureCasesProps>}
        */
-      getConfigureCases: (props) => {
-        return getConfigureCasesLazy(props);
-      },
+      getConfigureCases: getConfigureCasesLazy,
       /**
        * Get the create case form
        * @param props CreateCaseProps
        * @return {ReactElement<CreateCaseProps>}
        */
-      getCreateCase: (props) => {
-        return getCreateCaseLazy(props);
-      },
+      getCreateCase: getCreateCaseLazy,
       /**
        * Get the recent cases component
        * @param props RecentCasesProps
        * @return {ReactElement<RecentCasesProps>}
        */
-      getRecentCases: (props) => {
-        return getRecentCasesLazy(props);
-      },
+      getRecentCases: getRecentCasesLazy,
       /**
        * use Modal hook for all cases selector
        * @param props UseAllCasesSelectorModalProps
        * @return UseAllCasesSelectorModalReturnedValues
        */
-      getAllCasesSelectorModal: (props) => {
-        return getAllCasesSelectorModalLazy(props);
-      },
+      getAllCasesSelectorModal: getAllCasesSelectorModalLazy,
     };
   }
 

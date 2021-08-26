@@ -6,7 +6,7 @@
  */
 
 import { countBy } from 'lodash/fp';
-import { SavedObject, SavedObjectsFindResponse } from 'kibana/server';
+import { SavedObject } from 'kibana/server';
 import uuid from 'uuid';
 
 import { RulesSchema } from '../../../../../common/detection_engine/schemas/response/rules_schema';
@@ -17,11 +17,10 @@ import { INTERNAL_IDENTIFIER } from '../../../../../common/constants';
 import {
   RuleAlertType,
   isAlertType,
-  isAlertTypes,
   IRuleSavedAttributesSavedObjectAttributes,
   isRuleStatusFindType,
-  isRuleStatusFindTypes,
   isRuleStatusSavedObjectType,
+  IRuleStatusSOAttributes,
 } from '../../rules/types';
 import {
   createBulkErrorObject,
@@ -34,6 +33,7 @@ import {
 import { RuleActions } from '../../rule_actions/types';
 import { internalRuleToAPIResponse } from '../../schemas/rule_converters';
 import { RuleParams } from '../../schemas/rule_schemas';
+import { SanitizedAlert } from '../../../../../../alerting/common';
 
 type PromiseFromStreams = ImportRulesSchemaDecoded | Error;
 
@@ -103,11 +103,11 @@ export const transformTags = (tags: string[]): string[] => {
 // Transforms the data but will remove any null or undefined it encounters and not include
 // those on the export
 export const transformAlertToRule = (
-  alert: RuleAlertType,
+  alert: SanitizedAlert<RuleParams>,
   ruleActions?: RuleActions | null,
   ruleStatus?: SavedObject<IRuleSavedAttributesSavedObjectAttributes>
 ): Partial<RulesSchema> => {
-  return internalRuleToAPIResponse(alert, ruleActions, ruleStatus);
+  return internalRuleToAPIResponse(alert, ruleActions, ruleStatus?.attributes);
 };
 
 export const transformAlertsToRules = (alerts: RuleAlertType[]): Array<Partial<RulesSchema>> => {
@@ -116,33 +116,24 @@ export const transformAlertsToRules = (alerts: RuleAlertType[]): Array<Partial<R
 
 export const transformFindAlerts = (
   findResults: FindResult<RuleParams>,
-  ruleActions: Array<RuleActions | null>,
-  ruleStatuses?: Array<SavedObjectsFindResponse<IRuleSavedAttributesSavedObjectAttributes>>
+  ruleActions: { [key: string]: RuleActions | undefined },
+  ruleStatuses: { [key: string]: IRuleStatusSOAttributes[] | undefined }
 ): {
   page: number;
   perPage: number;
   total: number;
   data: Array<Partial<RulesSchema>>;
 } | null => {
-  if (!ruleStatuses && isAlertTypes(findResults.data)) {
-    return {
-      page: findResults.page,
-      perPage: findResults.perPage,
-      total: findResults.total,
-      data: findResults.data.map((alert, idx) => transformAlertToRule(alert, ruleActions[idx])),
-    };
-  } else if (isAlertTypes(findResults.data) && isRuleStatusFindTypes(ruleStatuses)) {
-    return {
-      page: findResults.page,
-      perPage: findResults.perPage,
-      total: findResults.total,
-      data: findResults.data.map((alert, idx) =>
-        transformAlertToRule(alert, ruleActions[idx], ruleStatuses[idx].saved_objects[0])
-      ),
-    };
-  } else {
-    return null;
-  }
+  return {
+    page: findResults.page,
+    perPage: findResults.perPage,
+    total: findResults.total,
+    data: findResults.data.map((alert) => {
+      const statuses = ruleStatuses[alert.id];
+      const status = statuses ? statuses[0] : undefined;
+      return internalRuleToAPIResponse(alert, ruleActions[alert.id], status);
+    }),
+  };
 };
 
 export const transform = (

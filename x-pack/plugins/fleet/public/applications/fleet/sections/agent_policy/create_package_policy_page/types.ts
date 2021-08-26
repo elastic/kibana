@@ -5,5 +5,11 @@
  * 2.0.
  */
 
-export type CreatePackagePolicyFrom = 'package' | 'package-edit' | 'policy' | 'edit';
+export type EditPackagePolicyFrom =
+  | 'package'
+  | 'package-edit'
+  | 'policy'
+  | 'edit'
+  | 'upgrade-from-fleet-policy-list'
+  | 'upgrade-from-integrations-policy-list';
 export type PackagePolicyFormState = 'VALID' | 'INVALID' | 'CONFIRM' | 'LOADING' | 'SUBMITTED';

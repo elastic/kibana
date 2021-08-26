@@ -14,6 +14,7 @@ export interface EmbeddableSetup extends PersistableStateService<EmbeddableState
 
 |  Property | Type | Description |
 |  --- | --- | --- |
+|  [getAllMigrations](./kibana-plugin-plugins-embeddable-server.embeddablesetup.getallmigrations.md) | <code>() =&gt; MigrateFunctionsObject</code> |  |
 |  [registerEmbeddableFactory](./kibana-plugin-plugins-embeddable-server.embeddablesetup.registerembeddablefactory.md) | <code>(factory: EmbeddableRegistryDefinition) =&gt; void</code> |  |
 |  [registerEnhancement](./kibana-plugin-plugins-embeddable-server.embeddablesetup.registerenhancement.md) | <code>(enhancement: EnhancementRegistryDefinition) =&gt; void</code> |  |
 

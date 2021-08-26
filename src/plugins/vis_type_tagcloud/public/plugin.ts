@@ -7,32 +7,21 @@
  */
 
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'kibana/public';
-import { Plugin as ExpressionsPublicPlugin } from '../../expressions/public';
 import { VisualizationsSetup } from '../../visualizations/public';
 import { ChartsPluginSetup } from '../../charts/public';
 
-import { createTagCloudFn } from './tag_cloud_fn';
-import { tagCloudVisTypeDefinition } from './tag_cloud_type';
-import { DataPublicPluginStart } from '../../data/public';
-import { setFormatService } from './services';
+import { getTagCloudVisTypeDefinition } from './tag_cloud_type';
 import { ConfigSchema } from '../config';
-import { getTagCloudVisRenderer } from './tag_cloud_vis_renderer';
 
 /** @internal */
 export interface TagCloudPluginSetupDependencies {
-  expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
   visualizations: VisualizationsSetup;
   charts: ChartsPluginSetup;
 }
 
 /** @internal */
 export interface TagCloudVisDependencies {
-  colors: ChartsPluginSetup['legacyColors'];
-}
-
-/** @internal */
-export interface TagCloudVisPluginStartDependencies {
-  data: DataPublicPluginStart;
+  palettes: ChartsPluginSetup['palettes'];
 }
 
 /** @internal */
@@ -43,19 +32,13 @@ export class TagCloudPlugin implements Plugin<void, void> {
     this.initializerContext = initializerContext;
   }
 
-  public setup(
-    core: CoreSetup,
-    { expressions, visualizations, charts }: TagCloudPluginSetupDependencies
-  ) {
+  public setup(core: CoreSetup, { visualizations, charts }: TagCloudPluginSetupDependencies) {
     const visualizationDependencies: TagCloudVisDependencies = {
-      colors: charts.legacyColors,
+      palettes: charts.palettes,
     };
-    expressions.registerFunction(createTagCloudFn);
-    expressions.registerRenderer(getTagCloudVisRenderer(visualizationDependencies));
-    visualizations.createBaseVisualization(tagCloudVisTypeDefinition);
+
+    visualizations.createBaseVisualization(getTagCloudVisTypeDefinition(visualizationDependencies));
   }
 
-  public start(core: CoreStart, { data }: TagCloudVisPluginStartDependencies) {
-    setFormatService(data.fieldFormats);
-  }
+  public start(core: CoreStart) {}
 }

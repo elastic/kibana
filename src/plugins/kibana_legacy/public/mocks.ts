@@ -17,11 +17,8 @@ const createStartContract = (): Start => ({
   config: {
     defaultAppId: 'home',
   },
-  dashboardConfig: {
-    turnHideWriteControlsOn: jest.fn(),
-    getHideWriteControls: jest.fn(),
-  },
   loadFontAwesome: jest.fn(),
+  loadAngularBootstrap: jest.fn(),
 });
 
 export const kibanaLegacyPluginMock = {

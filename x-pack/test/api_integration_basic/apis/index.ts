@@ -13,5 +13,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
 
     loadTestFile(require.resolve('./ml'));
     loadTestFile(require.resolve('./transform'));
+    loadTestFile(require.resolve('./security_solution'));
   });
 }

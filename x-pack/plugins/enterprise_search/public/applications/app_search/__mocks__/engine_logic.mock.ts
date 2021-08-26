@@ -6,12 +6,13 @@
  */
 
 import { EngineDetails } from '../components/engine/types';
-import { ENGINES_TITLE } from '../components/engines';
+import { ENGINES_TITLE } from '../components/engines/constants';
 import { generateEncodedPath } from '../utils/encode_path_params';
 
 export const mockEngineValues = {
   engineName: 'some-engine',
   engine: {} as EngineDetails,
+  searchKey: 'search-abc123',
 };
 
 export const mockEngineActions = {

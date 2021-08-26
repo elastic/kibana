@@ -8,7 +8,7 @@
 
 import React, { Component } from 'react';
 import { createSelector } from 'reselect';
-import { IndexPatternField, IndexPattern, IFieldType } from '../../../../../../plugins/data/public';
+import { IndexPatternField, IndexPattern } from '../../../../../../plugins/data/public';
 import { Table } from './components/table';
 import { IndexedFieldItem } from './types';
 
@@ -20,7 +20,7 @@ interface IndexedFieldsTableProps {
   helpers: {
     editField: (fieldName: string) => void;
     deleteField: (fieldName: string) => void;
-    getFieldInfo: (indexPattern: IndexPattern, field: IFieldType) => string[];
+    getFieldInfo: (indexPattern: IndexPattern, field: IndexPatternField) => string[];
   };
   fieldWildcardMatcher: (filters: any[]) => (val: any) => boolean;
 }

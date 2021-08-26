@@ -20,7 +20,7 @@ interface PostTransformsOptions {
   autoStart: boolean;
   frequency: string;
   indices: string[];
-  docsPerSecond: number | null;
+  docsPerSecond: number | undefined;
   kibanaVersion: string;
   maxPageSearchSize: number;
   query: object;

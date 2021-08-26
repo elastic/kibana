@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import type { estypes } from '@elastic/elasticsearch';
 
 import {
   ElasticsearchClient,
@@ -207,7 +208,7 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
 
         await ctx.core.elasticsearch.client.asCurrentUser.transform
           .putTransform({
-            // @ts-expect-error @elastic/elasticsearch max_page_search_size is required in TransformPivot
+            // @ts-expect-error @elastic/elasticsearch group_by is expected to be optional in TransformPivot
             body: req.body,
             transform_id: transformId,
           })
@@ -252,7 +253,7 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
           const {
             body,
           } = await ctx.core.elasticsearch.client.asCurrentUser.transform.updateTransform({
-            // @ts-expect-error query doesn't satisfy QueryContainer from @elastic/elasticsearch
+            // @ts-expect-error query doesn't satisfy QueryDslQueryContainer from @elastic/elasticsearch
             body: req.body,
             transform_id: transformId,
           });
@@ -570,7 +571,10 @@ const previewTransformHandler: RequestHandler<
         return acc;
       }, {} as Record<string, { type: string }>);
 
-      body.generated_dest_index.mappings.properties = fields;
+      body.generated_dest_index.mappings!.properties = fields as Record<
+        string,
+        estypes.MappingProperty
+      >;
     }
     return res.ok({ body });
   } catch (e) {

@@ -7,7 +7,7 @@
 
 import '../../../../../__mocks__/shallow_useeffect.mock';
 
-import { setMockValues, setMockActions } from '../../../../../__mocks__';
+import { setMockValues, setMockActions } from '../../../../../__mocks__/kea_logic';
 import { mostRecentIndexJob } from '../../../../__mocks__/content_sources.mock';
 
 import React from 'react';
@@ -16,7 +16,6 @@ import { shallow } from 'enzyme';
 
 import { EuiEmptyPrompt, EuiFieldSearch } from '@elastic/eui';
 
-import { Loading } from '../../../../../shared/loading';
 import { SchemaAddFieldModal, SchemaErrorsCallout } from '../../../../../shared/schema';
 
 import { Schema } from './schema';
@@ -71,13 +70,6 @@ describe('Schema', () => {
     expect(wrapper.find(SchemaFieldsTable)).toHaveLength(1);
   });
 
-  it('returns loading when loading', () => {
-    setMockValues({ ...mockValues, dataLoading: true });
-    const wrapper = shallow(<Schema />);
-
-    expect(wrapper.find(Loading)).toHaveLength(1);
-  });
-
   it('handles empty state', () => {
     setMockValues({ ...mockValues, activeSchema: {} });
     const wrapper = shallow(<Schema />);
@@ -106,7 +98,7 @@ describe('Schema', () => {
 
     expect(wrapper.find(SchemaErrorsCallout)).toHaveLength(1);
     expect(wrapper.find(SchemaErrorsCallout).prop('viewErrorsPath')).toEqual(
-      '/sources/123/schema_errors/123'
+      '/sources/123/schemas/123'
     );
   });
 });

@@ -1,5 +1,5 @@
 get:
-  summary: EPM - Packages - List
+  summary: Packages - List
   tags: []
   responses:
     '200':
@@ -10,5 +10,5 @@ get:
             type: array
             items:
               $ref: ../components/schemas/search_result.yaml
-  operationId: get-epm-list
+  operationId: list-all-packages
 parameters: []

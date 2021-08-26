@@ -45,6 +45,7 @@ describe('createLayerDescriptor', () => {
       __dataRequests: [],
       alpha: 0.75,
       id: '12345',
+      includeInFitToBounds: true,
       joins: [
         {
           leftField: 'iso2',
@@ -53,7 +54,7 @@ describe('createLayerDescriptor', () => {
             applyGlobalTime: true,
             id: '12345',
             indexPatternId: 'apm_static_index_pattern_id',
-            indexPatternTitle: 'apm-*',
+            indexPatternTitle: 'traces-apm*,logs-apm*,metrics-apm*,apm-*',
             metrics: [
               {
                 field: 'transaction.duration.us',
@@ -178,6 +179,7 @@ describe('createLayerDescriptor', () => {
       __dataRequests: [],
       alpha: 0.75,
       id: '12345',
+      includeInFitToBounds: true,
       label: '[Performance] Duration',
       maxZoom: 24,
       minZoom: 0,
@@ -220,6 +222,7 @@ describe('createLayerDescriptor', () => {
       __dataRequests: [],
       alpha: 0.75,
       id: '12345',
+      includeInFitToBounds: true,
       joins: [],
       label: '[Performance] Duration',
       maxZoom: 24,

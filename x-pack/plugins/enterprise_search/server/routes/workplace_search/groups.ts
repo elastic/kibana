@@ -152,28 +152,6 @@ export function registerShareGroupRoute({
   );
 }
 
-export function registerAssignGroupRoute({
-  router,
-  enterpriseSearchRequestHandler,
-}: RouteDependencies) {
-  router.post(
-    {
-      path: '/api/workplace_search/groups/{id}/assign',
-      validate: {
-        params: schema.object({
-          id: schema.string(),
-        }),
-        body: schema.object({
-          user_ids: schema.arrayOf(schema.string()),
-        }),
-      },
-    },
-    enterpriseSearchRequestHandler.createRequest({
-      path: '/ws/org/groups/:id/assign',
-    })
-  );
-}
-
 export function registerBoostsGroupRoute({
   router,
   enterpriseSearchRequestHandler,
@@ -204,6 +182,5 @@ export const registerGroupsRoutes = (dependencies: RouteDependencies) => {
   registerGroupRoute(dependencies);
   registerGroupUsersRoute(dependencies);
   registerShareGroupRoute(dependencies);
-  registerAssignGroupRoute(dependencies);
   registerBoostsGroupRoute(dependencies);
 };

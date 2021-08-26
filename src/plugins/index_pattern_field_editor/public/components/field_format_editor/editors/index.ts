@@ -6,17 +6,19 @@
  * Side Public License, v 1.
  */
 
-export { DefaultFormatEditor } from './default';
+export type { FieldFormatEditor, FieldFormatEditorFactory, FormatEditorProps } from './types';
 
-export { BytesFormatEditor } from './bytes';
-export { ColorFormatEditor } from './color';
-export { DateFormatEditor } from './date';
-export { DateNanosFormatEditor } from './date_nanos';
-export { DurationFormatEditor } from './duration';
-export { NumberFormatEditor } from './number';
-export { PercentFormatEditor } from './percent';
-export { StaticLookupFormatEditor } from './static_lookup';
-export { StringFormatEditor } from './string';
-export { TruncateFormatEditor } from './truncate';
-export { UrlFormatEditor } from './url';
-export { HistogramFormatEditor } from './histogram';
+export { DefaultFormatEditor, defaultFormatEditorFactory } from './default';
+
+export { BytesFormatEditor, bytesFormatEditorFactory } from './bytes';
+export { ColorFormatEditor, colorFormatEditorFactory } from './color';
+export { DateFormatEditor, dateFormatEditorFactory } from './date';
+export { DateNanosFormatEditor, dateNanosFormatEditorFactory } from './date_nanos';
+export { DurationFormatEditor, durationFormatEditorFactory } from './duration';
+export { NumberFormatEditor, numberFormatEditorFactory } from './number';
+export { PercentFormatEditor, percentFormatEditorFactory } from './percent';
+export { StaticLookupFormatEditor, staticLookupFormatEditorFactory } from './static_lookup';
+export { StringFormatEditor, stringFormatEditorFactory } from './string';
+export { TruncateFormatEditor, truncateFormatEditorFactory } from './truncate';
+export { UrlFormatEditor, urlFormatEditorFactory } from './url';
+export { HistogramFormatEditor, histogramFormatEditorFactory } from './histogram';

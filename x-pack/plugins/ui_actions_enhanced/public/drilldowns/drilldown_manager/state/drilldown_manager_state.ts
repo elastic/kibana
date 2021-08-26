@@ -8,7 +8,7 @@
 import useObservable from 'react-use/lib/useObservable';
 import { BehaviorSubject } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { SerializableState } from 'src/plugins/kibana_utils/common';
+import type { SerializableRecord } from '@kbn/utility-types';
 import {
   PublicDrilldownManagerProps,
   DrilldownManagerDependencies,
@@ -352,7 +352,7 @@ export class DrilldownManagerState {
     const action: SerializedAction = {
       factoryId: template.factoryId,
       name,
-      config: (template.config || {}) as SerializableState,
+      config: (template.config || {}) as SerializableRecord,
     };
     await dynamicActionManager.createEvent(action, template.triggers);
   }
@@ -395,7 +395,7 @@ export class DrilldownManagerState {
     if (drilldownState) {
       drilldownState.setName(this.pickName(template.name));
       drilldownState.setTriggers(template.triggers);
-      drilldownState.setConfig(template.config as SerializableState);
+      drilldownState.setConfig(template.config as SerializableRecord);
     }
   };
 

@@ -13,82 +13,16 @@ import {
   SavedObjectAttributes,
   SavedObjectsFindResponse,
   SavedObjectsClientContract,
+  SavedObjectsFindResult,
 } from 'kibana/server';
-import { UpdateRulesSchema } from '../../../../common/detection_engine/schemas/request';
-import { RuleAlertAction } from '../../../../common/detection_engine/types';
-import {
-  FalsePositives,
-  From,
-  RuleId,
-  Immutable,
-  DescriptionOrUndefined,
-  Interval,
-  MaxSignals,
-  RiskScore,
-  OutputIndex,
-  Name,
-  Severity,
-  Tags,
-  Threats,
-  To,
-  Type,
-  References,
-  Version,
-  AnomalyThresholdOrUndefined,
-  QueryOrUndefined,
-  LanguageOrUndefined,
-  SavedIdOrUndefined,
-  TimelineIdOrUndefined,
-  TimelineTitleOrUndefined,
+import type {
   MachineLearningJobIdOrUndefined,
-  IndexOrUndefined,
-  NoteOrUndefined,
-  MetaOrUndefined,
-  Description,
-  Enabled,
-  VersionOrUndefined,
-  IdOrUndefined,
-  RuleIdOrUndefined,
-  EnabledOrUndefined,
-  FalsePositivesOrUndefined,
+  From,
   FromOrUndefined,
-  OutputIndexOrUndefined,
-  IntervalOrUndefined,
-  MaxSignalsOrUndefined,
-  RiskScoreOrUndefined,
-  NameOrUndefined,
-  SeverityOrUndefined,
-  TagsOrUndefined,
-  ToOrUndefined,
-  ThreatsOrUndefined,
-  ThresholdOrUndefined,
-  TypeOrUndefined,
-  ReferencesOrUndefined,
-  PerPageOrUndefined,
-  PageOrUndefined,
-  SortFieldOrUndefined,
-  QueryFilterOrUndefined,
-  FieldsOrUndefined,
-  SortOrderOrUndefined,
-  JobStatus,
-  LastSuccessAt,
-  StatusDate,
-  LastSuccessMessage,
-  LastFailureAt,
-  LastFailureMessage,
-  Author,
-  AuthorOrUndefined,
-  LicenseOrUndefined,
+  RiskScore,
   RiskScoreMapping,
   RiskScoreMappingOrUndefined,
-  SeverityMapping,
-  SeverityMappingOrUndefined,
-  TimestampOverrideOrUndefined,
-  BuildingBlockTypeOrUndefined,
-  RuleNameOverrideOrUndefined,
-  EventCategoryOverrideOrUndefined,
-} from '../../../../common/detection_engine/schemas/common/schemas';
-import {
+  RiskScoreOrUndefined,
   ThreatIndexOrUndefined,
   ThreatQueryOrUndefined,
   ThreatMappingOrUndefined,
@@ -97,14 +31,83 @@ import {
   ConcurrentSearchesOrUndefined,
   ItemsPerSearchOrUndefined,
   ThreatIndicatorPathOrUndefined,
-} from '../../../../common/detection_engine/schemas/types/threat_mapping';
+  Threats,
+  ThreatsOrUndefined,
+  TypeOrUndefined,
+  Type,
+  LanguageOrUndefined,
+  SeverityMapping,
+  SeverityMappingOrUndefined,
+  SeverityOrUndefined,
+  Severity,
+  MaxSignalsOrUndefined,
+  MaxSignals,
+} from '@kbn/securitysolution-io-ts-alerting-types';
+import type { VersionOrUndefined, Version } from '@kbn/securitysolution-io-ts-types';
 
-import { AlertsClient, PartialAlert } from '../../../../../alerting/server';
+import type { ListArrayOrUndefined, ListArray } from '@kbn/securitysolution-io-ts-list-types';
+import { UpdateRulesSchema } from '../../../../common/detection_engine/schemas/request';
+import { RuleAlertAction } from '../../../../common/detection_engine/types';
+import {
+  FalsePositives,
+  RuleId,
+  Immutable,
+  DescriptionOrUndefined,
+  Interval,
+  OutputIndex,
+  Name,
+  Tags,
+  To,
+  References,
+  AnomalyThresholdOrUndefined,
+  QueryOrUndefined,
+  SavedIdOrUndefined,
+  TimelineIdOrUndefined,
+  TimelineTitleOrUndefined,
+  IndexOrUndefined,
+  NoteOrUndefined,
+  MetaOrUndefined,
+  Description,
+  Enabled,
+  Id,
+  IdOrUndefined,
+  RuleIdOrUndefined,
+  EnabledOrUndefined,
+  FalsePositivesOrUndefined,
+  OutputIndexOrUndefined,
+  IntervalOrUndefined,
+  NameOrUndefined,
+  TagsOrUndefined,
+  ToOrUndefined,
+  ThresholdOrUndefined,
+  ReferencesOrUndefined,
+  PerPageOrUndefined,
+  PageOrUndefined,
+  SortFieldOrUndefined,
+  QueryFilterOrUndefined,
+  FieldsOrUndefined,
+  SortOrderOrUndefined,
+  RuleExecutionStatus,
+  LastSuccessAt,
+  StatusDate,
+  LastSuccessMessage,
+  LastFailureAt,
+  LastFailureMessage,
+  Author,
+  AuthorOrUndefined,
+  LicenseOrUndefined,
+  TimestampOverrideOrUndefined,
+  BuildingBlockTypeOrUndefined,
+  RuleNameOverrideOrUndefined,
+  EventCategoryOverrideOrUndefined,
+} from '../../../../common/detection_engine/schemas/common/schemas';
+
+import { RulesClient, PartialAlert } from '../../../../../alerting/server';
 import { Alert, SanitizedAlert } from '../../../../../alerting/common';
 import { SIGNALS_ID } from '../../../../common/constants';
 import { PartialFilter } from '../types';
-import { ListArrayOrUndefined, ListArray } from '../../../../common/detection_engine/schemas/types';
 import { RuleParams } from '../schemas/rule_schemas';
+import { IRuleExecutionLogClient } from '../rule_execution_log/types';
 
 export type RuleAlertType = Alert<RuleParams>;
 
@@ -116,7 +119,7 @@ export interface IRuleStatusSOAttributes extends Record<string, any> {
   lastFailureMessage: LastFailureMessage | null | undefined;
   lastSuccessAt: LastSuccessAt | null | undefined;
   lastSuccessMessage: LastSuccessMessage | null | undefined;
-  status: JobStatus | null | undefined;
+  status: RuleExecutionStatus | null | undefined;
   lastLookBackDate: string | null | undefined;
   gap: string | null | undefined;
   bulkCreateTimeDurations: string[] | null | undefined;
@@ -130,8 +133,8 @@ export interface IRuleStatusResponseAttributes {
   last_failure_message: LastFailureMessage | null | undefined;
   last_success_at: LastSuccessAt | null | undefined;
   last_success_message: LastSuccessMessage | null | undefined;
-  status: JobStatus | null | undefined;
-  last_look_back_date: string | null | undefined;
+  status: RuleExecutionStatus | null | undefined;
+  last_look_back_date: string | null | undefined; // NOTE: This is no longer used on the UI, but left here in case users are using it within the API
   gap: string | null | undefined;
   bulk_create_time_durations: string[] | null | undefined;
   search_after_time_durations: string[] | null | undefined;
@@ -184,7 +187,7 @@ export interface HapiReadableStream extends Readable {
 }
 
 export interface Clients {
-  alertsClient: AlertsClient;
+  rulesClient: RulesClient;
 }
 
 export const isAlertTypes = (
@@ -211,14 +214,8 @@ export const isRuleStatusFindType = (
   return get('saved_objects', obj) != null;
 };
 
-export const isRuleStatusFindTypes = (
-  obj: unknown[] | undefined
-): obj is Array<SavedObjectsFindResponse<IRuleSavedAttributesSavedObjectAttributes>> => {
-  return obj ? obj.every((ruleStatus) => isRuleStatusFindType(ruleStatus)) : false;
-};
-
 export interface CreateRulesOptions {
-  alertsClient: AlertsClient;
+  rulesClient: RulesClient;
   anomalyThreshold: AnomalyThresholdOrUndefined;
   author: Author;
   buildingBlockType: BuildingBlockTypeOrUndefined;
@@ -270,15 +267,17 @@ export interface CreateRulesOptions {
 }
 
 export interface UpdateRulesOptions {
-  savedObjectsClient: SavedObjectsClientContract;
-  alertsClient: AlertsClient;
+  spaceId: string;
+  ruleStatusClient: IRuleExecutionLogClient;
+  rulesClient: RulesClient;
   defaultOutputIndex: string;
   ruleUpdate: UpdateRulesSchema;
 }
 
 export interface PatchRulesOptions {
-  savedObjectsClient: SavedObjectsClientContract;
-  alertsClient: AlertsClient;
+  spaceId: string;
+  ruleStatusClient: IRuleExecutionLogClient;
+  rulesClient: RulesClient;
   anomalyThreshold: AnomalyThresholdOrUndefined;
   author: AuthorOrUndefined;
   buildingBlockType: BuildingBlockTypeOrUndefined;
@@ -328,19 +327,21 @@ export interface PatchRulesOptions {
 }
 
 export interface ReadRuleOptions {
-  alertsClient: AlertsClient;
+  rulesClient: RulesClient;
   id: IdOrUndefined;
   ruleId: RuleIdOrUndefined;
 }
 
 export interface DeleteRuleOptions {
-  alertsClient: AlertsClient;
-  id: IdOrUndefined;
-  ruleId: RuleIdOrUndefined;
+  rulesClient: RulesClient;
+  savedObjectsClient: SavedObjectsClientContract;
+  ruleStatusClient: IRuleExecutionLogClient;
+  ruleStatuses: Array<SavedObjectsFindResult<IRuleStatusSOAttributes>>;
+  id: Id;
 }
 
 export interface FindRuleOptions {
-  alertsClient: AlertsClient;
+  rulesClient: RulesClient;
   perPage: PerPageOrUndefined;
   page: PageOrUndefined;
   sortField: SortFieldOrUndefined;

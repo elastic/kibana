@@ -5,41 +5,56 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import { PropertySignature } from 'ts-morph';
 
 import { ToolingLog, KibanaPlatformPlugin } from '@kbn/dev-utils';
-import { FunctionTypeNode, JSDoc } from 'ts-morph';
-import { getApiSectionId } from '../utils';
-import { getCommentsFromNode } from './js_doc_utils';
-import { AnchorLink, ApiDeclaration, TypeKind } from '../types';
+import { FunctionTypeNode } from 'ts-morph';
 import { buildApiDecsForParameters } from './build_parameter_decs';
-import { extractImportReferences } from './extract_import_refs';
-import { getJSDocReturnTagComment, getJSDocs, getJSDocTagNames } from './js_doc_utils';
-import { getSourceForNode } from './utils';
+import { AnchorLink, ApiDeclaration, TypeKind } from '../types';
+import { getJSDocReturnTagComment, getJSDocs } from './js_doc_utils';
+import { buildBasicApiDeclaration } from './build_basic_api_declaration';
 
-export function buildApiDecFromFunctionType(
-  name: string,
-  node: FunctionTypeNode,
-  plugins: KibanaPlatformPlugin[],
-  anchorLink: AnchorLink,
-  log: ToolingLog,
-  jsDocs?: JSDoc[]
-): ApiDeclaration {
-  log.debug(`Getting Function Type doc def for node ${name} of kind ${node.getKindName()}`);
-  return {
+/**
+ * Takes the various function-type node declaration types and converts them into an ApiDeclaration.
+ */
+export function buildFunctionTypeDec({
+  node,
+  typeNode,
+  plugins,
+  anchorLink,
+  currentPluginId,
+  log,
+  captureReferences,
+}: {
+  node: PropertySignature;
+  typeNode: FunctionTypeNode;
+  plugins: KibanaPlatformPlugin[];
+  anchorLink: AnchorLink;
+  currentPluginId: string;
+  log: ToolingLog;
+  captureReferences: boolean;
+}): ApiDeclaration {
+  const fn = {
+    ...buildBasicApiDeclaration({
+      currentPluginId,
+      anchorLink,
+      node,
+      captureReferences,
+      plugins,
+      log,
+      apiName: node.getName(),
+    }),
     type: TypeKind.FunctionKind,
-    id: getApiSectionId(anchorLink),
-    label: name,
-    signature: extractImportReferences(node.getType().getText(), plugins, log),
-    description: getCommentsFromNode(node),
-    tags: jsDocs ? getJSDocTagNames(jsDocs) : [],
-    returnComment: jsDocs ? getJSDocReturnTagComment(jsDocs) : [],
     children: buildApiDecsForParameters(
-      node.getParameters(),
+      typeNode.getParameters(),
       plugins,
       anchorLink,
+      currentPluginId,
       log,
-      jsDocs || getJSDocs(node)
+      captureReferences,
+      getJSDocs(node)
     ),
-    source: getSourceForNode(node),
+    returnComment: getJSDocReturnTagComment(node),
   };
+  return fn;
 }

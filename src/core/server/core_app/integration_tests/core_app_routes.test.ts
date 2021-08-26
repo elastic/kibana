@@ -20,6 +20,7 @@ describe('Core app routes', () => {
       },
     });
 
+    await root.preboot();
     await root.setup();
     await root.start();
   });

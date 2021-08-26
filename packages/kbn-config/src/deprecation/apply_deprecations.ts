@@ -6,8 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { cloneDeep } from 'lodash';
-import { ConfigDeprecationWithContext, AddConfigDeprecation } from './types';
+import { cloneDeep, unset } from 'lodash';
+import { set } from '@elastic/safer-lodash-set';
+import type {
+  AddConfigDeprecation,
+  ChangedDeprecatedPaths,
+  ConfigDeprecationWithContext,
+} from './types';
 
 const noopAddDeprecationFactory: () => AddConfigDeprecation = () => () => undefined;
 /**
@@ -21,10 +26,31 @@ export const applyDeprecations = (
   config: Record<string, any>,
   deprecations: ConfigDeprecationWithContext[],
   createAddDeprecation: (pluginId: string) => AddConfigDeprecation = noopAddDeprecationFactory
-) => {
-  let processed = cloneDeep(config);
+): { config: Record<string, any>; changedPaths: ChangedDeprecatedPaths } => {
+  const result = cloneDeep(config);
+  const changedPaths: ChangedDeprecatedPaths = {
+    set: [],
+    unset: [],
+  };
   deprecations.forEach(({ deprecation, path }) => {
-    processed = deprecation(processed, path, createAddDeprecation(path));
+    const commands = deprecation(result, path, createAddDeprecation(path));
+    if (commands) {
+      if (commands.set) {
+        changedPaths.set.push(...commands.set.map((c) => c.path));
+        commands.set.forEach(function ({ path: commandPath, value }) {
+          set(result, commandPath, value);
+        });
+      }
+      if (commands.unset) {
+        changedPaths.unset.push(...commands.unset.map((c) => c.path));
+        commands.unset.forEach(function ({ path: commandPath }) {
+          unset(result, commandPath);
+        });
+      }
+    }
   });
-  return processed;
+  return {
+    config: result,
+    changedPaths,
+  };
 };

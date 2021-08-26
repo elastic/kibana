@@ -19,10 +19,10 @@ import {
   UsageCollectionStart,
 } from './shared_imports';
 
-import { InternalFieldType, CloseEditor } from './types';
-import { FieldEditorFlyoutContentContainer } from './components/field_editor_flyout_content_container';
-
-import { PluginStart } from './types';
+import type { PluginStart, InternalFieldType, CloseEditor } from './types';
+import type { ApiService } from './lib/api';
+import { euiFlyoutClassname } from './constants';
+import { FieldEditorLoader } from './components/field_editor_loader';
 
 export interface OpenFieldEditorOptions {
   ctx: {
@@ -37,6 +37,7 @@ interface Dependencies {
   /** The search service from the data plugin */
   search: DataPublicPluginStart['search'];
   indexPatternService: DataPublicPluginStart['indexPatterns'];
+  apiService: ApiService;
   fieldFormats: DataPublicPluginStart['fieldFormats'];
   fieldFormatEditors: PluginStart['fieldFormatEditors'];
   usageCollection: UsageCollectionStart;
@@ -49,6 +50,7 @@ export const getFieldEditorOpener = ({
   fieldFormatEditors,
   search,
   usageCollection,
+  apiService,
 }: Dependencies) => (options: OpenFieldEditorOptions): CloseEditor => {
   const { uiSettings, overlays, docLinks, notifications } = core;
   const { Provider: KibanaReactContextProvider } = createKibanaReactContext({
@@ -58,8 +60,19 @@ export const getFieldEditorOpener = ({
   });
 
   let overlayRef: OverlayRef | null = null;
+  const canCloseValidator = {
+    current: () => true,
+  };
 
-  const openEditor = ({ onSave, fieldName, ctx }: OpenFieldEditorOptions): CloseEditor => {
+  const onMounted = (args: { canCloseValidator: () => boolean }) => {
+    canCloseValidator.current = args.canCloseValidator;
+  };
+
+  const openEditor = ({
+    onSave,
+    fieldName,
+    ctx: { indexPattern },
+  }: OpenFieldEditorOptions): CloseEditor => {
     const closeEditor = () => {
       if (overlayRef) {
         overlayRef.close();
@@ -75,7 +88,7 @@ export const getFieldEditorOpener = ({
       }
     };
 
-    const field = fieldName ? ctx.indexPattern.getFieldByName(fieldName) : undefined;
+    const field = fieldName ? indexPattern.getFieldByName(fieldName) : undefined;
 
     if (fieldName && !field) {
       const err = i18n.translate('indexPatternFieldEditor.noSuchFieldName', {
@@ -94,21 +107,48 @@ export const getFieldEditorOpener = ({
     overlayRef = overlays.openFlyout(
       toMountPoint(
         <KibanaReactContextProvider>
-          <FieldEditorFlyoutContentContainer
+          <FieldEditorLoader
             onSave={onSaveField}
             onCancel={closeEditor}
+            onMounted={onMounted}
             docLinks={docLinks}
             field={field}
-            ctx={{ ...ctx, fieldTypeToProcess, search }}
+            fieldTypeToProcess={fieldTypeToProcess}
+            indexPattern={indexPattern}
+            search={search}
             indexPatternService={indexPatternService}
             notifications={notifications}
+            usageCollection={usageCollection}
+            apiService={apiService}
             fieldFormatEditors={fieldFormatEditors}
             fieldFormats={fieldFormats}
             uiSettings={uiSettings}
-            usageCollection={usageCollection}
           />
         </KibanaReactContextProvider>
-      )
+      ),
+      {
+        className: euiFlyoutClassname,
+        maxWidth: 708,
+        size: 'l',
+        ownFocus: true,
+        hideCloseButton: true,
+        'aria-label': isNewRuntimeField
+          ? i18n.translate('indexPatternFieldEditor.createField.flyoutAriaLabel', {
+              defaultMessage: 'Create field',
+            })
+          : i18n.translate('indexPatternFieldEditor.editField.flyoutAriaLabel', {
+              defaultMessage: 'Edit {fieldName} field',
+              values: {
+                fieldName,
+              },
+            }),
+        onClose: (flyout) => {
+          const canClose = canCloseValidator.current();
+          if (canClose) {
+            flyout.close();
+          }
+        },
+      }
     );
 
     return closeEditor;

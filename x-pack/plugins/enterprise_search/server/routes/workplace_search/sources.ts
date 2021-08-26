@@ -25,7 +25,7 @@ const pageSchema = schema.object({
   current: schema.nullable(schema.number()),
   size: schema.nullable(schema.number()),
   total_pages: schema.nullable(schema.number()),
-  total_results: schema.number(),
+  total_results: schema.nullable(schema.number()),
 });
 
 const oauthConfigSchema = schema.object({
@@ -45,12 +45,41 @@ const displayFieldSchema = schema.object({
 
 const displaySettingsSchema = schema.object({
   titleField: schema.maybe(schema.string()),
-  subtitleField: schema.maybe(schema.string()),
-  descriptionField: schema.maybe(schema.string()),
+  subtitleField: schema.nullable(schema.string()),
+  descriptionField: schema.nullable(schema.string()),
   urlField: schema.maybe(schema.string()),
+  typeField: schema.nullable(schema.string()),
+  mediaTypeField: schema.nullable(schema.string()),
+  createdByField: schema.nullable(schema.string()),
+  updatedByField: schema.nullable(schema.string()),
   color: schema.string(),
   urlFieldIsLinkable: schema.boolean(),
   detailFields: schema.oneOf([schema.arrayOf(displayFieldSchema), displayFieldSchema]),
+});
+
+const sourceSettingsSchema = schema.object({
+  content_source: schema.object({
+    name: schema.maybe(schema.string()),
+    indexing: schema.maybe(
+      schema.object({
+        enabled: schema.maybe(schema.boolean()),
+        features: schema.maybe(
+          schema.object({
+            thumbnails: schema.maybe(
+              schema.object({
+                enabled: schema.boolean(),
+              })
+            ),
+            content_extraction: schema.maybe(
+              schema.object({
+                enabled: schema.boolean(),
+              })
+            ),
+          })
+        ),
+      })
+    ),
+  }),
 });
 
 // Account routes
@@ -131,7 +160,7 @@ export function registerAccountCreateSourceRoute({
           login: schema.maybe(schema.string()),
           password: schema.maybe(schema.string()),
           organizations: schema.maybe(schema.arrayOf(schema.string())),
-          indexPermissions: schema.boolean(),
+          indexPermissions: schema.maybe(schema.boolean()),
         }),
       },
     },
@@ -213,11 +242,7 @@ export function registerAccountSourceSettingsRoute({
     {
       path: '/api/workplace_search/account/sources/{id}/settings',
       validate: {
-        body: schema.object({
-          content_source: schema.object({
-            name: schema.string(),
-          }),
-        }),
+        body: sourceSettingsSchema,
         params: schema.object({
           id: schema.string(),
         }),
@@ -396,6 +421,7 @@ export function registerAccountSourceDownloadDiagnosticsRoute({
     },
     enterpriseSearchRequestHandler.createRequest({
       path: '/ws/sources/:sourceId/download_diagnostics',
+      hasJsonResponse: false,
     })
   );
 }
@@ -560,11 +586,7 @@ export function registerOrgSourceSettingsRoute({
     {
       path: '/api/workplace_search/org/sources/{id}/settings',
       validate: {
-        body: schema.object({
-          content_source: schema.object({
-            name: schema.string(),
-          }),
-        }),
+        body: sourceSettingsSchema,
         params: schema.object({
           id: schema.string(),
         }),
@@ -744,6 +766,7 @@ export function registerOrgSourceDownloadDiagnosticsRoute({
     },
     enterpriseSearchRequestHandler.createRequest({
       path: '/ws/org/sources/:sourceId/download_diagnostics',
+      hasJsonResponse: false,
     })
   );
 }

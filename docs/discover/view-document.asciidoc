@@ -50,7 +50,7 @@ image::images/discover-context-filters-inactive.png[Filter in context view]
 By default, five documents are added with each click.
 +
 [role="screenshot"]
-image::images/discover-context-load-newer-documents.png[Load button and the number of documents to load]
+image::images/discover-context-load-newer-documents.png[Load button and the number of documents to load, width=50%]
 . To configure the number of documents to display and
 the number of documents to load with each button click, go to *Stack Management > Advanced Settings*
 and edit the <<kibana-discover-settings, context settings>>.

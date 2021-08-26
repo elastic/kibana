@@ -5,13 +5,14 @@
  * 2.0.
  */
 
+import { buildQueryFilter, Filter } from '@kbn/es-query';
 import { ExpressionValueFilter } from '../../types';
 // @ts-expect-error untyped local
 import { buildBoolArray } from './build_bool_array';
-import { TimeRange, esFilters, Filter as DataFilter } from '../../../../../src/plugins/data/public';
+import { TimeRange } from '../../../../../src/plugins/data/public';
 
 export interface EmbeddableFilterInput {
-  filters: DataFilter[];
+  filters: Filter[];
   timeRange?: TimeRange;
 }
 
@@ -30,9 +31,9 @@ function getTimeRangeFromFilters(filters: ExpressionValueFilter[]): TimeRange | 
     : undefined;
 }
 
-export function getQueryFilters(filters: ExpressionValueFilter[]): DataFilter[] {
+export function getQueryFilters(filters: ExpressionValueFilter[]): Filter[] {
   const dataFilters = filters.map((filter) => ({ ...filter, type: filter.filterType }));
-  return buildBoolArray(dataFilters).map(esFilters.buildQueryFilter);
+  return buildBoolArray(dataFilters).map(buildQueryFilter);
 }
 
 export function buildEmbeddableFilters(filters: ExpressionValueFilter[]): EmbeddableFilterInput {

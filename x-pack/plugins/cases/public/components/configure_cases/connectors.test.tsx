@@ -11,8 +11,12 @@ import { mount, ReactWrapper } from 'enzyme';
 import { Connectors, Props } from './connectors';
 import { TestProviders } from '../../common/mock';
 import { ConnectorsDropdown } from './connectors_dropdown';
-import { connectors } from './__mock__';
+import { connectors, actionTypes } from './__mock__';
 import { ConnectorTypes } from '../../../common';
+import { useKibana } from '../../common/lib/kibana';
+
+jest.mock('../../common/lib/kibana');
+const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
 describe('Connectors', () => {
   let wrapper: ReactWrapper;
@@ -20,6 +24,7 @@ describe('Connectors', () => {
   const handleShowEditFlyout = jest.fn();
 
   const props: Props = {
+    actionTypes,
     connectors,
     disabled: false,
     handleShowEditFlyout,
@@ -31,6 +36,10 @@ describe('Connectors', () => {
   };
 
   beforeAll(() => {
+    useKibanaMock().services.triggersActionsUi.actionTypeRegistry.get = jest.fn().mockReturnValue({
+      actionTypeTitle: 'test',
+      iconClass: 'logoSecurity',
+    });
     wrapper = mount(<Connectors {...props} />, { wrappingComponent: TestProviders });
   });
 

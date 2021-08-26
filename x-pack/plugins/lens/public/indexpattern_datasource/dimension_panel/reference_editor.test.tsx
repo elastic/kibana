@@ -10,6 +10,7 @@ import { ReactWrapper, ShallowWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { EuiComboBox } from '@elastic/eui';
 import { mountWithIntl as mount } from '@kbn/test/jest';
+import 'jest-canvas-mock';
 import type { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from 'kibana/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import type { DataPublicPluginStart } from 'src/plugins/data/public';
@@ -51,6 +52,10 @@ describe('reference editor', () => {
       http: {} as HttpSetup,
       data: {} as DataPublicPluginStart,
       dimensionGroups: [],
+      isFullscreen: false,
+      toggleFullscreen: jest.fn(),
+      setIsCloseable: jest.fn(),
+      layerId: '1',
     };
   }
 
@@ -301,6 +306,31 @@ describe('reference editor', () => {
           value: 'average',
         }),
       ])
+    );
+  });
+
+  it('should not display hidden sub-function types', () => {
+    // This may happen for saved objects after changing the type of a field
+    wrapper = mount(
+      <ReferenceEditor
+        {...getDefaultArgs()}
+        validation={{
+          input: ['field', 'fullReference', 'managedReference'],
+          validateMetadata: (meta: OperationMetadata) => true,
+        }}
+      />
+    );
+
+    const subFunctionSelect = wrapper
+      .find('[data-test-subj="indexPattern-reference-function"]')
+      .first();
+
+    expect(subFunctionSelect.prop('isInvalid')).toEqual(true);
+    expect(subFunctionSelect.prop('selectedOptions')).not.toEqual(
+      expect.arrayContaining([expect.objectContaining({ value: 'math' })])
+    );
+    expect(subFunctionSelect.prop('selectedOptions')).not.toEqual(
+      expect.arrayContaining([expect.objectContaining({ value: 'formula' })])
     );
   });
 

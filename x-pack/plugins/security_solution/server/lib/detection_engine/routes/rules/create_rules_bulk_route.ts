@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { validate } from '../../../../../common/validate';
+import { validate } from '@kbn/securitysolution-io-ts-utils';
+import { getIndexExists } from '@kbn/securitysolution-es-utils';
 import { createRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/create_rules_type_dependents';
 import { createRulesBulkSchema } from '../../../../../common/detection_engine/schemas/request/create_rules_bulk_schema';
 import { rulesBulkSchema } from '../../../../../common/detection_engine/schemas/response/rules_bulk_schema';
@@ -17,7 +18,6 @@ import { throwHttpError } from '../../../machine_learning/validation';
 import { readRules } from '../../rules/read_rules';
 import { getDuplicates } from './utils';
 import { transformValidateBulkError } from './validate';
-import { getIndexExists } from '../../index/get_index_exists';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 
 import { transformBulkError, createBulkErrorObject, buildSiemResponse } from '../utils';
@@ -40,12 +40,12 @@ export const createRulesBulkRoute = (
     },
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
-      const alertsClient = context.alerting?.getAlertsClient();
+      const rulesClient = context.alerting?.getRulesClient();
       const esClient = context.core.elasticsearch.client;
       const savedObjectsClient = context.core.savedObjects.client;
       const siemClient = context.securitySolution?.getAppClient();
 
-      if (!siemClient || !alertsClient) {
+      if (!siemClient || !rulesClient) {
         return siemResponse.error({ statusCode: 404 });
       }
 
@@ -65,7 +65,7 @@ export const createRulesBulkRoute = (
           .map(async (payloadRule) => {
             if (payloadRule.rule_id != null) {
               const rule = await readRules({
-                alertsClient,
+                rulesClient,
                 ruleId: payloadRule.rule_id,
                 id: undefined,
               });
@@ -99,13 +99,13 @@ export const createRulesBulkRoute = (
                 });
               }
 
-              const createdRule = await alertsClient.create({
+              const createdRule = await rulesClient.create({
                 data: internalRule,
               });
 
               const ruleActions = await updateRulesNotifications({
                 ruleAlertId: createdRule.id,
-                alertsClient,
+                rulesClient,
                 savedObjectsClient,
                 enabled: createdRule.enabled,
                 actions: payloadRule.actions,

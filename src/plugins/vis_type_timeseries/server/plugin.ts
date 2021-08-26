@@ -35,7 +35,7 @@ import {
   DefaultSearchStrategy,
   RollupSearchStrategy,
 } from './lib/search_strategies';
-import { TimeseriesVisData, VisPayload } from '../common/types';
+import type { TimeseriesVisData, VisPayload } from '../common/types';
 
 import { registerTimeseriesUsageCollector } from './usage_collector';
 

@@ -54,6 +54,11 @@ export interface SpanRaw extends APMBaseDoc {
       body?: string;
       headers?: Record<string, unknown>;
     };
+    composite?: {
+      count: number;
+      sum: { us: number };
+      compression_strategy: string;
+    };
   };
   timestamp: TimestampUs;
   transaction?: {

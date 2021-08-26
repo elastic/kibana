@@ -7,21 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const SAVED_OBJECT_NO_PERMISSIONS_TITLE = i18n.translate(
-  'xpack.cases.caseSavedObjectNoPermissionsTitle',
-  {
-    defaultMessage: 'Kibana feature privileges required',
-  }
-);
-
-export const SAVED_OBJECT_NO_PERMISSIONS_MSG = i18n.translate(
-  'xpack.cases.caseSavedObjectNoPermissionsMessage',
-  {
-    defaultMessage:
-      'To view cases, you must have privileges for the Saved Object Management feature in the Kibana space. For more information, contact your Kibana administrator.',
-  }
-);
-
 export const BACK_TO_ALL = i18n.translate('xpack.cases.caseView.backLabel', {
   defaultMessage: 'Back to cases',
 });
@@ -30,13 +15,11 @@ export const CANCEL = i18n.translate('xpack.cases.caseView.cancel', {
   defaultMessage: 'Cancel',
 });
 
-export const DELETE_CASE = i18n.translate('xpack.cases.confirmDeleteCase.deleteCase', {
-  defaultMessage: 'Delete case',
-});
-
-export const DELETE_CASES = i18n.translate('xpack.cases.confirmDeleteCase.deleteCases', {
-  defaultMessage: 'Delete cases',
-});
+export const DELETE_CASE = (quantity: number = 1) =>
+  i18n.translate('xpack.cases.confirmDeleteCase.deleteCase', {
+    values: { quantity },
+    defaultMessage: `Delete {quantity, plural, =1 {case} other {cases}}`,
+  });
 
 export const NAME = i18n.translate('xpack.cases.caseView.name', {
   defaultMessage: 'Name',
@@ -56,10 +39,6 @@ export const REPORTER = i18n.translate('xpack.cases.caseView.reporterLabel', {
 
 export const PARTICIPANTS = i18n.translate('xpack.cases.caseView.particpantsLabel', {
   defaultMessage: 'Participants',
-});
-
-export const CREATE_BC_TITLE = i18n.translate('xpack.cases.caseView.breadcrumb', {
-  defaultMessage: 'Create',
 });
 
 export const CREATE_TITLE = i18n.translate('xpack.cases.caseView.create', {
@@ -150,6 +129,10 @@ export const TAGS_HELP = i18n.translate('xpack.cases.createCase.fieldTagsHelpTex
     'Type one or more custom identifying tags for this case. Press enter after each tag to begin a new one.',
 });
 
+export const TAGS_EMPTY_ERROR = i18n.translate('xpack.cases.createCase.fieldTagsEmptyError', {
+  defaultMessage: 'A tag must not be empty',
+});
+
 export const NO_TAGS = i18n.translate('xpack.cases.caseView.noTags', {
   defaultMessage: 'No tags are currently assigned to this case.',
 });
@@ -181,16 +164,8 @@ export const SAVE = i18n.translate('xpack.cases.caseView.description.save', {
   defaultMessage: 'Save',
 });
 
-export const GO_TO_DOCUMENTATION = i18n.translate('xpack.cases.caseView.goToDocumentationButton', {
-  defaultMessage: 'View documentation',
-});
-
 export const CONNECTORS = i18n.translate('xpack.cases.caseView.connectors', {
-  defaultMessage: 'External Incident Management System',
-});
-
-export const EDIT_CONNECTOR = i18n.translate('xpack.cases.caseView.editConnector', {
-  defaultMessage: 'Change external incident management system',
+  defaultMessage: 'External incident management system',
 });
 
 export const NO_CONNECTOR = i18n.translate('xpack.cases.common.noConnector', {
@@ -256,4 +231,14 @@ export const SELECTABLE_MESSAGE_COLLECTIONS = i18n.translate(
 );
 export const SELECT_CASE_TITLE = i18n.translate('xpack.cases.common.allCases.caseModal.title', {
   defaultMessage: 'Select case',
+});
+
+export const MAX_LENGTH_ERROR = (field: string, length: number) =>
+  i18n.translate('xpack.cases.createCase.maxLengthError', {
+    values: { field, length },
+    defaultMessage: 'The length of the {field} is too long. The maximum length is {length}.',
+  });
+
+export const LINK_APPROPRIATE_LICENSE = i18n.translate('xpack.cases.common.appropriateLicense', {
+  defaultMessage: 'appropriate license',
 });

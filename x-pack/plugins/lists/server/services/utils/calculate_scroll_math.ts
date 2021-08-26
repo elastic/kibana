@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Page, PerPage } from '../../../common/schemas';
+import type { Page, PerPage } from '@kbn/securitysolution-io-ts-list-types';
 
 interface CalculateScrollMathOptions {
   perPage: PerPage;

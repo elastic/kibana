@@ -19,6 +19,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['visualize', 'visEditor', 'visChart', 'timePicker']);
 
   describe('gauge chart', function indexPatternCreation() {
+    before(async () => {
+      await PageObjects.visualize.initTests();
+    });
     async function initGaugeVis() {
       log.debug('navigateToApp visualize');
       await PageObjects.visualize.navigateToNewAggBasedVisualization();

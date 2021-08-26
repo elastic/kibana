@@ -36,7 +36,7 @@ export interface ExplorerState {
   filteredFields: any[];
   filterPlaceHolder: any;
   indexPattern: { title: string; fields: any[] };
-  influencersFilterQuery: InfluencersFilterQuery;
+  influencersFilterQuery?: InfluencersFilterQuery;
   influencers: Dictionary<any>;
   isAndOperator: boolean;
   loading: boolean;
@@ -58,6 +58,7 @@ export interface ExplorerState {
   viewByFromPage: number;
   viewBySwimlaneOptions: string[];
   swimlaneLimit?: number;
+  swimLaneSeverity?: number;
 }
 
 function getDefaultIndexPattern() {

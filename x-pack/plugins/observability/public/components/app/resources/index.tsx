@@ -20,14 +20,21 @@ const resources = [
   {
     iconType: 'editorComment',
     label: i18n.translate('xpack.observability.resources.forum', {
-      defaultMessage: 'Discuss forum',
+      defaultMessage: 'Discuss Forum',
     }),
     href: 'https://ela.st/observability-discuss',
   },
   {
+    iconType: 'play',
+    label: i18n.translate('xpack.observability.resources.quick_start', {
+      defaultMessage: 'Quick Start Videos',
+    }),
+    href: 'https://ela.st/observability-quick-starts',
+  },
+  {
     iconType: 'training',
     label: i18n.translate('xpack.observability.resources.training', {
-      defaultMessage: 'Observability fundamentals',
+      defaultMessage: 'Free Observability Course',
     }),
     href: 'https://ela.st/observability-training',
   },
@@ -45,7 +52,7 @@ export function Resources() {
           </h4>
         </EuiTitle>
       </EuiFlexItem>
-      <EuiListGroup flush listItems={resources} data-test-subj="list-group" />
+      <EuiListGroup flush listItems={resources} data-test-subj="list-group" size="s" />
     </EuiFlexGroup>
   );
 }

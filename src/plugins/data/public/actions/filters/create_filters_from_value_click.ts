@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import _ from 'lodash';
 import { Datatable } from '../../../../../plugins/expressions/public';
 import { esFilters, Filter } from '../../../public';
 import { getIndexPatterns, getSearchService } from '../../../public/services';
@@ -140,5 +141,7 @@ export const createFiltersFromValueClickAction = async ({
       })
   );
 
-  return esFilters.mapAndFlattenFilters(filters);
+  return _.uniqWith(esFilters.mapAndFlattenFilters(filters), (a, b) =>
+    esFilters.compareFilters(a, b, esFilters.COMPARE_ALL_OPTIONS)
+  );
 };

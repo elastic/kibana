@@ -13,7 +13,7 @@ export function withApmSpan<T>(
   const options = parseSpanOptions(optionsOrName);
 
   const optionsWithDefaults = {
-    type: 'plugin:apm',
+    ...(options.intercept ? {} : { type: 'plugin:apm' }),
     ...options,
     labels: {
       plugin: 'apm',

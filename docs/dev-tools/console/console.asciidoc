@@ -1,7 +1,7 @@
 [[console-kibana]]
-== Console
+== Run {es} API requests
 
-Console enables you to interact with the REST API of {es}. You can:
+Interact with the REST API of {es} with *Console*. You can:
 
 * Send requests to {es} and view the responses
 * View API documentation
@@ -12,13 +12,13 @@ To get started, open the main menu, click *Dev Tools*, then click *Console*.
 [role="screenshot"]
 image::dev-tools/console/images/console.png["Console"]
 
-NOTE: You are unable to interact with the REST API of {kib} with the Console.
+NOTE: You cannot to interact with the REST API of {kib} with the Console.
 
 [float]
 [[console-api]]
 === Write requests
 
-Console understands commands in a cURL-like syntax.
+*Console* understands commands in a cURL-like syntax.
 For example, the following is a `GET` request to the {es} `_search` API.
 
 [source,js]
@@ -43,8 +43,8 @@ curl -XGET "http://localhost:9200/_search" -d'
 }'
 ----------------------------------
 
-When you paste the command into Console, {kib} automatically converts it
-to Console syntax.  Alternatively, if you want to see Console syntax in cURL, 
+When you paste the command into *Console*, {kib} automatically converts it
+to *Console* syntax.  Alternatively, if you want to see *Console* syntax in cURL,
 click the action icon (image:dev-tools/console/images/wrench.png[]) and select *Copy as cURL*.
 Once copied, the username and password will need to be provided
 for the calls to work from external environments.
@@ -53,7 +53,7 @@ for the calls to work from external environments.
 [[console-autocomplete]]
 ==== Autocomplete
 
-When you're typing a command, Console makes context-sensitive suggestions.
+When you're typing a command, *Console* makes context-sensitive suggestions.
 These suggestions show you the parameters for each API and speed up your typing.
 To configure your preferences for autocomplete, go to
 <<configuring-console, Settings>>.
@@ -69,15 +69,16 @@ and then select *Auto indent*.
 For example, you might have a request formatted like this:
 
 [role="screenshot"]
-image::dev-tools/console/images/copy-curl.png["Console close-up"]
+image::dev-tools/console/images/copy-curl.png["Console close-up", width=75%]
+]
 
-Console adjusts the JSON body of the request to apply the indents.
+*Console* adjusts the JSON body of the request to apply the indents.
 
 [role="screenshot"]
-image::dev-tools/console/images/request.png["Console close-up"]
+image::dev-tools/console/images/request.png["Console close-up", width=75%]
 
 If you select *Auto indent* on a request that is already well formatted,
-Console collapses the request body to a single line per document.
+*Console* collapses the request body to a single line per document.
 This is helpful when working with the {es} {ref}/docs-bulk.html[bulk APIs].
 
 
@@ -90,8 +91,9 @@ When you're ready to submit the request to {es}, click the
 green triangle.
 
 You can select multiple requests and submit them together.
-Console sends the requests to {es} one by one and shows the output
-in the response pane. Submitting multiple request is helpful when you're debugging an issue or trying query
+*Console* sends the requests to {es} one by one and shows the output
+in the response pane. Submitting multiple requests is helpful
+when you're debugging an issue or trying query
 combinations in multiple scenarios.
 
 
@@ -107,7 +109,7 @@ the action icon (image:dev-tools/console/images/wrench.png[]) and select
 [[console-history]]
 === Get your request history
 
-Console maintains a list of the last 500 requests that {es} successfully executed.
+*Console* maintains a list of the last 500 requests that {es} successfully executed.
 To view your most recent requests, click *History*. If you select a request
 and click *Apply*, {kib} adds it to the editor at the current cursor position.
 
@@ -115,11 +117,11 @@ and click *Apply*, {kib} adds it to the editor at the current cursor position.
 [[configuring-console]]
 === Configure Console settings
 
-You can configure the Console font size, JSON syntax,
+You can configure the *Console* font size, JSON syntax,
 and autocomplete suggestions in *Settings*.
 
 [role="screenshot"]
-image::dev-tools/console/images/console-settings.png["Console Settings"]
+image::dev-tools/console/images/console-settings.png["Console Settings", width=60%]
 
 [float]
 [[keyboard-shortcuts]]
@@ -132,7 +134,7 @@ shortcuts, click *Help*.
 [[console-settings]]
 === Disable Console
 
-If you don’t want to use Console, you can disable it by setting `console.enabled`
+If you don’t want to use *Console*, you can disable it by setting `console.enabled`
 to `false` in your `kibana.yml` configuration file. Changing this setting
 causes the server to regenerate assets on the next startup,
 which might cause a delay before pages start being served.

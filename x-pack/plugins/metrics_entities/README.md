@@ -2,7 +2,7 @@
 
 This is the metrics and entities plugin where you add can add transforms for your project
 and group those transforms into modules. You can also re-use existing transforms in your
-modules as well.
+newly created modules as well.
 
 ## Turn on experimental flags
 During at least phase 1 of this development, please add these to your `kibana.dev.yml` file to turn on the feature:
@@ -309,16 +309,14 @@ are notes during the phased approach. As we approach production and the feature 
 left over TODO's in the code base.
 
 - Add these properties to the route which are:
-  - disable_transforms/exclude flag to exclude 1 or more transforms within a module,
-  - pipeline flag,
-   - Change the REST routes on post to change the indexes for whichever indexes you want
- - Unit tests to ensure the data of the mapping.json includes the correct fields such as
-   _meta, at least one alias, a mapping section, etc... 
- - Add text/keyword and other things to the mappings (not just keyword maybe?) ... At least review the mappings one more time
- - Add a sort of @timestamp to the output destination indexes?
- - Add the REST Kibana security based tags if needed and push those to any plugins using this plugin. Something like: tags: ['access:metricsEntities-read'] and ['access:metricsEntities-all'],
- - Add schema validation choosing some schema library (io-ts or Kibana Schema or ... )
- - Add unit tests
- - Add e2e tests
- - Move ui code into this plugin from security_solutions? (maybe?)
-   - UI code could be within `kibana/packages` instead of in here directly and I think we will be better off.
+  - disable_transforms/exclude flag to exclude 1 or more transforms within a module
+  - pipeline flag
+  - Change the REST routes on post to change the indexes for whichever indexes you want
+- Unit tests to ensure the data of the mapping.json includes the correct fields such as _meta, at least one alias, a mapping section, etc... 
+- Add text/keyword and other things to the mappings (not just keyword maybe?) ... At least review the mappings one more time
+- Add a sort of @timestamp to the output destination indexes?
+- Add the REST Kibana security based tags if needed and push those to any plugins using this plugin. Something like: tags: ['access:metricsEntities-read'] and ['access:metricsEntities-all'],
+- Add schema validation choosing some schema library (io-ts or Kibana Schema or ... )
+- Add unit tests
+- Add e2e tests
+- Any UI code should not end up here. There is none right now, but all UI code should be within a kbn package or security_solutions

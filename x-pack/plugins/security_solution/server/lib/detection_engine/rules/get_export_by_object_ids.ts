@@ -8,7 +8,7 @@
 import { chunk } from 'lodash';
 
 import { RulesSchema } from '../../../../common/detection_engine/schemas/response/rules_schema';
-import { AlertsClient } from '../../../../../alerting/server';
+import { RulesClient } from '../../../../../alerting/server';
 import { getExportDetailsNdjson } from './get_export_details_ndjson';
 import { isAlertType } from '../rules/types';
 import { transformAlertToRule } from '../routes/rules/utils';
@@ -33,20 +33,20 @@ export interface RulesErrors {
 }
 
 export const getExportByObjectIds = async (
-  alertsClient: AlertsClient,
+  rulesClient: RulesClient,
   objects: Array<{ rule_id: string }>
 ): Promise<{
   rulesNdjson: string;
   exportDetails: string;
 }> => {
-  const rulesAndErrors = await getRulesFromObjects(alertsClient, objects);
+  const rulesAndErrors = await getRulesFromObjects(rulesClient, objects);
   const rulesNdjson = transformDataToNdjson(rulesAndErrors.rules);
   const exportDetails = getExportDetailsNdjson(rulesAndErrors.rules, rulesAndErrors.missingRules);
   return { rulesNdjson, exportDetails };
 };
 
 export const getRulesFromObjects = async (
-  alertsClient: AlertsClient,
+  rulesClient: RulesClient,
   objects: Array<{ rule_id: string }>
 ): Promise<RulesErrors> => {
   // If we put more than 1024 ids in one block like "alert.attributes.tags: (id1 OR id2 OR ... OR id1100)"
@@ -65,7 +65,7 @@ export const getRulesFromObjects = async (
     })
     .join(' OR ');
   const rules = await findRules({
-    alertsClient,
+    rulesClient,
     filter,
     page: 1,
     fields: undefined,

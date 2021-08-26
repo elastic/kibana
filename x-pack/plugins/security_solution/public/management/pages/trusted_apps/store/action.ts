@@ -68,6 +68,12 @@ export type TrustedAppsPoliciesStateChanged = Action<'trustedAppsPoliciesStateCh
   payload: AsyncResourceState<GetPolicyListResponse>;
 };
 
+export type TrustedAppForceRefresh = Action<'trustedAppForceRefresh'> & {
+  payload: {
+    forceRefresh: boolean;
+  };
+};
+
 export type TrustedAppsPageAction =
   | TrustedAppsListDataOutdated
   | TrustedAppsListResourceStateChanged
@@ -82,4 +88,5 @@ export type TrustedAppsPageAction =
   | TrustedAppCreationDialogConfirmed
   | TrustedAppsExistResponse
   | TrustedAppsPoliciesStateChanged
-  | TrustedAppCreationDialogClosed;
+  | TrustedAppCreationDialogClosed
+  | TrustedAppForceRefresh;

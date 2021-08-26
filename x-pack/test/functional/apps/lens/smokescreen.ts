@@ -15,6 +15,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const listingTable = getService('listingTable');
   const testSubjects = getService('testSubjects');
   const elasticChart = getService('elasticChart');
+  const filterBar = getService('filterBar');
 
   describe('lens smokescreen tests', () => {
     it('should allow creation of lens xy chart', async () => {
@@ -172,10 +173,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await testSubjects.existOrFail('indexPattern-dimension-formatDecimals');
 
+      await PageObjects.lens.closeDimensionEditor();
+
       expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_yDimensionPanel')).to.eql(
         'Test of label'
       );
-      await PageObjects.lens.closeDimensionEditor();
     });
 
     it('should be able to add very long labels and still be able to remove a dimension', async () => {
@@ -196,7 +198,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.missingOrFail('lnsXY_yDimensionPanel > lns-dimensionTrigger');
     });
 
-    it('should allow creation of a multi-axis chart', async () => {
+    it('should allow creation of a multi-axis chart and switching multiple times', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
       await elasticChart.setNewChartUiDebugFlag(true);
@@ -223,14 +225,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       await PageObjects.lens.changeAxisSide('right');
-
-      await PageObjects.lens.closeDimensionEditor();
-
       await PageObjects.lens.waitForVisualization();
-
-      const data = await PageObjects.lens.getCurrentChartDebugState();
+      let data = await PageObjects.lens.getCurrentChartDebugState();
       expect(data?.axes?.y.length).to.eql(2);
       expect(data?.axes?.y.some(({ position }) => position === 'right')).to.eql(true);
+
+      await PageObjects.lens.changeAxisSide('left');
+      await PageObjects.lens.waitForVisualization();
+      data = await PageObjects.lens.getCurrentChartDebugState();
+      expect(data?.axes?.y.length).to.eql(1);
+      expect(data?.axes?.y.some(({ position }) => position === 'right')).to.eql(false);
+
+      await PageObjects.lens.changeAxisSide('right');
+      await PageObjects.lens.waitForVisualization();
+
+      await PageObjects.lens.closeDimensionEditor();
     });
 
     it('should show value labels on bar charts when enabled', async () => {
@@ -407,6 +416,38 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await PageObjects.lens.getDatatableCellText(0, 1)).to.eql('6,011.351');
     });
 
+    it('should create a heatmap chart and transition to barchart', async () => {
+      await PageObjects.visualize.navigateToNewVisualization();
+      await PageObjects.visualize.clickVisType('lens');
+      await PageObjects.lens.goToTimeRange();
+      await PageObjects.lens.switchToVisualization('heatmap', 'heatmap');
+
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsHeatmap_xDimensionPanel > lns-empty-dimension',
+        operation: 'date_histogram',
+        field: '@timestamp',
+      });
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsHeatmap_yDimensionPanel > lns-empty-dimension',
+        operation: 'terms',
+        field: 'geo.dest',
+      });
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsHeatmap_cellPanel > lns-empty-dimension',
+        operation: 'average',
+        field: 'bytes',
+      });
+
+      expect(await PageObjects.lens.hasChartSwitchWarning('bar')).to.eql(false);
+      await PageObjects.lens.switchToVisualization('bar');
+      expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_xDimensionPanel')).to.eql(
+        '@timestamp'
+      );
+      expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_yDimensionPanel')).to.eql(
+        'Average of bytes'
+      );
+    });
+
     it('should create a valid XY chart with references', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
@@ -555,6 +596,57 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
     });
 
+    it('should not leave an incomplete column in the visualization config with field-based operation', async () => {
+      await PageObjects.visualize.navigateToNewVisualization();
+      await PageObjects.visualize.clickVisType('lens');
+      await PageObjects.lens.goToTimeRange();
+
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+        operation: 'min',
+      });
+
+      expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_yDimensionPanel')).to.eql(
+        undefined
+      );
+    });
+
+    it('should revert to previous configuration and not leave an incomplete column in the visualization config with reference-based operations', async () => {
+      await PageObjects.visualize.navigateToNewVisualization();
+      await PageObjects.visualize.clickVisType('lens');
+      await PageObjects.lens.goToTimeRange();
+
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
+        operation: 'date_histogram',
+        field: '@timestamp',
+      });
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+        operation: 'moving_average',
+        field: 'Records',
+      });
+
+      expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_yDimensionPanel')).to.eql(
+        'Moving average of Count of records'
+      );
+
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsXY_yDimensionPanel > lns-dimensionTrigger',
+        operation: 'median',
+        isPreviousIncompatible: true,
+        keepOpen: true,
+      });
+
+      expect(await PageObjects.lens.isDimensionEditorOpen()).to.eql(true);
+
+      await PageObjects.lens.closeDimensionEditor();
+
+      expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_yDimensionPanel')).to.eql(
+        'Moving average of Count of records'
+      );
+    });
+
     it('should transition from unique count to last value', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
@@ -601,6 +693,67 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         field: 'bytes',
       });
       expect(await testSubjects.isEnabled('lnsApp_downloadCSVButton')).to.eql(true);
+    });
+
+    it('should allow filtering by legend on an xy chart', async () => {
+      await PageObjects.visualize.navigateToNewVisualization();
+      await PageObjects.visualize.clickVisType('lens');
+      await PageObjects.lens.goToTimeRange();
+
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
+        operation: 'date_histogram',
+        field: '@timestamp',
+      });
+
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+        operation: 'average',
+        field: 'bytes',
+      });
+
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsXY_splitDimensionPanel > lns-empty-dimension',
+        operation: 'terms',
+        field: 'extension.raw',
+      });
+
+      await PageObjects.lens.filterLegend('jpg');
+      const hasExtensionFilter = await filterBar.hasFilter('extension.raw', 'jpg');
+      expect(hasExtensionFilter).to.be(true);
+
+      await filterBar.removeFilter('extension.raw');
+    });
+
+    it('should allow filtering by legend on a pie chart', async () => {
+      await PageObjects.visualize.navigateToNewVisualization();
+      await PageObjects.visualize.clickVisType('lens');
+      await PageObjects.lens.goToTimeRange();
+      await PageObjects.lens.switchToVisualization('pie');
+
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsPie_sliceByDimensionPanel > lns-empty-dimension',
+        operation: 'terms',
+        field: 'extension.raw',
+      });
+
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsPie_sliceByDimensionPanel > lns-empty-dimension',
+        operation: 'terms',
+        field: 'agent.raw',
+      });
+
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsPie_sizeByDimensionPanel > lns-empty-dimension',
+        operation: 'average',
+        field: 'bytes',
+      });
+
+      await PageObjects.lens.filterLegend('jpg');
+      const hasExtensionFilter = await filterBar.hasFilter('extension.raw', 'jpg');
+      expect(hasExtensionFilter).to.be(true);
+
+      await filterBar.removeFilter('extension.raw');
     });
   });
 }

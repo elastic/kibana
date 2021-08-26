@@ -10,13 +10,13 @@ import React from 'react';
 import { EuiCode, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { AggRow } from './agg_row';
-import { MetricsItemsSchema } from '../../../../common/types';
+import type { Metric } from '../../../../common/types';
 import { DragHandleProps } from '../../../types';
 
 interface TemporaryUnsupportedAggProps {
   disableDelete: boolean;
-  model: MetricsItemsSchema;
-  siblings: MetricsItemsSchema[];
+  model: Metric;
+  siblings: Metric[];
   dragHandleProps: DragHandleProps;
   onAdd: () => void;
   onDelete: () => void;

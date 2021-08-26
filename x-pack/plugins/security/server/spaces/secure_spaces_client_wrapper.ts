@@ -7,19 +7,22 @@
 
 import Boom from '@hapi/boom';
 
-import type { KibanaRequest } from 'src/core/server';
+import type { KibanaRequest, SavedObjectsClientContract } from 'src/core/server';
 
 import type {
   GetAllSpacesOptions,
   GetAllSpacesPurpose,
   GetSpaceResult,
   ISpacesClient,
+  LegacyUrlAliasTarget,
   Space,
 } from '../../../spaces/server';
 import type { AuditLogger } from '../audit';
-import { SpaceAuditAction, spaceAuditEvent } from '../audit';
+import { SavedObjectAction, savedObjectEvent, SpaceAuditAction, spaceAuditEvent } from '../audit';
 import type { AuthorizationServiceSetup } from '../authorization';
 import type { SecurityPluginSetup } from '../plugin';
+import type { EnsureAuthorizedDependencies, EnsureAuthorizedOptions } from '../saved_objects';
+import { ensureAuthorized, isAuthorizedForObjectInAllSpaces } from '../saved_objects';
 import type { LegacySpacesAuditLogger } from './legacy_audit_logger';
 
 const PURPOSE_PRIVILEGE_MAP: Record<
@@ -38,6 +41,9 @@ const PURPOSE_PRIVILEGE_MAP: Record<
   ],
 };
 
+/** @internal */
+export const LEGACY_URL_ALIAS_TYPE = 'legacy-url-alias';
+
 export class SecureSpacesClientWrapper implements ISpacesClient {
   private readonly useRbac = this.authorization.mode.useRbacForRequest(this.request);
 
@@ -46,7 +52,8 @@ export class SecureSpacesClientWrapper implements ISpacesClient {
     private readonly request: KibanaRequest,
     private readonly authorization: AuthorizationServiceSetup,
     private readonly auditLogger: AuditLogger,
-    private readonly legacyAuditLogger: LegacySpacesAuditLogger
+    private readonly legacyAuditLogger: LegacySpacesAuditLogger,
+    private readonly errors: SavedObjectsClientContract['errors']
   ) {}
 
   public async getAll({
@@ -277,6 +284,85 @@ export class SecureSpacesClientWrapper implements ISpacesClient {
     return this.spacesClient.delete(id);
   }
 
+  public async disableLegacyUrlAliases(aliases: LegacyUrlAliasTarget[]) {
+    if (this.useRbac) {
+      try {
+        const [uniqueSpaces, uniqueTypes, typesAndSpacesMap] = aliases.reduce(
+          ([spaces, types, typesAndSpaces], { targetSpace, targetType }) => {
+            const spacesForType = typesAndSpaces.get(targetType) ?? new Set();
+            return [
+              spaces.add(targetSpace),
+              types.add(targetType),
+              typesAndSpaces.set(targetType, spacesForType.add(targetSpace)),
+            ];
+          },
+          [new Set<string>(), new Set<string>(), new Map<string, Set<string>>()]
+        );
+
+        const action = 'bulk_update';
+        const { typeActionMap } = await this.ensureAuthorizedForSavedObjects(
+          Array.from(uniqueTypes),
+          [action],
+          Array.from(uniqueSpaces),
+          { requireFullAuthorization: false }
+        );
+        const unauthorizedTypes = new Set<string>();
+        for (const type of uniqueTypes) {
+          const spaces = Array.from(typesAndSpacesMap.get(type)!);
+          if (!isAuthorizedForObjectInAllSpaces(type, action, typeActionMap, spaces)) {
+            unauthorizedTypes.add(type);
+          }
+        }
+        if (unauthorizedTypes.size > 0) {
+          const targetTypes = Array.from(unauthorizedTypes).sort().join(',');
+          const msg = `Unable to disable aliases for ${targetTypes}`;
+          throw this.errors.decorateForbiddenError(new Error(msg));
+        }
+      } catch (error) {
+        aliases.forEach((alias) => {
+          const id = getAliasId(alias);
+          this.auditLogger.log(
+            savedObjectEvent({
+              action: SavedObjectAction.UPDATE,
+              savedObject: { type: LEGACY_URL_ALIAS_TYPE, id },
+              error,
+            })
+          );
+        });
+        throw error;
+      }
+    }
+
+    aliases.forEach((alias) => {
+      const id = getAliasId(alias);
+      this.auditLogger.log(
+        savedObjectEvent({
+          action: SavedObjectAction.UPDATE,
+          outcome: 'unknown',
+          savedObject: { type: LEGACY_URL_ALIAS_TYPE, id },
+        })
+      );
+    });
+
+    return this.spacesClient.disableLegacyUrlAliases(aliases);
+  }
+
+  private async ensureAuthorizedForSavedObjects<T extends string>(
+    types: string[],
+    actions: T[],
+    namespaces: string[],
+    options?: EnsureAuthorizedOptions
+  ) {
+    const ensureAuthorizedDependencies: EnsureAuthorizedDependencies = {
+      actions: this.authorization.actions,
+      errors: this.errors,
+      checkSavedObjectsPrivilegesAsCurrentUser: this.authorization.checkSavedObjectsPrivilegesWithRequest(
+        this.request
+      ),
+    };
+    return ensureAuthorized(ensureAuthorizedDependencies, types, actions, namespaces, options);
+  }
+
   private async ensureAuthorizedGlobally(action: string, method: string, forbiddenMessage: string) {
     const checkPrivileges = this.authorization.checkPrivilegesWithRequest(this.request);
     const { username, hasAllRequested } = await checkPrivileges.globally({ kibana: action });
@@ -311,4 +397,9 @@ export class SecureSpacesClientWrapper implements ISpacesClient {
   private filterUnauthorizedSpaceResults(value: GetSpaceResult | null): value is GetSpaceResult {
     return value !== null;
   }
+}
+
+/** @internal This is only exported for testing purposes. */
+export function getAliasId({ targetSpace, targetType, sourceId }: LegacyUrlAliasTarget) {
+  return `${targetSpace}:${targetType}:${sourceId}`;
 }

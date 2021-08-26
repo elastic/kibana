@@ -12,7 +12,14 @@ import { indexPatternWithTimefieldMock } from '../../../__mocks__/index_pattern_
 
 describe('Discover grid columns ', function () {
   it('returns eui grid columns without time column', async () => {
-    const actual = getEuiGridColumns(['extension', 'message'], {}, indexPatternMock, false, false);
+    const actual = getEuiGridColumns(
+      ['extension', 'message'],
+      {},
+      indexPatternMock,
+      false,
+      false,
+      true
+    );
     expect(actual).toMatchInlineSnapshot(`
       Array [
         Object {
@@ -54,6 +61,7 @@ describe('Discover grid columns ', function () {
       {},
       indexPatternWithTimefieldMock,
       false,
+      true,
       true
     );
     expect(actual).toMatchInlineSnapshot(`
@@ -94,7 +102,8 @@ describe('Discover grid columns ', function () {
       {},
       indexPatternWithTimefieldMock,
       true,
-      false
+      false,
+      true
     );
     expect(actual).toMatchInlineSnapshot(`
       Array [

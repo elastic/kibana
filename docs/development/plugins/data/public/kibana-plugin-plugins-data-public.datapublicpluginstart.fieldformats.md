@@ -4,7 +4,10 @@
 
 ## DataPublicPluginStart.fieldFormats property
 
-field formats service [FieldFormatsStart](./kibana-plugin-plugins-data-public.fieldformatsstart.md)
+> Warning: This API is now obsolete.
+> 
+> Use fieldFormats plugin instead
+> 
 
 <b>Signature:</b>
 

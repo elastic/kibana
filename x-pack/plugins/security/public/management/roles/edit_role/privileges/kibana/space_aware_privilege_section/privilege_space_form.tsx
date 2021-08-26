@@ -20,7 +20,6 @@ import {
   EuiFlyoutHeader,
   EuiForm,
   EuiFormRow,
-  EuiOverlayMask,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -93,64 +92,67 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
 
   public render() {
     return (
-      <EuiOverlayMask headerZindexLocation="below">
-        <EuiFlyout onClose={this.closeFlyout} size="m" maxWidth={true}>
-          <EuiFlyoutHeader hasBorder>
-            <EuiTitle size="m">
-              <h2>
+      <EuiFlyout
+        onClose={this.closeFlyout}
+        size="m"
+        maxWidth={true}
+        maskProps={{ headerZindexLocation: 'below' }}
+      >
+        <EuiFlyoutHeader hasBorder>
+          <EuiTitle size="m">
+            <h2>
+              <FormattedMessage
+                id="xpack.security.management.editRole.spacePrivilegeForm.modalTitle"
+                defaultMessage="Kibana privileges"
+              />
+            </h2>
+          </EuiTitle>
+        </EuiFlyoutHeader>
+        <EuiFlyoutBody>
+          <EuiErrorBoundary>{this.getForm()}</EuiErrorBoundary>
+        </EuiFlyoutBody>
+        <EuiFlyoutFooter>
+          {this.state.privilegeCalculator.hasSupersededInheritedPrivileges(
+            this.state.privilegeIndex
+          ) && (
+            <Fragment>
+              <EuiCallOut
+                color="warning"
+                iconType="alert"
+                data-test-subj="spaceFormGlobalPermissionsSupersedeWarning"
+                title={
+                  <FormattedMessage
+                    id="xpack.security.management.editRole.spacePrivilegeForm.supersededWarningTitle"
+                    defaultMessage="Superseded by global privileges"
+                  />
+                }
+              >
                 <FormattedMessage
-                  id="xpack.security.management.editRole.spacePrivilegeForm.modalTitle"
-                  defaultMessage="Kibana privileges"
+                  id="xpack.security.management.editRole.spacePrivilegeForm.supersededWarning"
+                  defaultMessage="Declared privileges are less permissive than configured global privileges. View the privilege summary to see effective privileges."
                 />
-              </h2>
-            </EuiTitle>
-          </EuiFlyoutHeader>
-          <EuiFlyoutBody>
-            <EuiErrorBoundary>{this.getForm()}</EuiErrorBoundary>
-          </EuiFlyoutBody>
-          <EuiFlyoutFooter>
-            {this.state.privilegeCalculator.hasSupersededInheritedPrivileges(
-              this.state.privilegeIndex
-            ) && (
-              <Fragment>
-                <EuiCallOut
-                  color="warning"
-                  iconType="alert"
-                  data-test-subj="spaceFormGlobalPermissionsSupersedeWarning"
-                  title={
-                    <FormattedMessage
-                      id="xpack.security.management.editRole.spacePrivilegeForm.supersededWarningTitle"
-                      defaultMessage="Superseded by global privileges"
-                    />
-                  }
-                >
-                  <FormattedMessage
-                    id="xpack.security.management.editRole.spacePrivilegeForm.supersededWarning"
-                    defaultMessage="Declared privileges are less permissive than configured global privileges. View the privilege summary to see effective privileges."
-                  />
-                </EuiCallOut>
-                <EuiSpacer size="s" />
-              </Fragment>
-            )}
-            <EuiFlexGroup justifyContent="spaceBetween">
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  iconType="cross"
-                  onClick={this.closeFlyout}
-                  flush="left"
-                  data-test-subj={'cancelSpacePrivilegeButton'}
-                >
-                  <FormattedMessage
-                    id="xpack.security.management.editRole.spacePrivilegeForm.cancelButton"
-                    defaultMessage="Cancel"
-                  />
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>{this.getSaveButton()}</EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlyoutFooter>
-        </EuiFlyout>
-      </EuiOverlayMask>
+              </EuiCallOut>
+              <EuiSpacer size="s" />
+            </Fragment>
+          )}
+          <EuiFlexGroup justifyContent="spaceBetween">
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                iconType="cross"
+                onClick={this.closeFlyout}
+                flush="left"
+                data-test-subj={'cancelSpacePrivilegeButton'}
+              >
+                <FormattedMessage
+                  id="xpack.security.management.editRole.spacePrivilegeForm.cancelButton"
+                  defaultMessage="Cancel"
+                />
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>{this.getSaveButton()}</EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlyoutFooter>
+      </EuiFlyout>
     );
   }
 

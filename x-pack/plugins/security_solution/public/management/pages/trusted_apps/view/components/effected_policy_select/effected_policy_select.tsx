@@ -21,10 +21,8 @@ import { EuiSelectableOption } from '@elastic/eui/src/components/selectable/sele
 import { FormattedMessage } from '@kbn/i18n/react';
 import styled from 'styled-components';
 import { PolicyData } from '../../../../../../../common/endpoint/types';
-import { MANAGEMENT_APP_ID } from '../../../../../common/constants';
 import { getPolicyDetailPath } from '../../../../../common/routing';
-import { useFormatUrl } from '../../../../../../common/components/link_to';
-import { SecurityPageName } from '../../../../../../../common/constants';
+import { useAppUrl } from '../../../../../../common/lib/kibana/hooks';
 import { LinkToApp } from '../../../../../../common/components/endpoint/link_to_app';
 import { useTestIdGenerator } from '../../../../../components/hooks/use_test_id_generator';
 
@@ -68,7 +66,7 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
     'data-test-subj': dataTestSubj,
     ...otherSelectableProps
   }) => {
-    const { formatUrl } = useFormatUrl(SecurityPageName.administration);
+    const { getAppUrl } = useAppUrl();
 
     const getTestId = useTestIdGenerator(dataTestSubj);
 
@@ -89,8 +87,7 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
           ),
           append: (
             <LinkToApp
-              href={formatUrl(getPolicyDetailPath(policy.id))}
-              appId={MANAGEMENT_APP_ID}
+              href={getAppUrl({ path: getPolicyDetailPath(policy.id) })}
               appPath={getPolicyDetailPath(policy.id)}
               target="_blank"
             >
@@ -106,7 +103,7 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
           'data-test-subj': `policy-${policy.id}`,
         }))
         .sort(({ label: labelA }, { label: labelB }) => labelA.localeCompare(labelB));
-    }, [formatUrl, isGlobal, options, selected]);
+    }, [getAppUrl, isGlobal, options, selected]);
 
     const handleOnPolicySelectChange = useCallback<
       Required<EuiSelectableProps<OptionPolicyData>>['onChange']

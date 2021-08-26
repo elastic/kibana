@@ -18,5 +18,6 @@ export interface EmbeddablePackageState
 |  --- | --- | --- |
 |  [embeddableId](./kibana-plugin-plugins-embeddable-public.embeddablepackagestate.embeddableid.md) | <code>string</code> |  |
 |  [input](./kibana-plugin-plugins-embeddable-public.embeddablepackagestate.input.md) | <code>Optional&lt;EmbeddableInput, 'id'&gt; &#124; Optional&lt;SavedObjectEmbeddableInput, 'id'&gt;</code> |  |
+|  [searchSessionId](./kibana-plugin-plugins-embeddable-public.embeddablepackagestate.searchsessionid.md) | <code>string</code> | Pass current search session id when navigating to an editor, Editors could use it continue previous search session |
 |  [type](./kibana-plugin-plugins-embeddable-public.embeddablepackagestate.type.md) | <code>string</code> |  |
 

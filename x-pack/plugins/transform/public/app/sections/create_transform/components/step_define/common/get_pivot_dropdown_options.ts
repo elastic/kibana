@@ -141,6 +141,7 @@ export function getPivotDropdownOptions(
   });
 
   return {
+    fields: combinedFields,
     groupByOptions,
     groupByOptionsData,
     aggOptions,

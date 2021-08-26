@@ -91,7 +91,7 @@ function mockEsClient() {
         cluster_uuid: 'test',
         cluster_name: 'test',
         version: { number: '8.0.0' } as estypes.ElasticsearchVersionInfo,
-      } as estypes.RootNodeInfoResponse,
+      } as estypes.InfoResponse,
     }
   );
 

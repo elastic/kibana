@@ -6,14 +6,15 @@
  */
 
 import { act, renderHook } from '@testing-library/react-hooks';
+import { useDeleteList } from '@kbn/securitysolution-list-hooks';
+import * as Api from '@kbn/securitysolution-list-api';
 
-import * as Api from '../api';
 import { httpServiceMock } from '../../../../../../src/core/public/mocks';
 import { getListResponseMock } from '../../../common/schemas/response/list_schema.mock';
 
-import { useDeleteList } from './use_delete_list';
+jest.mock('@kbn/securitysolution-list-api');
 
-jest.mock('../api');
+// TODO: This test should be ported to the package: packages/kbn-securitysolution-list-hooks/src/use_delete_list/index.test.ts once we have mocks in kbn packages
 
 describe('useDeleteList', () => {
   let httpMock: ReturnType<typeof httpServiceMock.createStartContract>;

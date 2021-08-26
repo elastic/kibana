@@ -28,7 +28,12 @@ import {
   getTrustedAppsSummary,
   updateTrustedApp,
 } from './service';
-import { TrustedAppNotFoundError, TrustedAppVersionConflictError } from './errors';
+import {
+  TrustedAppNotFoundError,
+  TrustedAppVersionConflictError,
+  TrustedAppPolicyNotExistsError,
+} from './errors';
+import { PackagePolicyServiceInterface } from '../../../../../fleet/server';
 
 const getBodyAfterFeatureFlagCheck = (
   body: PutTrustedAppUpdateRequest | PostTrustedAppCreateRequest,
@@ -54,6 +59,18 @@ const exceptionListClientFromContext = (
   return exceptionLists;
 };
 
+const packagePolicyClientFromEndpointContext = (
+  endpointAppContext: EndpointAppContext
+): PackagePolicyServiceInterface => {
+  const packagePolicy = endpointAppContext.service.getPackagePolicyService();
+
+  if (!packagePolicy) {
+    throw new Error('Package policy service not found');
+  }
+
+  return packagePolicy;
+};
+
 const errorHandler = <E extends Error>(
   logger: Logger,
   res: KibanaResponseFactory,
@@ -62,6 +79,11 @@ const errorHandler = <E extends Error>(
   if (error instanceof TrustedAppNotFoundError) {
     logger.error(error);
     return res.notFound({ body: error });
+  }
+
+  if (error instanceof TrustedAppPolicyNotExistsError) {
+    logger.error(error);
+    return res.badRequest({ body: { message: error.message, attributes: { type: error.type } } });
   }
 
   if (error instanceof TrustedAppVersionConflictError) {
@@ -150,7 +172,12 @@ export const getTrustedAppsCreateRouteHandler = (
       const body = getBodyAfterFeatureFlagCheck(req.body, endpointAppContext);
 
       return res.ok({
-        body: await createTrustedApp(exceptionListClientFromContext(context), body),
+        body: await createTrustedApp(
+          exceptionListClientFromContext(context),
+          context.core.savedObjects.client,
+          packagePolicyClientFromEndpointContext(endpointAppContext),
+          body
+        ),
       });
     } catch (error) {
       return errorHandler(logger, res, error);
@@ -173,7 +200,13 @@ export const getTrustedAppsUpdateRouteHandler = (
       const body = getBodyAfterFeatureFlagCheck(req.body, endpointAppContext);
 
       return res.ok({
-        body: await updateTrustedApp(exceptionListClientFromContext(context), req.params.id, body),
+        body: await updateTrustedApp(
+          exceptionListClientFromContext(context),
+          context.core.savedObjects.client,
+          packagePolicyClientFromEndpointContext(endpointAppContext),
+          req.params.id,
+          body
+        ),
       });
     } catch (error) {
       return errorHandler(logger, res, error);

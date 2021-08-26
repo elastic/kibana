@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
+import { render } from '@testing-library/react';
 
 import { basicCase } from '../../containers/mock';
 import { CaseActionBar } from '.';
@@ -16,11 +17,17 @@ describe('CaseActionBar', () => {
   const onRefresh = jest.fn();
   const onUpdateField = jest.fn();
   const defaultProps = {
+    allCasesNavigation: {
+      href: 'all-cases-href',
+      onClick: () => {},
+    },
     caseData: basicCase,
+    disableAlerting: false,
     isLoading: false,
     onRefresh,
     onUpdateField,
     currentExternalIncident: null,
+    userCanCrud: true,
   };
 
   beforeEach(() => {
@@ -107,5 +114,25 @@ describe('CaseActionBar', () => {
         syncAlerts: false,
       },
     });
+  });
+
+  it('should not show the sync alerts toggle when alerting is disabled', () => {
+    const { queryByText } = render(
+      <TestProviders>
+        <CaseActionBar {...defaultProps} disableAlerting={true} />
+      </TestProviders>
+    );
+
+    expect(queryByText('Sync alerts')).not.toBeInTheDocument();
+  });
+
+  it('should show the sync alerts toggle when alerting is enabled', () => {
+    const { queryByText } = render(
+      <TestProviders>
+        <CaseActionBar {...defaultProps} />
+      </TestProviders>
+    );
+
+    expect(queryByText('Sync alerts')).toBeInTheDocument();
   });
 });

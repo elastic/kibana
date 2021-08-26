@@ -10,5 +10,7 @@
 exporters: {
     datatableToCSV: typeof datatableToCSV;
     CSV_MIME_TYPE: string;
+    cellHasFormulas: (val: string) => boolean;
+    tableHasFormulas: (columns: import("../../expressions").DatatableColumn[], rows: Record<string, any>[]) => boolean;
 }
 ```

@@ -20,3 +20,10 @@ export const addError = actionCreator<{ id: string; title: string; message: stri
 );
 
 export const removeError = actionCreator<{ id: string }>('REMOVE_ERRORS');
+
+export const addErrorHash = actionCreator<{
+  id: string;
+  hash: string;
+  title: string;
+  message: string[];
+}>('ADD_ERROR_HASH');

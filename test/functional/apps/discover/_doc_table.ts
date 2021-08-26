@@ -10,6 +10,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
+  const browser = getService('browser');
   const log = getService('log');
   const retry = getService('retry');
   const esArchiver = getService('esArchiver');
@@ -29,10 +30,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     before(async function () {
       log.debug('load kibana index with default index pattern');
       await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
-      await kibanaServer.importExport.load('discover');
+      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover.json');
 
       // and load a set of makelogs data
-      await esArchiver.loadIfNeeded('logstash_functional');
+      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.uiSettings.replace(defaultSettings);
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       log.debug('discover doc table');
@@ -57,6 +58,46 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const finalRows = await PageObjects.discover.getDocTableRows();
       expect(finalRows.length).to.be.below(initialRows.length);
       await PageObjects.timePicker.setDefaultAbsoluteRange();
+    });
+
+    describe('classic table in window 900x700', async function () {
+      before(async () => {
+        await kibanaServer.uiSettings.update({ 'doc_table:legacy': true });
+        await browser.setWindowSize(900, 700);
+        await PageObjects.common.navigateToApp('discover');
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+      });
+
+      it('should load more rows when scrolling down the document table', async function () {
+        const initialRows = await testSubjects.findAll('docTableRow');
+        await testSubjects.scrollIntoView('discoverBackToTop');
+        // now count the rows
+        await retry.waitFor('next batch of documents to be displayed', async () => {
+          const actual = await testSubjects.findAll('docTableRow');
+          log.debug(`initial doc nr: ${initialRows.length}, actual doc nr: ${actual.length}`);
+          return actual.length > initialRows.length;
+        });
+      });
+    });
+
+    describe('classic table in window 600x700', async function () {
+      before(async () => {
+        await kibanaServer.uiSettings.update({ 'doc_table:legacy': true });
+        await browser.setWindowSize(600, 700);
+        await PageObjects.common.navigateToApp('discover');
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+      });
+
+      it('should load more rows when scrolling down the document table', async function () {
+        const initialRows = await testSubjects.findAll('docTableRow');
+        await testSubjects.scrollIntoView('discoverBackToTop');
+        // now count the rows
+        await retry.waitFor('next batch of documents to be displayed', async () => {
+          const actual = await testSubjects.findAll('docTableRow');
+          log.debug(`initial doc nr: ${initialRows.length}, actual doc nr: ${actual.length}`);
+          return actual.length > initialRows.length;
+        });
+      });
     });
 
     describe('legacy', async function () {
@@ -177,7 +218,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             await PageObjects.header.waitUntilLoadingHasFinished();
           }
           // remove the second column
-          await PageObjects.discover.clickFieldListItemAdd(extraColumns[1]);
+          await PageObjects.discover.clickFieldListItemRemove(extraColumns[1]);
           await PageObjects.header.waitUntilLoadingHasFinished();
           // test that the second column is no longer there
           const docHeader = await find.byCssSelector('thead > tr:nth-child(1)');
@@ -187,15 +228,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should make the document table scrollable', async function () {
         await PageObjects.discover.clearFieldSearchInput();
-        const dscTable = await find.byCssSelector('.dscTable');
+        const dscTableWrapper = await find.byCssSelector('.kbnDocTableWrapper');
         const fieldNames = await PageObjects.discover.getAllFieldNames();
-        const clientHeight = await dscTable.getAttribute('clientHeight');
+        const clientHeight = await dscTableWrapper.getAttribute('clientHeight');
         let fieldCounter = 0;
         const checkScrollable = async () => {
-          const scrollWidth = await dscTable.getAttribute('scrollWidth');
-          const clientWidth = await dscTable.getAttribute('clientWidth');
+          const scrollWidth = await dscTableWrapper.getAttribute('scrollWidth');
+          const clientWidth = await dscTableWrapper.getAttribute('clientWidth');
           log.debug(`scrollWidth: ${scrollWidth}, clientWidth: ${clientWidth}`);
-          return scrollWidth > clientWidth;
+          return Number(scrollWidth) > Number(clientWidth);
         };
         const addColumn = async () => {
           await PageObjects.discover.clickFieldListItemAdd(fieldNames[fieldCounter++]);
@@ -210,7 +251,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           return await checkScrollable();
         });
         // so now we need to check if the horizontal scrollbar is displayed
-        const newClientHeight = await dscTable.getAttribute('clientHeight');
+        const newClientHeight = await dscTableWrapper.getAttribute('clientHeight');
         expect(Number(clientHeight)).to.be.above(Number(newClientHeight));
       });
     });

@@ -1108,8 +1108,6 @@ class TimeseriesChartIntl extends Component {
     ctxAnnotationRects
       .enter()
       .append('rect')
-      .attr('rx', ctxAnnotationMargin)
-      .attr('ry', ctxAnnotationMargin)
       .on('mouseover', function (d) {
         showFocusChartTooltip(d, this);
       })
@@ -1134,10 +1132,12 @@ class TimeseriesChartIntl extends Component {
       .attr('height', ANNOTATION_SYMBOL_HEIGHT)
       .attr('width', (d) => {
         const start = Math.max(this.contextXScale(moment(d.timestamp)) + 1, contextXRangeStart);
-        const end =
+        const end = Math.min(
+          contextXRangeEnd,
           typeof d.end_timestamp !== 'undefined'
             ? this.contextXScale(moment(d.end_timestamp)) - 1
-            : start + ANNOTATION_MIN_WIDTH;
+            : start + ANNOTATION_MIN_WIDTH
+        );
         const width = Math.max(ANNOTATION_MIN_WIDTH, end - start);
         return width;
       });

@@ -18,7 +18,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('logs security', () => {
     before(async () => {
-      await esArchiver.load('empty_kibana');
+      await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
     });
     describe('global logs all privileges', () => {
       before(async () => {
@@ -59,7 +59,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows logs navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.eql(['Overview', 'Logs', 'Stack Management']);
+        expect(navLinks).to.eql(['Overview', 'Alerts', 'Logs', 'Stack Management']);
       });
 
       describe('logs landing page without data', () => {
@@ -122,7 +122,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows logs navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.eql(['Overview', 'Logs', 'Stack Management']);
+        expect(navLinks).to.eql(['Overview', 'Alerts', 'Logs', 'Stack Management']);
       });
 
       describe('logs landing page without data', () => {

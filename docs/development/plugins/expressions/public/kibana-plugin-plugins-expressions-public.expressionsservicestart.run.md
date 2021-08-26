@@ -24,5 +24,5 @@ expressions.run('...', null, { elasticsearchClient });
 <b>Signature:</b>
 
 ```typescript
-run: <Input, Output>(ast: string | ExpressionAstExpression, input: Input, params?: ExpressionExecutionParams) => Promise<Output>;
+run: <Input, Output>(ast: string | ExpressionAstExpression, input: Input, params?: ExpressionExecutionParams) => Observable<ExecutionResult<Output | ExpressionValueError>>;
 ```

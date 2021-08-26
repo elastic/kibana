@@ -41,7 +41,6 @@ declare interface JobService {
   ): Promise<any>;
   createResultsUrl(jobId: string[], start: number, end: number, location: string): string;
   getJobAndGroupIds(): Promise<ExistingJobsAndGroups>;
-  searchPreview(job: CombinedJob): Promise<estypes.SearchResponse<any>>;
   getJob(jobId: string): CombinedJob;
   loadJobsWrapper(): Promise<CombinedJob[]>;
 }

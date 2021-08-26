@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import _ from 'lodash';
+import { cloneDeep, assign } from 'lodash';
 import { SavedObjectsClientContract } from 'kibana/public';
 import { SavedObject, SavedObjectConfig } from '../../types';
 
@@ -24,7 +24,7 @@ export async function intializeSavedObject(
 
   if (!savedObject.id) {
     // just assign the defaults and be done
-    _.assign(savedObject, savedObject.defaults);
+    assign(savedObject, savedObject.defaults);
     await savedObject.hydrateIndexPattern!();
     if (typeof config.afterESResp === 'function') {
       savedObject = await config.afterESResp(savedObject);
@@ -36,7 +36,7 @@ export async function intializeSavedObject(
   const respMapped = {
     _id: resp.id,
     _type: resp.type,
-    _source: _.cloneDeep(resp.attributes),
+    _source: cloneDeep(resp.attributes),
     references: resp.references,
     found: !!resp._version,
   };

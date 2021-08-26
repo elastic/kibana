@@ -32,7 +32,7 @@ export interface FileUploadComponentProps {
 
 let loadModulesPromise: Promise<LazyLoadedFileUploadModules>;
 
-interface LazyLoadedFileUploadModules {
+export interface LazyLoadedFileUploadModules {
   JsonUploadAndParse: React.ComponentType<FileUploadComponentProps>;
   IndexNameForm: React.ComponentType<IndexNameFormProps>;
   importerFactory: (format: string, options: ImportFactoryOptions) => IImporter | undefined;

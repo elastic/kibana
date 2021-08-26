@@ -31,6 +31,14 @@ jest.mock('../../lib/kibana', () => ({
   }),
 }));
 
+jest.mock('react-redux', () => {
+  const original = jest.requireActual('react-redux');
+  return {
+    ...original,
+    useDispatch: () => jest.fn(),
+  };
+});
+
 describe('UrlStateContainer - lodash.throttle mocked to test update url', () => {
   afterEach(() => {
     jest.clearAllMocks();

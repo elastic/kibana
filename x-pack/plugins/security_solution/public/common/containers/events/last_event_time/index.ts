@@ -83,7 +83,7 @@ export const useTimelineLastEventTime = ({
             TimelineEventsLastEventTimeRequestOptions,
             TimelineEventsLastEventTimeStrategyResponse
           >(request, {
-            strategy: 'securitySolutionTimelineSearchStrategy',
+            strategy: 'timelineSearchStrategy',
             abortSignal: abortCtrl.current.signal,
           })
           .subscribe({

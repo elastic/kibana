@@ -22,11 +22,20 @@ import {
   ConfigDeprecationProvider,
   configDeprecationFactory,
   DeprecatedConfigDetails,
+  ChangedDeprecatedPaths,
 } from './deprecation';
 import { LegacyObjectToConfigAdapter } from './legacy';
 
 /** @internal */
 export type IConfigService = PublicMethodsOf<ConfigService>;
+
+/** @internal */
+export interface ConfigValidateParameters {
+  /**
+   * Indicates whether config deprecations should be logged during validation.
+   */
+  logDeprecations: boolean;
+}
 
 /** @internal */
 export class ConfigService {
@@ -36,6 +45,10 @@ export class ConfigService {
   private validated = false;
   private readonly config$: Observable<Config>;
   private lastConfig?: Config;
+  private readonly deprecatedConfigPaths = new BehaviorSubject<ChangedDeprecatedPaths>({
+    set: [],
+    unset: [],
+  });
 
   /**
    * Whenever a config if read at a path, we mark that path as 'handled'. We can
@@ -57,7 +70,8 @@ export class ConfigService {
     this.config$ = combineLatest([this.rawConfigProvider.getConfig$(), this.deprecations]).pipe(
       map(([rawConfig, deprecations]) => {
         const migrated = applyDeprecations(rawConfig, deprecations);
-        return new LegacyObjectToConfigAdapter(migrated);
+        this.deprecatedConfigPaths.next(migrated.changedPaths);
+        return new LegacyObjectToConfigAdapter(migrated.config);
       }),
       tap((config) => {
         this.lastConfig = config;
@@ -105,13 +119,16 @@ export class ConfigService {
    *
    * This must be done after every schemas and deprecation providers have been registered.
    */
-  public async validate() {
+  public async validate(params: ConfigValidateParameters = { logDeprecations: true }) {
     const namespaces = [...this.schemas.keys()];
     for (let i = 0; i < namespaces.length; i++) {
       await this.getValidatedConfigAtPath$(namespaces[i]).pipe(first()).toPromise();
     }
 
-    await this.logDeprecation();
+    if (params.logDeprecations) {
+      await this.logDeprecation();
+    }
+
     this.validated = true;
   }
 
@@ -189,6 +206,10 @@ export class ConfigService {
     const config = await this.config$.pipe(first()).toPromise();
     const handledPaths = [...this.handledPaths.values()].map(pathToString);
     return config.getFlattenedPaths().filter((path) => isPathHandled(path, handledPaths));
+  }
+
+  public getDeprecatedConfigPath$() {
+    return this.deprecatedConfigPaths.asObservable();
   }
 
   private async logDeprecation() {

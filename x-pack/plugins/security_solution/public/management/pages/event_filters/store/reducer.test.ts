@@ -9,10 +9,17 @@ import { initialEventFiltersPageState } from './builders';
 import { eventFiltersPageReducer } from './reducer';
 import { getInitialExceptionFromEvent } from './utils';
 import { createdEventFilterEntryMock, ecsEventMock } from '../test_utils';
+import { UserChangedUrl } from '../../../../common/store/routing/action';
+import { getListPageIsActive } from './selector';
+import { EventFiltersListPageState } from '../types';
 
-const initialState = initialEventFiltersPageState();
+describe('event filters reducer', () => {
+  let initialState: EventFiltersListPageState;
 
-describe('reducer', () => {
+  beforeEach(() => {
+    initialState = initialEventFiltersPageState();
+  });
+
   describe('EventFiltersForm', () => {
     it('sets the initial form values', () => {
       const entry = getInitialExceptionFromEvent(ecsEventMock());
@@ -37,9 +44,10 @@ describe('reducer', () => {
     it('change form values', () => {
       const entry = getInitialExceptionFromEvent(ecsEventMock());
       const nameChanged = 'name changed';
+      const newComment = 'new comment';
       const result = eventFiltersPageReducer(initialState, {
         type: 'eventFiltersChangeForm',
-        payload: { entry: { ...entry, name: nameChanged } },
+        payload: { entry: { ...entry, name: nameChanged }, newComment },
       });
 
       expect(result).toStrictEqual({
@@ -50,7 +58,27 @@ describe('reducer', () => {
             ...entry,
             name: nameChanged,
           },
+          newComment,
           hasNameError: false,
+          submissionResourceState: {
+            type: 'UninitialisedResourceState',
+          },
+        },
+      });
+    });
+
+    it('change form values without entry', () => {
+      const newComment = 'new comment';
+      const result = eventFiltersPageReducer(initialState, {
+        type: 'eventFiltersChangeForm',
+        payload: { newComment },
+      });
+
+      expect(result).toStrictEqual({
+        ...initialState,
+        form: {
+          ...initialState.form,
+          newComment,
           submissionResourceState: {
             type: 'UninitialisedResourceState',
           },
@@ -79,54 +107,114 @@ describe('reducer', () => {
       });
     });
 
-    it('create is success when there is no entry on entries list', () => {
+    it('clean form after change form status', () => {
+      const entry = getInitialExceptionFromEvent(ecsEventMock());
+      const nameChanged = 'name changed';
+      const newComment = 'new comment';
       const result = eventFiltersPageReducer(initialState, {
-        type: 'eventFiltersCreateSuccess',
-        payload: {
-          exception: createdEventFilterEntryMock(),
-        },
+        type: 'eventFiltersChangeForm',
+        payload: { entry: { ...entry, name: nameChanged }, newComment },
+      });
+      const cleanState = eventFiltersPageReducer(result, {
+        type: 'eventFiltersInitForm',
+        payload: { entry },
       });
 
-      expect(result).toStrictEqual({
+      expect(cleanState).toStrictEqual({
         ...initialState,
-        entries: [createdEventFilterEntryMock()],
+        form: { ...initialState.form, entry, hasNameError: true, newComment: '' },
       });
     });
 
-    it('create is success when there there are entries on entries list', () => {
-      const customizedInitialState = {
+    it('create is success and force list refresh', () => {
+      const initialStateWithListPageActive = {
         ...initialState,
-        entries: [createdEventFilterEntryMock(), createdEventFilterEntryMock()],
+        listPage: { ...initialState.listPage, active: true },
       };
-      const result = eventFiltersPageReducer(customizedInitialState, {
+      const result = eventFiltersPageReducer(initialStateWithListPageActive, {
         type: 'eventFiltersCreateSuccess',
-        payload: {
-          exception: { ...createdEventFilterEntryMock(), meta: {} },
-        },
       });
 
-      expect(result.entries).toHaveLength(3);
-      expect(result.entries[0]!.meta).not.toBeUndefined();
+      expect(result).toStrictEqual({
+        ...initialStateWithListPageActive,
+        listPage: {
+          ...initialStateWithListPageActive.listPage,
+          forceRefresh: true,
+        },
+      });
     });
   });
   describe('UserChangedUrl', () => {
-    it('receives a url change with show=create', () => {
-      const result = eventFiltersPageReducer(initialState, {
-        type: 'userChangedUrl',
-        payload: { search: '?show=create', pathname: '/event_filters', hash: '' },
+    const userChangedUrlAction = (
+      search: string = '',
+      pathname = '/administration/event_filters'
+    ): UserChangedUrl => ({
+      type: 'userChangedUrl',
+      payload: { search, pathname, hash: '' },
+    });
+
+    describe('When url is the Event List page', () => {
+      it('should mark page active when on the list url', () => {
+        const result = eventFiltersPageReducer(initialState, userChangedUrlAction());
+        expect(getListPageIsActive(result)).toBe(true);
       });
+
+      it('should mark page not active when not on the list url', () => {
+        const result = eventFiltersPageReducer(
+          initialState,
+          userChangedUrlAction('', '/some-other-page')
+        );
+        expect(getListPageIsActive(result)).toBe(false);
+      });
+    });
+
+    describe('When `show=create`', () => {
+      it('receives a url change with show=create', () => {
+        const result = eventFiltersPageReducer(initialState, userChangedUrlAction('?show=create'));
+
+        expect(result).toStrictEqual({
+          ...initialState,
+          location: {
+            ...initialState.location,
+            id: undefined,
+            show: 'create',
+          },
+          listPage: {
+            ...initialState.listPage,
+            active: true,
+          },
+        });
+      });
+    });
+  });
+
+  describe('ForceRefresh', () => {
+    it('sets the force refresh state to true', () => {
+      const result = eventFiltersPageReducer(
+        {
+          ...initialState,
+          listPage: { ...initialState.listPage, forceRefresh: false },
+        },
+        { type: 'eventFiltersForceRefresh', payload: { forceRefresh: true } }
+      );
 
       expect(result).toStrictEqual({
         ...initialState,
-        location: {
-          ...initialState.location,
-          id: undefined,
-          show: 'create',
+        listPage: { ...initialState.listPage, forceRefresh: true },
+      });
+    });
+    it('sets the force refresh state to false', () => {
+      const result = eventFiltersPageReducer(
+        {
+          ...initialState,
+          listPage: { ...initialState.listPage, forceRefresh: true },
         },
-        listPage: {
-          ...initialState.listPage,
-          active: true,
-        },
+        { type: 'eventFiltersForceRefresh', payload: { forceRefresh: false } }
+      );
+
+      expect(result).toStrictEqual({
+        ...initialState,
+        listPage: { ...initialState.listPage, forceRefresh: false },
       });
     });
   });

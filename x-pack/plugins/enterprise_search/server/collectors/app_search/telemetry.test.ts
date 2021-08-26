@@ -25,8 +25,7 @@ describe('App Search Telemetry Usage Collector', () => {
         'ui_error.cannot_connect': 3,
         'ui_error.not_found': 7,
         'ui_clicked.create_first_engine_button': 40,
-        'ui_clicked.header_launch_button': 50,
-        'ui_clicked.engine_table_link': 60,
+        'ui_clicked.engine_table_link': 50,
       },
     }),
     incrementCounter: jest.fn(),
@@ -66,8 +65,7 @@ describe('App Search Telemetry Usage Collector', () => {
         },
         ui_clicked: {
           create_first_engine_button: 40,
-          header_launch_button: 50,
-          engine_table_link: 60,
+          engine_table_link: 50,
         },
       });
     });
@@ -93,7 +91,6 @@ describe('App Search Telemetry Usage Collector', () => {
         },
         ui_clicked: {
           create_first_engine_button: 0,
-          header_launch_button: 0,
           engine_table_link: 0,
         },
       });

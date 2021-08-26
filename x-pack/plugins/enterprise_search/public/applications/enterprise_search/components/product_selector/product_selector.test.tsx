@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import { setMockValues } from '../../../__mocks__/kea.mock';
+import { setMockValues } from '../../../__mocks__/kea_logic';
 
 import React from 'react';
 
 import { shallow } from 'enzyme';
-
-import { EuiPage } from '@elastic/eui';
 
 import { LicenseCallout } from '../license_callout';
 import { ProductCard } from '../product_card';
@@ -25,7 +23,6 @@ describe('ProductSelector', () => {
     setMockValues({ config: { host: '' } });
     const wrapper = shallow(<ProductSelector access={{}} />);
 
-    expect(wrapper.find(EuiPage).hasClass('enterpriseSearchOverview')).toBe(true);
     expect(wrapper.find(ProductCard)).toHaveLength(2);
     expect(wrapper.find(SetupGuideCta)).toHaveLength(1);
     expect(wrapper.find(LicenseCallout)).toHaveLength(0);

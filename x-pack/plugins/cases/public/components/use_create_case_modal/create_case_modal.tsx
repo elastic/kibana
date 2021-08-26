@@ -19,6 +19,7 @@ export interface CreateCaseModalProps {
   isModalOpen: boolean;
   onCloseCaseModal: () => void;
   onSuccess: (theCase: Case) => Promise<void>;
+  owner: string;
 }
 
 const CreateModalComponent: React.FC<CreateCaseModalProps> = ({
@@ -27,8 +28,9 @@ const CreateModalComponent: React.FC<CreateCaseModalProps> = ({
   isModalOpen,
   onCloseCaseModal,
   onSuccess,
-}) => {
-  return isModalOpen ? (
+  owner,
+}) =>
+  isModalOpen ? (
     <EuiModal onClose={onCloseCaseModal} data-test-subj="create-case-modal">
       <EuiModalHeader>
         <EuiModalHeaderTitle>{i18n.CREATE_TITLE}</EuiModalHeaderTitle>
@@ -40,11 +42,11 @@ const CreateModalComponent: React.FC<CreateCaseModalProps> = ({
           onCancel: onCloseCaseModal,
           onSuccess,
           withSteps: false,
+          owner: [owner],
         })}
       </EuiModalBody>
     </EuiModal>
   ) : null;
-};
 
 export const CreateCaseModal = memo(CreateModalComponent);
 

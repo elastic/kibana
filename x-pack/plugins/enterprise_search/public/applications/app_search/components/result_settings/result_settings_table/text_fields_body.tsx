@@ -56,7 +56,7 @@ export const TextFieldsBody: React.FC = () => {
               }}
             />
           </EuiTableRowCellCheckbox>
-          <EuiTableRowCell align="center">
+          <EuiTableRowCell align="center" textOnly={false}>
             <FieldNumber
               fieldName={fieldName}
               fieldEnabledProperty="raw"
@@ -95,7 +95,7 @@ export const TextFieldsBody: React.FC = () => {
               }}
             />
           </EuiTableRowCellCheckbox>
-          <EuiTableRowCell align="center">
+          <EuiTableRowCell align="center" textOnly={false}>
             <FieldNumber
               fieldName={fieldName}
               fieldEnabledProperty="snippet"

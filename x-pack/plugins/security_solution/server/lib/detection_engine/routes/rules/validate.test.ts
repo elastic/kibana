@@ -8,10 +8,11 @@
 import { transformValidate, transformValidateBulkError } from './validate';
 import { BulkError } from '../utils';
 import { RulesSchema } from '../../../../../common/detection_engine/schemas/response';
-import { getAlertMock, getFindResultStatus } from '../__mocks__/request_responses';
+import { getAlertMock, getRuleExecutionStatuses } from '../__mocks__/request_responses';
 import { getListArrayMock } from '../../../../../common/detection_engine/schemas/types/lists.mock';
 import { getThreatMock } from '../../../../../common/detection_engine/schemas/types/threat.mock';
 import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
+import { RuleExecutionStatus } from '../../../../../common/detection_engine/schemas/common/schemas';
 
 export const ruleOutput = (): RulesSchema => ({
   actions: [],
@@ -107,12 +108,12 @@ describe('validate', () => {
     });
 
     test('it should do a validation correctly of a rule id with ruleStatus passed in', () => {
-      const ruleStatus = getFindResultStatus();
+      const ruleStatuses = getRuleExecutionStatuses();
       const ruleAlert = getAlertMock(getQueryRuleParams());
-      const validatedOrError = transformValidateBulkError('rule-1', ruleAlert, null, ruleStatus);
+      const validatedOrError = transformValidateBulkError('rule-1', ruleAlert, null, ruleStatuses);
       const expected: RulesSchema = {
         ...ruleOutput(),
-        status: 'succeeded',
+        status: RuleExecutionStatus.succeeded,
         status_date: '2020-02-18T15:26:49.783Z',
         last_success_at: '2020-02-18T15:26:49.783Z',
         last_success_message: 'succeeded',

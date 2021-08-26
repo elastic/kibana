@@ -39,12 +39,14 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
 
     describe('with generated data', () => {
       beforeEach('load heartbeat data', async () => {
-        await esArchiver.loadIfNeeded('uptime/blank');
-        await esArchiver.loadIfNeeded('uptime/blank_data_stream');
+        await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/uptime/blank');
+        await esArchiver.loadIfNeeded(
+          'x-pack/test/functional/es_archives/uptime/blank_data_stream'
+        );
       });
       after('unload', async () => {
-        await esArchiver.unload('uptime/blank');
-        await esArchiver.unload('uptime/blank_data_stream');
+        await esArchiver.unload('x-pack/test/functional/es_archives/uptime/blank');
+        await esArchiver.unload('x-pack/test/functional/es_archives/uptime/blank_data_stream');
       });
 
       loadTestFile(require.resolve('./certs'));
@@ -56,8 +58,16 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     });
 
     describe('with real-world data', () => {
-      beforeEach('load heartbeat data', async () => await esArchiver.load('uptime/full_heartbeat'));
-      afterEach('unload', async () => await esArchiver.unload('uptime/full_heartbeat'));
+      beforeEach(
+        'load heartbeat data',
+        async () =>
+          await esArchiver.load('x-pack/test/functional/es_archives/uptime/full_heartbeat')
+      );
+      afterEach(
+        'unload',
+        async () =>
+          await esArchiver.unload('x-pack/test/functional/es_archives/uptime/full_heartbeat')
+      );
       loadTestFile(require.resolve('./monitor_latest_status'));
       loadTestFile(require.resolve('./ping_histogram'));
       loadTestFile(require.resolve('./ping_list'));

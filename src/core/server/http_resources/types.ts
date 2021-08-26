@@ -84,9 +84,15 @@ export type HttpResourcesRequestHandler<
  * Allows to configure HTTP response parameters
  * @internal
  */
-export interface InternalHttpResourcesSetup {
+export interface InternalHttpResourcesPreboot {
   createRegistrar(router: IRouter): HttpResources;
 }
+
+/**
+ * Allows to configure HTTP response parameters
+ * @internal
+ */
+export type InternalHttpResourcesSetup = InternalHttpResourcesPreboot;
 
 /**
  * HttpResources service is responsible for serving static & dynamic assets for Kibana application via HTTP.

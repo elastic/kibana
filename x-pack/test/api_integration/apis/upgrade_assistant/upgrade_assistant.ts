@@ -35,7 +35,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('Update index settings route', () => {
+    describe('POST /api/upgrade_assistant/{indexName}/index_settings', () => {
       const indexName = 'update_settings_test_index';
       const indexSettings = {
         number_of_shards: '3',
@@ -93,6 +93,7 @@ export default function ({ getService }: FtrProviderContext) {
             index: indexName,
           });
 
+          // @ts-expect-error @elastic/elasticsearch supports flatten 'index.*' keys only
           const updatedIndexSettings = indexSettingsResponse[indexName].settings.index;
 
           // Verify number_of_shards and number_of_replicas are unchanged
@@ -118,6 +119,23 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(500);
 
         expect(body.error).to.eql('Internal Server Error');
+      });
+    });
+
+    describe('GET /api/upgrade_assistant/status', () => {
+      it('returns a successful response', async () => {
+        const { body } = await supertest
+          .get('/api/upgrade_assistant/status')
+          .set('kbn-xsrf', 'xxx')
+          .expect(200);
+
+        const expectedResponseKeys = ['readyForUpgrade', 'details'];
+
+        // We're not able to easily test different upgrade status scenarios (there are tests with mocked data to handle this)
+        // so, for now, we simply verify the response returns the expected format
+        expectedResponseKeys.forEach((key) => {
+          expect(body[key]).to.not.equal(undefined);
+        });
       });
     });
   });

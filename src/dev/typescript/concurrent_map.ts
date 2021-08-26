@@ -15,6 +15,10 @@ export async function concurrentMap<T, T2>(
   arr: T[],
   fn: (item: T, i: number) => Promise<T2>
 ): Promise<T2[]> {
+  if (!arr.length) {
+    return [];
+  }
+
   return await lastValueFrom(
     Rx.from(arr).pipe(
       // execute items in parallel based on concurrency

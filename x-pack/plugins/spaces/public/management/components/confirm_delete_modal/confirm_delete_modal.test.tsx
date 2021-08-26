@@ -6,10 +6,10 @@
  */
 
 import React from 'react';
+import { act } from 'react-dom/test-utils';
 
 import { mountWithIntl, shallowWithIntl } from '@kbn/test/jest';
 
-import type { SpacesManager } from '../../../spaces_manager';
 import { spacesManagerMock } from '../../../spaces_manager/mocks';
 import { ConfirmDeleteModal } from './confirm_delete_modal';
 
@@ -22,25 +22,53 @@ describe('ConfirmDeleteModal', () => {
     };
 
     const spacesManager = spacesManagerMock.create();
-    spacesManager.getActiveSpace.mockResolvedValue(space);
-
     const onCancel = jest.fn();
-    const onConfirm = jest.fn();
 
     expect(
       shallowWithIntl(
-        <ConfirmDeleteModal.WrappedComponent
-          space={space}
-          spacesManager={(spacesManager as unknown) as SpacesManager}
-          onCancel={onCancel}
-          onConfirm={onConfirm}
-          intl={null as any}
-        />
+        <ConfirmDeleteModal space={space} spacesManager={spacesManager} onCancel={onCancel} />
       )
-    ).toMatchSnapshot();
+    ).toMatchInlineSnapshot(`
+      <EuiConfirmModal
+        buttonColor="danger"
+        cancelButtonText="Cancel"
+        confirmButtonText="Delete space and all contents"
+        isLoading={false}
+        onCancel={[MockFunction]}
+        onConfirm={[Function]}
+        title="Delete space 'My Space'?"
+      >
+        <EuiText>
+          <p>
+            <FormattedMessage
+              defaultMessage="This space and {allContents} will be permanently deleted."
+              id="xpack.spaces.management.confirmDeleteModal.description"
+              values={
+                Object {
+                  "allContents": <strong>
+                    <FormattedMessage
+                      defaultMessage="all contents"
+                      id="xpack.spaces.management.confirmDeleteModal.allContents"
+                      values={Object {}}
+                    />
+                  </strong>,
+                }
+              }
+            />
+          </p>
+          <p>
+            <FormattedMessage
+              defaultMessage="You can't recover deleted spaces."
+              id="xpack.spaces.management.confirmDeleteModal.cannotUndoWarning"
+              values={Object {}}
+            />
+          </p>
+        </EuiText>
+      </EuiConfirmModal>
+    `);
   });
 
-  it(`requires the space name to be typed before confirming`, () => {
+  it('deletes the space when confirmed', async () => {
     const space = {
       id: 'my-space',
       name: 'My Space',
@@ -48,34 +76,23 @@ describe('ConfirmDeleteModal', () => {
     };
 
     const spacesManager = spacesManagerMock.create();
-    spacesManager.getActiveSpace.mockResolvedValue(space);
-
     const onCancel = jest.fn();
-    const onConfirm = jest.fn();
+    const onSuccess = jest.fn();
 
     const wrapper = mountWithIntl(
-      <ConfirmDeleteModal.WrappedComponent
+      <ConfirmDeleteModal
         space={space}
-        spacesManager={(spacesManager as unknown) as SpacesManager}
+        spacesManager={spacesManager}
         onCancel={onCancel}
-        onConfirm={onConfirm}
-        intl={null as any}
+        onSuccess={onSuccess}
       />
     );
 
-    const input = wrapper.find('input');
-    expect(input).toHaveLength(1);
+    await act(async () => {
+      wrapper.find('EuiButton[data-test-subj="confirmModalConfirmButton"]').simulate('click');
+      await spacesManager.deleteSpace.mock.results[0];
+    });
 
-    input.simulate('change', { target: { value: 'My Invalid Space Name ' } });
-
-    const confirmButton = wrapper.find('button[data-test-subj="confirmModalConfirmButton"]');
-    confirmButton.simulate('click');
-
-    expect(onConfirm).not.toHaveBeenCalled();
-
-    input.simulate('change', { target: { value: 'My Space' } });
-    confirmButton.simulate('click');
-
-    expect(onConfirm).toHaveBeenCalledTimes(1);
+    expect(spacesManager.deleteSpace).toHaveBeenLastCalledWith(space);
   });
 });

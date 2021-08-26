@@ -7,16 +7,16 @@
 
 import React from 'react';
 
-import { EuiPanel, EuiEmptyPrompt, EuiButton } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { DOCS_PREFIX } from '../../../routes';
 
-import { SynonymIcon } from './';
+import { SynonymModal, SynonymIcon } from './';
 
 export const EmptyState: React.FC = () => {
   return (
-    <EuiPanel color="subdued">
+    <>
       <EuiEmptyPrompt
         iconType={SynonymIcon}
         title={
@@ -47,6 +47,7 @@ export const EmptyState: React.FC = () => {
           </EuiButton>
         }
       />
-    </EuiPanel>
+      <SynonymModal />
+    </>
   );
 };

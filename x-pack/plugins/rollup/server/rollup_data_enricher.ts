@@ -5,20 +5,19 @@
  * 2.0.
  */
 
+import { IScopedClusterClient } from 'kibana/server';
 import { Index } from '../../../plugins/index_management/server';
 
-export const rollupDataEnricher = async (indicesList: Index[], callWithRequest: any) => {
+export const rollupDataEnricher = async (indicesList: Index[], client: IScopedClusterClient) => {
   if (!indicesList || !indicesList.length) {
     return Promise.resolve(indicesList);
   }
 
-  const params = {
-    path: '/_all/_rollup/data',
-    method: 'GET',
-  };
-
   try {
-    const rollupJobData = await callWithRequest('transport.request', params);
+    const { body: rollupJobData } = await client.asCurrentUser.rollup.getRollupIndexCaps({
+      index: '_all',
+    });
+
     return indicesList.map((index) => {
       const isRollupIndex = !!rollupJobData[index.name];
       return {

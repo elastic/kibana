@@ -7,28 +7,11 @@
 
 import type { Logger } from 'kibana/server';
 
-import type {
-  CaseConfigureServiceSetup,
-  CaseServiceSetup,
-  CaseUserActionServiceSetup,
-  ConnectorMappingsServiceSetup,
-} from '../../services';
-
 import type { CasesRouter } from '../../types';
 
 export interface RouteDeps {
-  caseConfigureService: CaseConfigureServiceSetup;
-  caseService: CaseServiceSetup;
-  connectorMappingsService: ConnectorMappingsServiceSetup;
   router: CasesRouter;
-  userActionService: CaseUserActionServiceSetup;
   logger: Logger;
-}
-
-export enum SortFieldCase {
-  closedAt = 'closed_at',
-  createdAt = 'created_at',
-  status = 'status',
 }
 
 export interface TotalCommentByCase {

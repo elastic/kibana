@@ -1,5 +1,9 @@
 {
   "id": "securitySolution",
+  "owner": {
+    "name": "Security solution",
+    "githubTeam": "security-solution"
+  },
   "version": "8.0.0",
   "extraPublicDirs": ["common"],
   "kibanaVersion": "kibana",
@@ -8,6 +12,7 @@
     "actions",
     "alerting",
     "cases",
+    "ruleRegistry",
     "data",
     "dataEnhanced",
     "embeddable",
@@ -16,6 +21,7 @@
     "inspector",
     "licensing",
     "maps",
+    "timelines",
     "triggersActionsUi",
     "uiActions"
   ],
@@ -23,10 +29,12 @@
     "encryptedSavedObjects",
     "fleet",
     "ml",
+    "dashboard",
     "newsfeed",
     "security",
     "spaces",
     "usageCollection",
+    "lens",
     "lists",
     "home",
     "telemetry",
@@ -34,5 +42,13 @@
   ],
   "server": true,
   "ui": true,
-  "requiredBundles": ["esUiShared", "fleet", "kibanaUtils", "kibanaReact", "lists", "ml"]
+  "requiredBundles": [
+    "esUiShared",
+    "fleet",
+    "kibanaUtils",
+    "kibanaReact",
+    "usageCollection",
+    "lists",
+    "ml"
+  ]
 }

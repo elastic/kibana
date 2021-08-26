@@ -11,15 +11,15 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { UserActionCopyLink } from './user_action_copy_link';
 import { UserActionPropertyActions } from './user_action_property_actions';
 
-interface UserActionContentToolbarProps {
+export interface UserActionContentToolbarProps {
   id: string;
   getCaseDetailHrefWithCommentId: (commentId: string) => string;
   editLabel: string;
   quoteLabel: string;
-  disabled: boolean;
   isLoading: boolean;
   onEdit: (id: string) => void;
   onQuote: (id: string) => void;
+  userCanCrud: boolean;
 }
 
 const UserActionContentToolbarComponent = ({
@@ -27,32 +27,28 @@ const UserActionContentToolbarComponent = ({
   getCaseDetailHrefWithCommentId,
   editLabel,
   quoteLabel,
-  disabled,
   isLoading,
   onEdit,
   onQuote,
-}: UserActionContentToolbarProps) => {
-  return (
-    <EuiFlexGroup>
-      <EuiFlexItem>
-        <UserActionCopyLink
-          id={id}
-          getCaseDetailHrefWithCommentId={getCaseDetailHrefWithCommentId}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem>
+  userCanCrud,
+}: UserActionContentToolbarProps) => (
+  <EuiFlexGroup responsive={false} alignItems="center">
+    <EuiFlexItem grow={false}>
+      <UserActionCopyLink id={id} getCaseDetailHrefWithCommentId={getCaseDetailHrefWithCommentId} />
+    </EuiFlexItem>
+    {userCanCrud && (
+      <EuiFlexItem grow={false}>
         <UserActionPropertyActions
           id={id}
           editLabel={editLabel}
           quoteLabel={quoteLabel}
-          disabled={disabled}
           isLoading={isLoading}
           onEdit={onEdit}
           onQuote={onQuote}
         />
       </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-};
+    )}
+  </EuiFlexGroup>
+);
 
 export const UserActionContentToolbar = memo(UserActionContentToolbarComponent);

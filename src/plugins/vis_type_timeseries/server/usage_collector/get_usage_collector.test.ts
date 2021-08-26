@@ -8,7 +8,7 @@
 
 import { getStats } from './get_usage_collector';
 import { createCollectorFetchContextMock } from 'src/plugins/usage_collection/server/mocks';
-import { TIME_RANGE_DATA_MODES } from '../../common/timerange_data_modes';
+import { TIME_RANGE_DATA_MODES } from '../../common/enums';
 
 const mockedSavedObjects = [
   {

@@ -13,14 +13,13 @@ import { i18n } from '@kbn/i18n';
 import {
   clearFlashMessages,
   flashAPIErrors,
-  setSuccessMessage,
-  setQueuedSuccessMessage,
+  flashSuccessToast,
   setQueuedErrorMessage,
 } from '../../../shared/flash_messages';
 import { HttpLogic } from '../../../shared/http';
 import { KibanaLogic } from '../../../shared/kibana';
 import { GROUPS_PATH } from '../../routes';
-import { ContentSourceDetails, GroupDetails, User, SourcePriority } from '../../types';
+import { ContentSourceDetails, GroupDetails, SourcePriority } from '../../types';
 
 export const MAX_NAME_LENGTH = 40;
 
@@ -31,40 +30,31 @@ interface GroupActions {
   onGroupNameInputChange(groupName: string): string;
   addGroupSource(sourceId: string): string;
   removeGroupSource(sourceId: string): string;
-  addGroupUser(userId: string): string;
-  removeGroupUser(userId: string): string;
   onGroupSourcesSaved(group: GroupDetails): GroupDetails;
-  onGroupUsersSaved(group: GroupDetails): GroupDetails;
   setGroupModalErrors(errors: string[]): string[];
   hideSharedSourcesModal(group: GroupDetails): GroupDetails;
-  hideManageUsersModal(group: GroupDetails): GroupDetails;
   selectAllSources(contentSources: ContentSourceDetails[]): ContentSourceDetails[];
-  selectAllUsers(users: User[]): User[];
   updatePriority(id: string, boost: number): { id: string; boost: number };
   resetGroup(): void;
   showConfirmDeleteModal(): void;
   hideConfirmDeleteModal(): void;
   showSharedSourcesModal(): void;
-  showManageUsersModal(): void;
   resetFlashMessages(): void;
   initializeGroup(groupId: string): { groupId: string };
   deleteGroup(): void;
   updateGroupName(): void;
   saveGroupSources(): void;
-  saveGroupUsers(): void;
   saveGroupSourcePrioritization(): void;
 }
 
 interface GroupValues {
   group: GroupDetails;
   dataLoading: boolean;
-  manageUsersModalVisible: boolean;
   managerModalFormErrors: string[];
   sharedSourcesModalVisible: boolean;
   confirmDeleteModalVisible: boolean;
   groupNameInputValue: string;
   selectedGroupSources: string[];
-  selectedGroupUsers: string[];
   groupPrioritiesUnchanged: boolean;
   activeSourcePriorities: SourcePriority;
   cachedSourcePriorities: SourcePriority;
@@ -79,27 +69,20 @@ export const GroupLogic = kea<MakeLogicType<GroupValues, GroupActions>>({
     onGroupNameInputChange: (groupName) => groupName,
     addGroupSource: (sourceId) => sourceId,
     removeGroupSource: (sourceId) => sourceId,
-    addGroupUser: (userId) => userId,
-    removeGroupUser: (userId) => userId,
     onGroupSourcesSaved: (group) => group,
-    onGroupUsersSaved: (group) => group,
     setGroupModalErrors: (errors) => errors,
     hideSharedSourcesModal: (group) => group,
-    hideManageUsersModal: (group) => group,
     selectAllSources: (contentSources) => contentSources,
-    selectAllUsers: (users) => users,
     updatePriority: (id, boost) => ({ id, boost }),
     resetGroup: () => true,
     showConfirmDeleteModal: () => true,
     hideConfirmDeleteModal: () => true,
     showSharedSourcesModal: () => true,
-    showManageUsersModal: () => true,
     resetFlashMessages: () => true,
     initializeGroup: (groupId) => ({ groupId }),
     deleteGroup: () => true,
     updateGroupName: () => true,
     saveGroupSources: () => true,
-    saveGroupUsers: () => true,
     saveGroupSourcePrioritization: () => true,
   },
   reducers: {
@@ -109,7 +92,6 @@ export const GroupLogic = kea<MakeLogicType<GroupValues, GroupActions>>({
         onInitializeGroup: (_, group) => group,
         onGroupNameChanged: (_, group) => group,
         onGroupSourcesSaved: (_, group) => group,
-        onGroupUsersSaved: (_, group) => group,
         resetGroup: () => ({} as GroupDetails),
       },
     ],
@@ -121,19 +103,10 @@ export const GroupLogic = kea<MakeLogicType<GroupValues, GroupActions>>({
         resetGroup: () => true,
       },
     ],
-    manageUsersModalVisible: [
-      false,
-      {
-        showManageUsersModal: () => true,
-        hideManageUsersModal: () => false,
-        onGroupUsersSaved: () => false,
-      },
-    ],
     managerModalFormErrors: [
       [],
       {
         setGroupModalErrors: (_, errors) => errors,
-        hideManageUsersModal: () => [],
       },
     ],
     sharedSourcesModalVisible: [
@@ -168,17 +141,6 @@ export const GroupLogic = kea<MakeLogicType<GroupValues, GroupActions>>({
         hideSharedSourcesModal: (_, { contentSources }) => contentSources.map(({ id }) => id),
         addGroupSource: (state, sourceId) => [...state, sourceId].sort(),
         removeGroupSource: (state, sourceId) => state.filter((id) => id !== sourceId),
-      },
-    ],
-    selectedGroupUsers: [
-      [],
-      {
-        onInitializeGroup: (_, { users }) => users.map(({ id }) => id),
-        onGroupUsersSaved: (_, { users }) => users.map(({ id }) => id),
-        selectAllUsers: (_, users) => users.map(({ id }) => id),
-        hideManageUsersModal: (_, { users }) => users.map(({ id }) => id),
-        addGroupUser: (state, userId) => [...state, userId].sort(),
-        removeGroupUser: (state, userId) => state.filter((id) => id !== userId),
       },
     ],
     cachedSourcePriorities: [
@@ -243,7 +205,7 @@ export const GroupLogic = kea<MakeLogicType<GroupValues, GroupActions>>({
           }
         );
 
-        setQueuedSuccessMessage(GROUP_DELETED_MESSAGE);
+        flashSuccessToast(GROUP_DELETED_MESSAGE);
         KibanaLogic.values.navigateToUrl(GROUPS_PATH);
       } catch (e) {
         flashAPIErrors(e);
@@ -268,7 +230,7 @@ export const GroupLogic = kea<MakeLogicType<GroupValues, GroupActions>>({
             values: { groupName: response.name },
           }
         );
-        setSuccessMessage(GROUP_RENAMED_MESSAGE);
+        flashSuccessToast(GROUP_RENAMED_MESSAGE);
       } catch (e) {
         flashAPIErrors(e);
       }
@@ -293,32 +255,7 @@ export const GroupLogic = kea<MakeLogicType<GroupValues, GroupActions>>({
             defaultMessage: 'Successfully updated shared content sources.',
           }
         );
-        setSuccessMessage(GROUP_SOURCES_UPDATED_MESSAGE);
-      } catch (e) {
-        flashAPIErrors(e);
-      }
-    },
-    saveGroupUsers: async () => {
-      const {
-        group: { id },
-        selectedGroupUsers,
-      } = values;
-
-      try {
-        const response = await HttpLogic.values.http.post(
-          `/api/workplace_search/groups/${id}/assign`,
-          {
-            body: JSON.stringify({ user_ids: selectedGroupUsers }),
-          }
-        );
-        actions.onGroupUsersSaved(response);
-        const GROUP_USERS_UPDATED_MESSAGE = i18n.translate(
-          'xpack.enterpriseSearch.workplaceSearch.groups.groupUsersUpdated',
-          {
-            defaultMessage: 'Successfully updated the users of this group.',
-          }
-        );
-        setSuccessMessage(GROUP_USERS_UPDATED_MESSAGE);
+        flashSuccessToast(GROUP_SOURCES_UPDATED_MESSAGE);
       } catch (e) {
         flashAPIErrors(e);
       }
@@ -351,16 +288,13 @@ export const GroupLogic = kea<MakeLogicType<GroupValues, GroupActions>>({
           }
         );
 
-        setSuccessMessage(GROUP_PRIORITIZATION_UPDATED_MESSAGE);
+        flashSuccessToast(GROUP_PRIORITIZATION_UPDATED_MESSAGE);
         actions.onGroupPrioritiesChanged(response);
       } catch (e) {
         flashAPIErrors(e);
       }
     },
     showConfirmDeleteModal: () => {
-      clearFlashMessages();
-    },
-    showManageUsersModal: () => {
       clearFlashMessages();
     },
     showSharedSourcesModal: () => {

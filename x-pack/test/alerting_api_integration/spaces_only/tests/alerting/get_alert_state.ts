@@ -76,7 +76,9 @@ export default function createGetAlertStateTests({ getService }: FtrProviderCont
       expect(alertInstances.length).to.eql(response.body.rule_type_state.runCount);
       alertInstances.forEach(([key, value], index) => {
         expect(key).to.eql(`instance-${index}`);
-        expect(value.state).to.eql({ instanceStateValue: true });
+        expect(value.state.instanceStateValue).to.be(true);
+        expect(value.state.start).not.to.be(undefined);
+        expect(value.state.duration).not.to.be(undefined);
       });
     });
 
@@ -131,7 +133,9 @@ export default function createGetAlertStateTests({ getService }: FtrProviderCont
         expect(alertInstances.length).to.eql(response.body.rule_type_state.runCount);
         alertInstances.forEach(([key, value], index) => {
           expect(key).to.eql(`instance-${index}`);
-          expect(value.state).to.eql({ instanceStateValue: true });
+          expect(value.state.instanceStateValue).to.be(true);
+          expect(value.state.start).not.to.be(undefined);
+          expect(value.state.duration).not.to.be(undefined);
         });
       });
     });

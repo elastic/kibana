@@ -12,6 +12,11 @@ import { EuiSuperSelect } from '@elastic/eui';
 import { ConnectorsDropdown, Props } from './connectors_dropdown';
 import { TestProviders } from '../../common/mock';
 import { connectors } from './__mock__';
+import { useKibana } from '../../common/lib/kibana';
+import { actionTypeRegistryMock } from '../../../../triggers_actions_ui/public/application/action_type_registry.mock';
+
+jest.mock('../../common/lib/kibana');
+const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
 describe('ConnectorsDropdown', () => {
   let wrapper: ReactWrapper;
@@ -23,7 +28,14 @@ describe('ConnectorsDropdown', () => {
     selectedConnector: 'none',
   };
 
+  const { createMockActionTypeModel } = actionTypeRegistryMock;
+
   beforeAll(() => {
+    connectors.forEach((connector) =>
+      useKibanaMock().services.triggersActionsUi.actionTypeRegistry.register(
+        createMockActionTypeModel({ id: connector.actionTypeId, iconClass: 'logoSecurity' })
+      )
+    );
     wrapper = mount(<ConnectorsDropdown {...props} />, { wrappingComponent: TestProviders });
   });
 
@@ -73,7 +85,7 @@ describe('ConnectorsDropdown', () => {
             >
               <Styled(EuiIcon)
                 size="m"
-                type="test-file-stub"
+                type="logoSecurity"
               />
             </EuiFlexItem>
             <EuiFlexItem>
@@ -96,7 +108,7 @@ describe('ConnectorsDropdown', () => {
             >
               <Styled(EuiIcon)
                 size="m"
-                type="test-file-stub"
+                type="logoSecurity"
               />
             </EuiFlexItem>
             <EuiFlexItem>
@@ -119,7 +131,7 @@ describe('ConnectorsDropdown', () => {
             >
               <Styled(EuiIcon)
                 size="m"
-                type="test-file-stub"
+                type="logoSecurity"
               />
             </EuiFlexItem>
             <EuiFlexItem>
@@ -142,7 +154,7 @@ describe('ConnectorsDropdown', () => {
             >
               <Styled(EuiIcon)
                 size="m"
-                type="test-file-stub"
+                type="logoSecurity"
               />
             </EuiFlexItem>
             <EuiFlexItem>
@@ -182,7 +194,13 @@ describe('ConnectorsDropdown', () => {
       wrappingComponent: TestProviders,
     });
 
-    expect(newWrapper.find('button span:not([data-euiicon-type])').text()).toEqual('My Connector');
+    expect(
+      newWrapper
+        .find('[data-test-subj="dropdown-connectors"]')
+        .first()
+        .text()
+        .includes('My Connector, is selected')
+    ).toBeTruthy();
   });
 
   test('if the props hideConnectorServiceNowSir is true, the connector should not be part of the list of options  ', () => {
@@ -204,5 +222,27 @@ describe('ConnectorsDropdown', () => {
     expect(
       options.some((o) => o['data-test-subj'] === 'dropdown-connector-servicenow-sir')
     ).toBeFalsy();
+  });
+
+  test('it does not throw when accessing the icon if the connector type is not registered', () => {
+    expect(() =>
+      mount(
+        <ConnectorsDropdown
+          {...props}
+          connectors={[
+            {
+              id: 'none',
+              actionTypeId: '.none',
+              name: 'None',
+              config: {},
+              isPreconfigured: false,
+            },
+          ]}
+        />,
+        {
+          wrappingComponent: TestProviders,
+        }
+      )
+    ).not.toThrowError();
   });
 });

@@ -21,7 +21,7 @@ search: {
         })[];
         InvalidEsCalendarIntervalError: typeof InvalidEsCalendarIntervalError;
         InvalidEsIntervalFormatError: typeof InvalidEsIntervalFormatError;
-        Ipv4Address: typeof Ipv4Address;
+        IpAddress: typeof IpAddress;
         isDateHistogramBucketAggConfig: typeof isDateHistogramBucketAggConfig;
         isNumberType: (agg: import("../common").AggConfig) => boolean;
         isStringType: (agg: import("../common").AggConfig) => boolean;
@@ -47,7 +47,9 @@ search: {
             intervalLabel: string;
         })[];
         getNumberHistogramIntervalByDatatableColumn: (column: import("../../expressions").DatatableColumn) => number | undefined;
-        getDateHistogramMetaDataByDatatableColumn: (column: import("../../expressions").DatatableColumn) => {
+        getDateHistogramMetaDataByDatatableColumn: (column: import("../../expressions").DatatableColumn, defaults?: Partial<{
+            timeZone: string;
+        }>) => {
             interval: string | undefined;
             timeZone: string | undefined;
             timeRange: import("../common").TimeRange | undefined;

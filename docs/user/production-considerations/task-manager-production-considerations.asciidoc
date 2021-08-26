@@ -68,11 +68,7 @@ This means that you can expect a single {kib} instance to support up to 200 _tas
 
 In practice, a {kib} instance will only achieve the upper bound of `200/tpm` if the duration of task execution is below the polling rate of 3 seconds. For the most part, the duration of tasks is below that threshold, but it can vary greatly as {es} and {kib} usage grow and task complexity increases (such as alerts executing heavy queries across large datasets).
 
-By <<task-manager-health-evaluate-the-workload,evaluating the workload>>, you can make a rough estimate as to the required throughput as a _tasks per minute_ measurement.
-
-For example, suppose your current workload reveals a required throughput of `440/tpm`.  You can address this scale by provisioning 3 {kib} instances, with an upper throughput of `600/tpm`. This scale would provide aproximately 25% additional capacity to handle ad-hoc non-recurring tasks and potential growth in recurring tasks.
-
-It is highly recommended that you maintain at least 20% additional capacity, beyond your expected workload, as spikes in ad-hoc tasks is possible at times of high activity (such as a spike in actions in response to an active alert).
+By <<task-manager-rough-throughput-estimation, estimating a rough throughput requirment>>, you can estimate the number of {kib} instances required to reliably execute tasks in a timely manner. An appropriate number of {kib} instances can be estimated to match the required scale.
 
 For details on monitoring the health of {kib} Task Manager, follow the guidance in <<task-manager-health-monitoring>>.
 
@@ -126,6 +122,35 @@ Throughput is best thought of as a measurements in tasks per minute.
 
 A default {kib} instance can support up to `200/tpm`.
 
+[float]
+===== Automatic estimation
+
+experimental[]
+
+As demonstrated in <<task-manager-health-evaluate-the-capacity-estimation, Evaluate your capacity estimation>>, the Task Manager <<task-manager-health-monitoring, health monitoring>> performs these estimations automatically.
+
+These estimates are based on historical data and should not be used as predictions, but can be used as a rough guide when scaling the system.
+
+We recommend provisioning enough {kib} instances to ensure a buffer between the observed maximum throughput (as estimated under `observed.max_throughput_per_minute`) and the average required throughput (as estimated under `observed.avg_required_throughput_per_minute`). Otherwise there might be insufficient capacity to handle spikes of ad-hoc tasks. How much of a buffer is needed largely depends on your use case, but keep in mind that estimated throughput takes into account recent spikes and, as long as they are representative of your system's behaviour, shouldn't require much of a buffer.
+
+We recommend provisioning at least as many {kib} instances as proposed by `proposed.provisioned_kibana`, but keep in mind that this number is based on the estimated required throughput, which is based on average historical performance, and cannot accurately predict future requirements.
+
+[WARNING]
+============================================================================
+Automatic capacity estimation is performed by each {kib} instance independently. This estimation is performed by observing the task throughput in that instance, the number of {kib} instances executing tasks at that moment in time, and the recurring workload in {es}.
+
+If a {kib} instance is idle at the moment of capacity estimation, the number of active {kib} instances might be miscounted and the available throughput miscalculated.
+
+When evaluating the proposed {kib} instance number under `proposed.provisioned_kibana`, we highly recommend verifying that the `observed.observed_kibana_instances` matches the number of provisioned {kib} instances.
+============================================================================
+
+[float]
+===== Manual estimation
+
+By <<task-manager-health-evaluate-the-workload,evaluating the workload>>, you can make a rough estimate as to the required throughput as a _tasks per minute_ measurement.
+
+For example, suppose your current workload reveals a required throughput of `440/tpm`.  You can address this scale by provisioning 3 {kib} instances, with an upper throughput of `600/tpm`. This scale would provide aproximately 25% additional capacity to handle ad-hoc non-recurring tasks and potential growth in recurring tasks.
+
 Given a deployment of 100 recurring tasks, estimating the required throughput depends on the scheduled cadence.
 Suppose you expect to run 50 tasks at a cadence of `10s`, the other 50 tasks at `20m`. In addition, you expect a couple dozen non-recurring tasks every minute.
 
@@ -136,8 +161,11 @@ A recurring task requires as many executions as its cadence can fit in a minute.
 
 For this reason, we recommend grouping tasks by _tasks per minute_ and _tasks per hour_, as demonstrated in <<task-manager-health-evaluate-the-workload,Evaluate your workload>>, averaging the _per hour_ measurement across all minutes.
 
+It is highly recommended that you maintain at least 20% additional capacity, beyond your expected workload, as spikes in ad-hoc tasks is possible at times of high activity (such as a spike in actions in response to an active alert).
+
 Given the predicted workload, you can estimate a lower bound throughput of `340/tpm` (`6/tpm` * 50 + `3/tph` * 50 + 20% buffer).
 As a default, a {kib} instance provides a throughput of `200/tpm`. A good starting point for your deployment is to provision 2 {kib} instances. You could then monitor their performance and reassess as the required throughput becomes clearer.
 
 Although this is a _rough_ estimate, the  _tasks per minute_ provides the lower bound needed to execute tasks on time.
-Once you calculate the rough _tasks per minute_ estimate, add a 20% buffer for non-recurring tasks. How much of a buffer is required largely depends on your use case, so <<task-manager-health-evaluate-the-workload,evaluate your workload>> as it grows to ensure enough of a buffer is provisioned.
+
+Once you estimate  _tasks per minute_ , add a buffer for non-recurring tasks. How much of a buffer is required largely depends on your use case. Ensure enough of a buffer is provisioned by <<task-manager-health-evaluate-the-workload,evaluating your workload>> as it grows and tracking the ratio of recurring to non-recurring tasks by <<task-manager-health-evaluate-the-runtime,evaluating your runtime>>.

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FormEvent, useState } from 'react';
+import React, { FormEvent } from 'react';
 
 import { useActions, useValues } from 'kea';
 
@@ -19,17 +19,15 @@ import {
   EuiCode,
   EuiSpacer,
   EuiLink,
-  EuiModal,
-  EuiModalBody,
   EuiTitle,
   EuiText,
 } from '@elastic/eui';
 
 import { LicensingLogic } from '../../../../shared/licensing';
+import { WorkplaceSearchPageTemplate } from '../../../components/layout';
 import { ContentSection } from '../../../components/shared/content_section';
 import { CredentialItem } from '../../../components/shared/credential_item';
 import { LicenseBadge } from '../../../components/shared/license_badge';
-import { ViewContentHeader } from '../../../components/shared/view_content_header';
 import {
   CLIENT_ID_LABEL,
   CLIENT_SECRET_LABEL,
@@ -47,9 +45,9 @@ import {
   REDIRECT_SECURE_ERROR_TEXT,
   REDIRECT_URIS_LABEL,
   SAVE_CHANGES_BUTTON,
-  LICENSE_MODAL_TITLE,
-  LICENSE_MODAL_DESCRIPTION,
-  LICENSE_MODAL_LINK,
+  NON_PLATINUM_OAUTH_TITLE,
+  NON_PLATINUM_OAUTH_DESCRIPTION,
+  NON_PLATINUM_OAUTH_LINK,
 } from '../../../constants';
 import { ENT_SEARCH_LICENSE_MANAGEMENT } from '../../../routes';
 import { SettingsLogic } from '../settings_logic';
@@ -58,9 +56,6 @@ export const OauthApplication: React.FC = () => {
   const { setOauthApplication, updateOauthApplication } = useActions(SettingsLogic);
   const { oauthApplication } = useValues(SettingsLogic);
   const { hasPlatinumLicense } = useValues(LicensingLogic);
-
-  const [isLicenseModalVisible, setIsLicenseModalVisible] = useState(!hasPlatinumLicense);
-  const closeLicenseModal = () => setIsLicenseModalVisible(false);
 
   if (!oauthApplication) return null;
 
@@ -91,110 +86,123 @@ export const OauthApplication: React.FC = () => {
     updateOauthApplication();
   };
 
-  const licenseModal = (
-    <EuiModal maxWidth={500} onClose={closeLicenseModal} data-test-subj="LicenseModal">
-      <EuiModalBody>
-        <EuiSpacer size="xl" />
-        <LicenseBadge />
-        <EuiSpacer />
-        <EuiTitle size="l">
-          <h1>{LICENSE_MODAL_TITLE}</h1>
-        </EuiTitle>
-        <EuiSpacer size="s" />
-        <EuiText color="subdued">{LICENSE_MODAL_DESCRIPTION}</EuiText>
-        <EuiSpacer />
-        <EuiLink external target="_blank" href={ENT_SEARCH_LICENSE_MANAGEMENT}>
-          {LICENSE_MODAL_LINK}
-        </EuiLink>
-        <EuiSpacer />
-      </EuiModalBody>
-    </EuiModal>
+  const nonPlatinumTitle = (
+    <>
+      <LicenseBadge />
+      <EuiSpacer size="s" />
+      <EuiTitle size="l">
+        <h1>{NON_PLATINUM_OAUTH_TITLE}</h1>
+      </EuiTitle>
+    </>
+  );
+
+  const nonPlatinumDescription = (
+    <>
+      <EuiText color="subdued">{NON_PLATINUM_OAUTH_DESCRIPTION}</EuiText>
+      <EuiSpacer />
+      <EuiLink external target="_blank" href={ENT_SEARCH_LICENSE_MANAGEMENT}>
+        {NON_PLATINUM_OAUTH_LINK}
+      </EuiLink>
+    </>
   );
 
   return (
-    <>
-      <form onSubmit={handleSubmit}>
-        <EuiForm>
-          <ViewContentHeader title={NAV.SETTINGS_OAUTH} description={description} />
-          <ContentSection>
-            <EuiFormRow label={NAME_LABEL}>
-              <EuiFieldText
-                value={oauthApplication.name}
-                data-test-subj="OAuthAppName"
-                onChange={(e) => setOauthApplication({ ...oauthApplication, name: e.target.value })}
-                required
-                disabled={!hasPlatinumLicense}
-              />
-            </EuiFormRow>
-            <EuiSpacer size="xl" />
-            <EuiFormRow
-              data-test-subj="RedirectURIsRow"
-              label={REDIRECT_URIS_LABEL}
-              helpText={redirectUriHelpText}
-              isInvalid={redirectUriInvalid}
-              error={redirectErrorText}
-            >
-              <EuiTextArea
-                value={oauthApplication.redirectUri}
-                data-test-subj="RedirectURIsTextArea"
-                onChange={(e) =>
-                  setOauthApplication({ ...oauthApplication, redirectUri: e.target.value })
-                }
-                required
-                disabled={!hasPlatinumLicense}
-              />
-            </EuiFormRow>
-            <EuiSpacer size="xl" />
-            <EuiFormRow helpText={CONFIDENTIAL_HELP_TEXT}>
-              <EuiSwitch
-                label={CONFIDENTIAL_LABEL}
-                checked={oauthApplication.confidential}
-                data-test-subj="ConfidentialToggle"
-                onChange={(e) =>
-                  setOauthApplication({ ...oauthApplication, confidential: e.target.checked })
-                }
-                disabled={!hasPlatinumLicense}
-              />
-            </EuiFormRow>
-            <EuiSpacer size="xl" />
-            <EuiButton
-              fill
-              color="primary"
-              data-test-subj="SaveOAuthApp"
-              type="submit"
+    <WorkplaceSearchPageTemplate
+      pageChrome={[NAV.SETTINGS, NAV.SETTINGS_OAUTH]}
+      pageHeader={{
+        pageTitle: hasPlatinumLicense ? NAV.SETTINGS_OAUTH : nonPlatinumTitle,
+        description: hasPlatinumLicense ? description : nonPlatinumDescription,
+      }}
+    >
+      <EuiForm component="form" onSubmit={handleSubmit}>
+        <EuiSpacer />
+        <ContentSection>
+          <EuiFormRow label={NAME_LABEL}>
+            <EuiFieldText
+              value={oauthApplication.name}
+              data-test-subj="OAuthAppName"
+              onChange={(e) =>
+                setOauthApplication({
+                  ...oauthApplication,
+                  name: e.target.value,
+                })
+              }
+              required
               disabled={!hasPlatinumLicense}
-            >
-              {SAVE_CHANGES_BUTTON}
-            </EuiButton>
+            />
+          </EuiFormRow>
+          <EuiSpacer size="xl" />
+          <EuiFormRow
+            data-test-subj="RedirectURIsRow"
+            label={REDIRECT_URIS_LABEL}
+            helpText={redirectUriHelpText}
+            isInvalid={redirectUriInvalid}
+            error={redirectErrorText}
+          >
+            <EuiTextArea
+              value={oauthApplication.redirectUri}
+              data-test-subj="RedirectURIsTextArea"
+              onChange={(e) =>
+                setOauthApplication({
+                  ...oauthApplication,
+                  redirectUri: e.target.value,
+                })
+              }
+              required
+              disabled={!hasPlatinumLicense}
+            />
+          </EuiFormRow>
+          <EuiSpacer size="xl" />
+          <EuiFormRow helpText={CONFIDENTIAL_HELP_TEXT}>
+            <EuiSwitch
+              label={CONFIDENTIAL_LABEL}
+              checked={oauthApplication.confidential}
+              data-test-subj="ConfidentialToggle"
+              onChange={(e) =>
+                setOauthApplication({
+                  ...oauthApplication,
+                  confidential: e.target.checked,
+                })
+              }
+              disabled={!hasPlatinumLicense}
+            />
+          </EuiFormRow>
+          <EuiSpacer size="xl" />
+          <EuiButton
+            fill
+            color="primary"
+            data-test-subj="SaveOAuthApp"
+            type="submit"
+            disabled={!hasPlatinumLicense}
+          >
+            {SAVE_CHANGES_BUTTON}
+          </EuiButton>
+        </ContentSection>
+        {persisted && (
+          <ContentSection title={CREDENTIALS_TITLE} description={CREDENTIALS_DESCRIPTION}>
+            <EuiFormRow>
+              <CredentialItem
+                label={CLIENT_ID_LABEL}
+                value={oauthApplication.uid}
+                testSubj="ClientID"
+              />
+            </EuiFormRow>
+
+            {oauthApplication.confidential && (
+              <>
+                <EuiSpacer size="s" />
+                <EuiFormRow>
+                  <CredentialItem
+                    label={CLIENT_SECRET_LABEL}
+                    value={oauthApplication.secret}
+                    testSubj="ClientSecret"
+                  />
+                </EuiFormRow>
+              </>
+            )}
           </ContentSection>
-          {persisted && (
-            <ContentSection title={CREDENTIALS_TITLE} description={CREDENTIALS_DESCRIPTION}>
-              <EuiFormRow>
-                <CredentialItem
-                  label={CLIENT_ID_LABEL}
-                  value={oauthApplication.uid}
-                  testSubj="ClientID"
-                />
-              </EuiFormRow>
-
-              {oauthApplication.confidential && (
-                <>
-                  <EuiSpacer size="s" />
-                  <EuiFormRow>
-                    <CredentialItem
-                      label={CLIENT_SECRET_LABEL}
-                      value={oauthApplication.secret}
-                      testSubj="ClientSecret"
-                    />
-                  </EuiFormRow>
-                </>
-              )}
-            </ContentSection>
-          )}
-        </EuiForm>
-      </form>
-
-      {isLicenseModalVisible && licenseModal}
-    </>
+        )}
+      </EuiForm>
+    </WorkplaceSearchPageTemplate>
   );
 };

@@ -192,6 +192,7 @@ exports[`CalendarForm Renders calendar form 1`] = `
       canDeleteCalendar={true}
       eventsList={Array []}
       onDeleteClick={[MockFunction]}
+      saving={false}
       showImportModal={[MockFunction]}
       showNewEventModal={[MockFunction]}
       showSearchBar={true}

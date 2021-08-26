@@ -5,7 +5,20 @@
  * 2.0.
  */
 
-import { RowRendererId } from '../../../../common/types/timeline';
+import {
+  ALERT_DURATION,
+  ALERT_ID,
+  ALERT_RULE_PRODUCER,
+  ALERT_START,
+  ALERT_STATUS,
+  ALERT_UUID,
+  ALERT_RULE_UUID,
+  ALERT_RULE_NAME,
+  ALERT_RULE_CATEGORY,
+} from '@kbn/rule-data-utils';
+
+import { defaultColumnHeaderType } from '../../../timelines/components/timeline/body/column_headers/default_headers';
+import { ColumnHeaderOptions, RowRendererId } from '../../../../common/types/timeline';
 import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
 import { Filter } from '../../../../../../../src/plugins/data/common/es_query';
 
@@ -13,25 +26,47 @@ import { SubsetTimelineModel } from '../../../timelines/store/timeline/model';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 import { columns } from '../../configurations/security_solution_detections/columns';
 
-export const buildAlertStatusFilter = (status: Status): Filter[] => [
-  {
-    meta: {
-      alias: null,
-      negate: false,
-      disabled: false,
-      type: 'phrase',
-      key: 'signal.status',
-      params: {
-        query: status,
+export const buildAlertStatusFilter = (status: Status): Filter[] => {
+  const combinedQuery =
+    status === 'acknowledged'
+      ? {
+          bool: {
+            should: [
+              {
+                term: {
+                  'signal.status': status,
+                },
+              },
+              {
+                term: {
+                  'signal.status': 'in-progress',
+                },
+              },
+            ],
+          },
+        }
+      : {
+          term: {
+            'signal.status': status,
+          },
+        };
+
+  return [
+    {
+      meta: {
+        alias: null,
+        negate: false,
+        disabled: false,
+        type: 'phrase',
+        key: 'signal.status',
+        params: {
+          query: status,
+        },
       },
+      query: combinedQuery,
     },
-    query: {
-      term: {
-        'signal.status': status,
-      },
-    },
-  },
-];
+  ];
+};
 
 export const buildAlertsRuleIdFilter = (ruleId: string | null): Filter[] =>
   ruleId
@@ -124,3 +159,97 @@ export const requiredFieldsForActions = [
   'host.os.family',
   'event.code',
 ];
+
+// TODO: Once we are past experimental phase this code should be removed
+export const buildAlertStatusFilterRuleRegistry = (status: Status): Filter[] => {
+  const combinedQuery =
+    status === 'acknowledged'
+      ? {
+          bool: {
+            should: [
+              {
+                term: {
+                  [ALERT_STATUS]: status,
+                },
+              },
+              {
+                term: {
+                  [ALERT_STATUS]: 'in-progress',
+                },
+              },
+            ],
+          },
+        }
+      : {
+          term: {
+            [ALERT_STATUS]: status,
+          },
+        };
+
+  return [
+    {
+      meta: {
+        alias: null,
+        negate: false,
+        disabled: false,
+        type: 'phrase',
+        key: ALERT_STATUS,
+        params: {
+          query: status,
+        },
+      },
+      query: combinedQuery,
+    },
+  ];
+};
+
+export const buildShowBuildingBlockFilterRuleRegistry = (
+  showBuildingBlockAlerts: boolean
+): Filter[] =>
+  showBuildingBlockAlerts
+    ? []
+    : [
+        {
+          meta: {
+            alias: null,
+            negate: true,
+            disabled: false,
+            type: 'exists',
+            key: 'kibana.rule.building_block_type',
+            value: 'exists',
+          },
+          // @ts-expect-error TODO: Rework parent typings to support ExistsFilter[]
+          exists: { field: 'kibana.rule.building_block_type' },
+        },
+      ];
+
+export const requiredFieldMappingsForActionsRuleRegistry = {
+  '@timestamp': '@timestamp',
+  'alert.id': ALERT_ID,
+  'event.kind': 'event.kind',
+  'alert.start': ALERT_START,
+  'alert.uuid': ALERT_UUID,
+  'event.action': 'event.action',
+  'alert.status': ALERT_STATUS,
+  'alert.duration.us': ALERT_DURATION,
+  'rule.uuid': ALERT_RULE_UUID,
+  'rule.name': ALERT_RULE_NAME,
+  'rule.category': ALERT_RULE_CATEGORY,
+  producer: ALERT_RULE_PRODUCER,
+  tags: 'tags',
+};
+
+export const alertsHeadersRuleRegistry: ColumnHeaderOptions[] = Object.entries(
+  requiredFieldMappingsForActionsRuleRegistry
+).map<ColumnHeaderOptions>(([alias, field]) => ({
+  columnHeaderType: defaultColumnHeaderType,
+  displayAsText: alias,
+  id: field,
+}));
+
+export const alertsDefaultModelRuleRegistry: SubsetTimelineModel = {
+  ...timelineDefaults,
+  columns: alertsHeadersRuleRegistry,
+  showCheckboxes: true,
+  excludedRowRendererIds: Object.values(RowRendererId),
+};

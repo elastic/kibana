@@ -16,12 +16,10 @@ import {
   getGroupPath,
   getGroupSourcePrioritizationPath,
   getReindexJobRoute,
-  getRoleMappingPath,
   getSourcesPath,
   GROUPS_PATH,
   SOURCES_PATH,
   PERSONAL_SOURCES_PATH,
-  ROLE_MAPPINGS_PATH,
   SOURCE_DETAILS_PATH,
 } from './routes';
 
@@ -52,12 +50,6 @@ describe('getGroupPath', () => {
   });
 });
 
-describe('getRoleMappingPath', () => {
-  it('should format path', () => {
-    expect(getRoleMappingPath('123')).toEqual(`${ROLE_MAPPINGS_PATH}/123`);
-  });
-});
-
 describe('getGroupSourcePrioritizationPath', () => {
   it('should format path', () => {
     expect(getGroupSourcePrioritizationPath('123')).toEqual(
@@ -84,13 +76,13 @@ describe('getReindexJobRoute', () => {
 
   it('should format org path', () => {
     expect(getReindexJobRoute(SOURCE_ID, REINDEX_ID, true)).toEqual(
-      `/sources/${SOURCE_ID}/schema_errors/${REINDEX_ID}`
+      `/sources/${SOURCE_ID}/schemas/${REINDEX_ID}`
     );
   });
 
   it('should format user path', () => {
     expect(getReindexJobRoute(SOURCE_ID, REINDEX_ID, false)).toEqual(
-      `/p/sources/${SOURCE_ID}/schema_errors/${REINDEX_ID}`
+      `/p/sources/${SOURCE_ID}/schemas/${REINDEX_ID}`
     );
   });
 });

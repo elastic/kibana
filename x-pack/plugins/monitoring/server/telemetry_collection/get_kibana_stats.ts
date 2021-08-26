@@ -7,8 +7,8 @@
 
 import moment from 'moment';
 import { isEmpty } from 'lodash';
-import { SearchResponse } from 'elasticsearch';
-import { LegacyAPICaller } from 'kibana/server';
+import type { estypes } from '@elastic/elasticsearch';
+import { ElasticsearchClient } from 'kibana/server';
 import { KIBANA_SYSTEM_ID, TELEMETRY_COLLECTION_INTERVAL } from '../../common/constants';
 import {
   fetchHighLevelStats,
@@ -70,14 +70,14 @@ export interface KibanaStats {
 /*
  * @param {Object} rawStats
  */
-export function getUsageStats(rawStats: SearchResponse<KibanaUsageStats>) {
+export function getUsageStats(rawStats: estypes.SearchResponse<KibanaUsageStats>) {
   const clusterIndexCache = new Set();
   const rawStatsHits = rawStats.hits?.hits || [];
 
   // get usage stats per cluster / .kibana index
   return rawStatsHits.reduce((accum, currInstance) => {
-    const clusterUuid = currInstance._source.cluster_uuid;
-    const currUsage = currInstance._source.kibana_stats?.usage || {};
+    const clusterUuid = currInstance._source!.cluster_uuid;
+    const currUsage = currInstance._source!.kibana_stats?.usage || {};
     const clusterIndexCombination = clusterUuid + currUsage.index;
 
     // return early if usage data is empty or if this cluster/index has already been processed
@@ -183,7 +183,7 @@ export function ensureTimeSpan(
  * specialized usage data that comes with kibana stats (kibana_stats.usage).
  */
 export async function getKibanaStats(
-  callCluster: LegacyAPICaller,
+  callCluster: ElasticsearchClient,
   clusterUuids: string[],
   start: string,
   end: string,

@@ -9,7 +9,6 @@
 import { overwrite } from '../../helpers';
 import { getBucketSize } from '../../helpers/get_bucket_size';
 import { offsetTime } from '../../offset_time';
-import { getIntervalAndTimefield } from '../../get_interval_and_timefield';
 import { isLastValueTimerangeMode } from '../../helpers/get_timerange_mode';
 import { search, UI_SETTINGS } from '../../../../../../../plugins/data/server';
 
@@ -22,23 +21,27 @@ export function dateHistogram(
   esQueryConfig,
   seriesIndex,
   capabilities,
-  uiSettings
+  uiSettings,
+  buildSeriesMetaParams
 ) {
   return (next) => async (doc) => {
     const maxBarsUiSettings = await uiSettings.get(UI_SETTINGS.HISTOGRAM_MAX_BARS);
     const barTargetUiSettings = await uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET);
 
-    const { timeField, interval, maxBars } = getIntervalAndTimefield(panel, series, seriesIndex);
-    const { bucketSize, intervalString } = getBucketSize(
-      req,
-      interval,
-      capabilities,
-      maxBars ? Math.min(maxBarsUiSettings, maxBars) : barTargetUiSettings
-    );
+    const { timeField, interval, maxBars } = await buildSeriesMetaParams();
+    const { from, to } = offsetTime(req, series.offset_time);
 
-    const getDateHistogramForLastBucketMode = () => {
-      const { from, to } = offsetTime(req, series.offset_time);
+    let bucketInterval;
+
+    const overwriteDateHistogramForLastBucketMode = () => {
       const { timezone } = capabilities;
+
+      const { intervalString } = getBucketSize(
+        req,
+        interval,
+        capabilities,
+        maxBars ? Math.min(maxBarsUiSettings, maxBars) : barTargetUiSettings
+      );
 
       overwrite(doc, `aggs.${series.id}.aggs.timeseries.date_histogram`, {
         field: timeField,
@@ -50,23 +53,28 @@ export function dateHistogram(
         },
         ...dateHistogramInterval(intervalString),
       });
+
+      bucketInterval = intervalString;
     };
 
-    const getDateHistogramForEntireTimerangeMode = () =>
+    const overwriteDateHistogramForEntireTimerangeMode = () => {
       overwrite(doc, `aggs.${series.id}.aggs.timeseries.auto_date_histogram`, {
         field: timeField,
         buckets: 1,
       });
 
+      bucketInterval = `${to.valueOf() - from.valueOf()}ms`;
+    };
+
     isLastValueTimerangeMode(panel, series)
-      ? getDateHistogramForLastBucketMode()
-      : getDateHistogramForEntireTimerangeMode();
+      ? overwriteDateHistogramForLastBucketMode()
+      : overwriteDateHistogramForEntireTimerangeMode();
 
     overwrite(doc, `aggs.${series.id}.meta`, {
       timeField,
-      intervalString,
-      bucketSize,
+      panelId: panel.id,
       seriesId: series.id,
+      intervalString: bucketInterval,
       index: panel.use_kibana_indexes ? seriesIndex.indexPattern?.id : undefined,
     });
 

@@ -11,11 +11,12 @@ import { registerGetRoute } from '../get';
 import { ContextService } from '../../../context';
 import { savedObjectsClientMock } from '../../service/saved_objects_client.mock';
 import { CoreUsageStatsClient } from '../../../core_usage_data';
+import { executionContextServiceMock } from '../../../execution_context/execution_context_service.mock';
 import { coreUsageStatsClientMock } from '../../../core_usage_data/core_usage_stats_client.mock';
 import { coreUsageDataServiceMock } from '../../../core_usage_data/core_usage_data_service.mock';
 import { HttpService, InternalHttpServiceSetup } from '../../../http';
 import { createHttpServer, createCoreContext } from '../../../http/test_utils';
-import { coreMock } from '../../../mocks';
+import { contextServiceMock, coreMock } from '../../../mocks';
 
 const coreId = Symbol('core');
 
@@ -29,10 +30,12 @@ describe('GET /api/saved_objects/{type}/{id}', () => {
   beforeEach(async () => {
     const coreContext = createCoreContext({ coreId });
     server = createHttpServer(coreContext);
+    await server.preboot({ context: contextServiceMock.createPrebootContract() });
 
     const contextService = new ContextService(coreContext);
     httpSetup = await server.setup({
       context: contextService.setup({ pluginDependencies: new Map() }),
+      executionContext: executionContextServiceMock.createInternalSetupContract(),
     });
 
     handlerContext = coreMock.createRequestHandlerContext();

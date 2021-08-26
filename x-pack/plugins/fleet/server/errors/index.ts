@@ -8,11 +8,7 @@
 /* eslint-disable max-classes-per-file */
 import { isESClientError } from './utils';
 
-export {
-  defaultIngestErrorHandler,
-  ingestErrorToResponseOptions,
-  isLegacyESClientError,
-} from './handlers';
+export { defaultIngestErrorHandler, ingestErrorToResponseOptions } from './handlers';
 
 export { isESClientError } from './utils';
 

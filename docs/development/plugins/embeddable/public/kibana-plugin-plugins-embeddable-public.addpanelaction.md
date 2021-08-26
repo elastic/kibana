@@ -14,7 +14,7 @@ export declare class AddPanelAction implements Action<ActionContext>
 
 |  Constructor | Modifiers | Description |
 |  --- | --- | --- |
-|  [(constructor)(getFactory, getAllFactories, overlays, notifications, SavedObjectFinder)](./kibana-plugin-plugins-embeddable-public.addpanelaction._constructor_.md) |  | Constructs a new instance of the <code>AddPanelAction</code> class |
+|  [(constructor)(getFactory, getAllFactories, overlays, notifications, SavedObjectFinder, reportUiCounter)](./kibana-plugin-plugins-embeddable-public.addpanelaction._constructor_.md) |  | Constructs a new instance of the <code>AddPanelAction</code> class |
 
 ## Properties
 

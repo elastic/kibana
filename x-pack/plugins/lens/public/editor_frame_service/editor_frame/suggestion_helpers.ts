@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import _ from 'lodash';
 import { Ast } from '@kbn/interpreter/common';
 import { IconType } from '@elastic/eui/src/components/icon/icon';
 import { Datatable } from 'src/plugins/expressions';
@@ -18,9 +17,19 @@ import {
   TableSuggestion,
   DatasourceSuggestion,
   DatasourcePublicAPI,
+  DatasourceMap,
+  VisualizationMap,
 } from '../../types';
-import { Action } from './state_management';
 import { DragDropIdentifier } from '../../drag_drop';
+import { LayerType, layerTypes } from '../../../common';
+import { getLayerType } from './config_panel/add_layer';
+import {
+  LensDispatch,
+  selectSuggestion,
+  switchVisualization,
+  DatasourceStates,
+  VisualizationState,
+} from '../../state_management';
 
 export interface Suggestion {
   visualizationId: string;
@@ -57,15 +66,9 @@ export function getSuggestions({
   activeData,
   mainPalette,
 }: {
-  datasourceMap: Record<string, Datasource>;
-  datasourceStates: Record<
-    string,
-    {
-      isLoading: boolean;
-      state: unknown;
-    }
-  >;
-  visualizationMap: Record<string, Visualization>;
+  datasourceMap: DatasourceMap;
+  datasourceStates: DatasourceStates;
+  visualizationMap: VisualizationMap;
   activeVisualizationId: string | null;
   subVisualizationId?: string;
   visualizationState: unknown;
@@ -78,84 +81,106 @@ export function getSuggestions({
     ([datasourceId]) => datasourceStates[datasourceId] && !datasourceStates[datasourceId].isLoading
   );
 
+  const layerTypesMap = datasources.reduce((memo, [datasourceId, datasource]) => {
+    const datasourceState = datasourceStates[datasourceId].state;
+    if (!activeVisualizationId || !datasourceState || !visualizationMap[activeVisualizationId]) {
+      return memo;
+    }
+    const layers = datasource.getLayers(datasourceState);
+    for (const layerId of layers) {
+      const type = getLayerType(
+        visualizationMap[activeVisualizationId],
+        visualizationState,
+        layerId
+      );
+      memo[layerId] = type;
+    }
+    return memo;
+  }, {} as Record<string, LayerType>);
+
+  const isLayerSupportedByVisualization = (layerId: string, supportedTypes: LayerType[]) =>
+    supportedTypes.includes(layerTypesMap[layerId] ?? layerTypes.DATA);
+
   // Collect all table suggestions from available datasources
-  const datasourceTableSuggestions = _.flatten(
-    datasources.map(([datasourceId, datasource]) => {
-      const datasourceState = datasourceStates[datasourceId].state;
-      let dataSourceSuggestions;
-      if (visualizeTriggerFieldContext) {
-        dataSourceSuggestions = datasource.getDatasourceSuggestionsForVisualizeField(
-          datasourceState,
-          visualizeTriggerFieldContext.indexPatternId,
-          visualizeTriggerFieldContext.fieldName
-        );
-      } else if (field) {
-        dataSourceSuggestions = datasource.getDatasourceSuggestionsForField(datasourceState, field);
-      } else {
-        dataSourceSuggestions = datasource.getDatasourceSuggestionsFromCurrentState(
-          datasourceState,
-          activeData
-        );
-      }
-      return dataSourceSuggestions.map((suggestion) => ({ ...suggestion, datasourceId }));
-    })
-  );
+  const datasourceTableSuggestions = datasources.flatMap(([datasourceId, datasource]) => {
+    const datasourceState = datasourceStates[datasourceId].state;
+    let dataSourceSuggestions;
+    if (visualizeTriggerFieldContext) {
+      dataSourceSuggestions = datasource.getDatasourceSuggestionsForVisualizeField(
+        datasourceState,
+        visualizeTriggerFieldContext.indexPatternId,
+        visualizeTriggerFieldContext.fieldName
+      );
+    } else if (field) {
+      dataSourceSuggestions = datasource.getDatasourceSuggestionsForField(datasourceState, field);
+    } else {
+      dataSourceSuggestions = datasource.getDatasourceSuggestionsFromCurrentState(
+        datasourceState,
+        activeData
+      );
+    }
+    return dataSourceSuggestions.map((suggestion) => ({ ...suggestion, datasourceId }));
+  });
 
   // Pass all table suggestions to all visualization extensions to get visualization suggestions
   // and rank them by score
-  return _.flatten(
-    Object.entries(visualizationMap).map(([visualizationId, visualization]) =>
-      _.flatten(
-        datasourceTableSuggestions.map((datasourceSuggestion) => {
+  return Object.entries(visualizationMap)
+    .flatMap(([visualizationId, visualization]) => {
+      const supportedLayerTypes = visualization.getSupportedLayers().map(({ type }) => type);
+      return datasourceTableSuggestions
+        .filter((datasourceSuggestion) => {
+          const filteredCount = datasourceSuggestion.keptLayerIds.filter((layerId) =>
+            isLayerSupportedByVisualization(layerId, supportedLayerTypes)
+          ).length;
+          // make it pass either suggestions with some ids left after filtering
+          // or suggestion with already 0 ids before the filtering (testing purposes)
+          return filteredCount || filteredCount === datasourceSuggestion.keptLayerIds.length;
+        })
+        .flatMap((datasourceSuggestion) => {
           const table = datasourceSuggestion.table;
           const currentVisualizationState =
             visualizationId === activeVisualizationId ? visualizationState : undefined;
           const palette =
             mainPalette ||
-            (activeVisualizationId &&
-            visualizationMap[activeVisualizationId] &&
-            visualizationMap[activeVisualizationId].getMainPalette
-              ? visualizationMap[activeVisualizationId].getMainPalette!(visualizationState)
+            (activeVisualizationId && visualizationMap[activeVisualizationId]?.getMainPalette
+              ? visualizationMap[activeVisualizationId].getMainPalette?.(visualizationState)
               : undefined);
+
           return getVisualizationSuggestions(
             visualization,
             table,
             visualizationId,
-            datasourceSuggestion,
+            {
+              ...datasourceSuggestion,
+              keptLayerIds: datasourceSuggestion.keptLayerIds.filter((layerId) =>
+                isLayerSupportedByVisualization(layerId, supportedLayerTypes)
+              ),
+            },
             currentVisualizationState,
             subVisualizationId,
             palette
           );
-        })
-      )
-    )
-  ).sort((a, b) => b.score - a.score);
+        });
+    })
+    .sort((a, b) => b.score - a.score);
 }
 
-export function applyVisualizeFieldSuggestions({
+export function getVisualizeFieldSuggestions({
   datasourceMap,
   datasourceStates,
   visualizationMap,
   activeVisualizationId,
   visualizationState,
   visualizeTriggerFieldContext,
-  dispatch,
 }: {
-  datasourceMap: Record<string, Datasource>;
-  datasourceStates: Record<
-    string,
-    {
-      isLoading: boolean;
-      state: unknown;
-    }
-  >;
-  visualizationMap: Record<string, Visualization>;
+  datasourceMap: DatasourceMap;
+  datasourceStates: DatasourceStates;
+  visualizationMap: VisualizationMap;
   activeVisualizationId: string | null;
   subVisualizationId?: string;
   visualizationState: unknown;
   visualizeTriggerFieldContext?: VisualizeFieldContext;
-  dispatch: (action: Action) => void;
-}): void {
+}): Suggestion | undefined {
   const suggestions = getSuggestions({
     datasourceMap,
     datasourceStates,
@@ -165,9 +190,7 @@ export function applyVisualizeFieldSuggestions({
     visualizeTriggerFieldContext,
   });
   if (suggestions.length) {
-    const selectedSuggestion =
-      suggestions.find((s) => s.visualizationId === activeVisualizationId) || suggestions[0];
-    switchToSuggestion(dispatch, selectedSuggestion, 'SWITCH_VISUALIZATION');
+    return suggestions.find((s) => s.visualizationId === activeVisualizationId) || suggestions[0];
   }
 }
 
@@ -207,31 +230,33 @@ function getVisualizationSuggestions(
 }
 
 export function switchToSuggestion(
-  dispatch: (action: Action) => void,
+  dispatchLens: LensDispatch,
   suggestion: Pick<
     Suggestion,
     'visualizationId' | 'visualizationState' | 'datasourceState' | 'datasourceId'
   >,
   type: 'SWITCH_VISUALIZATION' | 'SELECT_SUGGESTION' = 'SELECT_SUGGESTION'
 ) {
-  const action: Action = {
-    type,
+  const pickedSuggestion = {
     newVisualizationId: suggestion.visualizationId,
     initialState: suggestion.visualizationState,
     datasourceState: suggestion.datasourceState,
     datasourceId: suggestion.datasourceId!,
   };
 
-  dispatch(action);
+  dispatchLens(
+    type === 'SELECT_SUGGESTION'
+      ? selectSuggestion(pickedSuggestion)
+      : switchVisualization(pickedSuggestion)
+  );
 }
 
 export function getTopSuggestionForField(
   datasourceLayers: Record<string, DatasourcePublicAPI>,
-  activeVisualizationId: string | null,
+  visualization: VisualizationState,
+  datasourceStates: DatasourceStates,
   visualizationMap: Record<string, Visualization<unknown>>,
-  visualizationState: unknown,
   datasource: Datasource,
-  datasourceStates: Record<string, { state: unknown; isLoading: boolean }>,
   field: DragDropIdentifier
 ) {
   const hasData = Object.values(datasourceLayers).some(
@@ -239,20 +264,20 @@ export function getTopSuggestionForField(
   );
 
   const mainPalette =
-    activeVisualizationId && visualizationMap[activeVisualizationId]?.getMainPalette
-      ? visualizationMap[activeVisualizationId].getMainPalette?.(visualizationState)
+    visualization.activeId && visualizationMap[visualization.activeId]?.getMainPalette
+      ? visualizationMap[visualization.activeId].getMainPalette?.(visualization.state)
       : undefined;
   const suggestions = getSuggestions({
     datasourceMap: { [datasource.id]: datasource },
     datasourceStates,
     visualizationMap:
-      hasData && activeVisualizationId
-        ? { [activeVisualizationId]: visualizationMap[activeVisualizationId] }
+      hasData && visualization.activeId
+        ? { [visualization.activeId]: visualizationMap[visualization.activeId] }
         : visualizationMap,
-    activeVisualizationId,
-    visualizationState,
+    activeVisualizationId: visualization.activeId,
+    visualizationState: visualization.state,
     field,
     mainPalette,
   });
-  return suggestions.find((s) => s.visualizationId === activeVisualizationId) || suggestions[0];
+  return suggestions.find((s) => s.visualizationId === visualization.activeId) || suggestions[0];
 }

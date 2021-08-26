@@ -10,8 +10,8 @@ import { i18n } from '@kbn/i18n';
 import { ExpressionFunctionDefinition } from '../types';
 
 interface Arguments {
-  name: string;
-  value?: any;
+  name: string[];
+  value: any[];
 }
 
 export type ExpressionFunctionVarSet = ExpressionFunctionDefinition<
@@ -31,12 +31,14 @@ export const variableSet: ExpressionFunctionVarSet = {
       types: ['string'],
       aliases: ['_'],
       required: true,
+      multi: true,
       help: i18n.translate('expressions.functions.varset.name.help', {
         defaultMessage: 'Specify the name of the variable.',
       }),
     },
     value: {
       aliases: ['val'],
+      multi: true,
       help: i18n.translate('expressions.functions.varset.val.help', {
         defaultMessage:
           'Specify the value for the variable. When unspecified, the input context is used.',
@@ -45,7 +47,9 @@ export const variableSet: ExpressionFunctionVarSet = {
   },
   fn(input, args, context) {
     const variables: Record<string, any> = context.variables;
-    variables[args.name] = args.value === undefined ? input : args.value;
+    args.name.forEach((name, i) => {
+      variables[name] = args.value[i] === undefined ? input : args.value[i];
+    });
     return input;
   },
 };
