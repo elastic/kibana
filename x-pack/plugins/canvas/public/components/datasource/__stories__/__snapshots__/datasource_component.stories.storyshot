@@ -41,6 +41,7 @@ exports[`Storyshots components/datasource/DatasourceComponent datasource with ex
     >
       <div
         className="euiTextColor euiTextColor--default"
+        style={Object {}}
       >
         <p>
           The datasource has an argument controlled by an expression. Use the expression editor to modify the datasource.

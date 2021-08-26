@@ -6,17 +6,17 @@
  */
 
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
+import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
+import { requestContextMock, requestMock, serverMock } from '../__mocks__';
 import {
   getAlertMock,
-  getFindRequest,
-  getFindResultWithSingleHit,
   getFindBulkResultStatus,
+  getFindRequest,
+  getEmptySavedObjectsResponse,
+  getFindResultWithSingleHit,
 } from '../__mocks__/request_responses';
-import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { findRulesRoute } from './find_rules_route';
-import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
 
-jest.mock('../../signals/rule_status_service');
 describe('find_rules', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
@@ -27,7 +27,8 @@ describe('find_rules', () => {
 
     clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
     clients.rulesClient.get.mockResolvedValue(getAlertMock(getQueryRuleParams()));
-    clients.savedObjectsClient.find.mockResolvedValue(getFindBulkResultStatus());
+    clients.savedObjectsClient.find.mockResolvedValue(getEmptySavedObjectsResponse());
+    clients.ruleExecutionLogClient.findBulk.mockResolvedValue(getFindBulkResultStatus());
 
     findRulesRoute(server.router);
   });

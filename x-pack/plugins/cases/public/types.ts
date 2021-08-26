@@ -7,11 +7,17 @@
 
 import { CoreStart } from 'kibana/public';
 import { ReactElement } from 'react';
+
+import { LensPublicStart } from '../../lens/public';
 import { SecurityPluginSetup } from '../../security/public';
-import {
+import type {
   TriggersAndActionsUIPublicPluginSetup as TriggersActionsSetup,
   TriggersAndActionsUIPublicPluginStart as TriggersActionsStart,
 } from '../../triggers_actions_ui/public';
+import type { DataPublicPluginStart } from '../../../../src/plugins/data/public';
+import type { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
+import type { Storage } from '../../../../src/plugins/kibana_utils/public';
+
 import { AllCasesProps } from './components/all_cases';
 import { CaseViewProps } from './components/case_view';
 import { ConfigureCasesProps } from './components/configure_cases';
@@ -25,6 +31,10 @@ export interface SetupPlugins {
 }
 
 export interface StartPlugins {
+  data: DataPublicPluginStart;
+  embeddable: EmbeddableStart;
+  lens: LensPublicStart;
+  storage: Storage;
   triggersActionsUi: TriggersActionsStart;
 }
 

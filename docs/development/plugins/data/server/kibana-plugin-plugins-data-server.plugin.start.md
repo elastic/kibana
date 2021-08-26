@@ -7,12 +7,10 @@
 <b>Signature:</b>
 
 ```typescript
-start(core: CoreStart): {
-        fieldFormats: {
-            fieldFormatServiceFactory: (uiSettings: import("../../../core/server").IUiSettingsClient) => Promise<import("../common").FieldFormatsRegistry>;
-        };
+start(core: CoreStart, { fieldFormats }: DataPluginStartDependencies): {
+        fieldFormats: FieldFormatsStart;
         indexPatterns: {
-            indexPatternsServiceFactory: (savedObjectsClient: Pick<import("../../../core/server").SavedObjectsClient, "update" | "get" | "delete" | "create" | "bulkCreate" | "checkConflicts" | "find" | "bulkGet" | "resolve" | "collectMultiNamespaceReferences" | "updateObjectsSpaces" | "bulkUpdate" | "removeReferencesTo" | "openPointInTimeForType" | "closePointInTime" | "createPointInTimeFinder" | "errors">, elasticsearchClient: import("../../../core/server").ElasticsearchClient) => Promise<import(".").IndexPatternsService>;
+            indexPatternsServiceFactory: (savedObjectsClient: Pick<import("../../../core/server").SavedObjectsClient, "update" | "get" | "closePointInTime" | "create" | "delete" | "bulkCreate" | "checkConflicts" | "find" | "bulkGet" | "resolve" | "collectMultiNamespaceReferences" | "updateObjectsSpaces" | "bulkUpdate" | "removeReferencesTo" | "openPointInTimeForType" | "createPointInTimeFinder" | "errors">, elasticsearchClient: import("../../../core/server").ElasticsearchClient) => Promise<import(".").IndexPatternsService>;
         };
         search: ISearchStart<import("./search").IEsSearchRequest, import("./search").IEsSearchResponse<any>>;
     };
@@ -23,15 +21,14 @@ start(core: CoreStart): {
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  core | <code>CoreStart</code> |  |
+|  { fieldFormats } | <code>DataPluginStartDependencies</code> |  |
 
 <b>Returns:</b>
 
 `{
-        fieldFormats: {
-            fieldFormatServiceFactory: (uiSettings: import("../../../core/server").IUiSettingsClient) => Promise<import("../common").FieldFormatsRegistry>;
-        };
+        fieldFormats: FieldFormatsStart;
         indexPatterns: {
-            indexPatternsServiceFactory: (savedObjectsClient: Pick<import("../../../core/server").SavedObjectsClient, "update" | "get" | "delete" | "create" | "bulkCreate" | "checkConflicts" | "find" | "bulkGet" | "resolve" | "collectMultiNamespaceReferences" | "updateObjectsSpaces" | "bulkUpdate" | "removeReferencesTo" | "openPointInTimeForType" | "closePointInTime" | "createPointInTimeFinder" | "errors">, elasticsearchClient: import("../../../core/server").ElasticsearchClient) => Promise<import(".").IndexPatternsService>;
+            indexPatternsServiceFactory: (savedObjectsClient: Pick<import("../../../core/server").SavedObjectsClient, "update" | "get" | "closePointInTime" | "create" | "delete" | "bulkCreate" | "checkConflicts" | "find" | "bulkGet" | "resolve" | "collectMultiNamespaceReferences" | "updateObjectsSpaces" | "bulkUpdate" | "removeReferencesTo" | "openPointInTimeForType" | "createPointInTimeFinder" | "errors">, elasticsearchClient: import("../../../core/server").ElasticsearchClient) => Promise<import(".").IndexPatternsService>;
         };
         search: ISearchStart<import("./search").IEsSearchRequest, import("./search").IEsSearchResponse<any>>;
     }`

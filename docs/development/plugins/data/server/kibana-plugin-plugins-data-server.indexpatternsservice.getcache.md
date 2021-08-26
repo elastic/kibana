@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-getCache: () => Promise<SavedObject<IndexPatternSavedObjectAttrs>[] | null | undefined>;
+getCache: () => Promise<SavedObject<Pick<IndexPatternAttributes, "type" | "title" | "typeMeta">>[] | null | undefined>;
 ```

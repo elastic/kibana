@@ -74,7 +74,6 @@ export const SpecViewer = ({ vegaAdapter, ...rest }: SpecViewerProps) => {
         <CodeEditor
           languageId={XJsonLang.ID}
           value={spec}
-          onChange={() => {}}
           options={{
             readOnly: true,
             lineNumbers: 'off',

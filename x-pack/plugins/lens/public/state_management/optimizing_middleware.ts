@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { Dispatch, MiddlewareAPI, PayloadAction } from '@reduxjs/toolkit';
+import { Dispatch, MiddlewareAPI, Action } from '@reduxjs/toolkit';
 import { isEqual } from 'lodash';
-import { LensAppState } from './types';
+import { lensSlice } from './lens_slice';
 
 /** cancels updates to the store that don't change the state */
 export const optimizingMiddleware = () => (store: MiddlewareAPI) => {
-  return (next: Dispatch) => (action: PayloadAction<Partial<LensAppState>>) => {
-    if (action.type === 'lens/onActiveDataChange') {
+  return (next: Dispatch) => (action: Action) => {
+    if (lensSlice.actions.onActiveDataChange.match(action)) {
       if (isEqual(store.getState().lens.activeData, action.payload)) {
         return;
       }

@@ -15,7 +15,11 @@ import apm from 'elastic-apm-node';
 import { withSpan } from '@kbn/apm-utils';
 import { performance } from 'perf_hooks';
 import { identity, defaults, flow } from 'lodash';
-import { Logger, SavedObjectsErrorHelpers } from '../../../../../src/core/server';
+import {
+  Logger,
+  SavedObjectsErrorHelpers,
+  ExecutionContextStart,
+} from '../../../../../src/core/server';
 
 import { Middleware } from '../lib/middleware';
 import {
@@ -93,6 +97,7 @@ type Opts = {
   store: Updatable;
   onTaskEvent?: (event: TaskRun | TaskMarkRunning) => void;
   defaultMaxAttempts: number;
+  executionContext: ExecutionContextStart;
 } & Pick<Middleware, 'beforeRun' | 'beforeMarkRunning'>;
 
 export enum TaskRunResult {
@@ -137,6 +142,7 @@ export class TaskManagerRunner implements TaskRunner {
   private beforeMarkRunning: Middleware['beforeMarkRunning'];
   private onTaskEvent: (event: TaskRun | TaskMarkRunning) => void;
   private defaultMaxAttempts: number;
+  private readonly executionContext: ExecutionContextStart;
 
   /**
    * Creates an instance of TaskManagerRunner.
@@ -157,6 +163,7 @@ export class TaskManagerRunner implements TaskRunner {
     beforeMarkRunning,
     defaultMaxAttempts,
     onTaskEvent = identity,
+    executionContext,
   }: Opts) {
     this.instance = asPending(sanitizeInstance(instance));
     this.definitions = definitions;
@@ -166,6 +173,7 @@ export class TaskManagerRunner implements TaskRunner {
     this.beforeMarkRunning = beforeMarkRunning;
     this.onTaskEvent = onTaskEvent;
     this.defaultMaxAttempts = defaultMaxAttempts;
+    this.executionContext = executionContext;
   }
 
   /**
@@ -261,7 +269,15 @@ export class TaskManagerRunner implements TaskRunner {
 
     try {
       this.task = this.definition.createTaskRunner(modifiedContext);
-      const result = await withSpan({ name: 'run', type: 'task manager' }, () => this.task!.run());
+      const ctx = {
+        type: 'task manager',
+        name: `run ${this.instance.task.taskType}`,
+        id: this.instance.task.id,
+        description: 'run task',
+      };
+      const result = await this.executionContext.withContext(ctx, () =>
+        withSpan({ name: 'run', type: 'task manager' }, () => this.task!.run())
+      );
       const validatedResult = this.validateResult(result);
       const processedResult = await withSpan({ name: 'process result', type: 'task manager' }, () =>
         this.processResult(validatedResult, stopTaskTimer())

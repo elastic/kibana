@@ -5,21 +5,24 @@
  * 2.0.
  */
 import { createHash } from 'crypto';
+import { chunk, get, isEmpty, partition } from 'lodash';
 import moment from 'moment';
 import uuidv5 from 'uuid/v5';
+
 import dateMath from '@elastic/datemath';
 import type { estypes } from '@elastic/elasticsearch';
-import { chunk, isEmpty, partition } from 'lodash';
 import { ApiResponse, Context } from '@elastic/elasticsearch/lib/Transport';
-
+import { ALERT_ID } from '@kbn/rule-data-utils';
 import type { ListArray, ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { MAX_EXCEPTION_LIST_SIZE } from '@kbn/securitysolution-list-constants';
 import { hasLargeValueList } from '@kbn/securitysolution-list-utils';
 import { parseScheduleDates } from '@kbn/securitysolution-io-ts-utils';
 import { ElasticsearchClient } from '@kbn/securitysolution-es-utils';
+
 import {
   TimestampOverrideOrUndefined,
   Privilege,
+  RuleExecutionStatus,
 } from '../../../../common/detection_engine/schemas/common/schemas';
 import { Logger, SavedObjectsClientContract } from '../../../../../../../src/core/server';
 import {
@@ -39,10 +42,11 @@ import {
   RuleRangeTuple,
   BaseSignalHit,
   SignalSourceHit,
+  SimpleHit,
+  WrappedEventHit,
 } from './types';
 import { BuildRuleMessage } from './rule_messages';
 import { ShardError } from '../../types';
-import { RuleStatusService } from './rule_status_service';
 import {
   EqlRuleParams,
   MachineLearningRuleParams,
@@ -52,6 +56,9 @@ import {
   ThreatRuleParams,
   ThresholdRuleParams,
 } from '../schemas/rule_schemas';
+import { WrappedRACAlert } from '../rule_types/types';
+import { SearchTypes } from '../../../../common/detection_engine/types';
+import { IRuleExecutionLogClient } from '../rule_execution_log/types';
 
 interface SortExceptionsReturn {
   exceptionsWithValueLists: ExceptionListItemSchema[];
@@ -75,12 +82,16 @@ export const shorthandMap = {
   },
 };
 
-export const hasReadIndexPrivileges = async (
-  privileges: Privilege,
-  logger: Logger,
-  buildRuleMessage: BuildRuleMessage,
-  ruleStatusService: RuleStatusService
-): Promise<boolean> => {
+export const hasReadIndexPrivileges = async (args: {
+  privileges: Privilege;
+  logger: Logger;
+  buildRuleMessage: BuildRuleMessage;
+  ruleStatusClient: IRuleExecutionLogClient;
+  ruleId: string;
+  spaceId: string;
+}): Promise<boolean> => {
+  const { privileges, logger, buildRuleMessage, ruleStatusClient, ruleId, spaceId } = args;
+
   const indexNames = Object.keys(privileges.index);
   const [indexesWithReadPrivileges, indexesWithNoReadPrivileges] = partition(
     indexNames,
@@ -94,7 +105,12 @@ export const hasReadIndexPrivileges = async (
       indexesWithNoReadPrivileges
     )}`;
     logger.error(buildRuleMessage(errorString));
-    await ruleStatusService.partialFailure(errorString);
+    await ruleStatusClient.logStatusChange({
+      message: errorString,
+      ruleId,
+      spaceId,
+      newStatus: RuleExecutionStatus['partial failure'],
+    });
     return true;
   } else if (
     indexesWithReadPrivileges.length === 0 &&
@@ -106,25 +122,45 @@ export const hasReadIndexPrivileges = async (
       indexesWithNoReadPrivileges
     )}`;
     logger.error(buildRuleMessage(errorString));
-    await ruleStatusService.partialFailure(errorString);
+    await ruleStatusClient.logStatusChange({
+      message: errorString,
+      ruleId,
+      spaceId,
+      newStatus: RuleExecutionStatus['partial failure'],
+    });
     return true;
   }
   return false;
 };
 
-export const hasTimestampFields = async (
-  wroteStatus: boolean,
-  timestampField: string,
-  ruleName: string,
+export const hasTimestampFields = async (args: {
+  wroteStatus: boolean;
+  timestampField: string;
+  ruleName: string;
   // any is derived from here
   // node_modules/@elastic/elasticsearch/api/kibana.d.ts
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  timestampFieldCapsResponse: ApiResponse<Record<string, any>, Context>,
-  inputIndices: string[],
-  ruleStatusService: RuleStatusService,
-  logger: Logger,
-  buildRuleMessage: BuildRuleMessage
-): Promise<boolean> => {
+  timestampFieldCapsResponse: ApiResponse<Record<string, any>, Context>;
+  inputIndices: string[];
+  ruleStatusClient: IRuleExecutionLogClient;
+  ruleId: string;
+  spaceId: string;
+  logger: Logger;
+  buildRuleMessage: BuildRuleMessage;
+}): Promise<boolean> => {
+  const {
+    wroteStatus,
+    timestampField,
+    ruleName,
+    timestampFieldCapsResponse,
+    inputIndices,
+    ruleStatusClient,
+    ruleId,
+    spaceId,
+    logger,
+    buildRuleMessage,
+  } = args;
+
   if (!wroteStatus && isEmpty(timestampFieldCapsResponse.body.indices)) {
     const errorString = `This rule is attempting to query data from Elasticsearch indices listed in the "Index pattern" section of the rule definition, however no index matching: ${JSON.stringify(
       inputIndices
@@ -134,7 +170,12 @@ export const hasTimestampFields = async (
         : ''
     }`;
     logger.error(buildRuleMessage(errorString.trimEnd()));
-    await ruleStatusService.partialFailure(errorString.trimEnd());
+    await ruleStatusClient.logStatusChange({
+      message: errorString.trimEnd(),
+      ruleId,
+      spaceId,
+      newStatus: RuleExecutionStatus['partial failure'],
+    });
     return true;
   } else if (
     !wroteStatus &&
@@ -155,7 +196,12 @@ export const hasTimestampFields = async (
         : timestampFieldCapsResponse.body.fields[timestampField]?.unmapped?.indices
     )}`;
     logger.error(buildRuleMessage(errorString));
-    await ruleStatusService.partialFailure(errorString);
+    await ruleStatusClient.logStatusChange({
+      message: errorString,
+      ruleId,
+      spaceId,
+      newStatus: RuleExecutionStatus['partial failure'],
+    });
     return true;
   }
   return wroteStatus;
@@ -927,4 +973,26 @@ export const buildChunkedOrFilter = (field: string, values: string[], chunkSize:
       return `${field}: (${joinedValues})`;
     })
     .join(' OR ');
+};
+
+export const isWrappedEventHit = (event: SimpleHit): event is WrappedEventHit => {
+  return !isWrappedSignalHit(event) && !isWrappedRACAlert(event);
+};
+
+export const isWrappedSignalHit = (event: SimpleHit): event is WrappedSignalHit => {
+  return (event as WrappedSignalHit)?._source?.signal != null;
+};
+
+export const isWrappedRACAlert = (event: SimpleHit): event is WrappedRACAlert => {
+  return (event as WrappedRACAlert)?._source?.[ALERT_ID] != null;
+};
+
+export const getField = <T extends SearchTypes>(event: SimpleHit, field: string): T | undefined => {
+  if (isWrappedRACAlert(event)) {
+    return event._source, field.replace('signal', 'kibana.alert') as T; // TODO: handle special cases
+  } else if (isWrappedSignalHit(event)) {
+    return get(event._source, field) as T;
+  } else if (isWrappedEventHit(event)) {
+    return get(event._source, field) as T;
+  }
 };

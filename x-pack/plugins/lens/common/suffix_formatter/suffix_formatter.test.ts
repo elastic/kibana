@@ -42,4 +42,11 @@ describe('suffix formatter', () => {
 
     expect(result).toEqual('');
   });
+
+  it('should be a hidden formatter', () => {
+    const convertMock = jest.fn((x) => '');
+    const formatFactory = jest.fn(() => ({ convert: convertMock }));
+    const SuffixFormatter = getSuffixFormatter((formatFactory as unknown) as FormatFactory);
+    expect(SuffixFormatter.hidden).toBe(true);
+  });
 });

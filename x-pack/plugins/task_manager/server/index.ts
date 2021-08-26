@@ -28,6 +28,7 @@ export {
   isEphemeralTaskRejectedDueToCapacityError,
 } from './task_running';
 export { RunNowResult } from './task_scheduling';
+export { getOldestIdleActionTask } from './queries/oldest_idle_action_task';
 
 export {
   TaskManagerPlugin as TaskManager,
@@ -60,6 +61,17 @@ export const config: PluginConfigDescriptor<TaskManagerConfig> = {
               `Maximum allowed value of "${fromPath}.max_workers" is ${MAX_WORKERS_LIMIT}.` +
                 `Replace "${fromPath}.max_workers: ${taskManager?.max_workers}" with (${MAX_WORKERS_LIMIT}).`,
             ],
+          },
+        });
+      }
+    },
+    (settings, fromPath, addDeprecation) => {
+      const taskManager = get(settings, fromPath);
+      if (taskManager?.enabled === false || taskManager?.enabled === true) {
+        addDeprecation({
+          message: `"xpack.task_manager.enabled" is deprecated. The ability to disable this plugin will be removed in 8.0.0.`,
+          correctiveActions: {
+            manualSteps: [`Remove "xpack.task_manager.enabled" from your kibana configs.`],
           },
         });
       }

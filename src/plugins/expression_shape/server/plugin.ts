@@ -8,7 +8,7 @@
 
 import { CoreSetup, CoreStart, Plugin } from '../../../core/public';
 import { ExpressionsServerStart, ExpressionsServerSetup } from '../../expressions/server';
-import { shapeFunction } from '../common/expression_functions';
+import { shapeFunction, progressFunction } from '../common/expression_functions';
 
 interface SetupDeps {
   expressions: ExpressionsServerSetup;
@@ -25,6 +25,7 @@ export class ExpressionShapePlugin
   implements Plugin<ExpressionShapePluginSetup, ExpressionShapePluginStart, SetupDeps, StartDeps> {
   public setup(core: CoreSetup, { expressions }: SetupDeps): ExpressionShapePluginSetup {
     expressions.registerFunction(shapeFunction);
+    expressions.registerFunction(progressFunction);
   }
 
   public start(core: CoreStart): ExpressionShapePluginStart {}

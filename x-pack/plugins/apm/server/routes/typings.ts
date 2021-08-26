@@ -12,7 +12,7 @@ import {
   KibanaRequest,
   CoreStart,
 } from 'src/core/server';
-import { RuleDataClient } from '../../../rule_registry/server';
+import { IRuleDataClient } from '../../../rule_registry/server';
 import { AlertingApiRequestHandlerContext } from '../../../alerting/server';
 import type { RacApiRequestHandlerContext } from '../../../rule_registry/server';
 import { LicensingApiRequestHandlerContext } from '../../../licensing/server';
@@ -72,6 +72,6 @@ export interface APMRouteHandlerResources {
       start: () => Promise<Required<APMPluginDependencies>[key]['start']>;
     };
   };
-  ruleDataClient: RuleDataClient;
+  ruleDataClient: IRuleDataClient;
   telemetryUsageCounter?: TelemetryUsageCounter;
 }

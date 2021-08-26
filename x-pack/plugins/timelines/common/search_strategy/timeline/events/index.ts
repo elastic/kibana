@@ -16,3 +16,9 @@ export enum TimelineEventsQueries {
   kpi = 'eventsKpi',
   lastEventTime = 'eventsLastEventTime',
 }
+
+export const EntityType = {
+  ALERTS: 'alerts',
+  EVENTS: 'events',
+} as const;
+export type EntityType = typeof EntityType[keyof typeof EntityType];

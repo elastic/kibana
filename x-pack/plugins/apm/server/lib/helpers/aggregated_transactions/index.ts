@@ -24,7 +24,7 @@ export async function getHasAggregatedTransactions({
   start?: number;
   end?: number;
   apmEventClient: APMEventClient;
-  kuery?: string;
+  kuery: string;
 }) {
   const response = await apmEventClient.search(
     'get_has_aggregated_transactions',
@@ -65,7 +65,7 @@ export async function getSearchAggregatedTransactions({
   start?: number;
   end?: number;
   apmEventClient: APMEventClient;
-  kuery?: string;
+  kuery: string;
 }): Promise<boolean> {
   const searchAggregatedTransactions =
     config['xpack.apm.searchAggregatedTransactions'];

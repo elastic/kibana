@@ -6,9 +6,12 @@
   "false_positives": [
     "Exclude DNS servers from this rule as this is expected behavior. Endpoints usually query local DNS servers defined in their DHCP scopes, but this may be overridden if a user configures their endpoint to use a remote DNS server. This is uncommon in managed enterprise networks because it could break intranet name resolution when split horizon DNS is utilized. Some consumer VPN services and browser plug-ins may send DNS traffic to remote Internet destinations. In that case, such devices or networks can be excluded from this rule when this is expected behavior."
   ],
+  "from": "now-9m",
   "index": [
+    "auditbeat-*",
     "filebeat-*",
-    "packetbeat-*"
+    "packetbeat-*",
+    "logs-endpoint.events.*"
   ],
   "language": "kuery",
   "license": "Elastic License v2",
@@ -26,7 +29,8 @@
     "Elastic",
     "Network",
     "Threat Detection",
-    "Command and Control"
+    "Command and Control",
+    "Host"
   ],
   "threat": [
     {
@@ -41,5 +45,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 9
+  "version": 10
 }

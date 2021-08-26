@@ -16,6 +16,7 @@ import {
   TimelineEventsLastEventTimeRequestOptions,
   TimelineEventsLastEventTimeStrategyResponse,
   TimelineKpiStrategyResponse,
+  EntityType,
 } from './events';
 import {
   DocValueFields,
@@ -41,6 +42,7 @@ export interface TimelineRequestBasicOptions extends IEsSearchRequest {
   defaultIndex: string[];
   docValueFields?: DocValueFields[];
   factoryQueryType?: TimelineFactoryQueryTypes;
+  entityType?: EntityType;
 }
 
 export interface TimelineRequestSortField<Field = string> extends SortField<Field> {

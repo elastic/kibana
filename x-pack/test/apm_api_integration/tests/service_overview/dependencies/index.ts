@@ -8,9 +8,13 @@
 import expect from '@kbn/expect';
 import { last, omit, pick, sortBy } from 'lodash';
 import { ValuesType } from 'utility-types';
+import { Node, NodeType } from '../../../../../plugins/apm/common/connections';
 import { createApmApiSupertest } from '../../../common/apm_api_supertest';
 import { roundNumber } from '../../../utils';
-import { ENVIRONMENT_ALL } from '../../../../../plugins/apm/common/environment_filter_values';
+import {
+  ENVIRONMENT_ALL,
+  ENVIRONMENT_NOT_DEFINED,
+} from '../../../../../plugins/apm/common/environment_filter_values';
 import { APIReturnType } from '../../../../../plugins/apm/public/services/rest/createCallApmApi';
 import archives from '../../../common/fixtures/es_archiver/archives_metadata';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
@@ -23,6 +27,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   const archiveName = 'apm_8.0.0';
   const { start, end } = archives[archiveName];
+
+  function getName(node: Node) {
+    return node.type === NodeType.service ? node.serviceName : node.backendName;
+  }
 
   registry.when(
     'Service overview dependencies when data is not loaded',
@@ -228,16 +236,17 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       it('returns opbeans-node as a dependency', () => {
         const opbeansNode = response.body.serviceDependencies.find(
-          (item) => item.type === 'service' && item.serviceName === 'opbeans-node'
+          (item) => getName(item.location) === 'opbeans-node'
         );
 
         expect(opbeansNode !== undefined).to.be(true);
 
         const values = {
-          latency: roundNumber(opbeansNode?.latency.value),
-          throughput: roundNumber(opbeansNode?.throughput.value),
-          errorRate: roundNumber(opbeansNode?.errorRate.value),
-          ...pick(opbeansNode, 'serviceName', 'type', 'agentName', 'environment', 'impact'),
+          latency: roundNumber(opbeansNode?.currentStats.latency.value),
+          throughput: roundNumber(opbeansNode?.currentStats.throughput.value),
+          errorRate: roundNumber(opbeansNode?.currentStats.errorRate.value),
+          impact: opbeansNode?.currentStats.impact,
+          ...pick(opbeansNode?.location, 'serviceName', 'type', 'agentName', 'environment'),
         };
 
         const count = 4;
@@ -246,7 +255,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expect(values).to.eql({
           agentName: 'nodejs',
-          environment: '',
+          environment: ENVIRONMENT_NOT_DEFINED.value,
           serviceName: 'opbeans-node',
           type: 'service',
           errorRate: roundNumber(errors / count),
@@ -255,8 +264,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           impact: 100,
         });
 
-        const firstValue = roundNumber(opbeansNode?.latency.timeseries[0].y);
-        const lastValue = roundNumber(last(opbeansNode?.latency.timeseries)?.y);
+        const firstValue = roundNumber(opbeansNode?.currentStats.latency.timeseries[0].y);
+        const lastValue = roundNumber(last(opbeansNode?.currentStats.latency.timeseries)?.y);
 
         expect(firstValue).to.be(roundNumber(20 / 3));
         expect(lastValue).to.be('1.000');
@@ -264,16 +273,17 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       it('returns postgres as an external dependency', () => {
         const postgres = response.body.serviceDependencies.find(
-          (item) => item.type === 'external' && item.name === 'postgres'
+          (item) => getName(item.location) === 'postgres'
         );
 
         expect(postgres !== undefined).to.be(true);
 
         const values = {
-          latency: roundNumber(postgres?.latency.value),
-          throughput: roundNumber(postgres?.throughput.value),
-          errorRate: roundNumber(postgres?.errorRate.value),
-          ...pick(postgres, 'spanType', 'spanSubtype', 'name', 'impact', 'type'),
+          latency: roundNumber(postgres?.currentStats.latency.value),
+          throughput: roundNumber(postgres?.currentStats.throughput.value),
+          errorRate: roundNumber(postgres?.currentStats.errorRate.value),
+          impact: postgres?.currentStats.impact,
+          ...pick(postgres?.location, 'spanType', 'spanSubtype', 'backendName', 'type'),
         };
 
         const count = 1;
@@ -283,8 +293,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(values).to.eql({
           spanType: 'external',
           spanSubtype: 'http',
-          name: 'postgres',
-          type: 'external',
+          backendName: 'postgres',
+          type: 'backend',
           errorRate: roundNumber(errors / count),
           latency: roundNumber(sum / count),
           throughput: roundNumber(count / ((endTime - startTime) / 1000 / 60)),
@@ -325,38 +335,55 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       it('returns at least one item', () => {
         expect(response.body.serviceDependencies.length).to.be.greaterThan(0);
 
+        expectSnapshot(response.body.serviceDependencies.length).toMatchInline(`4`);
+
+        const { currentStats, ...firstItem } = sortBy(
+          response.body.serviceDependencies,
+          'currentStats.impact'
+        ).reverse()[0];
+
+        expectSnapshot(firstItem.location).toMatchInline(`
+          Object {
+            "agentName": "dotnet",
+            "environment": "production",
+            "id": "5948c153c2d8989f92a9c75ef45bb845f53e200d",
+            "serviceName": "opbeans-dotnet",
+            "type": "service",
+          }
+        `);
+
         expectSnapshot(
-          omit(response.body.serviceDependencies[0], [
+          omit(currentStats, [
             'errorRate.timeseries',
             'throughput.timeseries',
             'latency.timeseries',
+            'totalTime.timeseries',
           ])
         ).toMatchInline(`
           Object {
             "errorRate": Object {
-              "value": 0,
+              "value": 0.163636363636364,
             },
-            "impact": 1.97910470896139,
+            "impact": 100,
             "latency": Object {
-              "value": 1043.99015586546,
+              "value": 1117085.74545455,
             },
-            "name": "redis",
-            "spanSubtype": "redis",
-            "spanType": "db",
             "throughput": Object {
-              "value": 40.6333333333333,
+              "value": 1.83333333333333,
             },
-            "type": "external",
+            "totalTime": Object {
+              "value": 61439716,
+            },
           }
         `);
       });
 
       it('returns the right names', () => {
-        const names = response.body.serviceDependencies.map((item) => item.name);
+        const names = response.body.serviceDependencies.map((item) => getName(item.location));
         expectSnapshot(names.sort()).toMatchInline(`
           Array [
             "elasticsearch",
-            "opbeans-java",
+            "opbeans-dotnet",
             "postgresql",
             "redis",
           ]
@@ -365,12 +392,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       it('returns the right service names', () => {
         const serviceNames = response.body.serviceDependencies
-          .map((item) => (item.type === 'service' ? item.serviceName : undefined))
+          .map((item) =>
+            item.location.type === NodeType.service ? getName(item.location) : undefined
+          )
           .filter(Boolean);
 
         expectSnapshot(serviceNames.sort()).toMatchInline(`
           Array [
-            "opbeans-java",
+            "opbeans-dotnet",
           ]
         `);
       });
@@ -378,8 +407,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       it('returns the right latency values', () => {
         const latencyValues = sortBy(
           response.body.serviceDependencies.map((item) => ({
-            name: item.name,
-            latency: item.latency.value,
+            name: getName(item.location),
+            latency: item.currentStats.latency.value,
           })),
           'name'
         );
@@ -387,19 +416,19 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expectSnapshot(latencyValues).toMatchInline(`
           Array [
             Object {
-              "latency": 2568.40816326531,
+              "latency": 9496.32291666667,
               "name": "elasticsearch",
             },
             Object {
-              "latency": 25593.875,
-              "name": "opbeans-java",
+              "latency": 1117085.74545455,
+              "name": "opbeans-dotnet",
             },
             Object {
-              "latency": 28885.3293963255,
+              "latency": 27826.9968314322,
               "name": "postgresql",
             },
             Object {
-              "latency": 1043.99015586546,
+              "latency": 1468.27242524917,
               "name": "redis",
             },
           ]
@@ -409,8 +438,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       it('returns the right throughput values', () => {
         const throughputValues = sortBy(
           response.body.serviceDependencies.map((item) => ({
-            name: item.name,
-            throughput: item.throughput.value,
+            name: getName(item.location),
+            throughput: item.currentStats.throughput.value,
           })),
           'name'
         );
@@ -419,19 +448,19 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           Array [
             Object {
               "name": "elasticsearch",
-              "throughput": 13.0666666666667,
+              "throughput": 3.2,
             },
             Object {
-              "name": "opbeans-java",
-              "throughput": 0.533333333333333,
+              "name": "opbeans-dotnet",
+              "throughput": 1.83333333333333,
             },
             Object {
               "name": "postgresql",
-              "throughput": 50.8,
+              "throughput": 52.6,
             },
             Object {
               "name": "redis",
-              "throughput": 40.6333333333333,
+              "throughput": 40.1333333333333,
             },
           ]
         `);
@@ -440,10 +469,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       it('returns the right impact values', () => {
         const impactValues = sortBy(
           response.body.serviceDependencies.map((item) => ({
-            name: item.name,
-            impact: item.impact,
-            latency: item.latency.value,
-            throughput: item.throughput.value,
+            name: getName(item.location),
+            impact: item.currentStats.impact,
           })),
           'name'
         );
@@ -451,28 +478,51 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expectSnapshot(impactValues).toMatchInline(`
           Array [
             Object {
-              "impact": 1.36961744704522,
-              "latency": 2568.40816326531,
-              "name": "elasticsearch",
-              "throughput": 13.0666666666667,
-            },
-            Object {
               "impact": 0,
-              "latency": 25593.875,
-              "name": "opbeans-java",
-              "throughput": 0.533333333333333,
+              "name": "elasticsearch",
             },
             Object {
               "impact": 100,
-              "latency": 28885.3293963255,
-              "name": "postgresql",
-              "throughput": 50.8,
+              "name": "opbeans-dotnet",
             },
             Object {
-              "impact": 1.97910470896139,
-              "latency": 1043.99015586546,
+              "impact": 71.0403531954737,
+              "name": "postgresql",
+            },
+            Object {
+              "impact": 1.41447268043525,
               "name": "redis",
-              "throughput": 40.6333333333333,
+            },
+          ]
+        `);
+      });
+
+      it('returns the right totalTime values', () => {
+        const totalTimeValues = sortBy(
+          response.body.serviceDependencies.map((item) => ({
+            name: getName(item.location),
+            totalTime: item.currentStats.totalTime.value,
+          })),
+          'name'
+        );
+
+        expectSnapshot(totalTimeValues).toMatchInline(`
+          Array [
+            Object {
+              "name": "elasticsearch",
+              "totalTime": 911647,
+            },
+            Object {
+              "name": "opbeans-dotnet",
+              "totalTime": 61439716,
+            },
+            Object {
+              "name": "postgresql",
+              "totalTime": 43911001,
+            },
+            Object {
+              "name": "redis",
+              "totalTime": 1767800,
             },
           ]
         `);

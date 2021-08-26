@@ -7,14 +7,17 @@
 
 import expect from '@kbn/expect';
 import { keyBy } from 'lodash';
+
 export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['security', 'settings', 'common', 'accountSetting']);
   const log = getService('log');
-  const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
 
   describe('useremail', function () {
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/security/discover');
+      await kibanaServer.importExport.load(
+        'x-pack/test/functional/fixtures/kbn_archiver/security/discover'
+      );
       await PageObjects.settings.navigateTo();
       await PageObjects.security.clickElasticsearchUsers();
     });
@@ -55,6 +58,9 @@ export default function ({ getService, getPageObjects }) {
 
     after(async function () {
       await PageObjects.security.forceLogout();
+      await kibanaServer.importExport.unload(
+        'x-pack/test/functional/fixtures/kbn_archiver/security/discover'
+      );
     });
   });
 }

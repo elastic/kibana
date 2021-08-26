@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import type { SerializableRecord } from '@kbn/utility-types';
 import { EnhancementRegistryDefinition } from '../../../../src/plugins/embeddable/server';
 import { SavedObjectReference } from '../../../../src/core/types';
 import { ActionFactory, DynamicActionsState, SerializedEvent } from './types';
-import { SerializableState } from '../../../../src/plugins/kibana_utils/common';
 import { dynamicActionsCollector } from './telemetry/dynamic_actions_collector';
 import { dynamicActionFactoriesCollector } from './telemetry/dynamic_action_factories_collector';
 
@@ -17,14 +17,14 @@ export const dynamicActionEnhancement = (
 ): EnhancementRegistryDefinition => {
   return {
     id: 'dynamicActions',
-    telemetry: (serializableState: SerializableState, stats: Record<string, any>) => {
+    telemetry: (serializableState: SerializableRecord, stats: Record<string, any>) => {
       const state = serializableState as DynamicActionsState;
       stats = dynamicActionsCollector(state, stats);
       stats = dynamicActionFactoriesCollector(getActionFactory, state, stats);
 
       return stats;
     },
-    extract: (state: SerializableState) => {
+    extract: (state: SerializableRecord) => {
       const references: SavedObjectReference[] = [];
       const newState: DynamicActionsState = {
         events: (state as DynamicActionsState).events.map((event: SerializedEvent) => {
@@ -41,7 +41,7 @@ export const dynamicActionEnhancement = (
       };
       return { state: newState, references };
     },
-    inject: (state: SerializableState, references: SavedObjectReference[]) => {
+    inject: (state: SerializableRecord, references: SavedObjectReference[]) => {
       return {
         events: (state as DynamicActionsState).events.map((event: SerializedEvent) => {
           const factory = getActionFactory(event.action.factoryId);

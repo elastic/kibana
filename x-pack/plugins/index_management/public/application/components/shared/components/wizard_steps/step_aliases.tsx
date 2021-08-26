@@ -15,12 +15,11 @@ import {
   EuiSpacer,
   EuiFormRow,
   EuiText,
-  EuiCodeEditor,
   EuiCode,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { Forms } from '../../../../../shared_imports';
+import { EuiCodeEditor, Forms } from '../../../../../shared_imports';
 import { useJsonStep } from './use_json_step';
 
 interface Props {

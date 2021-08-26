@@ -4,14 +4,30 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import Boom from '@hapi/boom';
 
-import { SavedObjectsFindResult, SavedObjectsFindResponse, SavedObject } from 'kibana/server';
-import { isEmpty } from 'lodash';
+import Boom from '@hapi/boom';
+import unified from 'unified';
+import type { Node, Parent } from 'unist';
+// installed by @elastic/eui
+// eslint-disable-next-line import/no-extraneous-dependencies
+import markdown from 'remark-parse';
+import remarkStringify from 'remark-stringify';
+
+import {
+  SavedObjectsFindResult,
+  SavedObjectsFindResponse,
+  SavedObject,
+  SavedObjectReference,
+} from 'kibana/server';
+import { filter, flatMap, uniqWith, isEmpty, xorWith } from 'lodash';
+import { TimeRange } from 'src/plugins/data/server';
+import { EmbeddableStateWithType } from 'src/plugins/embeddable/common';
 import { AlertInfo } from '.';
+import { LensServerPluginSetup, LensDocShape715 } from '../../../lens/server';
 
 import {
   AssociationType,
+  CaseAttributes,
   CaseConnector,
   CaseResponse,
   CasesClientPostRequest,
@@ -24,17 +40,16 @@ import {
   CommentResponse,
   CommentsResponse,
   CommentType,
-  ConnectorTypeFields,
+  ConnectorTypes,
   ENABLE_CASE_CONNECTOR,
-  ESCaseAttributes,
-  ESCaseConnector,
-  ESConnectorFields,
   SubCaseAttributes,
   SubCaseResponse,
   SubCasesFindResponse,
   User,
 } from '../../common';
 import { UpdateAlertRequest } from '../client/alerts/types';
+import { LENS_ID, LensParser, LensSerializer } from '../../common/utils/markdown_plugins/lens';
+import { TimelineSerializer, TimelineParser } from '../../common/utils/markdown_plugins/timeline';
 
 /**
  * Default sort field for querying saved objects.
@@ -55,13 +70,13 @@ export const transformNewCase = ({
   newCase,
   username,
 }: {
-  connector: ESCaseConnector;
+  connector: CaseConnector;
   createdDate: string;
   email?: string | null;
   full_name?: string | null;
   newCase: CasesClientPostRequest;
   username?: string | null;
-}): ESCaseAttributes => ({
+}): CaseAttributes => ({
   ...newCase,
   closed_at: null,
   closed_by: null,
@@ -135,7 +150,7 @@ export const flattenCaseSavedObject = ({
   subCases,
   subCaseIds,
 }: {
-  savedObject: SavedObject<ESCaseAttributes>;
+  savedObject: SavedObject<CaseAttributes>;
   comments?: Array<SavedObject<CommentAttributes>>;
   totalComment?: number;
   totalAlerts?: number;
@@ -148,7 +163,6 @@ export const flattenCaseSavedObject = ({
   totalComment,
   totalAlerts,
   ...savedObject.attributes,
-  connector: transformESConnectorToCaseConnector(savedObject.attributes.connector),
   subCases,
   subCaseIds: !isEmpty(subCaseIds) ? subCaseIds : undefined,
 });
@@ -195,47 +209,6 @@ export const flattenCommentSavedObject = (
   version: savedObject.version ?? '0',
   ...savedObject.attributes,
 });
-
-export const transformCaseConnectorToEsConnector = (connector: CaseConnector): ESCaseConnector => ({
-  id: connector?.id ?? 'none',
-  name: connector?.name ?? 'none',
-  type: connector?.type ?? '.none',
-  fields:
-    connector?.fields != null
-      ? Object.entries(connector.fields).reduce<ESConnectorFields>(
-          (acc, [key, value]) => [
-            ...acc,
-            {
-              key,
-              value,
-            },
-          ],
-          []
-        )
-      : [],
-});
-
-export const transformESConnectorToCaseConnector = (connector?: ESCaseConnector): CaseConnector => {
-  const connectorTypeField = {
-    type: connector?.type ?? '.none',
-    fields:
-      connector && connector.fields != null && connector.fields.length > 0
-        ? connector.fields.reduce(
-            (fields, { key, value }) => ({
-              ...fields,
-              [key]: value,
-            }),
-            {}
-          )
-        : null,
-  } as ConnectorTypeFields;
-
-  return {
-    id: connector?.id ?? 'none',
-    name: connector?.name ?? 'none',
-    ...connectorTypeField,
-  };
-};
 
 export const getIDsAndIndicesAsArrays = (
   comment: CommentRequestAlertType
@@ -430,3 +403,101 @@ export function checkEnabledCaseConnectorOrThrow(subCaseID: string | undefined) 
     );
   }
 }
+
+/**
+ * Returns a connector that indicates that no connector was set.
+ *
+ * @returns the 'none' connector
+ */
+export const getNoneCaseConnector = () => ({
+  id: 'none',
+  name: 'none',
+  type: ConnectorTypes.none,
+  fields: null,
+});
+
+interface LensMarkdownNode extends EmbeddableStateWithType {
+  timeRange: TimeRange;
+  attributes: LensDocShape715 & { references: SavedObjectReference[] };
+}
+
+export const parseCommentString = (comment: string) => {
+  const processor = unified().use([[markdown, {}], LensParser, TimelineParser]);
+  return processor.parse(comment) as Parent;
+};
+
+export const stringifyComment = (comment: Parent) =>
+  unified()
+    .use([
+      [
+        remarkStringify,
+        {
+          allowDangerousHtml: true,
+          handlers: {
+            /*
+              because we're using rison in the timeline url we need
+              to make sure that markdown parser doesn't modify the url
+            */
+            timeline: TimelineSerializer,
+            lens: LensSerializer,
+          },
+        },
+      ],
+    ])
+    .stringify(comment);
+
+export const getLensVisualizations = (parsedComment: Array<LensMarkdownNode | Node>) =>
+  filter(parsedComment, { type: LENS_ID }) as LensMarkdownNode[];
+
+export const extractLensReferencesFromCommentString = (
+  lensEmbeddableFactory: LensServerPluginSetup['lensEmbeddableFactory'],
+  comment: string
+): SavedObjectReference[] => {
+  const extract = lensEmbeddableFactory()?.extract;
+
+  if (extract) {
+    const parsedComment = parseCommentString(comment);
+    const lensVisualizations = getLensVisualizations(parsedComment.children);
+    const flattenRefs = flatMap(
+      lensVisualizations,
+      (lensObject) => extract(lensObject)?.references ?? []
+    );
+
+    const uniqRefs = uniqWith(
+      flattenRefs,
+      (refA, refB) => refA.type === refB.type && refA.id === refB.id && refA.name === refB.name
+    );
+
+    return uniqRefs;
+  }
+  return [];
+};
+
+export const getOrUpdateLensReferences = (
+  lensEmbeddableFactory: LensServerPluginSetup['lensEmbeddableFactory'],
+  newComment: string,
+  currentComment?: SavedObject<CommentRequestUserType>
+) => {
+  if (!currentComment) {
+    return extractLensReferencesFromCommentString(lensEmbeddableFactory, newComment);
+  }
+
+  const savedObjectReferences = currentComment.references;
+  const savedObjectLensReferences = extractLensReferencesFromCommentString(
+    lensEmbeddableFactory,
+    currentComment.attributes.comment
+  );
+
+  const currentNonLensReferences = xorWith(
+    savedObjectReferences,
+    savedObjectLensReferences,
+    (refA, refB) => refA.type === refB.type && refA.id === refB.id
+  );
+
+  const newCommentLensReferences = extractLensReferencesFromCommentString(
+    lensEmbeddableFactory,
+    newComment
+  );
+
+  return currentNonLensReferences.concat(newCommentLensReferences);
+};

@@ -11,6 +11,7 @@ import type { GridlinesConfigResult } from './grid_lines_config';
 import type { LayerArgs } from './layer_config';
 import type { LegendConfigResult } from './legend_config';
 import type { TickLabelsConfigResult } from './tick_labels_config';
+import type { LabelsOrientationConfigResult } from './labels_orientation_config';
 
 export type ValueLabelConfig = 'hide' | 'inside' | 'outside';
 
@@ -32,6 +33,7 @@ export interface XYArgs {
   axisTitlesVisibilitySettings?: AxisTitlesVisibilityConfigResult;
   tickLabelsVisibilitySettings?: TickLabelsConfigResult;
   gridlinesVisibilitySettings?: GridlinesConfigResult;
+  labelsOrientation?: LabelsOrientationConfigResult;
   curveType?: XYCurveType;
   fillOpacity?: number;
   hideEndzones?: boolean;

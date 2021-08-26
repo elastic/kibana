@@ -258,8 +258,8 @@ export function SchemaOverviewHeading() {
             ),
             dataStreamsDocLink: (
               <ElasticDocsLink
-                section="/elasticsearch/reference"
-                path="/data-streams.html"
+                section="/apm/server"
+                path="/apm-integration-data-streams.html"
                 target="_blank"
               >
                 {i18n.translate(

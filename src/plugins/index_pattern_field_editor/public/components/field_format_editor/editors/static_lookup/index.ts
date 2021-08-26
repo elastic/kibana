@@ -6,4 +6,10 @@
  * Side Public License, v 1.
  */
 
-export { StaticLookupFormatEditor } from './static_lookup';
+import { FieldFormatEditorFactory } from '../types';
+import { formatId } from './constants';
+
+export type { StaticLookupFormatEditor } from './static_lookup';
+export const staticLookupFormatEditorFactory: FieldFormatEditorFactory = () =>
+  import('./static_lookup').then((m) => m.StaticLookupFormatEditor);
+staticLookupFormatEditorFactory.formatId = formatId;

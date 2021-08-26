@@ -2,11 +2,9 @@
 
 set -euo pipefail
 
-if [[ ! -d '.buildkite/node_modules' ]]; then
-  cd '.buildkite'
-  yarn install
-  cd -
-fi
+cd '.buildkite'
+yarn install
+cd -
 
 BUILDKITE_TOKEN="$(vault read -field=buildkite_token_all_jobs secret/kibana-issues/dev/buildkite-ci)"
 export BUILDKITE_TOKEN

@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import type { ExpressionFunctionAST } from '@kbn/interpreter/common';
 import memoizeOne from 'memoize-one';
+import { LayerType, layerTypes } from '../../../../../common';
 import type { TimeScaleUnit } from '../../../../../common/expressions';
 import type { IndexPattern, IndexPatternLayer } from '../../../types';
 import { adjustTimeScaleLabelSuffix } from '../../time_scale_utils';
@@ -23,6 +24,19 @@ export const buildLabelFunction = (ofName: (name?: string) => string) => (
   const rawLabel = ofName(name);
   return adjustTimeScaleLabelSuffix(rawLabel, undefined, timeScale, undefined, timeShift);
 };
+
+export function checkForDataLayerType(layerType: LayerType, name: string) {
+  if (layerType === layerTypes.THRESHOLD) {
+    return [
+      i18n.translate('xpack.lens.indexPattern.calculations.layerDataType', {
+        defaultMessage: '{name} is disabled for this type of layer.',
+        values: {
+          name,
+        },
+      }),
+    ];
+  }
+}
 
 /**
  * Checks whether the current layer includes a date histogram and returns an error otherwise

@@ -10,10 +10,11 @@ import { Position } from '@elastic/charts';
 import { Operation } from '../types';
 import type { State } from './types';
 import type { SeriesType, XYLayerConfig } from '../../common/expressions';
+import { layerTypes } from '../../common';
 import { createMockDatasource, createMockFramePublicAPI } from '../mocks';
 import { LensIconChartBar } from '../assets/chart_bar';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
-import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
+import { fieldFormatsServiceMock } from '../../../../../src/plugins/field_formats/public/mocks';
 
 function exampleState(): State {
   return {
@@ -23,6 +24,7 @@ function exampleState(): State {
     layers: [
       {
         layerId: 'first',
+        layerType: layerTypes.DATA,
         seriesType: 'area',
         splitAccessor: 'd',
         xAccessor: 'a',
@@ -32,11 +34,11 @@ function exampleState(): State {
   };
 }
 const paletteServiceMock = chartPluginMock.createPaletteRegistry();
-const dataMock = dataPluginMock.createStartContract();
+const fieldFormatsMock = fieldFormatsServiceMock.createStartContract();
 
 const xyVisualization = getXyVisualization({
   paletteService: paletteServiceMock,
-  data: dataMock,
+  fieldFormats: fieldFormatsMock,
 });
 
 describe('xy_visualization', () => {
@@ -145,6 +147,7 @@ describe('xy_visualization', () => {
             Object {
               "accessors": Array [],
               "layerId": "l1",
+              "layerType": "data",
               "position": "top",
               "seriesType": "bar_stacked",
               "showGridlines": false,
@@ -174,6 +177,7 @@ describe('xy_visualization', () => {
           ...exampleState().layers,
           {
             layerId: 'second',
+            layerType: layerTypes.DATA,
             seriesType: 'area',
             splitAccessor: 'e',
             xAccessor: 'f',
@@ -188,7 +192,7 @@ describe('xy_visualization', () => {
 
   describe('#appendLayer', () => {
     it('adds a layer', () => {
-      const layers = xyVisualization.appendLayer!(exampleState(), 'foo').layers;
+      const layers = xyVisualization.appendLayer!(exampleState(), 'foo', layerTypes.DATA).layers;
       expect(layers.length).toEqual(exampleState().layers.length + 1);
       expect(layers[layers.length - 1]).toMatchObject({ layerId: 'foo' });
     });
@@ -211,15 +215,61 @@ describe('xy_visualization', () => {
     });
   });
 
+  describe('#getSupportedLayers', () => {
+    it('should return a single layer type', () => {
+      expect(xyVisualization.getSupportedLayers()).toHaveLength(1);
+    });
+
+    it('should return the icon for the visualization type', () => {
+      expect(xyVisualization.getSupportedLayers()[0].icon).not.toBeUndefined();
+    });
+  });
+
+  describe('#getLayerType', () => {
+    it('should return the type only if the layer is in the state', () => {
+      expect(xyVisualization.getLayerType('first', exampleState())).toEqual(layerTypes.DATA);
+      expect(xyVisualization.getLayerType('foo', exampleState())).toBeUndefined();
+    });
+  });
+
   describe('#setDimension', () => {
+    let mockDatasource: ReturnType<typeof createMockDatasource>;
+    let frame: ReturnType<typeof createMockFramePublicAPI>;
+
+    beforeEach(() => {
+      frame = createMockFramePublicAPI();
+      mockDatasource = createMockDatasource('testDatasource');
+
+      mockDatasource.publicAPIMock.getTableSpec.mockReturnValue([
+        { columnId: 'd' },
+        { columnId: 'a' },
+        { columnId: 'b' },
+        { columnId: 'c' },
+      ]);
+
+      frame.datasourceLayers = {
+        first: mockDatasource.publicAPIMock,
+      };
+
+      frame.activeData = {
+        first: {
+          type: 'datatable',
+          rows: [],
+          columns: [],
+        },
+      };
+    });
+
     it('sets the x axis', () => {
       expect(
         xyVisualization.setDimension({
+          frame,
           prevState: {
             ...exampleState(),
             layers: [
               {
                 layerId: 'first',
+                layerType: layerTypes.DATA,
                 seriesType: 'area',
                 xAccessor: undefined,
                 accessors: [],
@@ -232,6 +282,7 @@ describe('xy_visualization', () => {
         }).layers[0]
       ).toEqual({
         layerId: 'first',
+        layerType: layerTypes.DATA,
         seriesType: 'area',
         xAccessor: 'newCol',
         accessors: [],
@@ -241,11 +292,13 @@ describe('xy_visualization', () => {
     it('replaces the x axis', () => {
       expect(
         xyVisualization.setDimension({
+          frame,
           prevState: {
             ...exampleState(),
             layers: [
               {
                 layerId: 'first',
+                layerType: layerTypes.DATA,
                 seriesType: 'area',
                 xAccessor: 'a',
                 accessors: [],
@@ -258,6 +311,7 @@ describe('xy_visualization', () => {
         }).layers[0]
       ).toEqual({
         layerId: 'first',
+        layerType: layerTypes.DATA,
         seriesType: 'area',
         xAccessor: 'newCol',
         accessors: [],
@@ -266,14 +320,43 @@ describe('xy_visualization', () => {
   });
 
   describe('#removeDimension', () => {
+    let mockDatasource: ReturnType<typeof createMockDatasource>;
+    let frame: ReturnType<typeof createMockFramePublicAPI>;
+
+    beforeEach(() => {
+      frame = createMockFramePublicAPI();
+      mockDatasource = createMockDatasource('testDatasource');
+
+      mockDatasource.publicAPIMock.getTableSpec.mockReturnValue([
+        { columnId: 'd' },
+        { columnId: 'a' },
+        { columnId: 'b' },
+        { columnId: 'c' },
+      ]);
+
+      frame.datasourceLayers = {
+        first: mockDatasource.publicAPIMock,
+      };
+
+      frame.activeData = {
+        first: {
+          type: 'datatable',
+          rows: [],
+          columns: [],
+        },
+      };
+    });
+
     it('removes the x axis', () => {
       expect(
         xyVisualization.removeDimension({
+          frame,
           prevState: {
             ...exampleState(),
             layers: [
               {
                 layerId: 'first',
+                layerType: layerTypes.DATA,
                 seriesType: 'area',
                 xAccessor: 'a',
                 accessors: [],
@@ -285,6 +368,7 @@ describe('xy_visualization', () => {
         }).layers[0]
       ).toEqual({
         layerId: 'first',
+        layerType: layerTypes.DATA,
         seriesType: 'area',
         xAccessor: undefined,
         accessors: [],
@@ -609,6 +693,7 @@ describe('xy_visualization', () => {
           layers: [
             {
               layerId: 'first',
+              layerType: layerTypes.DATA,
               seriesType: 'area',
               xAccessor: 'a',
               accessors: [],
@@ -624,12 +709,14 @@ describe('xy_visualization', () => {
           layers: [
             {
               layerId: 'first',
+              layerType: layerTypes.DATA,
               seriesType: 'area',
               xAccessor: 'a',
               accessors: [],
             },
             {
               layerId: 'second',
+              layerType: layerTypes.DATA,
               seriesType: 'area',
               xAccessor: 'a',
               accessors: [],
@@ -645,12 +732,14 @@ describe('xy_visualization', () => {
           layers: [
             {
               layerId: 'first',
+              layerType: layerTypes.DATA,
               seriesType: 'area',
               xAccessor: 'a',
               accessors: ['a'],
             },
             {
               layerId: 'second',
+              layerType: layerTypes.DATA,
               seriesType: 'area',
               xAccessor: undefined,
               accessors: ['a'],
@@ -667,6 +756,7 @@ describe('xy_visualization', () => {
           layers: [
             {
               layerId: 'first',
+              layerType: layerTypes.DATA,
               seriesType: 'area',
               xAccessor: undefined,
               accessors: [],
@@ -682,6 +772,7 @@ describe('xy_visualization', () => {
           layers: [
             {
               layerId: 'first',
+              layerType: layerTypes.DATA,
               seriesType: 'area',
               xAccessor: undefined,
               accessors: [],
@@ -689,6 +780,7 @@ describe('xy_visualization', () => {
             },
             {
               layerId: 'second',
+              layerType: layerTypes.DATA,
               seriesType: 'area',
               xAccessor: undefined,
               accessors: [],
@@ -705,12 +797,14 @@ describe('xy_visualization', () => {
           layers: [
             {
               layerId: 'first',
+              layerType: layerTypes.DATA,
               seriesType: 'area',
               xAccessor: 'a',
               accessors: [],
             },
             {
               layerId: 'second',
+              layerType: layerTypes.DATA,
               seriesType: 'area',
               xAccessor: undefined,
               accessors: ['a'],
@@ -731,12 +825,14 @@ describe('xy_visualization', () => {
           layers: [
             {
               layerId: 'first',
+              layerType: layerTypes.DATA,
               seriesType: 'area',
               xAccessor: 'a',
               accessors: ['a'],
             },
             {
               layerId: 'second',
+              layerType: layerTypes.DATA,
               seriesType: 'area',
               xAccessor: undefined,
               accessors: [],
@@ -744,6 +840,7 @@ describe('xy_visualization', () => {
             },
             {
               layerId: 'third',
+              layerType: layerTypes.DATA,
               seriesType: 'area',
               xAccessor: undefined,
               accessors: [],
@@ -765,18 +862,21 @@ describe('xy_visualization', () => {
           layers: [
             {
               layerId: 'first',
+              layerType: layerTypes.DATA,
               seriesType: 'area',
               xAccessor: 'a',
               accessors: [],
             },
             {
               layerId: 'second',
+              layerType: layerTypes.DATA,
               seriesType: 'area',
               xAccessor: 'a',
               accessors: ['a'],
             },
             {
               layerId: 'third',
+              layerType: layerTypes.DATA,
               seriesType: 'area',
               xAccessor: 'a',
               accessors: ['a'],
@@ -799,6 +899,7 @@ describe('xy_visualization', () => {
             layers: [
               {
                 layerId: 'first',
+                layerType: layerTypes.DATA,
                 seriesType: 'area',
                 splitAccessor: 'd',
                 xAccessor: 'a',
@@ -846,6 +947,7 @@ describe('xy_visualization', () => {
             layers: [
               {
                 layerId: 'first',
+                layerType: layerTypes.DATA,
                 seriesType: 'area',
                 splitAccessor: 'd',
                 xAccessor: 'a',
@@ -853,6 +955,7 @@ describe('xy_visualization', () => {
               },
               {
                 layerId: 'second',
+                layerType: layerTypes.DATA,
                 seriesType: 'area',
                 splitAccessor: 'd',
                 xAccessor: 'e',
@@ -900,6 +1003,7 @@ describe('xy_visualization', () => {
             layers: [
               {
                 layerId: 'first',
+                layerType: layerTypes.DATA,
                 seriesType: 'area',
                 splitAccessor: 'd',
                 xAccessor: 'a',
@@ -907,6 +1011,7 @@ describe('xy_visualization', () => {
               },
               {
                 layerId: 'second',
+                layerType: layerTypes.DATA,
                 seriesType: 'area',
                 splitAccessor: 'd',
                 xAccessor: 'e',
@@ -970,6 +1075,7 @@ describe('xy_visualization', () => {
           layers: [
             {
               layerId: 'first',
+              layerType: layerTypes.DATA,
               seriesType: 'area',
               xAccessor: 'a',
               accessors: ['b'],

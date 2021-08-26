@@ -39,4 +39,5 @@ export interface QueryStringInputProps
 |  [size](./kibana-plugin-plugins-data-public.querystringinputprops.size.md) | <code>SuggestionsListSize</code> |  |
 |  [storageKey](./kibana-plugin-plugins-data-public.querystringinputprops.storagekey.md) | <code>string</code> |  |
 |  [submitOnBlur](./kibana-plugin-plugins-data-public.querystringinputprops.submitonblur.md) | <code>boolean</code> |  |
+|  [timeRangeForSuggestionsOverride](./kibana-plugin-plugins-data-public.querystringinputprops.timerangeforsuggestionsoverride.md) | <code>boolean</code> | Override whether autocomplete suggestions are restricted by time range. |
 

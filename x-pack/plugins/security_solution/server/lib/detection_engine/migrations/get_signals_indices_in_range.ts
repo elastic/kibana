@@ -60,7 +60,6 @@ export const getSignalsIndicesInRange = async ({
                 '@timestamp': {
                   gte: from,
                   lte: 'now',
-                  // @ts-expect-error format doesn't exist in RangeQuery
                   format: 'strict_date_optional_time',
                 },
               },

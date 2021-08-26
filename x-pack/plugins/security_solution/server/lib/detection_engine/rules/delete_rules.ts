@@ -19,5 +19,5 @@ export const deleteRules = async ({
   await rulesClient.delete({ id });
   await deleteNotifications({ rulesClient, ruleAlertId: id });
   await deleteRuleActionsSavedObject({ ruleAlertId: id, savedObjectsClient });
-  ruleStatuses.saved_objects.forEach(async (obj) => ruleStatusClient.delete(obj.id));
+  ruleStatuses.forEach(async (obj) => ruleStatusClient.delete(obj.id));
 };

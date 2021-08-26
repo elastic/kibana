@@ -8,6 +8,6 @@
 
 ```typescript
 migrations: {
-        [key: string]: (state: SerializableState) => SerializableState;
+        [key: string]: (state: SerializableRecord) => SerializableRecord;
     };
 ```

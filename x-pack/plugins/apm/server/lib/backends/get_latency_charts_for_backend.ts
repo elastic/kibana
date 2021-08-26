@@ -30,15 +30,17 @@ export async function getLatencyChartsForBackend({
   setup: Setup;
   start: number;
   end: number;
-  environment?: string;
-  kuery?: string;
+  environment: string;
+  kuery: string;
   offset?: string;
 }) {
   const { apmEventClient } = setup;
 
-  const offsetInMs = getOffsetInMs(start, offset);
-  const startWithOffset = start - offsetInMs;
-  const endWithOffset = end - offsetInMs;
+  const { offsetInMs, startWithOffset, endWithOffset } = getOffsetInMs({
+    start,
+    end,
+    offset,
+  });
 
   const response = await apmEventClient.search('get_latency_for_backend', {
     apm: {

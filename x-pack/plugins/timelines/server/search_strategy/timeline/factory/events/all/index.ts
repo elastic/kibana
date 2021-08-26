@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { cloneDeep } from 'lodash/fp';
+import { cloneDeep, getOr } from 'lodash/fp';
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants';
 import { IEsSearchResponse } from '../../../../../../../../../src/plugins/data/common';
 import {
@@ -22,13 +22,13 @@ import { buildFieldsRequest, formatTimelineData } from './helpers';
 import { inspectStringifyObject } from '../../../../../utils/build_query';
 
 export const timelineEventsAll: TimelineFactory<TimelineEventsQueries.all> = {
-  buildDsl: (options: TimelineEventsAllRequestOptions) => {
+  buildDsl: ({ authFilter, ...options }: TimelineEventsAllRequestOptions) => {
     if (options.pagination && options.pagination.querySize >= DEFAULT_MAX_TABLE_QUERY_SIZE) {
       throw new Error(`No query size above ${DEFAULT_MAX_TABLE_QUERY_SIZE}`);
     }
     const { fieldRequested, ...queryOptions } = cloneDeep(options);
     queryOptions.fields = buildFieldsRequest(fieldRequested, queryOptions.excludeEcsData);
-    return buildTimelineEventsAllQuery(queryOptions);
+    return buildTimelineEventsAllQuery({ ...queryOptions, authFilter });
   },
   parse: async (
     options: TimelineEventsAllRequestOptions,
@@ -38,6 +38,7 @@ export const timelineEventsAll: TimelineFactory<TimelineEventsQueries.all> = {
     let { fieldRequested, ...queryOptions } = cloneDeep(options);
     queryOptions.fields = buildFieldsRequest(fieldRequested, queryOptions.excludeEcsData);
     const { activePage, querySize } = options.pagination;
+    const buckets = getOr([], 'aggregations.consumers.buckets', response.rawResponse);
     const totalCount = response.rawResponse.hits.total || 0;
     const hits = response.rawResponse.hits.hits;
 
@@ -61,12 +62,21 @@ export const timelineEventsAll: TimelineFactory<TimelineEventsQueries.all> = {
       )
     );
 
+    const consumers = buckets.reduce(
+      (acc: Record<string, number>, b: { key: string; doc_count: number }) => ({
+        ...acc,
+        [b.key]: b.doc_count,
+      }),
+      {}
+    );
+
     const inspect = {
       dsl: [inspectStringifyObject(buildTimelineEventsAllQuery(queryOptions))],
     };
 
     return {
       ...response,
+      consumers,
       inspect,
       edges,
       // @ts-expect-error code doesn't handle TotalHits

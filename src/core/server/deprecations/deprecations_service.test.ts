@@ -10,20 +10,21 @@
 import { DeprecationsService } from './deprecations_service';
 import { httpServiceMock } from '../http/http_service.mock';
 import { mockRouter } from '../http/router/router.mock';
+import { savedObjectsClientMock, elasticsearchServiceMock } from '../mocks';
 import { mockCoreContext } from '../core_context.mock';
 import { mockDeprecationsFactory } from './deprecations_factory.mock';
 import { mockDeprecationsRegistry } from './deprecations_registry.mock';
 
 describe('DeprecationsService', () => {
   const coreContext = mockCoreContext.create();
+  const http = httpServiceMock.createInternalSetupContract();
+  const router = mockRouter.create();
+  http.createRouter.mockReturnValue(router);
+  const deprecationsCoreSetupDeps = { http };
+
   beforeEach(() => jest.clearAllMocks());
 
   describe('#setup', () => {
-    const http = httpServiceMock.createInternalSetupContract();
-    const router = mockRouter.create();
-    http.createRouter.mockReturnValue(router);
-    const deprecationsCoreSetupDeps = { http };
-
     it('registers routes', () => {
       const deprecationsService = new DeprecationsService(coreContext);
       deprecationsService.setup(deprecationsCoreSetupDeps);
@@ -40,6 +41,23 @@ describe('DeprecationsService', () => {
       deprecationsService['registerConfigDeprecationsInfo'] = mockRegisterConfigDeprecationsInfo;
       deprecationsService.setup(deprecationsCoreSetupDeps);
       expect(mockRegisterConfigDeprecationsInfo).toBeCalledTimes(1);
+    });
+  });
+
+  describe('#start', () => {
+    describe('#asScopedToClient', () => {
+      it('returns client with #getAllDeprecations method', async () => {
+        const esClient = elasticsearchServiceMock.createScopedClusterClient();
+        const savedObjectsClient = savedObjectsClientMock.create();
+        const deprecationsService = new DeprecationsService(coreContext);
+
+        deprecationsService.setup(deprecationsCoreSetupDeps);
+
+        const start = deprecationsService.start();
+        const deprecationsClient = start.asScopedToClient(esClient, savedObjectsClient);
+
+        expect(deprecationsClient.getAllDeprecations).toBeDefined();
+      });
     });
   });
 

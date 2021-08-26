@@ -9,6 +9,8 @@ import { mount } from 'enzyme';
 import { cloneDeep } from 'lodash/fp';
 import React from 'react';
 
+import { ALERT_DURATION, ALERT_STATUS } from '@kbn/rule-data-utils';
+
 import { mockBrowserFields } from '../../../../common/containers/source/mock';
 import { DragDropContextWrapper } from '../../../../common/components/drag_and_drop/drag_drop_context_wrapper';
 import { defaultHeaders, mockTimelineData, TestProviders } from '../../../../common/mock';
@@ -55,7 +57,7 @@ describe('RenderCellValue', () => {
     const wrapper = mount(
       <TestProviders>
         <DragDropContextWrapper browserFields={mockBrowserFields}>
-          <RenderCellValue {...props} columnId="kibana.rac.alert.status" />
+          <RenderCellValue {...props} columnId={ALERT_STATUS} />
         </DragDropContextWrapper>
       </TestProviders>
     );
@@ -67,7 +69,7 @@ describe('RenderCellValue', () => {
     const wrapper = mount(
       <TestProviders>
         <DragDropContextWrapper browserFields={mockBrowserFields}>
-          <RenderCellValue {...props} columnId="kibana.rac.alert.duration.us" />
+          <RenderCellValue {...props} columnId={ALERT_DURATION} />
         </DragDropContextWrapper>
       </TestProviders>
     );

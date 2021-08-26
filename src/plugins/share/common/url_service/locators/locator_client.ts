@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { SerializableState } from 'src/plugins/kibana_utils/common';
+import type { SerializableRecord } from '@kbn/utility-types';
 import type { LocatorDependencies } from './locator';
 import type { LocatorDefinition, LocatorPublic, ILocatorClient } from './types';
 import { Locator } from './locator';
@@ -27,7 +27,7 @@ export class LocatorClient implements ILocatorClient {
    * @param definition A definition of URL locator.
    * @returns A public interface of URL locator.
    */
-  public create<P extends SerializableState>(definition: LocatorDefinition<P>): LocatorPublic<P> {
+  public create<P extends SerializableRecord>(definition: LocatorDefinition<P>): LocatorPublic<P> {
     const locator = new Locator<P>(definition, this.deps);
 
     this.locators.set(definition.id, locator);
@@ -41,7 +41,7 @@ export class LocatorClient implements ILocatorClient {
    * @param id ID of a URL locator.
    * @returns A public interface of a registered URL locator.
    */
-  public get<P extends SerializableState>(id: string): undefined | LocatorPublic<P> {
+  public get<P extends SerializableRecord>(id: string): undefined | LocatorPublic<P> {
     return this.locators.get(id);
   }
 }

@@ -6,10 +6,26 @@
  * Side Public License, v 1.
  */
 
+export * from './cidr';
+export * from './cidr_to_ast';
+export * from './date_range';
+export * from './date_range_to_ast';
+export * from './extended_bounds';
+export * from './extended_bounds_to_ast';
+export * from './geo_bounding_box';
+export * from './geo_bounding_box_to_ast';
+export * from './geo_point';
+export * from './geo_point_to_ast';
+export * from './ip_range';
+export * from './ip_range_to_ast';
 export * from './kibana';
 export * from './kibana_context';
 export * from './kql';
 export * from './lucene';
+export * from './numerical_range';
+export * from './numerical_range_to_ast';
+export * from './query_filter';
+export * from './query_filter_to_ast';
 export * from './query_to_ast';
 export * from './timerange_to_ast';
 export * from './kibana_context_type';

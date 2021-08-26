@@ -7,7 +7,7 @@
 
 import { combineLatest, Observable } from 'rxjs';
 import { filter, startWith, map } from 'rxjs/operators';
-import { JsonObject, JsonValue } from '@kbn/common-utils';
+import { JsonObject, JsonValue } from '@kbn/utility-types';
 import { isNumber, mapValues } from 'lodash';
 import { AggregatedStatProvider, AggregatedStat } from './runtime_statistics_aggregator';
 import { TaskLifecycleEvent } from '../polling_lifecycle';

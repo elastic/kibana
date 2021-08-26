@@ -43,6 +43,7 @@ exports[`BytesFormatEditor should render normally 1`] = `
     labelType="label"
   >
     <EuiFieldText
+      data-test-subj="numberEditorFormatPattern"
       isInvalid={false}
       onChange={[Function]}
       placeholder="0,0.[000]b"

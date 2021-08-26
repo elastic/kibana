@@ -15,7 +15,7 @@ import type { FormatFactory } from '../../common';
 
 export interface XyVisualizationPluginSetupPlugins {
   expressions: ExpressionsSetup;
-  formatFactory: Promise<FormatFactory>;
+  formatFactory: FormatFactory;
   editorFrame: EditorFrameSetup;
   charts: ChartsPluginSetup;
 }
@@ -25,7 +25,7 @@ export class XyVisualization {
 
   setup(
     core: CoreSetup<LensPluginStartDependencies, void>,
-    { expressions, formatFactory, editorFrame, charts }: XyVisualizationPluginSetupPlugins
+    { expressions, formatFactory, editorFrame }: XyVisualizationPluginSetupPlugins
   ) {
     editorFrame.registerVisualization(async () => {
       const {
@@ -35,17 +35,19 @@ export class XyVisualization {
         gridlinesConfig,
         axisTitlesVisibilityConfig,
         axisExtentConfig,
+        labelsOrientationConfig,
         layerConfig,
         xyChart,
         getXyChartRenderer,
         getXyVisualization,
       } = await import('../async_services');
-      const [, { data }] = await core.getStartServices();
+      const [, { charts, fieldFormats }] = await core.getStartServices();
       const palettes = await charts.palettes.getPalettes();
       expressions.registerFunction(() => legendConfig);
       expressions.registerFunction(() => yAxisConfig);
       expressions.registerFunction(() => tickLabelsConfig);
       expressions.registerFunction(() => axisExtentConfig);
+      expressions.registerFunction(() => labelsOrientationConfig);
       expressions.registerFunction(() => gridlinesConfig);
       expressions.registerFunction(() => axisTitlesVisibilityConfig);
       expressions.registerFunction(() => layerConfig);
@@ -55,11 +57,12 @@ export class XyVisualization {
         getXyChartRenderer({
           formatFactory,
           chartsThemeService: charts.theme,
+          chartsActiveCursorService: charts.activeCursor,
           paletteService: palettes,
           timeZone: getTimeZone(core.uiSettings),
         })
       );
-      return getXyVisualization({ paletteService: palettes, data });
+      return getXyVisualization({ paletteService: palettes, fieldFormats });
     });
   }
 }

@@ -21,7 +21,14 @@ import {
 import { RIGHT_ALIGNMENT } from '@elastic/eui/lib/services';
 import styled from 'styled-components';
 
-import { CaseStatuses, CaseType, DeleteCase, Case, SubCase } from '../../../common';
+import {
+  CaseStatuses,
+  CaseType,
+  DeleteCase,
+  Case,
+  SubCase,
+  ActionConnector,
+} from '../../../common';
 import { getEmptyTagValue } from '../empty_value';
 import { FormattedRelativePreferenceDate } from '../formatted_date';
 import { CaseDetailsHrefSchema, CaseDetailsLink, CasesNavigation } from '../links';
@@ -35,6 +42,7 @@ import { ConfirmDeleteCaseModal } from '../confirm_delete_case';
 import { useKibana } from '../../common/lib/kibana';
 import { StatusContextMenu } from '../case_action_bar/status_context_menu';
 import { TruncatedText } from '../truncated_text';
+import { getConnectorIcon } from '../utils';
 
 export type CasesColumns =
   | EuiTableActionsColumnType<Case>
@@ -66,6 +74,7 @@ export interface GetCasesColumn {
   refreshCases?: (a?: boolean) => void;
   showActions: boolean;
   userCanCrud: boolean;
+  connectors?: ActionConnector[];
 }
 export const useCasesColumns = ({
   caseDetailsNavigation,
@@ -77,6 +86,7 @@ export const useCasesColumns = ({
   refreshCases,
   showActions,
   userCanCrud,
+  connectors = [],
 }: GetCasesColumn): CasesColumns[] => {
   // Delete case
   const {
@@ -266,7 +276,7 @@ export const useCasesColumns = ({
       name: i18n.EXTERNAL_INCIDENT,
       render: (theCase: Case) => {
         if (theCase.id != null) {
-          return <ExternalServiceColumn theCase={theCase} />;
+          return <ExternalServiceColumn theCase={theCase} connectors={connectors} />;
         }
         return getEmptyTagValue();
       },
@@ -325,6 +335,7 @@ export const useCasesColumns = ({
 
 interface Props {
   theCase: Case;
+  connectors: ActionConnector[];
 }
 
 const IconWrapper = styled.span`
@@ -335,26 +346,31 @@ const IconWrapper = styled.span`
     width: 20px !important;
   }
 `;
-export const ExternalServiceColumn: React.FC<Props> = ({ theCase }) => {
+
+export const ExternalServiceColumn: React.FC<Props> = ({ theCase, connectors }) => {
   const { triggersActionsUi } = useKibana().services;
 
   if (theCase.externalService == null) {
     return renderStringField(i18n.NOT_PUSHED, `case-table-column-external-notPushed`);
   }
 
+  const lastPushedConnector: ActionConnector | undefined = connectors.find(
+    (connector) => connector.id === theCase.externalService?.connectorId
+  );
   const lastCaseUpdate = theCase.updatedAt != null ? new Date(theCase.updatedAt) : null;
   const lastCasePush =
     theCase.externalService?.pushedAt != null ? new Date(theCase.externalService?.pushedAt) : null;
   const hasDataToPush =
     lastCasePush === null ||
     (lastCaseUpdate != null && lastCasePush.getTime() < lastCaseUpdate?.getTime());
+
   return (
     <p>
       <IconWrapper>
         <EuiIcon
           size="original"
           title={theCase.externalService?.connectorName}
-          type={triggersActionsUi.actionTypeRegistry.get(theCase.connector.type)?.iconClass ?? ''}
+          type={getConnectorIcon(triggersActionsUi, lastPushedConnector?.actionTypeId)}
         />
       </IconWrapper>
       <EuiLink

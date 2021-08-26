@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import Semver from 'semver';
 import Boom from '@hapi/boom';
 import { omit, isEqual, map, uniq, pick, truncate, trim } from 'lodash';
 import { i18n } from '@kbn/i18n';
@@ -24,7 +25,7 @@ import {
   Alert,
   PartialAlert,
   RawAlert,
-  AlertTypeRegistry,
+  RuleTypeRegistry,
   AlertAction,
   IntervalSchedule,
   SanitizedAlert,
@@ -33,6 +34,7 @@ import {
   AlertExecutionStatusValues,
   AlertNotifyWhenType,
   AlertTypeParams,
+  ResolvedSanitizedRule,
 } from '../types';
 import {
   validateAlertTypeParams,
@@ -46,7 +48,7 @@ import {
 import { EncryptedSavedObjectsClient } from '../../../encrypted_saved_objects/server';
 import { TaskManagerStartContract } from '../../../task_manager/server';
 import { taskInstanceToAlertTaskInstance } from '../task_runner/alert_task_instance';
-import { RegistryAlertType, UntypedNormalizedAlertType } from '../alert_type_registry';
+import { RegistryRuleType, UntypedNormalizedAlertType } from '../rule_type_registry';
 import {
   AlertingAuthorization,
   WriteOperations,
@@ -69,7 +71,7 @@ import { KueryNode, nodeBuilder } from '../../../../../src/plugins/data/common';
 import { mapSortField } from './lib';
 import { getAlertExecutionStatusPending } from '../lib/alert_execution_status';
 
-export interface RegistryAlertTypeWithAuth extends RegistryAlertType {
+export interface RegistryAlertTypeWithAuth extends RegistryRuleType {
   authorizedConsumers: string[];
 }
 type NormalizedAlertAction = Omit<AlertAction, 'actionTypeId'>;
@@ -86,7 +88,7 @@ export interface ConstructorOptions {
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
   authorization: AlertingAuthorization;
   actionsAuthorization: ActionsAuthorization;
-  alertTypeRegistry: AlertTypeRegistry;
+  ruleTypeRegistry: RuleTypeRegistry;
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
   spaceId?: string;
   namespace?: string;
@@ -199,7 +201,7 @@ export class RulesClient {
   private readonly taskManager: TaskManagerStartContract;
   private readonly unsecuredSavedObjectsClient: SavedObjectsClientContract;
   private readonly authorization: AlertingAuthorization;
-  private readonly alertTypeRegistry: AlertTypeRegistry;
+  private readonly ruleTypeRegistry: RuleTypeRegistry;
   private readonly createAPIKey: (name: string) => Promise<CreateAPIKeyResult>;
   private readonly getActionsClient: () => Promise<ActionsClient>;
   private readonly actionsAuthorization: ActionsAuthorization;
@@ -209,7 +211,7 @@ export class RulesClient {
   private readonly auditLogger?: AuditLogger;
 
   constructor({
-    alertTypeRegistry,
+    ruleTypeRegistry,
     unsecuredSavedObjectsClient,
     authorization,
     taskManager,
@@ -230,7 +232,7 @@ export class RulesClient {
     this.spaceId = spaceId;
     this.namespace = namespace;
     this.taskManager = taskManager;
-    this.alertTypeRegistry = alertTypeRegistry;
+    this.ruleTypeRegistry = ruleTypeRegistry;
     this.unsecuredSavedObjectsClient = unsecuredSavedObjectsClient;
     this.authorization = authorization;
     this.createAPIKey = createAPIKey;
@@ -266,41 +268,43 @@ export class RulesClient {
       throw error;
     }
 
-    this.alertTypeRegistry.ensureAlertTypeEnabled(data.alertTypeId);
+    this.ruleTypeRegistry.ensureRuleTypeEnabled(data.alertTypeId);
 
     // Throws an error if alert type isn't registered
-    const alertType = this.alertTypeRegistry.get(data.alertTypeId);
+    const ruleType = this.ruleTypeRegistry.get(data.alertTypeId);
 
     const validatedAlertTypeParams = validateAlertTypeParams(
       data.params,
-      alertType.validate?.params
+      ruleType.validate?.params
     );
     const username = await this.getUserName();
 
     let createdAPIKey = null;
     try {
       createdAPIKey = data.enabled
-        ? await this.createAPIKey(this.generateAPIKeyName(alertType.id, data.name))
+        ? await this.createAPIKey(this.generateAPIKeyName(ruleType.id, data.name))
         : null;
     } catch (error) {
       throw Boom.badRequest(`Error creating rule: could not create API key - ${error.message}`);
     }
 
-    await this.validateActions(alertType, data.actions);
+    await this.validateActions(ruleType, data.actions);
 
     // Extract saved object references for this rule
     const { references, params: updatedParams, actions } = await this.extractReferences(
-      alertType,
+      ruleType,
       data.actions,
       validatedAlertTypeParams
     );
 
     const createTime = Date.now();
+    const legacyId = Semver.lt(this.kibanaVersion, '8.0.0') ? id : null;
     const notifyWhen = getAlertNotifyWhenType(data.notifyWhen, data.throttle);
 
     const rawAlert: RawAlert = {
       ...data,
       ...this.apiKeyAsAlertAttributes(createdAPIKey, username),
+      legacyId,
       actions,
       createdBy: username,
       updatedBy: username,
@@ -409,6 +413,52 @@ export class RulesClient {
       result.attributes,
       result.references
     );
+  }
+
+  public async resolve<Params extends AlertTypeParams = never>({
+    id,
+  }: {
+    id: string;
+  }): Promise<ResolvedSanitizedRule<Params>> {
+    const {
+      saved_object: result,
+      ...resolveResponse
+    } = await this.unsecuredSavedObjectsClient.resolve<RawAlert>('alert', id);
+    try {
+      await this.authorization.ensureAuthorized({
+        ruleTypeId: result.attributes.alertTypeId,
+        consumer: result.attributes.consumer,
+        operation: ReadOperations.Get,
+        entity: AlertingAuthorizationEntity.Rule,
+      });
+    } catch (error) {
+      this.auditLogger?.log(
+        ruleAuditEvent({
+          action: RuleAuditAction.RESOLVE,
+          savedObject: { type: 'alert', id },
+          error,
+        })
+      );
+      throw error;
+    }
+    this.auditLogger?.log(
+      ruleAuditEvent({
+        action: RuleAuditAction.RESOLVE,
+        savedObject: { type: 'alert', id },
+      })
+    );
+
+    const rule = this.getAlertFromRaw<Params>(
+      result.id,
+      result.attributes.alertTypeId,
+      result.attributes,
+      result.references
+    );
+
+    return {
+      ...rule,
+      ...resolveResponse,
+    };
   }
 
   public async getAlertState({ id }: { id: string }): Promise<AlertTaskState | void> {
@@ -731,7 +781,7 @@ export class RulesClient {
       })
     );
 
-    this.alertTypeRegistry.ensureAlertTypeEnabled(alertSavedObject.attributes.alertTypeId);
+    this.ruleTypeRegistry.ensureRuleTypeEnabled(alertSavedObject.attributes.alertTypeId);
 
     const updateResult = await this.updateAlert<Params>({ id, data }, alertSavedObject);
 
@@ -771,18 +821,18 @@ export class RulesClient {
     { id, data }: UpdateOptions<Params>,
     { attributes, version }: SavedObject<RawAlert>
   ): Promise<PartialAlert<Params>> {
-    const alertType = this.alertTypeRegistry.get(attributes.alertTypeId);
+    const ruleType = this.ruleTypeRegistry.get(attributes.alertTypeId);
 
     // Validate
     const validatedAlertTypeParams = validateAlertTypeParams(
       data.params,
-      alertType.validate?.params
+      ruleType.validate?.params
     );
-    await this.validateActions(alertType, data.actions);
+    await this.validateActions(ruleType, data.actions);
 
     // Extract saved object references for this rule
     const { references, params: updatedParams, actions } = await this.extractReferences(
-      alertType,
+      ruleType,
       data.actions,
       validatedAlertTypeParams
     );
@@ -792,7 +842,7 @@ export class RulesClient {
     let createdAPIKey = null;
     try {
       createdAPIKey = attributes.enabled
-        ? await this.createAPIKey(this.generateAPIKeyName(alertType.id, data.name))
+        ? await this.createAPIKey(this.generateAPIKeyName(ruleType.id, data.name))
         : null;
     } catch (error) {
       throw Boom.badRequest(`Error updating rule: could not create API key - ${error.message}`);
@@ -835,7 +885,7 @@ export class RulesClient {
 
     return this.getPartialAlertFromRaw(
       id,
-      alertType,
+      ruleType,
       updatedObject.attributes,
       updatedObject.references
     );
@@ -938,7 +988,7 @@ export class RulesClient {
       })
     );
 
-    this.alertTypeRegistry.ensureAlertTypeEnabled(attributes.alertTypeId);
+    this.ruleTypeRegistry.ensureRuleTypeEnabled(attributes.alertTypeId);
 
     try {
       await this.unsecuredSavedObjectsClient.update('alert', id, updateAttributes, { version });
@@ -1024,7 +1074,7 @@ export class RulesClient {
       })
     );
 
-    this.alertTypeRegistry.ensureAlertTypeEnabled(attributes.alertTypeId);
+    this.ruleTypeRegistry.ensureRuleTypeEnabled(attributes.alertTypeId);
 
     if (attributes.enabled === false) {
       const username = await this.getUserName();
@@ -1138,7 +1188,7 @@ export class RulesClient {
       })
     );
 
-    this.alertTypeRegistry.ensureAlertTypeEnabled(attributes.alertTypeId);
+    this.ruleTypeRegistry.ensureRuleTypeEnabled(attributes.alertTypeId);
 
     if (attributes.enabled === true) {
       await this.unsecuredSavedObjectsClient.update(
@@ -1215,7 +1265,7 @@ export class RulesClient {
       })
     );
 
-    this.alertTypeRegistry.ensureAlertTypeEnabled(attributes.alertTypeId);
+    this.ruleTypeRegistry.ensureRuleTypeEnabled(attributes.alertTypeId);
 
     const updateAttributes = this.updateMeta({
       muteAll: true,
@@ -1277,7 +1327,7 @@ export class RulesClient {
       })
     );
 
-    this.alertTypeRegistry.ensureAlertTypeEnabled(attributes.alertTypeId);
+    this.ruleTypeRegistry.ensureRuleTypeEnabled(attributes.alertTypeId);
 
     const updateAttributes = this.updateMeta({
       muteAll: false,
@@ -1339,7 +1389,7 @@ export class RulesClient {
       })
     );
 
-    this.alertTypeRegistry.ensureAlertTypeEnabled(attributes.alertTypeId);
+    this.ruleTypeRegistry.ensureRuleTypeEnabled(attributes.alertTypeId);
 
     const mutedInstanceIds = attributes.mutedInstanceIds || [];
     if (!attributes.muteAll && !mutedInstanceIds.includes(alertInstanceId)) {
@@ -1406,7 +1456,7 @@ export class RulesClient {
       })
     );
 
-    this.alertTypeRegistry.ensureAlertTypeEnabled(attributes.alertTypeId);
+    this.ruleTypeRegistry.ensureRuleTypeEnabled(attributes.alertTypeId);
 
     const mutedInstanceIds = attributes.mutedInstanceIds || [];
     if (!attributes.muteAll && mutedInstanceIds.includes(alertInstanceId)) {
@@ -1425,10 +1475,14 @@ export class RulesClient {
 
   public async listAlertTypes() {
     return await this.authorization.filterByRuleTypeAuthorization(
-      this.alertTypeRegistry.list(),
+      this.ruleTypeRegistry.list(),
       [ReadOperations.Get, WriteOperations.Create],
       AlertingAuthorizationEntity.Rule
     );
+  }
+
+  public getSpaceId(): string | undefined {
+    return this.spaceId;
   }
 
   private async scheduleAlert(id: string, alertTypeId: string, schedule: IntervalSchedule) {
@@ -1471,7 +1525,7 @@ export class RulesClient {
     rawAlert: RawAlert,
     references: SavedObjectReference[] | undefined
   ): Alert {
-    const ruleType = this.alertTypeRegistry.get(ruleTypeId);
+    const ruleType = this.ruleTypeRegistry.get(ruleTypeId);
     // In order to support the partial update API of Saved Objects we have to support
     // partial updates of an Alert, but when we receive an actual RawAlert, it is safe
     // to cast the result to an Alert
@@ -1488,36 +1542,29 @@ export class RulesClient {
       notifyWhen,
       scheduledTaskId,
       params,
-      ...rawAlert
+      legacyId, // exclude from result because it is an internal variable
+      executionStatus,
+      schedule,
+      actions,
+      ...partialRawAlert
     }: Partial<RawAlert>,
     references: SavedObjectReference[] | undefined
   ): PartialAlert<Params> {
-    // Not the prettiest code here, but if we want to use most of the
-    // alert fields from the rawAlert using `...rawAlert` kind of access, we
-    // need to specifically delete the executionStatus as it's a different type
-    // in RawAlert and Alert.  Probably next time we need to do something similar
-    // here, we should look at redesigning the implementation of this method.
-    const rawAlertWithoutExecutionStatus: Partial<Omit<RawAlert, 'executionStatus'>> = {
-      ...rawAlert,
-    };
-    delete rawAlertWithoutExecutionStatus.executionStatus;
-    const executionStatus = alertExecutionStatusFromRaw(this.logger, id, rawAlert.executionStatus);
-
     return {
       id,
       notifyWhen,
-      ...rawAlertWithoutExecutionStatus,
+      ...partialRawAlert,
       // we currently only support the Interval Schedule type
       // Once we support additional types, this type signature will likely change
-      schedule: rawAlert.schedule as IntervalSchedule,
-      actions: rawAlert.actions
-        ? this.injectReferencesIntoActions(id, rawAlert.actions, references || [])
-        : [],
+      schedule: schedule as IntervalSchedule,
+      actions: actions ? this.injectReferencesIntoActions(id, actions, references || []) : [],
       params: this.injectReferencesIntoParams(id, ruleType, params, references || []) as Params,
       ...(updatedAt ? { updatedAt: new Date(updatedAt) } : {}),
       ...(createdAt ? { createdAt: new Date(createdAt) } : {}),
       ...(scheduledTaskId ? { scheduledTaskId } : {}),
-      ...(executionStatus ? { executionStatus } : {}),
+      ...(executionStatus
+        ? { executionStatus: alertExecutionStatusFromRaw(this.logger, id, executionStatus) }
+        : {}),
     };
   }
 

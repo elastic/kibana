@@ -18,7 +18,6 @@ export const config: PluginConfigDescriptor<MapsXPackConfig> = {
   // the value `true` in this context signals configuration is exposed to browser
   exposeToBrowser: {
     enabled: true,
-    showMapVisualizationTypes: true,
     showMapsInspectorAdapter: true,
     preserveDrawingBuffer: true,
   },
@@ -36,8 +35,7 @@ export const config: PluginConfigDescriptor<MapsXPackConfig> = {
         documentationUrl:
           'https://www.elastic.co/guide/en/kibana/current/maps-connect-to-ems.html#elastic-maps-server',
         message: i18n.translate('xpack.maps.deprecation.proxyEMS.message', {
-          defaultMessage:
-            'map.proxyElasticMapsServiceInMaps is deprecated and will be removed in 8.0.',
+          defaultMessage: 'map.proxyElasticMapsServiceInMaps is deprecated and is no longer used',
         }),
         correctiveActions: {
           manualSteps: [
@@ -63,7 +61,7 @@ export const config: PluginConfigDescriptor<MapsXPackConfig> = {
       }
       addDeprecation({
         message: i18n.translate('xpack.maps.deprecation.regionmap.message', {
-          defaultMessage: 'map.regionmap is deprecated and will be removed in 8.0.',
+          defaultMessage: 'map.regionmap is deprecated and is no longer used',
         }),
         correctiveActions: {
           manualSteps: [

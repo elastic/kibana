@@ -19,6 +19,7 @@ export const timelineDefaults: SubsetTimelineModel &
   activeTab: TimelineTabs.query,
   prevActiveTab: TimelineTabs.query,
   columns: defaultHeaders,
+  defaultColumns: defaultHeaders,
   dataProviders: [],
   dateRange: { start, end },
   deletedEventIds: [],

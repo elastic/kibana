@@ -27,3 +27,6 @@ export const getEventIdToNoteIdsSelector = () =>
 
 export const getNotesSelector = () =>
   createSelector(selectNotesById, (notesById) => Object.values(notesById));
+
+export const getScrollToTopSelector = () =>
+  createSelector(selectTimeline, (timeline) => timeline?.scrollToTop);

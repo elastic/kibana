@@ -13,6 +13,7 @@ import {
   SavedObjectAttributes,
   SavedObjectsFindResponse,
   SavedObjectsClientContract,
+  SavedObjectsFindResult,
 } from 'kibana/server';
 import type {
   MachineLearningJobIdOrUndefined,
@@ -86,7 +87,7 @@ import {
   QueryFilterOrUndefined,
   FieldsOrUndefined,
   SortOrderOrUndefined,
-  JobStatus,
+  RuleExecutionStatus,
   LastSuccessAt,
   StatusDate,
   LastSuccessMessage,
@@ -106,7 +107,7 @@ import { Alert, SanitizedAlert } from '../../../../../alerting/common';
 import { SIGNALS_ID } from '../../../../common/constants';
 import { PartialFilter } from '../types';
 import { RuleParams } from '../schemas/rule_schemas';
-import { RuleStatusSavedObjectsClient } from '../signals/rule_status_saved_objects_client';
+import { IRuleExecutionLogClient } from '../rule_execution_log/types';
 
 export type RuleAlertType = Alert<RuleParams>;
 
@@ -118,7 +119,7 @@ export interface IRuleStatusSOAttributes extends Record<string, any> {
   lastFailureMessage: LastFailureMessage | null | undefined;
   lastSuccessAt: LastSuccessAt | null | undefined;
   lastSuccessMessage: LastSuccessMessage | null | undefined;
-  status: JobStatus | null | undefined;
+  status: RuleExecutionStatus | null | undefined;
   lastLookBackDate: string | null | undefined;
   gap: string | null | undefined;
   bulkCreateTimeDurations: string[] | null | undefined;
@@ -132,7 +133,7 @@ export interface IRuleStatusResponseAttributes {
   last_failure_message: LastFailureMessage | null | undefined;
   last_success_at: LastSuccessAt | null | undefined;
   last_success_message: LastSuccessMessage | null | undefined;
-  status: JobStatus | null | undefined;
+  status: RuleExecutionStatus | null | undefined;
   last_look_back_date: string | null | undefined; // NOTE: This is no longer used on the UI, but left here in case users are using it within the API
   gap: string | null | undefined;
   bulk_create_time_durations: string[] | null | undefined;
@@ -266,14 +267,16 @@ export interface CreateRulesOptions {
 }
 
 export interface UpdateRulesOptions {
-  savedObjectsClient: SavedObjectsClientContract;
+  spaceId: string;
+  ruleStatusClient: IRuleExecutionLogClient;
   rulesClient: RulesClient;
   defaultOutputIndex: string;
   ruleUpdate: UpdateRulesSchema;
 }
 
 export interface PatchRulesOptions {
-  savedObjectsClient: SavedObjectsClientContract;
+  spaceId: string;
+  ruleStatusClient: IRuleExecutionLogClient;
   rulesClient: RulesClient;
   anomalyThreshold: AnomalyThresholdOrUndefined;
   author: AuthorOrUndefined;
@@ -332,8 +335,8 @@ export interface ReadRuleOptions {
 export interface DeleteRuleOptions {
   rulesClient: RulesClient;
   savedObjectsClient: SavedObjectsClientContract;
-  ruleStatusClient: RuleStatusSavedObjectsClient;
-  ruleStatuses: SavedObjectsFindResponse<IRuleStatusSOAttributes, unknown>;
+  ruleStatusClient: IRuleExecutionLogClient;
+  ruleStatuses: Array<SavedObjectsFindResult<IRuleStatusSOAttributes>>;
   id: Id;
 }
 

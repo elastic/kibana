@@ -74,13 +74,13 @@ export function InfraSavedViewsProvider({ getService }: FtrProviderContext) {
     },
 
     async ensureViewIsLoaded(name: string) {
-      const subject = await testSubjects.find('savedViews-currentViewName');
+      const subject = await testSubjects.find('savedViews-openPopover');
       expect(await subject.getVisibleText()).to.be(name);
     },
 
     async ensureViewIsLoadable(name: string) {
-      const subjects = await testSubjects.getVisibleTextAll('savedViews-loadList');
-      expect(subjects.some((s) => s.split('\n').includes(name))).to.be(true);
+      const subject = await testSubjects.find('savedViews-loadList');
+      await subject.findByCssSelector(`li[title="${name}"]`);
     },
 
     async closeSavedViewsLoadModal() {

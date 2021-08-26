@@ -14,16 +14,27 @@ import {
   createMockLevelLogger,
   createMockReportingCore,
 } from '../test_helpers';
-import { BasePayload, ReportingRequestHandlerContext } from '../types';
+import { ReportingRequestHandlerContext } from '../types';
 import { ExportTypesRegistry, ReportingStore } from './';
-import { enqueueJobFactory } from './enqueue_job';
+import { enqueueJob } from './enqueue_job';
 import { Report } from './store';
-import { TaskRunResult } from './tasks';
 
 describe('Enqueue Job', () => {
   const logger = createMockLevelLogger();
   let mockReporting: ReportingCore;
   let mockExportTypesRegistry: ExportTypesRegistry;
+
+  const mockBaseParams = {
+    browserTimezone: 'UTC',
+    headers: 'cool_encrypted_headers',
+    objectType: 'cool_object_type',
+    title: 'cool_title',
+    version: 'unknown' as any,
+  };
+
+  beforeEach(() => {
+    mockBaseParams.version = '7.15.0-test';
+  });
 
   beforeAll(async () => {
     mockExportTypesRegistry = new ExportTypesRegistry();
@@ -34,10 +45,8 @@ describe('Enqueue Job', () => {
       jobContentEncoding: 'base64',
       jobContentExtension: 'pdf',
       validLicenses: ['turquoise'],
-      createJobFnFactory: () => async () =>
-        (({ createJobTest: { test1: 'yes' } } as unknown) as BasePayload),
-      runTaskFnFactory: () => async () =>
-        (({ runParamsTest: { test2: 'yes' } } as unknown) as TaskRunResult),
+      createJobFnFactory: () => async () => mockBaseParams,
+      runTaskFnFactory: jest.fn(),
     });
     mockReporting = await createMockReportingCore(createMockConfigSchema());
     mockReporting.getExportTypesRegistry = () => mockExportTypesRegistry;
@@ -63,29 +72,65 @@ describe('Enqueue Job', () => {
   });
 
   it('returns a Report object', async () => {
-    const enqueueJob = enqueueJobFactory(mockReporting, logger);
     const report = await enqueueJob(
-      'printablePdf',
-      {
-        objectType: 'visualization',
-        title: 'cool-viz',
-      },
-      false,
+      mockReporting,
+      ({} as unknown) as KibanaRequest,
       ({} as unknown) as ReportingRequestHandlerContext,
-      ({} as unknown) as KibanaRequest
+      false,
+      'printablePdf',
+      mockBaseParams,
+      logger
     );
 
-    expect(report).toMatchObject({
-      _id: expect.any(String),
-      _index: '.reporting-foo-index-234',
-      attempts: 0,
-      created_by: false,
-      created_at: expect.any(String),
-      jobtype: 'printable_pdf',
-      meta: { objectType: 'visualization' },
-      output: null,
-      payload: { createJobTest: { test1: 'yes' } },
-      status: 'pending',
-    });
+    const { _id, created_at: _created_at, ...snapObj } = report;
+    expect(snapObj).toMatchInlineSnapshot(`
+      Object {
+        "_index": ".reporting-foo-index-234",
+        "_primary_term": undefined,
+        "_seq_no": undefined,
+        "attempts": 0,
+        "browser_type": undefined,
+        "completed_at": undefined,
+        "created_by": false,
+        "jobtype": "printable_pdf",
+        "kibana_id": undefined,
+        "kibana_name": undefined,
+        "max_attempts": undefined,
+        "meta": Object {
+          "isDeprecated": undefined,
+          "layout": undefined,
+          "objectType": "cool_object_type",
+        },
+        "migration_version": "7.14.0",
+        "output": null,
+        "payload": Object {
+          "browserTimezone": "UTC",
+          "headers": "cool_encrypted_headers",
+          "objectType": "cool_object_type",
+          "title": "cool_title",
+          "version": "7.15.0-test",
+        },
+        "process_expiration": undefined,
+        "started_at": undefined,
+        "status": "pending",
+        "timeout": undefined,
+      }
+    `);
+  });
+
+  it('provides a default kibana version field for older POST URLs', async () => {
+    mockBaseParams.version = undefined;
+    const report = await enqueueJob(
+      mockReporting,
+      ({} as unknown) as KibanaRequest,
+      ({} as unknown) as ReportingRequestHandlerContext,
+      false,
+      'printablePdf',
+      mockBaseParams,
+      logger
+    );
+
+    const { _id, created_at: _created_at, ...snapObj } = report;
+    expect(snapObj.payload.version).toBe('7.14.0');
   });
 });

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from 'kibana/server';
 import { chunk } from 'lodash/fp';
 import { AddPrepackagedRulesSchemaDecoded } from '../../../../common/detection_engine/schemas/request/add_prepackaged_rules_schema';
 import { RulesClient, PartialAlert } from '../../../../../alerting/server';
@@ -13,6 +12,7 @@ import { patchRules } from './patch_rules';
 import { readRules } from './read_rules';
 import { PartialFilter } from '../types';
 import { RuleParams } from '../schemas/rule_schemas';
+import { IRuleExecutionLogClient } from '../rule_execution_log/types';
 
 /**
  * How many rules to update at a time is set to 50 from errors coming from
@@ -44,19 +44,27 @@ export const UPDATE_CHUNK_SIZE = 50;
  * This implements a chunked approach to not saturate network connections and
  * avoid being a "noisy neighbor".
  * @param rulesClient Alerting client
- * @param savedObjectsClient Saved object client
+ * @param spaceId Current user spaceId
+ * @param ruleStatusClient Rule execution log client
  * @param rules The rules to apply the update for
  * @param outputIndex The output index to apply the update to.
  */
 export const updatePrepackagedRules = async (
   rulesClient: RulesClient,
-  savedObjectsClient: SavedObjectsClientContract,
+  spaceId: string,
+  ruleStatusClient: IRuleExecutionLogClient,
   rules: AddPrepackagedRulesSchemaDecoded[],
   outputIndex: string
 ): Promise<void> => {
   const ruleChunks = chunk(UPDATE_CHUNK_SIZE, rules);
   for (const ruleChunk of ruleChunks) {
-    const rulePromises = createPromises(rulesClient, savedObjectsClient, ruleChunk, outputIndex);
+    const rulePromises = createPromises(
+      rulesClient,
+      spaceId,
+      ruleStatusClient,
+      ruleChunk,
+      outputIndex
+    );
     await Promise.all(rulePromises);
   }
 };
@@ -64,14 +72,16 @@ export const updatePrepackagedRules = async (
 /**
  * Creates promises of the rules and returns them.
  * @param rulesClient Alerting client
- * @param savedObjectsClient Saved object client
+ * @param spaceId Current user spaceId
+ * @param ruleStatusClient Rule execution log client
  * @param rules The rules to apply the update for
  * @param outputIndex The output index to apply the update to.
  * @returns Promise of what was updated.
  */
 export const createPromises = (
   rulesClient: RulesClient,
-  savedObjectsClient: SavedObjectsClientContract,
+  spaceId: string,
+  ruleStatusClient: IRuleExecutionLogClient,
   rules: AddPrepackagedRulesSchemaDecoded[],
   outputIndex: string
 ): Array<Promise<PartialAlert<RuleParams> | null>> => {
@@ -143,7 +153,8 @@ export const createPromises = (
       outputIndex,
       rule: existingRule,
       savedId,
-      savedObjectsClient,
+      spaceId,
+      ruleStatusClient,
       meta,
       filters,
       index,

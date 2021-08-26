@@ -43,7 +43,7 @@ const columns: Array<ITableColumn<Jobs[0]>> = [
       'xpack.apm.settings.anomalyDetection.jobList.actionColumnLabel',
       { defaultMessage: 'Action' }
     ),
-    render: (jobId: string) => (
+    render: (_, { job_id: jobId }) => (
       <MLExplorerLink jobId={jobId}>
         {i18n.translate(
           'xpack.apm.settings.anomalyDetection.jobList.mlJobLinkText',

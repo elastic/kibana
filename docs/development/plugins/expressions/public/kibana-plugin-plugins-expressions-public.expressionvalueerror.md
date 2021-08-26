@@ -9,6 +9,6 @@
 ```typescript
 export declare type ExpressionValueError = ExpressionValueBoxed<'error', {
     error: ErrorLike;
-    info?: SerializableState;
+    info?: SerializableRecord;
 }>;
 ```

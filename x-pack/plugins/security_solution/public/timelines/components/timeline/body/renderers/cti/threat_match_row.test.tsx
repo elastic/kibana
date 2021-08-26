@@ -22,7 +22,6 @@ describe('ThreatMatchRowView', () => {
       <ThreatMatchRowView
         contextId="contextId"
         eventId="eventId"
-        indicatorDataset="dataset"
         indicatorProvider="provider"
         indicatorReference="http://example.com"
         indicatorType="domain"
@@ -39,7 +38,6 @@ describe('ThreatMatchRowView', () => {
       <ThreatMatchRowView
         contextId="contextId"
         eventId="eventId"
-        indicatorDataset="dataset"
         indicatorProvider="provider"
         indicatorReference="http://example.com"
         indicatorType="domain"
@@ -64,7 +62,6 @@ describe('ThreatMatchRowView', () => {
       baseProps = {
         contextId: 'contextId',
         eventId: 'eventId',
-        indicatorDataset: 'dataset',
         indicatorProvider: 'provider',
         indicatorReference: 'http://example.com',
         indicatorType: 'domain',
@@ -115,29 +112,6 @@ describe('ThreatMatchRowView', () => {
         '[data-test-subj="threat-match-indicator-details-indicator-type"]'
       );
       expect(indicatorType.exists()).toBeFalsy();
-    });
-
-    it('renders the indicator dataset, if present', () => {
-      const wrapper = render(baseProps);
-      const indicatorDataset = wrapper.find(
-        '[data-test-subj="threat-match-indicator-details-indicator-dataset"]'
-      );
-      expect(indicatorDataset.props()).toEqual(
-        expect.objectContaining({
-          value: 'dataset',
-        })
-      );
-    });
-
-    it('does not render the indicator dataset, if absent', () => {
-      const wrapper = render({
-        ...baseProps,
-        indicatorDataset: undefined,
-      });
-      const indicatorDataset = wrapper.find(
-        '[data-test-subj="threat-match-indicator-details-indicator-dataset"]'
-      );
-      expect(indicatorDataset.exists()).toBeFalsy();
     });
 
     it('renders the indicator provider, if present', () => {

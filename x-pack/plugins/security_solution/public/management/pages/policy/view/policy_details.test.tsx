@@ -307,6 +307,16 @@ describe('Policy Details', () => {
         expect(userNotificationCheckbox).toHaveLength(1);
       });
 
+      it('behavior protection card and user notification checkbox are shown', () => {
+        const behavior = policyView.find('EuiPanel[data-test-subj="behaviorProtectionsForm"]');
+        const userNotificationCheckbox = policyView.find(
+          'EuiCheckbox[data-test-subj="behavior_protectionUserNotificationCheckbox"]'
+        );
+
+        expect(behavior).toHaveLength(1);
+        expect(userNotificationCheckbox).toHaveLength(1);
+      });
+
       it('ransomware card is shown', () => {
         const ransomware = policyView.find('EuiPanel[data-test-subj="ransomwareProtectionsForm"]');
         expect(ransomware).toHaveLength(1);
@@ -347,7 +357,7 @@ describe('Policy Details', () => {
 
       it('shows the locked card in place of 1 paid feature', () => {
         const lockedCard = policyView.find('EuiCard[data-test-subj="lockedPolicyCard"]');
-        expect(lockedCard).toHaveLength(2);
+        expect(lockedCard).toHaveLength(3);
       });
     });
   });

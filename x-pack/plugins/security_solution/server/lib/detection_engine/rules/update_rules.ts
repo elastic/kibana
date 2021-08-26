@@ -18,8 +18,9 @@ import { InternalRuleUpdate, RuleParams } from '../schemas/rule_schemas';
 import { enableRule } from './enable_rule';
 
 export const updateRules = async ({
+  spaceId,
   rulesClient,
-  savedObjectsClient,
+  ruleStatusClient,
   defaultOutputIndex,
   ruleUpdate,
 }: UpdateRulesOptions): Promise<PartialAlert<RuleParams> | null> => {
@@ -88,7 +89,7 @@ export const updateRules = async ({
   if (existingRule.enabled && enabled === false) {
     await rulesClient.disable({ id: existingRule.id });
   } else if (!existingRule.enabled && enabled === true) {
-    await enableRule({ rule: existingRule, rulesClient, savedObjectsClient });
+    await enableRule({ rule: existingRule, rulesClient, ruleStatusClient, spaceId });
   }
   return { ...update, enabled };
 };

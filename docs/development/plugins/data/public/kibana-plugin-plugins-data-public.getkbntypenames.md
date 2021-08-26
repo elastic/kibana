@@ -4,9 +4,10 @@
 
 ## getKbnTypeNames variable
 
-Get the esTypes known by all kbnFieldTypes
-
- {<!-- -->Array<string>}
+> Warning: This API is now obsolete.
+> 
+> Import from the "<!-- -->@<!-- -->kbn/field-types" package directly instead.  8.1
+> 
 
 <b>Signature:</b>
 

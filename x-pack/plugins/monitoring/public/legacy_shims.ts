@@ -52,7 +52,7 @@ export interface IShims {
   docTitle: CoreStart['chrome']['docTitle'];
   timefilter: MonitoringStartPluginDependencies['data']['query']['timefilter']['timefilter'];
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
-  alertTypeRegistry: TypeRegistry<AlertTypeModel>;
+  ruleTypeRegistry: TypeRegistry<AlertTypeModel>;
   uiSettings: IUiSettingsClient;
   http: HttpSetup;
   kfetch: (
@@ -119,7 +119,7 @@ export class Legacy {
       docTitle: core.chrome.docTitle,
       timefilter: data.query.timefilter.timefilter,
       actionTypeRegistry: triggersActionsUi?.actionTypeRegistry,
-      alertTypeRegistry: triggersActionsUi?.alertTypeRegistry,
+      ruleTypeRegistry: triggersActionsUi?.ruleTypeRegistry,
       uiSettings: core.uiSettings,
       http: core.http,
       kfetch: async (
@@ -146,5 +146,9 @@ export class Legacy {
       throw new Error('Legacy needs to be initiated with Legacy.init(...) before use');
     }
     return Legacy._shims;
+  }
+
+  public static isInitializated(): boolean {
+    return Boolean(Legacy._shims);
   }
 }

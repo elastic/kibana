@@ -23,6 +23,8 @@ import {
 import { RefOutputCache, OUTDIR_MERGE_BASE_FILENAME } from '../ref_output_cache';
 import { Archives } from '../archives';
 import type { RepoInfo } from '../repo_info';
+import { Project } from '../../project';
+import { ProjectSet } from '../../project_set';
 
 jest.mock('../repo_info');
 const { RepoInfo: MockRepoInfo } = jest.requireMock('../repo_info');
@@ -48,25 +50,41 @@ afterEach(async () => {
   logWriter.messages.length = 0;
 });
 
-it('creates and extracts caches, ingoring dirs with matching merge-base file and placing merge-base files', async () => {
+function makeMockProject(path: string) {
+  Fs.mkdirSync(Path.resolve(path, 'target/test-types'), { recursive: true });
+  Fs.writeFileSync(
+    Path.resolve(path, 'tsconfig.json'),
+    JSON.stringify({
+      compilerOptions: {
+        outDir: './target/test-types',
+      },
+      include: ['**/*'],
+      exclude: ['test/target/**/*'],
+    })
+  );
+
+  return Project.load(Path.resolve(path, 'tsconfig.json'));
+}
+
+it('creates and extracts caches, ingoring dirs with matching merge-base file, placing merge-base files, and overriding modified time for updated inputs', async () => {
   // setup repo mock
   const HEAD = 'abcdefg';
   repo.getHeadSha.mockResolvedValue(HEAD);
   repo.getRelative.mockImplementation((path) => Path.relative(TMP, path));
   repo.getRecentShasFrom.mockResolvedValue(['5678', '1234']);
+  repo.getFilesChangesSinceSha.mockResolvedValue([]);
 
   // create two fake outDirs
-  const outDirs = [Path.resolve(TMP, 'out/foo'), Path.resolve(TMP, 'out/bar')];
-  for (const dir of outDirs) {
-    Fs.mkdirSync(dir, { recursive: true });
-    Fs.writeFileSync(Path.resolve(dir, 'test'), 'hello world');
-  }
+  const projects = new ProjectSet([
+    makeMockProject(Path.resolve(TMP, 'test1')),
+    makeMockProject(Path.resolve(TMP, 'test2')),
+  ]);
 
   // init an archives instance using tmp
   const archives = await Archives.create(log, TMP);
 
   // init the RefOutputCache with our mock data
-  const refOutputCache = new RefOutputCache(log, repo, archives, outDirs, HEAD);
+  const refOutputCache = new RefOutputCache(log, repo, archives, projects, HEAD);
 
   // create the new cache right in the archives dir
   await refOutputCache.captureCache(Path.resolve(TMP));
@@ -88,19 +106,21 @@ it('creates and extracts caches, ingoring dirs with matching merge-base file and
   });
 
   // modify the files in the outDirs so we can see which ones are restored from the cache
-  for (const dir of outDirs) {
-    Fs.writeFileSync(Path.resolve(dir, 'test'), 'not cleared by cache init');
+  for (const dir of projects.outDirs) {
+    Fs.writeFileSync(Path.resolve(dir, 'no-cleared.txt'), 'not cleared by cache init');
   }
-  // add the mergeBase to the first outDir so that it is ignored
-  Fs.writeFileSync(Path.resolve(outDirs[0], OUTDIR_MERGE_BASE_FILENAME), HEAD);
+
+  // add the mergeBase to test1 outDir so that it is not cleared
+  Fs.writeFileSync(Path.resolve(projects.outDirs[0], OUTDIR_MERGE_BASE_FILENAME), HEAD);
 
   // rebuild the outDir from the refOutputCache
   await refOutputCache.initCaches();
 
+  // verify that "test1" outdir is untouched and that "test2" is cleared out
   const files = Object.fromEntries(
     globby
       .sync(
-        outDirs.map((p) => normalize(p)),
+        projects.outDirs.map((p) => normalize(p)),
         { dot: true }
       )
       .map((path) => [Path.relative(TMP, path), Fs.readFileSync(path, 'utf-8')])
@@ -108,10 +128,9 @@ it('creates and extracts caches, ingoring dirs with matching merge-base file and
 
   expect(files).toMatchInlineSnapshot(`
     Object {
-      "out/bar/.ts-ref-cache-merge-base": "abcdefg",
-      "out/bar/test": "hello world",
-      "out/foo/.ts-ref-cache-merge-base": "abcdefg",
-      "out/foo/test": "not cleared by cache init",
+      "test1/target/test-types/.ts-ref-cache-merge-base": "abcdefg",
+      "test1/target/test-types/no-cleared.txt": "not cleared by cache init",
+      "test2/target/test-types/.ts-ref-cache-merge-base": "abcdefg",
     }
   `);
   expect(logWriter.messages).toMatchInlineSnapshot(`
@@ -124,7 +143,7 @@ it('creates and extracts caches, ingoring dirs with matching merge-base file and
       " debg download complete, renaming tmp",
       " debg download of cache for abcdefg complete",
       " debg extracting archives/abcdefg.zip to rebuild caches in 1 outDirs",
-      " debg [out/bar] clearing outDir and replacing with cache",
+      " debg [test2/target/test-types] clearing outDir and replacing with cache",
     ]
   `);
 });
@@ -138,7 +157,7 @@ it('cleans up oldest archives when there are more than 10', async () => {
   }
 
   const archives = await Archives.create(log, TMP);
-  const cache = new RefOutputCache(log, repo, archives, [], '1234');
+  const cache = new RefOutputCache(log, repo, archives, new ProjectSet([]), '1234');
   expect(cache.archives.size()).toBe(102);
   await cache.cleanup();
   expect(cache.archives.size()).toBe(10);

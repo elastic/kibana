@@ -6,6 +6,8 @@
  */
 
 import { EuiDataGridColumn } from '@elastic/eui';
+import { ALERT_DURATION, ALERT_STATUS } from '@kbn/rule-data-utils';
+
 import { ColumnHeaderOptions } from '../../../../../common';
 import { defaultColumnHeaderType } from '../../../../timelines/components/timeline/body/column_headers/default_headers';
 import { DEFAULT_DATE_COLUMN_MIN_WIDTH } from '../../../../timelines/components/timeline/body/constants';
@@ -22,7 +24,7 @@ export const columns: Array<
   {
     columnHeaderType: defaultColumnHeaderType,
     displayAsText: i18n.STATUS,
-    id: 'kibana.rac.alert.status',
+    id: ALERT_STATUS,
     initialWidth: 74,
   },
   {
@@ -34,7 +36,7 @@ export const columns: Array<
   {
     columnHeaderType: defaultColumnHeaderType,
     displayAsText: i18n.ALERT_DURATION,
-    id: 'kibana.rac.alert.duration.us',
+    id: ALERT_DURATION,
     initialWidth: 116,
   },
   {
