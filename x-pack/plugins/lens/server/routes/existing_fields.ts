@@ -201,6 +201,7 @@ async function fetchIndexPatternStats({
         _source: false,
         runtime_mappings: runtimeFields.reduce((acc, field) => {
           if (!field.runtimeField) return acc;
+          // @ts-expect-error The MappingRuntimeField from @elastic/elasticsearch does not expose the "composite" runtime type yet
           acc[field.name] = field.runtimeField;
           return acc;
         }, {} as Record<string, estypes.MappingRuntimeField>),
