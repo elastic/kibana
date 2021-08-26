@@ -24,7 +24,7 @@ export default {
 };
 
 export const List: Story = (_args, { globals }) => {
-  const darkMode = globals.euiTheme.includes('dark');
+  const darkMode = globals?.euiTheme?.includes('dark') ?? false;
 
   return (
     <EuiFlexGroup gutterSize="l" wrap={true}>
