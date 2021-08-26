@@ -84,6 +84,7 @@
 
 |  Variable | Description |
 |  --- | --- |
+|  [createDefaultInspectorAdapters](./kibana-plugin-plugins-expressions-public.createdefaultinspectoradapters.md) |  |
 |  [ReactExpressionRenderer](./kibana-plugin-plugins-expressions-public.reactexpressionrenderer.md) |  |
 
 ## Type Aliases
