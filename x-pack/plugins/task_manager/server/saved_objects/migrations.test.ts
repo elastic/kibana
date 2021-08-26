@@ -66,6 +66,16 @@ describe('successful migrations', () => {
       expect(migration800(taskInstance, migrationContext)).toEqual(taskInstance);
     });
 
+    test('it is only applicable for saved objects that live in a custom space even if spaces are disabled', () => {
+      const migration800 = getMigrations()['8.0.0'];
+      const taskInstance = getMockData({
+        taskType: 'actions:123456',
+        params: JSON.stringify({ actionTaskParamsId: '123456' }),
+      });
+
+      expect(migration800(taskInstance, migrationContext)).toEqual(taskInstance);
+    });
+
     test('transforms alertingTaskLegacyIdToSavedObjectIds', () => {
       const migration800 = getMigrations()['8.0.0'];
       const taskInstance = getMockData({
