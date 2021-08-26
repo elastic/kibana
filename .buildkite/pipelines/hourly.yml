@@ -13,7 +13,7 @@ steps:
 
   - command: .buildkite/scripts/steps/functional/xpack_cigroup.sh
     label: 'Default CI Group'
-    parallelism: 1 # TODO 13
+    parallelism: 13 # TODO 13
     agents:
       queue: ci-group-6
     artifact_paths: target/junit/**/*.xml
@@ -38,7 +38,7 @@ steps:
 
   - command: .buildkite/scripts/steps/functional/oss_cigroup.sh
     label: 'OSS CI Group'
-    parallelism: 1 # TODO 12
+    parallelism: 12 # TODO 12
     agents:
       queue: ci-group-4d
     artifact_paths: target/junit/**/*.xml
