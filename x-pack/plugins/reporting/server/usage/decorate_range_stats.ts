@@ -9,10 +9,13 @@ import { uniq } from 'lodash';
 import {
   CSV_JOB_TYPE,
   CSV_JOB_TYPE_DEPRECATED,
+  DEPRECATED_JOB_TYPES,
   PDF_JOB_TYPE,
   PNG_JOB_TYPE,
 } from '../../common/constants';
 import { AvailableTotal, ExportType, FeatureAvailabilityMap, RangeStats } from './types';
+
+const jobTypeIsDeprecated = (jobType: string) => DEPRECATED_JOB_TYPES.includes(jobType);
 
 function getForFeature(
   range: Partial<RangeStats>,
@@ -21,7 +24,7 @@ function getForFeature(
   additional?: any
 ): AvailableTotal & typeof additional {
   const isAvailable = (feature: ExportType) => !!featureAvailability[feature];
-  const jobType = range[typeKey] || { total: 0, ...additional };
+  const jobType = range[typeKey] || { total: 0, ...additional, deprecated: 0 };
 
   // merge the additional stats for the jobType
   type AdditionalType = { [K in keyof typeof additional]: K };
@@ -32,9 +35,13 @@ function getForFeature(
     });
   }
 
+  // if the type itself is deprecated, all jobs are deprecated, otherwise only some of them might be
+  const deprecated = jobTypeIsDeprecated(typeKey) ? jobType.total : jobType.deprecated || 0;
+
   return {
     available: isAvailable(typeKey),
     total: jobType.total,
+    deprecated,
     ...filledAdditional,
   };
 }

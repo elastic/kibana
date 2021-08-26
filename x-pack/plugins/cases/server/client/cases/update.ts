@@ -12,6 +12,7 @@ import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
 import {
+  Logger,
   SavedObject,
   SavedObjectsClientContract,
   SavedObjectsFindResponse,
@@ -307,12 +308,14 @@ async function updateAlerts({
   caseService,
   unsecuredSavedObjectsClient,
   casesClientInternal,
+  logger,
 }: {
   casesWithSyncSettingChangedToOn: UpdateRequestWithOriginalCase[];
   casesWithStatusChangedAndSynced: UpdateRequestWithOriginalCase[];
   caseService: CasesService;
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
   casesClientInternal: CasesClientInternal;
+  logger: Logger;
 }) {
   /**
    * It's possible that a case ID can appear multiple times in each array. I'm intentionally placing the status changes
@@ -361,7 +364,9 @@ async function updateAlerts({
     []
   );
 
-  await casesClientInternal.alerts.updateStatus({ alerts: alertsToUpdate });
+  await casesClientInternal.alerts.updateStatus({
+    alerts: alertsToUpdate,
+  });
 }
 
 function partitionPatchRequest(
@@ -562,15 +567,6 @@ export const update = async (
       );
     });
 
-    // Update the alert's status to match any case status or sync settings changes
-    await updateAlerts({
-      casesWithStatusChangedAndSynced,
-      casesWithSyncSettingChangedToOn,
-      caseService,
-      unsecuredSavedObjectsClient,
-      casesClientInternal,
-    });
-
     const returnUpdatedCase = myCases.saved_objects
       .filter((myCase) =>
         updatedCases.saved_objects.some((updatedCase) => updatedCase.id === myCase.id)
@@ -596,6 +592,17 @@ export const update = async (
         actionDate: updatedDt,
         actionBy: { email, full_name, username },
       }),
+    });
+
+    // Update the alert's status to match any case status or sync settings changes
+    // Attempt to do this after creating/changing the other entities just in case it fails
+    await updateAlerts({
+      casesWithStatusChangedAndSynced,
+      casesWithSyncSettingChangedToOn,
+      caseService,
+      unsecuredSavedObjectsClient,
+      casesClientInternal,
+      logger,
     });
 
     return CasesResponseRt.encode(returnUpdatedCase);

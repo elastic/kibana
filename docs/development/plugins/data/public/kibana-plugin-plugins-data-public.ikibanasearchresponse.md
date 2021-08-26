@@ -21,4 +21,5 @@ export interface IKibanaSearchResponse<RawResponse = any>
 |  [loaded](./kibana-plugin-plugins-data-public.ikibanasearchresponse.loaded.md) | <code>number</code> | If relevant to the search strategy, return a loaded number that represents how progress is indicated. |
 |  [rawResponse](./kibana-plugin-plugins-data-public.ikibanasearchresponse.rawresponse.md) | <code>RawResponse</code> | The raw response returned by the internal search method (usually the raw ES response) |
 |  [total](./kibana-plugin-plugins-data-public.ikibanasearchresponse.total.md) | <code>number</code> | If relevant to the search strategy, return a total number that represents how progress is indicated. |
+|  [warning](./kibana-plugin-plugins-data-public.ikibanasearchresponse.warning.md) | <code>string</code> | Optional warnings that should be surfaced to the end user |
 

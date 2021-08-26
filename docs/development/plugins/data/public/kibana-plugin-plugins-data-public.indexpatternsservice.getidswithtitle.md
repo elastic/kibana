@@ -9,8 +9,5 @@ Get list of index pattern ids with titles
 <b>Signature:</b>
 
 ```typescript
-getIdsWithTitle: (refresh?: boolean) => Promise<Array<{
-        id: string;
-        title: string;
-    }>>;
+getIdsWithTitle: (refresh?: boolean) => Promise<IndexPatternListItem[]>;
 ```

@@ -25,13 +25,13 @@ export declare class IndexPatternsService
 |  [fieldArrayToMap](./kibana-plugin-plugins-data-public.indexpatternsservice.fieldarraytomap.md) |  | <code>(fields: FieldSpec[], fieldAttrs?: FieldAttrs &#124; undefined) =&gt; Record&lt;string, FieldSpec&gt;</code> | Converts field array to map |
 |  [find](./kibana-plugin-plugins-data-public.indexpatternsservice.find.md) |  | <code>(search: string, size?: number) =&gt; Promise&lt;IndexPattern[]&gt;</code> | Find and load index patterns by title |
 |  [get](./kibana-plugin-plugins-data-public.indexpatternsservice.get.md) |  | <code>(id: string) =&gt; Promise&lt;IndexPattern&gt;</code> | Get an index pattern by id. Cache optimized |
-|  [getCache](./kibana-plugin-plugins-data-public.indexpatternsservice.getcache.md) |  | <code>() =&gt; Promise&lt;SavedObject&lt;IndexPatternSavedObjectAttrs&gt;[] &#124; null &#124; undefined&gt;</code> |  |
+|  [getCache](./kibana-plugin-plugins-data-public.indexpatternsservice.getcache.md) |  | <code>() =&gt; Promise&lt;SavedObject&lt;Pick&lt;IndexPatternAttributes, &quot;type&quot; &#124; &quot;title&quot; &#124; &quot;typeMeta&quot;&gt;&gt;[] &#124; null &#124; undefined&gt;</code> |  |
 |  [getDefault](./kibana-plugin-plugins-data-public.indexpatternsservice.getdefault.md) |  | <code>() =&gt; Promise&lt;IndexPattern &#124; null&gt;</code> | Get default index pattern |
 |  [getDefaultId](./kibana-plugin-plugins-data-public.indexpatternsservice.getdefaultid.md) |  | <code>() =&gt; Promise&lt;string &#124; null&gt;</code> | Get default index pattern id |
 |  [getFieldsForIndexPattern](./kibana-plugin-plugins-data-public.indexpatternsservice.getfieldsforindexpattern.md) |  | <code>(indexPattern: IndexPattern &#124; IndexPatternSpec, options?: GetFieldsOptions &#124; undefined) =&gt; Promise&lt;any&gt;</code> | Get field list by providing an index patttern (or spec) |
 |  [getFieldsForWildcard](./kibana-plugin-plugins-data-public.indexpatternsservice.getfieldsforwildcard.md) |  | <code>(options: GetFieldsOptions) =&gt; Promise&lt;any&gt;</code> | Get field list by providing { pattern } |
 |  [getIds](./kibana-plugin-plugins-data-public.indexpatternsservice.getids.md) |  | <code>(refresh?: boolean) =&gt; Promise&lt;string[]&gt;</code> | Get list of index pattern ids |
-|  [getIdsWithTitle](./kibana-plugin-plugins-data-public.indexpatternsservice.getidswithtitle.md) |  | <code>(refresh?: boolean) =&gt; Promise&lt;Array&lt;{</code><br/><code>        id: string;</code><br/><code>        title: string;</code><br/><code>    }&gt;&gt;</code> | Get list of index pattern ids with titles |
+|  [getIdsWithTitle](./kibana-plugin-plugins-data-public.indexpatternsservice.getidswithtitle.md) |  | <code>(refresh?: boolean) =&gt; Promise&lt;IndexPatternListItem[]&gt;</code> | Get list of index pattern ids with titles |
 |  [getTitles](./kibana-plugin-plugins-data-public.indexpatternsservice.gettitles.md) |  | <code>(refresh?: boolean) =&gt; Promise&lt;string[]&gt;</code> | Get list of index pattern titles |
 |  [refreshFields](./kibana-plugin-plugins-data-public.indexpatternsservice.refreshfields.md) |  | <code>(indexPattern: IndexPattern) =&gt; Promise&lt;void&gt;</code> | Refresh field list for a given index pattern |
 |  [savedObjectToSpec](./kibana-plugin-plugins-data-public.indexpatternsservice.savedobjecttospec.md) |  | <code>(savedObject: SavedObject&lt;IndexPatternAttributes&gt;) =&gt; IndexPatternSpec</code> | Converts index pattern saved object to index pattern spec |
@@ -45,5 +45,6 @@ export declare class IndexPatternsService
 |  [createAndSave(spec, override, skipFetchFields)](./kibana-plugin-plugins-data-public.indexpatternsservice.createandsave.md) |  | Create a new index pattern and save it right away |
 |  [createSavedObject(indexPattern, override)](./kibana-plugin-plugins-data-public.indexpatternsservice.createsavedobject.md) |  | Save a new index pattern |
 |  [delete(indexPatternId)](./kibana-plugin-plugins-data-public.indexpatternsservice.delete.md) |  | Deletes an index pattern from .kibana index |
+|  [hasUserIndexPattern()](./kibana-plugin-plugins-data-public.indexpatternsservice.hasuserindexpattern.md) |  | Checks if current user has a user created index pattern ignoring fleet's server default index patterns |
 |  [updateSavedObject(indexPattern, saveAttempts, ignoreErrors)](./kibana-plugin-plugins-data-public.indexpatternsservice.updatesavedobject.md) |  | Save existing index pattern. Will attempt to merge differences if there are conflicts |
 

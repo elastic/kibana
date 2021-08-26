@@ -12,12 +12,12 @@ import React, { Fragment } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import type { ShareToSpaceTarget } from '../../types';
+import type { SpacesDataEntry } from '../../types';
 import type { ShareOptions } from '../types';
 import { ShareModeControl } from './share_mode_control';
 
 interface Props {
-  spaces: ShareToSpaceTarget[];
+  spaces: SpacesDataEntry[];
   objectNoun: string;
   onUpdate: (shareOptions: ShareOptions) => void;
   shareOptions: ShareOptions;

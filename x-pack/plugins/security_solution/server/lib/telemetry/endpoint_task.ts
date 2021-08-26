@@ -25,6 +25,7 @@ import {
   EndpointPolicyResponseAggregation,
   EndpointPolicyResponseDocument,
 } from './types';
+import { TELEMETRY_CHANNEL_ENDPOINT_META } from './constants';
 
 export const TelemetryEndpointTaskConstants = {
   TIMEOUT: '5m',
@@ -326,7 +327,7 @@ export class TelemetryEndpointTask {
        * Send the documents in a batches of 100
        */
       batchTelemetryRecords(telemetryPayloads, 100).forEach((telemetryBatch) =>
-        this.sender.sendOnDemand('endpoint-metadata', telemetryBatch)
+        this.sender.sendOnDemand(TELEMETRY_CHANNEL_ENDPOINT_META, telemetryBatch)
       );
       return telemetryPayloads.length;
     } catch (err) {

@@ -20,6 +20,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await reportingAPI.createTestReportingUser();
     });
 
+    loadTestFile(require.resolve('./bwc_generation_urls'));
     loadTestFile(require.resolve('./bwc_existing_indexes'));
     loadTestFile(require.resolve('./security_roles_privileges'));
     loadTestFile(require.resolve('./download_csv_dashboard'));
@@ -28,5 +29,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./spaces'));
     loadTestFile(require.resolve('./usage'));
     loadTestFile(require.resolve('./ilm_migration_apis'));
+    loadTestFile(require.resolve('./search_frozen_indices'));
   });
 }

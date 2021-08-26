@@ -149,4 +149,8 @@ export class Legacy {
     }
     return Legacy._shims;
   }
+
+  public static isInitializated(): boolean {
+    return Boolean(Legacy._shims);
+  }
 }

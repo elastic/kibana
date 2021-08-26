@@ -15,6 +15,8 @@ import { GenericEndpointInlineEditableTable } from '../../../../shared/tables/ge
 
 import { mountWithIntl } from '../../../../test_helpers';
 
+import { CrawlerDomain } from '../types';
+
 import { EntryPointsTable } from './entry_points_table';
 
 describe('EntryPointsTable', () => {
@@ -23,7 +25,7 @@ describe('EntryPointsTable', () => {
     { id: '1', value: '/whatever' },
     { id: '2', value: '/foo' },
   ];
-  const domain = {
+  const domain: CrawlerDomain = {
     createdOn: '2018-01-01T00:00:00.000Z',
     documentCount: 10,
     id: '6113e1407a2f2e6f42489794',
@@ -31,6 +33,9 @@ describe('EntryPointsTable', () => {
     crawlRules: [],
     entryPoints,
     sitemaps: [],
+    deduplicationEnabled: true,
+    deduplicationFields: ['title'],
+    availableDeduplicationFields: ['title', 'description'],
   };
 
   beforeEach(() => {

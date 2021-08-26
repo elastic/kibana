@@ -58,4 +58,11 @@ describe('SourcesRouter', () => {
     );
     expect(wrapper.find(Redirect).last().prop('to')).toEqual(PERSONAL_SOURCES_PATH);
   });
+
+  it('does not render the router until canCreatePersonalSources is fetched', () => {
+    setMockValues({ ...mockValues, account: {} }); // canCreatePersonalSources is undefined
+    const wrapper = shallow(<SourcesRouter />);
+
+    expect(wrapper.html()).toEqual(null);
+  });
 });

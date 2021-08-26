@@ -8,6 +8,7 @@
 import React from 'react';
 import { renderHook, act } from '@testing-library/react-hooks';
 import { useUserInfo, ManageUserInfo } from './index';
+import { Capabilities } from 'src/core/public';
 
 import { useKibana } from '../../../common/lib/kibana';
 import * as api from '../../containers/detection_engine/alerts/api';
@@ -46,6 +47,7 @@ describe('useUserInfo', () => {
         hasIndexManage: null,
         hasIndexMaintenance: null,
         hasIndexWrite: null,
+        hasIndexRead: null,
         hasIndexUpdateDelete: null,
         isAuthenticated: null,
         isSignalIndexExists: null,
@@ -65,7 +67,11 @@ describe('useUserInfo', () => {
     });
     const wrapper = ({ children }: { children: JSX.Element }) => (
       <TestProviders>
-        <UserPrivilegesProvider>
+        <UserPrivilegesProvider
+          kibanaCapabilities={
+            ({ siem: { crud_alerts: true, read_alerts: true } } as unknown) as Capabilities
+          }
+        >
           <ManageUserInfo>{children}</ManageUserInfo>
         </UserPrivilegesProvider>
       </TestProviders>

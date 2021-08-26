@@ -42,7 +42,7 @@ export class BasePath {
   /**
    * returns `basePath` value, specific for an incoming request.
    */
-  public get = (request: KibanaRequest | LegacyRequest) => {
+  public get = (request: KibanaRequest) => {
     const requestScopePath = this.basePathCache.get(ensureRawRequest(request)) || '';
     return `${this.serverBasePath}${requestScopePath}`;
   };
@@ -52,7 +52,7 @@ export class BasePath {
    *
    * @privateRemarks should work only for KibanaRequest as soon as spaces migrate to NP
    */
-  public set = (request: KibanaRequest | LegacyRequest, requestSpecificBasePath: string) => {
+  public set = (request: KibanaRequest, requestSpecificBasePath: string) => {
     const rawRequest = ensureRawRequest(request);
 
     if (this.basePathCache.has(rawRequest)) {

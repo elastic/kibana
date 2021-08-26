@@ -24,6 +24,7 @@ import type {
   DataPublicPluginSetup,
   DataPublicPluginStart,
 } from '../../../../src/plugins/data/public';
+import type { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
 import type {
   HomePublicPluginSetup,
   HomePublicPluginStart,
@@ -52,6 +53,7 @@ export interface ObservabilityPublicPluginsSetup {
 
 export interface ObservabilityPublicPluginsStart {
   cases: CasesUiStart;
+  embeddable: EmbeddableStart;
   home?: HomePublicPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   data: DataPublicPluginStart;
@@ -164,24 +166,10 @@ export class Plugin
         title: i18n.translate('xpack.observability.featureCatalogueTitle', {
           defaultMessage: 'Observability',
         }),
-        subtitle: i18n.translate('xpack.observability.featureCatalogueSubtitle', {
-          defaultMessage: 'Centralize & monitor',
-        }),
         description: i18n.translate('xpack.observability.featureCatalogueDescription', {
           defaultMessage:
             'Consolidate your logs, metrics, application traces, and system availability with purpose-built UIs.',
         }),
-        appDescriptions: [
-          i18n.translate('xpack.observability.featureCatalogueDescription1', {
-            defaultMessage: 'Monitor infrastructure metrics.',
-          }),
-          i18n.translate('xpack.observability.featureCatalogueDescription2', {
-            defaultMessage: 'Trace application requests.',
-          }),
-          i18n.translate('xpack.observability.featureCatalogueDescription3', {
-            defaultMessage: 'Measure SLAs and react to issues.',
-          }),
-        ],
         icon: 'logoObservability',
         path: '/app/observability/',
         order: 200,

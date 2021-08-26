@@ -25,8 +25,8 @@ const NoMatchStatusMessage = (allIndicesLength: number) => (
   <span>
     <FormattedMessage
       id="indexPatternEditor.status.notMatchLabel.notMatchDetail"
-      defaultMessage="The index pattern you've entered doesn't match any indices, data streams, or index aliases.
-  You can match {strongIndices}, below."
+      defaultMessage="The index pattern you entered doesn't match any data streams, indices, or index aliases.
+  You can match {strongIndices}."
       values={{
         strongIndices: (
           <strong>
@@ -49,7 +49,7 @@ const NoMatchNoIndicesStatusMessage = () => (
   <span>
     <FormattedMessage
       id="indexPatternEditor.status.notMatchLabel.notMatchNoIndicesDetail"
-      defaultMessage="The index pattern you've entered doesn't match any indices."
+      defaultMessage="The index pattern you entered doesn't match any data streams, indices, or index aliases."
     />
   </span>
 );
@@ -75,9 +75,9 @@ export const StatusMessage: React.FC<StatusMessageProps> = ({
         <span>
           <FormattedMessage
             id="indexPatternEditor.status.matchAnyLabel.matchAnyDetail"
-            defaultMessage="Your index pattern has {sourceCount, plural,
-              one {# match}
-              other {# matches}
+            defaultMessage="Your index pattern can match {sourceCount, plural,
+              one {# source}
+              other {# sources}
             }."
             values={{ sourceCount: allIndicesLength }}
           />
@@ -88,7 +88,7 @@ export const StatusMessage: React.FC<StatusMessageProps> = ({
         <span>
           <FormattedMessage
             id="indexPatternEditor.status.noSystemIndicesWithPromptLabel"
-            defaultMessage="No Elasticsearch indices match your pattern."
+            defaultMessage="No data streams, indices, or index aliases match your index pattern."
           />
         </span>
       );
@@ -97,7 +97,7 @@ export const StatusMessage: React.FC<StatusMessageProps> = ({
         <span>
           <FormattedMessage
             id="indexPatternEditor.status.noSystemIndicesLabel"
-            defaultMessage="No Elasticsearch indices match your pattern."
+            defaultMessage="No data streams, indices, or index aliases match your index pattern."
           />
         </span>
       );
@@ -127,7 +127,7 @@ export const StatusMessage: React.FC<StatusMessageProps> = ({
       <span>
         <FormattedMessage
           id="indexPatternEditor.status.partialMatchLabel.partialMatchDetail"
-          defaultMessage="Your index pattern doesn't match any sources, but you have {strongIndices} which
+          defaultMessage="Your index pattern doesn't match any data streams, indices, or index aliases, but {strongIndices}
           {matchedIndicesLength, plural,
             one {is}
             other {are}

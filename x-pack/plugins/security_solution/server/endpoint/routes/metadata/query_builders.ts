@@ -6,9 +6,9 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
+import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { metadataCurrentIndexPattern } from '../../../../common/endpoint/constants';
 import { KibanaRequest } from '../../../../../../../src/core/server';
-import { esKuery } from '../../../../../../../src/plugins/data/server';
 import { EndpointAppContext } from '../../types';
 
 export interface QueryBuilderOptions {
@@ -123,9 +123,7 @@ function buildQueryBody(
   };
 
   if (request?.body?.filters?.kql) {
-    const kqlQuery = esKuery.toElasticsearchQuery(
-      esKuery.fromKueryExpression(request.body.filters.kql)
-    );
+    const kqlQuery = toElasticsearchQuery(fromKueryExpression(request.body.filters.kql));
     const q = [];
     if (filterUnenrolledAgents || filterStatusAgents) {
       q.push(idFilter);

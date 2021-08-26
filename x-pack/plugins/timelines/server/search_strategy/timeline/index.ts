@@ -9,17 +9,6 @@ import { ALERT_RULE_CONSUMER, ALERT_RULE_TYPE_ID, SPACE_IDS } from '@kbn/rule-da
 import { map, mergeMap, catchError } from 'rxjs/operators';
 import { from } from 'rxjs';
 
-import type {
-  AlertConsumers,
-  mapConsumerToIndexName as mapConsumerToIndexNameTyped,
-  isValidFeatureId as isValidFeatureIdTyped,
-} from '@kbn/rule-data-utils';
-import {
-  mapConsumerToIndexName as mapConsumerToIndexNameNonTyped,
-  isValidFeatureId as isValidFeatureIdNonTyped,
-  // @ts-expect-error
-} from '@kbn/rule-data-utils/target_node/alerts_as_data_rbac';
-
 import {
   AlertingAuthorizationEntity,
   AlertingAuthorizationFilterType,
@@ -44,9 +33,6 @@ import {
   ISearchOptions,
 } from '../../../../../../src/plugins/data/common';
 
-const mapConsumerToIndexName: typeof mapConsumerToIndexNameTyped = mapConsumerToIndexNameNonTyped;
-const isValidFeatureId: typeof isValidFeatureIdTyped = isValidFeatureIdNonTyped;
-
 export const timelineSearchStrategyProvider = <T extends TimelineFactoryQueryTypes>(
   data: PluginStart,
   alerting: AlertingPluginStartContract
@@ -58,7 +44,6 @@ export const timelineSearchStrategyProvider = <T extends TimelineFactoryQueryTyp
     search: (request, options, deps) => {
       const factoryQueryType = request.factoryQueryType;
       const entityType = request.entityType;
-      const alertConsumers = request.alertConsumers;
 
       if (factoryQueryType == null) {
         throw new Error('factoryQueryType is required');
@@ -66,13 +51,7 @@ export const timelineSearchStrategyProvider = <T extends TimelineFactoryQueryTyp
 
       const queryFactory: TimelineFactory<T> = timelineFactory[factoryQueryType];
 
-      if (alertConsumers != null && entityType != null && entityType === EntityType.ALERTS) {
-        const allFeatureIdsValid = alertConsumers.every((id) => isValidFeatureId(id));
-
-        if (!allFeatureIdsValid) {
-          throw new Error('An invalid alerts consumer feature id was provided');
-        }
-
+      if (entityType != null && entityType === EntityType.ALERTS) {
         return timelineAlertsSearchStrategy({
           es: esAsInternal,
           request,
@@ -80,7 +59,6 @@ export const timelineSearchStrategyProvider = <T extends TimelineFactoryQueryTyp
           deps,
           queryFactory,
           alerting,
-          alertConsumers: alertConsumers ?? [],
         });
       } else {
         return timelineSearchStrategy({ es, request, options, deps, queryFactory });
@@ -126,7 +104,6 @@ const timelineAlertsSearchStrategy = <T extends TimelineFactoryQueryTypes>({
   deps,
   queryFactory,
   alerting,
-  alertConsumers,
 }: {
   es: ISearchStrategy;
   request: TimelineStrategyRequestType<T>;
@@ -134,11 +111,10 @@ const timelineAlertsSearchStrategy = <T extends TimelineFactoryQueryTypes>({
   deps: SearchStrategyDependencies;
   alerting: AlertingPluginStartContract;
   queryFactory: TimelineFactory<T>;
-  alertConsumers: AlertConsumers[];
 }) => {
   // Based on what solution alerts you want to see, figures out what corresponding
   // index to query (ex: siem --> .alerts-security.alerts)
-  const indices = alertConsumers.flatMap((consumer) => `${mapConsumerToIndexName[consumer]}*`);
+  const indices = request.defaultIndex ?? request.indexType;
   const requestWithAlertsIndices = { ...request, defaultIndex: indices, indexName: indices };
 
   // Note: Alerts RBAC are built off of the alerting's authorization class, which

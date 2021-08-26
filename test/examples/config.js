@@ -21,6 +21,7 @@ export default async function ({ readConfigFile }) {
   );
 
   return {
+    rootTags: ['runOutsideOfCiGroups'],
     testFiles: [
       require.resolve('./hello_world'),
       require.resolve('./embeddables'),

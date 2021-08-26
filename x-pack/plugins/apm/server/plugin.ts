@@ -51,6 +51,10 @@ import {
   TRANSACTION_TYPE,
 } from '../common/elasticsearch_fieldnames';
 import { tutorialProvider } from './tutorial';
+import {
+  apmFailedTransactionsCorrelationsSearchStrategyProvider,
+  FAILED_TRANSACTIONS_CORRELATION_SEARCH_STRATEGY,
+} from './lib/search_strategies/failed_transactions_correlations';
 
 export class APMPlugin
   implements
@@ -118,7 +122,6 @@ export class APMPlugin
       componentTemplates: [
         {
           name: 'mappings',
-          version: 0,
           mappings: mappingFromFieldMap(
             {
               [SERVICE_NAME]: {
@@ -138,9 +141,6 @@ export class APMPlugin
           ),
         },
       ],
-      indexTemplate: {
-        version: 0,
-      },
     });
 
     const resourcePlugins = mapValues(plugins, (value, key) => {
@@ -219,13 +219,25 @@ export class APMPlugin
           coreStart.savedObjects.createInternalRepository()
         );
 
+        const includeFrozen = await coreStart.uiSettings
+          .asScopedToClient(savedObjectsClient)
+          .get(UI_SETTINGS.SEARCH_INCLUDE_FROZEN);
+
+        // Register APM latency correlations search strategy
         plugins.data.search.registerSearchStrategy(
           'apmCorrelationsSearchStrategy',
           apmCorrelationsSearchStrategyProvider(
             boundGetApmIndices,
-            await coreStart.uiSettings
-              .asScopedToClient(savedObjectsClient)
-              .get(UI_SETTINGS.SEARCH_INCLUDE_FROZEN)
+            includeFrozen
+          )
+        );
+
+        // Register APM failed transactions correlations search strategy
+        plugins.data.search.registerSearchStrategy(
+          FAILED_TRANSACTIONS_CORRELATION_SEARCH_STRATEGY,
+          apmFailedTransactionsCorrelationsSearchStrategyProvider(
+            boundGetApmIndices,
+            includeFrozen
           )
         );
       })();

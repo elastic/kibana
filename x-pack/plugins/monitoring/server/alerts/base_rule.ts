@@ -251,7 +251,7 @@ export class BaseRule {
       ? {
           timestamp: {
             format: 'epoch_millis',
-            gte: +new Date() - limit - this.ruleOptions.fetchClustersRange,
+            gte: String(+new Date() - limit - this.ruleOptions.fetchClustersRange),
           },
         }
       : undefined;

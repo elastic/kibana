@@ -9,17 +9,13 @@ import SemVer from 'semver/classes/semver';
 import { i18n } from '@kbn/i18n';
 import { Plugin, CoreSetup, PluginInitializerContext } from 'src/core/public';
 
-import { ManagementSetup } from '../../../../src/plugins/management/public';
-
+import { SetupDependencies, StartDependencies, AppServicesContext } from './types';
 import { Config } from '../common/config';
 
-interface Dependencies {
-  management: ManagementSetup;
-}
-
-export class UpgradeAssistantUIPlugin implements Plugin {
+export class UpgradeAssistantUIPlugin
+  implements Plugin<void, void, SetupDependencies, StartDependencies> {
   constructor(private ctx: PluginInitializerContext) {}
-  setup(coreSetup: CoreSetup, { management }: Dependencies) {
+  setup(coreSetup: CoreSetup<StartDependencies>, { management, cloud }: SetupDependencies) {
     const { enabled, readonly } = this.ctx.config.get<Config>();
 
     if (!enabled) {
@@ -45,7 +41,8 @@ export class UpgradeAssistantUIPlugin implements Plugin {
       title: pluginName,
       order: 1,
       async mount(params) {
-        const [coreStart] = await coreSetup.getStartServices();
+        const [coreStart, { discover, data }] = await coreSetup.getStartServices();
+        const services: AppServicesContext = { discover, data, cloud };
 
         const {
           chrome: { docTitle },
@@ -58,7 +55,8 @@ export class UpgradeAssistantUIPlugin implements Plugin {
           coreSetup,
           params,
           kibanaVersionInfo,
-          readonly
+          readonly,
+          services
         );
 
         return () => {

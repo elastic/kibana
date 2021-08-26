@@ -173,7 +173,9 @@ export const App = (props: {
                             timeRange: time,
                             attributes: getLensAttributes(props.defaultIndexPattern!, color),
                           },
-                          true
+                          {
+                            openInNewTab: true,
+                          }
                         );
                         // eslint-disable-next-line no-bitwise
                         const newColor = '#' + ((Math.random() * 0xffffff) << 0).toString(16);
@@ -195,7 +197,9 @@ export const App = (props: {
                             timeRange: time,
                             attributes: getLensAttributes(props.defaultIndexPattern!, color),
                           },
-                          false
+                          {
+                            openInNewTab: false,
+                          }
                         );
                       }}
                     >
