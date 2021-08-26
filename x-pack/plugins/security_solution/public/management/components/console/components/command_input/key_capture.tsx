@@ -51,7 +51,7 @@ export interface KeyCaptureProps {
       'key' | 'altKey' | 'ctrlKey' | 'keyCode' | 'metaKey' | 'repeat' | 'shiftKey'
     >;
   }) => void;
-  focusRef?: MutableRefObject<(() => void) | null>;
+  focusRef?: MutableRefObject<((force?: boolean) => void) | null>;
 }
 
 export const KeyCapture = memo<KeyCaptureProps>(({ onCapture, focusRef }) => {
@@ -93,7 +93,12 @@ export const KeyCapture = memo<KeyCaptureProps>(({ onCapture, focusRef }) => {
 
   const inputRef = useRef<HTMLInputElement | null>(null);
 
-  const setFocus = useCallback(() => {
+  const setFocus = useCallback((force: boolean = false) => {
+    // If user selected text and `force` is not true, then don't focus (else they lose selection)
+    if (!force && (window.getSelection()?.toString() ?? '').length > 0) {
+      return;
+    }
+
     inputRef.current?.focus();
   }, []);
 

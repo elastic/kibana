@@ -41,6 +41,11 @@ export const Console = memo<ConsoleProps>(({ prompt }) => {
   const consoleService = useConsoleService();
   const [historyItems, setHistoryItems] = useState<HistoryItemComponent[]>([]);
   const consoleWindowRef = useRef<HTMLDivElement | null>(null);
+  const inputFocusRef: CommandInputProps['focusRef'] = useRef(null);
+
+  const handleConsoleClick = useCallback(() => {
+    inputFocusRef?.current();
+  }, []);
 
   const handleOnExecute = useCallback<CommandInputProps['onExecute']>(
     (commandInput) => {
@@ -110,6 +115,9 @@ export const Console = memo<ConsoleProps>(({ prompt }) => {
         });
         return;
       }
+
+      // FIXME:PT Implement support for a `--help` built in argument for all commands
+      //        This Would output the help for only that command (usage ++ description of each argument)
 
       // If args were entered, then validate them
       if (parsedInput.hasArgs()) {
@@ -196,16 +204,18 @@ export const Console = memo<ConsoleProps>(({ prompt }) => {
 
   return (
     <EuiThemeProvider darkMode={true}>
-      <ConsoleWindow panelRef={consoleWindowRef}>
-        <EuiFlexGroup direction="column">
-          <EuiFlexItem grow={true}>
-            <OutputHistory>{historyItems}</OutputHistory>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <CommandInput onExecute={handleOnExecute} prompt={prompt} />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </ConsoleWindow>
+      <div onClick={handleConsoleClick}>
+        <ConsoleWindow panelRef={consoleWindowRef}>
+          <EuiFlexGroup direction="column">
+            <EuiFlexItem grow={true}>
+              <OutputHistory>{historyItems}</OutputHistory>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <CommandInput onExecute={handleOnExecute} prompt={prompt} focusRef={inputFocusRef} />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </ConsoleWindow>
+      </div>
     </EuiThemeProvider>
   );
 });

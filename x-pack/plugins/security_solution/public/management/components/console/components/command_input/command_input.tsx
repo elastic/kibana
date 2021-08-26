@@ -44,26 +44,24 @@ export interface CommandInputProps extends CommonProps {
   onExecute: (command: { input: string }) => void;
   prompt?: string;
   isWaiting?: boolean;
+  focusRef?: KeyCaptureProps['focusRef'];
 }
 
 export const CommandInput = memo<CommandInputProps>(
-  ({ prompt = '>', onExecute, ...commonProps }) => {
+  ({ prompt = '>', onExecute, focusRef, ...commonProps }) => {
     // TODO:PT Support having a "console not focused" mode where the cursor will not blink
 
     const [textEntered, setTextEntered] = useState<string>('');
-    const focusRef: KeyCaptureProps['focusRef'] = useRef(null);
+    const _focusRef: KeyCaptureProps['focusRef'] = useRef(null);
     const textDisplayRef = useRef<HTMLDivElement | null>(null);
+
+    const keyCaptureFocusRef = focusRef || _focusRef;
 
     const handleTypingAreaClick = useCallback<MouseEventHandler>((ev) => {
       // FIXME:PT move this to the entire console window, so that clicking it focuses the cursor
 
-      // If user selected text, then don't focus (else they lose selection)
-      if ((window.getSelection()?.toString() ?? '').length > 0) {
-        return;
-      }
-
-      if (focusRef.current) {
-        focusRef.current();
+      if (keyCaptureFocusRef.current) {
+        keyCaptureFocusRef.current();
       }
     }, []);
 
@@ -114,7 +112,7 @@ export const CommandInput = memo<CommandInputProps>(
             <span className="cursor" />
           </EuiFlexItem>
         </EuiFlexGroup>
-        <KeyCapture onCapture={handleKeyCapture} focusRef={focusRef} />
+        <KeyCapture onCapture={handleKeyCapture} focusRef={keyCaptureFocusRef} />
       </CommandInputContainer>
     );
   }
