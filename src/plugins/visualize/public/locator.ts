@@ -34,10 +34,6 @@ export type VisualizeLocatorParams = {
 
   vis?: SerializableRecord;
 
-  forceNow?: string;
-
-  searchSourceFields?: SerializableRecord;
-
   linked?: boolean;
 };
 
@@ -46,7 +42,7 @@ export type VisualizeAppLocator = LocatorPublic<VisualizeLocatorParams>;
 export const VISUALIZE_APP_LOCATOR = 'VISUALIZE_APP_LOCATOR';
 
 export class VisualizeLocatorDefinition implements LocatorDefinition<VisualizeLocatorParams> {
-  constructor(private readonly deps: { useHash: boolean }) {}
+  constructor() {}
 
   id = VISUALIZE_APP_LOCATOR;
 
@@ -58,24 +54,6 @@ export class VisualizeLocatorDefinition implements LocatorDefinition<VisualizeLo
     path = params.type ? `${path}?type=${params.type}` : path;
 
     path = setStateToKbnUrl(
-      '_a',
-      omitBy(
-        {
-          linked: params.linked,
-          time: params.timeRange,
-          filters: params.filters?.filter((f) => !esFilters.isFilterPinned(f)),
-          uiState: params.uiState,
-          query: params.query,
-          vis: params.vis,
-          refreshInterval: params.refreshInterval,
-        },
-        (v) => v == null
-      ),
-      { useHash: this.deps.useHash },
-      path
-    );
-
-    path = setStateToKbnUrl(
       '_g',
       omitBy(
         {
@@ -85,7 +63,23 @@ export class VisualizeLocatorDefinition implements LocatorDefinition<VisualizeLo
         },
         (v) => v == null
       ),
-      { useHash: this.deps.useHash },
+      { useHash: false },
+      path
+    );
+
+    path = setStateToKbnUrl(
+      '_a',
+      omitBy(
+        {
+          linked: params.linked,
+          filters: params.filters?.filter((f) => !esFilters.isFilterPinned(f)),
+          uiState: params.uiState,
+          query: params.query,
+          vis: params.vis,
+        },
+        (v) => v == null
+      ),
+      { useHash: false },
       path
     );
 

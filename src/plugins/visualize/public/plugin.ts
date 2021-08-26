@@ -244,11 +244,7 @@ export class VisualizePlugin
     }
 
     if (share) {
-      share.url.locators.create(
-        new VisualizeLocatorDefinition({
-          useHash: core.uiSettings.get('state:storeInSessionStorage'),
-        })
-      );
+      share.url.locators.create(new VisualizeLocatorDefinition());
     }
 
     return {
