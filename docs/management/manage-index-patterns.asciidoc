@@ -7,9 +7,9 @@ To customize the data fields in your index pattern, you can add runtime fields t
 [[runtime-fields]]
 === Explore your data with runtime fields 
 
-Runtime fields are fields that you add to documents after you've ingested, and are evaluated at query time. With runtime fields, you allow for a smaller index and faster ingest time so that you can use less resources and reduce your operating costs. You can use runtime fields anywhere index patterns are used.
+Runtime fields are fields that you add to documents after you've ingested your data, and are evaluated at query time. With runtime fields, you allow for a smaller index and faster ingest time so that you can use less resources and reduce your operating costs. You can use runtime fields anywhere index patterns are used.
 
-When you use runtime fields, you can:
+With runtime fields, you can:
 
 * Define fields for a specific use without modifying the underlying schema. 
 
@@ -21,46 +21,52 @@ When you use runtime fields, you can:
 
 * Explore runtime field data in *Discover*.
 
-* Create visualizations with runtime field data using *Lens*, *Maps*, and *TSVB*.
+* Create visualizations with runtime field data to display on a dashboard.
 
 WARNING: Runtime fields can impact {kib} performance. When you run a query, {es} uses the fields you index first to shorten the response time. 
 Index the fields that you commonly search for and filter on, such as `timestamp`, then use runtime fields to limit the number of fields {es} uses to calculate values. 
 
-For more information, refer to {ref}/runtime.html[Runtime fields].
+For detailed information on how to use runtime fields with {es}, refer to {ref}/runtime.html[Runtime fields].
 
 [float]
 [[create-runtime-fields]]
-==== Create runtime fields
+==== Add runtime fields
 
-Create runtime fields in your index patterns, or create runtime fields in *Discover* and *Lens*. 
+To add runtime fields to your index patterns, you define the field values by emitting a single value using the {ref}/modules-scripting-painless.html[Painless scripting language]. You can also add runtime fields in <<add-field-in-discover,*Discover*>> and <<change-the-fields,*Lens*>>.
 
 . Open the main menu, then click *Stack Management > Index Patterns*.
 
 . Select the index pattern you want to add the runtime field to, then click *Add field*.
 
-. Enter a *Name* for the runtime field, then select the field *Type*.
+Define the field. 
 
-. Select *Set value*, then define the field value by emitting a single value using the {ref}/modules-scripting-painless.html[Painless scripting language].
-+
-The script must match the field *Type*, or the script fails.
+. Enter the *Name*, then select the *Type*.
+
+. Select *Set custom label* then enter the label you want to display in {kib} apps, such as *Discover*.
+
+. Select *Set value*, then define the script. The script must match the *Type*, or the index pattern fails anywhere it is used.
+
+To help you define the script, use the *Preview*.
+
+. To view the other documents that contain the field *Name*, use the *Document ID* arrows.
+
+. To filter the fields list, enter the keyword in *Filter fields*.
+
+. To pin your most used fields to the top of the fields list, hover over the field, then click image:images/stackManagement-indexPatterns-pinRuntimeField-7.15.png[Icon to pin field to the top of the list]
 
 . Click *Create field*.
-+
-For information on how to create runtime fields in *Discover*, refer to <<add-field-in-discover,Add a field>>.
-+
-For information on how to create runtime fields in *Lens*, refer to <<change-the-fields,Change the fields list>>.
 
 [float]
 [[runtime-field-examples]]
 ==== Runtime field examples
 
-Try the runtime field examples on your own using the *Sample web logs* data index pattern. 
+Try the runtime field examples on your own using the <<gs-get-data-into-kibana,*Sample web logs*>> data index pattern. 
 
 [float]
 [[simple-hello-world-example]]
 ==== Return a keyword value
 
-To return `Hello World!` value:
+Return a `Hello World!` value:
 
 [source,text]
 ----
@@ -101,7 +107,7 @@ emit("");
 [[replace-nulls-with-blanks]]
 ===== Replace nulls with blanks
 
-Replace null values with none values:
+Replace `null` values with `None` values:
 
 [source,text]
 ----
