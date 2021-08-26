@@ -171,7 +171,7 @@ export class SettingsPageObject extends FtrService {
       this.log.debug('We found and clicked on the timefield');
       const selectedValue = await this.testSubjects.getVisibleText('comboBoxInput');
       this.log.debug(`comboBoxInput: ${selectedValue}`);
-      return (selectedValue == selection);
+      return (selectedValue === selection);
     });
   }
 
