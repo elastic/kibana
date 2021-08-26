@@ -21,8 +21,6 @@ pageLoadAssetSize:
   embeddable: 242753
   embeddableEnhanced: 41145
   enterpriseSearch: 35741
-  esUiShared: 326798
-  expressions: 224120
   features: 21723
   fieldFormats: 92628
   globalSearch: 29696
@@ -69,9 +67,6 @@ pageLoadAssetSize:
   searchprofiler: 67080
   security: 95864
   securityOss: 30806
-  securitySolution: 217673
-  share: 99205
-  snapshotRestore: 79176
   spaces: 57868
   telemetry: 51957
   telemetryManagementSection: 38586
@@ -119,3 +114,8 @@ pageLoadAssetSize:
   expressionMetric: 22238
   expressionShape: 34008
   expressionTagcloud: 27505
+  esUiShared: 213076
+  expressions: 239282
+  securitySolution: 232514
+  share: 100298
+  snapshotRestore: 63225
