@@ -20,18 +20,6 @@ const value = 'foo';
 const props = { label, testSubj, value };
 
 describe('CredentialItem', () => {
-  const setState = jest.fn();
-  const useStateMock: any = (initState: any) => [initState, setState];
-
-  beforeEach(() => {
-    jest.spyOn(React, 'useState').mockImplementation(useStateMock);
-    setState(false);
-  });
-
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
-
   it('renders', () => {
     const wrapper = shallow(<CredentialItem {...props} />);
 
@@ -52,16 +40,15 @@ describe('CredentialItem', () => {
     expect(wrapper.find(EuiCopy)).toHaveLength(0);
   });
 
-  it.skip('handles credential visible toggle click', () => {
+  it('handles credential visible toggle click', () => {
     const wrapper = shallow(<CredentialItem {...props} hideCopy />);
     const button = wrapper.find(EuiButtonIcon).dive().find('button');
     button.simulate('click');
 
-    expect(setState).toHaveBeenCalled();
     expect(wrapper.find(EuiFieldText)).toHaveLength(1);
   });
 
-  it.skip('handles select all button click', () => {
+  it('handles select all button click', () => {
     const wrapper = shallow(<CredentialItem {...props} hideCopy />);
     // Toggle isVisible before EuiFieldText is visible
     const button = wrapper.find(EuiButtonIcon).dive().find('button');
