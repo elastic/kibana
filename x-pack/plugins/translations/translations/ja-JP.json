@@ -20170,7 +20170,6 @@
     "xpack.securitySolution.detectionEngine.createRule.QueryLabel": "カスタムクエリ",
     "xpack.securitySolution.detectionEngine.createRule.queryRuleTypeDescription": "クエリ",
     "xpack.securitySolution.detectionEngine.createRule.ruleActionsField.ruleActionsFormErrorsTitle": "次の一覧の問題を解決してください",
-    "xpack.securitySolution.detectionEngine.createRule.savedIdLabel": "保存されたクエリ名",
     "xpack.securitySolution.detectionEngine.createRule.stepAboutRule.descriptionFieldRequiredError": "説明が必要です。",
     "xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fiedIndexPatternsLabel": "インデックスパターン",
     "xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldAssociatedToEndpointListLabel": "既存のエンドポイント例外をルールに追加",
