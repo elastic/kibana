@@ -214,7 +214,8 @@ const transformControlColumns = ({
         rowIndex,
         setCellProps,
       }: EuiDataGridCellValueElementProps) => {
-        addBuildingBlockStyle(data[rowIndex].ecs, theme, setCellProps);
+        const rowData = data[rowIndex];
+        addBuildingBlockStyle(rowData.ecs, theme, setCellProps);
         let disabled = false;
         if (columnId === 'checkbox-control-column' && hasAlertsCrudPermissions != null) {
           // FUTURE ENGINEER, the assumption here is you can only have one producer and consumer at this time
