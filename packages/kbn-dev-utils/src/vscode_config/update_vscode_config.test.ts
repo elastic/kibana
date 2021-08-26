@@ -47,7 +47,8 @@ it('updates the passed JSON with the managed settings', () => {
      *   - bar
      *   - complex
      *
-     * To disable this place the text "// SELF MANAGED" at the top of this file.
+     * To disable this place the text "// SELF MANAGED" at the top of this file. To manage
+     * a specific setting place this comment directly before that key.
      */
     {
       "foo": 100,
@@ -71,7 +72,8 @@ it('initialized empty or undefined json values', () => {
      *   - bar
      *   - complex
      *
-     * To disable this place the text "// SELF MANAGED" at the top of this file.
+     * To disable this place the text "// SELF MANAGED" at the top of this file. To manage
+     * a specific setting place this comment directly before that key.
      */
     {
       "foo": 100,
@@ -93,7 +95,8 @@ it('initialized empty or undefined json values', () => {
      *   - bar
      *   - complex
      *
-     * To disable this place the text "// SELF MANAGED" at the top of this file.
+     * To disable this place the text "// SELF MANAGED" at the top of this file. To manage
+     * a specific setting place this comment directly before that key.
      */
     {
       "foo": 100,
@@ -139,7 +142,8 @@ it('persists comments in the original file', () => {
      *   - bar
      *   - complex
      *
-     * To disable this place the text "// SELF MANAGED" at the top of this file.
+     * To disable this place the text "// SELF MANAGED" at the top of this file. To manage
+     * a specific setting place this comment directly before that key.
      */
 
     /**
@@ -178,7 +182,8 @@ it('overrides old values for managed keys', () => {
      *   - bar
      *   - complex
      *
-     * To disable this place the text "// SELF MANAGED" at the top of this file.
+     * To disable this place the text "// SELF MANAGED" at the top of this file. To manage
+     * a specific setting place this comment directly before that key.
      */
     {
       "foo": 100,
@@ -205,5 +210,38 @@ it('does not modify files starting with // SELF MANAGED', () => {
     {
       "invalid": "I know what I am doing",
     }
+  `);
+});
+
+it('does not modify keys with leading `// SELF MANAGED` comment', () => {
+  const newJson = run(dedent`
+    {
+      "foo": 0,
+      // self managed
+      "bar": "custom value"
+    }
+  `);
+
+  expect(newJson).toMatchInlineSnapshot(`
+    /**
+     * @managed
+     *
+     * The following keys in this file are managed by @kbn/dev-utils:
+     *   - foo
+     *   - complex
+     *
+     * To disable this place the text "// SELF MANAGED" at the top of this file. To manage
+     * a specific setting place this comment directly before that key.
+     */
+    {
+      "foo": 100,
+      // self managed
+      "bar": "custom value",
+      "complex": {
+        "hello": true,
+        "world": [1, 2, 3]
+      }
+    }
+
   `);
 });
