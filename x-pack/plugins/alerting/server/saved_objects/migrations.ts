@@ -105,7 +105,7 @@ export function getMigrations(
     pipeMigrations(setLegacyId)
   );
 
-  const migrationActions800 = createEsoMigration(
+  const migrationRules800 = createEsoMigration(
     encryptedSavedObjects,
     (doc: SavedObjectUnsanitizedDoc<RawAlert>): doc is SavedObjectUnsanitizedDoc<RawAlert> => true,
     (doc) => doc // no-op
@@ -119,7 +119,7 @@ export function getMigrations(
     '7.14.1': executeMigrationWithErrorHandling(migrationSecurityRules714, '7.14.1'),
     '7.15.0': executeMigrationWithErrorHandling(migrationSecurityRules715, '7.15.0'),
     '7.16.0': executeMigrationWithErrorHandling(migrateLegacyIds716, '7.16.0'),
-    '8.0.0': executeMigrationWithErrorHandling(migrationActions800, '8.0.0'),
+    '8.0.0': executeMigrationWithErrorHandling(migrationRules800, '8.0.0'),
   };
 }
 
