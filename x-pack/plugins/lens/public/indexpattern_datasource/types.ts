@@ -6,10 +6,8 @@
  */
 
 import type { IndexPatternColumn, IncompleteColumn } from './operations';
-import type {
-  IndexPatternField as BaseIndexPatternField,
-  IndexPatternAggRestrictions,
-} from '../../../../../src/plugins/data/public';
+import type { IndexPatternAggRestrictions } from '../../../../../src/plugins/data/public';
+import type { FieldSpec } from '../../../../../src/plugins/data/common';
 import type { DragDropIdentifier } from '../drag_drop/providers';
 
 export {
@@ -59,7 +57,7 @@ export interface IndexPattern {
   hasRestrictions: boolean;
 }
 
-export type IndexPatternField = BaseIndexPatternField & {
+export type IndexPatternField = FieldSpec & {
   displayName: string;
   aggregationRestrictions?: Partial<IndexPatternAggRestrictions>;
   meta?: boolean;
