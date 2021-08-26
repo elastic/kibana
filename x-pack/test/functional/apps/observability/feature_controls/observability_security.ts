@@ -207,7 +207,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.observability.expectForbidden();
       });
 
-      it.skip(`create new case returns a 403`, async () => {
+      it(`create new case returns a 403`, async () => {
         await PageObjects.common.navigateToUrl('observabilityCases', 'create', {
           shouldUseHashForSubUrl: false,
         });

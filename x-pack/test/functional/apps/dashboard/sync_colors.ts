@@ -34,7 +34,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   }
 
   // FLAKY: https://github.com/elastic/kibana/issues/97403
-  describe.skip('sync colors', function () {
+  describe('sync colors', function () {
     before(async function () {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/lens/basic');

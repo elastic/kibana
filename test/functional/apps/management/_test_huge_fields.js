@@ -14,7 +14,7 @@ export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['common', 'home', 'settings']);
 
   // FLAKY: https://github.com/elastic/kibana/issues/89031
-  describe.skip('test large number of fields', function () {
+  describe('test large number of fields', function () {
     this.tags(['skipCloud']);
 
     const EXPECTED_FIELD_COUNT = '10006';

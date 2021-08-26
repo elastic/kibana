@@ -13,7 +13,7 @@ export default function ({ getService, getPageObjects }) {
   const log = getService('log');
 
   // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/96001
-  describe.skip('users', function () {
+  describe('users', function () {
     before(async () => {
       log.debug('users');
       await PageObjects.settings.navigateTo();

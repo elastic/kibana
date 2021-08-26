@@ -18,7 +18,7 @@ export default function ({ getService, getPageObjects }) {
   const testSubjects = getService('testSubjects');
 
   // FLAKY: https://github.com/elastic/kibana/issues/95376
-  describe.skip('runtime fields', function () {
+  describe('runtime fields', function () {
     this.tags(['skipFirefox']);
 
     before(async function () {

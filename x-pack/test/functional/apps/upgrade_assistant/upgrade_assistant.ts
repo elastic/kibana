@@ -40,11 +40,11 @@ export default function upgradeAssistantFunctionalTests({
       });
     });
 
-    it.skip('allows user to navigate to upgrade checkup', async () => {
+    it('allows user to navigate to upgrade checkup', async () => {
       await PageObjects.upgradeAssistant.navigateToPage();
     });
 
-    it.skip('allows user to toggle deprecation logging', async () => {
+    it('allows user to toggle deprecation logging', async () => {
       log.debug('expect initial state to be ON');
       expect(await PageObjects.upgradeAssistant.deprecationLoggingEnabledLabel()).to.be('On');
       expect(await PageObjects.upgradeAssistant.isDeprecationLoggingEnabled()).to.be(true);
@@ -67,7 +67,7 @@ export default function upgradeAssistantFunctionalTests({
       });
     });
 
-    it.skip('allows user to open cluster tab', async () => {
+    it('allows user to open cluster tab', async () => {
       await PageObjects.upgradeAssistant.navigateToPage();
       await PageObjects.upgradeAssistant.clickTab('cluster');
       expect(await PageObjects.upgradeAssistant.issueSummaryText()).to.be(
@@ -75,7 +75,7 @@ export default function upgradeAssistantFunctionalTests({
       );
     });
 
-    it.skip('allows user to open indices tab', async () => {
+    it('allows user to open indices tab', async () => {
       await PageObjects.upgradeAssistant.navigateToPage();
       await PageObjects.upgradeAssistant.clickTab('indices');
       expect(await PageObjects.upgradeAssistant.issueSummaryText()).to.be(

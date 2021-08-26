@@ -61,7 +61,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     // flaky https://github.com/elastic/kibana/issues/94889
-    it.skip('should show popover with expanded cell content by click on expand button', async () => {
+    it('should show popover with expanded cell content by click on expand button', async () => {
       log.debug('open popover with expanded cell content to get json from the editor');
       const documentCell = await dataGrid.getCellElement(1, 3);
       await documentCell.click();
@@ -105,7 +105,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
       // skipping for this backport because it's flaky, will resolve in master
-      it.skip('should show allow adding columns from the detail panel', async function () {
+      it('should show allow adding columns from the detail panel', async function () {
         await retry.try(async function () {
           await dataGrid.clickRowToggle({ isAnchorRow: false, rowIndex: rowToInspect - 1 });
           await dataGrid.getDetailsRows();
