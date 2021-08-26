@@ -168,7 +168,7 @@ const EmptyGrid: React.FC = () => {
                 size="200"
                 alt="observability overview image"
                 url={http!.basePath.prepend(
-                  '/plugins/timelines/assets/illustration-product-no-results-magnifying-glass.svg'
+                  '/plugins/timelines/assets/illustration_product_no_results_magnifying_glass.svg'
                 )}
               />
             </EuiFlexItem>
