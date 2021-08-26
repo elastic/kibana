@@ -4,8 +4,6 @@ set -euo pipefail
 
 source .buildkite/scripts/common/util.sh
 
-.buildkite/scripts/bootstrap.sh
-
 echo --- Build TS Refs
 checks-reporter-with-killswitch "Build TS Refs" \
   node scripts/build_ts_refs \

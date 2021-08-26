@@ -4,8 +4,6 @@ set -euo pipefail
 
 source .buildkite/scripts/common/util.sh
 
-.buildkite/scripts/bootstrap.sh
-
 echo --- Check Doc API Changes
 checks-reporter-with-killswitch "Check Doc API Changes" \
   node scripts/check_published_api_changes

@@ -4,8 +4,6 @@ set -euo pipefail
 
 source .buildkite/scripts/common/util.sh
 
-.buildkite/scripts/bootstrap.sh
-
 echo "--- Building kbn-pm distributable"
 yarn kbn run build -i @kbn/pm
 

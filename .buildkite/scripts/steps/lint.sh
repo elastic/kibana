@@ -4,8 +4,6 @@ set -euo pipefail
 
 .buildkite/scripts/bootstrap.sh
 
-# TODO linting
-
 echo '--- Lint: stylelint'
 node scripts/stylelint
 

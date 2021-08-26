@@ -4,8 +4,6 @@ set -euo pipefail
 
 source .buildkite/scripts/common/util.sh
 
-.buildkite/scripts/bootstrap.sh
-
 # Runs pre-commit hook script for the files touched in the last commit.
 # That way we can ensure a set of quick commit checks earlier as we removed
 # the pre-commit hook installation by default.
