@@ -659,17 +659,6 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
-    key: 'windows.advanced.memory_protection.shellcode_enhanced_pe_parsing',
-    first_supported_version: '7.15',
-    documentation: i18n.translate(
-      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.memory_protection.shellcode_enhanced_pe_parsing',
-      {
-        defaultMessage:
-          "A value of 'false' disables enhanced parsing of PEs found within shellcode payloads. Default: true.",
-      }
-    ),
-  },
-  {
     key: 'windows.advanced.memory_protection.shellcode',
     first_supported_version: '7.15',
     documentation: i18n.translate(
