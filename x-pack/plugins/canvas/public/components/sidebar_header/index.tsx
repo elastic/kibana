@@ -53,7 +53,7 @@ const createHandlers = function <T>(
   }, {} as Record<keyof T, (...args: any[]) => any>);
 };
 
-export const SidebarHeader2: React.FC<{ title: string }> = (props) => {
+export const SidebarHeader: React.FC<{ title: string }> = (props) => {
   const pageId = useSelector<State, string>((state) => getSelectedPage(state));
   const selectedNodes = useSelector<State, Array<string | undefined>>((state) =>
     getSelectedNodes(state, pageId)
@@ -84,14 +84,15 @@ export const SidebarHeader2: React.FC<{ title: string }> = (props) => {
     elementLayer: elementLayerDispatch,
   };
 
-  const basicHandlers = createHandlers(basicHandlerCreators, handlersContext);
-  const clipboardHandlers = createHandlers(clipboardHandlerCreators, handlersContext);
-  const layerHandlers = createHandlers(layerHandlerCreators, handlersContext);
-  const groupHandlers = createHandlers(groupHandlerCreators, handlersContext);
-  const alignmentDistributionHandlers = createHandlers(
-    alignmentDistributionHandlerCreators,
-    handlersContext
-  );
+  const handlersFactory = function <T>(handlers: Record<keyof T, (...args: any[]) => any>) {
+    return createHandlers(handlers, handlersContext);
+  };
+
+  const basicHandlers = handlersFactory(basicHandlerCreators);
+  const clipboardHandlers = handlersFactory(clipboardHandlerCreators);
+  const layerHandlers = handlersFactory(layerHandlerCreators);
+  const groupHandlers = handlersFactory(groupHandlerCreators);
+  const alignmentDistributionHandlers = handlersFactory(alignmentDistributionHandlerCreators);
 
   return (
     <Component
