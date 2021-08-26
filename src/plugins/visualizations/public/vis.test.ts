@@ -26,7 +26,7 @@ jest.mock('./services', () => {
   // eslint-disable-next-line
   const { SearchSource } = require('../../data/common/search/search_source');
   // eslint-disable-next-line
-  const fixturesStubbedLogstashIndexPatternProvider = require('./__fixtures__/stubbed_logstash_index_pattern');
+  const stubIndexPattern = require('../../data/common/stubs');
   const visType = new BaseVisType({
     name: 'pie',
     title: 'pie',
@@ -44,7 +44,7 @@ jest.mock('./services', () => {
     getSearch: () => ({
       searchSource: {
         create: () => {
-          return new SearchSource({ index: fixturesStubbedLogstashIndexPatternProvider });
+          return new SearchSource({ index: stubIndexPattern });
         },
       },
     }),
