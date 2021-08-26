@@ -652,22 +652,16 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
         const eventId = pageRowIndex < data.length ? data[pageRowIndex]._id : null;
         const ecs = pageRowIndex < data.length ? data[pageRowIndex].ecs : null;
 
-        const defaultStyles = useMemo(
-          () => ({
-            overflow: 'hidden',
-          }),
-          []
-        );
-        setCellProps({ style: { ...defaultStyles } });
-
         useEffect(() => {
+          const defaultStyles = { overflow: 'hidden' };
+          setCellProps({ style: { ...defaultStyles } });
           if (ecs && rowData) {
             addBuildingBlockStyle(ecs, theme, setCellProps, defaultStyles);
           } else {
             // disable the cell when it has no data
             setCellProps({ style: { display: 'none' } });
           }
-        }, [rowIndex, setCellProps, defaultStyles, ecs, rowData]);
+        }, [rowIndex, setCellProps, ecs, rowData]);
 
         if (rowData == null || header == null || eventId == null || ecs === null) {
           return null;
