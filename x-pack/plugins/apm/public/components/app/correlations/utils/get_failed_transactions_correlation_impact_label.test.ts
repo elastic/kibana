@@ -8,6 +8,20 @@
 import { getFailedTransactionsCorrelationImpactLabel } from './get_failed_transactions_correlation_impact_label';
 import { FAILED_TRANSACTIONS_IMPACT_THRESHOLD } from '../../../../../common/search_strategies/failure_correlations/constants';
 
+const EXPECTED_RESULT = {
+  HIGH: {
+    impact: FAILED_TRANSACTIONS_IMPACT_THRESHOLD.HIGH,
+    color: 'danger',
+  },
+  MEDIUM: {
+    impact: FAILED_TRANSACTIONS_IMPACT_THRESHOLD.MEDIUM,
+    color: 'warning',
+  },
+  LOW: {
+    impact: FAILED_TRANSACTIONS_IMPACT_THRESHOLD.LOW,
+    color: 'default',
+  },
+};
 describe('getFailedTransactionsCorrelationImpactLabel', () => {
   it('returns null if value is invalid ', () => {
     expect(getFailedTransactionsCorrelationImpactLabel(-0.03)).toBe(null);
@@ -21,32 +35,32 @@ describe('getFailedTransactionsCorrelationImpactLabel', () => {
   });
 
   it('returns High if value is within [0, 1e-6) ', () => {
-    expect(getFailedTransactionsCorrelationImpactLabel(0)).toBe(
-      FAILED_TRANSACTIONS_IMPACT_THRESHOLD.HIGH
+    expect(getFailedTransactionsCorrelationImpactLabel(0)).toStrictEqual(
+      EXPECTED_RESULT.HIGH
     );
-    expect(getFailedTransactionsCorrelationImpactLabel(1e-7)).toBe(
-      FAILED_TRANSACTIONS_IMPACT_THRESHOLD.HIGH
+    expect(getFailedTransactionsCorrelationImpactLabel(1e-7)).toStrictEqual(
+      EXPECTED_RESULT.HIGH
     );
   });
 
   it('returns Medium if value is within [1e-6, 1e-3) ', () => {
-    expect(getFailedTransactionsCorrelationImpactLabel(1e-6)).toBe(
-      FAILED_TRANSACTIONS_IMPACT_THRESHOLD.MEDIUM
+    expect(getFailedTransactionsCorrelationImpactLabel(1e-6)).toStrictEqual(
+      EXPECTED_RESULT.MEDIUM
     );
-    expect(getFailedTransactionsCorrelationImpactLabel(1e-5)).toBe(
-      FAILED_TRANSACTIONS_IMPACT_THRESHOLD.MEDIUM
+    expect(getFailedTransactionsCorrelationImpactLabel(1e-5)).toStrictEqual(
+      EXPECTED_RESULT.MEDIUM
     );
-    expect(getFailedTransactionsCorrelationImpactLabel(1e-4)).toBe(
-      FAILED_TRANSACTIONS_IMPACT_THRESHOLD.MEDIUM
+    expect(getFailedTransactionsCorrelationImpactLabel(1e-4)).toStrictEqual(
+      EXPECTED_RESULT.MEDIUM
     );
   });
 
   it('returns Low if value is within [1e-3, 0.02) ', () => {
-    expect(getFailedTransactionsCorrelationImpactLabel(1e-3)).toBe(
-      FAILED_TRANSACTIONS_IMPACT_THRESHOLD.LOW
+    expect(getFailedTransactionsCorrelationImpactLabel(1e-3)).toStrictEqual(
+      EXPECTED_RESULT.LOW
     );
-    expect(getFailedTransactionsCorrelationImpactLabel(0.009)).toBe(
-      FAILED_TRANSACTIONS_IMPACT_THRESHOLD.LOW
+    expect(getFailedTransactionsCorrelationImpactLabel(0.009)).toStrictEqual(
+      EXPECTED_RESULT.LOW
     );
   });
 });

@@ -33,14 +33,17 @@ import {
   EuiDataGridColumn,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiContextMenu,
+  EuiContextMenuPanel,
   EuiPopover,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 import React, { Suspense, useMemo, useState, useCallback } from 'react';
 import { get } from 'lodash';
-import { useGetUserAlertsPermissions } from '../../hooks/use_alert_permission';
+import {
+  getAlertsPermissions,
+  useGetUserAlertsPermissions,
+} from '../../hooks/use_alert_permission';
 import type { TimelinesUIStart, TGridType, SortDirection } from '../../../../timelines/public';
 import { useStatusBulkActionItems } from '../../../../timelines/public';
 import type { TopAlert } from './';
@@ -212,26 +215,25 @@ function ObservabilityActions({
     onUpdateFailure: onAlertStatusUpdated,
   });
 
-  const actionsPanels = useMemo(() => {
+  const actionsMenuItems = useMemo(() => {
     return [
-      {
-        id: 0,
-        content: [
-          timelines.getAddToExistingCaseButton({
-            event,
-            casePermissions,
-            appId: observabilityFeatureId,
-            onClose: afterCaseSelection,
-          }),
-          timelines.getAddToNewCaseButton({
-            event,
-            casePermissions,
-            appId: observabilityFeatureId,
-            onClose: afterCaseSelection,
-          }),
-          ...(alertPermissions.crud ? statusActionItems : []),
-        ],
-      },
+      ...(casePermissions?.crud
+        ? [
+            timelines.getAddToExistingCaseButton({
+              event,
+              casePermissions,
+              appId: observabilityFeatureId,
+              onClose: afterCaseSelection,
+            }),
+            timelines.getAddToNewCaseButton({
+              event,
+              casePermissions,
+              appId: observabilityFeatureId,
+              onClose: afterCaseSelection,
+            }),
+          ]
+        : []),
+      ...(alertPermissions.crud ? statusActionItems : []),
     ];
   }, [afterCaseSelection, casePermissions, timelines, event, statusActionItems, alertPermissions]);
 
@@ -255,26 +257,28 @@ function ObservabilityActions({
             aria-label="View alert in app"
           />
         </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiPopover
-            button={
-              <EuiButtonIcon
-                display="empty"
-                size="s"
-                color="text"
-                iconType="boxesHorizontal"
-                aria-label="More"
-                onClick={() => toggleActionsPopover(eventId)}
-              />
-            }
-            isOpen={openActionsPopoverId === eventId}
-            closePopover={closeActionsPopover}
-            panelPaddingSize="none"
-            anchorPosition="downLeft"
-          >
-            <EuiContextMenu panels={actionsPanels} initialPanelId={0} />
-          </EuiPopover>
-        </EuiFlexItem>
+        {actionsMenuItems.length > 0 && (
+          <EuiFlexItem>
+            <EuiPopover
+              button={
+                <EuiButtonIcon
+                  display="empty"
+                  size="s"
+                  color="text"
+                  iconType="boxesHorizontal"
+                  aria-label="More"
+                  onClick={() => toggleActionsPopover(eventId)}
+                />
+              }
+              isOpen={openActionsPopoverId === eventId}
+              closePopover={closeActionsPopover}
+              panelPaddingSize="none"
+              anchorPosition="downLeft"
+            >
+              <EuiContextMenuPanel size="s" items={actionsMenuItems} />
+            </EuiPopover>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     </>
   );
@@ -282,11 +286,21 @@ function ObservabilityActions({
 
 export function AlertsTableTGrid(props: AlertsTableTGridProps) {
   const { indexNames, rangeFrom, rangeTo, kuery, workflowStatus, setRefetch, addToQuery } = props;
-  const { timelines } = useKibana<{ timelines: TimelinesUIStart }>().services;
+  const {
+    timelines,
+    application: { capabilities },
+  } = useKibana<CoreStart & { timelines: TimelinesUIStart }>().services;
 
   const [flyoutAlert, setFlyoutAlert] = useState<TopAlert | undefined>(undefined);
 
   const casePermissions = useGetUserCasesPermissions();
+
+  const hasAlertsCrudPermissions = useCallback(
+    (featureId: string) => {
+      return getAlertsPermissions(capabilities, featureId).crud;
+    },
+    [capabilities]
+  );
 
   const leadingControlColumns = useMemo(() => {
     return [
@@ -327,8 +341,8 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
       defaultCellActions: getDefaultCellActions({ addToQuery }),
       end: rangeTo,
       filters: [],
+      hasAlertsCrudPermissions,
       indexNames,
-      itemsPerPage: 10,
       itemsPerPageOptions: [10, 25, 50],
       loadingText: i18n.translate('xpack.observability.alertsTable.loadingTextLabel', {
         defaultMessage: 'loading alerts',
@@ -362,14 +376,15 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
     };
   }, [
     casePermissions,
-    indexNames,
-    kuery,
-    leadingControlColumns,
-    rangeFrom,
-    rangeTo,
-    setRefetch,
-    workflowStatus,
     addToQuery,
+    rangeTo,
+    hasAlertsCrudPermissions,
+    indexNames,
+    workflowStatus,
+    kuery,
+    rangeFrom,
+    setRefetch,
+    leadingControlColumns,
   ]);
   const handleFlyoutClose = () => setFlyoutAlert(undefined);
   const { observabilityRuleTypeRegistry } = usePluginContext();

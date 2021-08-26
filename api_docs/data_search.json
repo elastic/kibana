@@ -1,554 +1,8 @@
 {
   "id": "data.search",
   "client": {
-    "classes": [
-      {
-        "parentPluginId": "data",
-        "id": "def-public.PainlessError",
-        "type": "Class",
-        "tags": [],
-        "label": "PainlessError",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "data",
-            "scope": "public",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-public.PainlessError",
-            "text": "PainlessError"
-          },
-          " extends ",
-          "EsError"
-        ],
-        "path": "src/plugins/data/public/search/errors/painless_error.tsx",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "data",
-            "id": "def-public.PainlessError.painlessStack",
-            "type": "string",
-            "tags": [],
-            "label": "painlessStack",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/plugins/data/public/search/errors/painless_error.tsx",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.PainlessError.indexPattern",
-            "type": "Object",
-            "tags": [],
-            "label": "indexPattern",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataIndexPatternsPluginApi",
-                "section": "def-common.IndexPattern",
-                "text": "IndexPattern"
-              },
-              " | undefined"
-            ],
-            "path": "src/plugins/data/public/search/errors/painless_error.tsx",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.PainlessError.Unnamed",
-            "type": "Function",
-            "tags": [],
-            "label": "Constructor",
-            "description": [],
-            "signature": [
-              "any"
-            ],
-            "path": "src/plugins/data/public/search/errors/painless_error.tsx",
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "data",
-                "id": "def-public.PainlessError.Unnamed.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "err",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "data",
-                    "scope": "public",
-                    "docId": "kibDataSearchPluginApi",
-                    "section": "def-public.IEsError",
-                    "text": "IEsError"
-                  }
-                ],
-                "path": "src/plugins/data/public/search/errors/painless_error.tsx",
-                "deprecated": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "data",
-                "id": "def-public.PainlessError.Unnamed.$2",
-                "type": "Object",
-                "tags": [],
-                "label": "indexPattern",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "data",
-                    "scope": "common",
-                    "docId": "kibDataIndexPatternsPluginApi",
-                    "section": "def-common.IndexPattern",
-                    "text": "IndexPattern"
-                  },
-                  " | undefined"
-                ],
-                "path": "src/plugins/data/public/search/errors/painless_error.tsx",
-                "deprecated": false,
-                "isRequired": false
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.PainlessError.getErrorMessage",
-            "type": "Function",
-            "tags": [],
-            "label": "getErrorMessage",
-            "description": [],
-            "signature": [
-              "(application: ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCoreApplicationPluginApi",
-                "section": "def-public.ApplicationStart",
-                "text": "ApplicationStart"
-              },
-              ") => JSX.Element"
-            ],
-            "path": "src/plugins/data/public/search/errors/painless_error.tsx",
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "data",
-                "id": "def-public.PainlessError.getErrorMessage.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "application",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCoreApplicationPluginApi",
-                    "section": "def-public.ApplicationStart",
-                    "text": "ApplicationStart"
-                  }
-                ],
-                "path": "src/plugins/data/public/search/errors/painless_error.tsx",
-                "deprecated": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
-        "id": "def-public.SearchInterceptor",
-        "type": "Class",
-        "tags": [],
-        "label": "SearchInterceptor",
-        "description": [],
-        "path": "src/plugins/data/public/search/search_interceptor/search_interceptor.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "data",
-            "id": "def-public.SearchInterceptor.Unnamed",
-            "type": "Function",
-            "tags": [],
-            "label": "Constructor",
-            "description": [],
-            "signature": [
-              "any"
-            ],
-            "path": "src/plugins/data/public/search/search_interceptor/search_interceptor.ts",
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "data",
-                "id": "def-public.SearchInterceptor.Unnamed.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "deps",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "data",
-                    "scope": "public",
-                    "docId": "kibDataSearchPluginApi",
-                    "section": "def-public.SearchInterceptorDeps",
-                    "text": "SearchInterceptorDeps"
-                  }
-                ],
-                "path": "src/plugins/data/public/search/search_interceptor/search_interceptor.ts",
-                "deprecated": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.SearchInterceptor.stop",
-            "type": "Function",
-            "tags": [],
-            "label": "stop",
-            "description": [],
-            "signature": [
-              "() => void"
-            ],
-            "path": "src/plugins/data/public/search/search_interceptor/search_interceptor.ts",
-            "deprecated": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.SearchInterceptor.search",
-            "type": "Function",
-            "tags": [
-              "options"
-            ],
-            "label": "search",
-            "description": [
-              "\nSearches using the given `search` method. Overrides the `AbortSignal` with one that will abort\neither when the request times out, or when the original `AbortSignal` is aborted. Updates\n`pendingCount$` when the request is started/finalized.\n"
-            ],
-            "signature": [
-              "({ id, ...request }: ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.IKibanaSearchRequest",
-                "text": "IKibanaSearchRequest"
-              },
-              "<any>, options?: ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.IAsyncSearchOptions",
-                "text": "IAsyncSearchOptions"
-              },
-              ") => ",
-              "Observable",
-              "<",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.IKibanaSearchResponse",
-                "text": "IKibanaSearchResponse"
-              },
-              "<any>>"
-            ],
-            "path": "src/plugins/data/public/search/search_interceptor/search_interceptor.ts",
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "data",
-                "id": "def-public.SearchInterceptor.search.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "{ id, ...request }",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "data",
-                    "scope": "common",
-                    "docId": "kibDataSearchPluginApi",
-                    "section": "def-common.IKibanaSearchRequest",
-                    "text": "IKibanaSearchRequest"
-                  },
-                  "<any>"
-                ],
-                "path": "src/plugins/data/public/search/search_interceptor/search_interceptor.ts",
-                "deprecated": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "data",
-                "id": "def-public.SearchInterceptor.search.$2",
-                "type": "Object",
-                "tags": [],
-                "label": "options",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "data",
-                    "scope": "common",
-                    "docId": "kibDataSearchPluginApi",
-                    "section": "def-common.IAsyncSearchOptions",
-                    "text": "IAsyncSearchOptions"
-                  }
-                ],
-                "path": "src/plugins/data/public/search/search_interceptor/search_interceptor.ts",
-                "deprecated": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": [
-              "`Observable` emitting the search response or an error."
-            ]
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.SearchInterceptor.showError",
-            "type": "Function",
-            "tags": [],
-            "label": "showError",
-            "description": [],
-            "signature": [
-              "(e: Error) => void"
-            ],
-            "path": "src/plugins/data/public/search/search_interceptor/search_interceptor.ts",
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "data",
-                "id": "def-public.SearchInterceptor.showError.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "e",
-                "description": [],
-                "signature": [
-                  "Error"
-                ],
-                "path": "src/plugins/data/public/search/search_interceptor/search_interceptor.ts",
-                "deprecated": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
-        "id": "def-public.SearchTimeoutError",
-        "type": "Class",
-        "tags": [],
-        "label": "SearchTimeoutError",
-        "description": [
-          "\nRequest Failure - When an entire multi request fails"
-        ],
-        "signature": [
-          {
-            "pluginId": "data",
-            "scope": "public",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-public.SearchTimeoutError",
-            "text": "SearchTimeoutError"
-          },
-          " extends ",
-          {
-            "pluginId": "kibanaUtils",
-            "scope": "common",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.KbnError",
-            "text": "KbnError"
-          }
-        ],
-        "path": "src/plugins/data/public/search/errors/timeout_error.tsx",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "data",
-            "id": "def-public.SearchTimeoutError.mode",
-            "type": "Enum",
-            "tags": [],
-            "label": "mode",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "data",
-                "scope": "public",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-public.TimeoutErrorMode",
-                "text": "TimeoutErrorMode"
-              }
-            ],
-            "path": "src/plugins/data/public/search/errors/timeout_error.tsx",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.SearchTimeoutError.Unnamed",
-            "type": "Function",
-            "tags": [],
-            "label": "Constructor",
-            "description": [],
-            "signature": [
-              "any"
-            ],
-            "path": "src/plugins/data/public/search/errors/timeout_error.tsx",
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "data",
-                "id": "def-public.SearchTimeoutError.Unnamed.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "err",
-                "description": [],
-                "signature": [
-                  "Record<string, any>"
-                ],
-                "path": "src/plugins/data/public/search/errors/timeout_error.tsx",
-                "deprecated": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "data",
-                "id": "def-public.SearchTimeoutError.Unnamed.$2",
-                "type": "Enum",
-                "tags": [],
-                "label": "mode",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "data",
-                    "scope": "public",
-                    "docId": "kibDataSearchPluginApi",
-                    "section": "def-public.TimeoutErrorMode",
-                    "text": "TimeoutErrorMode"
-                  }
-                ],
-                "path": "src/plugins/data/public/search/errors/timeout_error.tsx",
-                "deprecated": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.SearchTimeoutError.getErrorMessage",
-            "type": "Function",
-            "tags": [],
-            "label": "getErrorMessage",
-            "description": [],
-            "signature": [
-              "(application: ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCoreApplicationPluginApi",
-                "section": "def-public.ApplicationStart",
-                "text": "ApplicationStart"
-              },
-              ") => JSX.Element"
-            ],
-            "path": "src/plugins/data/public/search/errors/timeout_error.tsx",
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "data",
-                "id": "def-public.SearchTimeoutError.getErrorMessage.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "application",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCoreApplicationPluginApi",
-                    "section": "def-public.ApplicationStart",
-                    "text": "ApplicationStart"
-                  }
-                ],
-                "path": "src/plugins/data/public/search/errors/timeout_error.tsx",
-                "deprecated": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          }
-        ],
-        "initialIsOpen": false
-      }
-    ],
+    "classes": [],
     "functions": [
-      {
-        "parentPluginId": "data",
-        "id": "def-public.getEsPreference",
-        "type": "Function",
-        "tags": [],
-        "label": "getEsPreference",
-        "description": [],
-        "signature": [
-          "(uiSettings: ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.IUiSettingsClient",
-            "text": "IUiSettingsClient"
-          },
-          ", sessionId: string) => any"
-        ],
-        "path": "src/plugins/data/public/search/es_search/get_es_preference.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "data",
-            "id": "def-public.getEsPreference.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "uiSettings",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.IUiSettingsClient",
-                "text": "IUiSettingsClient"
-              }
-            ],
-            "path": "src/plugins/data/public/search/es_search/get_es_preference.ts",
-            "deprecated": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.getEsPreference.$2",
-            "type": "string",
-            "tags": [],
-            "label": "sessionId",
-            "description": [],
-            "signature": [
-              "string"
-            ],
-            "path": "src/plugins/data/public/search/es_search/get_es_preference.ts",
-            "deprecated": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
       {
         "parentPluginId": "data",
         "id": "def-public.isEsError",
@@ -918,7 +372,7 @@
                 "text": "IndexPattern"
               },
               ", configStates?: Pick<Pick<{ type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
-              "Serializable",
+              "SerializableRecord",
               " | undefined; schema?: string | undefined; }, \"enabled\" | \"id\" | \"schema\" | \"params\"> & Pick<{ type: string | ",
               {
                 "pluginId": "data",
@@ -1333,321 +787,6 @@
       },
       {
         "parentPluginId": "data",
-        "id": "def-public.SearchInterceptorDeps",
-        "type": "Interface",
-        "tags": [],
-        "label": "SearchInterceptorDeps",
-        "description": [],
-        "path": "src/plugins/data/public/search/search_interceptor/search_interceptor.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "data",
-            "id": "def-public.SearchInterceptorDeps.bfetch",
-            "type": "Object",
-            "tags": [],
-            "label": "bfetch",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "bfetch",
-                "scope": "public",
-                "docId": "kibBfetchPluginApi",
-                "section": "def-public.BfetchPublicContract",
-                "text": "BfetchPublicContract"
-              }
-            ],
-            "path": "src/plugins/data/public/search/search_interceptor/search_interceptor.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.SearchInterceptorDeps.http",
-            "type": "Object",
-            "tags": [],
-            "label": "http",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-public.HttpSetup",
-                "text": "HttpSetup"
-              }
-            ],
-            "path": "src/plugins/data/public/search/search_interceptor/search_interceptor.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.SearchInterceptorDeps.uiSettings",
-            "type": "Object",
-            "tags": [],
-            "label": "uiSettings",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.IUiSettingsClient",
-                "text": "IUiSettingsClient"
-              }
-            ],
-            "path": "src/plugins/data/public/search/search_interceptor/search_interceptor.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.SearchInterceptorDeps.startServices",
-            "type": "Object",
-            "tags": [],
-            "label": "startServices",
-            "description": [],
-            "signature": [
-              "Promise<[",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.CoreStart",
-                "text": "CoreStart"
-              },
-              ", any, unknown]>"
-            ],
-            "path": "src/plugins/data/public/search/search_interceptor/search_interceptor.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.SearchInterceptorDeps.toasts",
-            "type": "Object",
-            "tags": [],
-            "label": "toasts",
-            "description": [],
-            "signature": [
-              "{ get$: () => ",
-              "Observable",
-              "<",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.Toast",
-                "text": "Toast"
-              },
-              "[]>; add: (toastOrTitle: ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.ToastInput",
-                "text": "ToastInput"
-              },
-              ") => ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.Toast",
-                "text": "Toast"
-              },
-              "; remove: (toastOrId: string | ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.Toast",
-                "text": "Toast"
-              },
-              ") => void; addSuccess: (toastOrTitle: ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.ToastInput",
-                "text": "ToastInput"
-              },
-              ", options?: ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.ToastOptions",
-                "text": "ToastOptions"
-              },
-              " | undefined) => ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.Toast",
-                "text": "Toast"
-              },
-              "; addWarning: (toastOrTitle: ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.ToastInput",
-                "text": "ToastInput"
-              },
-              ", options?: ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.ToastOptions",
-                "text": "ToastOptions"
-              },
-              " | undefined) => ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.Toast",
-                "text": "Toast"
-              },
-              "; addDanger: (toastOrTitle: ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.ToastInput",
-                "text": "ToastInput"
-              },
-              ", options?: ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.ToastOptions",
-                "text": "ToastOptions"
-              },
-              " | undefined) => ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.Toast",
-                "text": "Toast"
-              },
-              "; addError: (error: Error, options: ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.ErrorToastOptions",
-                "text": "ErrorToastOptions"
-              },
-              ") => ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.Toast",
-                "text": "Toast"
-              },
-              "; addInfo: (toastOrTitle: ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.ToastInput",
-                "text": "ToastInput"
-              },
-              ", options?: ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.ToastOptions",
-                "text": "ToastOptions"
-              },
-              " | undefined) => ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.Toast",
-                "text": "Toast"
-              },
-              "; }"
-            ],
-            "path": "src/plugins/data/public/search/search_interceptor/search_interceptor.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.SearchInterceptorDeps.usageCollector",
-            "type": "Object",
-            "tags": [],
-            "label": "usageCollector",
-            "description": [],
-            "signature": [
-              "SearchUsageCollector",
-              " | undefined"
-            ],
-            "path": "src/plugins/data/public/search/search_interceptor/search_interceptor.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.SearchInterceptorDeps.session",
-            "type": "Object",
-            "tags": [],
-            "label": "session",
-            "description": [],
-            "signature": [
-              "{ start: () => string; destroy: () => void; readonly state$: ",
-              "Observable",
-              "<",
-              {
-                "pluginId": "data",
-                "scope": "public",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-public.SearchSessionState",
-                "text": "SearchSessionState"
-              },
-              ">; readonly sessionMeta$: ",
-              "Observable",
-              "<",
-              "SessionMeta",
-              ">; hasAccess: () => boolean; trackSearch: (searchDescriptor: ",
-              "TrackSearchDescriptor",
-              ") => () => void; getSessionId: () => string | undefined; getSession$: () => ",
-              "Observable",
-              "<string | undefined>; isStored: () => boolean; isRestore: () => boolean; restore: (sessionId: string) => void; continue: (sessionId: string) => void; clear: () => void; cancel: () => Promise<void>; save: () => Promise<void>; renameCurrentSession: (newName: string) => Promise<void>; isCurrentSession: (sessionId?: string | undefined) => boolean; getSearchOptions: (sessionId?: string | undefined) => Required<Pick<",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.ISearchOptions",
-                "text": "ISearchOptions"
-              },
-              ", \"isStored\" | \"isRestore\" | \"sessionId\">> | null; enableStorage: <ID extends string = string>(searchSessionInfoProvider: ",
-              {
-                "pluginId": "data",
-                "scope": "public",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-public.SearchSessionInfoProvider",
-                "text": "SearchSessionInfoProvider"
-              },
-              "<ID>, searchSessionIndicatorUiConfig?: ",
-              "SearchSessionIndicatorUiConfig",
-              " | undefined) => void; isSessionStorageReady: () => boolean; getSearchSessionIndicatorUiConfig: () => ",
-              "SearchSessionIndicatorUiConfig",
-              "; }"
-            ],
-            "path": "src/plugins/data/public/search/search_interceptor/search_interceptor.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
         "id": "def-public.SearchSessionInfoProvider",
         "type": "Interface",
         "tags": [],
@@ -1776,17 +915,6 @@
           "\nPossible state that current session can be in\n"
         ],
         "path": "src/plugins/data/public/search/session/search_session_state.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
-        "id": "def-public.TimeoutErrorMode",
-        "type": "Enum",
-        "tags": [],
-        "label": "TimeoutErrorMode",
-        "description": [],
-        "path": "src/plugins/data/public/search/errors/timeout_error.tsx",
         "deprecated": false,
         "initialIsOpen": false
       }
@@ -2027,348 +1155,8 @@
         "initialIsOpen": false
       }
     ],
-    "functions": [
-      {
-        "parentPluginId": "data",
-        "id": "def-server.getDefaultSearchParams",
-        "type": "Function",
-        "tags": [],
-        "label": "getDefaultSearchParams",
-        "description": [],
-        "signature": [
-          "(uiSettingsClient: ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCorePluginApi",
-            "section": "def-server.IUiSettingsClient",
-            "text": "IUiSettingsClient"
-          },
-          ") => Promise<Pick<",
-          "Search",
-          "<",
-          "RequestBody",
-          "<Record<string, any>>>, \"max_concurrent_shard_requests\" | \"ignore_unavailable\" | \"track_total_hits\">>"
-        ],
-        "path": "src/plugins/data/server/search/strategies/es_search/request_utils.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "data",
-            "id": "def-server.getDefaultSearchParams.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "uiSettingsClient",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.IUiSettingsClient",
-                "text": "IUiSettingsClient"
-              }
-            ],
-            "path": "src/plugins/data/server/search/strategies/es_search/request_utils.ts",
-            "deprecated": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
-        "id": "def-server.getShardTimeout",
-        "type": "Function",
-        "tags": [],
-        "label": "getShardTimeout",
-        "description": [],
-        "signature": [
-          "(config: Readonly<{ kibana: Readonly<{ readonly index: string; }>; elasticsearch: Readonly<{ readonly shardTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: \"year\" | \"years\" | \"y\" | \"month\" | \"months\" | \"M\" | \"week\" | \"weeks\" | \"w\" | \"day\" | \"days\" | \"d\" | \"hour\" | \"hours\" | \"h\" | \"minute\" | \"minutes\" | \"m\" | \"second\" | \"seconds\" | \"s\" | \"millisecond\" | \"milliseconds\" | \"ms\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: \"year\" | \"years\" | \"y\" | \"month\" | \"months\" | \"M\" | \"week\" | \"weeks\" | \"w\" | \"day\" | \"days\" | \"d\" | \"hour\" | \"hours\" | \"h\" | \"minute\" | \"minutes\" | \"m\" | \"second\" | \"seconds\" | \"s\" | \"millisecond\" | \"milliseconds\" | \"ms\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; }>; readonly requestTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: \"year\" | \"years\" | \"y\" | \"month\" | \"months\" | \"M\" | \"week\" | \"weeks\" | \"w\" | \"day\" | \"days\" | \"d\" | \"hour\" | \"hours\" | \"h\" | \"minute\" | \"minutes\" | \"m\" | \"second\" | \"seconds\" | \"s\" | \"millisecond\" | \"milliseconds\" | \"ms\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: \"year\" | \"years\" | \"y\" | \"month\" | \"months\" | \"M\" | \"week\" | \"weeks\" | \"w\" | \"day\" | \"days\" | \"d\" | \"hour\" | \"hours\" | \"h\" | \"minute\" | \"minutes\" | \"m\" | \"second\" | \"seconds\" | \"s\" | \"millisecond\" | \"milliseconds\" | \"ms\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; }>; readonly pingTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: \"year\" | \"years\" | \"y\" | \"month\" | \"months\" | \"M\" | \"week\" | \"weeks\" | \"w\" | \"day\" | \"days\" | \"d\" | \"hour\" | \"hours\" | \"h\" | \"minute\" | \"minutes\" | \"m\" | \"second\" | \"seconds\" | \"s\" | \"millisecond\" | \"milliseconds\" | \"ms\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: \"year\" | \"years\" | \"y\" | \"month\" | \"months\" | \"M\" | \"week\" | \"weeks\" | \"w\" | \"day\" | \"days\" | \"d\" | \"hour\" | \"hours\" | \"h\" | \"minute\" | \"minutes\" | \"m\" | \"second\" | \"seconds\" | \"s\" | \"millisecond\" | \"milliseconds\" | \"ms\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; }>; }>; path: Readonly<{ readonly data: string; }>; savedObjects: Readonly<{ readonly maxImportPayloadBytes: Readonly<{ isGreaterThan: (other: ",
-          "ByteSizeValue",
-          ") => boolean; isLessThan: (other: ",
-          "ByteSizeValue",
-          ") => boolean; isEqualTo: (other: ",
-          "ByteSizeValue",
-          ") => boolean; getValueInBytes: () => number; toString: (returnUnit?: \"b\" | \"kb\" | \"mb\" | \"gb\" | undefined) => string; }>; }>; }>) => Pick<",
-          "Search",
-          "<",
-          "RequestBody",
-          "<Record<string, any>>>, \"timeout\">"
-        ],
-        "path": "src/plugins/data/server/search/strategies/es_search/request_utils.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "data",
-            "id": "def-server.getShardTimeout.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "config",
-            "description": [],
-            "signature": [
-              "Readonly<{ kibana: Readonly<{ readonly index: string; }>; elasticsearch: Readonly<{ readonly shardTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: \"year\" | \"years\" | \"y\" | \"month\" | \"months\" | \"M\" | \"week\" | \"weeks\" | \"w\" | \"day\" | \"days\" | \"d\" | \"hour\" | \"hours\" | \"h\" | \"minute\" | \"minutes\" | \"m\" | \"second\" | \"seconds\" | \"s\" | \"millisecond\" | \"milliseconds\" | \"ms\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: \"year\" | \"years\" | \"y\" | \"month\" | \"months\" | \"M\" | \"week\" | \"weeks\" | \"w\" | \"day\" | \"days\" | \"d\" | \"hour\" | \"hours\" | \"h\" | \"minute\" | \"minutes\" | \"m\" | \"second\" | \"seconds\" | \"s\" | \"millisecond\" | \"milliseconds\" | \"ms\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; }>; readonly requestTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: \"year\" | \"years\" | \"y\" | \"month\" | \"months\" | \"M\" | \"week\" | \"weeks\" | \"w\" | \"day\" | \"days\" | \"d\" | \"hour\" | \"hours\" | \"h\" | \"minute\" | \"minutes\" | \"m\" | \"second\" | \"seconds\" | \"s\" | \"millisecond\" | \"milliseconds\" | \"ms\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: \"year\" | \"years\" | \"y\" | \"month\" | \"months\" | \"M\" | \"week\" | \"weeks\" | \"w\" | \"day\" | \"days\" | \"d\" | \"hour\" | \"hours\" | \"h\" | \"minute\" | \"minutes\" | \"m\" | \"second\" | \"seconds\" | \"s\" | \"millisecond\" | \"milliseconds\" | \"ms\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; }>; readonly pingTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: \"year\" | \"years\" | \"y\" | \"month\" | \"months\" | \"M\" | \"week\" | \"weeks\" | \"w\" | \"day\" | \"days\" | \"d\" | \"hour\" | \"hours\" | \"h\" | \"minute\" | \"minutes\" | \"m\" | \"second\" | \"seconds\" | \"s\" | \"millisecond\" | \"milliseconds\" | \"ms\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: \"year\" | \"years\" | \"y\" | \"month\" | \"months\" | \"M\" | \"week\" | \"weeks\" | \"w\" | \"day\" | \"days\" | \"d\" | \"hour\" | \"hours\" | \"h\" | \"minute\" | \"minutes\" | \"m\" | \"second\" | \"seconds\" | \"s\" | \"millisecond\" | \"milliseconds\" | \"ms\" | \"quarter\" | \"quarters\" | \"Q\" | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; }>; }>; path: Readonly<{ readonly data: string; }>; savedObjects: Readonly<{ readonly maxImportPayloadBytes: Readonly<{ isGreaterThan: (other: ",
-              "ByteSizeValue",
-              ") => boolean; isLessThan: (other: ",
-              "ByteSizeValue",
-              ") => boolean; isEqualTo: (other: ",
-              "ByteSizeValue",
-              ") => boolean; getValueInBytes: () => number; toString: (returnUnit?: \"b\" | \"kb\" | \"mb\" | \"gb\" | undefined) => string; }>; }>; }>"
-            ],
-            "path": "src/plugins/data/server/search/strategies/es_search/request_utils.ts",
-            "deprecated": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
-        "id": "def-server.searchUsageObserver",
-        "type": "Function",
-        "tags": [],
-        "label": "searchUsageObserver",
-        "description": [
-          "\nRxjs observer for easily doing `tap(searchUsageObserver(logger, usage))` in an rxjs chain."
-        ],
-        "signature": [
-          "(logger: ",
-          "Logger",
-          ", usage: ",
-          {
-            "pluginId": "data",
-            "scope": "server",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-server.SearchUsage",
-            "text": "SearchUsage"
-          },
-          " | undefined, { isRestore }: ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-common.ISearchOptions",
-            "text": "ISearchOptions"
-          },
-          ") => { next(response: ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-common.IEsSearchResponse",
-            "text": "IEsSearchResponse"
-          },
-          "<any>): void; error(): void; }"
-        ],
-        "path": "src/plugins/data/server/search/collectors/usage.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "data",
-            "id": "def-server.searchUsageObserver.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "logger",
-            "description": [],
-            "signature": [
-              "Logger"
-            ],
-            "path": "src/plugins/data/server/search/collectors/usage.ts",
-            "deprecated": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-server.searchUsageObserver.$2",
-            "type": "Object",
-            "tags": [],
-            "label": "usage",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "data",
-                "scope": "server",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-server.SearchUsage",
-                "text": "SearchUsage"
-              },
-              " | undefined"
-            ],
-            "path": "src/plugins/data/server/search/collectors/usage.ts",
-            "deprecated": false,
-            "isRequired": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-server.searchUsageObserver.$3",
-            "type": "Object",
-            "tags": [],
-            "label": "{ isRestore }",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.ISearchOptions",
-                "text": "ISearchOptions"
-              }
-            ],
-            "path": "src/plugins/data/server/search/collectors/usage.ts",
-            "deprecated": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
-        "id": "def-server.usageProvider",
-        "type": "Function",
-        "tags": [],
-        "label": "usageProvider",
-        "description": [],
-        "signature": [
-          "(core: ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCorePluginApi",
-            "section": "def-server.CoreSetup",
-            "text": "CoreSetup"
-          },
-          "<object, unknown>) => ",
-          {
-            "pluginId": "data",
-            "scope": "server",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-server.SearchUsage",
-            "text": "SearchUsage"
-          }
-        ],
-        "path": "src/plugins/data/server/search/collectors/usage.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "data",
-            "id": "def-server.usageProvider.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "core",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.CoreSetup",
-                "text": "CoreSetup"
-              },
-              "<object, unknown>"
-            ],
-            "path": "src/plugins/data/server/search/collectors/usage.ts",
-            "deprecated": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      }
-    ],
+    "functions": [],
     "interfaces": [
-      {
-        "parentPluginId": "data",
-        "id": "def-server.AsyncSearchResponse",
-        "type": "Interface",
-        "tags": [],
-        "label": "AsyncSearchResponse",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "data",
-            "scope": "server",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-server.AsyncSearchResponse",
-            "text": "AsyncSearchResponse"
-          },
-          "<T>"
-        ],
-        "path": "src/plugins/data/server/search/strategies/ese_search/types.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "data",
-            "id": "def-server.AsyncSearchResponse.id",
-            "type": "string",
-            "tags": [],
-            "label": "id",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/plugins/data/server/search/strategies/ese_search/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-server.AsyncSearchResponse.response",
-            "type": "Object",
-            "tags": [],
-            "label": "response",
-            "description": [],
-            "signature": [
-              "SearchResponse",
-              "<T>"
-            ],
-            "path": "src/plugins/data/server/search/strategies/ese_search/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-server.AsyncSearchResponse.start_time_in_millis",
-            "type": "number",
-            "tags": [],
-            "label": "start_time_in_millis",
-            "description": [],
-            "path": "src/plugins/data/server/search/strategies/ese_search/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-server.AsyncSearchResponse.expiration_time_in_millis",
-            "type": "number",
-            "tags": [],
-            "label": "expiration_time_in_millis",
-            "description": [],
-            "path": "src/plugins/data/server/search/strategies/ese_search/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-server.AsyncSearchResponse.is_partial",
-            "type": "boolean",
-            "tags": [],
-            "label": "is_partial",
-            "description": [],
-            "path": "src/plugins/data/server/search/strategies/ese_search/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-server.AsyncSearchResponse.is_running",
-            "type": "boolean",
-            "tags": [],
-            "label": "is_running",
-            "description": [],
-            "path": "src/plugins/data/server/search/strategies/ese_search/types.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
       {
         "parentPluginId": "data",
         "id": "def-server.AsyncSearchStatusResponse",
@@ -2385,13 +1173,7 @@
             "text": "AsyncSearchStatusResponse"
           },
           " extends Pick<",
-          {
-            "pluginId": "data",
-            "scope": "server",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-server.AsyncSearchResponse",
-            "text": "AsyncSearchResponse"
-          },
+          "AsyncSearchResponse",
           "<unknown>, \"id\" | \"start_time_in_millis\" | \"expiration_time_in_millis\" | \"is_partial\" | \"is_running\">"
         ],
         "path": "src/plugins/data/server/search/strategies/ese_search/types.ts",
@@ -2812,342 +1594,6 @@
               }
             ],
             "returnComment": []
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
-        "id": "def-server.ISearchSetup",
-        "type": "Interface",
-        "tags": [],
-        "label": "ISearchSetup",
-        "description": [],
-        "path": "src/plugins/data/server/search/types.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "data",
-            "id": "def-server.ISearchSetup.aggs",
-            "type": "Object",
-            "tags": [],
-            "label": "aggs",
-            "description": [],
-            "signature": [
-              "AggsCommonSetup"
-            ],
-            "path": "src/plugins/data/server/search/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-server.ISearchSetup.registerSearchStrategy",
-            "type": "Function",
-            "tags": [],
-            "label": "registerSearchStrategy",
-            "description": [
-              "\nExtension point exposed for other plugins to register their own search\nstrategies."
-            ],
-            "signature": [
-              "<SearchStrategyRequest extends ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.IKibanaSearchRequest",
-                "text": "IKibanaSearchRequest"
-              },
-              "<any> = ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.IEsSearchRequest",
-                "text": "IEsSearchRequest"
-              },
-              ", SearchStrategyResponse extends ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.IKibanaSearchResponse",
-                "text": "IKibanaSearchResponse"
-              },
-              "<any> = ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.IEsSearchResponse",
-                "text": "IEsSearchResponse"
-              },
-              "<any>>(name: string, strategy: ",
-              {
-                "pluginId": "data",
-                "scope": "server",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-server.ISearchStrategy",
-                "text": "ISearchStrategy"
-              },
-              "<SearchStrategyRequest, SearchStrategyResponse>) => void"
-            ],
-            "path": "src/plugins/data/server/search/types.ts",
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "data",
-                "id": "def-server.ISearchSetup.registerSearchStrategy.$1",
-                "type": "string",
-                "tags": [],
-                "label": "name",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "src/plugins/data/server/search/types.ts",
-                "deprecated": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "data",
-                "id": "def-server.ISearchSetup.registerSearchStrategy.$2",
-                "type": "Object",
-                "tags": [],
-                "label": "strategy",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "data",
-                    "scope": "server",
-                    "docId": "kibDataSearchPluginApi",
-                    "section": "def-server.ISearchStrategy",
-                    "text": "ISearchStrategy"
-                  },
-                  "<SearchStrategyRequest, SearchStrategyResponse>"
-                ],
-                "path": "src/plugins/data/server/search/types.ts",
-                "deprecated": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-server.ISearchSetup.usage",
-            "type": "Object",
-            "tags": [],
-            "label": "usage",
-            "description": [
-              "\nUsed internally for telemetry"
-            ],
-            "signature": [
-              {
-                "pluginId": "data",
-                "scope": "server",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-server.SearchUsage",
-                "text": "SearchUsage"
-              },
-              " | undefined"
-            ],
-            "path": "src/plugins/data/server/search/types.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
-        "id": "def-server.ISearchStart",
-        "type": "Interface",
-        "tags": [],
-        "label": "ISearchStart",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "data",
-            "scope": "server",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-server.ISearchStart",
-            "text": "ISearchStart"
-          },
-          "<SearchStrategyRequest, SearchStrategyResponse>"
-        ],
-        "path": "src/plugins/data/server/search/types.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "data",
-            "id": "def-server.ISearchStart.aggs",
-            "type": "Object",
-            "tags": [],
-            "label": "aggs",
-            "description": [],
-            "signature": [
-              "AggsStart"
-            ],
-            "path": "src/plugins/data/server/search/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-server.ISearchStart.searchAsInternalUser",
-            "type": "Object",
-            "tags": [],
-            "label": "searchAsInternalUser",
-            "description": [
-              "\nSearch as the internal Kibana system user. This is not a registered search strategy as we don't\nwant to allow access from the client."
-            ],
-            "signature": [
-              {
-                "pluginId": "data",
-                "scope": "server",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-server.ISearchStrategy",
-                "text": "ISearchStrategy"
-              },
-              "<",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.IEsSearchRequest",
-                "text": "IEsSearchRequest"
-              },
-              ", ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.IEsSearchResponse",
-                "text": "IEsSearchResponse"
-              },
-              "<any>>"
-            ],
-            "path": "src/plugins/data/server/search/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-server.ISearchStart.getSearchStrategy",
-            "type": "Function",
-            "tags": [],
-            "label": "getSearchStrategy",
-            "description": [
-              "\nGet other registered search strategies by name (or, by default, the Elasticsearch strategy).\nFor example, if a new strategy needs to use the already-registered ES search strategy, it can\nuse this function to accomplish that."
-            ],
-            "signature": [
-              "(name?: string | undefined) => ",
-              {
-                "pluginId": "data",
-                "scope": "server",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-server.ISearchStrategy",
-                "text": "ISearchStrategy"
-              },
-              "<SearchStrategyRequest, SearchStrategyResponse>"
-            ],
-            "path": "src/plugins/data/server/search/types.ts",
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "data",
-                "id": "def-server.ISearchStart.getSearchStrategy.$1",
-                "type": "string",
-                "tags": [],
-                "label": "name",
-                "description": [],
-                "signature": [
-                  "string | undefined"
-                ],
-                "path": "src/plugins/data/server/search/types.ts",
-                "deprecated": false,
-                "isRequired": false
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-server.ISearchStart.asScoped",
-            "type": "Function",
-            "tags": [],
-            "label": "asScoped",
-            "description": [],
-            "signature": [
-              "(request: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.KibanaRequest",
-                "text": "KibanaRequest"
-              },
-              "<unknown, unknown, unknown, any>) => ",
-              {
-                "pluginId": "data",
-                "scope": "server",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-server.IScopedSearchClient",
-                "text": "IScopedSearchClient"
-              }
-            ],
-            "path": "src/plugins/data/server/search/types.ts",
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "data",
-                "id": "def-server.ISearchStart.asScoped.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "request",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreHttpPluginApi",
-                    "section": "def-server.KibanaRequest",
-                    "text": "KibanaRequest"
-                  },
-                  "<unknown, unknown, unknown, any>"
-                ],
-                "path": "src/plugins/data/server/search/types.ts",
-                "deprecated": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-server.ISearchStart.searchSource",
-            "type": "Object",
-            "tags": [],
-            "label": "searchSource",
-            "description": [],
-            "signature": [
-              "{ asScoped: (request: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.KibanaRequest",
-                "text": "KibanaRequest"
-              },
-              "<unknown, unknown, unknown, any>) => Promise<",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.ISearchStartSearchSource",
-                "text": "ISearchStartSearchSource"
-              },
-              ">; }"
-            ],
-            "path": "src/plugins/data/server/search/types.ts",
-            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -3848,64 +2294,6 @@
           }
         ],
         "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
-        "id": "def-server.SearchUsage",
-        "type": "Interface",
-        "tags": [],
-        "label": "SearchUsage",
-        "description": [],
-        "path": "src/plugins/data/server/search/collectors/usage.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "data",
-            "id": "def-server.SearchUsage.trackError",
-            "type": "Function",
-            "tags": [],
-            "label": "trackError",
-            "description": [],
-            "signature": [
-              "() => Promise<void>"
-            ],
-            "path": "src/plugins/data/server/search/collectors/usage.ts",
-            "deprecated": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-server.SearchUsage.trackSuccess",
-            "type": "Function",
-            "tags": [],
-            "label": "trackSuccess",
-            "description": [],
-            "signature": [
-              "(duration: number) => Promise<void>"
-            ],
-            "path": "src/plugins/data/server/search/collectors/usage.ts",
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "data",
-                "id": "def-server.SearchUsage.trackSuccess.$1",
-                "type": "number",
-                "tags": [],
-                "label": "duration",
-                "description": [],
-                "signature": [
-                  "number"
-                ],
-                "path": "src/plugins/data/server/search/collectors/usage.ts",
-                "deprecated": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          }
-        ],
-        "initialIsOpen": false
       }
     ],
     "enums": [],
@@ -4174,7 +2562,7 @@
                 "description": [],
                 "signature": [
                   "Pick<Pick<{ type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
-                  "Serializable",
+                  "SerializableRecord",
                   " | undefined; schema?: string | undefined; }, \"enabled\" | \"id\" | \"schema\" | \"params\"> & Pick<{ type: ",
                   {
                     "pluginId": "data",
@@ -4541,7 +2929,7 @@
             "description": [],
             "signature": [
               "() => { type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
-              "Serializable",
+              "SerializableRecord",
               " | undefined; schema?: string | undefined; }"
             ],
             "path": "src/plugins/data/common/search/aggs/agg_config.ts",
@@ -4562,15 +2950,32 @@
             "description": [],
             "signature": [
               "() => { type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
-              "Serializable",
+              "SerializableRecord",
               " | undefined; schema?: string | undefined; }"
             ],
             "path": "src/plugins/data/common/search/aggs/agg_config.ts",
             "deprecated": true,
+            "removeBy": "8.1",
             "references": [
               {
                 "plugin": "visualizations",
                 "path": "src/plugins/visualizations/public/vis.ts"
+              },
+              {
+                "plugin": "visDefaultEditor",
+                "path": "src/plugins/vis_default_editor/public/components/sidebar/state/reducers.ts"
+              },
+              {
+                "plugin": "visDefaultEditor",
+                "path": "src/plugins/vis_default_editor/public/components/sidebar/state/reducers.ts"
+              },
+              {
+                "plugin": "visDefaultEditor",
+                "path": "src/plugins/vis_default_editor/public/components/sidebar/state/reducers.ts"
+              },
+              {
+                "plugin": "visDefaultEditor",
+                "path": "src/plugins/vis_default_editor/public/components/sidebar/sidebar.tsx"
               }
             ],
             "children": [],
@@ -5206,7 +3611,7 @@
                 "description": [],
                 "signature": [
                   "Pick<Pick<{ type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
-                  "Serializable",
+                  "SerializableRecord",
                   " | undefined; schema?: string | undefined; }, \"enabled\" | \"id\" | \"schema\" | \"params\"> & Pick<{ type: string | ",
                   {
                     "pluginId": "data",
@@ -5445,7 +3850,7 @@
                 "text": "AggConfig"
               },
               ">(params: Pick<Pick<{ type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
-              "Serializable",
+              "SerializableRecord",
               " | undefined; schema?: string | undefined; }, \"enabled\" | \"id\" | \"schema\" | \"params\"> & Pick<{ type: string | ",
               {
                 "pluginId": "data",
@@ -5476,7 +3881,7 @@
                 "description": [],
                 "signature": [
                   "Pick<Pick<{ type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
-                  "Serializable",
+                  "SerializableRecord",
                   " | undefined; schema?: string | undefined; }, \"enabled\" | \"id\" | \"schema\" | \"params\"> & Pick<{ type: string | ",
                   {
                     "pluginId": "data",
@@ -6207,7 +4612,7 @@
             "description": [],
             "signature": [
               "(agg: TAggConfig, state?: { type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
-              "Serializable",
+              "SerializableRecord",
               " | undefined; schema?: string | undefined; } | undefined) => TAggConfig"
             ],
             "path": "src/plugins/data/common/search/aggs/param_types/agg.ts",
@@ -6236,7 +4641,7 @@
                 "description": [],
                 "signature": [
                   "{ type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
-                  "Serializable",
+                  "SerializableRecord",
                   " | undefined; schema?: string | undefined; } | undefined"
                 ],
                 "path": "src/plugins/data/common/search/aggs/param_types/agg.ts",
@@ -6484,7 +4889,7 @@
               "\nThe type the values produced by this agg will have in the final data table.\nIf not specified, the type of the field is used."
             ],
             "signature": [
-              "\"string\" | \"number\" | \"boolean\" | \"object\" | \"date\" | \"_source\" | \"ip\" | \"attachment\" | \"geo_point\" | \"geo_shape\" | \"murmur3\" | \"unknown\" | \"conflict\" | \"nested\" | \"histogram\" | \"null\" | undefined"
+              "\"string\" | \"number\" | \"boolean\" | \"object\" | \"date\" | \"ip\" | \"geo_point\" | \"_source\" | \"attachment\" | \"geo_shape\" | \"murmur3\" | \"unknown\" | \"conflict\" | \"nested\" | \"histogram\" | \"null\" | undefined"
             ],
             "path": "src/plugins/data/common/search/aggs/agg_type.ts",
             "deprecated": false
@@ -8236,8 +6641,9 @@
             "label": "filterFieldTypes",
             "description": [],
             "signature": [
+              "\"*\" | ",
               "KBN_FIELD_TYPES",
-              " | \"*\" | ",
+              " | ",
               "KBN_FIELD_TYPES",
               "[]"
             ],
@@ -9636,6 +8042,7 @@
             ],
             "path": "src/plugins/data/common/search/search_source/search_source.ts",
             "deprecated": true,
+            "removeBy": "8.1",
             "references": [
               {
                 "plugin": "discover",
@@ -9656,6 +8063,14 @@
               {
                 "plugin": "maps",
                 "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/es_search_source.tsx"
+              },
+              {
+                "plugin": "inputControlVis",
+                "path": "src/plugins/input_control_vis/public/control/list_control_factory.ts"
+              },
+              {
+                "plugin": "inputControlVis",
+                "path": "src/plugins/input_control_vis/public/control/range_control_factory.ts"
               }
             ],
             "children": [
@@ -9886,7 +8301,7 @@
                 "section": "def-common.IndexPatternsService",
                 "text": "IndexPatternsService"
               },
-              ", \"get\" | \"delete\" | \"create\" | \"find\" | \"ensureDefaultIndexPattern\" | \"getIds\" | \"getTitles\" | \"getIdsWithTitle\" | \"clearCache\" | \"getCache\" | \"getDefault\" | \"getDefaultId\" | \"setDefault\" | \"getFieldsForWildcard\" | \"getFieldsForIndexPattern\" | \"refreshFields\" | \"fieldArrayToMap\" | \"savedObjectToSpec\" | \"createAndSave\" | \"createSavedObject\" | \"updateSavedObject\">, dependencies: ",
+              ", \"get\" | \"delete\" | \"create\" | \"find\" | \"ensureDefaultIndexPattern\" | \"getIds\" | \"getTitles\" | \"getIdsWithTitle\" | \"clearCache\" | \"getCache\" | \"getDefault\" | \"getDefaultId\" | \"setDefault\" | \"hasUserIndexPattern\" | \"getFieldsForWildcard\" | \"getFieldsForIndexPattern\" | \"refreshFields\" | \"fieldArrayToMap\" | \"savedObjectToSpec\" | \"createAndSave\" | \"createSavedObject\" | \"updateSavedObject\">, dependencies: ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -9939,7 +8354,7 @@
                     "section": "def-common.IndexPatternsService",
                     "text": "IndexPatternsService"
                   },
-                  ", \"get\" | \"delete\" | \"create\" | \"find\" | \"ensureDefaultIndexPattern\" | \"getIds\" | \"getTitles\" | \"getIdsWithTitle\" | \"clearCache\" | \"getCache\" | \"getDefault\" | \"getDefaultId\" | \"setDefault\" | \"getFieldsForWildcard\" | \"getFieldsForIndexPattern\" | \"refreshFields\" | \"fieldArrayToMap\" | \"savedObjectToSpec\" | \"createAndSave\" | \"createSavedObject\" | \"updateSavedObject\">"
+                  ", \"get\" | \"delete\" | \"create\" | \"find\" | \"ensureDefaultIndexPattern\" | \"getIds\" | \"getTitles\" | \"getIdsWithTitle\" | \"clearCache\" | \"getCache\" | \"getDefault\" | \"getDefaultId\" | \"setDefault\" | \"hasUserIndexPattern\" | \"getFieldsForWildcard\" | \"getFieldsForIndexPattern\" | \"refreshFields\" | \"fieldArrayToMap\" | \"savedObjectToSpec\" | \"createAndSave\" | \"createSavedObject\" | \"updateSavedObject\">"
                 ],
                 "path": "src/plugins/data/common/search/search_source/search_source_service.ts",
                 "deprecated": false,
@@ -10893,7 +9308,7 @@
             "section": "def-common.IndexPatternsService",
             "text": "IndexPatternsService"
           },
-          ", \"get\" | \"delete\" | \"create\" | \"find\" | \"ensureDefaultIndexPattern\" | \"getIds\" | \"getTitles\" | \"getIdsWithTitle\" | \"clearCache\" | \"getCache\" | \"getDefault\" | \"getDefaultId\" | \"setDefault\" | \"getFieldsForWildcard\" | \"getFieldsForIndexPattern\" | \"refreshFields\" | \"fieldArrayToMap\" | \"savedObjectToSpec\" | \"createAndSave\" | \"createSavedObject\" | \"updateSavedObject\">, searchSourceDependencies: ",
+          ", \"get\" | \"delete\" | \"create\" | \"find\" | \"ensureDefaultIndexPattern\" | \"getIds\" | \"getTitles\" | \"getIdsWithTitle\" | \"clearCache\" | \"getCache\" | \"getDefault\" | \"getDefaultId\" | \"setDefault\" | \"hasUserIndexPattern\" | \"getFieldsForWildcard\" | \"getFieldsForIndexPattern\" | \"refreshFields\" | \"fieldArrayToMap\" | \"savedObjectToSpec\" | \"createAndSave\" | \"createSavedObject\" | \"updateSavedObject\">, searchSourceDependencies: ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -10940,7 +9355,7 @@
                 "section": "def-common.IndexPatternsService",
                 "text": "IndexPatternsService"
               },
-              ", \"get\" | \"delete\" | \"create\" | \"find\" | \"ensureDefaultIndexPattern\" | \"getIds\" | \"getTitles\" | \"getIdsWithTitle\" | \"clearCache\" | \"getCache\" | \"getDefault\" | \"getDefaultId\" | \"setDefault\" | \"getFieldsForWildcard\" | \"getFieldsForIndexPattern\" | \"refreshFields\" | \"fieldArrayToMap\" | \"savedObjectToSpec\" | \"createAndSave\" | \"createSavedObject\" | \"updateSavedObject\">"
+              ", \"get\" | \"delete\" | \"create\" | \"find\" | \"ensureDefaultIndexPattern\" | \"getIds\" | \"getTitles\" | \"getIdsWithTitle\" | \"clearCache\" | \"getCache\" | \"getDefault\" | \"getDefaultId\" | \"setDefault\" | \"hasUserIndexPattern\" | \"getFieldsForWildcard\" | \"getFieldsForIndexPattern\" | \"refreshFields\" | \"fieldArrayToMap\" | \"savedObjectToSpec\" | \"createAndSave\" | \"createSavedObject\" | \"updateSavedObject\">"
             ],
             "path": "src/plugins/data/common/search/search_source/create_search_source.ts",
             "deprecated": false,
@@ -11247,7 +9662,7 @@
             "text": "Adapters"
           },
           ", ",
-          "Serializable",
+          "SerializableRecord",
           ">) => any"
         ],
         "path": "src/plugins/data/common/search/expressions/utils/function_wrapper.ts",
@@ -11755,7 +10170,7 @@
             "section": "def-common.DatatableColumn",
             "text": "DatatableColumn"
           },
-          ") => { interval: string | undefined; timeZone: string | undefined; timeRange: ",
+          ", defaults?: Partial<{ timeZone: string; }>) => { interval: string | undefined; timeZone: string | undefined; timeRange: ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -11783,6 +10198,20 @@
                 "section": "def-common.DatatableColumn",
                 "text": "DatatableColumn"
               }
+            ],
+            "path": "src/plugins/data/common/search/aggs/utils/get_date_histogram_meta.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.getDateHistogramMetaDataByDatatableColumn.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "defaults",
+            "description": [],
+            "signature": [
+              "Partial<{ timeZone: string; }>"
             ],
             "path": "src/plugins/data/common/search/aggs/utils/get_date_histogram_meta.ts",
             "deprecated": false,
@@ -13608,7 +12037,7 @@
             "section": "def-common.IKibanaSearchResponse",
             "text": "IKibanaSearchResponse"
           },
-          "<any> | undefined) => boolean | undefined"
+          "<any> | undefined) => boolean"
         ],
         "path": "src/plugins/data/common/search/utils.ts",
         "deprecated": false,
@@ -14922,7 +13351,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "Serializable",
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -15004,7 +13433,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "Serializable",
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -15054,7 +13483,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "Serializable",
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -15168,7 +13597,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "Serializable",
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -15250,7 +13679,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "Serializable",
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -15332,7 +13761,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "Serializable",
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -15382,7 +13811,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "Serializable",
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -15496,7 +13925,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "Serializable",
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -15578,7 +14007,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "Serializable",
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -15692,7 +14121,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "Serializable",
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -15746,7 +14175,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "Serializable",
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -15796,7 +14225,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "Serializable",
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -15854,7 +14283,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "Serializable",
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -15912,7 +14341,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "Serializable",
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -15970,7 +14399,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "Serializable",
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -16028,7 +14457,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "Serializable",
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -16086,7 +14515,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "Serializable",
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -16136,7 +14565,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "Serializable",
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -16186,7 +14615,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "Serializable",
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -16240,7 +14669,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "Serializable",
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -16294,7 +14723,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "Serializable",
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -16344,7 +14773,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "Serializable",
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -16394,7 +14823,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "Serializable",
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -16444,7 +14873,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "Serializable",
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -16494,7 +14923,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "Serializable",
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -16544,7 +14973,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "Serializable",
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -16594,7 +15023,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "Serializable",
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -16648,7 +15077,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "Serializable",
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -16698,7 +15127,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "Serializable",
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -16748,7 +15177,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "Serializable",
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -16802,7 +15231,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "Serializable",
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -16852,7 +15281,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "Serializable",
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -16902,7 +15331,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "Serializable",
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -16952,7 +15381,7 @@
                 "text": "Adapters"
               },
               ", ",
-              "Serializable",
+              "SerializableRecord",
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -17102,7 +15531,7 @@
             "description": [],
             "signature": [
               "{ type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
-              "Serializable",
+              "SerializableRecord",
               " | undefined; schema?: string | undefined; } | undefined"
             ],
             "path": "src/plugins/data/common/search/aggs/metrics/bucket_avg.ts",
@@ -17117,7 +15546,7 @@
             "description": [],
             "signature": [
               "{ type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
-              "Serializable",
+              "SerializableRecord",
               " | undefined; schema?: string | undefined; } | undefined"
             ],
             "path": "src/plugins/data/common/search/aggs/metrics/bucket_avg.ts",
@@ -17156,7 +15585,7 @@
             "description": [],
             "signature": [
               "{ type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
-              "Serializable",
+              "SerializableRecord",
               " | undefined; schema?: string | undefined; } | undefined"
             ],
             "path": "src/plugins/data/common/search/aggs/metrics/bucket_max.ts",
@@ -17171,7 +15600,7 @@
             "description": [],
             "signature": [
               "{ type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
-              "Serializable",
+              "SerializableRecord",
               " | undefined; schema?: string | undefined; } | undefined"
             ],
             "path": "src/plugins/data/common/search/aggs/metrics/bucket_max.ts",
@@ -17210,7 +15639,7 @@
             "description": [],
             "signature": [
               "{ type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
-              "Serializable",
+              "SerializableRecord",
               " | undefined; schema?: string | undefined; } | undefined"
             ],
             "path": "src/plugins/data/common/search/aggs/metrics/bucket_min.ts",
@@ -17225,7 +15654,7 @@
             "description": [],
             "signature": [
               "{ type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
-              "Serializable",
+              "SerializableRecord",
               " | undefined; schema?: string | undefined; } | undefined"
             ],
             "path": "src/plugins/data/common/search/aggs/metrics/bucket_min.ts",
@@ -17264,7 +15693,7 @@
             "description": [],
             "signature": [
               "{ type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
-              "Serializable",
+              "SerializableRecord",
               " | undefined; schema?: string | undefined; } | undefined"
             ],
             "path": "src/plugins/data/common/search/aggs/metrics/bucket_sum.ts",
@@ -17279,7 +15708,7 @@
             "description": [],
             "signature": [
               "{ type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
-              "Serializable",
+              "SerializableRecord",
               " | undefined; schema?: string | undefined; } | undefined"
             ],
             "path": "src/plugins/data/common/search/aggs/metrics/bucket_sum.ts",
@@ -17365,7 +15794,7 @@
             "description": [],
             "signature": [
               "{ type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
-              "Serializable",
+              "SerializableRecord",
               " | undefined; schema?: string | undefined; } | undefined"
             ],
             "path": "src/plugins/data/common/search/aggs/metrics/cumulative_sum.ts",
@@ -17702,7 +16131,7 @@
             "description": [],
             "signature": [
               "{ type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
-              "Serializable",
+              "SerializableRecord",
               " | undefined; schema?: string | undefined; } | undefined"
             ],
             "path": "src/plugins/data/common/search/aggs/metrics/derivative.ts",
@@ -17843,7 +16272,7 @@
             "description": [],
             "signature": [
               "{ type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
-              "Serializable",
+              "SerializableRecord",
               " | undefined; schema?: string | undefined; } | undefined"
             ],
             "path": "src/plugins/data/common/search/aggs/metrics/filtered_metric.ts",
@@ -17858,7 +16287,7 @@
             "description": [],
             "signature": [
               "{ type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
-              "Serializable",
+              "SerializableRecord",
               " | undefined; schema?: string | undefined; } | undefined"
             ],
             "path": "src/plugins/data/common/search/aggs/metrics/filtered_metric.ts",
@@ -18557,7 +16986,7 @@
             "description": [],
             "signature": [
               "{ type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
-              "Serializable",
+              "SerializableRecord",
               " | undefined; schema?: string | undefined; } | undefined"
             ],
             "path": "src/plugins/data/common/search/aggs/metrics/moving_avg.ts",
@@ -18770,7 +17199,7 @@
             "description": [],
             "signature": [
               "{ type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
-              "Serializable",
+              "SerializableRecord",
               " | undefined; schema?: string | undefined; } | undefined"
             ],
             "path": "src/plugins/data/common/search/aggs/metrics/serial_diff.ts",
@@ -19027,7 +17456,7 @@
             "description": [],
             "signature": [
               "{ type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
-              "Serializable",
+              "SerializableRecord",
               " | undefined; schema?: string | undefined; } | undefined"
             ],
             "path": "src/plugins/data/common/search/aggs/buckets/terms.ts",
@@ -19433,7 +17862,7 @@
             "label": "valueType",
             "description": [],
             "signature": [
-              "\"string\" | \"number\" | \"boolean\" | \"object\" | \"date\" | \"_source\" | \"ip\" | \"attachment\" | \"geo_point\" | \"geo_shape\" | \"murmur3\" | \"unknown\" | \"conflict\" | \"nested\" | \"histogram\" | \"null\" | undefined"
+              "\"string\" | \"number\" | \"boolean\" | \"object\" | \"date\" | \"ip\" | \"geo_point\" | \"_source\" | \"attachment\" | \"geo_shape\" | \"murmur3\" | \"unknown\" | \"conflict\" | \"nested\" | \"histogram\" | \"null\" | undefined"
             ],
             "path": "src/plugins/data/common/search/aggs/agg_type.ts",
             "deprecated": false
@@ -19773,8 +18202,9 @@
             "label": "filterFieldTypes",
             "description": [],
             "signature": [
+              "\"*\" | ",
               "KBN_FIELD_TYPES",
-              " | \"*\" | ",
+              " | ",
               "KBN_FIELD_TYPES",
               "[] | undefined"
             ],
@@ -20398,9 +18828,9 @@
             "signature": [
               "() => Pick<Pick<",
               {
-                "pluginId": "data",
+                "pluginId": "fieldFormats",
                 "scope": "common",
-                "docId": "kibDataFieldFormatsPluginApi",
+                "docId": "kibFieldFormatsPluginApi",
                 "section": "def-common.FieldFormatsRegistry",
                 "text": "FieldFormatsRegistry"
               },
@@ -20934,6 +19364,21 @@
             ],
             "signature": [
               "boolean | undefined"
+            ],
+            "path": "src/plugins/data/common/search/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.IKibanaSearchResponse.warning",
+            "type": "string",
+            "tags": [],
+            "label": "warning",
+            "description": [
+              "\nOptional warnings that should be surfaced to the end user"
+            ],
+            "signature": [
+              "string | undefined"
             ],
             "path": "src/plugins/data/common/search/types.ts",
             "deprecated": false
@@ -21648,8 +20093,9 @@
             "label": "filterFieldTypes",
             "description": [],
             "signature": [
+              "\"*\" | ",
               "KBN_FIELD_TYPES",
-              " | \"*\" | ",
+              " | ",
               "KBN_FIELD_TYPES",
               "[] | undefined"
             ],
@@ -21667,61 +20113,6 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/data/common/search/aggs/metrics/metric_agg_type.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
-        "id": "def-common.MsearchRequestBody",
-        "type": "Interface",
-        "tags": [],
-        "label": "MsearchRequestBody",
-        "description": [],
-        "path": "src/plugins/data/common/search/search_source/legacy/types.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "data",
-            "id": "def-common.MsearchRequestBody.searches",
-            "type": "Array",
-            "tags": [],
-            "label": "searches",
-            "description": [],
-            "signature": [
-              "MsearchRequest[]"
-            ],
-            "path": "src/plugins/data/common/search/search_source/legacy/types.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
-        "id": "def-common.MsearchResponse",
-        "type": "Interface",
-        "tags": [],
-        "label": "MsearchResponse",
-        "description": [],
-        "path": "src/plugins/data/common/search/search_source/legacy/types.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "data",
-            "id": "def-common.MsearchResponse.body",
-            "type": "Object",
-            "tags": [],
-            "label": "body",
-            "description": [],
-            "signature": [
-              "ApiResponse",
-              "<{ responses: ",
-              "SearchResponse",
-              "<any>[]; }, unknown>"
-            ],
-            "path": "src/plugins/data/common/search/search_source/legacy/types.ts",
             "deprecated": false
           }
         ],
@@ -21889,9 +20280,9 @@
             "signature": [
               "() => Pick<Pick<",
               {
-                "pluginId": "data",
+                "pluginId": "fieldFormats",
                 "scope": "common",
-                "docId": "kibDataFieldFormatsPluginApi",
+                "docId": "kibFieldFormatsPluginApi",
                 "section": "def-common.FieldFormatsRegistry",
                 "text": "FieldFormatsRegistry"
               },
@@ -21964,9 +20355,9 @@
             "signature": [
               "() => Pick<Pick<",
               {
-                "pluginId": "data",
+                "pluginId": "fieldFormats",
                 "scope": "common",
-                "docId": "kibDataFieldFormatsPluginApi",
+                "docId": "kibFieldFormatsPluginApi",
                 "section": "def-common.FieldFormatsRegistry",
                 "text": "FieldFormatsRegistry"
               },
@@ -23574,8 +21965,24 @@
             "text": "IAggType"
           },
           "; enabled?: boolean | undefined; id?: string | undefined; schema?: string | undefined; params?: {} | ",
-          "Serializable",
+          "SerializableRecord",
           " | undefined; }"
+        ],
+        "path": "src/plugins/data/common/search/aggs/agg_config.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.AggConfigSerialized",
+        "type": "Type",
+        "tags": [],
+        "label": "AggConfigSerialized",
+        "description": [],
+        "signature": [
+          "{ type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
+          "SerializableRecord",
+          " | undefined; schema?: string | undefined; }"
         ],
         "path": "src/plugins/data/common/search/aggs/agg_config.ts",
         "deprecated": false,
@@ -24027,7 +22434,7 @@
             "text": "IndexPattern"
           },
           ", configStates?: Pick<Pick<{ type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
-          "Serializable",
+          "SerializableRecord",
           " | undefined; schema?: string | undefined; }, \"enabled\" | \"id\" | \"schema\" | \"params\"> & Pick<{ type: string | ",
           {
             "pluginId": "data",
@@ -24216,7 +22623,7 @@
             "text": "IAggType"
           },
           "; enabled?: boolean | undefined; id?: string | undefined; schema?: string | undefined; params?: {} | ",
-          "Serializable",
+          "SerializableRecord",
           " | undefined; }"
         ],
         "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
@@ -24356,7 +22763,7 @@
             "text": "Adapters"
           },
           ", ",
-          "Serializable",
+          "SerializableRecord",
           ">>"
         ],
         "path": "src/plugins/data/common/search/expressions/esaggs/esaggs_fn.ts",
@@ -24395,7 +22802,7 @@
             "text": "Adapters"
           },
           ", ",
-          "Serializable",
+          "SerializableRecord",
           ">>"
         ],
         "path": "src/plugins/data/common/search/expressions/esdsl.ts",
@@ -24575,7 +22982,7 @@
             "text": "Adapters"
           },
           ", ",
-          "Serializable",
+          "SerializableRecord",
           ">>"
         ],
         "path": "src/plugins/data/common/search/expressions/cidr.ts",
@@ -24638,7 +23045,7 @@
             "text": "Adapters"
           },
           ", ",
-          "Serializable",
+          "SerializableRecord",
           ">>"
         ],
         "path": "src/plugins/data/common/search/expressions/date_range.ts",
@@ -24687,7 +23094,7 @@
             "text": "Adapters"
           },
           ", ",
-          "Serializable",
+          "SerializableRecord",
           ">>"
         ],
         "path": "src/plugins/data/common/search/expressions/exists_filter.ts",
@@ -24750,7 +23157,7 @@
             "text": "Adapters"
           },
           ", ",
-          "Serializable",
+          "SerializableRecord",
           ">>"
         ],
         "path": "src/plugins/data/common/search/expressions/extended_bounds.ts",
@@ -24805,7 +23212,7 @@
             "text": "Adapters"
           },
           ", ",
-          "Serializable",
+          "SerializableRecord",
           ">>"
         ],
         "path": "src/plugins/data/common/search/expressions/field.ts",
@@ -24860,7 +23267,7 @@
             "text": "Adapters"
           },
           ", ",
-          "Serializable",
+          "SerializableRecord",
           ">>"
         ],
         "path": "src/plugins/data/common/search/expressions/geo_bounding_box.ts",
@@ -24915,7 +23322,7 @@
             "text": "Adapters"
           },
           ", ",
-          "Serializable",
+          "SerializableRecord",
           ">>"
         ],
         "path": "src/plugins/data/common/search/expressions/geo_point.ts",
@@ -24978,7 +23385,7 @@
             "text": "Adapters"
           },
           ", ",
-          "Serializable",
+          "SerializableRecord",
           ">>"
         ],
         "path": "src/plugins/data/common/search/expressions/ip_range.ts",
@@ -25149,7 +23556,7 @@
             "text": "Adapters"
           },
           ", ",
-          "Serializable",
+          "SerializableRecord",
           ">>"
         ],
         "path": "src/plugins/data/common/search/expressions/kibana_filter.ts",
@@ -25212,7 +23619,7 @@
             "text": "Adapters"
           },
           ", ",
-          "Serializable",
+          "SerializableRecord",
           ">>"
         ],
         "path": "src/plugins/data/common/search/expressions/timerange.ts",
@@ -25261,7 +23668,7 @@
             "text": "Adapters"
           },
           ", ",
-          "Serializable",
+          "SerializableRecord",
           ">>"
         ],
         "path": "src/plugins/data/common/search/expressions/kql.ts",
@@ -25310,7 +23717,7 @@
             "text": "Adapters"
           },
           ", ",
-          "Serializable",
+          "SerializableRecord",
           ">>"
         ],
         "path": "src/plugins/data/common/search/expressions/lucene.ts",
@@ -25373,7 +23780,7 @@
             "text": "Adapters"
           },
           ", ",
-          "Serializable",
+          "SerializableRecord",
           ">>"
         ],
         "path": "src/plugins/data/common/search/expressions/numerical_range.ts",
@@ -25422,7 +23829,7 @@
             "text": "Adapters"
           },
           ", ",
-          "Serializable",
+          "SerializableRecord",
           ">>"
         ],
         "path": "src/plugins/data/common/search/expressions/phrase_filter.ts",
@@ -25477,7 +23884,7 @@
             "text": "Adapters"
           },
           ", ",
-          "Serializable",
+          "SerializableRecord",
           ">>"
         ],
         "path": "src/plugins/data/common/search/expressions/query_filter.ts",
@@ -25524,7 +23931,7 @@
             "text": "Adapters"
           },
           ", ",
-          "Serializable",
+          "SerializableRecord",
           ">>"
         ],
         "path": "src/plugins/data/common/search/expressions/range.ts",
@@ -25573,7 +23980,7 @@
             "text": "Adapters"
           },
           ", ",
-          "Serializable",
+          "SerializableRecord",
           ">>"
         ],
         "path": "src/plugins/data/common/search/expressions/range_filter.ts",
@@ -25630,8 +24037,9 @@
         "label": "FieldTypes",
         "description": [],
         "signature": [
+          "\"*\" | ",
           "KBN_FIELD_TYPES",
-          " | \"*\" | ",
+          " | ",
           "KBN_FIELD_TYPES",
           "[]"
         ],
@@ -26308,9 +24716,9 @@
           "\nSame as `ISearchOptions`, but contains only serializable fields, which can\nbe sent over the network."
         ],
         "signature": [
-          "{ isStored?: boolean | undefined; isRestore?: boolean | undefined; sessionId?: string | undefined; executionContext?: ",
+          "{ executionContext?: ",
           "KibanaExecutionContext",
-          " | undefined; strategy?: string | undefined; legacyHitsTotal?: boolean | undefined; }"
+          " | undefined; isStored?: boolean | undefined; isRestore?: boolean | undefined; sessionId?: string | undefined; strategy?: string | undefined; legacyHitsTotal?: boolean | undefined; }"
         ],
         "path": "src/plugins/data/common/search/types.ts",
         "deprecated": false,
@@ -27483,7 +25891,7 @@
               "FilterStateStore",
               "; } | undefined; meta: ",
               "FilterMeta",
-              "; query?: any; type: \"kibana_filter\"; }"
+              "; query?: Record<string, any> | undefined; type: \"kibana_filter\"; }"
             ],
             "path": "src/plugins/data/common/search/expressions/exists_filter.ts",
             "deprecated": false,
@@ -30119,9 +28527,9 @@
         "label": "migrateIncludeExcludeFormat",
         "description": [],
         "signature": [
-          "{ scriptable?: boolean | undefined; filterFieldTypes?: ",
+          "{ scriptable?: boolean | undefined; filterFieldTypes?: \"*\" | ",
           "KBN_FIELD_TYPES",
-          " | \"*\" | ",
+          " | ",
           "KBN_FIELD_TYPES",
           "[] | undefined; makeAgg?: ((agg: ",
           {
@@ -30132,7 +28540,7 @@
             "text": "IBucketAggConfig"
           },
           ", state?: { type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
-          "Serializable",
+          "SerializableRecord",
           " | undefined; schema?: string | undefined; } | undefined) => ",
           {
             "pluginId": "data",
@@ -30810,7 +29218,7 @@
               "FilterStateStore",
               "; } | undefined; meta: ",
               "FilterMeta",
-              "; query?: any; type: \"kibana_filter\"; }"
+              "; query?: Record<string, any> | undefined; type: \"kibana_filter\"; }"
             ],
             "path": "src/plugins/data/common/search/expressions/phrase_filter.ts",
             "deprecated": false,
@@ -31306,7 +29714,7 @@
               "FilterStateStore",
               "; } | undefined; meta: ",
               "FilterMeta",
-              "; query?: any; type: \"kibana_filter\"; }"
+              "; query?: Record<string, any> | undefined; type: \"kibana_filter\"; }"
             ],
             "path": "src/plugins/data/common/search/expressions/range_filter.ts",
             "deprecated": false,

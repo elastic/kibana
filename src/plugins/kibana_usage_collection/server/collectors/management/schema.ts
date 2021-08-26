@@ -144,10 +144,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'long',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'courier:batchSearches': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
   'courier:setRequestPreference': {
     type: 'keyword',
     _meta: { description: 'Non-default value of setting.' },
