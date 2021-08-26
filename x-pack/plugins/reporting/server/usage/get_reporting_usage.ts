@@ -15,8 +15,7 @@ import { getExportTypesHandler } from './get_export_type_handler';
 import type {
   AggregationResultBuckets,
   AvailableTotal,
-  FeatureAvailabilityMap,
-  JobTypes,
+  AvailableTotals,
   KeyCountBucket,
   RangeStats,
   ReportingUsageType,
@@ -65,15 +64,15 @@ const getAppStatuses = (buckets: StatusByAppBucket[]) =>
 
 function getAggStats(aggs: AggregationResultBuckets): Partial<RangeStats> {
   const { buckets: jobBuckets } = aggs[JOB_TYPES_KEY];
-  const jobTypes = jobBuckets.reduce((accum: JobTypes, bucket) => {
+  const jobTypes = jobBuckets.reduce((accum: AvailableTotals, bucket) => {
     const { key, doc_count: count, isDeprecated } = bucket;
     const deprecatedCount = isDeprecated?.doc_count;
     const total: Omit<AvailableTotal, 'available'> = {
       total: count,
-      deprecated: deprecatedCount,
+      deprecated: deprecatedCount || 0,
     };
     return { ...accum, [key]: total };
-  }, {} as JobTypes);
+  }, {} as AvailableTotals);
 
   // merge pdf stats into pdf jobtype key
   const pdfJobs = jobTypes[PRINTABLE_PDF_JOBTYPE];
@@ -100,19 +99,19 @@ function getAggStats(aggs: AggregationResultBuckets): Partial<RangeStats> {
   return { _all: all, status: statusTypes, statuses: statusByApp, ...jobTypes };
 }
 
-type RangeStatSets = Partial<RangeStats> & {
-  last7Days: Partial<RangeStats>;
+type RangeStatSets = AvailableTotals & {
+  last7Days: AvailableTotals;
 };
 
 // & ReportingUsageSearchResponse
 type ESResponse = Partial<estypes.SearchResponse>;
 
-async function handleResponse(response: ESResponse): Promise<Partial<RangeStatSets>> {
+function handleResponse(response: ESResponse): RangeStatSets | { last7Days: object } {
   const buckets = get(response, 'aggregations.ranges.buckets');
   if (!buckets) {
-    return {};
+    return { last7Days: {} };
   }
-  const { last7Days, all } = buckets as any;
+  const { last7Days, all } = buckets;
 
   const last7DaysUsage = last7Days ? getAggStats(last7Days) : {};
   const allUsage = all ? getAggStats(all) : {};
@@ -179,26 +178,22 @@ export async function getReportingUsage(
   return esClient
     .search(params)
     .then(({ body: response }) => handleResponse(response))
-    .then(
-      (usage: Partial<RangeStatSets>): ReportingUsageType => {
-        // Allow this to explicitly throw an exception if/when this config is deprecated,
-        // because we shouldn't collect browserType in that case!
-        const browserType = config.get('capture', 'browser', 'type');
+    .then((usage) => {
+      // Allow this to explicitly throw an exception if/when this config is deprecated,
+      // because we shouldn't collect browserType in that case!
+      const browserType = config.get('capture', 'browser', 'type');
 
-        const exportTypesHandler = getExportTypesHandler(exportTypesRegistry);
-        const availability = exportTypesHandler.getAvailability(
-          featureAvailability
-        ) as FeatureAvailabilityMap;
+      const exportTypesHandler = getExportTypesHandler(exportTypesRegistry);
+      const availability = exportTypesHandler.getAvailability(featureAvailability);
 
-        const { last7Days, ...all } = usage;
+      const { last7Days, ...all } = usage;
 
-        return {
-          available: true,
-          browser_type: browserType,
-          enabled: true,
-          last7Days: decorateRangeStats(last7Days, availability),
-          ...decorateRangeStats(all, availability),
-        };
-      }
-    );
+      return {
+        available: true,
+        browser_type: browserType,
+        enabled: true,
+        last7Days: decorateRangeStats(last7Days, availability),
+        ...decorateRangeStats(all, availability),
+      };
+    });
 }

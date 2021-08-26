@@ -31,7 +31,7 @@ function getMockUsageCollection() {
     }
   }
   return {
-    makeUsageCollector: (options: any) => {
+    makeUsageCollector: (options: object) => {
       return new MockUsageCollector(null, options);
     },
     registerCollector: sinon.stub(),
@@ -58,7 +58,7 @@ function getPluginsMock(
 
 const getResponseMock = (base = {}) => base;
 
-const getMockFetchClients = (resp: any) => {
+const getMockFetchClients = (resp: object) => {
   const fetchParamsMock = createCollectorFetchContextMock();
   fetchParamsMock.esClient.search = jest.fn().mockResolvedValue({ body: resp });
   return fetchParamsMock;
@@ -70,7 +70,7 @@ describe('license checks', () => {
   });
 
   describe('with a basic license', () => {
-    let usageStats: any;
+    let usageStats: ReportingUsageType;
     beforeAll(async () => {
       const plugins = getPluginsMock({ license: 'basic' });
       const collector = getReportingUsageCollector(
@@ -99,7 +99,7 @@ describe('license checks', () => {
   });
 
   describe('with no license', () => {
-    let usageStats: any;
+    let usageStats: ReportingUsageType;
     beforeAll(async () => {
       const plugins = getPluginsMock({ license: 'none' });
       const collector = getReportingUsageCollector(
@@ -128,7 +128,7 @@ describe('license checks', () => {
   });
 
   describe('with platinum license', () => {
-    let usageStats: any;
+    let usageStats: ReportingUsageType;
     beforeAll(async () => {
       const plugins = getPluginsMock({ license: 'platinum' });
       const collector = getReportingUsageCollector(
@@ -157,7 +157,7 @@ describe('license checks', () => {
   });
 
   describe('with no usage data', () => {
-    let usageStats: any;
+    let usageStats: ReportingUsageType;
     beforeAll(async () => {
       const plugins = getPluginsMock({ license: 'basic' });
       const collector = getReportingUsageCollector(
@@ -477,117 +477,6 @@ describe('data modeling', () => {
     );
     const usageStats = await collector.fetch(collectorFetchContext);
     expect(usageStats).toMatchSnapshot();
-  });
-
-  test('Cast various example data to the TypeScript definition', () => {
-    const check = (obj: ReportingUsageType) => {
-      return typeof obj;
-    };
-
-    // just check that the example objects can be cast to ReportingUsageType
-    check({
-      PNG: { available: true, total: 7 },
-      _all: 21,
-      available: true,
-      browser_type: 'chromium',
-      csv: { available: true, total: 4 },
-      csv_searchsource: { available: true, total: 4 },
-      enabled: true,
-      last7Days: {
-        PNG: { available: true, total: 0 },
-        _all: 0,
-        csv: { available: true, total: 0 },
-        csv_searchsource: { available: true, total: 0 },
-        printable_pdf: {
-          app: { dashboard: 0, visualization: 0 },
-          available: true,
-          layout: { preserve_layout: 0, print: 0 },
-          total: 0,
-        },
-        status: { completed: 0, failed: 0 },
-        statuses: {},
-      },
-      printable_pdf: {
-        app: { 'canvas workpad': 3, dashboard: 3, visualization: 4 },
-        available: true,
-        layout: { preserve_layout: 7, print: 3 },
-        total: 10,
-      },
-      status: { completed: 21, failed: 0 },
-      statuses: {
-        completed: {
-          PNG: { dashboard: 3, visualization: 4 },
-          csv: {},
-          printable_pdf: { 'canvas workpad': 3, dashboard: 3, visualization: 4 },
-        },
-      },
-    });
-    check({
-      PNG: { available: true, total: 3 },
-      _all: 4,
-      available: true,
-      browser_type: 'chromium',
-      csv: { available: true, total: 0 },
-      csv_searchsource: { available: true, total: 0 },
-      enabled: true,
-      last7Days: {
-        PNG: { available: true, total: 3 },
-        _all: 4,
-        csv: { available: true, total: 0 },
-        csv_searchsource: { available: true, total: 0 },
-        printable_pdf: {
-          app: { 'canvas workpad': 1, dashboard: 0, visualization: 0 },
-          available: true,
-          layout: { preserve_layout: 1, print: 0 },
-          total: 1,
-        },
-        status: { completed: 4, failed: 0 },
-        statuses: {
-          completed: { PNG: { visualization: 3 }, printable_pdf: { 'canvas workpad': 1 } },
-        },
-      },
-      printable_pdf: {
-        app: { 'canvas workpad': 1, dashboard: 0, visualization: 0 },
-        available: true,
-        layout: { preserve_layout: 1, print: 0 },
-        total: 1,
-      },
-      status: { completed: 4, failed: 0 },
-      statuses: {
-        completed: { PNG: { visualization: 3 }, printable_pdf: { 'canvas workpad': 1 } },
-      },
-    });
-    check({
-      available: true,
-      browser_type: 'chromium',
-      enabled: true,
-      last7Days: {
-        _all: 0,
-        status: { completed: 0, failed: 0 },
-        statuses: {},
-        printable_pdf: {
-          available: true,
-          total: 0,
-          app: { dashboard: 0, visualization: 0 },
-          layout: { preserve_layout: 0, print: 0 },
-        },
-        csv: { available: true, total: 0 },
-        csv_searchsource: { available: true, total: 0 },
-        PNG: { available: true, total: 0 },
-      },
-      _all: 0,
-      status: { completed: 0, failed: 0 },
-      statuses: {},
-      printable_pdf: {
-        available: true,
-        total: 0,
-        app: { dashboard: 0, visualization: 0 },
-        layout: { preserve_layout: 0, print: 0 },
-      },
-      csv: { available: true, total: 0 },
-      csv_searchsource: { available: true, total: 0 },
-      PNG: { available: true, total: 0 },
-    });
   });
 });
 

@@ -17,7 +17,7 @@ import { AuthenticatedUser, SecurityPluginSetup } from '../../security/server';
 import { SpacesPluginSetup } from '../../spaces/server';
 import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
 import { CancellationToken } from '../common';
-import { BaseParams, BasePayload, TaskRunResult } from '../common/types';
+import { BaseParams, BasePayload, JobType, TaskRunResult } from '../common/types';
 import { ReportingConfigType } from './config';
 import { ReportingCore } from './core';
 import { LevelLogger } from './lib';
@@ -90,7 +90,7 @@ export interface ExportTypeDefinition<
 > {
   id: string;
   name: string;
-  jobType: string;
+  jobType: JobType;
   jobContentEncoding?: string;
   jobContentExtension: string;
   createJobFnFactory: CreateJobFnFactory<CreateJobFnType> | null; // immediate job does not have a "create" phase

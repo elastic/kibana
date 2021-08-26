@@ -6,6 +6,7 @@
  */
 
 import type { SerializableRecord } from '@kbn/utility-types';
+import { ALL_APP_NAMES, ALL_JOB_TYPES } from './constants';
 
 export interface PageSizeParams {
   pageMarginTop: number;
@@ -189,3 +190,7 @@ type Url = string;
 type UrlLocatorTuple = [url: Url, locatorParams: LocatorParams];
 
 export type UrlOrUrlLocatorTuple = Url | UrlLocatorTuple;
+
+export type JobType = typeof ALL_JOB_TYPES[number];
+export type AppName = typeof ALL_APP_NAMES[number];
+export { JOB_STATUSES } from './constants';

@@ -82,6 +82,19 @@ export const USES_HEADLESS_JOB_TYPES = [PDF_JOB_TYPE, PNG_JOB_TYPE];
 
 export const DEPRECATED_JOB_TYPES = [CSV_JOB_TYPE_DEPRECATED];
 
+// Telemetry: used for schema definition of stats for each export type
+export const ALL_JOB_TYPES = <const>[
+  CSV_JOB_TYPE,
+  CSV_JOB_TYPE_DEPRECATED,
+  PDF_JOB_TYPE,
+  PDF_JOB_TYPE_V2,
+  PNG_JOB_TYPE,
+  PNG_JOB_TYPE_V2,
+];
+
+// Telemetry: used for schema definition of stats for each app
+export const ALL_APP_NAMES = <const>['canvas workpad', 'dashboard', 'visualization'];
+
 // Licenses
 export const LICENSE_TYPE_TRIAL = 'trial';
 export const LICENSE_TYPE_BASIC = 'basic';

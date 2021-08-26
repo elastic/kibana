@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-import { ExportTypesRegistry } from '../lib/export_types_registry';
-import { FeaturesAvailability } from './';
+import type { JobType } from '../../common/types';
+import type { ExportTypesRegistry } from '../lib/export_types_registry';
+import type { FeaturesAvailability } from './';
+
+type FeatureAvailabilityMap = { [E in JobType]: boolean };
 
 /*
  * Gets a handle to the Reporting export types registry and returns a few
@@ -22,8 +25,8 @@ export function getExportTypesHandler(exportTypesRegistry: ExportTypesRegistry) 
      * @param {Object} xpackInfo: xpack_main plugin info object
      * @return {Object} availability of each export type
      */
-    getAvailability(featuresAvailability: FeaturesAvailability): { [exportType: string]: boolean } {
-      const exportTypesAvailability: { [exportType: string]: boolean } = {};
+    getAvailability(featuresAvailability: FeaturesAvailability): FeatureAvailabilityMap {
+      const exportTypesAvailability = {} as FeatureAvailabilityMap;
       const xpackInfoAvailable = featuresAvailability && featuresAvailability.isAvailable();
       const licenseType = featuresAvailability.license.getType();
       if (!licenseType) {

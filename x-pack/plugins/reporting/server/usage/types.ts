@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { AppName, JobType, JOB_STATUSES } from '../../common/types';
+
 export interface KeyCountBucket {
   key: string;
   doc_count: number;
@@ -60,40 +62,35 @@ export interface SearchResponse {
 export interface AvailableTotal {
   available: boolean;
   total: number;
-  deprecated?: number;
+  deprecated: number;
+  app?: AppCount;
+  layout?: LayoutCount;
 }
 
-type BaseJobTypes = 'csv' | 'csv_searchsource' | 'PNG' | 'printable_pdf';
-
-export interface LayoutCounts {
+export interface LayoutCount {
   print: number;
   preserve_layout: number;
+  canvas: number;
 }
 
-type AppNames = 'canvas workpad' | 'dashboard' | 'visualization';
-export type AppCounts = {
-  [A in AppNames]?: number;
+export type AppCount = {
+  [A in AppName]?: number;
 };
 
-export type JobTypes = { [K in BaseJobTypes]: AvailableTotal } & {
-  printable_pdf: AvailableTotal & {
-    app: AppCounts;
-    layout: LayoutCounts;
-  };
+export type AvailableTotals = { [K in JobType]: AvailableTotal } & {
+  printable_pdf: Required<AvailableTotal>;
 };
 
-export type ByAppCounts = { [J in BaseJobTypes]?: AppCounts };
+export type AppCounts = { [J in JobType]: AppCount };
 
-type Statuses = 'completed' | 'completed_with_warnings' | 'failed' | 'pending' | 'processing';
-
-type StatusCounts = {
-  [S in Statuses]?: number;
+export type StatusCounts = {
+  [S in JOB_STATUSES]?: number;
 };
-type StatusByAppCounts = {
-  [S in Statuses]?: ByAppCounts;
+export type StatusByAppCounts = {
+  [S in JOB_STATUSES]?: AppCounts;
 };
 
-export type RangeStats = JobTypes & {
+export type RangeStats = AvailableTotals & {
   _all: number;
   status: StatusCounts;
   statuses: StatusByAppCounts;
@@ -106,8 +103,7 @@ export type ReportingUsageType = RangeStats & {
   last7Days: RangeStats;
 };
 
-export type ExportType = 'csv' | 'csv_searchsource' | 'printable_pdf' | 'PNG';
-export type FeatureAvailabilityMap = { [F in ExportType]: boolean };
+export type FeatureAvailabilityMap = { [F in JobType]: boolean };
 
 export interface ReportingUsageSearchResponse {
   aggregations: {
