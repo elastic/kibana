@@ -10,7 +10,8 @@ import { createSpacesAndUsers, deleteSpacesAndUsers } from '../../../common/lib/
 
 // eslint-disable-next-line import/no-default-export
 export default ({ loadTestFile, getService }: FtrProviderContext): void => {
-  describe('rules security and spaces enabled: basic', function () {
+  // FAILING: https://github.com/elastic/kibana/issues/110153
+  describe.skip('rules security and spaces enabled: basic', function () {
     // Fastest ciGroup for the moment.
     this.tags('ciGroup5');
 

@@ -199,9 +199,11 @@ describe('createLifecycleRuleTypeFactory', () => {
               "kibana.alert.rule.uuid": "alertId",
               "kibana.alert.start": "2021-06-16T09:01:00.000Z",
               "kibana.alert.status": "open",
+              "kibana.alert.workflow_status": "open",
               "kibana.space_ids": Array [
                 "spaceId",
               ],
+              "kibana.version": "7.16.0",
               "service.name": "opbeans-java",
               "tags": Array [
                 "tags",
@@ -221,9 +223,11 @@ describe('createLifecycleRuleTypeFactory', () => {
               "kibana.alert.rule.uuid": "alertId",
               "kibana.alert.start": "2021-06-16T09:01:00.000Z",
               "kibana.alert.status": "open",
+              "kibana.alert.workflow_status": "open",
               "kibana.space_ids": Array [
                 "spaceId",
               ],
+              "kibana.version": "7.16.0",
               "service.name": "opbeans-node",
               "tags": Array [
                 "tags",

@@ -77,6 +77,20 @@ describe('Deprecations table', () => {
     );
   });
 
+  it('shows critical and warning deprecations count', () => {
+    const { find } = testBed;
+    const criticalDeprecations = esDeprecationsMockResponse.deprecations.filter(
+      (deprecation) => deprecation.isCritical
+    );
+    const warningDeprecations = esDeprecationsMockResponse.deprecations.filter(
+      (deprecation) => deprecation.isCritical === false
+    );
+
+    expect(find('criticalDeprecationsCount').text()).toContain(criticalDeprecations.length);
+
+    expect(find('warningDeprecationsCount').text()).toContain(warningDeprecations.length);
+  });
+
   describe('search bar', () => {
     it('filters results by "critical" status', async () => {
       const { find, actions } = testBed;
@@ -148,7 +162,7 @@ describe('Deprecations table', () => {
 
       expect(exists('noDeprecationsRow')).toBe(true);
       expect(find('noDeprecationsRow').text()).toContain(
-        'No Elasticsearch deprecation issues found'
+        'No Elasticsearch deprecation warnings found'
       );
     });
   });
