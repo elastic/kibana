@@ -6,15 +6,15 @@
  */
 
 import React, { memo, ReactNode, useEffect, useState } from 'react';
-import { EuiCallOut, EuiLoadingChart } from '@elastic/eui';
+import { EuiCallOut, EuiCallOutProps, EuiLoadingChart } from '@elastic/eui';
 import { UserCommandInput } from './user_command_input';
 import { CommandExecutionFailure } from './command_execution_failure';
 
-export interface HelpOutputProps {
+export interface HelpOutputProps extends Pick<EuiCallOutProps, 'title'> {
   input: string;
   children: ReactNode | Promise<{ result: ReactNode }>;
 }
-export const HelpOutput = memo<HelpOutputProps>(({ input, children }) => {
+export const HelpOutput = memo<HelpOutputProps>(({ input, children, ...euiCalloutProps }) => {
   const [content, setContent] = useState<ReactNode>(<EuiLoadingChart size="l" mono />);
 
   useEffect(() => {
@@ -38,7 +38,9 @@ export const HelpOutput = memo<HelpOutputProps>(({ input, children }) => {
       <div>
         <UserCommandInput input={input} />
       </div>
-      <EuiCallOut color="primary">{content}</EuiCallOut>
+      <EuiCallOut {...euiCalloutProps} color="primary" size="s" iconType="help">
+        {content}
+      </EuiCallOut>
     </div>
   );
 });

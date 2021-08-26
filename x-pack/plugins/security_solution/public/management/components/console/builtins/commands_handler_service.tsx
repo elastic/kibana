@@ -12,6 +12,7 @@ import { builtInCommands } from './commands';
 import { HistoryItem, HistoryItemComponent } from '../components/history_item';
 import { HelpOutput } from '../components/help_output';
 import { ParsedCommandInput } from '../service/parsed_command_input';
+import { CommandList } from '../components/command_list';
 
 export class ConsoleBuiltinCommandsService implements ConsoleServiceInterface {
   constructor(private commandList = builtInCommands()) {}
@@ -36,7 +37,7 @@ export class ConsoleBuiltinCommandsService implements ConsoleServiceInterface {
           result: (
             <HistoryItem>
               {
-                <HelpOutput input={parsedInput.input}>
+                <HelpOutput input={parsedInput.input} title="Available commands">
                   {this.getHelpContent(parsedInput, contextConsoleService)}
                 </HelpOutput>
               }
@@ -64,14 +65,7 @@ export class ConsoleBuiltinCommandsService implements ConsoleServiceInterface {
       helpOutput = (await consoleService.getHelp()).result;
     } else {
       helpOutput = (
-        <p>
-          {'The following commands are available:'}
-          <EuiSpacer />
-          {consoleService.getCommandList().map((commandDefinition) => {
-            return <div>{`${commandDefinition.name} - ${commandDefinition.about}`}</div>;
-          })}
-          <EuiSpacer />
-        </p>
+        <CommandList commands={this.commandList.concat(consoleService.getCommandList())} />
       );
     }
 
