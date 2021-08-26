@@ -25,7 +25,7 @@ object can be retrieved via the Resolve API using either its new ID or its old I
 
 
 `type`::
-  (Required, string) Valid options include `visualization`, `dashboard`, `search`, `index-pattern`, `config`, and `timelion-sheet`.
+  (Required, string) Valid options include `visualization`, `dashboard`, `search`, `index-pattern`, `config`.
 
 `id`::
   (Required, string) The ID of the object to retrieve.

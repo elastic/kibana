@@ -11,6 +11,7 @@ import { FtrService } from '../ftr_provider_context';
 export class MonacoEditorService extends FtrService {
   private readonly retry = this.ctx.getService('retry');
   private readonly browser = this.ctx.getService('browser');
+  private readonly testSubjects = this.ctx.getService('testSubjects');
 
   public async getCodeEditorValue(nthIndex: number = 0) {
     let values: string[] = [];
@@ -25,6 +26,12 @@ export class MonacoEditorService extends FtrService {
     });
 
     return values[nthIndex] as string;
+  }
+
+  public async typeCodeEditorValue(value: string, testSubjId: string) {
+    const editor = await this.testSubjects.find(testSubjId);
+    const textarea = await editor.findByCssSelector('textarea');
+    textarea.type(value);
   }
 
   public async setCodeEditorValue(value: string, nthIndex = 0) {

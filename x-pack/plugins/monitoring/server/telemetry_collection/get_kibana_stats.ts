@@ -49,7 +49,6 @@ export interface ClusterUsageStats {
   search?: { total: number };
   index_pattern?: { total: number };
   graph_workspace?: { total: number };
-  timelion_sheet?: { total: number };
   indices: number;
   plugins?: {
     xpack?: unknown;
@@ -95,7 +94,6 @@ export function getUsageStats(rawStats: estypes.SearchResponse<KibanaUsageStats>
       search: rollUpTotals(rolledUpStats, currUsage, 'search'),
       index_pattern: rollUpTotals(rolledUpStats, currUsage, 'index_pattern'),
       graph_workspace: rollUpTotals(rolledUpStats, currUsage, 'graph_workspace'),
-      timelion_sheet: rollUpTotals(rolledUpStats, currUsage, 'timelion_sheet'),
       indices: rollUpIndices(rolledUpStats),
     };
 
@@ -108,7 +106,6 @@ export function getUsageStats(rawStats: estypes.SearchResponse<KibanaUsageStats>
       /* eslint-disable @typescript-eslint/naming-convention */
       index_pattern,
       graph_workspace,
-      timelion_sheet,
       /* eslint-enable @typescript-eslint/naming-convention */
       xpack,
       ...pluginsTop

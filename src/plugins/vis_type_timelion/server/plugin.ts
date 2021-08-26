@@ -24,9 +24,7 @@ import { getUiSettings } from './ui_settings';
 /**
  * Describes public Timelion plugin contract returned at the `setup` stage.
  */
-export interface PluginSetupContract {
-  uiEnabled: boolean;
-}
+export interface PluginSetupContract {}
 
 export interface TimelionPluginStartDeps {
   data: PluginStart;
@@ -76,8 +74,6 @@ export class TimelionPlugin
     validateEsRoute(router);
 
     core.uiSettings.register(getUiSettings(config));
-
-    return deepFreeze({ uiEnabled: config.ui.enabled });
   }
 
   public start() {

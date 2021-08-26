@@ -92,9 +92,6 @@ export default async function ({ readConfigFile }) {
       settings: {
         pathname: '/app/management',
       },
-      timelion: {
-        pathname: '/app/timelion',
-      },
       console: {
         pathname: '/app/dev_tools',
         hash: '/console',

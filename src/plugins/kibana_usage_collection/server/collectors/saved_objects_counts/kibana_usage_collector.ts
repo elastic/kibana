@@ -19,7 +19,6 @@ interface KibanaSavedObjectCounts {
   search: { total: number };
   index_pattern: { total: number };
   graph_workspace: { total: number };
-  timelion_sheet: { total: number };
 }
 
 interface KibanaUsage extends KibanaSavedObjectCounts {
@@ -32,7 +31,6 @@ const TYPES = [
   'search',
   'index-pattern',
   'graph-workspace',
-  'timelion-sheet',
 ];
 
 export async function getKibanaSavedObjectCounts(
@@ -87,12 +85,6 @@ export function registerKibanaUsageCollector(
           total: {
             type: 'long',
             _meta: { description: 'Total number of graph_workspace saved objects' },
-          },
-        },
-        timelion_sheet: {
-          total: {
-            type: 'long',
-            _meta: { description: 'Total number of timelion_sheet saved objects' },
           },
         },
       },

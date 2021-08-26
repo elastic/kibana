@@ -342,7 +342,6 @@ functions and will be impacted:
 2. [tile_map](https://github.com/elastic/kibana/blob/6039709929caf0090a4130b8235f3a53bd04ed84/src/legacy/core_plugins/tile_map/public/plugin.ts#L62)
 3. [vis_type_table](https://github.com/elastic/kibana/blob/6039709929caf0090a4130b8235f3a53bd04ed84/src/legacy/core_plugins/vis_type_table/public/plugin.ts#L61)
 4. [vis_type_vega](https://github.com/elastic/kibana/blob/6039709929caf0090a4130b8235f3a53bd04ed84/src/legacy/core_plugins/vis_type_vega/public/plugin.ts#L59)
-5. [timelion](https://github.com/elastic/kibana/blob/9d69b72a5f200e58220231035b19da852fc6b0a5/src/plugins/timelion/server/plugin.ts#L40)
 6. [code](https://github.com/elastic/kibana/blob/5049b460b47d4ae3432e1d9219263bb4be441392/x-pack/legacy/plugins/code/server/plugin.ts#L129-L149)
 7. [spaces](https://github.com/elastic/kibana/blob/096c7ee51136327f778845c636d7c4f1188e5db2/x-pack/legacy/plugins/spaces/server/new_platform/plugin.ts#L95)
 8. [licensing](https://github.com/elastic/kibana/blob/4667c46caef26f8f47714504879197708debae32/x-pack/plugins/licensing/server/plugin.ts)

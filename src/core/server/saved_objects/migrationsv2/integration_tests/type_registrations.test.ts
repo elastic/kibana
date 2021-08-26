@@ -91,7 +91,6 @@ const previouslyRegisteredTypes = [
   'tag',
   'task',
   'telemetry',
-  'timelion-sheet',
   'tsvb-validation-telemetry',
   'ui-counter',
   'ui-metric',

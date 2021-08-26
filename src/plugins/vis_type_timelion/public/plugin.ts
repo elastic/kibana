@@ -59,9 +59,7 @@ export interface VisTypeTimelionPluginStart {
 }
 
 /** @public */
-export interface VisTypeTimelionPluginSetup {
-  isUiEnabled: boolean;
-}
+export interface VisTypeTimelionPluginSetup {}
 
 /** @internal */
 export class TimelionVisPlugin
@@ -87,10 +85,6 @@ export class TimelionVisPlugin
     expressions.registerFunction(() => getTimelionVisualizationConfig(dependencies));
     expressions.registerRenderer(getTimelionVisRenderer(dependencies));
     visualizations.createBaseVisualization(getTimelionVisDefinition(dependencies));
-
-    return {
-      isUiEnabled: this.initializerContext.config.get().ui.enabled,
-    };
   }
 
   public start(core: CoreStart, { data, charts }: TimelionVisStartDependencies) {

@@ -71,11 +71,9 @@ describe('Features Plugin', () => {
     `);
   });
 
-  it('returns OSS + registered kibana features with timelion when available', async () => {
+  it('returns OSS + registered kibana features', async () => {
     const plugin = new FeaturesPlugin(initContext);
-    const { registerKibanaFeature: registerFeature } = await plugin.setup(coreSetup, {
-      visTypeTimelion: { uiEnabled: true },
-    });
+    const { registerKibanaFeature: registerFeature } = await plugin.setup(coreSetup);
     registerFeature({
       id: 'baz',
       name: 'baz',
@@ -96,7 +94,6 @@ describe('Features Plugin', () => {
         "advancedSettings",
         "indexPatterns",
         "savedObjectsManagement",
-        "timelion",
       ]
     `);
   });

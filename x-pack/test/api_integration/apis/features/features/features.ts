@@ -102,7 +102,6 @@ export default function ({ getService }: FtrProviderContext) {
             'enterpriseSearch',
             'advancedSettings',
             'indexPatterns',
-            'timelion',
             'graph',
             'monitoring',
             'savedObjectsManagement',

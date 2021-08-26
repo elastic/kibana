@@ -17,7 +17,7 @@ export default function ({ getService }: FtrProviderContext) {
       await spacesService.create({
         id: 'foo-space',
         name: 'Foo Space',
-        disabledFeatures: ['timelion'],
+        disabledFeatures: [],
         color: '#AABBCC',
       });
     });
@@ -63,7 +63,7 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(200, {
           id: 'foo-space',
           name: 'Foo Space',
-          disabledFeatures: ['timelion'],
+          disabledFeatures: [],
           color: '#AABBCC',
         });
     });

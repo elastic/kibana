@@ -28,7 +28,6 @@ export default function ({ getService }: FtrProviderContext) {
             indexPatterns: ['all', 'read'],
             savedObjectsManagement: ['all', 'read'],
             savedObjectsTagging: ['all', 'read'],
-            timelion: ['all', 'read'],
             graph: ['all', 'read'],
             maps: ['all', 'read'],
             canvas: ['all', 'read'],
