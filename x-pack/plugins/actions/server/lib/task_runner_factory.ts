@@ -22,7 +22,6 @@ import { ActionExecutorContract } from './action_executor';
 import { ExecutorError } from './executor_error';
 import { RunContext } from '../../../task_manager/server';
 import { EncryptedSavedObjectsClient } from '../../../encrypted_saved_objects/server';
-import { ActionTypeDisabledError } from './errors';
 import {
   ActionTaskParams,
   ActionTypeRegistryContract,
@@ -140,14 +139,8 @@ export class TaskRunnerFactory {
             relatedSavedObjects: validatedRelatedSavedObjects(logger, relatedSavedObjects),
           });
         } catch (e) {
-          if (e instanceof ActionTypeDisabledError) {
-            // We'll stop re-trying due to action being forbidden
-            throw new ExecutorError(e.message, {}, false);
-          }
-
-          if (isRetryableBasedOnAttempts) {
-            throw new ExecutorError(e.message, {}, getRetry ? getRetry(taskInfo.attempts) : true);
-          }
+          // Intentionally swallow the alert to avoid persisting failed tasks
+          logger.error(`Action '${actionId}' failed: ${e.message}`);
         }
 
         if (
@@ -163,6 +156,8 @@ export class TaskRunnerFactory {
             executorResult.data,
             executorResult.retry as boolean | Date
           );
+        } else if (executorResult && executorResult?.status === 'error') {
+          logger.error(`Action '${actionId}' failed: ${executorResult.message}`);
         }
 
         // Cleanup action_task_params object now that we're done with it
