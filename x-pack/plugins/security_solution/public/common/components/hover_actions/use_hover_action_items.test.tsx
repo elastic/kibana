@@ -22,7 +22,9 @@ describe('useHoverActionItems', () => {
     defaultFocusedButtonRef: null,
     field: 'signal.rule.name',
     handleHoverActionClicked: jest.fn(),
-    isObjectArray: true,
+    hideTopN: false,
+    isCaseView: false,
+    isObjectArray: false,
     ownFocus: false,
     showTopN: false,
     stKeyboardEvent: undefined,
@@ -108,6 +110,76 @@ describe('useHoverActionItems', () => {
         'hover-actions-show-top-n'
       );
       expect(result.current.overflowActionItems[2].props.items[3].props['data-test-subj']).toEqual(
+        'hover-actions-copy-button'
+      );
+    });
+  });
+
+  test('it should hide the Top N action when hideTopN is true', async () => {
+    await act(async () => {
+      const { result, waitForNextUpdate } = renderHook(() => {
+        const testProps = {
+          ...defaultProps,
+          hideTopN: true, // <-- hide the Top N action
+        };
+        return useHoverActionItems(testProps);
+      });
+      await waitForNextUpdate();
+
+      result.current.allActionItems.forEach((item) => {
+        expect(item.props['data-test-subj']).not.toEqual('hover-actions-show-top-n');
+      });
+    });
+  });
+
+  test('should not have toggle column', async () => {
+    await act(async () => {
+      const { result, waitForNextUpdate } = renderHook(() => {
+        const defaultFocusedButtonRef = useRef(null);
+        const testProps = {
+          ...defaultProps,
+          isObjectArray: true,
+          defaultFocusedButtonRef,
+          enableOverflowButton: true,
+        };
+        return useHoverActionItems(testProps);
+      });
+      await waitForNextUpdate();
+
+      expect(result.current.overflowActionItems).toHaveLength(3);
+      expect(result.current.overflowActionItems[0].props['data-test-subj']).toEqual(
+        'hover-actions-filter-for'
+      );
+      expect(result.current.overflowActionItems[1].props['data-test-subj']).toEqual(
+        'hover-actions-filter-out'
+      );
+
+      result.current.overflowActionItems[2].props.items.forEach((item: JSX.Element) => {
+        expect(item.props['data-test-subj']).not.toEqual('hover-actions-toggle-column');
+      });
+    });
+  });
+
+  test('should not have filter in, filter out, or toggle column', async () => {
+    await act(async () => {
+      const { result, waitForNextUpdate } = renderHook(() => {
+        const testProps = {
+          ...defaultProps,
+          isCaseView: true,
+          enableOverflowButton: false,
+        };
+        return useHoverActionItems(testProps);
+      });
+      await waitForNextUpdate();
+
+      expect(result.current.allActionItems).toHaveLength(3);
+      expect(result.current.allActionItems[0].props['data-test-subj']).toEqual(
+        'hover-actions-add-timeline'
+      );
+      expect(result.current.allActionItems[1].props['data-test-subj']).toEqual(
+        'hover-actions-show-top-n'
+      );
+      expect(result.current.allActionItems[2].props['data-test-subj']).toEqual(
         'hover-actions-copy-button'
       );
     });

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiToolTip } from '@elastic/eui';
+import { EuiToolTip, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
@@ -18,9 +18,9 @@ import {
   asPercent,
 } from '../../../../common/utils/formatters';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
-import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useFetcher } from '../../../hooks/use_fetcher';
+import { useTimeRange } from '../../../hooks/use_time_range';
 import { truncate, unit } from '../../../utils/style';
 import { ServiceNodeMetricOverviewLink } from '../../shared/Links/apm/ServiceNodeMetricOverviewLink';
 import { ITableColumn, ManagedTable } from '../../shared/managed_table';
@@ -35,12 +35,10 @@ const ServiceNodeName = euiStyled.div`
 
 function ServiceNodeOverview() {
   const {
-    query: { environment, kuery },
+    query: { environment, kuery, rangeFrom, rangeTo },
   } = useApmParams('/services/:serviceName/nodes');
 
-  const {
-    urlParams: { start, end },
-  } = useUrlParams();
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const { serviceName } = useApmServiceContext();
 
@@ -80,6 +78,12 @@ function ServiceNodeOverview() {
             {i18n.translate('xpack.apm.jvmsTable.nameColumnLabel', {
               defaultMessage: 'Name',
             })}
+            <EuiIcon
+              size="s"
+              color="subdued"
+              type="questionInCircle"
+              className="eui-alignTop"
+            />
           </>
         </EuiToolTip>
       ),
@@ -113,10 +117,19 @@ function ServiceNodeOverview() {
       },
     },
     {
+      name: i18n.translate('xpack.apm.jvmsTable.hostName', {
+        defaultMessage: 'Host name',
+      }),
+      field: 'hostName',
+      sortable: true,
+      render: (_, { hostName }) => hostName ?? '',
+    },
+    {
       name: i18n.translate('xpack.apm.jvmsTable.cpuColumnLabel', {
         defaultMessage: 'CPU avg',
       }),
       field: 'cpu',
+      dataType: 'number',
       sortable: true,
       render: (_, { cpu }) => asPercent(cpu, 1),
     },
@@ -125,6 +138,7 @@ function ServiceNodeOverview() {
         defaultMessage: 'Heap memory avg',
       }),
       field: 'heapMemory',
+      dataType: 'number',
       sortable: true,
       render: asDynamicBytes,
     },
@@ -133,6 +147,7 @@ function ServiceNodeOverview() {
         defaultMessage: 'Non-heap memory avg',
       }),
       field: 'nonHeapMemory',
+      dataType: 'number',
       sortable: true,
       render: asDynamicBytes,
     },
@@ -141,6 +156,7 @@ function ServiceNodeOverview() {
         defaultMessage: 'Thread count max',
       }),
       field: 'threadCount',
+      dataType: 'number',
       sortable: true,
       render: asInteger,
     },

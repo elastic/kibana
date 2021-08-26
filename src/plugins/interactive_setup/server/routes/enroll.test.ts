@@ -113,7 +113,7 @@ describe('Enroll routes', () => {
       mockRouteParams.preboot.isSetupOnHold.mockReturnValue(false);
 
       const mockRequest = httpServerMock.createKibanaRequest({
-        body: { apiKey: 'some-key', hosts: ['host1', 'host2'], caFingerprint: 'ab:cd:ef' },
+        body: { apiKey: 'some-key', hosts: ['host1', 'host2'], caFingerprint: 'deadbeef' },
       });
 
       await expect(routeHandler(mockContext, mockRequest, kibanaResponseFactory)).resolves.toEqual({
@@ -134,7 +134,7 @@ describe('Enroll routes', () => {
       );
 
       const mockRequest = httpServerMock.createKibanaRequest({
-        body: { apiKey: 'some-key', hosts: ['host1', 'host2'], caFingerprint: 'ab:cd:ef' },
+        body: { apiKey: 'some-key', hosts: ['host1', 'host2'], caFingerprint: 'deadbeef' },
       });
 
       await expect(routeHandler(mockContext, mockRequest, kibanaResponseFactory)).resolves.toEqual({
@@ -164,7 +164,7 @@ describe('Enroll routes', () => {
       mockRouteParams.kibanaConfigWriter.isConfigWritable.mockResolvedValue(false);
 
       const mockRequest = httpServerMock.createKibanaRequest({
-        body: { apiKey: 'some-key', hosts: ['host1', 'host2'], caFingerprint: 'ab:cd:ef' },
+        body: { apiKey: 'some-key', hosts: ['host1', 'host2'], caFingerprint: 'deadbeef' },
       });
 
       await expect(routeHandler(mockContext, mockRequest, kibanaResponseFactory)).resolves.toEqual({
@@ -203,7 +203,7 @@ describe('Enroll routes', () => {
       );
 
       const mockRequest = httpServerMock.createKibanaRequest({
-        body: { apiKey: 'some-key', hosts: ['host1', 'host2'], caFingerprint: 'ab:cd:ef' },
+        body: { apiKey: 'some-key', hosts: ['host1', 'host2'], caFingerprint: 'deadbeef' },
       });
 
       await expect(routeHandler(mockContext, mockRequest, kibanaResponseFactory)).resolves.toEqual({
@@ -236,7 +236,7 @@ describe('Enroll routes', () => {
       );
 
       const mockRequest = httpServerMock.createKibanaRequest({
-        body: { apiKey: 'some-key', hosts: ['host1', 'host2'], caFingerprint: 'ab:cd:ef' },
+        body: { apiKey: 'some-key', hosts: ['host1', 'host2'], caFingerprint: 'deadbeef' },
       });
 
       await expect(routeHandler(mockContext, mockRequest, kibanaResponseFactory)).resolves.toEqual({
@@ -273,7 +273,7 @@ describe('Enroll routes', () => {
       mockRouteParams.kibanaConfigWriter.writeConfig.mockResolvedValue();
 
       const mockRequest = httpServerMock.createKibanaRequest({
-        body: { apiKey: 'some-key', hosts: ['host1', 'host2'], caFingerprint: 'ab:cd:ef' },
+        body: { apiKey: 'some-key', hosts: ['host1', 'host2'], caFingerprint: 'deadbeef' },
       });
 
       await expect(routeHandler(mockContext, mockRequest, kibanaResponseFactory)).resolves.toEqual({
@@ -286,7 +286,7 @@ describe('Enroll routes', () => {
       expect(mockRouteParams.elasticsearch.enroll).toHaveBeenCalledWith({
         apiKey: 'some-key',
         hosts: ['host1', 'host2'],
-        caFingerprint: 'ab:cd:ef',
+        caFingerprint: 'DE:AD:BE:EF',
       });
 
       expect(mockRouteParams.kibanaConfigWriter.writeConfig).toHaveBeenCalledTimes(1);

@@ -198,6 +198,7 @@ export interface RawAlert extends SavedObjectAttributes {
   tags: string[];
   alertTypeId: string;
   consumer: string;
+  legacyId: string | null;
   schedule: SavedObjectAttributes;
   actions: RawAlertAction[];
   params: SavedObjectAttributes;
