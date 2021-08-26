@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Plugin, Logger, CoreSetup, PluginInitializerContext } from 'src/core/server';
+import { Plugin, Logger, CoreSetup, PluginInitializerContext, CoreStart } from 'src/core/server';
 
 import { once } from 'lodash';
 import { StackAlertsDeps, StackAlertsStartDeps } from './types';
@@ -17,10 +17,18 @@ import {
   TECHNICAL_COMPONENT_TEMPLATE_NAME,
 } from '../../rule_registry/common/assets';
 import { mappingFromFieldMap } from '../../rule_registry/common/mapping_from_field_map';
+import { setIndexPatternsService, setInternalRepository } from './kibana_services';
+import { PluginStart as DataPluginStart } from '../../../../src/plugins/data/server';
+
+export interface StartDeps {
+  data: DataPluginStart;
+}
 
 export class AlertingBuiltinsPlugin
   implements Plugin<void, void, StackAlertsDeps, StackAlertsStartDeps> {
   private readonly logger: Logger;
+  private alertsIndexPattern: string = '';
+  private setIndexPattern: (() => void) | null = null;
 
   constructor(ctx: PluginInitializerContext) {
     this.logger = ctx.logger.get();
@@ -33,7 +41,7 @@ export class AlertingBuiltinsPlugin
     features.registerKibanaFeature(BUILT_IN_ALERTS_FEATURE);
 
     const { ruleDataService } = ruleRegistry;
-    const alertsIndexPattern = ruleDataService.getFullAssetName('stack-alerts*');
+    this.alertsIndexPattern = ruleDataService.getFullAssetName('stack-alerts*');
     let ruleDataClient: RuleDataClient | null = null;
     const initializeRuleDataTemplates = once(async () => {
       const componentTemplateName = ruleDataService.getFullAssetName('stack-alerts-mappings');
@@ -85,7 +93,7 @@ export class AlertingBuiltinsPlugin
       await ruleDataService.createOrUpdateIndexTemplate({
         name: ruleDataService.getFullAssetName('stack-alerts.tracking-containment-index-template'),
         body: {
-          index_patterns: [alertsIndexPattern],
+          index_patterns: [this.alertsIndexPattern],
           composed_of: [
             ruleDataService.getFullAssetName(TECHNICAL_COMPONENT_TEMPLATE_NAME),
             ruleDataService.getFullAssetName(ECS_COMPONENT_TEMPLATE_NAME),
@@ -93,7 +101,7 @@ export class AlertingBuiltinsPlugin
           ],
         },
       });
-      await ruleDataService.updateIndexMappingsMatchingPattern(alertsIndexPattern);
+      await ruleDataService.updateIndexMappingsMatchingPattern(this.alertsIndexPattern);
     });
 
     // initialize eagerly
@@ -102,10 +110,17 @@ export class AlertingBuiltinsPlugin
     });
 
     ruleDataClient = ruleDataService.getRuleDataClient(
-      'synthetics', // TODO: Update rback package to include stack alerts geo
+      'synthetics', // TODO: Update rbac package to include stack alerts geo
       ruleDataService.getFullAssetName('stack-alerts'),
-      () => initializeRuleDataTemplatesPromise
+      async () => {
+        return initializeRuleDataTemplatesPromise;
+      }
     );
+    ruleDataClient.createWriteTargetIfNeeded({}).then(() => {
+      if (this.setIndexPattern) {
+        this.setIndexPattern();
+      }
+    });
 
     registerBuiltInAlertTypes({
       logger: this.logger,
@@ -124,6 +139,25 @@ export class AlertingBuiltinsPlugin
     });
   }
 
-  public start() {}
+  public start(core: CoreStart, plugins: StartDeps) {
+    // TODO: Follow-up: This is to create an index pattern using the service.
+    // Should we be getting this for free with alerts as data?
+    this.setIndexPattern = () => {
+      setInternalRepository(core.savedObjects.createInternalRepository);
+      setIndexPatternsService(
+        plugins.data.indexPatterns.indexPatternsServiceFactory,
+        core.elasticsearch.client.asInternalUser
+      ).then((indexPatternsService) => {
+        indexPatternsService.createAndSave(
+          {
+            title: this.alertsIndexPattern,
+            timeFieldName: 'entityDateTime',
+          },
+          true
+        );
+      });
+    };
+  }
+
   public stop() {}
 }
