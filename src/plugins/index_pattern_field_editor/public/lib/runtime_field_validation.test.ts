@@ -13,7 +13,7 @@ const dataStart = dataPluginMock.createStartContract();
 const { search } = dataStart;
 
 const runtimeField = {
-  type: 'keyword',
+  type: 'keyword' as const,
   script: {
     source: 'emit("hello")',
   },
