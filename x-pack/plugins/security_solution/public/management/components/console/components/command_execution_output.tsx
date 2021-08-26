@@ -5,13 +5,24 @@
  * 2.0.
  */
 
-import React, { memo, ReactNode, useEffect, useState } from 'react';
-import { EuiLoadingChart } from '@elastic/eui';
+import React, { memo, ReactNode, useCallback, useEffect, useState } from 'react';
+import { EuiButton, EuiLoadingChart } from '@elastic/eui';
+import styled from 'styled-components';
 import { useConsoleService } from './console_provider';
 import { Command } from '../service/console_service';
 import { CommandExecutionFailure } from './command_execution_failure';
 import { UserCommandInput } from './user_command_input';
 import { useInternalServices } from './internal_context';
+
+const CommandOutputContainer = styled.div`
+  position: relative;
+
+  .run-in-background {
+    position: absolute;
+    right: 0;
+    top: 1em;
+  }
+`;
 
 export interface CommandExecutionOutputProps {
   command: Command;
@@ -22,8 +33,18 @@ export const CommandExecutionOutput = memo<CommandExecutionOutputProps>(({ comma
   const [output, setOutput] = useState<ReactNode | null>(null);
   const internalServices = useInternalServices();
 
+  // FIXME:PT implement the `run in the background` functionality
+  const [showRunInBackground, setShowRunInTheBackground] = useState(false);
+  const handleRunInBackgroundClick = useCallback(() => {
+    setShowRunInTheBackground(false);
+  }, []);
+
   useEffect(() => {
     (async () => {
+      const timeoutId = setTimeout(() => {
+        setShowRunInTheBackground(true);
+      }, 15000);
+
       try {
         const commandOutput = await consoleService.executeCommand(command);
         setOutput(commandOutput.result);
@@ -32,7 +53,10 @@ export const CommandExecutionOutput = memo<CommandExecutionOutputProps>(({ comma
       } catch (error) {
         setOutput(<CommandExecutionFailure error={error} />);
       }
+
+      clearTimeout(timeoutId);
       setIsRunning(false);
+      setShowRunInTheBackground(false);
     })();
   }, [command, consoleService]);
 
@@ -43,17 +67,30 @@ export const CommandExecutionOutput = memo<CommandExecutionOutputProps>(({ comma
   }, [isRunning, internalServices]);
 
   return (
-    <div>
+    <CommandOutputContainer>
+      {showRunInBackground && (
+        <div className="run-in-background">
+          <EuiButton
+            fill
+            color="text"
+            size="s"
+            onClick={handleRunInBackgroundClick}
+            title="Command response is taking a bit long. Click here to run it in the background and be notified when a response is received"
+          >
+            {'Run in background'}
+          </EuiButton>
+        </div>
+      )}
       <div>
         <UserCommandInput input={command.input} />
         {isRunning && (
           <>
-            <EuiLoadingChart size="m" mono style={{ marginLeft: '0.5em' }} />
+            <EuiLoadingChart size="m" style={{ marginLeft: '0.5em' }} />
           </>
         )}
       </div>
       <div>{output}</div>
-    </div>
+    </CommandOutputContainer>
   );
 });
 CommandExecutionOutput.displayName = 'CommandExecutionOutput';

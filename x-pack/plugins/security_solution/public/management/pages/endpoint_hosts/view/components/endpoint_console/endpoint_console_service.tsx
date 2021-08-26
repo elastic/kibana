@@ -398,7 +398,7 @@ Handles  NPM(K)    PM(K)      WS(K)     CPU(s)     Id  SI ProcessName
   }
 
   private async sendGetFile(command: Command): Promise<ReactNode> {
-    await delay(60000); // 1minutes
+    await delay(30000); // 1minutes
 
     const files: Array<{ title: string; path: string }> = [];
 
