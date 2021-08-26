@@ -11,6 +11,7 @@ import { takeLatest, select, call, put } from 'redux-saga/effects';
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
 import { createSelector } from 'reselect';
 import { GraphStoreDependencies, GraphState, fillWorkspace } from '.';
+import { reset } from './global';
 import { datasourceSelector } from './datasource';
 import { liveResponseFieldsSelector, selectedFieldsSelector } from './fields';
 import { fetchTopNodes } from '../services/fetch_top_nodes';
@@ -30,6 +31,7 @@ export const initializeWorkspace = actionCreator('INITIALIZE_WORKSPACE');
 export const submitSearch = actionCreator<string>('SUBMIT_SEARCH');
 
 export const workspaceReducer = reducerWithInitialState(initialWorkspaceState)
+  .case(reset, () => ({ isInitialized: false }))
   .case(initializeWorkspace, () => ({ isInitialized: true }))
   .build();
 

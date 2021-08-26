@@ -10,6 +10,7 @@ import { I18nProvider } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { Provider } from 'react-redux';
 import { IHttpFetchError } from 'kibana/public';
+import { useHistory } from 'react-router-dom';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 import { showSaveModal } from '../../../../../src/plugins/saved_objects/public';
 import {
@@ -23,21 +24,17 @@ import {
   Workspace,
 } from '../types';
 import { createGraphStore } from '../state_management';
-import { createWorkspace } from '../angular/graph_client_workspace';
-import { WorkspaceLayout } from './workspace_layout';
-import { GraphDependencies } from '../application';
+import { createWorkspace } from '../services/workspace/graph_client_workspace';
+import { WorkspaceLayout } from '../components/workspace_layout';
+import { GraphServices } from '../application';
 import { formatHttpError } from '../helpers/format_http_error';
 
 export interface GraphWorkspaceProps {
   indexPatternProvider: IndexPatternProvider;
   indexPatterns: IndexPatternSavedObject[];
   savedWorkspace: GraphWorkspaceSavedObject;
-  workspaceId: string;
-  query: string;
-  deps: GraphDependencies;
-  angularLocation: angular.ILocationService;
-  locationUrl: (path?: string) => string;
-  reloadRoute: () => void;
+  urlQuery: string | null;
+  deps: GraphServices;
 }
 
 export const GraphWorkspace = (props: GraphWorkspaceProps) => {
@@ -55,6 +52,7 @@ export const GraphWorkspace = (props: GraphWorkspaceProps) => {
    */
   const [renderCounter, setRenderCounter] = useState(0);
   const [loading, setLoading] = useState(false);
+  const history = useHistory();
 
   const handleHttpError = useCallback(
     (error: IHttpFetchError) => {
@@ -166,7 +164,7 @@ export const GraphWorkspace = (props: GraphWorkspaceProps) => {
       savedObjectsClient: props.deps.savedObjectsClient,
       showSaveModal,
       savePolicy: props.deps.graphSavePolicy,
-      changeUrl: (newUrl) => props.locationUrl(newUrl),
+      changeUrl: (newUrl) => history.push(newUrl),
       notifyReact: () => setRenderCounter((cur) => ++cur),
       chrome: props.deps.chrome,
       I18nContext: props.deps.coreStart.i18n.Context,
@@ -199,9 +197,7 @@ export const GraphWorkspace = (props: GraphWorkspaceProps) => {
             coreStart={props.deps.coreStart}
             canEditDrillDownUrls={props.deps.canEditDrillDownUrls}
             overlays={props.deps.overlays}
-            locationUrl={props.locationUrl}
-            reloadRoute={props.reloadRoute}
-            urlQuery={props.query}
+            urlQuery={props.urlQuery}
             indexPatterns={props.indexPatterns}
             savedWorkspace={props.savedWorkspace}
             indexPatternProvider={props.indexPatternProvider}

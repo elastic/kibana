@@ -8,7 +8,8 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { Provider, useStore } from 'react-redux';
-import { AppMountParameters, CoreStart } from 'kibana/public';
+import { AppMountParameters, Capabilities, CoreStart } from 'kibana/public';
+import { useHistory, useLocation } from 'react-router-dom';
 import { NavigationPublicPluginStart as NavigationStart } from '../../../../../../src/plugins/navigation/public';
 import { toMountPoint } from '../../../../../../src/plugins/kibana_react/public';
 import { datasourceSelector, hasFieldsSelector } from '../../state_management';
@@ -17,7 +18,6 @@ import { AsObservable, Settings, SettingsWorkspaceProps } from '../settings';
 import { asSyncedObservable } from '../../helpers/as_observable';
 
 interface WorkspaceTopNavMenuProps {
-  locationUrl: (path?: string) => string;
   workspace: Workspace | undefined;
   setShowInspect: React.Dispatch<React.SetStateAction<boolean>>;
   confirmWipeWorkspace: (
@@ -29,14 +29,15 @@ interface WorkspaceTopNavMenuProps {
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   graphSavePolicy: GraphSavePolicy;
   navigation: NavigationStart;
-  capabilities: Record<string, boolean | Record<string, boolean>>;
+  capabilities: Capabilities;
   coreStart: CoreStart;
   canEditDrillDownUrls: boolean;
-  reloadRoute: () => void;
 }
 
 export const WorkspaceTopNavMenu = (props: WorkspaceTopNavMenuProps) => {
   const store = useStore();
+  const location = useLocation();
+  const history = useHistory();
 
   // register things for legacy angular UI
   const allSavingDisabled = props.graphSavePolicy === 'none';
@@ -57,10 +58,12 @@ export const WorkspaceTopNavMenu = (props: WorkspaceTopNavMenuProps) => {
     }),
     run() {
       props.confirmWipeWorkspace(() => {
-        if (props.locationUrl() === '/workspace/') {
-          props.reloadRoute();
+        if (location.pathname === '/workspace/') {
+          history.go(0);
         } else {
-          props.locationUrl('/workspace/');
+          props.workspace?.clearGraph();
+          store.dispatch({ type: 'x-pack/graph/RESET' });
+          history.push('/workspace/');
         }
       });
     },
@@ -69,7 +72,7 @@ export const WorkspaceTopNavMenu = (props: WorkspaceTopNavMenuProps) => {
 
   // if saving is disabled using uiCapabilities, we don't want to render the save
   // button so it's consistent with all of the other applications
-  if (props.capabilities.save) {
+  if (props.capabilities.graph.save) {
     // allSavingDisabled is based on the xpack.graph.savePolicy, we'll maintain this functionality
 
     topNavMenu.push({

@@ -10,7 +10,7 @@ import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import React, { Fragment } from 'react';
 import { EuiEmptyPrompt, EuiLink, EuiButton } from '@elastic/eui';
 
-import { CoreStart, ApplicationStart } from 'kibana/public';
+import { CoreStart, ApplicationStart, Capabilities } from 'kibana/public';
 import { TableListView } from '../../../../../src/plugins/kibana_react/public';
 import { GraphWorkspaceSavedObject } from '../types';
 
@@ -22,8 +22,7 @@ export interface ListingProps {
   editItem: (record: GraphWorkspaceSavedObject) => void;
   getViewUrl: (record: GraphWorkspaceSavedObject) => string;
   listingLimit: number;
-  hideWriteControls: boolean;
-  capabilities: { save: boolean; delete: boolean };
+  capabilities: Capabilities;
   initialFilter: string;
   initialPageSize: number;
 }
@@ -37,16 +36,16 @@ export function Listing(props: ListingProps) {
         })}
         headingId="graphListingHeading"
         rowHeader="title"
-        createItem={props.capabilities.save ? props.createItem : undefined}
+        createItem={props.capabilities.graph.save ? props.createItem : undefined}
         findItems={props.findItems}
-        deleteItems={props.capabilities.delete ? props.deleteItems : undefined}
-        editItem={props.capabilities.save ? props.editItem : undefined}
+        deleteItems={props.capabilities.graph.delete ? props.deleteItems : undefined}
+        editItem={props.capabilities.graph.save ? props.editItem : undefined}
         tableColumns={getTableColumns(props.getViewUrl)}
         listingLimit={props.listingLimit}
         initialFilter={props.initialFilter}
         initialPageSize={props.initialPageSize}
         emptyPrompt={getNoItemsMessage(
-          props.capabilities.save === false,
+          props.capabilities.graph.save === false,
           props.createItem,
           props.coreStart.application
         )}

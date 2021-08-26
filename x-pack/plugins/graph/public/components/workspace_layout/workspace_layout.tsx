@@ -57,12 +57,10 @@ type WorkspaceLayoutProps = Pick<
   renderCounter: number;
   workspace?: Workspace;
   loading: boolean;
-  locationUrl: (path?: string) => string;
-  urlQuery: string;
+  urlQuery: string | null;
   indexPatterns: IndexPatternSavedObject[];
   savedWorkspace: GraphWorkspaceSavedObject;
   indexPatternProvider: IndexPatternProvider;
-  reloadRoute: () => void;
 };
 
 interface WorkspaceLayoutStateProps {
@@ -79,7 +77,6 @@ const WorkspaceLayoutComponent = ({
   renderCounter,
   workspace,
   loading,
-  locationUrl,
   savedWorkspace,
   urlQuery,
   hasFields,
@@ -95,7 +92,6 @@ const WorkspaceLayoutComponent = ({
   loadSavedWorkspace: loadSavedWorkspaceAction,
   submit,
   setHeaderActionMenu,
-  reloadRoute,
 }: WorkspaceLayoutProps & WorkspaceLayoutStateProps & WorkspaceLayoutDispatchProps) => {
   const [initialQuery, setInitialQuery] = useState<string>();
   const [currentIndexPattern, setCurrentIndexPattern] = useState<IndexPattern>();
@@ -133,7 +129,7 @@ const WorkspaceLayoutComponent = ({
     if (urlQuery && !initialQuery) {
       setInitialQuery(urlQuery);
     }
-    if (initialQuery && workspace) {
+    if (urlQuery && initialQuery && workspace) {
       submit(urlQuery);
     }
   }, [initialQuery, submit, urlQuery, workspace]);
@@ -200,8 +196,6 @@ const WorkspaceLayoutComponent = ({
         capabilities={capabilities}
         coreStart={coreStart}
         canEditDrillDownUrls={canEditDrillDownUrls}
-        locationUrl={locationUrl}
-        reloadRoute={reloadRoute}
         setShowInspect={setShowInspect}
         confirmWipeWorkspace={confirmWipeWorkspace}
         setHeaderActionMenu={setHeaderActionMenu}

@@ -118,6 +118,7 @@ export interface Workspace {
   mergeIds: (term1: string, term2: string) => void;
   changeHandler: () => void;
   unblocklist: (node: WorkspaceNode) => void;
+  clearGraph: () => void;
 
   getQuery(startNodes?: WorkspaceNode[], loose?: boolean): JsonObject;
   getSelectedOrAllNodes(): WorkspaceNode[];

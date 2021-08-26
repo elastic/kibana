@@ -49,7 +49,7 @@ const defaultsProps = {
 const urlFor = (basePath: IBasePath, id: string) =>
   basePath.prepend(`/app/graph#/workspace/${encodeURIComponent(id)}`);
 
-function mapHits(hit: { id: string; attributes: Record<string, unknown> }, url: string) {
+function mapHits(hit: any, url: string): GraphWorkspaceSavedObject {
   const source = hit.attributes;
   source.id = hit.id;
   source.url = url;
@@ -123,11 +123,11 @@ export async function getSavedWorkspace(
   return savedObject as GraphWorkspaceSavedObject;
 }
 
-export function deleteSavedWorkspace(
+export async function deleteSavedWorkspace(
   savedObjectsClient: SavedObjectsClientContract,
   ids: string[]
 ) {
-  return Promise.all(ids.map((id: string) => savedObjectsClient.delete(savedWorkspaceType, id)));
+  await Promise.all(ids.map((id: string) => savedObjectsClient.delete(savedWorkspaceType, id)));
 }
 
 export async function saveSavedWorkspace(
