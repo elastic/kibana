@@ -24,7 +24,10 @@ import { useUrlParams } from '../../../context/url_params_context/use_url_params
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { useTransactionLatencyCorrelationsFetcher } from '../../../hooks/use_transaction_latency_correlations_fetcher';
-import { TransactionDistributionChart } from '../../shared/charts/transaction_distribution_chart';
+import {
+  TransactionDistributionChart,
+  TransactionDistributionChartData,
+} from '../../shared/charts/transaction_distribution_chart';
 import { CorrelationsTable } from './correlations_table';
 import { push } from '../../shared/Links/url_helpers';
 import {
@@ -301,6 +304,29 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
     };
   }, [histograms, sortField, sortDirection]);
 
+  const transactionDistributionChartData: TransactionDistributionChartData[] = [];
+
+  if (Array.isArray(overallHistogram)) {
+    transactionDistributionChartData.push({
+      id: i18n.translate(
+        'xpack.apm.transactionDistribution.chart.allTransactionsLabel',
+        { defaultMessage: 'All transactions' }
+      ),
+      histogram: overallHistogram,
+    });
+  }
+
+  if (
+    Array.isArray(selectedHistogram?.histogram) &&
+    selectedHistogram?.field !== undefined &&
+    selectedHistogram.value !== undefined
+  ) {
+    transactionDistributionChartData.push({
+      id: `${selectedHistogram.field}:${selectedHistogram.value}`,
+      histogram: selectedHistogram.histogram,
+    });
+  }
+
   return (
     <div data-test-subj="apmLatencyCorrelationsTabContent">
       <EuiFlexGroup>
@@ -326,8 +352,7 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
       <TransactionDistributionChart
         markerPercentile={DEFAULT_PERCENTILE_THRESHOLD}
         markerValue={percentileThresholdValue ?? 0}
-        {...selectedHistogram}
-        overallHistogram={overallHistogram}
+        data={transactionDistributionChartData}
       />
 
       <EuiSpacer size="s" />

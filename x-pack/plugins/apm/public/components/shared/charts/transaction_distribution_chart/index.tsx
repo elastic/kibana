@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
+import { flatten } from 'lodash';
+
 import {
   AnnotationDomainType,
   AreaSeries,
@@ -37,14 +39,16 @@ import { useTheme } from '../../../../hooks/use_theme';
 
 import { ChartContainer } from '../chart_container';
 
+export interface TransactionDistributionChartData {
+  id: string;
+  histogram: HistogramItem[];
+}
+
 interface TransactionDistributionChartProps {
-  field?: string;
-  value?: string;
-  histogram?: HistogramItem[];
+  data: TransactionDistributionChartData[];
   markerCurrentTransaction?: number;
   markerValue: number;
   markerPercentile: number;
-  overallHistogram?: HistogramItem[];
   onChartSelection?: BrushEndListener;
   selection?: [number, number];
 }
@@ -70,22 +74,21 @@ const CHART_PLACEHOLDER_VALUE = 0.0001;
 // as a circular marker instead of a bar
 // This provides a workaround by making the next bin not empty
 export const replaceHistogramDotsWithBars = (
-  originalHistogram: HistogramItem[] | undefined
+  originalHistogram: HistogramItem[]
 ) => {
-  if (originalHistogram === undefined) return;
   const histogram = [...originalHistogram];
-  {
-    for (let i = 0; i < histogram.length - 1; i++) {
-      if (
-        histogram[i].doc_count > 0 &&
-        histogram[i].doc_count !== CHART_PLACEHOLDER_VALUE &&
-        histogram[i + 1].doc_count === 0
-      ) {
-        histogram[i + 1].doc_count = CHART_PLACEHOLDER_VALUE;
-      }
+
+  for (let i = 0; i < histogram.length - 1; i++) {
+    if (
+      histogram[i].doc_count > 0 &&
+      histogram[i].doc_count !== CHART_PLACEHOLDER_VALUE &&
+      histogram[i + 1].doc_count === 0
+    ) {
+      histogram[i + 1].doc_count = CHART_PLACEHOLDER_VALUE;
     }
-    return histogram;
   }
+
+  return histogram;
 };
 
 // Create and call a duration formatter for every value since the durations for the
@@ -95,23 +98,21 @@ const xAxisTickFormat: TickFormatter<number> = (d) =>
   getDurationFormatter(d, 0.9999)(d).formatted;
 
 export function TransactionDistributionChart({
-  field: fieldName,
-  value: fieldValue,
-  histogram: originalHistogram,
+  data,
   markerCurrentTransaction,
   markerValue,
   markerPercentile,
-  overallHistogram,
   onChartSelection,
   selection,
 }: TransactionDistributionChartProps) {
   const chartTheme = useChartTheme();
   const euiTheme = useTheme();
 
-  const patchedOverallHistogram = useMemo(
-    () => replaceHistogramDotsWithBars(overallHistogram),
-    [overallHistogram]
-  );
+  const areaSeriesColors = [
+    euiTheme.eui.euiColorVis1,
+    euiTheme.eui.euiColorVis2,
+    euiTheme.eui.euiColorVis9,
+  ];
 
   const annotationsDataValues: LineAnnotationDatum[] = [
     {
@@ -130,14 +131,14 @@ export function TransactionDistributionChart({
 
   // This will create y axis ticks for 1, 10, 100, 1000 ...
   const yMax =
-    Math.max(...(overallHistogram ?? []).map((d) => d.doc_count)) ?? 0;
+    Math.max(
+      ...flatten(data.map((d) => d.histogram)).map((d) => d.doc_count)
+    ) ?? 0;
   const yTicks = Math.ceil(Math.log10(yMax));
   const yAxisDomain = {
     min: 0.9,
     max: Math.pow(10, yTicks),
   };
-
-  const histogram = replaceHistogramDotsWithBars(originalHistogram);
 
   const selectionAnnotation =
     selection !== undefined
@@ -161,12 +162,9 @@ export function TransactionDistributionChart({
     >
       <ChartContainer
         height={250}
-        hasData={
-          Array.isArray(patchedOverallHistogram) &&
-          patchedOverallHistogram.length > 0
-        }
+        hasData={Array.isArray(data) && data.length > 0}
         status={
-          Array.isArray(patchedOverallHistogram)
+          Array.isArray(data) && data.length > 0
             ? FETCH_STATUS.SUCCESS
             : FETCH_STATUS.LOADING
         }
@@ -264,34 +262,19 @@ export function TransactionDistributionChart({
             ticks={yTicks}
             gridLine={{ visible: true }}
           />
-          <AreaSeries
-            id={i18n.translate(
-              'xpack.apm.transactionDistribution.chart.allTransactionsLabel',
-              { defaultMessage: 'All transactions' }
-            )}
-            xScaleType={ScaleType.Log}
-            yScaleType={ScaleType.Log}
-            data={patchedOverallHistogram ?? []}
-            curve={CurveType.CURVE_STEP_AFTER}
-            xAccessor="key"
-            yAccessors={['doc_count']}
-            color={euiTheme.eui.euiColorVis1}
-            fit="lookahead"
-          />
-          {Array.isArray(histogram) &&
-            fieldName !== undefined &&
-            fieldValue !== undefined && (
-              <AreaSeries
-                id={`${fieldName}:${fieldValue}`}
-                xScaleType={ScaleType.Log}
-                yScaleType={ScaleType.Log}
-                data={histogram}
-                curve={CurveType.CURVE_STEP_AFTER}
-                xAccessor="key"
-                yAccessors={['doc_count']}
-                color={euiTheme.eui.euiColorVis2}
-              />
-            )}
+          {data.map((d, i) => (
+            <AreaSeries
+              id={d.id}
+              xScaleType={ScaleType.Log}
+              yScaleType={ScaleType.Log}
+              data={replaceHistogramDotsWithBars(d.histogram)}
+              curve={CurveType.CURVE_STEP_AFTER}
+              xAccessor="key"
+              yAccessors={['doc_count']}
+              color={areaSeriesColors[i]}
+              fit="lookahead"
+            />
+          ))}
         </Chart>
       </ChartContainer>
     </div>

@@ -21,7 +21,10 @@ import { getDurationFormatter } from '../../../../../common/utils/formatters';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useTransactionDistributionFetcher } from '../../../../hooks/use_transaction_distribution_fetcher';
-import { TransactionDistributionChart } from '../../../shared/charts/transaction_distribution_chart';
+import {
+  TransactionDistributionChart,
+  TransactionDistributionChartData,
+} from '../../../shared/charts/transaction_distribution_chart';
 import { useUiTracker } from '../../../../../../observability/public';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useApmParams } from '../../../../hooks/use_apm_params';
@@ -151,6 +154,18 @@ export function TransactionDistribution({
     trackApmEvent({ metric: 'transaction_distribution_chart_clear_selection' });
   };
 
+  const transactionDistributionChartData: TransactionDistributionChartData[] = [];
+
+  if (Array.isArray(transactionDistribution)) {
+    transactionDistributionChartData.push({
+      id: i18n.translate(
+        'xpack.apm.transactionDistribution.chart.allTransactionsLabel',
+        { defaultMessage: 'All transactions' }
+      ),
+      histogram: transactionDistribution,
+    });
+  }
+
   return (
     <div data-test-subj="apmTransactionDistributionTabContent">
       <EuiFlexGroup style={{ minHeight: MIN_TAB_TITLE_HEIGHT }}>
@@ -212,10 +227,10 @@ export function TransactionDistribution({
       <EuiSpacer size="s" />
 
       <TransactionDistributionChart
+        data={transactionDistributionChartData}
         markerCurrentTransaction={markerCurrentTransaction}
         markerPercentile={DEFAULT_PERCENTILE_THRESHOLD}
         markerValue={percentileThresholdValue ?? 0}
-        overallHistogram={transactionDistribution}
         onChartSelection={onTrackedChartSelection}
         selection={selection}
       />

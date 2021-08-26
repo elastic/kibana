@@ -16,18 +16,20 @@ import type {
   SearchServiceFetchParams,
 } from '../../../../../common/search_strategies/correlations/types';
 
-import { getQueryWithParams } from './get_query_with_params';
+import {
+  getQueryWithParams,
+  GetQueryWithParamsFieldFilter,
+} from './get_query_with_params';
 import { getRequestBase } from './get_request_base';
 
 export const getTransactionDurationHistogramRequest = (
   params: SearchServiceFetchParams,
   interval: number,
-  fieldName?: string,
-  fieldValue?: string
+  fieldFilter?: GetQueryWithParamsFieldFilter[]
 ): estypes.SearchRequest => ({
   ...getRequestBase(params),
   body: {
-    query: getQueryWithParams({ params, fieldName, fieldValue }),
+    query: getQueryWithParams({ params, fieldFilter }),
     size: 0,
     aggs: {
       transaction_duration_histogram: {
@@ -41,16 +43,10 @@ export const fetchTransactionDurationHistogram = async (
   esClient: ElasticsearchClient,
   params: SearchServiceFetchParams,
   interval: number,
-  fieldName?: string,
-  fieldValue?: string
+  fieldFilter?: GetQueryWithParamsFieldFilter[]
 ): Promise<HistogramItem[]> => {
   const resp = await esClient.search<ResponseHit>(
-    getTransactionDurationHistogramRequest(
-      params,
-      interval,
-      fieldName,
-      fieldValue
-    )
+    getTransactionDurationHistogramRequest(params, interval, fieldFilter)
   );
 
   if (resp.body.aggregations === undefined) {

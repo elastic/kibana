@@ -42,15 +42,17 @@ export async function* fetchTransactionDurationHistograms(
     // If one of the fields have an error
     // We don't want to stop the whole process
     try {
-      const { correlation, ksTest } = await fetchTransactionDurationCorrelation(
+      const {
+        correlation,
+        ksTest,
+      } = await fetchTransactionDurationCorrelation(
         esClient,
         params,
         expectations,
         ranges,
         fractions,
         totalDocCount,
-        item.field,
-        item.value
+        [{ fieldName: item.field, fieldValue: item.value }]
       );
 
       if (state.getIsCancelled()) {
@@ -68,8 +70,7 @@ export async function* fetchTransactionDurationHistograms(
           esClient,
           params,
           histogramRangeSteps,
-          item.field,
-          item.value
+          [{ fieldName: item.field, fieldValue: item.value }]
         );
         yield {
           ...item,

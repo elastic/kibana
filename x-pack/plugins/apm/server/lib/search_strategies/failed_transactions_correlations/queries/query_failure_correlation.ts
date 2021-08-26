@@ -12,6 +12,7 @@ import {
   getTermsQuery,
 } from '../../correlations/queries/get_query_with_params';
 import { getRequestBase } from '../../correlations/queries/get_request_base';
+import { fetchTransactionDurationRanges } from '../../correlations/queries';
 import { EVENT_OUTCOME } from '../../../../../common/elasticsearch_fieldnames';
 import { EventOutcome } from '../../../../../common/event_outcome';
 
@@ -29,7 +30,7 @@ export const getFailureCorrelationRequest = (
       ...query.bool,
       filter: [
         ...query.bool.filter,
-        ...getTermsQuery(EVENT_OUTCOME, EventOutcome.failure),
+        ...[getTermsQuery(EVENT_OUTCOME, EventOutcome.failure)],
       ],
     },
   };
@@ -63,6 +64,7 @@ export const getFailureCorrelationRequest = (
 export const fetchFailedTransactionsCorrelationPValues = async (
   esClient: ElasticsearchClient,
   params: SearchServiceFetchParams,
+  histogramRangeSteps: number[],
   fieldName: string
 ) => {
   const resp = await esClient.search(
@@ -104,8 +106,25 @@ export const fetchFailedTransactionsCorrelationPValues = async (
       successPercentage:
         (bucket.bg_count - bucket.doc_count) /
         (overallResult.bg_count - overallResult.doc_count),
+      histogram: [] as Array<{ key: number; doc_count: number }>,
     };
   });
+
+  for (let i = 0; i < result.length; i++) {
+    const current = result[i];
+
+    const histogram = await fetchTransactionDurationRanges(
+      esClient,
+      params,
+      histogramRangeSteps,
+      [
+        { fieldName: EVENT_OUTCOME, fieldValue: EventOutcome.failure },
+        { fieldName: current.fieldName, fieldValue: current.fieldValue },
+      ]
+    );
+
+    current.histogram = histogram;
+  }
 
   return result;
 };

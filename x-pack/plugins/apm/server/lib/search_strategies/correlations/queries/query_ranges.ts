@@ -30,10 +30,9 @@ interface ResponseHit {
 export const getTransactionDurationRangesRequest = (
   params: SearchServiceFetchParams,
   rangesSteps: number[],
-  fieldName?: string,
-  fieldValue?: string
+  fieldFilter?: Array<{ fieldName: string; fieldValue: string }>
 ): estypes.SearchRequest => {
-  const query = getQueryWithParams({ params, fieldName, fieldValue });
+  const query = getQueryWithParams({ params, fieldFilter });
 
   const ranges = rangesSteps.reduce(
     (p, to) => {
@@ -68,16 +67,10 @@ export const fetchTransactionDurationRanges = async (
   esClient: ElasticsearchClient,
   params: SearchServiceFetchParams,
   rangesSteps: number[],
-  fieldName?: string,
-  fieldValue?: string
+  fieldFilter?: Array<{ fieldName: string; fieldValue: string }>
 ): Promise<Array<{ key: number; doc_count: number }>> => {
   const resp = await esClient.search<ResponseHit>(
-    getTransactionDurationRangesRequest(
-      params,
-      rangesSteps,
-      fieldName,
-      fieldValue
-    )
+    getTransactionDurationRangesRequest(params, rangesSteps, fieldFilter)
   );
 
   if (resp.body.aggregations === undefined) {

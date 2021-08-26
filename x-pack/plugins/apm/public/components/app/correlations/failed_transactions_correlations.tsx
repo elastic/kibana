@@ -34,7 +34,10 @@ import { isErrorMessage } from './utils/is_error_message';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { getFailedTransactionsCorrelationImpactLabel } from './utils/get_failed_transactions_correlation_impact_label';
 import { createHref, push } from '../../shared/Links/url_helpers';
-import { TransactionDistributionChart } from '../../shared/charts/transaction_distribution_chart';
+import {
+  TransactionDistributionChart,
+  TransactionDistributionChartData,
+} from '../../shared/charts/transaction_distribution_chart';
 import { useUiTracker } from '../../../../../observability/public';
 import { useFailedTransactionsCorrelationsFetcher } from '../../../hooks/use_failed_transactions_correlations_fetcher';
 import { useApmParams } from '../../../hooks/use_apm_params';
@@ -44,7 +47,6 @@ import { CrossClusterSearchCompatibilityWarning } from './cross_cluster_search_w
 import { CorrelationsProgressControls } from './progress_controls';
 import type { SearchServiceParams } from '../../../../common/search_strategies/correlations/types';
 import type { FailedTransactionsCorrelationValue } from '../../../../common/search_strategies/failure_correlations/types';
-import { Summary } from '../../shared/Summary';
 import { asPercent } from '../../../../common/utils/formatters';
 import { useTimeRange } from '../../../hooks/use_time_range';
 
@@ -404,6 +406,32 @@ export function FailedTransactionsCorrelations({
     };
   }, [result?.values, sortField, sortDirection]);
 
+  const transactionDistributionChartData: TransactionDistributionChartData[] = [];
+
+  if (Array.isArray(overallHistogram)) {
+    transactionDistributionChartData.push({
+      id: i18n.translate(
+        'xpack.apm.transactionDistribution.chart.allTransactionsLabel',
+        { defaultMessage: 'All transactions' }
+      ),
+      histogram: overallHistogram,
+    });
+  }
+
+  if (Array.isArray(errorHistogram)) {
+    transactionDistributionChartData.push({
+      id: `All failed transactions`,
+      histogram: errorHistogram,
+    });
+  }
+
+  if (selectedTerm !== undefined && Array.isArray(selectedTerm.histogram)) {
+    transactionDistributionChartData.push({
+      id: `${selectedTerm.fieldName}:${selectedTerm.fieldValue}`,
+      histogram: selectedTerm.histogram,
+    });
+  }
+
   return (
     <div data-test-subj="apmFailedTransactionsCorrelationsTabContent">
       <EuiFlexItem style={{ flexDirection: 'row', alignItems: 'center' }}>
@@ -459,10 +487,7 @@ export function FailedTransactionsCorrelations({
       <TransactionDistributionChart
         markerPercentile={DEFAULT_PERCENTILE_THRESHOLD}
         markerValue={percentileThresholdValue ?? 0}
-        overallHistogram={overallHistogram}
-        histogram={errorHistogram}
-        field="Failed transactions"
-        value=""
+        data={transactionDistributionChartData}
       />
 
       <EuiSpacer size="s" />
@@ -493,24 +518,6 @@ export function FailedTransactionsCorrelations({
           <CrossClusterSearchCompatibilityWarning version="7.15" />
         </>
       )}
-
-      {inspectEnabled &&
-      selectedTerm?.pValue != null &&
-      (isRunning || correlationTerms.length > 0) ? (
-        <>
-          <EuiSpacer size="m" />
-          <Summary
-            items={[
-              <EuiBadge color="hollow">
-                {`${selectedTerm.fieldName}: ${selectedTerm.key}`}
-              </EuiBadge>,
-              <>{`p-value: ${selectedTerm.pValue.toPrecision(3)}`}</>,
-            ]}
-          />
-        </>
-      ) : null}
-
-      <EuiSpacer size="m" />
 
       <div data-test-subj="apmCorrelationsTable">
         {(isRunning || correlationTerms.length > 0) && (

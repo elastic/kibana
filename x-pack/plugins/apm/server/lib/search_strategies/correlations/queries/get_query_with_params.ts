@@ -15,23 +15,20 @@ import { rangeRt } from '../../../../routes/default_api_types';
 import { getCorrelationsFilters } from '../../../correlations/get_filters';
 import { Setup, SetupTimeRange } from '../../../helpers/setup_request';
 
-export const getTermsQuery = (
-  fieldName: string | undefined,
-  fieldValue: string | undefined
-) => {
-  return fieldName && fieldValue ? [{ term: { [fieldName]: fieldValue } }] : [];
+export const getTermsQuery = (fieldName: string, fieldValue: string) => {
+  return { term: { [fieldName]: fieldValue } };
 };
+
+export interface GetQueryWithParamsFieldFilter {
+  fieldName: string;
+  fieldValue: string;
+}
 
 interface QueryParams {
   params: SearchServiceFetchParams;
-  fieldName?: string;
-  fieldValue?: string;
+  fieldFilter?: GetQueryWithParamsFieldFilter[];
 }
-export const getQueryWithParams = ({
-  params,
-  fieldName,
-  fieldValue,
-}: QueryParams) => {
+export const getQueryWithParams = ({ params, fieldFilter }: QueryParams) => {
   const {
     environment,
     kuery,
@@ -63,7 +60,9 @@ export const getQueryWithParams = ({
     bool: {
       filter: [
         ...filters,
-        ...getTermsQuery(fieldName, fieldValue),
+        ...(Array.isArray(fieldFilter)
+          ? fieldFilter.map((d) => getTermsQuery(d.fieldName, d.fieldValue))
+          : []),
       ] as estypes.QueryDslQueryContainer[],
     },
   };

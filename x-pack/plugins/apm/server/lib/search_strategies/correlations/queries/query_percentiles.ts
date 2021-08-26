@@ -12,7 +12,10 @@ import type { ElasticsearchClient } from 'src/core/server';
 import { TRANSACTION_DURATION } from '../../../../../common/elasticsearch_fieldnames';
 import type { SearchServiceFetchParams } from '../../../../../common/search_strategies/correlations/types';
 
-import { getQueryWithParams } from './get_query_with_params';
+import {
+  getQueryWithParams,
+  GetQueryWithParamsFieldFilter,
+} from './get_query_with_params';
 import { getRequestBase } from './get_request_base';
 import { SIGNIFICANT_VALUE_DIGITS } from '../constants';
 
@@ -31,10 +34,9 @@ interface ResponseHit {
 export const getTransactionDurationPercentilesRequest = (
   params: SearchServiceFetchParams,
   percents?: number[],
-  fieldName?: string,
-  fieldValue?: string
+  fieldFilter?: GetQueryWithParamsFieldFilter[]
 ): estypes.SearchRequest => {
-  const query = getQueryWithParams({ params, fieldName, fieldValue });
+  const query = getQueryWithParams({ params, fieldFilter });
 
   return {
     ...getRequestBase(params),
@@ -61,16 +63,10 @@ export const fetchTransactionDurationPercentiles = async (
   esClient: ElasticsearchClient,
   params: SearchServiceFetchParams,
   percents?: number[],
-  fieldName?: string,
-  fieldValue?: string
+  fieldFilter?: GetQueryWithParamsFieldFilter[]
 ): Promise<{ totalDocs: number; percentiles: Record<string, number> }> => {
   const resp = await esClient.search<ResponseHit>(
-    getTransactionDurationPercentilesRequest(
-      params,
-      percents,
-      fieldName,
-      fieldValue
-    )
+    getTransactionDurationPercentilesRequest(params, percents, fieldFilter)
   );
 
   // return early with no results if the search didn't return any documents

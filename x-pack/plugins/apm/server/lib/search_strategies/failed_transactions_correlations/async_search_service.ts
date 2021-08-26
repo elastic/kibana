@@ -68,8 +68,7 @@ export const asyncErrorCorrelationSearchServiceProvider = (
         esClient,
         params,
         histogramRangeSteps,
-        EVENT_OUTCOME,
-        EventOutcome.failure
+        [{ fieldName: EVENT_OUTCOME, fieldValue: EventOutcome.failure }]
       );
 
       state.setProgress({ loadedOverallHistogram: 1 });
@@ -96,6 +95,7 @@ export const asyncErrorCorrelationSearchServiceProvider = (
                 fetchFailedTransactionsCorrelationPValues(
                   esClient,
                   params,
+                  histogramRangeSteps,
                   fieldName
                 )
               )

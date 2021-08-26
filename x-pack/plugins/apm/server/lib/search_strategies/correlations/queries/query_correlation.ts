@@ -12,7 +12,10 @@ import type { ElasticsearchClient } from 'src/core/server';
 import { TRANSACTION_DURATION } from '../../../../../common/elasticsearch_fieldnames';
 import type { SearchServiceFetchParams } from '../../../../../common/search_strategies/correlations/types';
 
-import { getQueryWithParams } from './get_query_with_params';
+import {
+  getQueryWithParams,
+  GetQueryWithParamsFieldFilter,
+} from './get_query_with_params';
 import { getRequestBase } from './get_request_base';
 
 export interface HistogramItem {
@@ -46,10 +49,9 @@ export const getTransactionDurationCorrelationRequest = (
   ranges: estypes.AggregationsAggregationRange[],
   fractions: number[],
   totalDocCount: number,
-  fieldName?: string,
-  fieldValue?: string
+  fieldFilter?: GetQueryWithParamsFieldFilter[]
 ): estypes.SearchRequest => {
-  const query = getQueryWithParams({ params, fieldName, fieldValue });
+  const query = getQueryWithParams({ params, fieldFilter });
 
   const bucketCorrelation: BucketCorrelation = {
     buckets_path: 'latency_ranges>_count',
@@ -101,8 +103,7 @@ export const fetchTransactionDurationCorrelation = async (
   ranges: estypes.AggregationsAggregationRange[],
   fractions: number[],
   totalDocCount: number,
-  fieldName?: string,
-  fieldValue?: string
+  fieldFilter?: GetQueryWithParamsFieldFilter[]
 ): Promise<{
   ranges: unknown[];
   correlation: number | null;
@@ -115,8 +116,7 @@ export const fetchTransactionDurationCorrelation = async (
       ranges,
       fractions,
       totalDocCount,
-      fieldName,
-      fieldValue
+      fieldFilter
     )
   );
 

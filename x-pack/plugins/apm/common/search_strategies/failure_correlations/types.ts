@@ -7,6 +7,11 @@
 
 import { FAILED_TRANSACTIONS_IMPACT_THRESHOLD } from './constants';
 
+export interface HistogramItem {
+  key: number;
+  doc_count: number;
+}
+
 export interface FailedTransactionsCorrelationValue {
   key: string;
   doc_count: number;
@@ -18,6 +23,7 @@ export interface FailedTransactionsCorrelationValue {
   normalizedScore: number;
   failurePercentage: number;
   successPercentage: number;
+  histogram: HistogramItem[];
 }
 
 export type FailureCorrelationImpactThreshold = typeof FAILED_TRANSACTIONS_IMPACT_THRESHOLD[keyof typeof FAILED_TRANSACTIONS_IMPACT_THRESHOLD];
