@@ -148,6 +148,13 @@ export function FailedTransactionsCorrelations({
       ? [
           {
             width: '100px',
+            field: 'pValue',
+            name: 'p-value',
+            render: (pValue: number) => pValue.toPrecision(3),
+            sortable: true,
+          },
+          {
+            width: '100px',
             field: 'failurePercentage',
             name: (
               <EuiToolTip
