@@ -372,21 +372,39 @@ describe('successful migrations', () => {
       });
       const migratedAction = migration800(action, context);
       expect(migratedAction).toEqual({
+        ...action,
         attributes: {
-          actionId: '1234',
-          params: `{ spaceId: 'user1', actionId: '1234' }`,
+          ...action.attributes,
+          relatedSavedObjects: [
+            {
+              id: '1234',
+              namespace: 'some-namespace',
+              type: 'action',
+              typeId: 'test',
+            },
+          ],
         },
-        id: action.id,
-        namespaces: ['default'],
-        references: [
-          {
-            id: '1234',
-            name: 'test',
-            type: 'action',
-          },
-        ],
-        type: 'action_task_params',
       });
+    });
+
+    test('resolveSavedObjectIdsInActionTaskParams in non default namespace', () => {
+      const migration800 = getActionTaskParamsMigrations(encryptedSavedObjectsSetup, [])['8.0.0'];
+      const action = getMockData(
+        {
+          relatedSavedObjects: [
+            {
+              id: '1234',
+              type: 'action',
+              typeId: 'test',
+              namespace: 'some-namespace',
+            },
+          ],
+        },
+        undefined,
+        ['custom']
+      );
+      const migratedAction = migration800(action, context);
+      expect(migratedAction.attributes.actionId).not.toEqual(action.attributes.actionId);
     });
   });
 });
