@@ -24,7 +24,7 @@ import { ITableColumn, ManagedTable } from '../../shared/managed_table';
 type TraceGroup = APIReturnType<'GET /api/apm/traces'>['items'][0];
 
 const StyledTransactionLink = euiStyled(TransactionDetailLink)`
-  font-size: ${({ theme }) => theme.eui.euiFontSizeM};
+  font-size: ${({ theme }) => theme.eui.euiFontSizeS};
   ${truncate('100%')};
 `;
 
