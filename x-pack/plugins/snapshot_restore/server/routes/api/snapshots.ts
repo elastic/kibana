@@ -7,11 +7,22 @@
 
 import { schema, TypeOf } from '@kbn/config-schema';
 import type { SnapshotDetailsEs } from '../../../common/types';
-import { SNAPSHOT_LIST_MAX_SIZE } from '../../../common/constants';
-import { deserializeSnapshotDetails } from '../../../common/lib';
+import { deserializeSnapshotDetails, convertSortFieldToES } from '../../../common/lib';
 import type { RouteDependencies } from '../../types';
 import { getManagedRepositoryName } from '../../lib';
 import { addBasePath } from '../helpers';
+
+const querySchema = schema.object({
+  sortField: schema.oneOf([
+    schema.literal('snapshot'),
+    schema.literal('indices'),
+    schema.literal('durationInMillis'),
+    schema.literal('startTimeInMillis'),
+  ]),
+  sortDirection: schema.oneOf([schema.literal('desc'), schema.literal('asc')]),
+  pageIndex: schema.number(),
+  pageSize: schema.number(),
+});
 
 export function registerSnapshotsRoutes({
   router,
@@ -20,9 +31,13 @@ export function registerSnapshotsRoutes({
 }: RouteDependencies) {
   // GET all snapshots
   router.get(
-    { path: addBasePath('snapshots'), validate: false },
+    { path: addBasePath('snapshots'), validate: { query: querySchema } },
     license.guardApiRoute(async (ctx, req, res) => {
       const { client: clusterClient } = ctx.core.elasticsearch;
+      const sortField = convertSortFieldToES((req.query as TypeOf<typeof querySchema>).sortField);
+      const sortDirection = (req.query as TypeOf<typeof querySchema>).sortDirection;
+      const pageIndex = (req.query as TypeOf<typeof querySchema>).pageIndex;
+      const pageSize = (req.query as TypeOf<typeof querySchema>).pageSize;
 
       const managedRepository = await getManagedRepositoryName(clusterClient.asCurrentUser);
 
@@ -63,11 +78,10 @@ export function registerSnapshotsRoutes({
           snapshot: '_all',
           ignore_unavailable: true, // Allow request to succeed even if some snapshots are unavailable.
           // @ts-expect-error @elastic/elasticsearch "desc" is a new param
-          order: 'desc',
-          // TODO We are temporarily hard-coding the maximum number of snapshots returned
-          // in order to prevent an unusable UI for users with large number of snapshots
-          // In the near future, this will be resolved with server-side pagination
-          size: SNAPSHOT_LIST_MAX_SIZE,
+          order: sortDirection,
+          sort: sortField,
+          size: pageSize,
+          offset: pageIndex * pageSize,
         });
 
         // Decorate each snapshot with the repository with which it's associated.
@@ -82,6 +96,8 @@ export function registerSnapshotsRoutes({
             repositories,
             // @ts-expect-error @elastic/elasticsearch "failures" is a new field in the response
             errors: fetchedSnapshots?.failures,
+            // @ts-expect-error @elastic/elasticsearch "total" is a new field in the response
+            total: fetchedSnapshots?.total,
           },
         });
       } catch (e) {

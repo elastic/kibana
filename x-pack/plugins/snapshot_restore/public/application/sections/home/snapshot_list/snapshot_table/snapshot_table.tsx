@@ -9,31 +9,42 @@ import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiButton,
-  EuiInMemoryTable,
   EuiLink,
   Query,
   EuiLoadingSpinner,
   EuiToolTip,
   EuiButtonIcon,
+  Criteria,
+  EuiBasicTable,
 } from '@elastic/eui';
 
+import { reactRouterNavigate } from '../../../../../../../../../src/plugins/kibana_react/public';
 import { SnapshotDetails } from '../../../../../../common/types';
+import { SnapshotTableOptions, SortField, SortDirection } from '../../../../../../common/lib';
 import { UseRequestResponse } from '../../../../../shared_imports';
 import { SNAPSHOT_STATE, UIM_SNAPSHOT_SHOW_DETAILS_CLICK } from '../../../../constants';
 import { useServices } from '../../../../app_context';
-import { linkToRepository, linkToRestoreSnapshot } from '../../../../services/navigation';
+import {
+  linkToRepository,
+  linkToRestoreSnapshot,
+  linkToSnapshot,
+} from '../../../../services/navigation';
 import { DataPlaceholder, FormattedDateTime, SnapshotDeleteProvider } from '../../../../components';
 
-import { reactRouterNavigate } from '../../../../../../../../../src/plugins/kibana_react/public';
-
+const openSnapshotDetailsUrl = (repositoryNameToOpen: string, snapshotIdToOpen: string): string => {
+  return linkToSnapshot(repositoryNameToOpen, snapshotIdToOpen);
+};
 interface Props {
   snapshots: SnapshotDetails[];
   repositories: string[];
   reload: UseRequestResponse['resendRequest'];
-  openSnapshotDetailsUrl: (repositoryName: string, snapshotId: string) => string;
   repositoryFilter?: string;
   policyFilter?: string;
   onSnapshotDeleted: (snapshotsDeleted: Array<{ snapshot: string; repository: string }>) => void;
+  tableOptions: SnapshotTableOptions;
+  setTableOptions: (options: SnapshotTableOptions) => void;
+  totalItemCount: number;
+  isLoading: boolean;
 }
 
 const getLastSuccessfulManagedSnapshot = (
@@ -55,10 +66,13 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
   snapshots,
   repositories,
   reload,
-  openSnapshotDetailsUrl,
   onSnapshotDeleted,
   repositoryFilter,
   policyFilter,
+  tableOptions,
+  setTableOptions,
+  totalItemCount,
+  isLoading,
 }) => {
   const { i18n, uiMetricService, history } = useServices();
   const [selectedItems, setSelectedItems] = useState<SnapshotDetails[]>([]);
@@ -92,7 +106,7 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
         defaultMessage: 'Repository',
       }),
       truncateText: true,
-      sortable: true,
+      sortable: false,
       render: (repositoryName: string) => (
         <EuiLink
           {...reactRouterNavigate(history, linkToRepository(repositoryName))}
@@ -118,7 +132,7 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
         defaultMessage: 'Shards',
       }),
       truncateText: true,
-      sortable: true,
+      sortable: false,
       width: '100px',
       render: (totalShards: number) => totalShards,
     },
@@ -128,7 +142,7 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
         defaultMessage: 'Failed shards',
       }),
       truncateText: true,
-      sortable: true,
+      sortable: false,
       width: '100px',
       render: (failedShards: number) => failedShards,
     },
@@ -263,16 +277,17 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
     },
   ];
 
-  // By default, we'll display the most recent snapshots at the top of the table.
   const sorting = {
     sort: {
-      field: 'startTimeInMillis',
-      direction: 'desc' as const,
+      field: tableOptions.sortField,
+      direction: tableOptions.sortDirection,
     },
   };
 
   const pagination = {
-    initialPageSize: 20,
+    pageIndex: tableOptions.pageIndex,
+    pageSize: tableOptions.pageSize,
+    totalItemCount,
     pageSizeOptions: [10, 20, 50],
   };
 
@@ -387,12 +402,22 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
   };
 
   return (
-    <EuiInMemoryTable
+    <EuiBasicTable
       items={snapshots}
       itemId="uuid"
       columns={columns}
       search={search}
       sorting={sorting}
+      onChange={(criteria: Criteria<SnapshotDetails>) => {
+        const { page: { index, size } = {}, sort: { field, direction } = {} } = criteria;
+        setTableOptions({
+          sortField: field as SortField,
+          sortDirection: direction as SortDirection,
+          pageIndex: index ?? tableOptions.pageIndex,
+          pageSize: size ?? tableOptions.pageSize,
+        });
+      }}
+      loading={isLoading}
       isSelectable={true}
       selection={selection}
       pagination={pagination}

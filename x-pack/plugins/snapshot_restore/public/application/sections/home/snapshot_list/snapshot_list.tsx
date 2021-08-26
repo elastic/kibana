@@ -19,7 +19,8 @@ import {
   EuiIcon,
 } from '@elastic/eui';
 
-import { APP_SLM_CLUSTER_PRIVILEGES, SNAPSHOT_LIST_MAX_SIZE } from '../../../../../common';
+import { APP_SLM_CLUSTER_PRIVILEGES } from '../../../../../common';
+import { SNAPSHOT_DEFAULT_TABLE_OPTIONS, SnapshotTableOptions } from '../../../../../common/lib';
 import { WithPrivileges, PageLoading, PageError, Error } from '../../../../shared_imports';
 import { BASE_PATH, UIM_SNAPSHOT_LIST_LOAD } from '../../../constants';
 import { useLoadSnapshots } from '../../../services/http';
@@ -28,7 +29,6 @@ import {
   linkToAddRepository,
   linkToPolicies,
   linkToAddPolicy,
-  linkToSnapshot,
 } from '../../../services/navigation';
 import { useCore, useServices } from '../../../app_context';
 import { useDecodedParams } from '../../../lib';
@@ -47,22 +47,19 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
   history,
 }) => {
   const { repositoryName, snapshotId } = useDecodedParams<MatchParams>();
+  const [tableOptions, setTableOptions] = useState<SnapshotTableOptions>(
+    SNAPSHOT_DEFAULT_TABLE_OPTIONS
+  );
   const {
     error,
+    isInitialRequest,
     isLoading,
-    data: { snapshots = [], repositories = [], policies = [], errors = {} },
+    data: { snapshots = [], repositories = [], policies = [], errors = {}, total: totalItemCount },
     resendRequest: reload,
-  } = useLoadSnapshots();
+  } = useLoadSnapshots(tableOptions);
 
-  const { uiMetricService, i18n } = useServices();
+  const { uiMetricService } = useServices();
   const { docLinks } = useCore();
-
-  const openSnapshotDetailsUrl = (
-    repositoryNameToOpen: string,
-    snapshotIdToOpen: string
-  ): string => {
-    return linkToSnapshot(repositoryNameToOpen, snapshotIdToOpen);
-  };
 
   const closeSnapshotDetails = () => {
     history.push(`${BASE_PATH}/snapshots`);
@@ -110,7 +107,9 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
 
   let content;
 
-  if (isLoading) {
+  // display "loading" section only on initial load, after that the table will have a loading indicator
+  // to avoid table re-rendering on every page change
+  if (isInitialRequest && isLoading) {
     content = (
       <PageLoading>
         <span data-test-subj="snapshotListEmpty">
@@ -214,7 +213,7 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
         />
       </EuiPageContent>
     );
-  } else if (snapshots.length === 0) {
+  } else if (totalItemCount === 0) {
     content = (
       <EuiPageContent
         hasShadow={false}
@@ -351,53 +350,21 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
       </>
     ) : null;
 
-    const maxSnapshotsWarning = snapshots.length === SNAPSHOT_LIST_MAX_SIZE && (
-      <>
-        <EuiCallOut
-          color="warning"
-          iconType="help"
-          data-test-subj="maxSnapshotsWarning"
-          title={i18n.translate('xpack.snapshotRestore.snapshotsList.maxSnapshotsDisplayedTitle', {
-            defaultMessage: 'Cannot show the full list of snapshots',
-          })}
-        >
-          <FormattedMessage
-            id="xpack.snapshotRestore.snapshotsList.maxSnapshotsDisplayedDescription"
-            defaultMessage="You've reached the maximum number of viewable snapshots. To view all of your snapshots, use {docLink}."
-            values={{
-              docLink: (
-                <EuiLink
-                  href={docLinks.links.snapshotRestore.getSnapshot}
-                  target="_blank"
-                  data-test-subj="documentationLink"
-                >
-                  <FormattedMessage
-                    id="xpack.snapshotRestore.snapshotsList.maxSnapshotsDisplayedDocLinkText"
-                    defaultMessage="the Elasticsearch API"
-                  />
-                </EuiLink>
-              ),
-            }}
-          />
-        </EuiCallOut>
-        <EuiSpacer size="l" />
-      </>
-    );
-
     content = (
       <section data-test-subj="snapshotList">
         {repositoryErrorsWarning}
-
-        {maxSnapshotsWarning}
 
         <SnapshotTable
           snapshots={snapshots}
           repositories={repositories}
           reload={reload}
-          openSnapshotDetailsUrl={openSnapshotDetailsUrl}
           onSnapshotDeleted={onSnapshotDeleted}
           repositoryFilter={filteredRepository}
           policyFilter={filteredPolicy}
+          tableOptions={tableOptions}
+          setTableOptions={setTableOptions}
+          totalItemCount={totalItemCount}
+          isLoading={isLoading}
         />
       </section>
     );
