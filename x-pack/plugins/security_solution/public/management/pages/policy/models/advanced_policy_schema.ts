@@ -673,7 +673,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     key: 'windows.advanced.memory_protection.memory_scan',
     first_supported_version: '7.15',
     documentation: i18n.translate(
-      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.memory_protection.signature',
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.memory_protection.memory_scan',
       {
         defaultMessage:
           'Enable scanning for malicious memory regions as a part of memory protection. Default: true.',
