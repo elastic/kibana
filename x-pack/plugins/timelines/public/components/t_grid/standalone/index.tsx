@@ -93,6 +93,7 @@ export interface TGridStandaloneProps {
   filters: Filter[];
   footerText: React.ReactNode;
   filterStatus: AlertStatus;
+  hasAlertsCrudPermissions: (featureId: string) => boolean;
   height?: number;
   indexNames: string[];
   itemsPerPageOptions: number[];
@@ -124,6 +125,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
   filters,
   footerText,
   filterStatus,
+  hasAlertsCrudPermissions,
   indexNames,
   itemsPerPageOptions,
   onRuleChange,
@@ -202,7 +204,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
 
   const [
     loading,
-    { events, updatedAt, loadPage, pageInfo, refetch, totalCount = 0, inspect },
+    { consumers, events, updatedAt, loadPage, pageInfo, refetch, totalCount = 0, inspect },
   ] = useTimelineEvents({
     docValueFields: [],
     entityType,
@@ -219,6 +221,27 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
     data,
   });
   setRefetch(refetch);
+
+  const { hasAlertsCrud, totalSelectAllAlerts } = useMemo(() => {
+    return Object.entries(consumers).reduce<{
+      hasAlertsCrud: boolean;
+      totalSelectAllAlerts: number;
+    }>(
+      (acc, [featureId, nbrAlerts]) => {
+        const featureHasPermission = hasAlertsCrudPermissions(featureId);
+        return {
+          hasAlertsCrud: featureHasPermission || acc.hasAlertsCrud,
+          totalSelectAllAlerts: featureHasPermission
+            ? nbrAlerts + acc.totalSelectAllAlerts
+            : acc.totalSelectAllAlerts,
+        };
+      },
+      {
+        hasAlertsCrud: false,
+        totalSelectAllAlerts: 0,
+      }
+    );
+  }, [consumers, hasAlertsCrudPermissions]);
 
   const totalCountMinusDeleted = useMemo(
     () => (totalCount > 0 ? totalCount - deletedEventIds.length : 0),
@@ -322,6 +345,8 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
                     data={nonDeletedEvents}
                     defaultCellActions={defaultCellActions}
                     filterQuery={filterQuery}
+                    hasAlertsCrud={hasAlertsCrud}
+                    hasAlertsCrudPermissions={hasAlertsCrudPermissions}
                     id={STANDALONE_ID}
                     indexNames={indexNames}
                     isEventViewer={true}
@@ -340,6 +365,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
                       itemsPerPage: itemsPerPageStore,
                     })}
                     totalItems={totalCountMinusDeleted}
+                    totalSelectAllAlerts={totalSelectAllAlerts}
                     unit={unit}
                     filterStatus={filterStatus}
                     trailingControlColumns={trailingControlColumns}
