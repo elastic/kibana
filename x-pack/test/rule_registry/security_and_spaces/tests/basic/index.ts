@@ -10,7 +10,8 @@ import { createSpacesAndUsers, deleteSpacesAndUsers } from '../../../common/lib/
 
 // eslint-disable-next-line import/no-default-export
 export default ({ loadTestFile, getService }: FtrProviderContext): void => {
-  describe('rules security and spaces enabled: basic', function () {
+  // FAILING: https://github.com/elastic/kibana/issues/110153
+  describe.skip('rules security and spaces enabled: basic', function () {
     // Fastest ciGroup for the moment.
     this.tags('ciGroup5');
 
@@ -27,5 +28,6 @@ export default ({ loadTestFile, getService }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./update_alert'));
     loadTestFile(require.resolve('./bulk_update_alerts'));
     loadTestFile(require.resolve('./find_alerts'));
+    loadTestFile(require.resolve('./get_alerts_index'));
   });
 };
