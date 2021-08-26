@@ -306,7 +306,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
     return [
       {
         id: 'expand',
-        width: 96,
+        width: 120,
         headerCellRender: () => {
           return (
             <EventsThContent>
