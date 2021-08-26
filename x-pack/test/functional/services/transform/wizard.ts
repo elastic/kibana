@@ -110,7 +110,7 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
         .toArray()
         .map((cell) => {
           const cellText = $(cell).text();
-          const pattern = /^(.*)Row: (\d+), Column: (\d+):$/;
+          const pattern = /^(.*)Row: (\d+); Column: (\d+)$/;
           const matches = cellText.match(pattern);
           expect(matches).to.not.eql(null, `Cell text should match pattern '${pattern}'`);
           return { text: matches![1], row: Number(matches![2]), column: Number(matches![3]) };

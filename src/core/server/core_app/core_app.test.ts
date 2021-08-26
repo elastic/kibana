@@ -137,7 +137,7 @@ describe('CoreApp', () => {
         mockResponseFactory
       );
 
-      expect(mockResponseFactory.renderAnonymousCoreApp).toHaveBeenCalled();
+      expect(mockResponseFactory.renderCoreApp).toHaveBeenCalled();
     });
   });
 
