@@ -622,17 +622,12 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
         const rowData = rowIndex < data.length ? data[rowIndex].data : null;
         const header = columnHeaders.find((h) => h.id === columnId);
         const eventId = rowIndex < data.length ? data[rowIndex]._id : null;
-        const defaultStyles = useMemo(
-          () => ({
-            overflow: 'hidden',
-          }),
-          []
-        );
-        setCellProps({ style: { ...defaultStyles } });
 
         useEffect(() => {
+          const defaultStyles = { overflow: 'hidden' };
+          setCellProps({ style: { ...defaultStyles } });
           addBuildingBlockStyle(data[rowIndex].ecs, theme, setCellProps, defaultStyles);
-        }, [rowIndex, setCellProps, defaultStyles]);
+        }, [rowIndex, setCellProps]);
 
         if (rowData == null || header == null || eventId == null) {
           return null;
