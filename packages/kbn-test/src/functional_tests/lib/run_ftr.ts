@@ -5,14 +5,37 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import type { ToolingLog } from '@kbn/dev-utils';
 import { FunctionalTestRunner, readConfigFile } from '../../functional_test_runner';
 import { CliError } from './run_cli';
 
+export interface CreateFtrOptions {
+  /** installation dir from which to run Kibana */
+  installDir: string;
+  log: ToolingLog;
+  /** Whether to exit test run at the first failure */
+  bail?: boolean;
+  grep: string;
+  updateBaselines?: boolean;
+  suiteFiles?: {
+    include?: string[];
+    exclude?: string[];
+  };
+  suiteTags?: {
+    include?: string[];
+    exclude?: string[];
+  };
+  updateSnapshots?: boolean;
+}
+
+export interface CreateFtrParams {
+  configPath: string;
+  options: CreateFtrOptions;
+}
 async function createFtr({
   configPath,
   options: { installDir, log, bail, grep, updateBaselines, suiteFiles, suiteTags, updateSnapshots },
-}) {
+}: CreateFtrParams) {
   const config = await readConfigFile(log, configPath);
 
   return {
@@ -28,18 +51,18 @@ async function createFtr({
       updateBaselines,
       updateSnapshots,
       suiteFiles: {
-        include: [...suiteFiles.include, ...config.get('suiteFiles.include')],
-        exclude: [...suiteFiles.exclude, ...config.get('suiteFiles.exclude')],
+        include: [...(suiteFiles?.include || []), ...config.get('suiteFiles.include')],
+        exclude: [...(suiteFiles?.exclude || []), ...config.get('suiteFiles.exclude')],
       },
       suiteTags: {
-        include: [...suiteTags.include, ...config.get('suiteTags.include')],
-        exclude: [...suiteTags.exclude, ...config.get('suiteTags.exclude')],
+        include: [...(suiteTags?.include || []), ...config.get('suiteTags.include')],
+        exclude: [...(suiteTags?.exclude || []), ...config.get('suiteTags.exclude')],
       },
     }),
   };
 }
 
-export async function assertNoneExcluded({ configPath, options }) {
+export async function assertNoneExcluded({ configPath, options }: CreateFtrParams) {
   const { config, ftr } = await createFtr({ configPath, options });
 
   if (config.get('testRunner')) {
@@ -61,7 +84,7 @@ export async function assertNoneExcluded({ configPath, options }) {
   }
 }
 
-export async function runFtr({ configPath, options }) {
+export async function runFtr({ configPath, options }: CreateFtrParams) {
   const { ftr } = await createFtr({ configPath, options });
 
   const failureCount = await ftr.run();
@@ -72,7 +95,7 @@ export async function runFtr({ configPath, options }) {
   }
 }
 
-export async function hasTests({ configPath, options }) {
+export async function hasTests({ configPath, options }: CreateFtrParams) {
   const { ftr, config } = await createFtr({ configPath, options });
 
   if (config.get('testRunner')) {

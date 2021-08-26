@@ -6,11 +6,17 @@
  * Side Public License, v 1.
  */
 
+import { esTestConfig } from '@kbn/test';
+import * as http from 'http';
+import supertest from 'supertest';
+
 import {
+  createRootWithCorePlugins,
   createTestServers,
   TestElasticsearchUtils,
   TestKibanaUtils,
 } from '../../../test_helpers/kbn_server';
+import { Root } from '../../root';
 
 describe('elasticsearch clients', () => {
   let esServer: TestElasticsearchUtils;
@@ -53,5 +59,52 @@ describe('elasticsearch clients', () => {
 
     expect(resp.headers).toHaveProperty('warning');
     expect(resp.headers!.warning).toMatch('system indices');
+  });
+});
+
+function createFakeElasticsearchServer() {
+  const server = http.createServer((req, res) => {
+    // Reply with a 200 and empty response by default (intentionally malformed response)
+    res.writeHead(200);
+    res.end();
+  });
+  server.listen(esTestConfig.getPort());
+
+  return server;
+}
+
+describe('fake elasticsearch', () => {
+  let esServer: http.Server;
+  let kibanaServer: Root;
+  let kibanaHttpServer: http.Server;
+
+  beforeAll(async () => {
+    kibanaServer = createRootWithCorePlugins({ status: { allowAnonymous: true } });
+    esServer = createFakeElasticsearchServer();
+
+    const kibanaPreboot = await kibanaServer.preboot();
+    kibanaHttpServer = kibanaPreboot.http.server.listener; // Mind that we are using the prebootServer at this point because the migration gets hanging, while waiting for ES to be correct
+    await kibanaServer.setup();
+  });
+
+  afterAll(async () => {
+    await kibanaServer.shutdown();
+    await new Promise<void>((resolve, reject) =>
+      esServer.close((err) => (err ? reject(err) : resolve()))
+    );
+  });
+
+  test('should return unknown product when it cannot perform the Product check (503 response)', async () => {
+    const resp = await supertest(kibanaHttpServer).get('/api/status').expect(503);
+    expect(resp.body.status.overall.state).toBe('red');
+    expect(resp.body.status.statuses[0].message).toBe(
+      'Unable to retrieve version information from Elasticsearch nodes. The client noticed that the server is not Elasticsearch and we do not support this unknown product.'
+    );
+  });
+
+  test('should fail to start Kibana because of the Product Check Error', async () => {
+    await expect(kibanaServer.start()).rejects.toThrowError(
+      'The client noticed that the server is not Elasticsearch and we do not support this unknown product.'
+    );
   });
 });
