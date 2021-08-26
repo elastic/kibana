@@ -14,7 +14,7 @@ import { TooltipSelector } from '../../../../components/tooltip_selector';
 
 import { getIndexPatternService } from '../../../../kibana_services';
 import { getTermsFields, getSortFields, getSourceFields } from '../../../../index_pattern_util';
-import { SortDirection, IFieldType } from '../../../../../../../../src/plugins/data/public';
+import { SortDirection, IndexPatternField } from '../../../../../../../../src/plugins/data/public';
 import { ESDocField } from '../../../fields/es_doc_field';
 import { OnSourceChangeArgs } from '../../source';
 import { TopHitsForm } from './top_hits_form';
@@ -36,8 +36,8 @@ interface Props {
 interface State {
   loadError?: string;
   sourceFields: IField[];
-  termFields: IFieldType[];
-  sortFields: IFieldType[];
+  termFields: IndexPatternField[];
+  sortFields: IndexPatternField[];
 }
 
 export class TopHitsUpdateSourceEditor extends Component<Props, State> {

@@ -10,7 +10,7 @@ import React, { Fragment, Component } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import {
-  IFieldType,
+  IndexPatternField,
   IndexPattern,
   indexPatterns,
 } from '../../../../../../../src/plugins/data/public';
@@ -30,7 +30,7 @@ interface Props {
 
 interface State {
   indexPattern: IndexPattern | null;
-  fields: IFieldType[];
+  fields: IndexPatternField[];
 }
 
 export class UpdateSourceEditor extends Component<Props, State> {

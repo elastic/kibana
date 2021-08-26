@@ -15,7 +15,7 @@ import { getGeoFields, getTermsFields, getSortFields } from '../../../../index_p
 import { ESSearchSourceDescriptor } from '../../../../../common/descriptor_types';
 import {
   IndexPattern,
-  IFieldType,
+  IndexPatternField,
   SortDirection,
 } from '../../../../../../../../src/plugins/data/common';
 import { TopHitsForm } from './top_hits_form';
@@ -27,12 +27,12 @@ interface Props {
 
 interface State {
   indexPattern: IndexPattern | null;
-  geoFields: IFieldType[];
+  geoFields: IndexPatternField[];
   geoFieldName: string | null;
   sortField: string | null;
-  sortFields: IFieldType[];
+  sortFields: IndexPatternField[];
   sortOrder: SortDirection;
-  termFields: IFieldType[];
+  termFields: IndexPatternField[];
   topHitsSplitField: string | null;
   topHitsSize: number;
 }
