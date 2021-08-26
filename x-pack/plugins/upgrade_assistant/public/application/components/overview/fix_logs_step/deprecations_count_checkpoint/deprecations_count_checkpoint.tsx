@@ -11,7 +11,7 @@ import { FormattedDate, FormattedTime, FormattedMessage } from '@kbn/i18n/react'
 
 import { i18n } from '@kbn/i18n';
 import { EuiCallOut, EuiButton, EuiLoadingContent } from '@elastic/eui';
-import { useAppContext } from '../../../../app_context';
+import { useServices } from '../../../../app_context';
 import { Storage } from '../../../../../shared_imports';
 
 const LS_SETTING_ID = 'kibana.upgradeAssistant.lastCheckpoint';
@@ -65,7 +65,7 @@ const getPreviousCheckpointDate = () => {
 };
 
 export const DeprecationsCountCheckpoint: FunctionComponent = () => {
-  const { api } = useAppContext();
+  const { api } = useServices();
   const [previousCheck, setPreviousCheck] = useState(getPreviousCheckpointDate());
   const { data, error, isLoading, resendRequest, isInitialRequest } = api.getDeprecationLogsCount(
     previousCheck
