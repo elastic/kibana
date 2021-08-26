@@ -34,6 +34,7 @@ import { isErrorMessage } from './utils/is_error_message';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { getFailedTransactionsCorrelationImpactLabel } from './utils/get_failed_transactions_correlation_impact_label';
 import { createHref, push } from '../../shared/Links/url_helpers';
+import { TransactionDistributionChart } from '../../shared/charts/transaction_distribution_chart';
 import { useUiTracker } from '../../../../../observability/public';
 import { useFailedTransactionsCorrelationsFetcher } from '../../../hooks/use_failed_transactions_correlations_fetcher';
 import { useApmParams } from '../../../hooks/use_apm_params';
@@ -46,6 +47,8 @@ import type { FailedTransactionsCorrelationValue } from '../../../../common/sear
 import { Summary } from '../../shared/Summary';
 import { asPercent } from '../../../../common/utils/formatters';
 import { useTimeRange } from '../../../hooks/use_time_range';
+
+const DEFAULT_PERCENTILE_THRESHOLD = 95;
 
 export function FailedTransactionsCorrelations({
   onFilter,
@@ -70,7 +73,7 @@ export function FailedTransactionsCorrelations({
 
   const inspectEnabled = uiSettings.get<boolean>(enableInspectEsQueries);
 
-  const searchServicePrams: SearchServiceParams = {
+  const searchServiceParams: SearchServiceParams = {
     environment,
     kuery,
     serviceName,
@@ -78,6 +81,7 @@ export function FailedTransactionsCorrelations({
     transactionType,
     start,
     end,
+    percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
   };
 
   const result = useFailedTransactionsCorrelationsFetcher();
@@ -86,6 +90,9 @@ export function FailedTransactionsCorrelations({
     ccsWarning,
     log,
     error,
+    percentileThresholdValue,
+    overallHistogram,
+    errorHistogram,
     isRunning,
     progress,
     startFetch,
@@ -93,7 +100,7 @@ export function FailedTransactionsCorrelations({
   } = result;
 
   const startFetchHandler = useCallback(() => {
-    startFetch(searchServicePrams);
+    startFetch(searchServiceParams);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [environment, serviceName, kuery, start, end]);
 
@@ -446,6 +453,17 @@ export function FailedTransactionsCorrelations({
           <FailedTransactionsCorrelationsHelpPopover />
         </EuiFlexItem>
       </EuiFlexItem>
+
+      <EuiSpacer size="s" />
+
+      <TransactionDistributionChart
+        markerPercentile={DEFAULT_PERCENTILE_THRESHOLD}
+        markerValue={percentileThresholdValue ?? 0}
+        overallHistogram={overallHistogram}
+        histogram={errorHistogram}
+        field="Failed transactions"
+        value=""
+      />
 
       <EuiSpacer size="s" />
 

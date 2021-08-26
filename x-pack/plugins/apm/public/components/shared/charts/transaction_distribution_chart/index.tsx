@@ -282,7 +282,7 @@ export function TransactionDistributionChart({
             fieldName !== undefined &&
             fieldValue !== undefined && (
               <AreaSeries
-                id={`apmTransactionDistributionChartAreaSeries${fieldName}${fieldValue}`}
+                id={`${fieldName}:${fieldValue}`}
                 xScaleType={ScaleType.Log}
                 yScaleType={ScaleType.Log}
                 data={histogram}

@@ -16,6 +16,7 @@ import {
 import type { SearchServiceParams } from '../../common/search_strategies/correlations/types';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 import { ApmPluginStartDeps } from '../plugin';
+import type { HistogramItem } from '../../common/search_strategies/correlations/types';
 import { FailedTransactionsCorrelationValue } from '../../common/search_strategies/failure_correlations/types';
 import { FAILED_TRANSACTIONS_CORRELATION_SEARCH_STRATEGY } from '../../common/search_strategies/failure_correlations/constants';
 
@@ -24,6 +25,9 @@ interface RawResponse {
   values: FailedTransactionsCorrelationValue[];
   log: string[];
   ccsWarning: boolean;
+  percentileThresholdValue: number;
+  overallHistogram: HistogramItem[];
+  errorHistogram: HistogramItem[];
 }
 
 interface FailedTransactionsCorrelationsFetcherState {
@@ -34,6 +38,9 @@ interface FailedTransactionsCorrelationsFetcherState {
   ccsWarning: RawResponse['ccsWarning'];
   values: RawResponse['values'];
   log: RawResponse['log'];
+  overallHistogram?: RawResponse['overallHistogram'];
+  errorHistogram?: RawResponse['errorHistogram'];
+  percentileThresholdValue?: RawResponse['percentileThresholdValue'];
   timeTook?: number;
   total: number;
 }
@@ -69,6 +76,18 @@ export const useFailedTransactionsCorrelationsFetcher = () => {
       loaded: response.loaded!,
       total: response.total!,
       timeTook: response.rawResponse.took,
+      // only set percentileThresholdValue and overallHistogram once it's repopulated on a refresh,
+      // otherwise the consuming chart would flicker with an empty state on reload.
+      ...(response.rawResponse?.percentileThresholdValue !== undefined &&
+      response.rawResponse?.overallHistogram !== undefined &&
+      response.rawResponse?.errorHistogram !== undefined
+        ? {
+            overallHistogram: response.rawResponse?.overallHistogram,
+            errorHistogram: response.rawResponse?.errorHistogram,
+            percentileThresholdValue:
+              response.rawResponse?.percentileThresholdValue,
+          }
+        : {}),
     }));
   }
 

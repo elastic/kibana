@@ -11,11 +11,17 @@ import type { SearchServiceParams } from '../../../../common/search_strategies/c
 import type { ApmIndicesConfig } from '../../settings/apm_indices/get_apm_indices';
 import { asyncSearchServiceLogProvider } from '../correlations/async_search_service_log';
 import { asyncErrorCorrelationsSearchServiceStateProvider } from './async_search_service_state';
-import { fetchTransactionDurationFieldCandidates } from '../correlations/queries';
+import {
+  fetchTransactionDurationFieldCandidates,
+  fetchTransactionDurationPercentiles,
+  fetchTransactionDurationRanges,
+  fetchTransactionDurationHistogramRangeSteps,
+} from '../correlations/queries';
 import type { SearchServiceFetchParams } from '../../../../common/search_strategies/correlations/types';
 import { fetchFailedTransactionsCorrelationPValues } from './queries/query_failure_correlation';
 import { ERROR_CORRELATION_THRESHOLD } from './constants';
 import { EVENT_OUTCOME } from '../../../../common/elasticsearch_fieldnames';
+import { EventOutcome } from '../../../../common/event_outcome';
 
 export const asyncErrorCorrelationSearchServiceProvider = (
   esClient: ElasticsearchClient,
@@ -35,6 +41,40 @@ export const asyncErrorCorrelationSearchServiceProvider = (
         index: indices['apm_oss.transactionIndices'],
         includeFrozen,
       };
+
+      // 95th percentile to be displayed as a marker in the log log chart
+      const {
+        percentiles: percentilesResponseThresholds,
+      } = await fetchTransactionDurationPercentiles(
+        esClient,
+        params,
+        params.percentileThreshold ? [params.percentileThreshold] : undefined
+      );
+      const percentileThresholdValue =
+        percentilesResponseThresholds[`${params.percentileThreshold}.0`];
+      state.setPercentileThresholdValue(percentileThresholdValue);
+
+      const histogramRangeSteps = await fetchTransactionDurationHistogramRangeSteps(
+        esClient,
+        params
+      );
+
+      const overallLogHistogramChartData = await fetchTransactionDurationRanges(
+        esClient,
+        params,
+        histogramRangeSteps
+      );
+      const errorLogHistogramChartData = await fetchTransactionDurationRanges(
+        esClient,
+        params,
+        histogramRangeSteps,
+        EVENT_OUTCOME,
+        EventOutcome.failure
+      );
+
+      state.setProgress({ loadedOverallHistogram: 1 });
+      state.setErrorHistogram(errorLogHistogramChartData);
+      state.setOverallHistogram(overallLogHistogramChartData);
 
       const {
         fieldCandidates: candidates,
@@ -113,7 +153,15 @@ export const asyncErrorCorrelationSearchServiceProvider = (
   fetchErrorCorrelations();
 
   return () => {
-    const { ccsWarning, error, isRunning, progress } = state.getState();
+    const {
+      ccsWarning,
+      error,
+      isRunning,
+      overallHistogram,
+      errorHistogram,
+      percentileThresholdValue,
+      progress,
+    } = state.getState();
 
     return {
       ccsWarning,
@@ -121,9 +169,12 @@ export const asyncErrorCorrelationSearchServiceProvider = (
       log: getLogMessages(),
       isRunning,
       loaded: Math.round(state.getOverallProgress() * 100),
+      overallHistogram,
+      errorHistogram,
       started: progress.started,
       total: 100,
       values: state.getValuesSortedByScore(),
+      percentileThresholdValue,
       cancel: () => {
         addLogMessage(`Service cancelled.`);
         state.setIsCancelled(true);

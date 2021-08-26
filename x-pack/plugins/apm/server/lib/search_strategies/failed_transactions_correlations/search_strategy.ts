@@ -82,6 +82,9 @@ export const apmFailedTransactionsCorrelationsSearchStrategyProvider = (
         started,
         total,
         values,
+        percentileThresholdValue,
+        overallHistogram,
+        errorHistogram,
       } = getAsyncSearchServiceState();
 
       if (error instanceof Error) {
@@ -106,6 +109,9 @@ export const apmFailedTransactionsCorrelationsSearchStrategyProvider = (
           log,
           took,
           values,
+          percentileThresholdValue,
+          overallHistogram,
+          errorHistogram,
         },
       });
     },
