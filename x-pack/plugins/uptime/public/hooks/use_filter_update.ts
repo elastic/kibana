@@ -50,22 +50,24 @@ export const useFilterUpdate = (
   const { filters: currentFilters, excludedFilters: currentExcludedFilters } = getUrlParams();
 
   useEffect(() => {
-    const filterKueries: Map<string, string[]> = parseFiltersMap(currentFilters);
-    const excludedFilterKueries: Map<string, string[]> = parseFiltersMap(currentExcludedFilters);
-
     if (fieldName) {
-      // store the new set of filters
-      // update filters in the URL from filter group
-      const newFilters = getUpdateFilters(filterKueries, fieldName, values);
-      if (currentFilters !== newFilters && shouldUpdateUrl) {
-        updateUrl({ filters: newFilters, pagination: '' });
-      }
+      const currentFiltersMap: Map<string, string[]> = parseFiltersMap(currentFilters);
+      const currentExclusionsMap: Map<string, string[]> = parseFiltersMap(currentExcludedFilters);
+      const newFiltersString = getUpdateFilters(currentFiltersMap, fieldName, values);
+      const newExclusionsString = getUpdateFilters(currentExclusionsMap, fieldName, notValues);
 
-      const newExcludedFilters = getUpdateFilters(excludedFilterKueries, fieldName, notValues);
-      if (currentExcludedFilters !== newExcludedFilters && shouldUpdateUrl) {
-        updateUrl({ excludedFilters: newExcludedFilters, pagination: '' });
+      const update: { [key: string]: string } = {};
+      if (currentFilters !== newFiltersString) {
+        update.filters = newFiltersString;
+      }
+      if (currentExcludedFilters !== newExclusionsString) {
+        update.excludedFilters = newExclusionsString;
+      }
+      if (shouldUpdateUrl && Object.keys(update).length > 0) {
+        updateUrl({ ...update, pagination: '' });
       }
     }
-    // eslint-disable-next-line
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fieldName, values, notValues]);
 };
