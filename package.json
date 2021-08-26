@@ -685,6 +685,7 @@
     "cypress-real-events": "^1.4.0",
     "debug": "^2.6.9",
     "delete-empty": "^2.0.0",
+    "dependency-check": "^4.1.0",
     "diff": "^4.0.1",
     "dpdm": "3.5.0",
     "ejs": "^3.1.6",
