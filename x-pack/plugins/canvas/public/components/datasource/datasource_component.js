@@ -20,7 +20,7 @@ import {
 import { isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 
-import { getDefaultIndex } from '../../lib/es_service';
+import { getDefaultIndex } from '../../../public/lib/es_service';
 import { DatasourceSelector } from './datasource_selector';
 import { DatasourcePreview } from './datasource_preview';
 
