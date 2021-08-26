@@ -1,0 +1,162 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+
+import Path from 'path';
+import fs from 'fs/promises';
+import JSON5 from 'json5';
+import * as kbnTestServer from '../../../../test_helpers/kbn_server';
+import { Root } from '../../../root';
+import { ElasticsearchClient } from '../../../elasticsearch';
+import { Env } from '@kbn/config';
+import { REPO_ROOT } from '@kbn/utils';
+import { getEnvOptions } from '../../../config/mocks';
+
+const kibanaVersion = Env.createDefault(REPO_ROOT, getEnvOptions()).packageInfo.version;
+const targetIndex = `.kibana_${kibanaVersion}_001`;
+const logFilePath = Path.join(__dirname, 'batch_size_bytes.log');
+
+async function removeLogFile() {
+  // ignore errors if it doesn't exist
+  await fs.unlink(logFilePath).catch(() => void 0);
+}
+
+describe('migration v2', () => {
+  let esServer: kbnTestServer.TestElasticsearchUtils;
+  let root: Root;
+  let startES: () => Promise<kbnTestServer.TestElasticsearchUtils>;
+
+  beforeAll(async () => {
+    await removeLogFile();
+  });
+
+  beforeEach(() => {
+    ({ startES } = kbnTestServer.createTestServers({
+      adjustTimeout: (t: number) => jest.setTimeout(t),
+      settings: {
+        es: {
+          license: 'basic',
+          dataArchive: Path.join(__dirname, 'archives', '7.14.0_xpack_sample_saved_objects.zip'),
+          esArgs: ['http.max_content_length=1715275b'],
+        },
+      },
+    }));
+  });
+
+  afterEach(async () => {
+    if (root) {
+      await root.shutdown();
+    }
+    if (esServer) {
+      await esServer.stop();
+    }
+
+    await new Promise((resolve) => setTimeout(resolve, 10000));
+  });
+
+  it('completes the migration even when a full batch would exceed ES http.max_content_length', async () => {
+    root = createRoot({ batchSizeBytes: 1715275 });
+    esServer = await startES();
+    await root.preboot();
+    await root.setup();
+    await expect(root.start()).resolves.toBeTruthy();
+
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+
+    const esClient: ElasticsearchClient = esServer.es.getClient();
+    const migratedIndexResponse = await esClient.count({
+      index: targetIndex,
+    });
+    const oldIndexResponse = await esClient.count({
+      index: '.kibana_7.14.0_001',
+    });
+
+    // Use a >= comparison since once Kibana has started it might create new
+    // documents like telemetry tasks
+    expect(migratedIndexResponse.body.count).toBeGreaterThanOrEqual(oldIndexResponse.body.count);
+  });
+
+  it('fails with a descriptive message when a single document exceeds batchSizeBytes', async () => {
+    root = createRoot({ batchSizeBytes: 1015275 });
+    esServer = await startES();
+    await root.preboot();
+    await root.setup();
+    await expect(root.start()).rejects.toMatchInlineSnapshot(
+      `[Error: Unable to complete saved object migrations for the [.kibana] index: The document with _id "canvas-workpad-template:workpad-template-061d7868-2b4e-4dc8-8bf7-3772b52926e5" is 1715275 bytes which equals or exceeds the configured maximum batch size of 1015275 bytes. To proceed, please increase the migrations.batchSizeBytes Kibana configuration option and ensure that the Elasticsearch http.max_content_length configuration option is set to an equal or larger value.]`
+    );
+
+    const logFileContent = await fs.readFile(logFilePath, 'utf-8');
+    const records = logFileContent
+      .split('\n')
+      .filter(Boolean)
+      .map((str) => JSON5.parse(str)) as any[];
+
+    expect(
+      records.find((rec) =>
+        rec.message.startsWith(
+          `Unable to complete saved object migrations for the [.kibana] index: The document with _id "canvas-workpad-template:workpad-template-061d7868-2b4e-4dc8-8bf7-3772b52926e5" is 1715275 bytes which equals or exceeds the configured maximum batch size of 1015275 bytes. To proceed, please increase the migrations.batchSizeBytes Kibana configuration option and ensure that the Elasticsearch http.max_content_length configuration option is set to an equal or larger value.`
+        )
+      )
+    ).toBeDefined();
+  });
+});
+
+function createRoot(options: { batchSizeBytes?: number }) {
+  return kbnTestServer.createRootWithCorePlugins(
+    {
+      migrations: {
+        skip: false,
+        enableV2: true,
+        batchSize: 1000,
+        batchSizeBytes: options.batchSizeBytes,
+      },
+      logging: {
+        appenders: {
+          file: {
+            type: 'file',
+            fileName: logFilePath,
+            layout: {
+              type: 'json',
+            },
+          },
+        },
+        loggers: [
+          {
+            name: 'root',
+            appenders: ['file'],
+          },
+        ],
+      },
+    },
+    {
+      oss: true,
+    }
+  );
+}
+
+async function fetchDocs(esClient: ElasticsearchClient, index: string, type: string) {
+  const { body } = await esClient.search<any>({
+    index,
+    size: 10000,
+    body: {
+      query: {
+        bool: {
+          should: [
+            {
+              term: { type },
+            },
+          ],
+        },
+      },
+    },
+  });
+
+  return body.hits.hits.map((h) => ({
+    ...h._source,
+    id: h._id,
+  }));
+}

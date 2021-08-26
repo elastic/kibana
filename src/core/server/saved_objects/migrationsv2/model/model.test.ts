@@ -1177,7 +1177,7 @@ describe('migrations v2 model', () => {
         const newState = model(reindexSourceToTempIndexBulkState, res) as FatalState;
         expect(newState.controlState).toEqual('FATAL');
         expect(newState.reason).toMatchInlineSnapshot(
-          `"While indexing a batch of saved objects, Elasticsearch returned a 413 Request Entity Too Large exception. Try to use smaller batches by changing the Kibana 'migrations.batchSize' configuration option and restarting Kibana."`
+          `"While indexing a batch of saved objects, Elasticsearch returned a 413 Request Entity Too Large exception. Ensure that the Kibana configuration option 'migrations.batchSize' is set to a value that is lower than or equal to the Elasticsearch 'http.max_content_length' configuration option."`
         );
       });
       test('REINDEX_SOURCE_TO_TEMP_INDEX_BULK should throw a throwBadResponse error if action failed', () => {
@@ -1615,7 +1615,7 @@ describe('migrations v2 model', () => {
         const newState = model(transformedDocumentsBulkIndexState, res) as FatalState;
         expect(newState.controlState).toEqual('FATAL');
         expect(newState.reason).toMatchInlineSnapshot(
-          `"While indexing a batch of saved objects, Elasticsearch returned a 413 Request Entity Too Large exception. Try to use smaller batches by changing the Kibana 'migrations.batchSize' configuration option and restarting Kibana."`
+          `"While indexing a batch of saved objects, Elasticsearch returned a 413 Request Entity Too Large exception. Ensure that the Kibana configuration option 'migrations.batchSize' is set to a value that is lower than or equal to the Elasticsearch 'http.max_content_length' configuration option."`
         );
       });
     });
