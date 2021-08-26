@@ -149,6 +149,11 @@ export const useTransactionLatencyCorrelationsFetcher = () => {
     abortCtrl.current.abort();
     setFetchState((prevState) => ({
       ...prevState,
+      // If we didn't receive data for the overall histogram yet
+      // set it to an empty array to indicate loading stopped.
+      ...(prevState.overallHistogram === undefined
+        ? { overallHistogram: [] }
+        : {}),
       isRunning: false,
     }));
   }, [setFetchState]);
