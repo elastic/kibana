@@ -141,6 +141,18 @@ Object {
               "field": "jvm.memory.heap.used",
             },
           },
+          "latest": Object {
+            "top_metrics": Object {
+              "metrics": Array [
+                Object {
+                  "field": "host.hostname",
+                },
+              ],
+              "sort": Object {
+                "@timestamp": "desc",
+              },
+            },
+          },
           "nonHeapMemory": Object {
             "avg": Object {
               "field": "jvm.memory.non_heap.used",

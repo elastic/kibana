@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiToolTip } from '@elastic/eui';
+import { EuiToolTip, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
@@ -78,6 +78,12 @@ function ServiceNodeOverview() {
             {i18n.translate('xpack.apm.jvmsTable.nameColumnLabel', {
               defaultMessage: 'Name',
             })}
+            <EuiIcon
+              size="s"
+              color="subdued"
+              type="questionInCircle"
+              className="eui-alignTop"
+            />
           </>
         </EuiToolTip>
       ),
@@ -111,10 +117,19 @@ function ServiceNodeOverview() {
       },
     },
     {
+      name: i18n.translate('xpack.apm.jvmsTable.hostName', {
+        defaultMessage: 'Host name',
+      }),
+      field: 'hostName',
+      sortable: true,
+      render: (_, { hostName }) => hostName ?? '',
+    },
+    {
       name: i18n.translate('xpack.apm.jvmsTable.cpuColumnLabel', {
         defaultMessage: 'CPU avg',
       }),
       field: 'cpu',
+      dataType: 'number',
       sortable: true,
       render: (_, { cpu }) => asPercent(cpu, 1),
     },
@@ -123,6 +138,7 @@ function ServiceNodeOverview() {
         defaultMessage: 'Heap memory avg',
       }),
       field: 'heapMemory',
+      dataType: 'number',
       sortable: true,
       render: asDynamicBytes,
     },
@@ -131,6 +147,7 @@ function ServiceNodeOverview() {
         defaultMessage: 'Non-heap memory avg',
       }),
       field: 'nonHeapMemory',
+      dataType: 'number',
       sortable: true,
       render: asDynamicBytes,
     },
@@ -139,6 +156,7 @@ function ServiceNodeOverview() {
         defaultMessage: 'Thread count max',
       }),
       field: 'threadCount',
+      dataType: 'number',
       sortable: true,
       render: asInteger,
     },
