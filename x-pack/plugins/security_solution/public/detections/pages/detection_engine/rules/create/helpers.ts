@@ -256,8 +256,6 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
         language: ruleFields.queryBar?.query?.language,
         query: ruleFields.queryBar?.query?.query as string,
         saved_id: ruleFields.queryBar?.saved_id,
-        ...(ruleType === 'query' &&
-          ruleFields.queryBar?.saved_id && { type: 'saved_query' as Type }),
       };
 
   return {

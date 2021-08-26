@@ -176,7 +176,7 @@ describe('helpers', () => {
       );
     });
 
-    test('returns expected array of ListItems when "savedId" exists', () => {
+    test('returns empty array of ListItems when "savedId" exists', () => {
       const mockQueryBarWithSavedId = {
         ...mockQueryBar,
         query: '',
@@ -189,7 +189,7 @@ describe('helpers', () => {
         query: mockQueryBarWithSavedId.query,
         savedId: mockQueryBarWithSavedId.saved_id,
       });
-      expect(result[0].description).toEqual(<>{mockQueryBarWithSavedId.saved_id} </>);
+      expect(result.length).toEqual(0);
     });
   });
 
