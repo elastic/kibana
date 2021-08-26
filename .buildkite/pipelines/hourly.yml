@@ -82,12 +82,6 @@ steps:
       queue: n2-2
     key: checks
 
-  - command: .buildkite/scripts/steps/test/quick.sh
-    label: 'Quick Tests'
-    agents:
-      queue: n2-2
-    key: quick
-
   - wait: ~
     continue_on_failure: true
   - plugins:

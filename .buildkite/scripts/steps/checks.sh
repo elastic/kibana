@@ -18,3 +18,5 @@ set -euo pipefail
 .buildkite/scripts/steps/checks/licenses.sh
 .buildkite/scripts/steps/checks/plugins_with_circular_deps.sh
 .buildkite/scripts/steps/checks/verify_notice.sh
+.buildkite/scripts/steps/checks/test_projects.sh
+.buildkite/scripts/steps/checks/test_hardening.sh
