@@ -53,8 +53,6 @@ import { createMlAlertType } from './lib/detection_engine/rule_types/ml/create_m
 import { initRoutes } from './routes';
 import { isAlertExecutor } from './lib/detection_engine/signals/types';
 import { signalRulesAlertType } from './lib/detection_engine/signals/signal_rule_alert_type';
-import { rulesNotificationAlertType } from './lib/detection_engine/notifications/rules_notification_alert_type';
-import { isNotificationAlertExecutor } from './lib/detection_engine/notifications/types';
 import { ManifestTask } from './endpoint/lib/artifacts';
 import { initSavedObjects } from './saved_objects';
 import { AppClientFactory } from './client';
@@ -236,16 +234,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         componentTemplates: [
           {
             name: 'mappings',
-            version: 0,
             mappings: mappingFromFieldMap(
               { ...alertsFieldMap, ...rulesFieldMap, ...ctiFieldMap },
               false
             ),
           },
         ],
-        indexTemplate: {
-          version: 0,
-        },
         secondaryAlias: config.signalsIndex,
       });
 
@@ -304,16 +298,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         experimentalFeatures,
         ruleDataService: plugins.ruleRegistry.ruleDataService,
       });
-      const ruleNotificationType = rulesNotificationAlertType({
-        logger: this.logger,
-      });
 
       if (isAlertExecutor(signalRuleType)) {
         this.setupPlugins.alerting.registerType(signalRuleType);
-      }
-
-      if (isNotificationAlertExecutor(ruleNotificationType)) {
-        this.setupPlugins.alerting.registerType(ruleNotificationType);
       }
     }
 

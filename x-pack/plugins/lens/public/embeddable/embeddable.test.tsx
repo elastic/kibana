@@ -23,6 +23,7 @@ import { AttributeService, ViewMode } from '../../../../../src/plugins/embeddabl
 import { LensAttributeService } from '../lens_attribute_service';
 import { OnSaveProps } from '../../../../../src/plugins/saved_objects/public/save_modal';
 import { act } from 'react-dom/test-utils';
+import { inspectorPluginMock } from '../../../../../src/plugins/inspector/public/mocks';
 
 jest.mock('../../../../../src/plugins/inspector/public/', () => ({
   isAvailable: false,
@@ -116,6 +117,7 @@ describe('embeddable', () => {
           canSaveDashboards: true,
           canSaveVisualizations: true,
         },
+        inspector: inspectorPluginMock.createStartContract(),
         getTrigger,
         documentToExpression: () =>
           Promise.resolve({
@@ -154,6 +156,7 @@ describe('embeddable', () => {
         expressionRenderer,
         basePath,
         indexPatternService: {} as IndexPatternsContract,
+        inspector: inspectorPluginMock.createStartContract(),
         capabilities: { canSaveDashboards: true, canSaveVisualizations: true },
         getTrigger,
         documentToExpression: () =>
@@ -193,6 +196,7 @@ describe('embeddable', () => {
         attributeService,
         expressionRenderer,
         basePath,
+        inspector: inspectorPluginMock.createStartContract(),
         indexPatternService: {} as IndexPatternsContract,
         capabilities: {
           canSaveDashboards: true,
@@ -234,6 +238,7 @@ describe('embeddable', () => {
         attributeService,
         expressionRenderer,
         basePath,
+        inspector: inspectorPluginMock.createStartContract(),
         indexPatternService: ({
           get: (id: string) => Promise.resolve({ id }),
         } as unknown) as IndexPatternsContract,
@@ -274,6 +279,7 @@ describe('embeddable', () => {
         attributeService,
         expressionRenderer,
         basePath,
+        inspector: inspectorPluginMock.createStartContract(),
         indexPatternService: {} as IndexPatternsContract,
         capabilities: {
           canSaveDashboards: true,
@@ -318,6 +324,7 @@ describe('embeddable', () => {
         attributeService,
         expressionRenderer,
         basePath,
+        inspector: inspectorPluginMock.createStartContract(),
         indexPatternService: {} as IndexPatternsContract,
         capabilities: { canSaveDashboards: true, canSaveVisualizations: true },
         getTrigger,
@@ -363,6 +370,7 @@ describe('embeddable', () => {
         attributeService,
         expressionRenderer,
         basePath,
+        inspector: inspectorPluginMock.createStartContract(),
         indexPatternService: {} as IndexPatternsContract,
         capabilities: {
           canSaveDashboards: true,
@@ -409,6 +417,7 @@ describe('embeddable', () => {
         attributeService,
         expressionRenderer,
         basePath,
+        inspector: inspectorPluginMock.createStartContract(),
         indexPatternService: {} as IndexPatternsContract,
         capabilities: {
           canSaveDashboards: true,
@@ -462,6 +471,7 @@ describe('embeddable', () => {
         attributeService,
         expressionRenderer,
         basePath,
+        inspector: inspectorPluginMock.createStartContract(),
         indexPatternService: {} as IndexPatternsContract,
         capabilities: {
           canSaveDashboards: true,
@@ -515,6 +525,7 @@ describe('embeddable', () => {
         attributeService,
         expressionRenderer,
         basePath,
+        inspector: inspectorPluginMock.createStartContract(),
         indexPatternService: {} as IndexPatternsContract,
         capabilities: {
           canSaveDashboards: true,
@@ -567,6 +578,7 @@ describe('embeddable', () => {
         attributeService,
         expressionRenderer,
         basePath,
+        inspector: inspectorPluginMock.createStartContract(),
         indexPatternService: ({ get: jest.fn() } as unknown) as IndexPatternsContract,
         capabilities: {
           canSaveDashboards: true,
@@ -608,6 +620,7 @@ describe('embeddable', () => {
         attributeService,
         expressionRenderer,
         basePath,
+        inspector: inspectorPluginMock.createStartContract(),
         indexPatternService: {} as IndexPatternsContract,
         capabilities: {
           canSaveDashboards: true,
@@ -649,6 +662,7 @@ describe('embeddable', () => {
         attributeService,
         expressionRenderer,
         basePath,
+        inspector: inspectorPluginMock.createStartContract(),
         indexPatternService: {} as IndexPatternsContract,
         capabilities: {
           canSaveDashboards: true,
@@ -690,6 +704,7 @@ describe('embeddable', () => {
         attributeService,
         expressionRenderer,
         basePath,
+        inspector: inspectorPluginMock.createStartContract(),
         indexPatternService: {} as IndexPatternsContract,
         capabilities: {
           canSaveDashboards: true,
@@ -746,6 +761,7 @@ describe('embeddable', () => {
         attributeService,
         expressionRenderer,
         basePath,
+        inspector: inspectorPluginMock.createStartContract(),
         indexPatternService: {} as IndexPatternsContract,
         capabilities: {
           canSaveDashboards: true,
@@ -818,6 +834,7 @@ describe('embeddable', () => {
         attributeService,
         expressionRenderer,
         basePath,
+        inspector: inspectorPluginMock.createStartContract(),
         indexPatternService: {} as IndexPatternsContract,
         capabilities: {
           canSaveDashboards: true,
@@ -865,6 +882,7 @@ describe('embeddable', () => {
         attributeService,
         expressionRenderer,
         basePath,
+        inspector: inspectorPluginMock.createStartContract(),
         indexPatternService: {} as IndexPatternsContract,
         capabilities: {
           canSaveDashboards: true,
@@ -912,6 +930,7 @@ describe('embeddable', () => {
         attributeService,
         expressionRenderer,
         basePath,
+        inspector: inspectorPluginMock.createStartContract(),
         indexPatternService: {} as IndexPatternsContract,
         capabilities: {
           canSaveDashboards: true,
