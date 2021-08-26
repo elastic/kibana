@@ -21,11 +21,11 @@ import { TelemetryEvent, ESLicense, ESClusterInfo, GetEndpointListResponse } fro
 
 export class TelemetryReceiver {
   private readonly logger: Logger;
-  private esClient?: ElasticsearchClient;
   private agentService?: AgentService;
   private agentPolicyService?: AgentPolicyServiceInterface;
-  private savedObjectsClient?: SavedObjectsClientContract;
+  private esClient?: ElasticsearchClient;
   private exceptionListClient?: ExceptionListClient;
+  private soClient?: SavedObjectsClientContract;
   private readonly max_records = 10_000;
   private maxQueueSize = 100;
 
@@ -38,29 +38,16 @@ export class TelemetryReceiver {
     endpointContextService?: EndpointAppContextService,
     exceptionListClient?: ExceptionListClient
   ) {
-    this.esClient = core?.elasticsearch.client.asInternalUser;
     this.agentService = endpointContextService?.getAgentService();
     this.agentPolicyService = endpointContextService?.getAgentPolicyService();
-    this.savedObjectsClient = (core?.savedObjects.createInternalRepository() as unknown) as SavedObjectsClientContract;
+    this.esClient = core?.elasticsearch.client.asInternalUser;
     this.exceptionListClient = exceptionListClient;
-  }
-
-  /**
-   * Get the cluster info from the connected cluster.
-   * Copied from:
-   * src/plugins/telemetry/server/telemetry_collection/get_cluster_info.ts
-   * This is the equivalent to GET /
-   *
-   * @param {function} esClient The asInternalUser handler (exposed for testing)
-   */
-  private async getClusterInfo(esClient: ElasticsearchClient) {
-    const { body } = await esClient.info();
-    return body;
+    this.soClient = (core?.savedObjects.createInternalRepository() as unknown) as SavedObjectsClientContract;
   }
 
   public async fetchFleetAgents() {
     if (this.esClient === undefined || this.esClient === null) {
-      throw Error('could not fetch policy responses. es client is not available');
+      throw Error('elasticsearch client is unavailable: cannot retrieve fleet policy responses');
     }
 
     return this.agentService?.listAgents(this.esClient, {
@@ -73,14 +60,17 @@ export class TelemetryReceiver {
 
   public async fetchClusterInfo(): Promise<ESClusterInfo> {
     if (this.esClient === undefined) {
-      throw Error("Couldn't fetch cluster info. es client is not available");
+      throw Error('elasticsearch client is unavailable: cannot retrieve cluster infomation');
     }
+
     return this.getClusterInfo(this.esClient);
   }
 
   public async fetchEndpointPolicyResponses(executeFrom: string, executeTo: string) {
     if (this.esClient === undefined || this.esClient === null) {
-      throw Error('could not fetch policy responses. es client is not available');
+      throw Error(
+        'elasticsearch client is unavailable: cannot retrieve elastic endpoint policy responses'
+      );
     }
 
     const query: SearchRequest = {
@@ -127,7 +117,7 @@ export class TelemetryReceiver {
 
   public async fetchEndpointMetrics(executeFrom: string, executeTo: string) {
     if (this.esClient === undefined || this.esClient === null) {
-      throw Error('could not fetch policy responses. es client is not available');
+      throw Error('elasticsearch client is unavailable: cannot retrieve elastic endpoint metrics');
     }
 
     const query: SearchRequest = {
@@ -173,6 +163,10 @@ export class TelemetryReceiver {
   }
 
   public async fetchDiagnosticAlerts(executeFrom: string, executeTo: string) {
+    if (this.esClient === undefined || this.esClient === null) {
+      throw Error('elasticsearch client is unavailable: cannot retrieve diagnostic alerts');
+    }
+
     const query = {
       expand_wildcards: 'open,hidden',
       index: '.logs-endpoint.diagnostic.collection-*',
@@ -197,11 +191,32 @@ export class TelemetryReceiver {
       },
     };
 
-    if (this.esClient === undefined) {
-      throw Error('could not fetch diagnostic alerts. es client is not available');
+    return (await this.esClient.search<TelemetryEvent>(query)).body;
+  }
+
+  /**
+   * Get the cluster info from the connected cluster.
+   * Copied from:
+   * src/plugins/telemetry/server/telemetry_collection/get_cluster_info.ts
+   * This is the equivalent to GET /
+   */
+  private async getClusterInfo(esClient: ElasticsearchClient) {
+    const { body } = await esClient.info();
+    return body;
+  }
+
+  public async fetchLicenseInfo(): Promise<ESLicense | undefined> {
+    if (this.esClient === undefined || this.esClient === null) {
+      throw Error('elasticsearch client is unavailable: cannot retrieve license information');
     }
 
-    return (await this.esClient.search<TelemetryEvent>(query)).body;
+    try {
+      const ret = await this.getLicense(this.esClient, true);
+      return ret.license;
+    } catch (err) {
+      this.logger.debug(`failed retrieving license: ${err}`);
+      return undefined;
+    }
   }
 
   private async getLicense(
@@ -221,19 +236,6 @@ export class TelemetryReceiver {
     ).body as Promise<{ license: ESLicense }>; // Note: We have to as cast since transport.request doesn't have generics
   }
 
-  public async fetchLicenseInfo(): Promise<ESLicense | undefined> {
-    if (!this.esClient) {
-      return undefined;
-    }
-    try {
-      const ret = await this.getLicense(this.esClient, true);
-      return ret.license;
-    } catch (err) {
-      this.logger.warn(`Error retrieving license: ${err}`);
-      return undefined;
-    }
-  }
-
   public copyLicenseFields(lic: ESLicense) {
     return {
       uid: lic.uid,
@@ -245,16 +247,18 @@ export class TelemetryReceiver {
   }
 
   public async fetchPolicyConfigs(id: string) {
-    if (this.savedObjectsClient === undefined || this.savedObjectsClient === null) {
-      throw Error('could not fetch endpoint policy configs. saved object client is not available');
+    if (this.soClient === undefined || this.soClient === null) {
+      throw Error(
+        'saved object client is unavailable: cannot retrieve endpoint policy configurations'
+      );
     }
 
-    return this.agentPolicyService?.get(this.savedObjectsClient, id);
+    return this.agentPolicyService?.get(this.soClient, id);
   }
 
   public async fetchTrustedApplications() {
     if (this?.exceptionListClient === undefined || this?.exceptionListClient === null) {
-      throw Error('could not fetch trusted applications. exception list client not available.');
+      throw Error('exception list client is unavailable: cannot retrieve trusted applications');
     }
 
     return getTrustedAppsList(this.exceptionListClient, { page: 1, per_page: 10_000 });
@@ -262,7 +266,7 @@ export class TelemetryReceiver {
 
   public async fetchEndpointList(listId: string): Promise<GetEndpointListResponse> {
     if (this?.exceptionListClient === undefined || this?.exceptionListClient === null) {
-      throw Error('could not fetch trusted applications. exception list client not available.');
+      throw Error('exception list client is unavailable: could not retrieve trusted applications');
     }
 
     // Ensure list is created if it does not exist
