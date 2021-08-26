@@ -1084,18 +1084,15 @@ describe('user action transform utils', () => {
         });
       });
 
-      it('returns no references and undefined transformed json when actionDetails is invalid json', () => {
-        expect(
+      it('throws an error when actionDetails is invalid json', () => {
+        expect(() =>
           extractConnectorIdFromJson({
             action: 'a',
             actionFields: [],
             actionDetails: '{a',
             fieldType: UserActionFieldType.New,
           })
-        ).toEqual({
-          transformedActionDetails: '{a',
-          references: [],
-        });
+        ).toThrow();
       });
     });
 

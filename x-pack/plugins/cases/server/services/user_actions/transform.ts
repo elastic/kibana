@@ -31,6 +31,10 @@ import {
 import { ACTION_SAVED_OBJECT_TYPE } from '../../../../actions/server';
 import { UserActionFieldType } from './types';
 
+/**
+ * Extracts the connector id from a json encoded string and formats it as a saved object reference. This will remove
+ * the field it extracted the connector id from.
+ */
 export function extractConnectorIdFromJson({
   action,
   actionFields,
@@ -42,28 +46,24 @@ export function extractConnectorIdFromJson({
   actionDetails?: string | null;
   fieldType: UserActionFieldType;
 }): { transformedActionDetails?: string | null; references: SavedObjectReference[] } {
-  const defResult = { transformedActionDetails: actionDetails, references: [] };
-
   if (!action || !actionFields || !actionDetails) {
-    return defResult;
+    return { transformedActionDetails: actionDetails, references: [] };
   }
 
-  try {
-    const decodedJson = JSON.parse(actionDetails);
+  const decodedJson = JSON.parse(actionDetails);
 
-    const { transformedActionDetails, references } = extractConnectorIdHelper({
-      action,
-      actionFields,
-      actionDetails: decodedJson,
-      fieldType,
-    });
-
-    return { transformedActionDetails, references };
-  } catch (error) {
-    return defResult;
-  }
+  return extractConnectorIdHelper({
+    action,
+    actionFields,
+    actionDetails: decodedJson,
+    fieldType,
+  });
 }
 
+/**
+ * Extracts the connector id from an unencoded object and formats it as a saved object reference.
+ * This will remove the field it extracted the connector id from.
+ */
 export function extractConnectorId({
   action,
   actionFields,
@@ -103,6 +103,10 @@ function encodeActionDetails(actionDetails: Record<string, unknown>): string | n
   }
 }
 
+/**
+ * Internal helper function for extracting the connector id. This is only exported for usage in unit tests.
+ * This function handles encoding the transformed fields as a json string
+ */
 export function extractConnectorIdHelper({
   action,
   actionFields,
@@ -217,7 +221,7 @@ export const transformConnectorIdToReference = (
 
   const { id: ignoreNoneId, ...restNoneConnector } = getNoneCaseConnector();
   const connectorFieldsToReturn =
-    connector && references.length > 0 ? restConnector : restNoneConnector;
+    connector && isConnectorIdValid(connectorId) ? restConnector : restNoneConnector;
 
   return {
     transformedConnector: {
@@ -232,7 +236,7 @@ const createConnectorReference = (
   type: string,
   name: string
 ): SavedObjectReference[] => {
-  return id && id !== noneConnectorId
+  return isConnectorIdValid(id)
     ? [
         {
           id,
@@ -242,6 +246,9 @@ const createConnectorReference = (
       ]
     : [];
 };
+
+const isConnectorIdValid = (id: string | null | undefined): id is string =>
+  id != null && id !== noneConnectorId;
 
 function isUpdateCaseConnector(
   action: string,

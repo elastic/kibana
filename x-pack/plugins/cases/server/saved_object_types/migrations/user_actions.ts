@@ -11,6 +11,8 @@ import { addOwnerToSO, SanitizedCaseOwner } from '.';
 import {
   SavedObjectUnsanitizedDoc,
   SavedObjectSanitizedDoc,
+  SavedObjectMigrationContext,
+  LogMeta,
 } from '../../../../../../src/core/server';
 import { ConnectorTypes, isCreateConnector, isPush, isUpdateConnector } from '../../../common';
 
@@ -23,24 +25,53 @@ interface UserActions {
   old_value: string;
 }
 
+interface UserActionUnmigratedConnectorDocument {
+  action?: string;
+  action_field?: string[];
+  new_value?: string | null;
+  old_value?: string | null;
+}
+
+interface UserActionLogMeta extends LogMeta {
+  migrations: { userAction: { id: string } };
+}
+
 export function userActionsConnectorIdMigration(
-  doc: SavedObjectUnsanitizedDoc<{
-    action?: string;
-    action_field?: string[];
-    new_value?: string | null;
-    old_value?: string | null;
-  }>
+  doc: SavedObjectUnsanitizedDoc<UserActionUnmigratedConnectorDocument>,
+  context: SavedObjectMigrationContext
 ): SavedObjectSanitizedDoc<unknown> {
+  const originalDocWithReferences = { ...doc, references: doc.references ?? [] };
+
   if (!isConnectorUserAction(doc.attributes.action, doc.attributes.action_field)) {
-    return { ...doc, references: doc.references ?? [] };
+    return originalDocWithReferences;
   }
 
+  try {
+    return formatDocumentWithConnectorReferences(doc);
+  } catch (error) {
+    logError(doc.id, context, error);
+
+    return originalDocWithReferences;
+  }
+}
+
+function isConnectorUserAction(action?: string, actionFields?: string[]): boolean {
+  return (
+    isCreateConnector(action, actionFields) ||
+    isUpdateConnector(action, actionFields) ||
+    isPush(action, actionFields)
+  );
+}
+
+function formatDocumentWithConnectorReferences(
+  doc: SavedObjectUnsanitizedDoc<UserActionUnmigratedConnectorDocument>
+): SavedObjectSanitizedDoc<unknown> {
   const { new_value, old_value, action, action_field, ...restAttributes } = doc.attributes;
   const { references = [] } = doc;
 
   const {
     transformedActionDetails: transformedNewValue,
-    references: newValueRefs,
+    references: newValueConnectorRefs,
   } = extractConnectorIdFromJson({
     action,
     actionFields: action_field,
@@ -50,7 +81,7 @@ export function userActionsConnectorIdMigration(
 
   const {
     transformedActionDetails: transformedOldValue,
-    references: oldValueRefs,
+    references: oldValueConnectorRefs,
   } = extractConnectorIdFromJson({
     action,
     actionFields: action_field,
@@ -67,15 +98,20 @@ export function userActionsConnectorIdMigration(
       new_value: transformedNewValue,
       old_value: transformedOldValue,
     },
-    references: [...references, ...newValueRefs, ...oldValueRefs],
+    references: [...references, ...newValueConnectorRefs, ...oldValueConnectorRefs],
   };
 }
 
-function isConnectorUserAction(action?: string, actionFields?: string[]): boolean {
-  return (
-    isCreateConnector(action, actionFields) ||
-    isUpdateConnector(action, actionFields) ||
-    isPush(action, actionFields)
+function logError(id: string, context: SavedObjectMigrationContext, error: Error) {
+  context.log.error<UserActionLogMeta>(
+    `Failed to migrate user action connector doc id: ${id} version: ${context.migrationVersion} error: ${error.message}`,
+    {
+      migrations: {
+        userAction: {
+          id,
+        },
+      },
+    }
   );
 }
 

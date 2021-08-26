@@ -7,7 +7,8 @@
 
 /* eslint-disable @typescript-eslint/naming-convention */
 
-import { SavedObjectSanitizedDoc } from 'kibana/server';
+import { SavedObjectMigrationContext, SavedObjectSanitizedDoc } from 'kibana/server';
+import { migrationMocks } from 'src/core/server/mocks';
 import { CaseUserActionAttributes, CASE_USER_ACTION_SAVED_OBJECT } from '../../../common';
 import {
   createConnectorObject,
@@ -40,6 +41,12 @@ const create_7_14_0_userAction = (
 describe('user action migrations', () => {
   describe('7.15.0 connector ID migration', () => {
     describe('userActionsConnectorIdMigration', () => {
+      let context: jest.Mocked<SavedObjectMigrationContext>;
+
+      beforeEach(() => {
+        context = migrationMocks.createContext();
+      });
+
       describe('push user action', () => {
         it('extracts the external_service connector_id to references for a new pushed user action', () => {
           const userAction = create_7_14_0_userAction({
@@ -50,7 +57,8 @@ describe('user action migrations', () => {
           });
 
           const migratedUserAction = userActionsConnectorIdMigration(
-            userAction
+            userAction,
+            context
           ) as SavedObjectSanitizedDoc<CaseUserActionAttributes>;
 
           const parsedExternalService = JSON.parse(migratedUserAction.attributes.new_value!);
@@ -92,7 +100,8 @@ describe('user action migrations', () => {
           });
 
           const migratedUserAction = userActionsConnectorIdMigration(
-            userAction
+            userAction,
+            context
           ) as SavedObjectSanitizedDoc<CaseUserActionAttributes>;
 
           const parsedNewExternalService = JSON.parse(migratedUserAction.attributes.new_value!);
@@ -118,7 +127,8 @@ describe('user action migrations', () => {
           };
 
           const migratedUserAction = userActionsConnectorIdMigration(
-            userAction
+            userAction,
+            context
           ) as SavedObjectSanitizedDoc<CaseUserActionAttributes>;
 
           const parsedNewExternalService = JSON.parse(migratedUserAction.attributes.new_value!);
@@ -142,7 +152,8 @@ describe('user action migrations', () => {
           });
 
           const migratedUserAction = userActionsConnectorIdMigration(
-            userAction
+            userAction,
+            context
           ) as SavedObjectSanitizedDoc<CaseUserActionAttributes>;
 
           expect(migratedUserAction.attributes.old_value).toBeNull();
@@ -162,6 +173,51 @@ describe('user action migrations', () => {
             }
           `);
         });
+
+        it('leaves the object unmodified when it new value is invalid json', () => {
+          const userAction = create_7_14_0_userAction({
+            action: 'push-to-service',
+            action_field: ['pushed'],
+            new_value: '{a',
+            old_value: null,
+          });
+
+          const migratedUserAction = userActionsConnectorIdMigration(
+            userAction,
+            context
+          ) as SavedObjectSanitizedDoc<CaseUserActionAttributes>;
+
+          expect(migratedUserAction.attributes.old_value).toBeNull();
+          expect(migratedUserAction.attributes.new_value).toEqual('{a');
+          expect(migratedUserAction).toMatchInlineSnapshot(`
+            Object {
+              "attributes": Object {
+                "action": "push-to-service",
+                "action_field": Array [
+                  "pushed",
+                ],
+                "new_value": "{a",
+                "old_value": null,
+              },
+              "id": "1",
+              "references": Array [],
+              "type": "cases-user-actions",
+            }
+          `);
+        });
+
+        it('logs an error new value is invalid json', () => {
+          const userAction = create_7_14_0_userAction({
+            action: 'push-to-service',
+            action_field: ['pushed'],
+            new_value: '{a',
+            old_value: null,
+          });
+
+          userActionsConnectorIdMigration(userAction, context);
+
+          expect(context.log.error).toHaveBeenCalled();
+        });
       });
 
       describe('update connector user action', () => {
@@ -174,7 +230,8 @@ describe('user action migrations', () => {
           });
 
           const migratedUserAction = userActionsConnectorIdMigration(
-            userAction
+            userAction,
+            context
           ) as SavedObjectSanitizedDoc<CaseUserActionAttributes>;
 
           const parsedConnector = JSON.parse(migratedUserAction.attributes.new_value!);
@@ -213,7 +270,8 @@ describe('user action migrations', () => {
           });
 
           const migratedUserAction = userActionsConnectorIdMigration(
-            userAction
+            userAction,
+            context
           ) as SavedObjectSanitizedDoc<CaseUserActionAttributes>;
 
           const parsedNewConnector = JSON.parse(migratedUserAction.attributes.new_value!);
@@ -240,7 +298,8 @@ describe('user action migrations', () => {
           };
 
           const migratedUserAction = userActionsConnectorIdMigration(
-            userAction
+            userAction,
+            context
           ) as SavedObjectSanitizedDoc<CaseUserActionAttributes>;
 
           const parsedNewConnectorId = JSON.parse(migratedUserAction.attributes.new_value!);
@@ -264,7 +323,8 @@ describe('user action migrations', () => {
           });
 
           const migratedUserAction = userActionsConnectorIdMigration(
-            userAction
+            userAction,
+            context
           ) as SavedObjectSanitizedDoc<CaseUserActionAttributes>;
 
           expect(migratedUserAction).toMatchInlineSnapshot(`
@@ -283,6 +343,49 @@ describe('user action migrations', () => {
             }
           `);
         });
+
+        it('leaves the object unmodified when old_value is invalid json', () => {
+          const userAction = create_7_14_0_userAction({
+            action: 'update',
+            action_field: ['connector'],
+            new_value: '{}',
+            old_value: '{b',
+          });
+
+          const migratedUserAction = userActionsConnectorIdMigration(
+            userAction,
+            context
+          ) as SavedObjectSanitizedDoc<CaseUserActionAttributes>;
+
+          expect(migratedUserAction).toMatchInlineSnapshot(`
+            Object {
+              "attributes": Object {
+                "action": "update",
+                "action_field": Array [
+                  "connector",
+                ],
+                "new_value": "{}",
+                "old_value": "{b",
+              },
+              "id": "1",
+              "references": Array [],
+              "type": "cases-user-actions",
+            }
+          `);
+        });
+
+        it('logs an error message when old_value is invalid json', () => {
+          const userAction = create_7_14_0_userAction({
+            action: 'update',
+            action_field: ['connector'],
+            new_value: createJiraConnector(),
+            old_value: '{b',
+          });
+
+          userActionsConnectorIdMigration(userAction, context);
+
+          expect(context.log.error).toHaveBeenCalled();
+        });
       });
 
       describe('create connector user action', () => {
@@ -295,7 +398,8 @@ describe('user action migrations', () => {
           });
 
           const migratedUserAction = userActionsConnectorIdMigration(
-            userAction
+            userAction,
+            context
           ) as SavedObjectSanitizedDoc<CaseUserActionAttributes>;
 
           const parsedConnector = JSON.parse(migratedUserAction.attributes.new_value!);
@@ -336,7 +440,8 @@ describe('user action migrations', () => {
           });
 
           const migratedUserAction = userActionsConnectorIdMigration(
-            userAction
+            userAction,
+            context
           ) as SavedObjectSanitizedDoc<CaseUserActionAttributes>;
 
           const parsedNewConnector = JSON.parse(migratedUserAction.attributes.new_value!);
@@ -363,7 +468,8 @@ describe('user action migrations', () => {
           };
 
           const migratedUserAction = userActionsConnectorIdMigration(
-            userAction
+            userAction,
+            context
           ) as SavedObjectSanitizedDoc<CaseUserActionAttributes>;
 
           const parsedNewConnectorId = JSON.parse(migratedUserAction.attributes.new_value!);
@@ -387,7 +493,8 @@ describe('user action migrations', () => {
           });
 
           const migratedUserAction = userActionsConnectorIdMigration(
-            userAction
+            userAction,
+            context
           ) as SavedObjectSanitizedDoc<CaseUserActionAttributes>;
 
           expect(migratedUserAction).toMatchInlineSnapshot(`
@@ -405,6 +512,49 @@ describe('user action migrations', () => {
               "type": "cases-user-actions",
             }
           `);
+        });
+
+        it('leaves the object unmodified when new_value is invalid json', () => {
+          const userAction = create_7_14_0_userAction({
+            action: 'create',
+            action_field: ['connector'],
+            new_value: 'new json value',
+            old_value: 'old value',
+          });
+
+          const migratedUserAction = userActionsConnectorIdMigration(
+            userAction,
+            context
+          ) as SavedObjectSanitizedDoc<CaseUserActionAttributes>;
+
+          expect(migratedUserAction).toMatchInlineSnapshot(`
+            Object {
+              "attributes": Object {
+                "action": "create",
+                "action_field": Array [
+                  "connector",
+                ],
+                "new_value": "new json value",
+                "old_value": "old value",
+              },
+              "id": "1",
+              "references": Array [],
+              "type": "cases-user-actions",
+            }
+          `);
+        });
+
+        it('logs an error message when new_value is invalid json', () => {
+          const userAction = create_7_14_0_userAction({
+            action: 'create',
+            action_field: ['connector'],
+            new_value: 'new json value',
+            old_value: 'old value',
+          });
+
+          userActionsConnectorIdMigration(userAction, context);
+
+          expect(context.log.error).toHaveBeenCalled();
         });
       });
     });
