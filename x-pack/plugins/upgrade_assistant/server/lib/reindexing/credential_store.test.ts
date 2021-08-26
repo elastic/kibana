@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ReindexSavedObject } from '../../../common/types';
+import { ReindexStep, ReindexStatus } from '../../../common/types';
 import { Credential, credentialStoreFactory } from './credential_store';
 
 describe('credentialStore', () => {
@@ -13,8 +13,20 @@ describe('credentialStore', () => {
     const creds = { key: '1' } as Credential;
     const reindexOp = {
       id: 'asdf',
-      attributes: { indexName: 'test', lastCompletedStep: 1, locked: null },
-    } as ReindexSavedObject;
+      type: 'type',
+      references: [],
+      attributes: {
+        indexName: 'test',
+        newIndexName: 'new-index',
+        status: ReindexStatus.inProgress,
+        lastCompletedStep: ReindexStep.created,
+        locked: null,
+        reindexTaskId: null,
+        reindexTaskPercComplete: null,
+        errorMessage: null,
+        runningReindexCount: null,
+      },
+    };
 
     const credStore = credentialStoreFactory();
     credStore.set(reindexOp, creds);
@@ -25,8 +37,20 @@ describe('credentialStore', () => {
     const creds = { key: '1' } as Credential;
     const reindexOp = {
       id: 'asdf',
-      attributes: { indexName: 'test', lastCompletedStep: 1, locked: null },
-    } as ReindexSavedObject;
+      type: 'type',
+      references: [],
+      attributes: {
+        indexName: 'test',
+        newIndexName: 'new-index',
+        status: ReindexStatus.inProgress,
+        lastCompletedStep: ReindexStep.created,
+        locked: null,
+        reindexTaskId: null,
+        reindexTaskPercComplete: null,
+        errorMessage: null,
+        runningReindexCount: null,
+      },
+    };
 
     const credStore = credentialStoreFactory();
     credStore.set(reindexOp, creds);
