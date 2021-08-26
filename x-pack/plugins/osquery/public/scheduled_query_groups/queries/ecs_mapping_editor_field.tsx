@@ -6,7 +6,7 @@
  */
 
 import { produce } from 'immer';
-import { find, sortBy, isArray, map } from 'lodash';
+import { find, orderBy, sortedUniqBy, isArray, map } from 'lodash';
 import React, {
   forwardRef,
   useCallback,
@@ -78,7 +78,10 @@ const typeMap = {
 
 const StyledFieldIcon = styled(FieldIcon)`
   width: 32px;
-  padding: 0 4px;
+
+  > svg {
+    padding: 0 6px !important;
+  }
 `;
 
 const StyledFieldSpan = styled.span`
@@ -88,7 +91,15 @@ const StyledFieldSpan = styled.span`
 
 // align the icon to the inputs
 const StyledButtonWrapper = styled.div`
-  margin-top: 32px;
+  margin-top: 30px;
+`;
+
+const ECSFieldColumn = styled(EuiFlexGroup)`
+  max-width: 100%;
+`;
+
+const ECSFieldWrapper = styled(EuiFlexItem)`
+  max-width: calc(100% - 66px);
 `;
 
 const singleSelection = { asPlainText: true };
@@ -163,7 +174,7 @@ export const ECSComboboxField: React.FC<ECSComboboxFieldProps> = ({
         size="l"
         type={
           // @ts-expect-error update types
-          selectedOptions[0]?.value?.type === 'keyword' ? 'string' : selectedOptions[0]?.value?.type
+          typeMap[selectedOptions[0]?.value?.type] ?? selectedOptions[0]?.value?.type
         }
       />
     ),
@@ -220,7 +231,7 @@ export const OsqueryColumnField: React.FC<OsqueryColumnFieldProps> = ({
   idAria,
   ...rest
 }) => {
-  const { setErrors, setValue } = field;
+  const { setValue } = field;
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
   const describedByIds = useMemo(() => (idAria ? [idAria] : []), [idAria]);
   const [selectedOptions, setSelected] = useState<
@@ -250,25 +261,6 @@ export const OsqueryColumnField: React.FC<OsqueryColumnFieldProps> = ({
     []
   );
 
-  const onCreateOsqueryOption = useCallback(
-    (searchValue = []) => {
-      const normalizedSearchValue = searchValue.trim().toLowerCase();
-
-      if (!normalizedSearchValue) {
-        return;
-      }
-
-      const newOption = {
-        label: searchValue,
-      };
-
-      // Select the option.
-      setSelected([newOption]);
-      setValue(newOption.label);
-    },
-    [setValue, setSelected]
-  );
-
   const handleChange = useCallback(
     (newSelectedOptions) => {
       setSelected(newSelectedOptions);
@@ -285,7 +277,7 @@ export const OsqueryColumnField: React.FC<OsqueryColumnFieldProps> = ({
 
       return selectedOption ? [selectedOption] : [{ label: field.value }];
     });
-  }, [euiFieldProps?.options, setSelected, field.value, setErrors]);
+  }, [euiFieldProps?.options, setSelected, field.value]);
 
   return (
     <EuiFormRow
@@ -302,7 +294,6 @@ export const OsqueryColumnField: React.FC<OsqueryColumnFieldProps> = ({
         singleSelection={singleSelection}
         selectedOptions={selectedOptions}
         onChange={handleChange}
-        onCreateOption={onCreateOsqueryOption}
         renderOption={renderOsqueryOption}
         rowHeight={32}
         isClearable
@@ -513,7 +504,7 @@ export const ECSMappingEditorForm = forwardRef<ECSMappingEditorFormRef, ECSMappi
 
     return (
       <Form form={form}>
-        <EuiFlexGroup alignItems="flexStart">
+        <EuiFlexGroup alignItems="flexStart" gutterSize="s">
           <EuiFlexItem>
             <CommonUseField
               path="value.field"
@@ -526,15 +517,15 @@ export const ECSMappingEditorForm = forwardRef<ECSMappingEditorFormRef, ECSMappi
             />
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiFlexGroup alignItems="flexStart">
+            <ECSFieldColumn alignItems="flexStart" gutterSize="s" wrap>
               <EuiFlexItem grow={false}>
                 <StyledButtonWrapper>
                   <EuiIcon type="arrowRight" />
                 </StyledButtonWrapper>
               </EuiFlexItem>
-              <EuiFlexItem>
+              <ECSFieldWrapper>
                 <CommonUseField path="key" component={ECSComboboxField} />
-              </EuiFlexItem>
+              </ECSFieldWrapper>
               <EuiFlexItem grow={false}>
                 <StyledButtonWrapper>
                   {defaultValue ? (
@@ -564,7 +555,7 @@ export const ECSMappingEditorForm = forwardRef<ECSMappingEditorFormRef, ECSMappi
                   )}
                 </StyledButtonWrapper>
               </EuiFlexItem>
-            </EuiFlexGroup>
+            </ECSFieldColumn>
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="s" />
@@ -634,6 +625,11 @@ export const ECSMappingEditorField = ({ field, query, fieldRef }: ECSMappingEdit
         return currentValue;
       }
 
+      const tablesOrderMap = ast?.from?.reduce((acc, table, index) => {
+        acc[table.as ?? table.table] = index;
+        return acc;
+      }, {});
+
       const astOsqueryTables: Record<string, OsqueryColumn[]> = ast?.from?.reduce((acc, table) => {
         const osqueryTable = find(osquerySchema, ['name', table.table]);
 
@@ -665,6 +661,7 @@ export const ECSMappingEditorField = ({ field, query, fieldRef }: ECSMappingEdit
             name: osqueryColumn.name,
             description: osqueryColumn.description,
             table: tableName,
+            tableOrder: tablesOrderMap[tableName],
             suggestion_label: osqueryColumn.name,
           },
         }));
@@ -678,13 +675,14 @@ export const ECSMappingEditorField = ({ field, query, fieldRef }: ECSMappingEdit
         isArray(ast?.columns) &&
         ast?.columns
           ?.map((column) => {
-            if (column.expr.column === '*') {
+            if (column.expr.column === '*' && astOsqueryTables[column.expr.table]) {
               return astOsqueryTables[column.expr.table].map((osqueryColumn) => ({
                 label: osqueryColumn.name,
                 value: {
                   name: osqueryColumn.name,
                   description: osqueryColumn.description,
                   table: column.expr.table,
+                  tableOrder: tablesOrderMap[column.expr.table],
                   suggestion_label: `${osqueryColumn.name}`,
                 },
               }));
@@ -706,6 +704,7 @@ export const ECSMappingEditorField = ({ field, query, fieldRef }: ECSMappingEdit
                       name: osqueryColumn.name,
                       description: osqueryColumn.description,
                       table: column.expr.table,
+                      tableOrder: tablesOrderMap[column.expr.table],
                       suggestion_label: `${label}`,
                     },
                   },
@@ -717,8 +716,12 @@ export const ECSMappingEditorField = ({ field, query, fieldRef }: ECSMappingEdit
           })
           .flat();
 
-      //  @ts-expect-error update types
-      return sortBy(suggestions, 'value.suggestion_label');
+      // Remove column duplicates by keeping the column from the table that appears last in the query
+      return sortedUniqBy(
+        //  @ts-expect-error update types
+        orderBy(suggestions, ['value.suggestion_label', 'value.tableOrder'], ['asc', 'desc']),
+        'label'
+      );
     });
   }, [query]);
 
@@ -766,6 +769,10 @@ export const ECSMappingEditorField = ({ field, query, fieldRef }: ECSMappingEdit
             return draft;
           })
         );
+
+        if (formRefs.current[key]) {
+          delete formRefs.current[key];
+        }
       }
     },
     [setValue]

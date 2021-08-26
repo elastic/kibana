@@ -14,7 +14,7 @@ import { AggSelect } from './agg_select';
 import { createChangeHandler } from '../lib/create_change_handler';
 import { createSelectHandler } from '../lib/create_select_handler';
 import { createTextHandler } from '../lib/create_text_handler';
-import { METRIC_TYPES } from '../../../../common/enums';
+import { TSVB_METRIC_TYPES } from '../../../../common/enums';
 
 import {
   htmlIdGenerator,
@@ -146,7 +146,7 @@ const StandardSiblingAggUi = (props) => {
           >
             <MetricSelect
               onChange={handleSelectChange('field')}
-              exclude={[METRIC_TYPES.PERCENTILE, METRIC_TYPES.TOP_HIT]}
+              exclude={[TSVB_METRIC_TYPES.PERCENTILE, TSVB_METRIC_TYPES.TOP_HIT]}
               metrics={siblings}
               fields={fields[getIndexPatternKey(indexPattern)]}
               metric={model}
