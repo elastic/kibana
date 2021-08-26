@@ -72,10 +72,6 @@ export async function callAsyncWithDebug<T>({
 
     const inspectableEsQueries = inspectableEsQueriesMap.get(request);
     if (!isCalledWithInternalUser && inspectableEsQueries) {
-      // inspectableEsQueries.push({
-
-      //   esError: esError?.response ?? esError?.message,
-      // });
       inspectableEsQueries.push(
         getInspectResponse({
           esError,
