@@ -54,7 +54,6 @@ export const deleteRulesBulkRoute = (
     const siemResponse = buildSiemResponse(response);
 
     const rulesClient = context.alerting?.getRulesClient();
-    const savedObjectsClient = context.core.savedObjects.client;
 
     if (!rulesClient) {
       return siemResponse.error({ statusCode: 404 });
@@ -88,12 +87,16 @@ export const deleteRulesBulkRoute = (
           });
           await deleteRules({
             rulesClient,
-            savedObjectsClient,
             ruleStatusClient,
             ruleStatuses,
             id: rule.id,
           });
-          return transformValidateBulkError(idOrRuleIdOrUnknown, rule, undefined, ruleStatuses);
+          return transformValidateBulkError(
+            idOrRuleIdOrUnknown,
+            rule,
+            ruleStatuses,
+            isRuleRegistryEnabled
+          );
         } catch (err) {
           return transformBulkError(idOrRuleIdOrUnknown, err);
         }

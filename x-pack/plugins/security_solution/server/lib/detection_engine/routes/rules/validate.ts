@@ -25,16 +25,14 @@ import {
 } from '../../rules/types';
 import { createBulkErrorObject, BulkError } from '../utils';
 import { transform, transformAlertToRule } from './utils';
-import { RuleActions } from '../../rule_actions/types';
 import { RuleParams } from '../../schemas/rule_schemas';
 
 export const transformValidate = (
   alert: PartialAlert<RuleParams>,
-  ruleActions?: RuleActions | null,
   ruleStatus?: SavedObject<IRuleSavedAttributesSavedObjectAttributes>,
   isRuleRegistryEnabled?: boolean
 ): [RulesSchema | null, string | null] => {
-  const transformed = transform(alert, ruleActions, ruleStatus, isRuleRegistryEnabled);
+  const transformed = transform(alert, ruleStatus, isRuleRegistryEnabled);
   if (transformed == null) {
     return [null, 'Internal error transforming'];
   } else {
@@ -44,11 +42,10 @@ export const transformValidate = (
 
 export const newTransformValidate = (
   alert: PartialAlert<RuleParams>,
-  ruleActions?: RuleActions | null,
   ruleStatus?: SavedObject<IRuleSavedAttributesSavedObjectAttributes>,
   isRuleRegistryEnabled?: boolean
 ): [FullResponseSchema | null, string | null] => {
-  const transformed = transform(alert, ruleActions, ruleStatus, isRuleRegistryEnabled);
+  const transformed = transform(alert, ruleStatus, isRuleRegistryEnabled);
   if (transformed == null) {
     return [null, 'Internal error transforming'];
   } else {
@@ -59,13 +56,12 @@ export const newTransformValidate = (
 export const transformValidateBulkError = (
   ruleId: string,
   alert: PartialAlert<RuleParams>,
-  ruleActions?: RuleActions | null,
   ruleStatus?: Array<SavedObjectsFindResult<IRuleStatusSOAttributes>>,
   isRuleRegistryEnabled?: boolean
 ): RulesSchema | BulkError => {
   if (isAlertType(isRuleRegistryEnabled ?? false, alert)) {
     if (ruleStatus && ruleStatus?.length > 0 && isRuleStatusSavedObjectType(ruleStatus[0])) {
-      const transformed = transformAlertToRule(alert, ruleActions, ruleStatus[0]);
+      const transformed = transformAlertToRule(alert, ruleStatus[0]);
       const [validated, errors] = validateNonExact(transformed, rulesSchema);
       if (errors != null || validated == null) {
         return createBulkErrorObject({

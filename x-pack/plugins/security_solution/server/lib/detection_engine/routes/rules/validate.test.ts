@@ -73,12 +73,7 @@ describe.each([
   describe('transformValidate', () => {
     test('it should do a validation correctly of a partial alert', () => {
       const ruleAlert = getAlertMock(getQueryRuleParams());
-      const [validated, errors] = transformValidate(
-        ruleAlert,
-        undefined,
-        undefined,
-        isRuleRegistryEnabled
-      );
+      const [validated, errors] = transformValidate(ruleAlert, undefined, isRuleRegistryEnabled);
       expect(validated).toEqual(ruleOutput());
       expect(errors).toEqual(null);
     });
@@ -87,12 +82,7 @@ describe.each([
       const ruleAlert = getAlertMock(getQueryRuleParams());
       // @ts-expect-error
       delete ruleAlert.name;
-      const [validated, errors] = transformValidate(
-        ruleAlert,
-        undefined,
-        undefined,
-        isRuleRegistryEnabled
-      );
+      const [validated, errors] = transformValidate(ruleAlert, undefined, isRuleRegistryEnabled);
       expect(validated).toEqual(null);
       expect(errors).toEqual('Invalid value "undefined" supplied to "name"');
     });
@@ -104,7 +94,6 @@ describe.each([
       const validatedOrError = transformValidateBulkError(
         'rule-1',
         ruleAlert,
-        undefined,
         undefined,
         isRuleRegistryEnabled
       );
@@ -118,7 +107,6 @@ describe.each([
       const validatedOrError = transformValidateBulkError(
         'rule-1',
         ruleAlert,
-        undefined,
         undefined,
         isRuleRegistryEnabled
       );
@@ -138,7 +126,6 @@ describe.each([
       const validatedOrError = transformValidateBulkError(
         'rule-1',
         ruleAlert,
-        null,
         ruleStatuses,
         isRuleRegistryEnabled
       );
@@ -159,7 +146,6 @@ describe.each([
       const validatedOrError = transformValidateBulkError(
         'rule-1',
         ruleAlert,
-        undefined,
         undefined,
         isRuleRegistryEnabled
       );
