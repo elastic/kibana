@@ -76,11 +76,11 @@ export const renderApp = ({ history, kibanaLegacy, element, ...deps }: GraphDepe
 
   if (!capabilities.graph.save) {
     chrome.setBadge({
-      text: i18n.translate('discover.badge.readOnly.text', {
+      text: i18n.translate('xpack.graph.badge.readOnly.text', {
         defaultMessage: 'Read only',
       }),
-      tooltip: i18n.translate('discover.badge.readOnly.tooltip', {
-        defaultMessage: 'Unable to save searches',
+      tooltip: i18n.translate('xpack.graph.badge.readOnly.tooltip', {
+        defaultMessage: 'Unable to save Graph workspaces',
       }),
       iconType: 'glasses',
     });
