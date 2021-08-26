@@ -49,7 +49,7 @@ export const DateRangePicker = memo(() => {
     autoRefreshOptions,
     recentlyUsedDateRanges,
   } = useEndpointSelector(getActivityLogDataPaging);
-
+  
   const dispatchActionUpdateActivityLogPaging = useCallback(
     async ({ start, end }) => {
       dispatch({
