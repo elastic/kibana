@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IndexPatternField, IndexPattern } from '../../../../../../src/plugins/data/public';
+import type { IndexPatternField, IndexPattern } from 'src/plugins/data/public';
 import { ESTooltipProperty } from './es_tooltip_property';
 import { TooltipProperty } from './tooltip_property';
 import { AbstractField } from '../fields/field';

@@ -9,11 +9,8 @@ import React, { Fragment, Component } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
-import {
-  IndexPatternField,
-  IndexPattern,
-  indexPatterns,
-} from '../../../../../../../src/plugins/data/public';
+import type { IndexPatternField, IndexPattern } from 'src/plugins/data/public';
+import { indexPatterns } from '../../../../../../../src/plugins/data/public';
 import { MetricsEditor } from '../../../components/metrics_editor';
 import { getIndexPatternService } from '../../../kibana_services';
 import { GeoLineForm } from './geo_line_form';

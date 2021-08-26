@@ -7,7 +7,7 @@
 
 import _ from 'lodash';
 import { SavedObject } from 'kibana/server';
-import { IndexPatternField } from 'src/plugins/data/public';
+import type { IndexPatternField } from 'src/plugins/data/public';
 import {
   ES_GEO_FIELD_TYPE,
   LAYER_TYPE,

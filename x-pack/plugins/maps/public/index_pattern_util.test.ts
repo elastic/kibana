@@ -19,11 +19,11 @@ import { IndexPatternField } from 'src/plugins/data/public';
 describe('getSourceFields', () => {
   test('Should remove multi fields from field list', () => {
     const fields = [
-      ({
+      {
         name: 'agent',
         type: 'string',
-      } as unknown) as IndexPatternField,
-      ({
+      } as IndexPatternField,
+      {
         name: 'agent.keyword',
         subType: {
           multi: {
@@ -31,7 +31,7 @@ describe('getSourceFields', () => {
           },
         },
         type: 'string',
-      } as unknown) as IndexPatternField,
+      } as IndexPatternField,
     ];
     const sourceFields = getSourceFields(fields);
     expect(sourceFields).toEqual([{ name: 'agent', type: 'string' }]);
@@ -41,29 +41,29 @@ describe('getSourceFields', () => {
 describe('Gold+ licensing', () => {
   const testStubs = [
     {
-      field: ({
+      field: {
         name: 'location',
         type: 'geo_point',
         aggregatable: true,
-      } as unknown) as IndexPatternField,
+      } as IndexPatternField,
       supportedInBasic: true,
       supportedInGold: true,
     },
     {
-      field: ({
+      field: {
         name: 'location',
         type: 'geo_shape',
         aggregatable: false,
-      } as unknown) as IndexPatternField,
+      } as IndexPatternField,
       supportedInBasic: false,
       supportedInGold: false,
     },
     {
-      field: ({
+      field: {
         name: 'location',
         type: 'geo_shape',
         aggregatable: true,
-      } as unknown) as IndexPatternField,
+      } as IndexPatternField,
       supportedInBasic: false,
       supportedInGold: true,
     },

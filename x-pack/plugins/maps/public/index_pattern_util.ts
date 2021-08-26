@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IndexPatternField, IndexPattern } from 'src/plugins/data/public';
+import type { IndexPatternField, IndexPattern } from 'src/plugins/data/public';
 import { i18n } from '@kbn/i18n';
 import { getIndexPatternService } from './kibana_services';
 import { indexPatterns } from '../../../../src/plugins/data/public';

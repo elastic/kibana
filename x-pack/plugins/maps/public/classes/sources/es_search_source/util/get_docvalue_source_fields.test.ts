@@ -6,8 +6,7 @@
  */
 
 import { getDocValueAndSourceFields } from './get_docvalue_source_fields';
-import { IndexPattern } from '../../../../../../../../src/plugins/data/common/index_patterns/index_patterns';
-import { IndexPatternField } from '../../../../../../../../src/plugins/data/common/index_patterns/fields';
+import type { IndexPatternField, IndexPattern } from 'src/plugins/data/public';
 
 function createMockIndexPattern(fields: IndexPatternField[]): IndexPattern {
   const indexPattern = {
@@ -29,9 +28,8 @@ describe('getDocValueAndSourceFields', () => {
       createMockIndexPattern([
         {
           name: 'foobar',
-          // @ts-expect-error runtimeField not added yet to IndexPatternField. API tbd
-          runtimeField: {},
-        },
+          runtimeField: { type: 'keyword' },
+        } as IndexPatternField,
       ]),
       ['foobar'],
       'epoch_millis'
