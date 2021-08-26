@@ -19,11 +19,6 @@ import { runRoute } from './routes/run';
 import { ConfigManager } from './lib/config_manager';
 import { getUiSettings } from './ui_settings';
 
-/**
- * Describes public Timelion plugin contract returned at the `setup` stage.
- */
-export interface PluginSetupContract {}
-
 export interface TimelionPluginStartDeps {
   data: PluginStart;
 }
