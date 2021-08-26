@@ -659,8 +659,6 @@ export interface DataPublicPluginSetup {
     //
     // (undocumented)
     autocomplete: AutocompleteSetup;
-    // @deprecated (undocumented)
-    fieldFormats: FieldFormatsSetup;
     // (undocumented)
     query: QuerySetup;
     // (undocumented)
@@ -1299,9 +1297,9 @@ export interface IndexPatternAttributes {
     // (undocumented)
     title: string;
     // (undocumented)
-    type: string;
+    type?: string;
     // (undocumented)
-    typeMeta: string;
+    typeMeta?: string;
 }
 
 // @public (undocumented)
@@ -1957,12 +1955,10 @@ export interface Reason {
 // Warning: (ae-missing-release-tag) "RefreshInterval" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export interface RefreshInterval {
-    // (undocumented)
+export type RefreshInterval = {
     pause: boolean;
-    // (undocumented)
     value: number;
-}
+};
 
 // Warning: (ae-missing-release-tag) "SavedQuery" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
