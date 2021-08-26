@@ -32,6 +32,7 @@ interface WorkspaceTopNavMenuProps {
   capabilities: Capabilities;
   coreStart: CoreStart;
   canEditDrillDownUrls: boolean;
+  isInitialized: boolean;
 }
 
 export const WorkspaceTopNavMenu = (props: WorkspaceTopNavMenuProps) => {
@@ -56,13 +57,14 @@ export const WorkspaceTopNavMenu = (props: WorkspaceTopNavMenuProps) => {
     tooltip: i18n.translate('xpack.graph.topNavMenu.newWorkspaceTooltip', {
       defaultMessage: 'Create a new workspace',
     }),
+    disableButton() {
+      return !props.isInitialized;
+    },
     run() {
       props.confirmWipeWorkspace(() => {
         if (location.pathname === '/workspace/') {
           history.go(0);
         } else {
-          props.workspace?.clearGraph();
-          store.dispatch({ type: 'x-pack/graph/RESET' });
           history.push('/workspace/');
         }
       });

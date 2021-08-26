@@ -199,6 +199,7 @@ const WorkspaceLayoutComponent = ({
         setShowInspect={setShowInspect}
         confirmWipeWorkspace={confirmWipeWorkspace}
         setHeaderActionMenu={setHeaderActionMenu}
+        isInitialized={isInitialized}
       />
 
       <InspectPanel

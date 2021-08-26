@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { I18nProvider } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { Provider } from 'react-redux';
@@ -171,6 +171,19 @@ export const GraphWorkspace = (props: GraphWorkspaceProps) => {
       handleSearchQueryError,
     })
   );
+
+  /**
+   * Clean objects when navigating to a new workspace, except initial load
+   */
+  useEffect(() => {
+    const unregisterListener = history.listen((location, action) => {
+      if (location.pathname === '/workspace/') {
+        workspaceRef.current?.clearGraph();
+        store.dispatch({ type: 'x-pack/graph/RESET' });
+      }
+    });
+    return () => unregisterListener();
+  }, [history, store]);
 
   const services = useMemo(
     () => ({
