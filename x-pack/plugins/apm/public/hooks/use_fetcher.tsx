@@ -168,7 +168,11 @@ export function useFetcher<TReturn>(
   ]);
 
   useEffect(() => {
-    addInspectorRequest(result);
+    if (result.error) {
+      addInspectorRequest({ ...result, data: result.error.body?.attributes });
+    } else {
+      addInspectorRequest(result);
+    }
   }, [addInspectorRequest, result]);
 
   return useMemo(() => {

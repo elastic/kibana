@@ -6,6 +6,7 @@
  */
 
 import type { UnwrapPromise } from '@kbn/utility-types';
+import type { Request } from '../../../../src/plugins/inspector/common';
 import '../../../typings/rison_node';
 import '../../infra/types/eui';
 // EUIBasicTable
@@ -28,11 +29,4 @@ export type PromiseValueType<T extends Promise<any>> = UnwrapPromise<T>;
 
 export type Maybe<T> = T | null | undefined;
 
-export type InspectResponse = Array<{
-  response: any;
-  duration: number;
-  requestType: string;
-  requestParams: Record<string, unknown>;
-  esError: Error;
-  operationName: string;
-}>;
+export type InspectResponse = Request[];
