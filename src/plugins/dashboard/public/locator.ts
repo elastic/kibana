@@ -7,13 +7,20 @@
  */
 
 import type { SerializableRecord } from '@kbn/utility-types';
+import { flow } from 'lodash';
 import type { TimeRange, Filter, Query, QueryState, RefreshInterval } from '../../data/public';
 import type { LocatorDefinition, LocatorPublic } from '../../share/public';
 import type { SavedDashboardPanel } from '../common/types';
+import type { RawDashboardState } from './types';
 import { esFilters } from '../../data/public';
 import { setStateToKbnUrl } from '../../kibana_utils/public';
 import { ViewMode } from '../../embeddable/public';
 import { DashboardConstants } from './dashboard_constants';
+
+/**
+ * Useful for ensuring that we don't pass any non-serializable values to history.push (for example, functions).
+ */
+const getSerializableRecord: <O>(o: O) => O & SerializableRecord = flow(JSON.stringify, JSON.parse);
 
 const cleanEmptyKeys = (stateObj: Record<string, unknown>) => {
   Object.keys(stateObj).forEach((key) => {
@@ -26,7 +33,12 @@ const cleanEmptyKeys = (stateObj: Record<string, unknown>) => {
 
 export const DASHBOARD_APP_LOCATOR = 'DASHBOARD_APP_LOCATOR';
 
-export interface DashboardAppLocatorParams extends SerializableRecord {
+/**
+ * We use `type` instead of `interface` to avoid having to extend this type with
+ * `SerializableRecord`. See https://github.com/microsoft/TypeScript/issues/15300.
+ */
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type DashboardAppLocatorParams = {
   /**
    * If given, the dashboard saved object with this id will be loaded. If not given,
    * a new, unsaved dashboard will be loaded up.
@@ -40,7 +52,7 @@ export interface DashboardAppLocatorParams extends SerializableRecord {
   /**
    * Optionally set the refresh interval.
    */
-  refreshInterval?: RefreshInterval & SerializableRecord;
+  refreshInterval?: RefreshInterval;
 
   /**
    * Optionally apply filers. NOTE: if given and used in conjunction with `dashboardId`, and the
@@ -80,13 +92,15 @@ export interface DashboardAppLocatorParams extends SerializableRecord {
   /**
    * List of dashboard panels
    */
-  panels?: SavedDashboardPanel[] & SerializableRecord;
+  panels?: SavedDashboardPanel[];
 
   /**
    * Saved query ID
    */
   savedQuery?: string;
-}
+
+  options?: RawDashboardState['options'];
+};
 
 export type DashboardAppLocator = LocatorPublic<DashboardAppLocatorParams>;
 
@@ -95,17 +109,29 @@ export interface DashboardAppLocatorDependencies {
   getDashboardFilterFields: (dashboardId: string) => Promise<Filter[]>;
 }
 
+export type ForwardedDashboardState = Omit<
+  DashboardAppLocatorParams,
+  'dashboardId' | 'preserveSavedFilters' | 'useHash' | 'searchSessionId'
+>;
+
 export class DashboardAppLocatorDefinition implements LocatorDefinition<DashboardAppLocatorParams> {
   public readonly id = DASHBOARD_APP_LOCATOR;
 
   constructor(protected readonly deps: DashboardAppLocatorDependencies) {}
 
   public readonly getLocation = async (params: DashboardAppLocatorParams) => {
-    const useHash = params.useHash ?? this.deps.useHashedUrl;
-    const hash = params.dashboardId ? `view/${params.dashboardId}` : `create`;
+    const {
+      filters,
+      useHash: paramsUseHash,
+      preserveSavedFilters,
+      dashboardId,
+      ...restParams
+    } = params;
+    const useHash = paramsUseHash ?? this.deps.useHashedUrl;
+    const hash = dashboardId ? `view/${dashboardId}` : `create`;
 
     const getSavedFiltersFromDestinationDashboardIfNeeded = async (): Promise<Filter[]> => {
-      if (params.preserveSavedFilters === false) return [];
+      if (preserveSavedFilters === false) return [];
       if (!params.dashboardId) return [];
       try {
         return await this.deps.getDashboardFilterFields(params.dashboardId);
@@ -116,26 +142,16 @@ export class DashboardAppLocatorDefinition implements LocatorDefinition<Dashboar
       }
     };
 
+    const state: ForwardedDashboardState = restParams;
+
     // leave filters `undefined` if no filters was applied
     // in this case dashboard will restore saved filters on its own
-    const filters = params.filters && [
+    state.filters = params.filters && [
       ...(await getSavedFiltersFromDestinationDashboardIfNeeded()),
       ...params.filters,
     ];
 
-    let path = setStateToKbnUrl(
-      '_a',
-      cleanEmptyKeys({
-        query: params.query,
-        filters: filters?.filter((f) => !esFilters.isFilterPinned(f)),
-        viewMode: params.viewMode,
-        panels: params.panels,
-        savedQuery: params.savedQuery,
-      }),
-      { useHash },
-      `#/${hash}`
-    );
-
+    let path = `#/${hash}`;
     path = setStateToKbnUrl<QueryState>(
       '_g',
       cleanEmptyKeys({
@@ -154,7 +170,7 @@ export class DashboardAppLocatorDefinition implements LocatorDefinition<Dashboar
     return {
       app: DashboardConstants.DASHBOARDS_ID,
       path,
-      state: {},
+      state: getSerializableRecord(cleanEmptyKeys(state)),
     };
   };
 }

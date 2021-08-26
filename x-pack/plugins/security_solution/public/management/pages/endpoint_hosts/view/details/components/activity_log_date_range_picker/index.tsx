@@ -33,22 +33,6 @@ export const DateRangePicker = memo(() => {
     getActivityLogDataPaging
   );
 
-  const onClear = useCallback(
-    ({ clearStart = false, clearEnd = false }: { clearStart?: boolean; clearEnd?: boolean }) => {
-      dispatch({
-        type: 'endpointDetailsActivityLogUpdatePaging',
-        payload: {
-          disabled: false,
-          page,
-          pageSize,
-          startDate: clearStart ? undefined : startDate,
-          endDate: clearEnd ? undefined : endDate,
-        },
-      });
-    },
-    [dispatch, endDate, startDate, page, pageSize]
-  );
-
   const onChangeStartDate = useCallback(
     (date) => {
       dispatch({
@@ -95,7 +79,6 @@ export const DateRangePicker = memo(() => {
                   endDate={endDate ? moment(endDate) : undefined}
                   isInvalid={isInvalidDateRange}
                   onChange={onChangeStartDate}
-                  onClear={() => onClear({ clearStart: true })}
                   placeholderText={i18.ACTIVITY_LOG.datePicker.startDate}
                   selected={startDate ? moment(startDate) : undefined}
                   showTimeSelect
@@ -108,7 +91,6 @@ export const DateRangePicker = memo(() => {
                   endDate={endDate ? moment(endDate) : undefined}
                   isInvalid={isInvalidDateRange}
                   onChange={onChangeEndDate}
-                  onClear={() => onClear({ clearEnd: true })}
                   placeholderText={i18.ACTIVITY_LOG.datePicker.endDate}
                   selected={endDate ? moment(endDate) : undefined}
                   showTimeSelect
