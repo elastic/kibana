@@ -13,6 +13,7 @@ import { ExpressionRenderDefinition, IInterpreterRenderHandlers } from 'src/plug
 export const defaultHandlers: IInterpreterRenderHandlers = {
   getRenderMode: () => 'view',
   isSyncColorsEnabled: () => false,
+  isNoInteractivity: () => false,
   done: action('done'),
   onDestroy: action('onDestroy'),
   reload: action('reload'),

@@ -346,6 +346,7 @@ export class Embeddable
         searchSessionId={this.externalSearchContext.searchSessionId}
         handleEvent={this.handleEvent}
         onData$={this.updateActiveData}
+        noInteractivity={input.noInteractivity}
         renderMode={input.renderMode}
         syncColors={input.syncColors}
         hasCompatibleActions={this.hasCompatibleActions}

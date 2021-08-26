@@ -1068,7 +1068,7 @@ describe('xy_expression', () => {
       const { args, data } = sampleArgs();
 
       const wrapper = mountWithIntl(
-        <XYChart {...defaultProps} data={data} args={args} renderMode="noInteractivity" />
+        <XYChart {...defaultProps} data={data} args={args} noInteractivity />
       );
 
       expect(wrapper.find(Settings).first().prop('onBrushEnd')).toBeUndefined();
@@ -1338,7 +1338,7 @@ describe('xy_expression', () => {
       const { args, data } = sampleArgs();
 
       const wrapper = mountWithIntl(
-        <XYChart {...defaultProps} data={data} args={args} renderMode="noInteractivity" />
+        <XYChart {...defaultProps} data={data} args={args} noInteractivity />
       );
 
       expect(wrapper.find(Settings).first().prop('onElementClick')).toBeUndefined();

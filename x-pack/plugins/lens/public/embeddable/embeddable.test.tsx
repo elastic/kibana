@@ -516,7 +516,8 @@ describe('embeddable', () => {
       timeRange,
       query,
       filters,
-      renderMode: 'noInteractivity',
+      renderMode: 'view',
+      noInteractivity: true,
     } as LensEmbeddableInput;
 
     const embeddable = new Embeddable(
@@ -549,7 +550,12 @@ describe('embeddable', () => {
     await embeddable.initializeSavedVis(input);
     embeddable.render(mountpoint);
 
-    expect(expressionRenderer.mock.calls[0][0].renderMode).toEqual('noInteractivity');
+    expect(expressionRenderer.mock.calls[0][0]).toEqual(
+      expect.objectContaining({
+        noInteractivity: true,
+        renderMode: 'view',
+      })
+    );
   });
 
   it('should merge external context with query and filters of the saved object', async () => {

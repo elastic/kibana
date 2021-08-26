@@ -53,6 +53,11 @@ export type EmbeddableInput = {
    */
   syncColors?: boolean;
 
+  /**
+   * Flag indicating that the chart is rendered in a non-interactive environment.
+   */
+  noInteractivity?: boolean;
+
   executionContext?: KibanaExecutionContext;
 };
 

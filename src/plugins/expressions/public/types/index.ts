@@ -44,6 +44,7 @@ export interface IExpressionLoaderParams {
   customRenderers?: [];
   uiState?: unknown;
   inspectorAdapters?: Adapters;
+  noInteractivity?: boolean;
   onRenderError?: RenderErrorHandlerFnType;
   searchSessionId?: string;
   renderMode?: RenderMode;
