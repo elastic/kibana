@@ -16,6 +16,7 @@ export {
   KBN_FIELD_TYPES,
   ES_FIELD_TYPES,
   EnhancedRuntimeField,
+  RuntimeCompositeWithSubFields,
 } from '../../data/common';
 
 export { createKibanaReactContext, toMountPoint, CodeEditor } from '../../kibana_react/public';

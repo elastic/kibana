@@ -16,8 +16,9 @@ import {
   IndexPattern,
   DataPublicPluginStart,
   UsageCollectionStart,
+  RuntimeCompositeWithSubFields,
 } from '../shared_imports';
-import type { Field, PluginStart, InternalFieldType, CompositeField } from '../types';
+import type { Field, PluginStart, InternalFieldType } from '../types';
 import { pluginName } from '../constants';
 import { deserializeField, getRuntimeFieldValidator, getLinks, ApiService } from '../lib';
 import {
@@ -117,7 +118,7 @@ export const FieldEditorFlyoutContentContainer = ({
   );
 
   const saveCompositeRuntime = useCallback(
-    (updatedField: CompositeField): IndexPatternField[] => {
+    (updatedField: RuntimeCompositeWithSubFields): IndexPatternField[] => {
       if (field?.type !== undefined && field?.type !== 'composite') {
         // A previous runtime field is now a runtime composite
         indexPattern.removeRuntimeField(field.name);
@@ -140,7 +141,7 @@ export const FieldEditorFlyoutContentContainer = ({
   const saveRuntimeField = useCallback(
     (updatedField: Field): [IndexPatternField] => {
       if (field?.type !== undefined && field?.type === 'object') {
-        // A previous runtime object is now a runtime field
+        // A previous runtime composite is now a runtime field
         indexPattern.removeRuntimeComposite(field.name);
       } else if (field?.name && field.name !== updatedField.name) {
         // rename an existing runtime field
@@ -154,7 +155,7 @@ export const FieldEditorFlyoutContentContainer = ({
   );
 
   const saveField = useCallback(
-    async (updatedField: Field | CompositeField) => {
+    async (updatedField: Field | RuntimeCompositeWithSubFields) => {
       setIsSaving(true);
 
       if (fieldTypeToProcess === 'runtime') {
@@ -171,9 +172,9 @@ export const FieldEditorFlyoutContentContainer = ({
 
       try {
         const editedFields: IndexPatternField[] =
-          updatedField.type === 'composite'
-            ? saveCompositeRuntime(updatedField as CompositeField)
-            : saveRuntimeField(updatedField);
+          (updatedField as RuntimeCompositeWithSubFields).subFields !== undefined
+            ? saveCompositeRuntime(updatedField as RuntimeCompositeWithSubFields)
+            : saveRuntimeField(updatedField as Field);
 
         await indexPatternService.updateSavedObject(indexPattern);
 

@@ -10,7 +10,6 @@ import { FunctionComponent } from 'react';
 
 import {
   DataPublicPluginStart,
-  RuntimeField,
   UsageCollectionStart,
   EnhancedRuntimeField,
 } from './shared_imports';
@@ -45,12 +44,6 @@ export type InternalFieldType = 'concrete' | 'runtime';
 
 export interface Field extends EnhancedRuntimeField {
   name: string;
-}
-
-export interface CompositeField extends RuntimeField {
-  type: 'composite';
-  name: string;
-  subFields: Record<string, EnhancedRuntimeField>;
 }
 
 export type FieldFormatConfig = EnhancedRuntimeField['format'];

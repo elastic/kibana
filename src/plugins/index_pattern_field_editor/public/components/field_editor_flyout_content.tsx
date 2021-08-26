@@ -20,10 +20,14 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-import type { Field, CompositeField } from '../types';
+import type { Field } from '../types';
 import { RuntimeFieldPainlessError } from '../lib';
 import { euiFlyoutClassname } from '../constants';
-import type { RuntimeField, EnhancedRuntimeField } from '../shared_imports';
+import type {
+  RuntimeField,
+  EnhancedRuntimeField,
+  RuntimeCompositeWithSubFields,
+} from '../shared_imports';
 import { FlyoutPanels } from './flyout_panels';
 import { useFieldEditorContext } from './field_editor_context';
 import { FieldEditor, FieldEditorFormState } from './field_editor/field_editor';
@@ -51,7 +55,7 @@ export interface Props {
   /**
    * Handler for the "save" footer button
    */
-  onSave: (field: Field | CompositeField) => void;
+  onSave: (field: Field | RuntimeCompositeWithSubFields) => void;
   /**
    * Handler for the "cancel" footer button
    */
@@ -122,7 +126,7 @@ const FieldEditorFlyoutContentComponent = ({
   }, [isFormModified]);
 
   const addSubfieldsToField = useCallback(
-    (_field: Field): Field | CompositeField => {
+    (_field: Field): Field | RuntimeCompositeWithSubFields => {
       if (_field.type === 'composite' && fieldsInScript.length > 0) {
         const subFields = fieldsInScript.reduce((acc, subFieldName) => {
           const subField: EnhancedRuntimeField = {
@@ -136,10 +140,9 @@ const FieldEditorFlyoutContentComponent = ({
           return acc;
         }, {} as Record<string, EnhancedRuntimeField>);
 
-        const updatedField: CompositeField = {
-          type: 'composite',
+        const updatedField: RuntimeCompositeWithSubFields = {
           name: _field.name,
-          script: _field.script,
+          script: _field.script!,
           subFields,
         };
 
