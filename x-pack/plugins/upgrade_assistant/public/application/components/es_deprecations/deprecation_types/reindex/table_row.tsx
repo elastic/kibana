@@ -9,7 +9,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { EuiTableRowCell } from '@elastic/eui';
 import { EnrichedDeprecationInfo } from '../../../../../../common/types';
 import { GlobalFlyout } from '../../../../../shared_imports';
-import { useAppContext } from '../../../../app_context';
+import { useServices } from '../../../../app_context';
 import { DeprecationTableColumns } from '../../../types';
 import { EsDeprecationsTableCells } from '../../es_deprecations_table_cells';
 import { ReindexResolutionCell } from './resolution_table_cell';
@@ -29,7 +29,7 @@ const ReindexTableRowCells: React.FunctionComponent<TableRowProps> = ({
 }) => {
   const [showFlyout, setShowFlyout] = useState(false);
   const reindexState = useReindexContext();
-  const { api } = useAppContext();
+  const { api } = useServices();
 
   const {
     addContent: addContentToGlobalFlyout,
@@ -94,7 +94,7 @@ const ReindexTableRowCells: React.FunctionComponent<TableRowProps> = ({
 };
 
 export const ReindexTableRow: React.FunctionComponent<TableRowProps> = (props) => {
-  const { api } = useAppContext();
+  const { api } = useServices();
 
   return (
     <ReindexStatusProvider indexName={props.deprecation.index!} api={api}>

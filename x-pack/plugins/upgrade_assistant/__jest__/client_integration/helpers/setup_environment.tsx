@@ -7,6 +7,7 @@
 
 import React from 'react';
 import axios from 'axios';
+import { merge } from 'lodash';
 // @ts-ignore
 import axiosXhrAdapter from 'axios/lib/adapters/xhr';
 
@@ -18,6 +19,7 @@ import { breadcrumbService } from '../../../public/application/lib/breadcrumbs';
 import { GlobalFlyout } from '../../../public/shared_imports';
 import { getAppContextMock } from './app_context.mock';
 import { init as initHttpRequests } from './http_requests';
+import { AppDependencies } from '../../../public/types';
 
 const { GlobalFlyoutProvider } = GlobalFlyout;
 
@@ -29,10 +31,10 @@ export const WithAppDependencies = (Comp: any, overrides: Record<string, unknown
   apiService.setup((mockHttpClient as unknown) as HttpSetup);
   breadcrumbService.setup(() => '');
 
-  const appContextMock = getAppContextMock((mockHttpClient as unknown) as HttpSetup);
+  const appContextMock = (getAppContextMock() as unknown) as AppDependencies;
 
   return (
-    <AppContextProvider value={{ ...appContextMock, ...overrides }}>
+    <AppContextProvider value={merge(appContextMock, overrides)}>
       <GlobalFlyoutProvider>
         <Comp {...props} />
       </GlobalFlyoutProvider>

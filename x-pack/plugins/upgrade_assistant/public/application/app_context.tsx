@@ -6,46 +6,16 @@
  */
 
 import React, { createContext, useContext } from 'react';
-import {
-  CoreStart,
-  DeprecationsServiceStart,
-  DocLinksStart,
-  HttpSetup,
-  NotificationsStart,
-} from 'src/core/public';
-import { SharePluginSetup } from 'src/plugins/share/public';
-import { ApiService } from './lib/api';
-import { AppServicesContext } from '../types';
-import { BreadcrumbService } from './lib/breadcrumbs';
+import { AppDependencies } from '../types';
 
-export interface KibanaVersionContext {
-  currentMajor: number;
-  prevMajor: number;
-  nextMajor: number;
-}
-
-export interface ContextValue {
-  http: HttpSetup;
-  docLinks: DocLinksStart;
-  kibanaVersionInfo: KibanaVersionContext;
-  notifications: NotificationsStart;
-  isReadOnlyMode: boolean;
-  api: ApiService;
-  breadcrumbs: BreadcrumbService;
-  getUrlForApp: CoreStart['application']['getUrlForApp'];
-  deprecations: DeprecationsServiceStart;
-  share: SharePluginSetup;
-  services: AppServicesContext;
-}
-
-export const AppContext = createContext<ContextValue>({} as any);
+export const AppContext = createContext<AppDependencies | undefined>(undefined);
 
 export const AppContextProvider = ({
   children,
   value,
 }: {
   children: React.ReactNode;
-  value: ContextValue;
+  value: AppDependencies;
 }) => {
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 };
@@ -57,3 +27,7 @@ export const useAppContext = () => {
   }
   return ctx;
 };
+
+export const useServices = () => useAppContext().services;
+
+export const usePlugins = () => useAppContext().plugins;

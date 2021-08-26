@@ -20,13 +20,10 @@ jest.mock('../../../../../app_context', () => {
   );
 
   return {
-    useAppContext: () => {
+    useServices: () => {
       return {
-        docLinks: docLinksServiceMock.createStartContract(),
-        kibanaVersionInfo: {
-          currentMajor: mockKibanaSemverVersion.major,
-          prevMajor: mockKibanaSemverVersion.major - 1,
-          nextMajor: mockKibanaSemverVersion.major + 1,
+        core: {
+          docLinks: docLinksServiceMock.createStartContract(),
         },
       };
     },

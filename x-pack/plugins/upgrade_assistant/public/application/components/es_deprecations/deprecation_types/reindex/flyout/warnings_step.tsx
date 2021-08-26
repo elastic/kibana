@@ -20,7 +20,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { ReindexWarning, ReindexWarningTypes } from '../../../../../../../common/types';
-import { useAppContext } from '../../../../../app_context';
+import { useServices } from '../../../../../app_context';
 import {
   CustomTypeNameWarningCheckbox,
   DeprecatedSettingWarningCheckbox,
@@ -56,7 +56,9 @@ export const WarningsFlyoutStep: React.FunctionComponent<WarningsConfirmationFly
   closeFlyout,
   advanceNextStep,
 }) => {
-  const { docLinks } = useAppContext();
+  const {
+    core: { docLinks },
+  } = useServices();
   const { links } = docLinks;
 
   const [checkedIds, setCheckedIds] = useState<CheckedIds>(

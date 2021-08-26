@@ -36,7 +36,7 @@ describe('Overview - Upgrade Step', () => {
     test('Shows upgrade CTA and link to docs', async () => {
       await act(async () => {
         testBed = await setupOverviewPage({
-          services: {
+          plugins: {
             cloud: {
               isCloudEnabled: true,
               deploymentUrl:

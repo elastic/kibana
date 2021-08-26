@@ -20,7 +20,7 @@ import { i18n } from '@kbn/i18n';
 
 import { reactRouterNavigate } from '../../../../../../../../../src/plugins/kibana_react/public';
 import { getDeprecationsUpperLimit } from '../../../../lib/utils';
-import { useAppContext } from '../../../../app_context';
+import { useServices } from '../../../../app_context';
 import { EsStatsErrors } from './es_stats_error';
 import { NoDeprecations } from '../no_deprecations';
 
@@ -62,7 +62,7 @@ const i18nTexts = {
 
 export const ESDeprecationStats: FunctionComponent = () => {
   const history = useHistory();
-  const { api } = useAppContext();
+  const { api } = useServices();
 
   const { data: esDeprecations, isLoading, error } = api.useLoadEsDeprecations();
 

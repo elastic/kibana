@@ -9,7 +9,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { EuiTableRowCell } from '@elastic/eui';
 import { EnrichedDeprecationInfo, MlAction } from '../../../../../../common/types';
 import { GlobalFlyout } from '../../../../../shared_imports';
-import { useAppContext } from '../../../../app_context';
+import { useServices } from '../../../../app_context';
 import { DeprecationTableColumns } from '../../../types';
 import { EsDeprecationsTableCells } from '../../es_deprecations_table_cells';
 import { MlSnapshotsResolutionCell } from './resolution_table_cell';
@@ -78,7 +78,7 @@ export const MlSnapshotsTableRowCells: React.FunctionComponent<TableRowProps> = 
 };
 
 export const MlSnapshotsTableRow: React.FunctionComponent<TableRowProps> = (props) => {
-  const { api } = useAppContext();
+  const { api } = useServices();
 
   return (
     <MlSnapshotsStatusProvider

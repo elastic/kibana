@@ -13,7 +13,7 @@ import { i18n } from '@kbn/i18n';
 
 import type { DomainDeprecationDetails } from 'kibana/public';
 import { SectionLoading } from '../../../shared_imports';
-import { useAppContext } from '../../app_context';
+import { useServices } from '../../app_context';
 import { NoDeprecationsPrompt } from '../shared';
 import { KibanaDeprecationList } from './deprecation_list';
 import { StepsModal, StepsModalContent } from './steps_modal';
@@ -64,7 +64,11 @@ export const KibanaDeprecationsContent = withRouter(({ history }: RouteComponent
   >(undefined);
   const [isResolvingDeprecation, setIsResolvingDeprecation] = useState(false);
 
-  const { deprecations, breadcrumbs, docLinks, api, notifications } = useAppContext();
+  const {
+    core: { deprecations, docLinks, notifications },
+    breadcrumbs,
+    api,
+  } = useServices();
 
   const getAllDeprecations = useCallback(async () => {
     setIsLoading(true);

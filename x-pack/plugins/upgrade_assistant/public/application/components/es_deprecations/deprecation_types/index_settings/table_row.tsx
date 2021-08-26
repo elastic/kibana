@@ -9,7 +9,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { EuiTableRowCell } from '@elastic/eui';
 import { EnrichedDeprecationInfo } from '../../../../../../common/types';
 import { GlobalFlyout } from '../../../../../shared_imports';
-import { useAppContext } from '../../../../app_context';
+import { useServices } from '../../../../app_context';
 import type { ResponseError } from '../../../../lib/api';
 import { EsDeprecationsTableCells } from '../../es_deprecations_table_cells';
 import { DeprecationTableColumns, Status } from '../../../types';
@@ -33,7 +33,7 @@ export const IndexSettingsTableRow: React.FunctionComponent<Props> = ({
     details?: ResponseError;
   }>({ statusType: 'idle' });
 
-  const { api } = useAppContext();
+  const { api } = useServices();
 
   const {
     addContent: addContentToGlobalFlyout,
