@@ -13,13 +13,9 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 // @ts-expect-error
 import realHits from '../../../../../__fixtures__/real_hits.js';
 import { act } from 'react-dom/test-utils';
-// @ts-expect-error
-import stubbedLogstashFields from '../../../../../__fixtures__/logstash_fields';
 import { mountWithIntl } from '@kbn/test/jest';
 import React from 'react';
-import { coreMock } from '../../../../../../../../core/public/mocks';
 import { IndexPatternAttributes } from '../../../../../../../data/common';
-import { getStubIndexPattern } from '../../../../../../../data/public/test_utils';
 import { SavedObject } from '../../../../../../../../core/types';
 import {
   DiscoverSidebarResponsive,
@@ -29,6 +25,7 @@ import { DiscoverServices } from '../../../../../build_services';
 import { ElasticSearchHit } from '../../../../doc_views/doc_views_types';
 import { FetchStatus } from '../../../../types';
 import { DataDocuments$ } from '../../services/use_saved_search';
+import { stubLogstashIndexPattern } from '../../../../../../../data/common/stubs';
 
 const mockServices = ({
   history: () => ({
@@ -59,11 +56,12 @@ const mockCalcFieldCounts = jest.fn(() => {
 });
 
 jest.mock('../../../../../kibana_services', () => ({
+  getUiActions: jest.fn(() => {
+    return {
+      getTriggerCompatibleActions: jest.fn(() => []),
+    };
+  }),
   getServices: () => mockServices,
-}));
-
-jest.mock('./lib/get_index_pattern_field_list', () => ({
-  getIndexPatternFieldList: jest.fn((indexPattern) => indexPattern.fields),
 }));
 
 jest.mock('../../utils/calc_field_counts', () => ({
@@ -71,13 +69,7 @@ jest.mock('../../utils/calc_field_counts', () => ({
 }));
 
 function getCompProps(): DiscoverSidebarResponsiveProps {
-  const indexPattern = getStubIndexPattern(
-    'logstash-*',
-    (cfg: unknown) => cfg,
-    'time',
-    stubbedLogstashFields(),
-    coreMock.createSetup()
-  );
+  const indexPattern = stubLogstashIndexPattern;
 
   // @ts-expect-error _.each() is passing additional args to flattenHit
   const hits = (each(cloneDeep(realHits), indexPattern.flattenHit) as Array<
