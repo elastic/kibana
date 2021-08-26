@@ -11,13 +11,7 @@ import fs from 'fs/promises';
 import JSON5 from 'json5';
 import * as kbnTestServer from '../../../../test_helpers/kbn_server';
 import { Root } from '../../../root';
-import { ElasticsearchClient } from '../../../elasticsearch';
-import { Env } from '@kbn/config';
-import { REPO_ROOT } from '@kbn/utils';
-import { getEnvOptions } from '../../../config/mocks';
 
-const kibanaVersion = Env.createDefault(REPO_ROOT, getEnvOptions()).packageInfo.version;
-const targetIndex = `.kibana_${kibanaVersion}_001`;
 const logFilePath = Path.join(__dirname, 'batch_size_bytes_exceeds_es_content_length.log');
 
 async function removeLogFile() {
@@ -114,27 +108,4 @@ function createRoot(options: { batchSizeBytes?: number }) {
       oss: true,
     }
   );
-}
-
-async function fetchDocs(esClient: ElasticsearchClient, index: string, type: string) {
-  const { body } = await esClient.search<any>({
-    index,
-    size: 10000,
-    body: {
-      query: {
-        bool: {
-          should: [
-            {
-              term: { type },
-            },
-          ],
-        },
-      },
-    },
-  });
-
-  return body.hits.hits.map((h) => ({
-    ...h._source,
-    id: h._id,
-  }));
 }

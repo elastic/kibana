@@ -137,26 +137,3 @@ function createRoot(options: { batchSizeBytes?: number }) {
     }
   );
 }
-
-async function fetchDocs(esClient: ElasticsearchClient, index: string, type: string) {
-  const { body } = await esClient.search<any>({
-    index,
-    size: 10000,
-    body: {
-      query: {
-        bool: {
-          should: [
-            {
-              term: { type },
-            },
-          ],
-        },
-      },
-    },
-  });
-
-  return body.hits.hits.map((h) => ({
-    ...h._source,
-    id: h._id,
-  }));
-}
