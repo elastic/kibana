@@ -1,9 +1,23 @@
 {
   "id": "embeddableExplorer",
-  "version": "0.0.1",
   "kibanaVersion": "kibana",
+  "version": "0.0.1",
   "server": false,
   "ui": true,
-  "requiredPlugins": ["uiActions", "inspector", "embeddable", "embeddableExamples", "developerExamples", "dashboard", "kibanaReact", "savedObjects"],
+  "owner": {
+    "name": "App Services",
+    "githubTeam": "kibana-app-services"
+  },
+  "description": "Example app that relies on registered functionality in the embeddable_examples plugin",
+  "requiredPlugins": [
+    "uiActions",
+    "inspector",
+    "embeddable",
+    "embeddableExamples",
+    "developerExamples",
+    "dashboard",
+    "kibanaReact",
+    "savedObjects"
+  ],
   "optionalPlugins": []
 }
