@@ -116,7 +116,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
     selectedPatterns,
     loading: isLoadingIndexPattern,
   } = useSourcererScope(scopeId);
-  const { globalFullScreen, setGlobalFullScreen } = useGlobalFullScreen();
+  const { globalFullScreen } = useGlobalFullScreen();
   // TODO: Once we are past experimental phase this code should be removed
   const tGridEnabled = useIsExperimentalFeatureEnabled('tGridEnabled');
   const tGridEventRenderedViewEnabled = useIsExperimentalFeatureEnabled(
@@ -180,7 +180,6 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
               onRuleChange,
               renderCellValue,
               rowRenderers,
-              setGlobalFullScreen,
               start,
               sort,
               additionalFilters,

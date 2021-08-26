@@ -18,7 +18,6 @@ import { ChartsPluginStart } from '../../../../../src/plugins/charts/public';
 import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
 import { PluginStartContract as AlertingStart } from '../../../alerting/public';
 import type { SpacesPluginStart } from '../../../spaces/public';
-import type { SpacesOssPluginStart } from '../../../../../src/plugins/spaces_oss/public';
 
 import { suspendedComponentWithProps } from './lib/suspended_component_with_props';
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
@@ -37,7 +36,6 @@ export interface TriggersAndActionsUiServices extends CoreStart {
   charts: ChartsPluginStart;
   alerting?: AlertingStart;
   spaces?: SpacesPluginStart;
-  spacesOss: SpacesOssPluginStart;
   storage?: Storage;
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
   actionTypeRegistry: ActionTypeRegistryContract;

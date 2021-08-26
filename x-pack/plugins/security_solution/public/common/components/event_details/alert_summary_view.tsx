@@ -23,6 +23,7 @@ import {
   SIGNAL_STATUS,
   ALERTS_HEADERS_TARGET_IMPORT_HASH,
   TIMESTAMP,
+  ALERTS_HEADERS_RULE_DESCRIPTION,
 } from '../../../detections/components/alerts_table/translations';
 import {
   AGENT_STATUS_FIELD_NAME,
@@ -102,6 +103,11 @@ const memoryShellCodeAlertFields: EventSummaryField[] = [
   },
 ];
 
+const behaviorAlertFields: EventSummaryField[] = [
+  ...defaultDisplayFields,
+  { id: 'rule.description', label: ALERTS_HEADERS_RULE_DESCRIPTION },
+];
+
 const memorySignatureAlertFields: EventSummaryField[] = [
   ...defaultDisplayFields,
   { id: 'rule.name', label: ALERTS_HEADERS_RULE_NAME },
@@ -155,6 +161,8 @@ function getEventFieldsToDisplay({
       return memoryShellCodeAlertFields;
     case EventCode.MEMORY_SIGNATURE:
       return memorySignatureAlertFields;
+    case EventCode.BEHAVIOR:
+      return behaviorAlertFields;
   }
 
   switch (eventCategory) {

@@ -42,7 +42,7 @@ export const EnableAlertsModal: React.FC<Props> = ({ alerts }: Props) => {
     {
       id: 'create-alerts',
       label: i18n.translate('xpack.monitoring.alerts.modal.yesOption', {
-        defaultMessage: 'Yes (Recommended - create default rules in this kibana spaces)',
+        defaultMessage: 'Yes (Recommended - create default rules in this kibana space)',
       }),
     },
     {

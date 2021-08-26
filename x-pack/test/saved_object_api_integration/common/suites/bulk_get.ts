@@ -9,12 +9,7 @@ import expect from '@kbn/expect';
 import { SuperTest } from 'supertest';
 import { SAVED_OBJECT_TEST_CASES as CASES } from '../lib/saved_object_test_cases';
 import { SPACES } from '../lib/spaces';
-import {
-  createRequest,
-  expectResponses,
-  getUrlPrefix,
-  getTestTitle,
-} from '../lib/saved_object_test_utils';
+import { expectResponses, getUrlPrefix, getTestTitle } from '../lib/saved_object_test_utils';
 import { ExpectResponseBody, TestCase, TestDefinition, TestSuite } from '../lib/types';
 
 export interface BulkGetTestDefinition extends TestDefinition {
@@ -22,6 +17,7 @@ export interface BulkGetTestDefinition extends TestDefinition {
 }
 export type BulkGetTestSuite = TestSuite<BulkGetTestDefinition>;
 export interface BulkGetTestCase extends TestCase {
+  namespaces?: string[]; // used to define individual "object namespaces" string arrays, e.g., bulkGet across multiple namespaces
   failure?: 400 | 404; // only used for permitted response case
 }
 
@@ -29,6 +25,12 @@ const DOES_NOT_EXIST = Object.freeze({ type: 'dashboard', id: 'does-not-exist' }
 export const TEST_CASES: Record<string, BulkGetTestCase> = Object.freeze({
   ...CASES,
   DOES_NOT_EXIST,
+});
+
+const createRequest = ({ type, id, namespaces }: BulkGetTestCase) => ({
+  type,
+  id,
+  ...(namespaces && { namespaces }), // individual "object namespaces" string array
 });
 
 export function bulkGetTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
@@ -49,6 +51,7 @@ export function bulkGetTestSuiteFactory(esArchiver: any, supertest: SuperTest<an
         const object = savedObjects[i];
         const testCase = testCaseArray[i];
         await expectResponses.permitted(object, testCase);
+        // TODO: add assertions for redacted namespaces (this already exists in the bulkCreate test suite)
       }
     }
   };

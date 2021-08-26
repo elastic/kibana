@@ -237,6 +237,7 @@ export const config: {
                 delay: Type<import("moment").Duration>;
             }>;
             ignoreVersionMismatch: import("@kbn/config-schema/target_types/types").ConditionalType<false, boolean, boolean>;
+            skipStartupConnectionCheck: import("@kbn/config-schema/target_types/types").ConditionalType<true, boolean, boolean>;
         }>;
     };
     logging: {
@@ -807,6 +808,7 @@ export type ElasticsearchClientConfig = Pick<ElasticsearchConfig, 'customHeaders
     requestTimeout?: ElasticsearchConfig['requestTimeout'] | ClientOptions['requestTimeout'];
     ssl?: Partial<ElasticsearchConfig['ssl']>;
     keepAlive?: boolean;
+    caFingerprint?: ClientOptions['caFingerprint'];
 };
 
 // @public
@@ -824,6 +826,8 @@ export class ElasticsearchConfig {
     readonly requestTimeout: Duration;
     readonly serviceAccountToken?: string;
     readonly shardTimeout: Duration;
+    // @internal
+    readonly skipStartupConnectionCheck: boolean;
     readonly sniffInterval: false | Duration;
     readonly sniffOnConnectionFault: boolean;
     readonly sniffOnStart: boolean;
@@ -1003,6 +1007,7 @@ export interface HttpServerInfo {
 // @public
 export interface HttpServicePreboot {
     basePath: IBasePath;
+    getServerInfo: () => HttpServerInfo;
     registerRoutes(path: string, callback: (router: IRouter) => void): void;
 }
 
@@ -1528,7 +1533,8 @@ export interface PluginManifest {
     readonly id: PluginName;
     readonly kibanaVersion: string;
     readonly optionalPlugins: readonly PluginName[];
-    readonly owner?: {
+    // (undocumented)
+    readonly owner: {
         readonly name: string;
         readonly githubTeam?: string;
     };
@@ -1855,6 +1861,7 @@ export interface SavedObjectsBulkGetObject {
     fields?: string[];
     // (undocumented)
     id: string;
+    namespaces?: string[];
     // (undocumented)
     type: string;
 }
@@ -2460,8 +2467,9 @@ export interface SavedObjectsMigrationVersion {
 export type SavedObjectsNamespaceType = 'single' | 'multiple' | 'multiple-isolated' | 'agnostic';
 
 // @public (undocumented)
-export interface SavedObjectsOpenPointInTimeOptions extends SavedObjectsBaseOptions {
+export interface SavedObjectsOpenPointInTimeOptions {
     keepAlive?: string;
+    namespaces?: string[];
     preference?: string;
 }
 
@@ -2915,9 +2923,9 @@ export const validBodyOutput: readonly ["data", "stream"];
 //
 // src/core/server/elasticsearch/client/types.ts:94:7 - (ae-forgotten-export) The symbol "Explanation" needs to be exported by the entry point index.d.ts
 // src/core/server/http/router/response.ts:301:3 - (ae-forgotten-export) The symbol "KibanaResponse" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:380:3 - (ae-forgotten-export) The symbol "KibanaConfigType" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:380:3 - (ae-forgotten-export) The symbol "SharedGlobalConfigKeys" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:383:3 - (ae-forgotten-export) The symbol "SavedObjectsConfigType" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:489:5 - (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "create"
+// src/core/server/plugins/types.ts:377:3 - (ae-forgotten-export) The symbol "KibanaConfigType" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:377:3 - (ae-forgotten-export) The symbol "SharedGlobalConfigKeys" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:380:3 - (ae-forgotten-export) The symbol "SavedObjectsConfigType" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:486:5 - (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "create"
 
 ```
