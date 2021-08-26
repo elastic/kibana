@@ -74,3 +74,10 @@ export const runtimeFieldSpec = {
   ),
 };
 export const runtimeFieldSpecSchema = schema.object(runtimeFieldSpec);
+
+export const runtimeCompositeSpec = {
+  name: schema.string(),
+  script: runtimeFieldSpec.script,
+  fields: schema.arrayOf(schema.string()),
+};
+export const runtimeCompositeSpecSchema = schema.object(runtimeCompositeSpec);
