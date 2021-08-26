@@ -15,7 +15,7 @@ export const builtInCommands = (): CommandDefinition[] => {
     },
     {
       name: 'clear',
-      about: 'clear the console buffer',
+      about: 'Clear the console buffer',
     },
   ];
 };

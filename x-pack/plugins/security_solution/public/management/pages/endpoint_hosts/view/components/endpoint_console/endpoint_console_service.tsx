@@ -28,29 +28,6 @@ import { BASE_POLICY_RESPONSE_ROUTE } from '../../../../../../../common/endpoint
 
 const delay = async (ms: number = 4000) => new Promise((r) => setTimeout(r, ms));
 
-const EuiDescriptionListStyled = styled(EuiDescriptionList)`
-  &.euiDescriptionList {
-    > .euiDescriptionList__title.title {
-      width: 15ch;
-      color: ${({ theme }) => theme.eui.euiCodeBlockSectionColor};
-    }
-
-    > .euiDescriptionList__description.description {
-      width: calc(97% - 15ch);
-    }
-
-    > .euiDescriptionList__title.title,
-    > .euiDescriptionList__description.description {
-      margin-top: ${({ theme }) => theme.eui.paddingSizes.xs};
-    }
-
-    > .euiDescriptionList__title.title:first-child,
-    > .euiDescriptionList__description.description:first-child {
-      margin-top: 0;
-    }
-  }
-`;
-
 export class EndpointConsoleService implements ConsoleServiceInterface {
   constructor(private readonly endpoint: HostMetadata) {}
 
@@ -158,9 +135,11 @@ export class EndpointConsoleService implements ConsoleServiceInterface {
     const policyResponse = (await this.fetchPolicyResponse()).policy_response;
 
     if (policyResponse) {
+      // @ts-ignore
       if (policyResponse.agent.build) {
         aboutInfo.push({
           title: 'Build',
+          // @ts-ignore
           description: policyResponse.agent.build.original,
         });
       }
@@ -169,36 +148,24 @@ export class EndpointConsoleService implements ConsoleServiceInterface {
         {
           title: 'artifacts.global',
           description: (
-            <EuiDescriptionListStyled
+            <EuiDescriptionList
               compressed
               type="column"
               listItems={policyResponse.Endpoint.policy.applied.artifacts.global.identifiers.map(
                 ({ name, sha256 }) => ({ title: name, description: sha256 })
               )}
-              titleProps={{
-                className: 'eui-textTruncate title',
-              }}
-              descriptionProps={{
-                className: 'description',
-              }}
             />
           ),
         },
         {
           title: 'artifacts.user',
           description: (
-            <EuiDescriptionListStyled
+            <EuiDescriptionList
               compressed
               type="column"
               listItems={policyResponse.Endpoint.policy.applied.artifacts.user.identifiers.map(
                 ({ name, sha256 }) => ({ title: name, description: sha256 })
               )}
-              titleProps={{
-                className: 'eui-textTruncate title',
-              }}
-              descriptionProps={{
-                className: 'description',
-              }}
             />
           ),
         }
@@ -206,16 +173,11 @@ export class EndpointConsoleService implements ConsoleServiceInterface {
     }
 
     return (
-      <EuiDescriptionListStyled
+      <EuiDescriptionList
         type="column"
+        className="descriptionList-20_80"
         listItems={aboutInfo}
         compressed={true}
-        titleProps={{
-          className: 'eui-textTruncate title',
-        }}
-        descriptionProps={{
-          className: 'description',
-        }}
       />
     );
   }
@@ -436,7 +398,7 @@ Handles  NPM(K)    PM(K)      WS(K)     CPU(s)     Id  SI ProcessName
   }
 
   private async sendGetFile(command: Command): Promise<ReactNode> {
-    await delay(6000);
+    await delay(60000); // 1minutes
 
     const files: Array<{ title: string; path: string }> = [];
 

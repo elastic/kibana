@@ -49,4 +49,7 @@ export interface ConsoleServiceInterface {
    * which is generated out of the Command list
    */
   getHelp?: () => Promise<{ result: ReactNode }>;
+
+  /** Get command usage help content */
+  getCommandUsage?: (command: CommandDefinition) => Promise<{ result: ReactNode }>;
 }

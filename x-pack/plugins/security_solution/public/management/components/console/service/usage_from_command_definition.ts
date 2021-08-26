@@ -20,7 +20,7 @@ export const usageFromCommandDefinition = (command: CommandDefinition): string =
         requiredArgs += `--${argName}`;
       } else {
         if (optionalArgs.length) {
-          requiredArgs += ' ';
+          optionalArgs += ' ';
         }
         optionalArgs += `--${argName}`;
       }

@@ -11,6 +11,7 @@ import { useConsoleService } from './console_provider';
 import { Command } from '../service/console_service';
 import { CommandExecutionFailure } from './command_execution_failure';
 import { UserCommandInput } from './user_command_input';
+import { useInternalServices } from './internal_context';
 
 export interface CommandExecutionOutputProps {
   command: Command;
@@ -19,6 +20,7 @@ export const CommandExecutionOutput = memo<CommandExecutionOutputProps>(({ comma
   const consoleService = useConsoleService();
   const [isRunning, setIsRunning] = useState<boolean>(true);
   const [output, setOutput] = useState<ReactNode | null>(null);
+  const internalServices = useInternalServices();
 
   useEffect(() => {
     (async () => {
@@ -33,6 +35,12 @@ export const CommandExecutionOutput = memo<CommandExecutionOutputProps>(({ comma
       setIsRunning(false);
     })();
   }, [command, consoleService]);
+
+  useEffect(() => {
+    if (!isRunning) {
+      internalServices.scrollDown();
+    }
+  }, [isRunning, internalServices]);
 
   return (
     <div>

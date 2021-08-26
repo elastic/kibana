@@ -21,7 +21,7 @@ export const EndpointConsole = memo<EndpointConsoleProps>(({ endpoint }) => {
 
   return (
     <ConsoleProvider service={consoleService}>
-      <Console prompt="endpoint-v7.14.0 >" />
+      <Console prompt={`endpoint-${endpoint.agent.version} >`} />
     </ConsoleProvider>
   );
 });

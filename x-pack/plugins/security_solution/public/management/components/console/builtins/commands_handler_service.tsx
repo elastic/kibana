@@ -13,6 +13,7 @@ import { HistoryItem, HistoryItemComponent } from '../components/history_item';
 import { HelpOutput } from '../components/help_output';
 import { ParsedCommandInput } from '../service/parsed_command_input';
 import { CommandList } from '../components/command_list';
+import { CommandUsage } from '../components/command_usage';
 
 export class ConsoleBuiltinCommandsService implements ConsoleServiceInterface {
   constructor(private commandList = builtInCommands()) {}
@@ -36,11 +37,9 @@ export class ConsoleBuiltinCommandsService implements ConsoleServiceInterface {
         return {
           result: (
             <HistoryItem>
-              {
-                <HelpOutput input={parsedInput.input} title="Available commands">
-                  {this.getHelpContent(parsedInput, contextConsoleService)}
-                </HelpOutput>
-              }
+              <HelpOutput input={parsedInput.input} title="Available commands">
+                {this.getHelpContent(parsedInput, contextConsoleService)}
+              </HelpOutput>
             </HistoryItem>
           ),
         };
@@ -76,5 +75,11 @@ export class ConsoleBuiltinCommandsService implements ConsoleServiceInterface {
 
   isBuiltin(name: string): boolean {
     return !!this.commandList.find((command) => command.name === name);
+  }
+
+  async getCommandUsage(command: CommandDefinition): Promise<{ result: ReactNode }> {
+    return {
+      result: <CommandUsage command={command} />,
+    };
   }
 }

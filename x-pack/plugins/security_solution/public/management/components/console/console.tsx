@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, ReactNode, useCallback, useEffect, useRef, useState } from 'react';
+import React, { memo, ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
 import styled from 'styled-components';
 import { OutputHistory } from './components/output_history';
@@ -18,19 +18,35 @@ import { CommandExecutionOutput } from './components/command_execution_output';
 import { parseCommandInput } from './service/parsed_command_input';
 import { BadArgument } from './components/bad_argument';
 import { ConsoleBuiltinCommandsService } from './builtins/commands_handler_service';
-import { Command } from './service/console_service';
+import { ConsoleInternalContext, InternalServices } from './components/internal_context';
 
 // FIXME:PT implement dark mode for the console or light mode switch
 
-const ConsoleWindow = styled(EuiPanel)`
-  min-width: ${({ theme }) => theme.eui.euiBreakpoints.s};
-  min-height: 300px;
-  max-height: 100%;
-  overflow-y: auto;
+const ConsoleWindow = styled.div`
+  height: 100%;
 
   // FIXME: IMPORTANT - this should NOT be used in production
   // dark mode on light theme / light mode on dark theme
   filter: invert(100%);
+
+  .ui-panel {
+    min-width: ${({ theme }) => theme.eui.euiBreakpoints.s};
+    height: 100%;
+    min-height: 300px;
+    overflow-y: auto;
+  }
+
+  .descriptionList-20_80 {
+    &.euiDescriptionList {
+      > .euiDescriptionList__title {
+        width: 20%;
+      }
+
+      > .euiDescriptionList__description {
+        width: 80%;
+      }
+    }
+  }
 `;
 
 // FIXME: PT add CommonProps to the type below
@@ -98,13 +114,27 @@ export const Console = memo<ConsoleProps>(({ prompt }) => {
         return;
       }
 
-      // FIXME:PT Implement support for a `--help` built in argument for all commands
-      //        This Would output the help for only that command (usage ++ description of each argument)
-
       // FIXME: the validation checks below should be lifted and centralized so that they can be reused (in builtinCommands)
 
       // If args were entered, then validate them
       if (parsedInput.hasArgs()) {
+        if (parsedInput.hasArg('help')) {
+          setHistoryItems((prevState) => {
+            return [
+              ...prevState,
+              <HistoryItem>
+                <HelpOutput input={parsedInput.input} title={`${parsedInput.name} command`}>
+                  {(consoleService.getCommandUsage || builtinCommandService.getCommandUsage)(
+                    commandDefinition
+                  )}
+                </HelpOutput>
+              </HistoryItem>,
+            ];
+          });
+
+          return;
+        }
+
         if (!commandDefinition.args) {
           setHistoryItems((prevState) => {
             return [
@@ -189,29 +219,45 @@ export const Console = memo<ConsoleProps>(({ prompt }) => {
         ];
       });
     },
-    [consoleService]
+    [builtinCommandService, consoleService]
   );
+
+  const internalServices: InternalServices = useMemo(() => {
+    return {
+      scrollDown: () => {
+        if (consoleWindowRef.current) {
+          // FIXME:PT avoid setTimeout()
+          setTimeout(() => {
+            consoleWindowRef.current.scrollTop = consoleWindowRef.current.scrollHeight;
+          }, 1);
+        }
+      },
+    };
+  }, []);
 
   // Anytime we add a new item to the history, scroll down so that command input remains visible
   useEffect(() => {
-    if (historyItems.length && consoleWindowRef.current) {
-      consoleWindowRef.current.scrollTop = consoleWindowRef.current.scrollHeight;
+    if (historyItems.length) {
+      internalServices.scrollDown();
     }
-  }, [historyItems.length]);
+  }, [historyItems.length, internalServices]);
 
   return (
-    <div onClick={handleConsoleClick}>
-      <ConsoleWindow panelRef={consoleWindowRef}>
-        <EuiFlexGroup direction="column">
-          <EuiFlexItem grow={true}>
-            <OutputHistory>{historyItems}</OutputHistory>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <CommandInput onExecute={handleOnExecute} prompt={prompt} focusRef={inputFocusRef} />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </ConsoleWindow>
-    </div>
+    // eslint-disable-next-line jsx-a11y/click-events-have-key-events
+    <ConsoleWindow onClick={handleConsoleClick}>
+      <ConsoleInternalContext.Provider value={internalServices}>
+        <EuiPanel className="ui-panel" panelRef={consoleWindowRef}>
+          <EuiFlexGroup direction="column">
+            <EuiFlexItem grow={true}>
+              <OutputHistory>{historyItems}</OutputHistory>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <CommandInput onExecute={handleOnExecute} prompt={prompt} focusRef={inputFocusRef} />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPanel>
+      </ConsoleInternalContext.Provider>
+    </ConsoleWindow>
   );
 });
 
