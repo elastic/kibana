@@ -96,7 +96,9 @@ export const EndpointActivityLog = memo(
     return (
       <>
         <StyledEuiFlexGroup direction="column" responsive={false} isShorter={isShorter}>
-          {showEmptyState ? (
+          {activityLogLoading && !activityLastLogData?.data.length ? (
+            <EuiLoadingContent lines={3} />
+          ) : showEmptyState ? (
             <EuiFlexItem>
               <EuiEmptyPrompt
                 iconType="editorUnorderedList"

@@ -386,6 +386,12 @@ export const getLastLoadedActivityLogData: (
   return getLastLoadedResourceState(activityLog)?.data;
 });
 
+export const getActivityLogUninitialized: (
+  state: Immutable<EndpointState>
+) => boolean = createSelector(getActivityLogData, (activityLog) =>
+  isUninitialisedResourceState(activityLog)
+);
+
 export const getActivityLogRequestLoading: (
   state: Immutable<EndpointState>
 ) => boolean = createSelector(getActivityLogData, (activityLog) =>
