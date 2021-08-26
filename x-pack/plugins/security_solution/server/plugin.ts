@@ -339,6 +339,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     });
 
     this.telemetryEventsSender.setup(
+      this.telemetryReceiver,
       plugins.telemetry,
       plugins.taskManager,
       this.telemetryUsageCounter

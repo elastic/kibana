@@ -8,7 +8,7 @@
 import { cloneDeep } from 'lodash';
 import axios from 'axios';
 import { URL } from 'url';
-import { CoreStart, Logger } from 'src/core/server';
+import { Logger } from 'src/core/server';
 import { TelemetryPluginStart, TelemetryPluginSetup } from 'src/plugins/telemetry/server';
 import { UsageCounter } from 'src/plugins/usage_collection/server';
 import { transformDataToNdjson } from '../../utils/read_stream/create_stream_from_ndjson';
@@ -19,8 +19,6 @@ import {
 import { TelemetryReceiver } from './receiver';
 import { processEvents } from './filters';
 import { DiagnosticTask, EndpointTask, ExceptionListsTask } from './tasks';
-import { EndpointAppContextService } from '../../endpoint/endpoint_app_context_services';
-import { ExceptionListClient } from '../../../../lists/server';
 import { createUsageCounterLabel } from './helpers';
 import { TelemetryEvent } from './types';
 
@@ -49,6 +47,7 @@ export class TelemetryEventsSender {
   }
 
   public setup(
+    telemetryReceiver: TelemetryReceiver,
     telemetrySetup?: TelemetryPluginSetup,
     taskManager?: TaskManagerSetupContract,
     telemetryUsageCounter?: UsageCounter
@@ -57,9 +56,14 @@ export class TelemetryEventsSender {
     this.telemetryUsageCounter = telemetryUsageCounter;
 
     if (taskManager) {
-      this.diagnosticTask = new DiagnosticTask(this.logger, taskManager, this);
-      this.endpointTask = new EndpointTask(this.logger, taskManager, this);
-      this.exceptionListsTask = new ExceptionListsTask(this.logger, taskManager, this);
+      this.diagnosticTask = new DiagnosticTask(this.logger, taskManager, this, telemetryReceiver);
+      this.endpointTask = new EndpointTask(this.logger, taskManager, this, telemetryReceiver);
+      this.exceptionListsTask = new ExceptionListsTask(
+        this.logger,
+        taskManager,
+        this,
+        telemetryReceiver
+      );
     }
   }
 
