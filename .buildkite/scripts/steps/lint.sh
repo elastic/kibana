@@ -7,6 +7,10 @@ export BUILD_TS_REFS_DISABLE=true
 
 .buildkite/scripts/bootstrap.sh
 
-echo '--- Jest'
-checks-reporter-with-killswitch "Jest Unit Tests" \
-  node scripts/jest --ci --verbose --maxWorkers=13
+# TODO linting
+
+echo '--- Lint: stylelint'
+node scripts/stylelint
+
+echo '--- Lint: eslint'
+node scripts/eslint --no-cache

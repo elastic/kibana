@@ -7,6 +7,6 @@ export BUILD_TS_REFS_DISABLE=true
 
 .buildkite/scripts/bootstrap.sh
 
-echo '--- Jest'
-checks-reporter-with-killswitch "Jest Unit Tests" \
-  node scripts/jest --ci --verbose --maxWorkers=13
+echo --- Check i18n
+checks-reporter-with-killswitch "Check i18n" \
+  node scripts/i18n_check --ignore-missing

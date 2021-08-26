@@ -7,6 +7,7 @@ export BUILD_TS_REFS_DISABLE=true
 
 .buildkite/scripts/bootstrap.sh
 
-echo '--- Jest'
-checks-reporter-with-killswitch "Jest Unit Tests" \
-  node scripts/jest --ci --verbose --maxWorkers=13
+echo --- Check Bundle Limits
+
+checks-reporter-with-killswitch "Check Bundle Limits" \
+  node scripts/build_kibana_platform_plugins --validate-limits

@@ -7,6 +7,7 @@ export BUILD_TS_REFS_DISABLE=true
 
 .buildkite/scripts/bootstrap.sh
 
-echo '--- Jest'
-checks-reporter-with-killswitch "Jest Unit Tests" \
-  node scripts/jest --ci --verbose --maxWorkers=13
+echo "--- Building kbn-pm distributable"
+yarn kbn run build -i @kbn/pm
+
+verify_no_git_changes 'yarn kbn run build -i @kbn/pm'
