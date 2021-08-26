@@ -90,11 +90,15 @@ const getImportPath = (dir, specifier) => {
 };
 
 /**
+ * Recursively traverse from a file path to collect all the exported values/types
+ * from the file. Returns an ExportSet which groups the exports by type, either
+ * "value" or "type" exports.
+ *
  * @param {Parser} parser
  * @param {string} from
  * @param {ts.ExportDeclaration} exportFrom
- * @param {ExportSet} exportSet
- * @param {boolean} assumeAllTypes
+ * @param {ExportSet | undefined} exportSet only passed when called recursively
+ * @param {boolean | undefined} assumeAllTypes only passed when called recursively
  * @returns {ExportSet | undefined}
  */
 const getExportNamesDeep = (

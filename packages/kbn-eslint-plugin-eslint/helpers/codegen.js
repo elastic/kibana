@@ -12,6 +12,11 @@ const { default: generate } = require('@babel/generator');
 /** @typedef {import('./export_set').ExportSet} ExportSet */
 
 /**
+ * Generate code for replacing a `export * from './path'`, ie.
+ *
+ * export type { foo } from './path'
+ * export { bar } from './path'
+
  * @param {ExportSet} exportSet
  * @param {string} source
  */
@@ -42,6 +47,11 @@ const getExportCode = (exportSet, source) => {
 };
 
 /**
+ * Generate code for replacing a `export * as name from './path'`, ie.
+ *
+ * import { foo, bar } from './path'
+ * export const name = { foo, bar }
+ *
  * @param {string} nsName
  * @param {string[]} exportNames
  * @param {string} source

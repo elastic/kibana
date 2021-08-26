@@ -6,6 +6,9 @@
  * Side Public License, v 1.
  */
 
+/**
+ * Helper class to collect exports of different types, either "value" exports or "type" exports
+ */
 class ExportSet {
   constructor() {
     /** @type {Set<string>} */
