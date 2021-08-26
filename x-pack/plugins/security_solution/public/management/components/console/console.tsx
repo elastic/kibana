@@ -225,12 +225,12 @@ export const Console = memo<ConsoleProps>(({ prompt }) => {
   const internalServices: InternalServices = useMemo(() => {
     return {
       scrollDown: () => {
-        if (consoleWindowRef.current) {
-          // FIXME:PT avoid setTimeout()
-          setTimeout(() => {
+        // FIXME:PT avoid setTimeout()
+        setTimeout(() => {
+          if (consoleWindowRef.current) {
             consoleWindowRef.current.scrollTop = consoleWindowRef.current.scrollHeight;
-          }, 1);
-        }
+          }
+        }, 1);
       },
     };
   }, []);

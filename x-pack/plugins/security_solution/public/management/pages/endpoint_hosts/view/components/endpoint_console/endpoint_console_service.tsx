@@ -16,7 +16,6 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { EuiDescriptionListProps } from '@elastic/eui/src/components/description_list/description_list';
-import styled from 'styled-components';
 import {
   ConsoleServiceInterface,
   CommandDefinition,

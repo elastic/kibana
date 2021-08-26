@@ -8,15 +8,15 @@
 import React, { FC, memo, useMemo } from 'react';
 import {
   CommonProps,
-  EuiPageHeader,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiTitle,
+  EuiPageHeader,
   EuiSpacer,
+  EuiTitle,
 } from '@elastic/eui';
 import { SecurityPageName } from '../../../common/constants';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
-import { useRunningConsoleManagement } from './running_console_magenement_provider';
+import { RunningConsoles } from './running_consoles';
 
 interface AdministrationListPageProps {
   title: React.ReactNode;
@@ -24,14 +24,6 @@ interface AdministrationListPageProps {
   actions?: React.ReactNode;
   headerBackComponent?: React.ReactNode;
 }
-
-const RunningConsoles = memo(() => {
-  const { consoleCount, getConsoleSelectorElement } = useRunningConsoleManagement();
-
-  return consoleCount ? <div>{getConsoleSelectorElement()}</div> : null;
-});
-
-RunningConsoles.displayName = 'RunningConsoles';
 
 export const AdministrationListPage: FC<AdministrationListPageProps & CommonProps> = memo(
   ({ title, subtitle, actions, children, headerBackComponent, ...otherProps }) => {

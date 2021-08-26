@@ -6,21 +6,19 @@
  */
 
 import React, { memo, ReactNode, useCallback, useContext, useMemo, useState } from 'react';
-import {
-  EuiIcon,
-  EuiModal,
-  EuiModalBody,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
-  EuiSuperSelect,
-} from '@elastic/eui';
+import { EuiIcon, EuiModal, EuiModalBody, EuiModalHeader, EuiModalHeaderTitle } from '@elastic/eui';
+
+interface RunningConsole {
+  id: string;
+  title: ReactNode;
+  show(): void;
+}
 
 interface ConsoleManagement {
   openConsole(id: string, options: { title: ReactNode; console: JSX.Element }): void;
   hideConsole(id: string): void;
   closeConsole(id: string): void;
-  consoleCount: number;
-  getConsoleSelectorElement(): JSX.Element;
+  consoleList: ReadonlyArray<Readonly<RunningConsole>>;
 }
 
 const RunningConsoleManagementContext = React.createContext<ConsoleManagement | null>(null);
@@ -60,27 +58,19 @@ export const RunningConsoleManagementProvider = memo(({ children }) => {
 
   const closeConsole = useCallback<ConsoleManagement['closeConsole']>(() => {}, []);
 
-  const getConsoleSelectorElement = useCallback<
-    ConsoleManagement['getConsoleSelectorElement']
-  >(() => {
-    const options = Object.entries(consoles).map(([id, opt]) => {
-      return {
-        value: id,
-        inputDisplay: opt.title,
-      };
-    });
-    return (
-      <EuiSuperSelect
-        options={options}
-        valueOfSelected={''}
-        onChange={(id) => openConsole(id, consoles[id])}
-      />
-    );
-  }, [consoles, openConsole]);
-
   const consoleCount = useMemo(() => {
     return Object.keys(consoles).length;
   }, [consoles]);
+
+  const consoleList: ConsoleManagement['getConsoleList'] = useMemo(() => {
+    return Object.entries(consoles).map(([id, { title }]) => {
+      return {
+        title,
+        id,
+        show: () => openConsole(id, consoles[id]),
+      };
+    });
+  }, [consoles, openConsole]);
 
   const consoleManagement = useMemo(() => {
     return {
@@ -88,9 +78,9 @@ export const RunningConsoleManagementProvider = memo(({ children }) => {
       hideConsole,
       closeConsole,
       consoleCount,
-      getConsoleSelectorElement,
+      consoleList,
     };
-  }, [closeConsole, consoleCount, getConsoleSelectorElement, hideConsole, openConsole]);
+  }, [closeConsole, consoleCount, consoleList, hideConsole, openConsole]);
 
   const visibleConsoles = useMemo(() => {
     const dialogs = [];
