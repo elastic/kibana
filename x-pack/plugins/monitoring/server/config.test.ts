@@ -87,6 +87,7 @@ describe('config schema', () => {
             ],
             "requestTimeout": "PT30S",
             "shardTimeout": "PT30S",
+            "skipStartupConnectionCheck": false,
             "sniffInterval": false,
             "sniffOnConnectionFault": false,
             "sniffOnStart": false,
