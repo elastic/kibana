@@ -20,21 +20,6 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       await PageObjects.timePicker.setDefaultAbsoluteRange();
     });
 
-    it('should show custom doc views', async () => {
-      await testSubjects.click('docTableExpandToggleColumn');
-      const angularTab = await find.byButtonText('Angular doc view');
-      const reactTab = await find.byButtonText('React doc view');
-      expect(await angularTab.isDisplayed()).to.be(true);
-      expect(await reactTab.isDisplayed()).to.be(true);
-    });
-
-    it('should render angular doc view', async () => {
-      const angularTab = await find.byButtonText('Angular doc view');
-      await angularTab.click();
-      const angularContent = await testSubjects.find('angular-docview');
-      expect(await angularContent.getVisibleText()).to.be('logstash-2015.09.22');
-    });
-
     it('should render react doc view', async () => {
       const reactTab = await find.byButtonText('React doc view');
       await reactTab.click();
