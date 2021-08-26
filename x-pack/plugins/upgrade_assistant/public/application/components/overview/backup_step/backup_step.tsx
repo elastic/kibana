@@ -9,7 +9,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 
-import { CloudSetup } from '../../../../shared_imports';
+import type { CloudSetup } from '../../../../../../cloud/public';
 import { OnPremBackup } from './on_prem_backup';
 import { CloudBackup, CloudBackupStatusResponse } from './cloud_backup';
 

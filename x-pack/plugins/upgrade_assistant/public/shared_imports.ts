@@ -27,6 +27,4 @@ export { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 
 export { APP_WRAPPER_CLASS } from '../../../../src/core/public';
 
-export { CloudSetup } from '../../cloud/public';
-
 export const useKibana = () => _useKibana<AppServicesContext>();
