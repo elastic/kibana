@@ -7,7 +7,7 @@
 
 import { HttpSetup } from 'src/core/public';
 import { ESUpgradeStatus } from '../../../common/types';
-import { API_BASE_PATH } from '../../../common/constants';
+import { API_BASE_PATH, DEPRECATION_LOGS_COUNT_POLL_INTERVAL_MS } from '../../../common/constants';
 import {
   UseRequestConfig,
   SendRequestConfig,
@@ -80,6 +80,17 @@ export class ApiService {
     });
 
     return result;
+  }
+
+  public getDeprecationLogsCount(from: string) {
+    return this.useRequest<{
+      count: number;
+    }>({
+      path: `${API_BASE_PATH}/deprecation_logging/count`,
+      method: 'get',
+      query: { from },
+      pollIntervalMs: DEPRECATION_LOGS_COUNT_POLL_INTERVAL_MS,
+    });
   }
 
   public async updateIndexSettings(indexName: string, settings: string[]) {
