@@ -1857,6 +1857,7 @@ export interface SavedObjectsBulkGetObject {
     fields?: string[];
     // (undocumented)
     id: string;
+    namespaces?: string[];
     // (undocumented)
     type: string;
 }
