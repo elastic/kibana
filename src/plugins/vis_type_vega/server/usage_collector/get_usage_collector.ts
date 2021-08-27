@@ -7,13 +7,8 @@
  */
 
 import { parse } from 'hjson';
-import { ElasticsearchClient, SavedObject } from 'src/core/server';
 
-import type {
-  SavedObject,
-  SavedObjectsClientContract,
-  SavedObjectsFindResult,
-} from '../../../../core/server';
+import type { SavedObjectsClientContract, SavedObjectsFindResult } from '../../../../core/server';
 import type { SavedVisState } from '../../../visualizations/common';
 import type { VegaSavedObjectAttributes, VisTypeVegaPluginSetupDependencies } from '../types';
 
@@ -75,6 +70,7 @@ export const getStats = async (
   const finder = await soClient.createPointInTimeFinder({
     type: 'visualization',
     perPage: 1000,
+    namespaces: ['*'],
   });
 
   const doTelemetry = ({ params }: SavedVisState) => {
