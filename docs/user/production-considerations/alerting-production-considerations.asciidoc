@@ -19,7 +19,7 @@ When relying on rules and actions as mission critical services, make sure you fo
 By default, each {kib} instance polls for work at three second intervals, and can run a maximum of ten concurrent tasks.
 These tasks are then run on the {kib} server.
 
-Rules are recurring background tasks which are rescheduled according to the <<defining-alerts-general-details, check interval>> on completion.
+Rules are recurring background tasks which are rescheduled according to the <<defining-rules-general-details, check interval>> on completion.
 Actions are non-recurring background tasks which are deleted on completion.
 
 For more details on Task Manager, see <<task-manager-background-tasks>>.
@@ -36,13 +36,13 @@ For detailed guidance, see <<alerting-troubleshooting, Alerting Troubleshooting>
 
 [float]
 [[alerting-scaling-guidance]]
-=== Scaling Guidance
+=== Scaling guidance
 
 As rules and actions leverage background tasks to perform the majority of work, scaling Alerting is possible by following the <<task-manager-scaling-guidance,Task Manager Scaling Guidance>>.
 
 When estimating the required task throughput, keep the following in mind:
 
-* Each rule uses a single recurring task that is scheduled to run at the cadence defined by its <<defining-alerts-general-details,check interval>>.
+* Each rule uses a single recurring task that is scheduled to run at the cadence defined by its <<defining-rules-general-details,check interval>>.
 * Each action uses a single task. However, because <<alerting-concepts-suppressing-duplicate-notifications,actions are taken per instance>>, alerts can generate a large number of non-recurring tasks.
 
 It is difficult to predict how much throughput is needed to ensure all rules and actions are executed at consistent schedules.
@@ -58,7 +58,7 @@ Alerts and actions log activity in a set of "event log" indices.  These indices 
 
 The name of the index policy is `kibana-event-log-policy`.  {kib} creates the index policy on startup, if it doesn't already exist.  The index policy can be customized for your environment, but {kib} never modifies the index policy after creating it.
 
-Because Kibana uses the documents to display historic data, you should set the delete phase longer than you would like the historic data to be shown. For example, if you would like to see one month's worth of historic data, you should set the delete phase to at least one month.
+Because {kib} uses the documents to display historic data, you should set the delete phase longer than you would like the historic data to be shown. For example, if you would like to see one month's worth of historic data, you should set the delete phase to at least one month.
 
 For more information on index lifecycle management, see:
 {ref}/index-lifecycle-management.html[Index Lifecycle Policies].

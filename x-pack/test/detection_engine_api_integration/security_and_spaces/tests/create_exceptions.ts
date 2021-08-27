@@ -8,6 +8,8 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import expect from '@kbn/expect';
+import type { CreateExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
 import {
   CreateRulesSchema,
   EqlCreateSchema,
@@ -24,11 +26,6 @@ import {
 } from '../../../lists_api_integration/utils';
 import { RulesSchema } from '../../../../plugins/security_solution/common/detection_engine/schemas/response';
 import { getCreateExceptionListMinimalSchemaMock } from '../../../../plugins/lists/common/schemas/request/create_exception_list_schema.mock';
-import { CreateExceptionListItemSchema } from '../../../../plugins/lists/common';
-import {
-  EXCEPTION_LIST_ITEM_URL,
-  EXCEPTION_LIST_URL,
-} from '../../../../plugins/lists/common/constants';
 
 import { DETECTION_ENGINE_RULES_URL } from '../../../../plugins/security_solution/common/constants';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
@@ -50,12 +47,13 @@ import {
   getSignalsByIds,
   findImmutableRuleById,
   getPrePackagedRulesStatus,
-  getRuleForSignalTesting,
   getOpenSignals,
   createRuleWithExceptionEntries,
+  getEqlRuleForSignalTesting,
+  getThresholdRuleForSignalTesting,
 } from '../../utils';
 import { ROLES } from '../../../../plugins/security_solution/common/test';
-import { createUserAndRole, deleteUserAndRole } from '../roles_users_utils';
+import { createUserAndRole, deleteUserAndRole } from '../../../common/services/security_solution';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
@@ -65,17 +63,23 @@ export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
 
   describe('create_rules_with_exceptions', () => {
+    before(async () => {
+      await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
+    });
+
+    after(async () => {
+      await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
+    });
+
     describe('creating rules with exceptions', () => {
       beforeEach(async () => {
         await createSignalsIndex(supertest);
-        await esArchiver.load('auditbeat/hosts');
       });
 
       afterEach(async () => {
         await deleteSignalsIndex(supertest);
         await deleteAllAlerts(supertest);
         await deleteAllExceptions(es);
-        await esArchiver.unload('auditbeat/hosts');
       });
 
       describe('elastic admin', () => {
@@ -531,16 +535,22 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       describe('tests with auditbeat data', () => {
+        before(async () => {
+          await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
+        });
+
+        after(async () => {
+          await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
+        });
+
         beforeEach(async () => {
           await createSignalsIndex(supertest);
-          await esArchiver.load('auditbeat/hosts');
         });
 
         afterEach(async () => {
           await deleteSignalsIndex(supertest);
           await deleteAllAlerts(supertest);
           await deleteAllExceptions(es);
-          await esArchiver.unload('auditbeat/hosts');
         });
 
         it('should be able to execute against an exception list that does not include valid entries and get back 10 signals', async () => {
@@ -618,10 +628,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         it('generates no signals when an exception is added for an EQL rule', async () => {
           const rule: EqlCreateSchema = {
-            ...getRuleForSignalTesting(['auditbeat-*']),
-            rule_id: 'eql-rule',
-            type: 'eql',
-            language: 'eql',
+            ...getEqlRuleForSignalTesting(['auditbeat-*']),
             query: 'configuration where agent.id=="a1d7b39c-f898-4dbe-a761-efb61939302d"',
           };
           const createdRule = await createRuleWithExceptionEntries(supertest, rule, [
@@ -640,11 +647,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         it('generates no signals when an exception is added for a threshold rule', async () => {
           const rule: ThresholdCreateSchema = {
-            ...getRuleForSignalTesting(['auditbeat-*']),
-            rule_id: 'threshold-rule',
-            type: 'threshold',
-            language: 'kuery',
-            query: '*:*',
+            ...getThresholdRuleForSignalTesting(['auditbeat-*']),
             threshold: {
               field: 'host.id',
               value: 700,

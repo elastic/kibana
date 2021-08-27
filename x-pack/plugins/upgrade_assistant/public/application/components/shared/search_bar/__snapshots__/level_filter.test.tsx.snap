@@ -12,7 +12,7 @@ exports[`DeprecationLevelFilter renders 1`] = `
       numFilters={1}
       onClick={[Function]}
     >
-      critical
+      Critical
     </EuiFilterButton>
   </EuiFilterGroup>
 </EuiFlexItem>

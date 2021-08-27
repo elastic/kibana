@@ -7,12 +7,16 @@
  */
 
 import { SavedObjectsClientContract, SimpleSavedObject } from '../../../../../core/public';
+import { INDEX_PATTERN_SAVED_OBJECT_TYPE } from '../../constants';
 
 export async function getTitle(
   client: SavedObjectsClientContract,
   indexPatternId: string
 ): Promise<SimpleSavedObject<any>> {
-  const savedObject = (await client.get('index-pattern', indexPatternId)) as SimpleSavedObject<any>;
+  const savedObject = (await client.get(
+    INDEX_PATTERN_SAVED_OBJECT_TYPE,
+    indexPatternId
+  )) as SimpleSavedObject<any>;
 
   if (savedObject.error) {
     throw new Error(`Unable to get index-pattern title: ${savedObject.error.message}`);

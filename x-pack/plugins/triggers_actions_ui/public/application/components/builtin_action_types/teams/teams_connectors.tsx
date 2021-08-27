@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import React, { Fragment } from 'react';
-import { EuiCallOut, EuiFieldText, EuiFormRow, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
+import React from 'react';
+import { EuiFieldText, EuiFormRow, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ActionConnectorFieldsProps } from '../../../../types';
 import { TeamsActionConnector } from '../types';
 import { useKibana } from '../../../../common/lib/kibana';
+import { getEncryptedFieldNotifyLabel } from '../../get_encrypted_field_notify_label';
 
 const TeamsActionFields: React.FunctionComponent<
   ActionConnectorFieldsProps<TeamsActionConnector>
@@ -19,8 +20,11 @@ const TeamsActionFields: React.FunctionComponent<
   const { webhookUrl } = action.secrets;
   const { docLinks } = useKibana().services;
 
+  const isWebhookUrlInvalid: boolean =
+    errors.webhookUrl !== undefined && errors.webhookUrl.length > 0 && webhookUrl !== undefined;
+
   return (
-    <Fragment>
+    <>
       <EuiFormRow
         id="webhookUrl"
         fullWidth
@@ -33,7 +37,7 @@ const TeamsActionFields: React.FunctionComponent<
           </EuiLink>
         }
         error={errors.webhookUrl}
-        isInvalid={errors.webhookUrl.length > 0 && webhookUrl !== undefined}
+        isInvalid={isWebhookUrlInvalid}
         label={i18n.translate(
           'xpack.triggersActionsUI.components.builtinActionTypes.teamsAction.webhookUrlTextFieldLabel',
           {
@@ -41,11 +45,19 @@ const TeamsActionFields: React.FunctionComponent<
           }
         )}
       >
-        <Fragment>
-          {getEncryptedFieldNotifyLabel(!action.id)}
+        <>
+          {getEncryptedFieldNotifyLabel(
+            !action.id,
+            1,
+            action.isMissingSecrets ?? false,
+            i18n.translate(
+              'xpack.triggersActionsUI.components.builtinActionTypes.teamsAction.reenterValueLabel',
+              { defaultMessage: 'This URL is encrypted. Please reenter a value for this field.' }
+            )
+          )}
           <EuiFieldText
             fullWidth
-            isInvalid={errors.webhookUrl.length > 0 && webhookUrl !== undefined}
+            isInvalid={isWebhookUrlInvalid}
             name="webhookUrl"
             readOnly={readOnly}
             value={webhookUrl || ''}
@@ -59,43 +71,11 @@ const TeamsActionFields: React.FunctionComponent<
               }
             }}
           />
-        </Fragment>
+        </>
       </EuiFormRow>
-    </Fragment>
+    </>
   );
 };
-
-function getEncryptedFieldNotifyLabel(isCreate: boolean) {
-  if (isCreate) {
-    return (
-      <Fragment>
-        <EuiSpacer size="s" />
-        <EuiText size="s" data-test-subj="rememberValuesMessage">
-          <FormattedMessage
-            id="xpack.triggersActionsUI.components.builtinActionTypes.teamsAction.rememberValueLabel"
-            defaultMessage="Remember this value. You must reenter it each time you edit the connector."
-          />
-        </EuiText>
-        <EuiSpacer size="s" />
-      </Fragment>
-    );
-  }
-  return (
-    <Fragment>
-      <EuiSpacer size="s" />
-      <EuiCallOut
-        size="s"
-        iconType="iInCircle"
-        data-test-subj="reenterValuesMessage"
-        title={i18n.translate(
-          'xpack.triggersActionsUI.components.builtinActionTypes.teamsAction.reenterValueLabel',
-          { defaultMessage: 'This URL is encrypted. Please reenter a value for this field.' }
-        )}
-      />
-      <EuiSpacer size="m" />
-    </Fragment>
-  );
-}
 
 // eslint-disable-next-line import/no-default-export
 export { TeamsActionFields as default };

@@ -1,17 +1,13 @@
 {
   "id": "uiActionsEnhanced",
+  "owner": {
+    "name": "Kibana App Services",
+    "githubTeam": "kibana-app-services"
+  },
   "version": "kibana",
   "configPath": ["xpack", "ui_actions_enhanced"],
   "server": true,
   "ui": true,
-  "requiredPlugins": [
-    "embeddable",
-    "uiActions",
-    "licensing"
-  ],
-  "requiredBundles": [
-    "kibanaUtils",
-    "kibanaReact",
-    "data"
-  ]
+  "requiredPlugins": ["embeddable", "uiActions", "licensing"],
+  "requiredBundles": ["kibanaUtils", "kibanaReact", "data"]
 }

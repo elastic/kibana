@@ -13,7 +13,6 @@ import {
   registerGroupRoute,
   registerGroupUsersRoute,
   registerShareGroupRoute,
-  registerAssignGroupRoute,
   registerBoostsGroupRoute,
 } from './groups';
 
@@ -262,41 +261,6 @@ describe('groups routes', () => {
           params: { id: '123' },
           body: {
             content_source_ids: ['123', '234'],
-          },
-        };
-        mockRouter.shouldValidate(request);
-      });
-    });
-  });
-
-  describe('POST /api/workplace_search/groups/{id}/assign', () => {
-    let mockRouter: MockRouter;
-
-    beforeEach(() => {
-      jest.clearAllMocks();
-      mockRouter = new MockRouter({
-        method: 'post',
-        path: '/api/workplace_search/groups/{id}/assign',
-      });
-
-      registerAssignGroupRoute({
-        ...mockDependencies,
-        router: mockRouter.router,
-      });
-    });
-
-    it('creates a request handler', () => {
-      expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/ws/org/groups/:id/assign',
-      });
-    });
-
-    describe('validates', () => {
-      it('correctly', () => {
-        const request = {
-          params: { id: '123' },
-          body: {
-            user_ids: ['123', '234'],
           },
         };
         mockRouter.shouldValidate(request);

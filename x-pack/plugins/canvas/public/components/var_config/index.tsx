@@ -7,12 +7,22 @@
 
 import React, { FC } from 'react';
 import copy from 'copy-to-clipboard';
+import { i18n } from '@kbn/i18n';
+
 import { VarConfig as ChildComponent } from './var_config';
 import { useNotifyService } from '../../services';
-import { ComponentStrings } from '../../../i18n';
 import { CanvasVariable } from '../../../types';
 
-const { VarConfig: strings } = ComponentStrings;
+const strings = {
+  getCopyNotificationDescription: () =>
+    i18n.translate('xpack.canvas.varConfig.copyNotificationDescription', {
+      defaultMessage: 'Variable syntax copied to clipboard',
+    }),
+  getDeleteNotificationDescription: () =>
+    i18n.translate('xpack.canvas.varConfig.deleteNotificationDescription', {
+      defaultMessage: 'Variable successfully deleted',
+    }),
+};
 
 interface Props {
   variables: CanvasVariable[];

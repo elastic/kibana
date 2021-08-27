@@ -16,11 +16,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('lens search sessions', () => {
     before(async () => {
-      await esArchiver.loadIfNeeded('logstash_functional');
-      await esArchiver.loadIfNeeded('lens/basic');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/lens/basic');
     });
     after(async () => {
-      await esArchiver.unload('lens/basic');
+      await esArchiver.unload('x-pack/test/functional/es_archives/lens/basic');
     });
 
     it("doesn't shows search sessions indicator UI", async () => {

@@ -7,15 +7,15 @@
 
 import { i18n } from '@kbn/i18n';
 import { BrowserDownload } from '../';
-import { CaptureConfig } from '../../../server/types';
+import { ReportingCore } from '../../../server';
 import { LevelLogger } from '../../lib';
 import { HeadlessChromiumDriverFactory } from './driver_factory';
 import { ChromiumArchivePaths } from './paths';
 
 export const chromium: BrowserDownload = {
   paths: new ChromiumArchivePaths(),
-  createDriverFactory: (binaryPath: string, captureConfig: CaptureConfig, logger: LevelLogger) =>
-    new HeadlessChromiumDriverFactory(binaryPath, captureConfig, logger),
+  createDriverFactory: (core: ReportingCore, binaryPath: string, logger: LevelLogger) =>
+    new HeadlessChromiumDriverFactory(core, binaryPath, logger),
 };
 
 export const getChromiumDisconnectedError = () =>

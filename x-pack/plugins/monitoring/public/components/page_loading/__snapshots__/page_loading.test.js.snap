@@ -5,7 +5,7 @@ exports[`PageLoading should show a simple page loading component 1`] = `
   class="euiPage euiPage--paddingMedium euiPage--grow"
   style="height:calc(100vh - 50px)"
 >
-  <main
+  <div
     class="euiPageBody euiPageBody--borderRadiusNone"
   >
     <div
@@ -37,6 +37,6 @@ exports[`PageLoading should show a simple page loading component 1`] = `
         </div>
       </div>
     </div>
-  </main>
+  </div>
 </div>
 `;

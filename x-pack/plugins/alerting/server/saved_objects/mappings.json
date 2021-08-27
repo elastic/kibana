@@ -28,6 +28,9 @@
       "consumer": {
         "type": "keyword"
       },
+      "legacyId": {
+        "type": "keyword"
+      },
       "actions": {
         "type": "nested",
         "properties": {
@@ -47,7 +50,8 @@
         }
       },
       "params": {
-        "type": "flattened"
+        "type": "flattened",
+        "ignore_above": 4096
       },
       "scheduledTaskId": {
         "type": "keyword"

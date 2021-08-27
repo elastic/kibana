@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import Joi from 'joi';
 import { CoreSetup, PluginInitializerContext } from 'src/core/server';
 import { SavedObject } from 'src/core/public';
 import {
@@ -55,11 +54,13 @@ export class SampleDataRegistry {
 
     return {
       registerSampleDataset: (specProvider: SampleDatasetProvider) => {
-        const { error, value } = Joi.validate(specProvider(), sampleDataSchema);
-
-        if (error) {
+        let value: SampleDatasetSchema;
+        try {
+          value = sampleDataSchema.validate(specProvider());
+        } catch (error) {
           throw new Error(`Unable to register sample dataset spec because it's invalid. ${error}`);
         }
+
         const defaultIndexSavedObjectJson = value.savedObjects.find((savedObjectJson: any) => {
           return (
             savedObjectJson.type === 'index-pattern' && savedObjectJson.id === value.defaultIndex
@@ -142,12 +143,16 @@ export class SampleDataRegistry {
           reference.type = embeddableType;
           reference.id = embeddableId;
 
+          const referenceName = reference.name.includes(':')
+            ? reference.name.split(':')[1]
+            : reference.name;
+
           const panels = JSON.parse(dashboard.attributes.panelsJSON);
           const panel = panels.find((panelItem: any) => {
-            return panelItem.panelRefName === reference.name;
+            return panelItem.panelRefName === referenceName;
           });
           if (!panel) {
-            throw new Error(`Unable to find panel for reference: ${reference.name}`);
+            throw new Error(`Unable to find panel for reference: ${referenceName}`);
           }
           panel.embeddableConfig = embeddableConfig;
           dashboard.attributes.panelsJSON = JSON.stringify(panels);

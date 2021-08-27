@@ -6,13 +6,12 @@
  */
 
 import { SavedObjectsType } from 'src/core/server';
+import { CASE_USER_ACTION_SAVED_OBJECT } from '../../common';
 import { userActionsMigrations } from './migrations';
-
-export const CASE_USER_ACTION_SAVED_OBJECT = 'cases-user-actions';
 
 export const caseUserActionSavedObjectType: SavedObjectsType = {
   name: CASE_USER_ACTION_SAVED_OBJECT,
-  hidden: false,
+  hidden: true,
   namespaceType: 'single',
   mappings: {
     properties: {
@@ -43,6 +42,9 @@ export const caseUserActionSavedObjectType: SavedObjectsType = {
       },
       old_value: {
         type: 'text',
+      },
+      owner: {
+        type: 'keyword',
       },
     },
   },

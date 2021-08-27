@@ -11,7 +11,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Enumeration of Users or Groups via Built-in Commands",
-  "query": "process where event.type in (\"start\", \"process_started\") and\n  not process.parent.executable : (\"/Applications/NoMAD.app/Contents/MacOS/NoMAD\", \n    \"/Applications/ZoomPresence.app/Contents/MacOS/ZoomPresence\") and \n  process.name : (\"ldapsearch\", \"dsmemberutil\") or\n  (process.name : \"dscl\" and \n     process.args : (\"read\", \"-read\", \"list\", \"-list\", \"ls\", \"search\", \"-search\") and \n     process.args : (\"/Active Directory/*\", \"/Users*\", \"/Groups*\"))\n",
+  "query": "process where event.type in (\"start\", \"process_started\") and\n  not process.parent.executable : (\"/Applications/NoMAD.app/Contents/MacOS/NoMAD\", \n    \"/Applications/ZoomPresence.app/Contents/MacOS/ZoomPresence\",\n     \"/Applications/Sourcetree.app/Contents/MacOS/Sourcetree\",\n     \"/Library/Application Support/JAMF/Jamf.app/Contents/MacOS/JamfDaemon.app/Contents/MacOS/JamfDaemon\",\n     \"/usr/local/jamf/bin/jamf\"\n    ) and \n  process.name : (\"ldapsearch\", \"dsmemberutil\") or\n  (process.name : \"dscl\" and \n     process.args : (\"read\", \"-read\", \"list\", \"-list\", \"ls\", \"search\", \"-search\") and \n     process.args : (\"/Active Directory/*\", \"/Users*\", \"/Groups*\"))\n",
   "risk_score": 21,
   "rule_id": "6e9b351e-a531-4bdc-b73e-7034d6eed7ff",
   "severity": "low",
@@ -46,5 +46,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 1
+  "version": 2
 }

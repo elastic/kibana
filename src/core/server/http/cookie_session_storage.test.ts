@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import request from 'request';
+import { parse as parseCookie } from 'tough-cookie';
 import supertest from 'supertest';
 import { REPO_ROOT } from '@kbn/dev-utils';
 import { ByteSizeValue } from '@kbn/config-schema';
@@ -14,10 +14,10 @@ import { BehaviorSubject } from 'rxjs';
 
 import { CoreContext } from '../core_context';
 import { HttpService } from './http_service';
-import { KibanaRequest } from './router';
 import { Env } from '../config';
 
 import { contextServiceMock } from '../context/context_service.mock';
+import { executionContextServiceMock } from '../execution_context/execution_context_service.mock';
 import { loggingSystemMock } from '../logging/logging_system.mock';
 import { getEnvOptions, configServiceMock } from '../config/mocks';
 import { httpServerMock } from './http_server.mocks';
@@ -34,6 +34,7 @@ const contextSetup = contextServiceMock.createSetupContract();
 
 const setupDeps = {
   context: contextSetup,
+  executionContext: executionContextServiceMock.createInternalSetupContract(),
 };
 
 configService.atPath.mockImplementation((path) => {
@@ -69,7 +70,11 @@ configService.atPath.mockImplementation((path) => {
     } as any);
   }
   if (path === 'csp') {
-    return new BehaviorSubject({} as any);
+    return new BehaviorSubject({
+      strict: false,
+      disableEmbedding: false,
+      warnLegacyBrowsers: true,
+    });
   }
   throw new Error(`Unexpected config path: ${path}`);
 });
@@ -98,7 +103,7 @@ interface Storage {
 }
 
 function retrieveSessionCookie(cookies: string) {
-  const sessionCookie = request.cookie(cookies);
+  const sessionCookie = parseCookie(cookies);
   if (!sessionCookie) {
     throw new Error('session cookie expected to be defined');
   }
@@ -317,7 +322,7 @@ describe.skip('Cookie based SessionStorage', () => {
         },
       };
 
-      const mockRequest = httpServerMock.createRawRequest();
+      const mockRequest = httpServerMock.createKibanaRequest();
 
       const factory = await createCookieSessionStorageFactory(
         logger.get(),
@@ -328,7 +333,7 @@ describe.skip('Cookie based SessionStorage', () => {
       expect(mockServer.register).toBeCalledTimes(1);
       expect(mockServer.auth.strategy).toBeCalledTimes(1);
 
-      const session = await factory.asScoped(KibanaRequest.from(mockRequest)).get();
+      const session = await factory.asScoped(mockRequest).get();
       expect(session).toBe(null);
 
       expect(mockServer.auth.test).toBeCalledTimes(1);
@@ -348,7 +353,7 @@ describe.skip('Cookie based SessionStorage', () => {
         },
       };
 
-      const mockRequest = httpServerMock.createRawRequest();
+      const mockRequest = httpServerMock.createKibanaRequest();
 
       const factory = await createCookieSessionStorageFactory(
         logger.get(),
@@ -359,7 +364,7 @@ describe.skip('Cookie based SessionStorage', () => {
       expect(mockServer.register).toBeCalledTimes(1);
       expect(mockServer.auth.strategy).toBeCalledTimes(1);
 
-      const session = await factory.asScoped(KibanaRequest.from(mockRequest)).get();
+      const session = await factory.asScoped(mockRequest).get();
       expect(session).toBe('foo');
 
       expect(mockServer.auth.test).toBeCalledTimes(1);
@@ -377,7 +382,7 @@ describe.skip('Cookie based SessionStorage', () => {
         },
       };
 
-      const mockRequest = httpServerMock.createRawRequest();
+      const mockRequest = httpServerMock.createKibanaRequest();
 
       const factory = await createCookieSessionStorageFactory(
         logger.get(),
@@ -388,7 +393,7 @@ describe.skip('Cookie based SessionStorage', () => {
       expect(mockServer.register).toBeCalledTimes(1);
       expect(mockServer.auth.strategy).toBeCalledTimes(1);
 
-      const session = await factory.asScoped(KibanaRequest.from(mockRequest)).get();
+      const session = await factory.asScoped(mockRequest).get();
       expect(session).toBe(null);
 
       expect(loggingSystemMock.collect(logger).debug).toEqual([['Error: Invalid cookie.']]);

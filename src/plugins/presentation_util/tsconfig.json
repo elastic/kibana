@@ -1,15 +1,18 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "composite": true,
     "outDir": "./target/types",
     "emitDeclarationOnly": true,
     "declaration": true,
     "declarationMap": true
   },
+  "extraPublicDirs": [
+    "common"
+  ],
   "include": [
     "common/**/*",
     "public/**/*",
+    "public/**/*.json",
     "server/**/*",
     "storybook/**/*",
     "../../../typings/**/*"
@@ -18,5 +21,7 @@
     { "path": "../../core/tsconfig.json" },
     { "path": "../saved_objects/tsconfig.json" },
     { "path": "../kibana_react/tsconfig.json" },
+    { "path": "../embeddable/tsconfig.json" },
+    { "path": "../data/tsconfig.json" }
   ]
 }

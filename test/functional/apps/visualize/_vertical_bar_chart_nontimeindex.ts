@@ -18,6 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('vertical bar chart with index without time filter', function () {
     const vizName1 = 'Visualization VerticalBarChart without time filter';
+    let isNewChartsLibraryEnabled = false;
 
     const initBarChart = async () => {
       log.debug('navigateToApp visualize');
@@ -39,7 +40,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.visEditor.clickGo();
     };
 
-    before(initBarChart);
+    before(async () => {
+      isNewChartsLibraryEnabled = await PageObjects.visChart.isNewChartsLibraryEnabled();
+      await PageObjects.visualize.initTests(isNewChartsLibraryEnabled);
+      await initBarChart();
+    });
 
     it('should save and load', async function () {
       await PageObjects.visualize.saveVisualizationExpectSuccessAndBreadcrumb(vizName1);

@@ -79,7 +79,6 @@ interface Props<DynamicOptions> {
   fieldMetaOptions: FieldMetaOptions;
   styleName: VECTOR_STYLES;
   onChange: (updatedOptions: DynamicOptions) => void;
-  switchDisabled: boolean;
   dataMappingFunction: DATA_MAPPING_FUNCTION;
   supportedDataMappingFunctions: DATA_MAPPING_FUNCTION[];
 }
@@ -169,7 +168,6 @@ export function OrdinalDataMappingPopover<DynamicOptions>(props: Props<DynamicOp
               checked={props.fieldMetaOptions.isEnabled}
               onChange={onIsEnabledChange}
               compressed
-              disabled={props.switchDisabled}
             />{' '}
             <EuiToolTip
               content={

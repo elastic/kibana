@@ -1,0 +1,75 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`TooltipControl render should not render tooltips when there are no open tooltips 1`] = `""`;
+
+exports[`TooltipControl render should render hover tooltip 1`] = `
+<TooltipPopover
+  addFilters={[Function]}
+  closeTooltip={[Function]}
+  features={
+    Array [
+      Object {
+        "actions": Array [],
+        "id": 1,
+        "layerId": "tfi3f",
+        "mbProperties": Object {},
+      },
+    ]
+  }
+  findLayerById={[Function]}
+  index={0}
+  isLocked={false}
+  key="1"
+  loadFeatureGeometry={[Function]}
+  location={
+    Array [
+      -120,
+      30,
+    ]
+  }
+  mbMap={
+    Object {
+      "getLayer": [Function],
+      "off": [Function],
+      "on": [Function],
+      "queryRenderedFeatures": [Function],
+    }
+  }
+/>
+`;
+
+exports[`TooltipControl render should render locked tooltip 1`] = `
+<TooltipPopover
+  addFilters={[Function]}
+  closeTooltip={[Function]}
+  features={
+    Array [
+      Object {
+        "actions": Array [],
+        "id": 1,
+        "layerId": "tfi3f",
+        "mbProperties": Object {},
+      },
+    ]
+  }
+  findLayerById={[Function]}
+  index={0}
+  isLocked={true}
+  key="2"
+  loadFeatureGeometry={[Function]}
+  location={
+    Array [
+      -120,
+      30,
+    ]
+  }
+  mbMap={
+    Object {
+      "getLayer": [Function],
+      "off": [Function],
+      "on": [Function],
+      "queryRenderedFeatures": [Function],
+    }
+  }
+/>
+`;

@@ -85,9 +85,9 @@ export function resolveTestSuiteFactory(esArchiver: any, supertest: SuperTest<an
       if (!testCase.failure) {
         expect(response.body.outcome).to.eql(expectedOutcome);
         if (expectedOutcome === 'conflict' || expectedOutcome === 'aliasMatch') {
-          expect(response.body.aliasTargetId).to.eql(expectedAliasTargetId);
+          expect(response.body.alias_target_id).to.eql(expectedAliasTargetId);
         } else {
-          expect(response.body.aliasTargetId).to.eql(undefined);
+          expect(response.body.alias_target_id).to.eql(undefined);
         }
       }
     }
@@ -120,8 +120,16 @@ export function resolveTestSuiteFactory(esArchiver: any, supertest: SuperTest<an
     const { user, spaceId = SPACES.DEFAULT.spaceId, tests } = definition;
 
     describeFn(description, () => {
-      before(() => esArchiver.load('saved_objects/spaces'));
-      after(() => esArchiver.unload('saved_objects/spaces'));
+      before(() =>
+        esArchiver.load(
+          'x-pack/test/saved_object_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
+        )
+      );
+      after(() =>
+        esArchiver.unload(
+          'x-pack/test/saved_object_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
+        )
+      );
 
       for (const test of tests) {
         it(`should return ${test.responseStatusCode} ${test.title}`, async () => {

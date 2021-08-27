@@ -14,12 +14,15 @@ import {
   addPreviewLayers,
   promotePreviewLayers,
   removePreviewLayers,
+  setDrawMode,
   setFirstPreviewLayerToSelectedLayer,
+  setEditLayerToSelectedLayer,
   updateFlyout,
 } from '../../actions';
 import { MapStoreState } from '../../reducers/store';
 import { LayerDescriptor } from '../../../common/descriptor_types';
 import { hasPreviewLayers, isLoadingPreviewLayers } from '../../selectors/map_selectors';
+import { DRAW_MODE } from '../../../common';
 
 function mapStateToProps(state: MapStoreState) {
   return {
@@ -41,6 +44,10 @@ function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyActi
     closeFlyout: () => {
       dispatch(updateFlyout(FLYOUT_STATE.NONE));
       dispatch(removePreviewLayers());
+    },
+    enableEditMode: () => {
+      dispatch(setEditLayerToSelectedLayer());
+      dispatch(setDrawMode(DRAW_MODE.DRAW_SHAPES));
     },
   };
 }

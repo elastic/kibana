@@ -7,8 +7,7 @@
 
 import expect from '@kbn/expect';
 import moment from 'moment';
-import type { SuperTest } from 'supertest';
-import type supertestAsPromised from 'supertest-as-promised';
+import type SuperTest from 'supertest';
 import deepmerge from 'deepmerge';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -29,7 +28,7 @@ import { assertTelemetryPayload } from '../../../../../test/api_integration/apis
  * @param timestamp The new timestamp to be set
  */
 function updateMonitoringDates(
-  esSupertest: SuperTest<supertestAsPromised.Test>,
+  esSupertest: SuperTest.SuperTest<SuperTest.Test>,
   fromTimestamp: string,
   toTimestamp: string,
   timestamp: string
@@ -85,7 +84,7 @@ export default function ({ getService }: FtrProviderContext) {
       let localXPack: Record<string, unknown>;
       let monitoring: Array<Record<string, unknown>>;
 
-      const archive = 'monitoring/multicluster';
+      const archive = 'x-pack/test/functional/es_archives/monitoring/multicluster';
       const fromTimestamp = '2017-08-15T21:00:00.000Z';
       const toTimestamp = '2017-08-16T00:00:00.000Z';
 
@@ -134,7 +133,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('with basic cluster and reporting and canvas usage info', () => {
-      const archive = 'monitoring/basic_6.3.x';
+      const archive = 'x-pack/test/functional/es_archives/monitoring/basic_6.3.x';
       const fromTimestamp = '2018-07-23T22:54:59.087Z';
       const toTimestamp = '2018-07-23T22:55:05.933Z';
       before(async () => {

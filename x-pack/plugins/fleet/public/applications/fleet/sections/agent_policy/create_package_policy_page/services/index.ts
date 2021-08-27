@@ -15,4 +15,4 @@ export {
   validatePackagePolicyConfig,
   validationHasErrors,
   countValidationErrors,
-} from './validate_package_policy';
+} from '../../../../services';

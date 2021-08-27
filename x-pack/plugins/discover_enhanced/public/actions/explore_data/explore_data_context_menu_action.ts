@@ -12,8 +12,8 @@ import {
   IEmbeddable,
 } from '../../../../../../src/plugins/embeddable/public';
 import { Query, Filter, TimeRange } from '../../../../../../src/plugins/data/public';
-import { DiscoverUrlGeneratorState } from '../../../../../../src/plugins/discover/public';
-import { KibanaURL } from '../../../../../../src/plugins/share/public';
+import { DiscoverAppLocatorParams } from '../../../../../../src/plugins/discover/public';
+import { KibanaLocation } from '../../../../../../src/plugins/share/public';
 import * as shared from './shared';
 import { AbstractExploreDataAction } from './abstract_explore_data_action';
 
@@ -40,29 +40,31 @@ export class ExploreDataContextMenuAction
 
   public readonly order = 200;
 
-  protected readonly getUrl = async (context: EmbeddableQueryContext): Promise<KibanaURL> => {
+  protected readonly getLocation = async (
+    context: EmbeddableQueryContext
+  ): Promise<KibanaLocation> => {
     const { plugins } = this.params.start();
-    const { urlGenerator } = plugins.discover;
+    const { locator } = plugins.discover;
 
-    if (!urlGenerator) {
-      throw new Error('Discover URL generator not available.');
+    if (!locator) {
+      throw new Error('Discover URL locator not available.');
     }
 
     const { embeddable } = context;
-    const state: DiscoverUrlGeneratorState = {};
+    const params: DiscoverAppLocatorParams = {};
 
     if (embeddable) {
-      state.indexPatternId = shared.getIndexPatterns(embeddable)[0] || undefined;
+      params.indexPatternId = shared.getIndexPatterns(embeddable)[0] || undefined;
 
       const input = embeddable.getInput();
 
-      if (input.timeRange && !state.timeRange) state.timeRange = input.timeRange;
-      if (input.query) state.query = input.query;
-      if (input.filters) state.filters = [...input.filters, ...(state.filters || [])];
+      if (input.timeRange && !params.timeRange) params.timeRange = input.timeRange;
+      if (input.query) params.query = input.query;
+      if (input.filters) params.filters = [...input.filters, ...(params.filters || [])];
     }
 
-    const path = await urlGenerator.createUrl(state);
+    const location = await locator.getLocation(params);
 
-    return new KibanaURL(path);
+    return location;
   };
 }

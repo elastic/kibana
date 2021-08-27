@@ -17,7 +17,7 @@ remote sources, without a live user interaction.
 To manage API keys, open the main menu, then click *Stack Management > API Keys*.
 
 [role="screenshot"]
-image:user/security/api-keys/images/api-keys.png["API Keys UI"]
+image:images/api-keys.png["API Keys UI"]
 
 [float]
 [[api-keys-service]]
@@ -49,7 +49,7 @@ cluster privileges to use API keys in {kib}. To manage roles, open the main menu
 To create an API key, open the main menu, then click *Stack Management > API Keys > Create API key*.
 
 [role="screenshot"]
-image:user/security/api-keys/images/create-api-key.png["Create API Key UI"]
+image:images/create-api-key.png["Create API Key UI"]
 
 Once created, you can copy the API key (Base64 encoded) and use it to send requests to {es} on your behalf. For example:
 

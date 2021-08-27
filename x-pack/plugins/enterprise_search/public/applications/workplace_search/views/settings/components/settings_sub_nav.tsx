@@ -5,22 +5,40 @@
  * 2.0.
  */
 
-import React from 'react';
+import { useRouteMatch } from 'react-router-dom';
 
-import { SideNavLink } from '../../../../shared/layout';
+import { EuiSideNavItemType } from '@elastic/eui';
+
+import { generateNavLink } from '../../../../shared/layout';
 import { NAV } from '../../../constants';
 import {
+  ORG_SETTINGS_PATH,
   ORG_SETTINGS_CUSTOMIZE_PATH,
   ORG_SETTINGS_CONNECTORS_PATH,
   ORG_SETTINGS_OAUTH_APPLICATION_PATH,
 } from '../../../routes';
 
-export const SettingsSubNav: React.FC = () => (
-  <>
-    <SideNavLink to={ORG_SETTINGS_CUSTOMIZE_PATH}>{NAV.SETTINGS_CUSTOMIZE}</SideNavLink>
-    <SideNavLink to={ORG_SETTINGS_CONNECTORS_PATH}>
-      {NAV.SETTINGS_SOURCE_PRIORITIZATION}
-    </SideNavLink>
-    <SideNavLink to={ORG_SETTINGS_OAUTH_APPLICATION_PATH}>{NAV.SETTINGS_OAUTH}</SideNavLink>
-  </>
-);
+export const useSettingsSubNav = () => {
+  const isSettingsPage = !!useRouteMatch(ORG_SETTINGS_PATH);
+  if (!isSettingsPage) return undefined;
+
+  const navItems: Array<EuiSideNavItemType<unknown>> = [
+    {
+      id: 'settingsCustomize',
+      name: NAV.SETTINGS_CUSTOMIZE,
+      ...generateNavLink({ to: ORG_SETTINGS_CUSTOMIZE_PATH }),
+    },
+    {
+      id: 'settingsConnectors',
+      name: NAV.SETTINGS_SOURCE_PRIORITIZATION,
+      ...generateNavLink({ to: ORG_SETTINGS_CONNECTORS_PATH, shouldShowActiveForSubroutes: true }),
+    },
+    {
+      id: 'settingsOAuth',
+      name: NAV.SETTINGS_OAUTH,
+      ...generateNavLink({ to: ORG_SETTINGS_OAUTH_APPLICATION_PATH }),
+    },
+  ];
+
+  return navItems;
+};

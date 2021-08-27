@@ -9,7 +9,6 @@ import { ajaxErrorHandlersProvider } from '../lib/ajax_error_handler';
 import { Legacy } from '../legacy_shims';
 import { STANDALONE_CLUSTER_CLUSTER_UUID } from '../../common/constants';
 import { showInternalMonitoringToast } from '../lib/internal_monitoring_toasts';
-import { showAlertsToast } from '../alerts/lib/alerts_toast';
 
 function formatClusters(clusters) {
   return clusters.map(formatCluster);
@@ -58,16 +57,6 @@ export function monitoringClustersProvider($injector) {
       }
     }
 
-    async function ensureAlertsEnabled() {
-      try {
-        return $http.post('../api/monitoring/v1/alerts/enable', {});
-      } catch (err) {
-        const Private = $injector.get('Private');
-        const ajaxErrorHandlers = Private(ajaxErrorHandlersProvider);
-        return ajaxErrorHandlers(err);
-      }
-    }
-
     async function ensureMetricbeatEnabled() {
       if (Legacy.shims.isCloud) {
         return;
@@ -97,8 +86,7 @@ export function monitoringClustersProvider($injector) {
       const clusters = await getClusters();
       if (clusters.length) {
         try {
-          const [{ data }] = await Promise.all([ensureAlertsEnabled(), ensureMetricbeatEnabled()]);
-          showAlertsToast(data);
+          await ensureMetricbeatEnabled();
         } catch (_err) {
           // Intentionally swallow the error as this will retry the next page load
         }

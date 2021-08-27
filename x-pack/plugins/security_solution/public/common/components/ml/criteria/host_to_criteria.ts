@@ -9,6 +9,9 @@ import { HostItem } from '../../../../../common/search_strategy/security_solutio
 import { CriteriaFields } from '../types';
 
 export const hostToCriteria = (hostItem: HostItem): CriteriaFields[] => {
+  if (hostItem == null) {
+    return [];
+  }
   if (hostItem.host != null && hostItem.host.name != null) {
     const criteria: CriteriaFields[] = [
       {

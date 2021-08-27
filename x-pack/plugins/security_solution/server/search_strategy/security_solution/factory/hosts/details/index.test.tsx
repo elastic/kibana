@@ -12,6 +12,30 @@ import {
   mockSearchStrategyResponse,
   formattedSearchStrategyResponse,
 } from './__mocks__';
+import {
+  IScopedClusterClient,
+  SavedObjectsClientContract,
+} from '../../../../../../../../../src/core/server';
+import { EndpointAppContext } from '../../../../../endpoint/types';
+import { EndpointAppContextService } from '../../../../../endpoint/endpoint_app_context_services';
+import { allowedExperimentalValues } from '../../../../../../common/experimental_features';
+
+const mockDeps = {
+  esClient: {} as IScopedClusterClient,
+  savedObjectsClient: {} as SavedObjectsClientContract,
+  endpointContext: {
+    logFactory: {
+      get: jest.fn().mockReturnValue({
+        warn: jest.fn(),
+      }),
+    },
+    config: jest.fn().mockResolvedValue({}),
+    experimentalFeatures: {
+      ...allowedExperimentalValues,
+    },
+    service: {} as EndpointAppContextService,
+  } as EndpointAppContext,
+};
 
 describe('hostDetails search strategy', () => {
   const buildHostDetailsQuery = jest.spyOn(buildQuery, 'buildHostDetailsQuery');
@@ -29,7 +53,7 @@ describe('hostDetails search strategy', () => {
 
   describe('parse', () => {
     test('should parse data correctly', async () => {
-      const result = await hostDetails.parse(mockOptions, mockSearchStrategyResponse);
+      const result = await hostDetails.parse(mockOptions, mockSearchStrategyResponse, mockDeps);
       expect(result).toMatchObject(formattedSearchStrategyResponse);
     });
   });

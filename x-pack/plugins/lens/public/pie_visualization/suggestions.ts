@@ -7,8 +7,9 @@
 
 import { partition } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { SuggestionRequest, VisualizationSuggestion } from '../types';
-import { PieVisualizationState } from './types';
+import type { SuggestionRequest, VisualizationSuggestion } from '../types';
+import { layerTypes } from '../../common';
+import type { PieVisualizationState } from '../../common/expressions';
 import { CHART_NAMES, MAX_PIE_BUCKETS, MAX_TREEMAP_BUCKETS } from './constants';
 
 function shouldReject({ table, keptLayerIds }: SuggestionRequest<PieVisualizationState>) {
@@ -51,9 +52,10 @@ export function suggestions({
 
   const results: Array<VisualizationSuggestion<PieVisualizationState>> = [];
 
-  if (groups.length <= MAX_PIE_BUCKETS) {
-    let newShape: PieVisualizationState['shape'] = 'donut';
-    if (groups.length !== 1) {
+  if (groups.length <= MAX_PIE_BUCKETS && subVisualizationId !== 'treemap') {
+    let newShape: PieVisualizationState['shape'] =
+      (subVisualizationId as PieVisualizationState['shape']) || 'donut';
+    if (groups.length !== 1 && !subVisualizationId) {
       newShape = 'pie';
     }
 
@@ -74,6 +76,7 @@ export function suggestions({
                 layerId: table.layerId,
                 groups: groups.map((col) => col.columnId),
                 metric: metricColumnId,
+                layerType: layerTypes.DATA,
               }
             : {
                 layerId: table.layerId,
@@ -83,6 +86,7 @@ export function suggestions({
                 categoryDisplay: 'default',
                 legendDisplay: 'default',
                 nestedLegend: false,
+                layerType: layerTypes.DATA,
               },
         ],
       },
@@ -108,7 +112,10 @@ export function suggestions({
     });
   }
 
-  if (groups.length <= MAX_TREEMAP_BUCKETS) {
+  if (
+    groups.length <= MAX_TREEMAP_BUCKETS &&
+    (!subVisualizationId || subVisualizationId === 'treemap')
+  ) {
     results.push({
       title: i18n.translate('xpack.lens.pie.treemapSuggestionLabel', {
         defaultMessage: 'As Treemap',
@@ -130,6 +137,7 @@ export function suggestions({
                   state.layers[0].categoryDisplay === 'inside'
                     ? 'default'
                     : state.layers[0].categoryDisplay,
+                layerType: layerTypes.DATA,
               }
             : {
                 layerId: table.layerId,
@@ -139,6 +147,7 @@ export function suggestions({
                 categoryDisplay: 'default',
                 legendDisplay: 'default',
                 nestedLegend: false,
+                layerType: layerTypes.DATA,
               },
         ],
       },
@@ -149,7 +158,11 @@ export function suggestions({
   }
 
   return [...results]
-    .sort((a, b) => a.score - b.score)
+    .map((suggestion) => ({
+      ...suggestion,
+      score: suggestion.score + 0.05 * groups.length,
+    }))
+    .sort((a, b) => b.score - a.score)
     .map((suggestion) => ({
       ...suggestion,
       hide: incompleteConfiguration || suggestion.hide,

@@ -9,7 +9,6 @@ import { APP_WRAPPER_CLASS } from '../../../../../../src/core/server';
 export const DEFAULT_PAGELOAD_SELECTOR = `.${APP_WRAPPER_CLASS}`;
 
 export const CONTEXT_GETNUMBEROFITEMS = 'GetNumberOfItems';
-export const CONTEXT_GETBROWSERDIMENSIONS = 'GetBrowserDimensions';
 export const CONTEXT_INJECTCSS = 'InjectCss';
 export const CONTEXT_WAITFORRENDER = 'WaitForRender';
 export const CONTEXT_GETTIMERANGE = 'GetTimeRange';

@@ -5,32 +5,24 @@
  * 2.0.
  */
 
-import React, { Component, Fragment } from 'react';
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
   EuiButton,
+  EuiButtonEmpty,
   EuiEmptyPrompt,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiLoadingKibana,
-  EuiLoadingSpinner,
   EuiOverlayMask,
-  EuiPageBody,
   EuiPageContent,
-  EuiPageContentHeader,
-  EuiPageContentHeaderSection,
   EuiSpacer,
-  EuiText,
-  EuiTextColor,
-  EuiTitle,
-  EuiCallOut,
+  EuiPageHeader,
 } from '@elastic/eui';
 
+import { remoteClustersUrl } from '../../services/documentation';
 import { reactRouterNavigate } from '../../../../../../../src/plugins/kibana_react/public';
-import { extractQueryParams } from '../../../shared_imports';
+import { extractQueryParams, SectionLoading } from '../../../shared_imports';
 import { setBreadcrumbs } from '../../services/breadcrumb';
 
 import { RemoteClusterTable } from './remote_cluster_table';
@@ -82,41 +74,6 @@ export class RemoteClusterList extends Component {
     clearInterval(this.interval);
   }
 
-  getHeaderSection(isAuthorized) {
-    return (
-      <Fragment>
-        <EuiPageContentHeader>
-          <EuiPageContentHeaderSection>
-            <EuiTitle size="l">
-              <h1>
-                <FormattedMessage
-                  id="xpack.remoteClusters.remoteClusterListTitle"
-                  defaultMessage="Remote Clusters"
-                />
-              </h1>
-            </EuiTitle>
-          </EuiPageContentHeaderSection>
-
-          {isAuthorized && (
-            <EuiPageContentHeaderSection>
-              <EuiButton
-                {...reactRouterNavigate(this.props.history, '/add')}
-                fill
-                data-test-subj="remoteClusterCreateButton"
-              >
-                <FormattedMessage
-                  id="xpack.remoteClusters.remoteClusterList.connectButtonLabel"
-                  defaultMessage="Add a remote cluster"
-                />
-              </EuiButton>
-            </EuiPageContentHeaderSection>
-          )}
-        </EuiPageContentHeader>
-        <EuiSpacer size="m" />
-      </Fragment>
-    );
-  }
-
   renderBlockingAction() {
     const { isCopyingCluster, isRemovingCluster } = this.props;
 
@@ -132,16 +89,28 @@ export class RemoteClusterList extends Component {
   }
 
   renderNoPermission() {
-    const title = i18n.translate('xpack.remoteClusters.remoteClusterList.noPermissionTitle', {
-      defaultMessage: 'Permission error',
-    });
     return (
-      <EuiCallOut title={title} color="warning" iconType="help">
-        <FormattedMessage
-          id="xpack.remoteClusters.remoteClusterList.noPermissionText"
-          defaultMessage="You do not have permission to view or add remote clusters."
+      <EuiPageContent verticalPosition="center" horizontalPosition="center" color="danger">
+        <EuiEmptyPrompt
+          iconType="alert"
+          title={
+            <h2>
+              <FormattedMessage
+                id="xpack.remoteClusters.remoteClusterList.noPermissionTitle"
+                defaultMessage="Permission error"
+              />
+            </h2>
+          }
+          body={
+            <p>
+              <FormattedMessage
+                id="xpack.remoteClusters.remoteClusterList.noPermissionText"
+                defaultMessage="You do not have permission to view or add remote clusters."
+              />
+            </p>
+          }
         />
-      </EuiCallOut>
+      </EuiPageContent>
     );
   }
 
@@ -150,80 +119,84 @@ export class RemoteClusterList extends Component {
     // handle unexpected error shapes in the API action.
     const { statusCode, error: errorString } = error.body;
 
-    const title = i18n.translate('xpack.remoteClusters.remoteClusterList.loadingErrorTitle', {
-      defaultMessage: 'Error loading remote clusters',
-    });
     return (
-      <EuiCallOut title={title} color="danger" iconType="alert">
-        {statusCode} {errorString}
-      </EuiCallOut>
+      <EuiPageContent verticalPosition="center" horizontalPosition="center" color="danger">
+        <EuiEmptyPrompt
+          iconType="alert"
+          title={
+            <h2>
+              <FormattedMessage
+                id="xpack.remoteClusters.remoteClusterList.loadingErrorTitle"
+                defaultMessage="Error loading remote clusters"
+              />
+            </h2>
+          }
+          body={
+            <p>
+              {statusCode} {errorString}
+            </p>
+          }
+        />
+      </EuiPageContent>
     );
   }
 
   renderEmpty() {
     return (
-      <EuiEmptyPrompt
-        data-test-subj="remoteClusterListEmptyPrompt"
-        iconType="managementApp"
-        title={
-          <h1>
-            <FormattedMessage
-              id="xpack.remoteClusters.remoteClusterList.emptyPromptTitle"
-              defaultMessage="Add your first remote cluster"
-            />
-          </h1>
-        }
-        body={
-          <Fragment>
+      <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
+        <EuiEmptyPrompt
+          data-test-subj="remoteClusterListEmptyPrompt"
+          iconType="managementApp"
+          title={
+            <h2>
+              <FormattedMessage
+                id="xpack.remoteClusters.remoteClusterList.emptyPromptTitle"
+                defaultMessage="Add your first remote cluster"
+              />
+            </h2>
+          }
+          body={
             <p>
               <FormattedMessage
                 id="xpack.remoteClusters.remoteClusterList.emptyPromptDescription"
                 defaultMessage="Remote clusters create a uni-directional connection from your
-                  local cluster to other clusters."
+                local cluster to other clusters."
               />
             </p>
-          </Fragment>
-        }
-        actions={
-          <EuiButton
-            {...reactRouterNavigate(this.props.history, '/add')}
-            fill
-            iconType="plusInCircle"
-            data-test-subj="remoteClusterEmptyPromptCreateButton"
-          >
-            <FormattedMessage
-              id="xpack.remoteClusters.remoteClusterList.emptyPrompt.connectButtonLabel"
-              defaultMessage="Add a remote cluster"
-            />
-          </EuiButton>
-        }
-      />
+          }
+          actions={
+            <EuiButton
+              {...reactRouterNavigate(this.props.history, '/add')}
+              fill
+              iconType="plusInCircle"
+              data-test-subj="remoteClusterEmptyPromptCreateButton"
+            >
+              <FormattedMessage
+                id="xpack.remoteClusters.remoteClusterList.emptyPrompt.connectButtonLabel"
+                defaultMessage="Add a remote cluster"
+              />
+            </EuiButton>
+          }
+        />
+      </EuiPageContent>
     );
   }
 
   renderLoading() {
     return (
-      <EuiFlexGroup
-        justifyContent="flexStart"
-        alignItems="center"
-        gutterSize="s"
+      <EuiPageContent
+        verticalPosition="center"
+        horizontalPosition="center"
+        color="subdued"
         data-test-subj="remoteClustersTableLoading"
       >
-        <EuiFlexItem grow={false}>
-          <EuiLoadingSpinner size="m" />
-        </EuiFlexItem>
-
-        <EuiFlexItem grow={false}>
-          <EuiText>
-            <EuiTextColor color="subdued">
-              <FormattedMessage
-                id="xpack.remoteClusters.remoteClusterList.loadingTitle"
-                defaultMessage="Loading remote clusters..."
-              />
-            </EuiTextColor>
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+        <SectionLoading>
+          <FormattedMessage
+            id="xpack.remoteClusters.remoteClusterList.loadingTitle"
+            defaultMessage="Loading remote clusters…"
+          />
+        </SectionLoading>
+      </EuiPageContent>
     );
   }
 
@@ -231,10 +204,35 @@ export class RemoteClusterList extends Component {
     const { clusters } = this.props;
 
     return (
-      <Fragment>
+      <>
+        <EuiPageHeader
+          bottomBorder
+          pageTitle={
+            <FormattedMessage
+              id="xpack.remoteClusters.remoteClusterListTitle"
+              defaultMessage="Remote Clusters"
+            />
+          }
+          rightSideItems={[
+            <EuiButtonEmpty
+              href={remoteClustersUrl}
+              target="_blank"
+              iconType="help"
+              data-test-subj="documentationLink"
+            >
+              <FormattedMessage
+                id="xpack.remoteClusters.remoteClustersDocsLinkText"
+                defaultMessage="Remote Clusters docs"
+              />
+            </EuiButtonEmpty>,
+          ]}
+        />
+
+        <EuiSpacer size="l" />
+
         <RemoteClusterTable clusters={clusters} />
         <DetailPanel />
-      </Fragment>
+      </>
     );
   }
 
@@ -242,7 +240,6 @@ export class RemoteClusterList extends Component {
     const { isLoading, clusters, clusterLoadError } = this.props;
     const isEmpty = !isLoading && !clusters.length;
     const isAuthorized = !clusterLoadError || clusterLoadError.status !== 403;
-    const isHeaderVisible = clusterLoadError || !isEmpty;
 
     let content;
 
@@ -261,13 +258,10 @@ export class RemoteClusterList extends Component {
     }
 
     return (
-      <EuiPageBody>
-        <EuiPageContent>
-          {isHeaderVisible && this.getHeaderSection(isAuthorized)}
-          {content}
-          {this.renderBlockingAction()}
-        </EuiPageContent>
-      </EuiPageBody>
+      <>
+        {content}
+        {this.renderBlockingAction()}
+      </>
     );
   }
 }

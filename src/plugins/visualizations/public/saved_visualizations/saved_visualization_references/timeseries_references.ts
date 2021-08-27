@@ -8,12 +8,10 @@
 
 import { SavedObjectReference } from '../../../../../core/types';
 import { VisParams } from '../../../common';
+import { INDEX_PATTERN_SAVED_OBJECT_TYPE } from '../../../../data/public';
 
 /** @internal **/
 const REF_NAME_POSTFIX = '_ref_name';
-
-/** @internal **/
-const INDEX_PATTERN_REF_TYPE = 'index_pattern';
 
 /** @internal **/
 type Action = (object: Record<string, any>, key: string) => void;
@@ -51,7 +49,7 @@ export const extractTimeSeriesReferences = (
         object[key + REF_NAME_POSTFIX] = name;
         references.push({
           name,
-          type: INDEX_PATTERN_REF_TYPE,
+          type: INDEX_PATTERN_SAVED_OBJECT_TYPE,
           id: object[key].id,
         });
         delete object[key];

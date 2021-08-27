@@ -94,7 +94,7 @@ export async function getJSErrors({
 
   const { apmEventClient } = setup;
 
-  const response = await apmEventClient.search(params);
+  const response = await apmEventClient.search('get_js_errors', params);
 
   const { totalErrorGroups, totalErrorPages, errors } =
     response.aggregations ?? {};

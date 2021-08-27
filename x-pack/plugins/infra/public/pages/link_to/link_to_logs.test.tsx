@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { render } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import React from 'react';
 import { Route, Router, Switch } from 'react-router-dom';
 import { httpServiceMock } from 'src/core/public/mocks';
-import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
+import { KibanaContextProvider, KibanaPageTemplate } from 'src/plugins/kibana_react/public';
 import { useLogSource } from '../../containers/logs/log_source';
 import {
   createLoadedUseLogSourceMock,
@@ -27,6 +27,11 @@ const renderRoutes = (routes: React.ReactElement) => {
     http: httpServiceMock.createStartContract(),
     data: {
       indexPatterns: {},
+    },
+    observability: {
+      navigation: {
+        PageTemplate: KibanaPageTemplate,
+      },
     },
   };
   const renderResult = render(
@@ -193,7 +198,7 @@ describe('LinkToLogsPage component', () => {
       expect(searchParams.get('logPosition')).toEqual(null);
     });
 
-    it('renders a loading page while loading the source configuration', () => {
+    it('renders a loading page while loading the source configuration', async () => {
       useLogSourceMock.mockImplementation(createLoadingUseLogSourceMock());
 
       const { history, queryByTestId } = renderRoutes(
@@ -203,8 +208,9 @@ describe('LinkToLogsPage component', () => {
       );
 
       history.push('/link-to/host-logs/HOST_NAME');
-
-      expect(queryByTestId('nodeLoadingPage-host')).not.toBeEmpty();
+      await waitFor(() => {
+        expect(queryByTestId('nodeLoadingPage-host')).not.toBeEmpty();
+      });
     });
   });
 

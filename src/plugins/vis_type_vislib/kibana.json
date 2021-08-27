@@ -1,8 +1,0 @@
-{
-  "id": "visTypeVislib",
-  "version": "kibana",
-  "server": true,
-  "ui": true,
-  "requiredPlugins": ["charts", "data", "expressions", "visualizations", "kibanaLegacy"],
-  "requiredBundles": ["kibanaUtils", "visDefaultEditor", "visTypeXy"]
-}

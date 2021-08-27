@@ -8,7 +8,7 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { EuiIcon, EuiLink, EuiText } from '@elastic/eui';
+import { EuiLink, EuiText } from '@elastic/eui';
 
 const bodyDocsLink =
   'https://www.elastic.co/guide/en/beats/heartbeat/current/configuration-heartbeat-options.html#monitor-http-response';
@@ -20,8 +20,6 @@ export const DocLinkForBody = () => {
         defaultMessage: 'docs',
         description: 'Docs link to set response body',
       })}
-      &nbsp;
-      <EuiIcon size="s" type="popout" />
     </EuiLink>
   );
 

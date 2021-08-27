@@ -20,8 +20,10 @@ import { ChangeIndexPattern } from './change_indexpattern';
 import { EuiProgress, EuiLoadingSpinner } from '@elastic/eui';
 import { documentField } from './document_field';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
+import { fieldFormatsServiceMock } from '../../../../../src/plugins/field_formats/public/mocks';
 import { indexPatternFieldEditorPluginMock } from '../../../../../src/plugins/index_pattern_field_editor/public/mocks';
 import { getFieldByNameFactory } from './pure_helpers';
+import { uiActionsPluginMock } from '../../../../../src/plugins/ui_actions/public/mocks';
 
 const fieldsOne = [
   {
@@ -236,7 +238,7 @@ const initialState: IndexPatternPrivateState = {
   isFirstExistenceFetch: false,
 };
 
-const dslQuery = { bool: { must: [{ match_all: {} }], filter: [], should: [], must_not: [] } };
+const dslQuery = { bool: { must: [], filter: [], should: [], must_not: [] } };
 
 describe('IndexPattern Data Panel', () => {
   let defaultProps: Parameters<typeof InnerIndexPatternDataPanel>[0] & {
@@ -250,6 +252,7 @@ describe('IndexPattern Data Panel', () => {
       indexPatternRefs: [],
       existingFields: {},
       data: dataPluginMock.createStartContract(),
+      fieldFormats: fieldFormatsServiceMock.createStartContract(),
       indexPatternFieldEditor: indexPatternFieldEditorPluginMock.createStartContract(),
       onUpdateIndexPattern: jest.fn(),
       dragDropContext: createMockedDragDropContext(),
@@ -267,6 +270,7 @@ describe('IndexPattern Data Panel', () => {
       showNoDataPopover: jest.fn(),
       dropOntoWorkspace: jest.fn(),
       hasSuggestionForField: jest.fn(() => false),
+      uiActions: uiActionsPluginMock.createStartContract(),
     };
   });
 

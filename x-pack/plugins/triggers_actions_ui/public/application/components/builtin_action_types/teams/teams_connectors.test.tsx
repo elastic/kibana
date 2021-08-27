@@ -84,4 +84,27 @@ describe('TeamsActionFields renders', () => {
     expect(wrapper.find('[data-test-subj="reenterValuesMessage"]').length).toBeGreaterThan(0);
     expect(wrapper.find('[data-test-subj="rememberValuesMessage"]').length).toEqual(0);
   });
+
+  test('should display a message for missing secrets after import', () => {
+    const actionConnector = {
+      secrets: {
+        webhookUrl: 'http:\\test',
+      },
+      id: 'test',
+      actionTypeId: '.teams',
+      isMissingSecrets: true,
+      name: 'teams',
+      config: {},
+    } as TeamsActionConnector;
+    const wrapper = mountWithIntl(
+      <TeamsActionFields
+        action={actionConnector}
+        errors={{ index: [], webhookUrl: [] }}
+        editActionConfig={() => {}}
+        editActionSecrets={() => {}}
+        readOnly={false}
+      />
+    );
+    expect(wrapper.find('[data-test-subj="missingSecretsMessage"]').length).toBeGreaterThan(0);
+  });
 });

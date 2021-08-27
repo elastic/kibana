@@ -79,6 +79,7 @@ describe('RollingFileAppender', () => {
           pattern: '.%i',
         },
       });
+      await root.preboot();
       await root.setup();
 
       const logger = root.logger.get('test.rolling.file');
@@ -124,6 +125,7 @@ describe('RollingFileAppender', () => {
           pattern: '-%i',
         },
       });
+      await root.preboot();
       await root.setup();
 
       const logger = root.logger.get('test.rolling.file');
@@ -174,6 +176,7 @@ describe('RollingFileAppender', () => {
           pattern: '-%i',
         },
       });
+      await root.preboot();
       await root.setup();
 
       const logger = root.logger.get('test.rolling.file');

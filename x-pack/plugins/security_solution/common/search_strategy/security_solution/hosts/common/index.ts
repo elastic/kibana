@@ -8,6 +8,7 @@
 import { CloudEcs } from '../../../../ecs/cloud';
 import { HostEcs, OsEcs } from '../../../../ecs/host';
 import { Hit, Hits, Maybe, SearchHit, StringOrNumber, TotalValue } from '../../../common';
+import { EndpointPendingActions, HostStatus } from '../../../../endpoint/types';
 
 export enum HostPolicyResponseActionStatus {
   success = 'success',
@@ -25,10 +26,21 @@ export interface EndpointFields {
   endpointPolicy?: Maybe<string>;
   sensorVersion?: Maybe<string>;
   policyStatus?: Maybe<HostPolicyResponseActionStatus>;
+  /** if the host is currently isolated */
+  isolation?: Maybe<boolean>;
+  /** A count of pending endpoint actions against the host */
+  pendingActions?: Maybe<EndpointPendingActions['pending_actions']>;
+  elasticAgentStatus?: Maybe<HostStatus>;
+  id?: Maybe<string>;
+}
+
+interface AgentFields {
+  id?: Maybe<string>;
 }
 
 export interface HostItem {
   _id?: Maybe<string>;
+  agent?: Maybe<AgentFields>;
   cloud?: Maybe<CloudEcs>;
   endpoint?: Maybe<EndpointFields>;
   host?: Maybe<HostEcs>;
@@ -70,6 +82,9 @@ export interface HostAggEsItem {
   cloud_machine_type?: HostBuckets;
   cloud_provider?: HostBuckets;
   cloud_region?: HostBuckets;
+  endpoint?: {
+    id: HostBuckets;
+  };
   host_architecture?: HostBuckets;
   host_id?: HostBuckets;
   host_ip?: HostBuckets;

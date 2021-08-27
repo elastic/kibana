@@ -51,7 +51,7 @@ export async function getVisitorBreakdown({
 
   const { apmEventClient } = setup;
 
-  const response = await apmEventClient.search(params);
+  const response = await apmEventClient.search('get_visitor_breakdown', params);
   const { browsers, os } = response.aggregations!;
 
   const totalItems = response.hits.total.value;

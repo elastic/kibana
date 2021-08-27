@@ -31,8 +31,8 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
   describe('metrics', () => {
-    before(() => esArchiver.load('infra/7.0.0/hosts'));
-    after(() => esArchiver.unload('infra/7.0.0/hosts'));
+    before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/7.0.0/hosts'));
+    after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/7.0.0/hosts'));
 
     const fetchNodeDetails = async (
       body: NodeDetailsRequest

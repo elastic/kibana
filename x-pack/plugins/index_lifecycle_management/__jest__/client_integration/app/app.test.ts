@@ -5,15 +5,17 @@
  * 2.0.
  */
 
+import { act } from 'react-dom/test-utils';
+
+import { getDefaultHotPhasePolicy } from '../edit_policy/constants';
+import { setupEnvironment } from '../helpers';
+
 import {
   AppTestBed,
   getDoubleEncodedPolicyEditPath,
   getEncodedPolicyEditPath,
   setup,
 } from './app.helpers';
-import { setupEnvironment } from '../helpers/setup_environment';
-import { getDefaultHotPhasePolicy, POLICY_NAME } from '../edit_policy/constants';
-import { act } from 'react-dom/test-utils';
 
 const SPECIAL_CHARS_NAME = 'test?#$+=&@:';
 const PERCENT_SIGN_NAME = 'test%';
@@ -61,7 +63,7 @@ describe('<App />', () => {
     });
 
     test('when there are policies', async () => {
-      httpRequestsMockHelpers.setLoadPolicies([getDefaultHotPhasePolicy(POLICY_NAME)]);
+      httpRequestsMockHelpers.setLoadPolicies([getDefaultHotPhasePolicy()]);
       await act(async () => {
         testBed = await setup(['/']);
       });

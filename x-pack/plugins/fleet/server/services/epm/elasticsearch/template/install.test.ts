@@ -142,6 +142,7 @@ describe('EPM install', () => {
 
   it('tests installPackage remove the aliases property if the property existed', async () => {
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    // @ts-expect-error not full interface
     esClient.indices.getIndexTemplate.mockImplementation(() =>
       elasticsearchServiceMock.createSuccessTransportRequestPromise({
         index_templates: [

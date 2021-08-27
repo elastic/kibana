@@ -11,7 +11,6 @@ import type { TypeOf } from '@kbn/config-schema';
 import type {
   GetAgentsResponse,
   GetOneAgentResponse,
-  GetOneAgentEventsResponse,
   GetAgentStatusResponse,
   PutAgentReassignResponse,
   PostBulkAgentReassignResponse,
@@ -21,7 +20,6 @@ import type {
   GetOneAgentRequestSchema,
   UpdateAgentRequestSchema,
   DeleteAgentRequestSchema,
-  GetOneAgentEventsRequestSchema,
   GetAgentStatusRequestSchema,
   PutAgentReassignRequestSchema,
   PostBulkAgentReassignRequestSchema,
@@ -37,12 +35,8 @@ export const getAgentHandler: RequestHandler<
   const esClient = context.core.elasticsearch.client.asCurrentUser;
 
   try {
-    const agent = await AgentService.getAgentById(esClient, request.params.agentId);
     const body: GetOneAgentResponse = {
-      item: {
-        ...agent,
-        status: AgentService.getAgentStatus(agent),
-      },
+      item: await AgentService.getAgentById(esClient, request.params.agentId),
     };
 
     return response.ok({ body });
@@ -53,39 +47,6 @@ export const getAgentHandler: RequestHandler<
       });
     }
 
-    return defaultIngestErrorHandler({ error, response });
-  }
-};
-
-export const getAgentEventsHandler: RequestHandler<
-  TypeOf<typeof GetOneAgentEventsRequestSchema.params>,
-  TypeOf<typeof GetOneAgentEventsRequestSchema.query>
-> = async (context, request, response) => {
-  const soClient = context.core.savedObjects.client;
-  try {
-    const { page, perPage, kuery } = request.query;
-    const { items, total } = await AgentService.getAgentEvents(soClient, request.params.agentId, {
-      page,
-      perPage,
-      kuery,
-    });
-
-    const body: GetOneAgentEventsResponse = {
-      list: items,
-      total,
-      page,
-      perPage,
-    };
-
-    return response.ok({
-      body,
-    });
-  } catch (error) {
-    if (error.isBoom && error.output.statusCode === 404) {
-      return response.notFound({
-        body: { message: `Agent ${request.params.agentId} not found` },
-      });
-    }
     return defaultIngestErrorHandler({ error, response });
   }
 };
@@ -126,12 +87,8 @@ export const updateAgentHandler: RequestHandler<
     await AgentService.updateAgent(esClient, request.params.agentId, {
       user_provided_metadata: request.body.user_provided_metadata,
     });
-    const agent = await AgentService.getAgentById(esClient, request.params.agentId);
     const body = {
-      item: {
-        ...agent,
-        status: AgentService.getAgentStatus(agent),
-      },
+      item: await AgentService.getAgentById(esClient, request.params.agentId),
     };
 
     return response.ok({ body });
@@ -167,10 +124,7 @@ export const getAgentsHandler: RequestHandler<
       : 0;
 
     const body: GetAgentsResponse = {
-      list: agents.map((agent) => ({
-        ...agent,
-        status: AgentService.getAgentStatus(agent),
-      })),
+      list: agents,
       total,
       totalInactive,
       page,
@@ -248,13 +202,11 @@ export const getAgentStatusForAgentPolicyHandler: RequestHandler<
   undefined,
   TypeOf<typeof GetAgentStatusRequestSchema.query>
 > = async (context, request, response) => {
-  const soClient = context.core.savedObjects.client;
   const esClient = context.core.elasticsearch.client.asCurrentUser;
 
   try {
     // TODO change path
     const results = await AgentService.getAgentStatusForAgentPolicy(
-      soClient,
       esClient,
       request.query.policyId,
       request.query.kuery

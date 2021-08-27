@@ -51,3 +51,6 @@ export const TYPE_STRING = '`string`';
 export const URL = 'URL';
 export const UTC = 'UTC';
 export const ZIP = 'ZIP';
+export const IMAGE_MODE_CONTAIN = 'contain';
+export const IMAGE_MODE_COVER = 'cover';
+export const IMAGE_MODE_STRETCH = 'stretch';

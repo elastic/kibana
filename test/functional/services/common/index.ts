@@ -9,6 +9,6 @@
 export { BrowserProvider, Browser } from './browser';
 export { FailureDebuggingProvider } from './failure_debugging';
 export { FindProvider } from './find';
-export { ScreenshotsProvider } from './screenshots';
-export { SnapshotsProvider } from './snapshots';
-export { TestSubjectsProvider, TestSubjects } from './test_subjects';
+export { ScreenshotsService } from './screenshots';
+export { SnapshotsService } from './snapshots';
+export { TestSubjects } from './test_subjects';

@@ -14,6 +14,7 @@ export {
   NotAuthorizedSection,
   Privileges,
   SectionError,
+  PageError,
   useAuthorizationContext,
   WithPrivileges,
 } from '../../__packages_do_not_import__/authorization';

@@ -1,0 +1,13 @@
+{
+  "id": "telemetryTestPlugin",
+  "owner": {
+    "name": "Core",
+    "githubTeam": "kibana-core"
+  },
+  "version": "0.0.1",
+  "kibanaVersion": "kibana",
+  "configPath": ["telemetryTestPlugin"],
+  "requiredPlugins": ["telemetry"],
+  "server": false,
+  "ui": true
+}

@@ -19,6 +19,7 @@ import {
 export const mockOptions: NetworkTopNFlowRequestOptions = {
   defaultIndex: [
     'apm-*-transaction*',
+    'traces-apm*',
     'auditbeat-*',
     'endgame-*',
     'filebeat-*',
@@ -812,6 +813,7 @@ export const formattedSearchStrategyResponse: NetworkTopNFlowStrategyResponse = 
           allowNoIndices: true,
           index: [
             'apm-*-transaction*',
+            'traces-apm*',
             'auditbeat-*',
             'endgame-*',
             'filebeat-*',
@@ -879,6 +881,7 @@ export const expectedDsl = {
   allowNoIndices: true,
   index: [
     'apm-*-transaction*',
+    'traces-apm*',
     'auditbeat-*',
     'endgame-*',
     'filebeat-*',

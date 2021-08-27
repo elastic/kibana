@@ -163,14 +163,38 @@ describe('ThresholdVisualization', () => {
     expect(wrapper.find(LineAnnotation)).toHaveLength(1);
   });
 
-  test('renders error message when getting visualization fails', async () => {
+  test('renders error callout with message when getting visualization fails', async () => {
     const errorMessage = 'oh no';
-    getThresholdAlertVisualizationData.mockImplementation(() => Promise.reject(errorMessage));
+    getThresholdAlertVisualizationData.mockImplementation(() =>
+      Promise.reject(new Error(errorMessage))
+    );
     const wrapper = await setup();
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
 
     expect(wrapper.find('[data-test-subj="errorCallout"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="errorCallout"]').first().text()).toBe(
       `Cannot load alert visualization${errorMessage}`
+    );
+  });
+
+  test('renders error callout even when unable to get message from error', async () => {
+    getThresholdAlertVisualizationData.mockImplementation(() =>
+      Promise.reject(new Error(undefined))
+    );
+    const wrapper = await setup();
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    expect(wrapper.find('[data-test-subj="errorCallout"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="errorCallout"]').first().text()).toBe(
+      `Cannot load alert visualization`
     );
   });
 

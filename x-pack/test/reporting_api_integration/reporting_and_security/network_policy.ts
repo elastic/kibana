@@ -14,7 +14,7 @@ export default function ({ getService }: FtrProviderContext) {
   const reportingAPI = getService('reportingAPI');
   const retry = getService('retry');
   const supertest = getService('supertest');
-  const archive = 'reporting/canvas_disallowed_url';
+  const archive = 'x-pack/test/functional/es_archives/reporting/canvas_disallowed_url';
 
   /*
    * The Reporting API Functional Test config implements a network policy that

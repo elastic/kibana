@@ -19,14 +19,16 @@ import {
   ProtectionModes,
   UIPolicyConfig,
 } from '../../../../../../../common/endpoint/types';
-import { PolicyProtection, MacPolicyProtection } from '../../../types';
+import { PolicyProtection, MacPolicyProtection, LinuxPolicyProtection } from '../../../types';
 
 export const ProtectionSwitch = React.memo(
   ({
     protection,
+    protectionLabel,
     osList,
   }: {
     protection: PolicyProtection;
+    protectionLabel?: string;
     osList: ImmutableArray<Partial<keyof UIPolicyConfig>>;
   }) => {
     const policyDetailsConfig = usePolicyDetailsSelector(policyConfig);
@@ -44,12 +46,17 @@ export const ProtectionSwitch = React.memo(
                 newPayload[os][protection].mode = ProtectionModes.off;
               } else if (os === 'mac') {
                 newPayload[os][protection as MacPolicyProtection].mode = ProtectionModes.off;
+              } else if (os === 'linux') {
+                newPayload[os][protection as LinuxPolicyProtection].mode = ProtectionModes.off;
               }
               if (isPlatinumPlus) {
                 if (os === 'windows') {
                   newPayload[os].popup[protection].enabled = event.target.checked;
                 } else if (os === 'mac') {
                   newPayload[os].popup[protection as MacPolicyProtection].enabled =
+                    event.target.checked;
+                } else if (os === 'linux') {
+                  newPayload[os].popup[protection as LinuxPolicyProtection].enabled =
                     event.target.checked;
                 }
               }
@@ -60,12 +67,17 @@ export const ProtectionSwitch = React.memo(
                 newPayload[os][protection].mode = ProtectionModes.prevent;
               } else if (os === 'mac') {
                 newPayload[os][protection as MacPolicyProtection].mode = ProtectionModes.prevent;
+              } else if (os === 'linux') {
+                newPayload[os][protection as LinuxPolicyProtection].mode = ProtectionModes.prevent;
               }
               if (isPlatinumPlus) {
                 if (os === 'windows') {
                   newPayload[os].popup[protection].enabled = event.target.checked;
                 } else if (os === 'mac') {
                   newPayload[os].popup[protection as MacPolicyProtection].enabled =
+                    event.target.checked;
+                } else if (os === 'linux') {
+                  newPayload[os].popup[protection as LinuxPolicyProtection].enabled =
                     event.target.checked;
                 }
               }
@@ -83,10 +95,9 @@ export const ProtectionSwitch = React.memo(
     return (
       <EuiSwitch
         label={i18n.translate('xpack.securitySolution.endpoint.policy.details.protectionsEnabled', {
-          defaultMessage:
-            '{protectionName} protections {mode, select, true {enabled} false {disabled}}',
+          defaultMessage: '{protectionLabel} {mode, select, true {enabled} false {disabled}}',
           values: {
-            protectionName: protection.charAt(0).toUpperCase() + protection.substring(1),
+            protectionLabel,
             mode: selected !== ProtectionModes.off,
           },
         })}

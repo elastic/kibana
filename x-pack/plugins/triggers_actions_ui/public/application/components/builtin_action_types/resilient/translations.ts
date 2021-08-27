@@ -7,20 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const DESC = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.resilient.selectMessageText',
-  {
-    defaultMessage: 'Create an incident in IBM Resilient.',
-  }
-);
-
-export const TITLE = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.resilient.actionTypeTitle',
-  {
-    defaultMessage: 'Resilient',
-  }
-);
-
 export const API_URL_LABEL = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.resilient.apiUrlTextFieldLabel',
   {

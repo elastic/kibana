@@ -6,13 +6,12 @@
  */
 
 import expect from '@kbn/expect';
+import type { CreateListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { LIST_ITEM_URL, LIST_URL } from '@kbn/securitysolution-list-constants';
 import { getCreateMinimalListItemSchemaMock } from '../../../../plugins/lists/common/schemas/request/create_list_item_schema.mock';
 import { getCreateMinimalListSchemaMock } from '../../../../plugins/lists/common/schemas/request/create_list_schema.mock';
 import { LIST_ID, NAME } from '../../../../plugins/lists/common/constants.mock';
-import { CreateListItemSchema } from '../../../../plugins/lists/common/schemas';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-
-import { LIST_ITEM_URL, LIST_URL } from '../../../../plugins/lists/common/constants';
 
 import { createListsIndex, deleteListsIndex, binaryToString } from '../../utils';
 

@@ -102,3 +102,20 @@ export const checkIfSamePath = (pathA: ProcessorSelector, pathB: ProcessorSelect
   if (pathA.length !== pathB.length) return false;
   return pathA.join('.') === pathB.join('.');
 };
+
+/*
+ * Given a string it checks if it contains a valid mustache template snippet.
+ *
+ * Note: This allows strings with spaces such as: {{{hello world}}}. I figured we
+ * should use .+ instead of \S (disallow all whitespaces) because the backend seems
+ * to allow spaces inside the template snippet anyway.
+ *
+ * See: https://www.elastic.co/guide/en/elasticsearch/reference/master/ingest.html#template-snippets
+ */
+export const hasTemplateSnippet = (str: string = '') => {
+  // Matches when:
+  //  * contains a {{{
+  //  * Followed by all strings of length >= 1
+  //  * And followed by }}}
+  return /{{{.+}}}/.test(str);
+};

@@ -12,6 +12,7 @@ import {
   createGetPingsRoute,
   createJourneyRoute,
   createJourneyScreenshotRoute,
+  createJourneyScreenshotBlocksRoute,
 } from './pings';
 import { createGetDynamicSettingsRoute, createPostDynamicSettingsRoute } from './dynamic_settings';
 import { createLogPageViewRoute } from './telemetry';
@@ -54,4 +55,5 @@ export const restApiRoutes: UMRestApiRouteFactory[] = [
   createNetworkEventsRoute,
   createJourneyFailedStepsRoute,
   createLastSuccessfulStepRoute,
+  createJourneyScreenshotBlocksRoute,
 ];

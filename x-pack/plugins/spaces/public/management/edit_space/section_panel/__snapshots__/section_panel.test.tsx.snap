@@ -1,7 +1,10 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`it renders without blowing up 1`] = `
-<EuiPanel>
+<EuiPanel
+  hasBorder={true}
+  hasShadow={false}
+>
   <EuiFlexGroup
     alignItems="baseline"
     gutterSize="s"
@@ -11,7 +14,7 @@ exports[`it renders without blowing up 1`] = `
       grow={false}
     >
       <EuiTitle
-        size="m"
+        size="s"
       >
         <h2>
           <EuiIcon

@@ -12,7 +12,6 @@ import {
 import { Setup } from '../../helpers/setup_request';
 import { toESFormat } from './helper';
 import { APMIndexDocumentParams } from '../../helpers/create_es_client/create_internal_es_client';
-import { withApmSpan } from '../../../utils/with_apm_span';
 
 export function createOrUpdateCustomLink({
   customLinkId,
@@ -23,23 +22,21 @@ export function createOrUpdateCustomLink({
   customLink: Omit<CustomLink, '@timestamp'>;
   setup: Setup;
 }) {
-  return withApmSpan('create_or_update_custom_link', () => {
-    const { internalClient, indices } = setup;
+  const { internalClient, indices } = setup;
 
-    const params: APMIndexDocumentParams<CustomLinkES> = {
-      refresh: true,
-      index: indices.apmCustomLinkIndex,
-      body: {
-        '@timestamp': Date.now(),
-        ...toESFormat(customLink),
-      },
-    };
+  const params: APMIndexDocumentParams<CustomLinkES> = {
+    refresh: true,
+    index: indices.apmCustomLinkIndex,
+    body: {
+      '@timestamp': Date.now(),
+      ...toESFormat(customLink),
+    },
+  };
 
-    // by specifying an id elasticsearch will delete the previous doc and insert the updated doc
-    if (customLinkId) {
-      params.id = customLinkId;
-    }
+  // by specifying an id elasticsearch will delete the previous doc and insert the updated doc
+  if (customLinkId) {
+    params.id = customLinkId;
+  }
 
-    return internalClient.index(params);
-  });
+  return internalClient.index('create_or_update_custom_link', params);
 }

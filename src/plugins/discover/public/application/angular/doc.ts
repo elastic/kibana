@@ -7,17 +7,17 @@
  */
 
 import { getAngularModule, getServices } from '../../kibana_services';
-// @ts-ignore
 import { getRootBreadcrumbs } from '../helpers/breadcrumbs';
 import html from './doc.html';
 import { Doc } from '../components/doc/doc';
 
 interface LazyScope extends ng.IScope {
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 const { timefilter } = getServices();
 const app = getAngularModule();
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 app.directive('discoverDoc', function (reactDirective: any) {
   return reactDirective(
     Doc,
@@ -31,6 +31,7 @@ app.directive('discoverDoc', function (reactDirective: any) {
   );
 });
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 app.config(($routeProvider: any) => {
   $routeProvider
     .when('/doc/:indexPattern/:index/:type', {
@@ -39,7 +40,7 @@ app.config(($routeProvider: any) => {
     // the new route, es 7 deprecated types, es 8 removed them
     .when('/doc/:indexPattern/:index', {
       // have to be written as function expression, because it's not compiled in dev mode
-      // eslint-disable-next-line object-shorthand
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any, object-shorthand
       controller: function ($scope: LazyScope, $route: any) {
         timefilter.disableAutoRefreshSelector();
         timefilter.disableTimeRangeSelector();
@@ -49,6 +50,7 @@ app.config(($routeProvider: any) => {
         $scope.indexPatternService = getServices().indexPatterns;
       },
       template: html,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       k7Breadcrumbs: ($route: any) => [
         ...getRootBreadcrumbs(),
         {

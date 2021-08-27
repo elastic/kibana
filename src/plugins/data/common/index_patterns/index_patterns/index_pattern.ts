@@ -7,7 +7,7 @@
  */
 
 import _, { each, reject } from 'lodash';
-import { FieldAttrs, FieldAttrSet } from '../..';
+import { FieldAttrs, FieldAttrSet, IndexPatternAttributes } from '../..';
 import type { RuntimeField } from '../types';
 import { DuplicateField } from '../../../../kibana_utils/common';
 
@@ -15,7 +15,7 @@ import { ES_FIELD_TYPES, KBN_FIELD_TYPES, IIndexPattern, IFieldType } from '../.
 import { IndexPatternField, IIndexPatternFieldList, fieldList } from '../fields';
 import { formatHitProvider } from './format_hit';
 import { flattenHitWrapper } from './flatten_hit';
-import { FieldFormatsStartCommon, FieldFormat } from '../../field_formats';
+import { FieldFormatsStartCommon, FieldFormat } from '../../../../field_formats/common';
 import { IndexPatternSpec, TypeMeta, SourceFilter, IndexPatternFieldMap } from '../types';
 import { SerializedFieldFormat } from '../../../../expressions/common';
 import { castEsToKbnFieldTypeName } from '../../kbn_field_types';
@@ -52,8 +52,9 @@ export class IndexPattern implements IIndexPattern {
   public fields: IIndexPatternFieldList & { toSpec: () => IndexPatternFieldMap };
   public timeFieldName: string | undefined;
   /**
-   * @deprecated
-   * Deprecated. used by time range index patterns
+   * @deprecated Used by time range index patterns
+   * @removeBy 8.1
+   *
    */
   public intervalName: string | undefined;
   /**
@@ -240,6 +241,8 @@ export class IndexPattern implements IIndexPattern {
    * @param script script code
    * @param fieldType
    * @param lang
+   * @deprecated use runtime field instead
+   * @removeBy 8.1
    */
   async addScriptedField(name: string, script: string, fieldType: string = 'string') {
     const scriptedFields = this.getScriptedFields();
@@ -265,6 +268,8 @@ export class IndexPattern implements IIndexPattern {
   /**
    * Remove scripted field from field list
    * @param fieldName
+   * @deprecated use runtime field instead
+   * @removeBy 8.1
    */
 
   removeScriptedField(fieldName: string) {
@@ -274,10 +279,20 @@ export class IndexPattern implements IIndexPattern {
     }
   }
 
+  /**
+   *
+   * @deprecated use runtime field instead
+   * @removeBy 8.1
+   */
   getNonScriptedFields() {
     return [...this.fields.getAll().filter((field) => !field.scripted)];
   }
 
+  /**
+   *
+   * @deprecated use runtime field instead
+   * @removeBy 8.1
+   */
   getScriptedFields() {
     return [...this.fields.getAll().filter((field) => field.scripted)];
   }
@@ -308,7 +323,7 @@ export class IndexPattern implements IIndexPattern {
   /**
    * Returns index pattern as saved object body for saving
    */
-  getAsSavedObjectBody() {
+  getAsSavedObjectBody(): IndexPatternAttributes {
     const fieldFormatMap = _.isEmpty(this.fieldFormatMap)
       ? undefined
       : JSON.stringify(this.fieldFormatMap);
@@ -321,12 +336,10 @@ export class IndexPattern implements IIndexPattern {
       timeFieldName: this.timeFieldName,
       intervalName: this.intervalName,
       sourceFilters: this.sourceFilters ? JSON.stringify(this.sourceFilters) : undefined,
-      fields: this.fields
-        ? JSON.stringify(this.fields.filter((field) => field.scripted))
-        : undefined,
+      fields: JSON.stringify(this.fields?.filter((field) => field.scripted) ?? []),
       fieldFormatMap,
-      type: this.type,
-      typeMeta: this.typeMeta ? JSON.stringify(this.typeMeta) : undefined,
+      type: this.type!,
+      typeMeta: JSON.stringify(this.typeMeta ?? {}),
       allowNoIndex: this.allowNoIndex ? this.allowNoIndex : undefined,
       runtimeFieldMap: runtimeFieldMap ? JSON.stringify(runtimeFieldMap) : undefined,
     };
@@ -356,7 +369,6 @@ export class IndexPattern implements IIndexPattern {
    * @param name Field name
    * @param runtimeField Runtime field definition
    */
-
   addRuntimeField(name: string, runtimeField: RuntimeField) {
     const existingField = this.getFieldByName(name);
     if (existingField) {
@@ -376,11 +388,41 @@ export class IndexPattern implements IIndexPattern {
   }
 
   /**
-   * Remove a runtime field - removed from mapped field or removed unmapped
-   * field as appropriate
-   * @param name Field name
+   * Checks if runtime field exists
+   * @param name
    */
+  hasRuntimeField(name: string): boolean {
+    return !!this.runtimeFieldMap[name];
+  }
 
+  /**
+   * Returns runtime field if exists
+   * @param name
+   */
+  getRuntimeField(name: string): RuntimeField | null {
+    return this.runtimeFieldMap[name] ?? null;
+  }
+
+  /**
+   * Replaces all existing runtime fields with new fields
+   * @param newFields
+   */
+  replaceAllRuntimeFields(newFields: Record<string, RuntimeField>) {
+    const oldRuntimeFieldNames = Object.keys(this.runtimeFieldMap);
+    oldRuntimeFieldNames.forEach((name) => {
+      this.removeRuntimeField(name);
+    });
+
+    Object.entries(newFields).forEach(([name, field]) => {
+      this.addRuntimeField(name, field);
+    });
+  }
+
+  /**
+   * Remove a runtime field - removed from mapped field or removed unmapped
+   * field as appropriate. Doesn't clear associated field attributes.
+   * @param name - Field name to remove
+   */
   removeRuntimeField(name: string) {
     const existingField = this.getFieldByName(name);
     if (existingField) {
@@ -388,9 +430,6 @@ export class IndexPattern implements IIndexPattern {
         // mapped field, remove runtimeField def
         existingField.runtimeField = undefined;
       } else {
-        // runtimeField only
-        this.setFieldCustomLabel(name, null);
-        this.deleteFieldFormat(name);
         this.fields.remove(existingField);
       }
     }

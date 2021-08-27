@@ -60,8 +60,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await PageObjects.visEditor.clickGo();
   }
 
-  describe('vlad point series', function describeIndexTests() {
-    before(initChart);
+  describe('point series', function describeIndexTests() {
+    let isNewChartsLibraryEnabled = false;
+    before(async () => {
+      isNewChartsLibraryEnabled = await PageObjects.visChart.isNewChartsLibraryEnabled();
+      await PageObjects.visualize.initTests(isNewChartsLibraryEnabled);
+      await initChart();
+    });
 
     describe('secondary value axis', function () {
       it('should show correct chart', async function () {
@@ -146,7 +151,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should put secondary axis on the right', async function () {
-        const length = await PageObjects.visChart.getRightValueAxesCount();
+        const length = await PageObjects.visChart.getAxesCountByPosition('right');
         expect(length).to.be(1);
       });
     });

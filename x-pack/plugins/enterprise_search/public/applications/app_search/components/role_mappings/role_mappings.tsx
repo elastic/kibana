@@ -5,138 +5,114 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import {
-  EuiButton,
-  EuiConfirmModal,
-  EuiEmptyPrompt,
-  EuiOverlayMask,
-  EuiPageContent,
-  EuiPageContentBody,
-  EuiPageHeader,
-  EuiPanel,
-} from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiSpacer } from '@elastic/eui';
 
-import { FlashMessages } from '../../../shared/flash_messages';
-import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
-import { Loading } from '../../../shared/loading';
-import { AddRoleMappingButton, RoleMappingsTable } from '../../../shared/role_mapping';
+import { APP_SEARCH_PLUGIN } from '../../../../../common/constants';
 import {
-  EMPTY_ROLE_MAPPINGS_TITLE,
-  ROLE_MAPPINGS_TITLE,
-  ROLE_MAPPINGS_DESCRIPTION,
-} from '../../../shared/role_mapping/constants';
+  RoleMappingsTable,
+  RoleMappingsHeading,
+  RolesEmptyPrompt,
+  UsersTable,
+  UsersHeading,
+  UsersEmptyPrompt,
+} from '../../../shared/role_mapping';
+import { ROLE_MAPPINGS_TITLE } from '../../../shared/role_mapping/constants';
 
-import { ROLE_MAPPING_NEW_PATH } from '../../routes';
+import { DOCS_PREFIX } from '../../routes';
+import { AppSearchPageTemplate } from '../layout';
 
-import {
-  ROLE_MAPPINGS_ENGINE_ACCESS_HEADING,
-  EMPTY_ROLE_MAPPINGS_BODY,
-  ROLE_MAPPINGS_RESET_BUTTON,
-  ROLE_MAPPINGS_RESET_CONFIRM_TITLE,
-  ROLE_MAPPINGS_RESET_CONFIRM_BUTTON,
-  ROLE_MAPPINGS_RESET_CANCEL_BUTTON,
-} from './constants';
+import { ROLE_MAPPINGS_ENGINE_ACCESS_HEADING } from './constants';
+import { RoleMapping } from './role_mapping';
 import { RoleMappingsLogic } from './role_mappings_logic';
-import { generateRoleMappingPath } from './utils';
+import { User } from './user';
+
+const ROLES_DOCS_LINK = `${DOCS_PREFIX}/security-and-users.html`;
 
 export const RoleMappings: React.FC = () => {
-  const { initializeRoleMappings, handleResetMappings, resetState } = useActions(RoleMappingsLogic);
-  const { roleMappings, multipleAuthProvidersConfig, dataLoading } = useValues(RoleMappingsLogic);
+  const {
+    enableRoleBasedAccess,
+    initializeRoleMappings,
+    initializeRoleMapping,
+    initializeSingleUserRoleMapping,
+    handleDeleteMapping,
+    resetState,
+  } = useActions(RoleMappingsLogic);
+  const {
+    roleMappings,
+    singleUserRoleMappings,
+    multipleAuthProvidersConfig,
+    dataLoading,
+    roleMappingFlyoutOpen,
+    singleUserRoleMappingFlyoutOpen,
+  } = useValues(RoleMappingsLogic);
 
   useEffect(() => {
     initializeRoleMappings();
     return resetState;
   }, []);
 
-  const [isResetWarningVisible, setResetWarningVisibility] = useState(false);
-  const showWarning = () => setResetWarningVisibility(true);
-  const hideWarning = () => setResetWarningVisibility(false);
+  const hasUsers = singleUserRoleMappings.length > 0;
 
-  if (dataLoading) return <Loading />;
-
-  const RESET_MAPPINGS_WARNING_MODAL_BODY = (
-    <FormattedMessage
-      id="xpack.enterpriseSearch.appSearch.resetMappingsWarningModalBody"
-      defaultMessage="{strongText}, and all users who successfully authenticate will be assigned the Owner role and have access to all engines."
-      values={{
-        strongText: (
-          <strong>
-            {i18n.translate('xpack.enterpriseSearch.appSearch.resetMappingsWarningModalBodyBold', {
-              defaultMessage: 'All role mappings will be deleted',
-            })}
-          </strong>
-        ),
-      }}
+  const rolesEmptyState = (
+    <RolesEmptyPrompt
+      productName={APP_SEARCH_PLUGIN.NAME}
+      docsLink={ROLES_DOCS_LINK}
+      onEnable={enableRoleBasedAccess}
     />
   );
 
-  const addMappingButton = <AddRoleMappingButton path={ROLE_MAPPING_NEW_PATH} />;
-
-  const roleMappingEmptyState = (
-    <EuiPanel paddingSize="l" color="subdued" hasBorder={false}>
-      <EuiEmptyPrompt
-        iconType="usersRolesApp"
-        title={<h2>{EMPTY_ROLE_MAPPINGS_TITLE}</h2>}
-        body={<p>{EMPTY_ROLE_MAPPINGS_BODY}</p>}
-        actions={addMappingButton}
+  const roleMappingsSection = (
+    <section>
+      <RoleMappingsHeading
+        productName={APP_SEARCH_PLUGIN.NAME}
+        docsLink={ROLES_DOCS_LINK}
+        onClick={() => initializeRoleMapping()}
       />
-    </EuiPanel>
+      <RoleMappingsTable
+        roleMappings={roleMappings}
+        accessItemKey="engines"
+        accessHeader={ROLE_MAPPINGS_ENGINE_ACCESS_HEADING}
+        initializeRoleMapping={initializeRoleMapping}
+        shouldShowAuthProvider={multipleAuthProvidersConfig}
+        handleDeleteMapping={handleDeleteMapping}
+      />
+    </section>
   );
 
-  const roleMappingsTable = (
-    <RoleMappingsTable
-      roleMappings={roleMappings}
+  const usersTable = (
+    <UsersTable
       accessItemKey="engines"
-      accessHeader={ROLE_MAPPINGS_ENGINE_ACCESS_HEADING}
-      addMappingButton={addMappingButton}
-      getRoleMappingPath={generateRoleMappingPath}
-      shouldShowAuthProvider={multipleAuthProvidersConfig}
+      singleUserRoleMappings={singleUserRoleMappings}
+      initializeSingleUserRoleMapping={initializeSingleUserRoleMapping}
+      handleDeleteMapping={handleDeleteMapping}
     />
   );
 
-  const resetMappings = (
-    <EuiButton size="s" color="danger" onClick={showWarning}>
-      {ROLE_MAPPINGS_RESET_BUTTON}
-    </EuiButton>
+  const usersSection = (
+    <>
+      <UsersHeading onClick={() => initializeSingleUserRoleMapping()} />
+      <EuiSpacer />
+      {hasUsers ? usersTable : <UsersEmptyPrompt />}
+    </>
   );
-
-  const resetMappingsWarningModal = isResetWarningVisible ? (
-    <EuiOverlayMask>
-      <EuiConfirmModal
-        onCancel={hideWarning}
-        onConfirm={() => handleResetMappings(hideWarning)}
-        title={ROLE_MAPPINGS_RESET_CONFIRM_TITLE}
-        cancelButtonText={ROLE_MAPPINGS_RESET_CANCEL_BUTTON}
-        confirmButtonText={ROLE_MAPPINGS_RESET_CONFIRM_BUTTON}
-        buttonColor="danger"
-        maxWidth={640}
-      >
-        <p>{RESET_MAPPINGS_WARNING_MODAL_BODY}</p>
-      </EuiConfirmModal>
-    </EuiOverlayMask>
-  ) : null;
 
   return (
-    <>
-      <SetPageChrome trail={[ROLE_MAPPINGS_TITLE]} />
-      <EuiPageHeader
-        rightSideItems={[resetMappings]}
-        pageTitle={ROLE_MAPPINGS_TITLE}
-        description={ROLE_MAPPINGS_DESCRIPTION}
-      />
-      <EuiPageContent hasShadow={false} hasBorder={roleMappings.length > 0}>
-        <EuiPageContentBody>
-          <FlashMessages />
-          {roleMappings.length === 0 ? roleMappingEmptyState : roleMappingsTable}
-        </EuiPageContentBody>
-      </EuiPageContent>
-      {resetMappingsWarningModal}
-    </>
+    <AppSearchPageTemplate
+      pageChrome={[ROLE_MAPPINGS_TITLE]}
+      pageHeader={{ pageTitle: ROLE_MAPPINGS_TITLE }}
+      isLoading={dataLoading}
+      isEmptyState={roleMappings.length < 1}
+      emptyState={rolesEmptyState}
+    >
+      {roleMappingFlyoutOpen && <RoleMapping />}
+      {singleUserRoleMappingFlyoutOpen && <User />}
+      {roleMappingsSection}
+      <EuiSpacer size="xxl" />
+      {usersSection}
+    </AppSearchPageTemplate>
   );
 };

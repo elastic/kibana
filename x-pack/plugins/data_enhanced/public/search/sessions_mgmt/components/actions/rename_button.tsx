@@ -20,19 +20,24 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useState } from 'react';
+import { CoreStart } from 'kibana/public';
 import { SearchSessionsMgmtAPI } from '../../lib/api';
-import { TableText } from '../';
-import { OnActionComplete } from './types';
+import { IClickActionDescriptor } from '../';
+import { toMountPoint } from '../../../../../../../../src/plugins/kibana_react/public';
+import { OnActionDismiss } from './types';
+import { UISession } from '../../types';
 
 interface RenameButtonProps {
-  id: string;
-  name: string;
+  searchSession: UISession;
   api: SearchSessionsMgmtAPI;
-  onActionComplete: OnActionComplete;
 }
 
-const RenameDialog = ({ onDismiss, ...props }: RenameButtonProps & { onDismiss: () => void }) => {
-  const { id, name: originalName, api, onActionComplete } = props;
+const RenameDialog = ({
+  onActionDismiss,
+  ...props
+}: RenameButtonProps & { onActionDismiss: OnActionDismiss }) => {
+  const { api, searchSession } = props;
+  const { id, name: originalName } = searchSession;
   const [isLoading, setIsLoading] = useState(false);
   const [newName, setNewName] = useState(originalName);
 
@@ -56,7 +61,7 @@ const RenameDialog = ({ onDismiss, ...props }: RenameButtonProps & { onDismiss: 
   const isNewNameValid = newName && originalName !== newName;
 
   return (
-    <EuiModal onClose={onDismiss} initialFocus="[name=newName]">
+    <EuiModal onClose={onActionDismiss} initialFocus="[name=newName]">
       <EuiModalHeader>
         <EuiModalHeaderTitle>{title}</EuiModalHeaderTitle>
       </EuiModalHeader>
@@ -75,7 +80,7 @@ const RenameDialog = ({ onDismiss, ...props }: RenameButtonProps & { onDismiss: 
       </EuiModalBody>
 
       <EuiModalFooter>
-        <EuiButtonEmpty onClick={onDismiss}>{cancel}</EuiButtonEmpty>
+        <EuiButtonEmpty onClick={onActionDismiss}>{cancel}</EuiButtonEmpty>
 
         <EuiButton
           disabled={!isNewNameValid}
@@ -84,8 +89,7 @@ const RenameDialog = ({ onDismiss, ...props }: RenameButtonProps & { onDismiss: 
             setIsLoading(true);
             await api.sendRename(id, newName);
             setIsLoading(false);
-            onDismiss();
-            onActionComplete();
+            onActionDismiss();
           }}
           fill
           isLoading={isLoading}
@@ -97,26 +101,21 @@ const RenameDialog = ({ onDismiss, ...props }: RenameButtonProps & { onDismiss: 
   );
 };
 
-export const RenameButton = (props: RenameButtonProps) => {
-  const [showRenameDialog, setShowRenameDialog] = useState(false);
-
-  const onClick = () => {
-    setShowRenameDialog(true);
-  };
-
-  const onDismiss = () => {
-    setShowRenameDialog(false);
-  };
-
-  return (
-    <>
-      <TableText onClick={onClick}>
-        <FormattedMessage
-          id="xpack.data.mgmt.searchSessions.actionRename"
-          defaultMessage="Edit name"
-        />
-      </TableText>
-      {showRenameDialog ? <RenameDialog {...props} onDismiss={onDismiss} /> : null}
-    </>
-  );
-};
+export const createRenameActionDescriptor = (
+  api: SearchSessionsMgmtAPI,
+  uiSession: UISession,
+  core: CoreStart
+): IClickActionDescriptor => ({
+  iconType: 'pencil',
+  label: (
+    <FormattedMessage id="xpack.data.mgmt.searchSessions.actionRename" defaultMessage="Edit name" />
+  ),
+  onClick: async () => {
+    const ref = core.overlays.openModal(
+      toMountPoint(
+        <RenameDialog onActionDismiss={() => ref?.close()} api={api} searchSession={uiSession} />
+      )
+    );
+    await ref.onClose;
+  },
+});

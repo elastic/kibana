@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { mountWithIntl } from '../../../__mocks__';
-
 import React from 'react';
+
+import { mountWithIntl } from '../../../test_helpers';
 
 import { FormattedDateTime } from './';
 

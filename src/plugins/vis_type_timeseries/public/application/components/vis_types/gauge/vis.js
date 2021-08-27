@@ -10,9 +10,10 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import { visWithSplits } from '../../vis_with_splits';
 import { createTickFormatter } from '../../lib/tick_formatter';
-import _, { get, isUndefined, assign, includes } from 'lodash';
+import { get, isUndefined, assign, includes } from 'lodash';
 import { Gauge } from '../../../visualizations/views/gauge';
-import { getLastValue } from '../../../../../common/get_last_value';
+import { getLastValue } from '../../../../../common/last_value_utils';
+import { getOperator, shouldOperate } from '../../../../../common/operators_utils';
 
 function getColors(props) {
   const { model, visData } = props;
@@ -21,9 +22,9 @@ function getColors(props) {
   let gauge;
   if (model.gauge_color_rules) {
     model.gauge_color_rules.forEach((rule) => {
-      if (rule.operator && rule.value != null) {
-        const value = (series[0] && getLastValue(series[0].data)) || 0;
-        if (_[rule.operator](value, rule.value)) {
+      if (rule.operator) {
+        const value = getLastValue(series[0]?.data);
+        if (shouldOperate(rule, value) && getOperator(rule.operator)(value, rule.value)) {
           gauge = rule.gauge;
           text = rule.text;
         }
@@ -85,6 +86,7 @@ GaugeVisualization.propTypes = {
   additionalLabel: PropTypes.string,
   model: PropTypes.object,
   onBrush: PropTypes.func,
+  onFilterClick: PropTypes.func,
   onChange: PropTypes.func,
   visData: PropTypes.object,
   getConfig: PropTypes.func,

@@ -17,6 +17,7 @@ import {
 export const mockOptions: HostDetailsRequestOptions = {
   defaultIndex: [
     'apm-*-transaction*',
+    'traces-apm*',
     'auditbeat-*',
     'endgame-*',
     'filebeat-*',
@@ -1303,6 +1304,7 @@ export const formattedSearchStrategyResponse = {
           allowNoIndices: true,
           index: [
             'apm-*-transaction*',
+            'traces-apm*',
             'auditbeat-*',
             'endgame-*',
             'filebeat-*',
@@ -1370,6 +1372,20 @@ export const formattedSearchStrategyResponse = {
                 terms: { field: 'cloud.region', size: 10, order: { timestamp: 'desc' } },
                 aggs: { timestamp: { max: { field: '@timestamp' } } },
               },
+              endpoint_id: {
+                filter: {
+                  term: {
+                    'agent.type': 'endpoint',
+                  },
+                },
+                aggs: {
+                  value: {
+                    terms: {
+                      field: 'agent.id',
+                    },
+                  },
+                },
+              },
             },
             query: {
               bool: {
@@ -1402,6 +1418,7 @@ export const expectedDsl = {
   allowNoIndices: true,
   index: [
     'apm-*-transaction*',
+    'traces-apm*',
     'auditbeat-*',
     'endgame-*',
     'filebeat-*',
@@ -1413,6 +1430,20 @@ export const expectedDsl = {
   track_total_hits: false,
   body: {
     aggregations: {
+      endpoint_id: {
+        filter: {
+          term: {
+            'agent.type': 'endpoint',
+          },
+        },
+        aggs: {
+          value: {
+            terms: {
+              field: 'agent.id',
+            },
+          },
+        },
+      },
       host_architecture: {
         terms: {
           field: 'host.architecture',

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-const DASHBOARD_STATE_STORAGE_KEY = '_a';
+export const DASHBOARD_STATE_STORAGE_KEY = '_a';
 
 export const DashboardConstants = {
   LANDING_PAGE_PATH: '/list',
@@ -17,6 +17,8 @@ export const DashboardConstants = {
   DASHBOARDS_ID: 'dashboards',
   DASHBOARD_ID: 'dashboard',
   SEARCH_SESSION_ID: 'searchSessionId',
+  CHANGE_CHECK_DEBOUNCE: 100,
+  CHANGE_APPLY_DEBOUNCE: 50,
 };
 
 export function createDashboardEditUrl(id?: string, editMode?: boolean) {

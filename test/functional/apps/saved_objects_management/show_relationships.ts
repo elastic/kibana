@@ -15,11 +15,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('saved objects relationships flyout', () => {
     beforeEach(async () => {
-      await esArchiver.load('saved_objects_management/show_relationships');
+      await esArchiver.load(
+        'test/functional/fixtures/es_archiver/saved_objects_management/show_relationships'
+      );
     });
 
     afterEach(async () => {
-      await esArchiver.unload('saved_objects_management/show_relationships');
+      await esArchiver.unload(
+        'test/functional/fixtures/es_archiver/saved_objects_management/show_relationships'
+      );
     });
 
     it('displays the invalid references', async () => {

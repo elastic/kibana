@@ -8,40 +8,15 @@
 import { LogMessageFormattingRule } from '../rule_types';
 
 const BUILTIN_GENERIC_MESSAGE_FIELDS = ['message', '@message'];
+const BUILTIN_FALLBACK_MESSAGE_FIELDS = ['log.original', 'event.original'];
 
-export const getGenericRules = (genericMessageFields: string[]) => [
-  ...Array.from(new Set([...genericMessageFields, ...BUILTIN_GENERIC_MESSAGE_FIELDS])).reduce<
-    LogMessageFormattingRule[]
-  >((genericRules, fieldName) => [...genericRules, ...createGenericRulesForField(fieldName)], []),
-  {
-    when: {
-      exists: ['event.dataset', 'log.original'],
-    },
-    format: [
-      {
-        constant: '[',
-      },
-      {
-        field: 'event.dataset',
-      },
-      {
-        constant: '] ',
-      },
-      {
-        field: 'log.original',
-      },
-    ],
-  },
-  {
-    when: {
-      exists: ['log.original'],
-    },
-    format: [
-      {
-        field: 'log.original',
-      },
-    ],
-  },
+export const getGenericRules = (genericMessageFields: string[]): LogMessageFormattingRule[] => [
+  ...Array.from(new Set([...genericMessageFields, ...BUILTIN_GENERIC_MESSAGE_FIELDS])).flatMap(
+    createGenericRulesForField
+  ),
+  ...BUILTIN_FALLBACK_MESSAGE_FIELDS.filter(
+    (fieldName) => !genericMessageFields.includes(fieldName)
+  ).flatMap(createFallbackRulesForField),
 ];
 
 const createGenericRulesForField = (fieldName: string) => [
@@ -158,6 +133,38 @@ const createGenericRulesForField = (fieldName: string) => [
       },
       {
         field: 'error.stack_trace.text',
+      },
+    ],
+  },
+  {
+    when: {
+      exists: [fieldName],
+    },
+    format: [
+      {
+        field: fieldName,
+      },
+    ],
+  },
+];
+
+const createFallbackRulesForField = (fieldName: string) => [
+  {
+    when: {
+      exists: ['event.dataset', fieldName],
+    },
+    format: [
+      {
+        constant: '[',
+      },
+      {
+        field: 'event.dataset',
+      },
+      {
+        constant: '] ',
+      },
+      {
+        field: fieldName,
       },
     ],
   },

@@ -13,6 +13,10 @@ import { isObject } from 'lodash/fp';
 
 type ErrorFactory = (message: string) => Error;
 
+/**
+ * @deprecated Use packages/kbn-securitysolution-io-ts-utils/src/format_errors/index.ts
+ * Bug fix for the TODO is in the format_errors package
+ */
 export const formatErrors = (errors: rt.Errors): string[] => {
   const err = errors.map((error) => {
     if (error.message != null) {
@@ -64,7 +68,9 @@ const getExcessProps = (props: rt.Props, r: Record<string, unknown>): string[] =
   return ex;
 };
 
-export function excess<C extends rt.InterfaceType<rt.Props>>(codec: C): C {
+export function excess<C extends rt.InterfaceType<rt.Props> | rt.PartialType<rt.Props>>(
+  codec: C
+): C {
   const r = new rt.InterfaceType(
     codec.name,
     codec.is,

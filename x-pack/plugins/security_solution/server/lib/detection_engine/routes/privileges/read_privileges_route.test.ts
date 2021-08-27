@@ -8,16 +8,21 @@
 import { readPrivilegesRoute } from './read_privileges_route';
 import { serverMock, requestContextMock } from '../__mocks__';
 import { getPrivilegeRequest, getMockPrivilegesResult } from '../__mocks__/request_responses';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
 
 describe('read_privileges route', () => {
   let server: ReturnType<typeof serverMock.create>;
-  let { clients, context } = requestContextMock.createTools();
+  let { context } = requestContextMock.createTools();
 
   beforeEach(() => {
     server = serverMock.create();
-    ({ clients, context } = requestContextMock.createTools());
+    ({ context } = requestContextMock.createTools());
 
-    clients.clusterClient.callAsCurrentUser.mockResolvedValue(getMockPrivilegesResult());
+    context.core.elasticsearch.client.asCurrentUser.transport.request.mockResolvedValue({
+      body: getMockPrivilegesResult(),
+    });
+
     readPrivilegesRoute(server.router, true);
   });
 
@@ -60,9 +65,9 @@ describe('read_privileges route', () => {
     });
 
     test('returns 500 when bad response from cluster', async () => {
-      clients.clusterClient.callAsCurrentUser.mockImplementation(() => {
-        throw new Error('Test error');
-      });
+      context.core.elasticsearch.client.asCurrentUser.transport.request.mockResolvedValue(
+        elasticsearchClientMock.createErrorTransportRequestPromise(new Error('Test error'))
+      );
       const response = await server.inject(
         getPrivilegeRequest({ auth: { isAuthenticated: false } }),
         context

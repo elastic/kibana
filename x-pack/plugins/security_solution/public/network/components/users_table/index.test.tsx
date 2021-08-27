@@ -26,6 +26,8 @@ import { UsersTable } from '.';
 import { mockUsersData } from './mock';
 import { FlowTarget } from '../../../../common/search_strategy';
 
+jest.mock('../../../common/lib/kibana');
+
 describe('Users Table Component', () => {
   const loadPage = jest.fn();
   const state: State = mockGlobalState;
@@ -92,9 +94,7 @@ describe('Users Table Component', () => {
         direction: 'desc',
         field: 'name',
       });
-      expect(wrapper.find('.euiTable thead tr th button').first().text()).toEqual(
-        'UserClick to sort in ascending order'
-      );
+      expect(wrapper.find('.euiTable thead tr th button').first().text()).toEqual('User');
     });
   });
 });

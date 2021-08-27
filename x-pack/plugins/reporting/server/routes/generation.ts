@@ -6,17 +6,15 @@
  */
 
 import Boom from '@hapi/boom';
-import { errors as elasticsearchErrors } from 'elasticsearch';
 import { kibanaResponseFactory } from 'src/core/server';
 import { ReportingCore } from '../';
 import { API_BASE_URL } from '../../common/constants';
 import { LevelLogger as Logger } from '../lib';
-import { enqueueJobFactory } from '../lib/enqueue_job';
-import { registerGenerateFromJobParams } from './generate_from_jobparams';
+import { enqueueJob } from '../lib/enqueue_job';
 import { registerGenerateCsvFromSavedObjectImmediate } from './csv_searchsource_immediate';
+import { registerGenerateFromJobParams } from './generate_from_jobparams';
+import { registerLegacy } from './legacy';
 import { HandlerFunction } from './types';
-
-const esErrors = elasticsearchErrors as Record<string, any>;
 
 const getDownloadBaseUrl = (reporting: ReportingCore) => {
   const config = reporting.getConfig();
@@ -45,8 +43,15 @@ export function registerJobGenerationRoutes(reporting: ReportingCore, logger: Lo
     }
 
     try {
-      const enqueueJob = enqueueJobFactory(reporting, logger);
-      const report = await enqueueJob(exportTypeId, jobParams, user, context, req);
+      const report = await enqueueJob(
+        reporting,
+        req,
+        context,
+        user,
+        exportTypeId,
+        jobParams,
+        logger
+      );
 
       // return task manager's task information and the download URL
       const downloadBaseUrl = getDownloadBaseUrl(reporting);
@@ -77,28 +82,11 @@ export function registerJobGenerationRoutes(reporting: ReportingCore, logger: Lo
       });
     }
 
-    if (err instanceof esErrors['401']) {
-      return res.unauthorized({
-        body: `Sorry, you aren't authenticated`,
-      });
-    }
-
-    if (err instanceof esErrors['403']) {
-      return res.forbidden({
-        body: `Sorry, you are not authorized`,
-      });
-    }
-
-    if (err instanceof esErrors['404']) {
-      return res.notFound({
-        body: err.message,
-      });
-    }
-
     // unknown error, can't convert to 4xx
     throw err;
   }
 
   registerGenerateFromJobParams(reporting, handler, handleError);
   registerGenerateCsvFromSavedObjectImmediate(reporting, handleError, logger);
+  registerLegacy(reporting, handler, handleError, logger);
 }

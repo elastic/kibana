@@ -105,7 +105,6 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
   const { currentSavedSearch, currentIndexPattern } = mlContext;
   const { savedSearchQuery, savedSearchQueryStr } = useSavedSearch();
 
-  const [loadingFieldOptions, setLoadingFieldOptions] = useState<boolean>(false);
   const [fieldOptionsFetchFail, setFieldOptionsFetchFail] = useState<boolean>(false);
   const [loadingDepVarOptions, setLoadingDepVarOptions] = useState<boolean>(false);
   const [dependentVariableFetchFail, setDependentVariableFetchFail] = useState<boolean>(false);
@@ -116,6 +115,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
   const [fetchingExplainData, setFetchingExplainData] = useState<boolean>(false);
   const [maxDistinctValuesError, setMaxDistinctValuesError] = useState<string | undefined>();
   const [unsupportedFieldsError, setUnsupportedFieldsError] = useState<string | undefined>();
+  const [noDocsContainMappedFields, setNoDocsContainMappedFields] = useState<boolean>(false);
   const [minimumFieldsRequiredMessage, setMinimumFieldsRequiredMessage] = useState<
     undefined | string
   >();
@@ -247,28 +247,28 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
     if (firstUpdate.current) {
       firstUpdate.current = false;
     }
-    // Reset if jobType changes (jobType requires dependent_variable to be set -
-    // which won't be the case if switching from outlier detection)
-    if (jobTypeChanged) {
-      setLoadingFieldOptions(true);
-    }
+
+    const depVarNotIncluded =
+      isJobTypeWithDepVar && includes.length > 0 && includes.includes(dependentVariable) === false;
     // Ensure runtime field is in 'includes' table if it is set as dependent variable
     const depVarIsRuntimeField =
-      isJobTypeWithDepVar &&
+      depVarNotIncluded &&
       runtimeMappings &&
-      Object.keys(runtimeMappings).includes(dependentVariable) &&
-      includes.length > 0 &&
-      includes.includes(dependentVariable) === false;
+      Object.keys(runtimeMappings).includes(dependentVariable);
     let formToUse = form;
 
-    if (depVarIsRuntimeField) {
+    if (depVarIsRuntimeField || depVarNotIncluded) {
       formToUse = cloneDeep(form);
       formToUse.includes = [...includes, dependentVariable];
     }
 
-    const { success, expectedMemory, fieldSelection, errorMessage } = await fetchExplainData(
-      formToUse
-    );
+    const {
+      success,
+      expectedMemory,
+      fieldSelection,
+      errorMessage,
+      noDocsContainMappedFields: noDocsWithFields,
+    } = await fetchExplainData(formToUse);
 
     if (success) {
       if (shouldUpdateEstimatedMml) {
@@ -279,24 +279,23 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
         (field) => field.is_included === true && field.is_required === false
       );
 
+      const formStateUpdated = {
+        ...(shouldUpdateModelMemoryLimit ? { modelMemoryLimit: expectedMemory } : {}),
+        ...(depVarIsRuntimeField || jobTypeChanged || depVarNotIncluded
+          ? { includes: formToUse.includes }
+          : {}),
+        requiredFieldsError: !hasRequiredFields ? requiredFieldsErrorText : undefined,
+      };
+
       if (jobTypeChanged) {
-        setLoadingFieldOptions(false);
         setFieldOptionsFetchFail(false);
         setMaxDistinctValuesError(undefined);
         setUnsupportedFieldsError(undefined);
-        setFormState({
-          ...(shouldUpdateModelMemoryLimit ? { modelMemoryLimit: expectedMemory } : {}),
-          requiredFieldsError: !hasRequiredFields ? requiredFieldsErrorText : undefined,
-          includes: formToUse.includes,
-        });
+        setNoDocsContainMappedFields(false);
         setIncludesTableItems(fieldSelection ? fieldSelection : []);
-      } else {
-        setFormState({
-          ...(shouldUpdateModelMemoryLimit ? { modelMemoryLimit: expectedMemory } : {}),
-          requiredFieldsError: !hasRequiredFields ? requiredFieldsErrorText : undefined,
-          includes: formToUse.includes,
-        });
       }
+
+      setFormState(formStateUpdated);
       setFetchingExplainData(false);
     } else {
       const {
@@ -319,10 +318,10 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
           : DEFAULT_MODEL_MEMORY_LIMIT.outlier_detection;
 
       setEstimatedModelMemoryLimit(fallbackModelMemoryLimit);
-      setLoadingFieldOptions(false);
       setFieldOptionsFetchFail(true);
       setMaxDistinctValuesError(maxDistinctValuesErrorMessage);
       setUnsupportedFieldsError(unsupportedFieldsErrorMessage);
+      setNoDocsContainMappedFields(noDocsWithFields);
       setFetchingExplainData(false);
       setFormState({
         ...(shouldUpdateModelMemoryLimit ? { modelMemoryLimit: fallbackModelMemoryLimit } : {}),
@@ -333,6 +332,17 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
   useEffect(() => {
     setFormState({ sourceIndex: currentIndexPattern.title });
   }, []);
+
+  const indexPatternFieldsTableItems = useMemo(() => {
+    if (indexData?.indexPatternFields !== undefined) {
+      return indexData.indexPatternFields.map((field) => ({
+        name: field,
+        is_included: false,
+        is_required: false,
+      }));
+    }
+    return [];
+  }, [`${indexData?.indexPatternFields}`]);
 
   useEffect(() => {
     if (typeof savedSearchQueryStr === 'string') {
@@ -407,7 +417,12 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
           ? [...updatedIncludes, dependentVariable]
           : updatedIncludes;
 
-        const { success, fieldSelection, errorMessage } = await fetchExplainData(formCopy);
+        const {
+          success,
+          fieldSelection,
+          errorMessage,
+          noDocsContainMappedFields: noDocsWithFields,
+        } = await fetchExplainData(formCopy);
         if (success) {
           // update the field selection table
           const hasRequiredFields = fieldSelection.some(
@@ -431,6 +446,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
           setIncludesTableItems(updatedFieldSelection ? updatedFieldSelection : fieldSelection);
           setMaxDistinctValuesError(undefined);
           setUnsupportedFieldsError(undefined);
+          setNoDocsContainMappedFields(noDocsWithFields);
           setFormState({
             includes: updatedIncludes,
             requiredFieldsError: !hasRequiredFields ? requiredFieldsErrorText : undefined,
@@ -452,6 +468,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
 
           setMaxDistinctValuesError(maxDistinctValuesErrorMessage);
           setUnsupportedFieldsError(unsupportedFieldsErrorMessage);
+          setNoDocsContainMappedFields(noDocsWithFields);
         }
       }
     }
@@ -508,6 +525,11 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
   // Don't render until `savedSearchQuery` has been initialized.
   // `undefined` means uninitialized, `null` means initialized but not used.
   if (savedSearchQuery === undefined) return null;
+
+  const tableItems =
+    includesTableItems.length > 0 && !noDocsContainMappedFields
+      ? includesTableItems
+      : indexPatternFieldsTableItems;
 
   return (
     <Fragment>
@@ -606,12 +628,22 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
                   defaultMessage: 'Enter field to be used as dependent variable.',
                 }
               )}
-              placeholder={i18n.translate(
-                'xpack.ml.dataframe.analytics.create.dependentVariablePlaceholder',
-                {
-                  defaultMessage: 'dependent variable',
-                }
-              )}
+              placeholder={
+                jobType === ANALYSIS_CONFIG_TYPE.REGRESSION
+                  ? i18n.translate(
+                      'xpack.ml.dataframe.analytics.create.dependentVariableRegressionPlaceholder',
+                      {
+                        defaultMessage: 'Select the numeric field that you want to predict.',
+                      }
+                    )
+                  : i18n.translate(
+                      'xpack.ml.dataframe.analytics.create.dependentVariableClassificationPlaceholder',
+                      {
+                        defaultMessage:
+                          'Select the numeric, categorical, or boolean field that you want to predict.',
+                      }
+                    )
+              }
               isDisabled={isJobCreated}
               isLoading={loadingDepVarOptions}
               singleSelection={true}
@@ -647,10 +679,9 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
         includes={includes}
         minimumFieldsRequiredMessage={minimumFieldsRequiredMessage}
         setMinimumFieldsRequiredMessage={setMinimumFieldsRequiredMessage}
-        tableItems={includesTableItems}
+        tableItems={firstUpdate.current ? includesTableItems : tableItems}
         unsupportedFieldsError={unsupportedFieldsError}
         setUnsupportedFieldsError={setUnsupportedFieldsError}
-        loadingItems={loadingFieldOptions}
         setFormState={setFormState}
       />
       {showScatterplotMatrix && (

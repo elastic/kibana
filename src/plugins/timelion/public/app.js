@@ -21,7 +21,7 @@ import {
   registerListenEventListener,
   watchMultiDecorator,
 } from '../../kibana_legacy/public';
-import { getTimezone } from '../../vis_type_timelion/public';
+import { _LEGACY_ as visTypeTimelion } from '../../vis_type_timelion/public';
 import { initCellsDirective } from './directives/cells/cells';
 import { initFullscreenDirective } from './directives/fullscreen/fullscreen';
 import { initFixedElementDirective } from './directives/fixed_element';
@@ -144,7 +144,7 @@ export function initTimelionApp(app, deps) {
     $scope.updatedSheets = [];
 
     const savedVisualizations = deps.plugins.visualizations.savedVisualizationsLoader;
-    const timezone = getTimezone(deps.core.uiSettings);
+    const timezone = visTypeTimelion.getTimezone(deps.core.uiSettings);
 
     const defaultExpression = '.es(*)';
 

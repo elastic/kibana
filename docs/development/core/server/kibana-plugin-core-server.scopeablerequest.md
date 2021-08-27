@@ -11,5 +11,5 @@ See [KibanaRequest](./kibana-plugin-core-server.kibanarequest.md)<!-- -->.
 <b>Signature:</b>
 
 ```typescript
-export declare type ScopeableRequest = KibanaRequest | LegacyRequest | FakeRequest;
+export declare type ScopeableRequest = KibanaRequest | FakeRequest;
 ```

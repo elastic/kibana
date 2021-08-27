@@ -301,51 +301,60 @@ export function jobSavedObjectServiceFactory(
     return filterJobObjectIdsForSpace('anomaly-detector', ids, 'datafeed_id', allowWildcards);
   }
 
-  async function assignJobsToSpaces(jobType: JobType, jobIds: string[], spaces: string[]) {
+  async function updateJobsSpaces(
+    jobType: JobType,
+    jobIds: string[],
+    spacesToAdd: string[],
+    spacesToRemove: string[]
+  ) {
     const results: Record<string, { success: boolean; error?: any }> = {};
     const jobs = await _getJobObjects(jobType);
-    for (const id of jobIds) {
-      const job = jobs.find((j) => j.attributes.job_id === id);
+    const jobObjectIdMap = new Map<string, string>();
+    const objectsToUpdate: Array<{ type: string; id: string }> = [];
+    for (const jobId of jobIds) {
+      const job = jobs.find((j) => j.attributes.job_id === jobId);
       if (job === undefined) {
-        results[id] = {
+        results[jobId] = {
           success: false,
-          error: createError(id, 'job_id'),
+          error: createError(jobId, 'job_id'),
         };
       } else {
-        try {
-          await savedObjectsClient.addToNamespaces(ML_SAVED_OBJECT_TYPE, job.id, spaces);
-          results[id] = {
-            success: true,
-          };
-        } catch (error) {
-          results[id] = {
-            success: false,
-            error: getSavedObjectClientError(error),
-          };
-        }
+        jobObjectIdMap.set(job.id, jobId);
+        objectsToUpdate.push({ type: ML_SAVED_OBJECT_TYPE, id: job.id });
       }
     }
-    return results;
-  }
 
-  async function removeJobsFromSpaces(jobType: JobType, jobIds: string[], spaces: string[]) {
-    const results: Record<string, { success: boolean; error?: any }> = {};
-    const jobs = await _getJobObjects(jobType);
-    for (const job of jobs) {
-      if (jobIds.includes(job.attributes.job_id)) {
-        try {
-          await savedObjectsClient.deleteFromNamespaces(ML_SAVED_OBJECT_TYPE, job.id, spaces);
-          results[job.attributes.job_id] = {
-            success: true,
-          };
-        } catch (error) {
-          results[job.attributes.job_id] = {
+    try {
+      const updateResult = await savedObjectsClient.updateObjectsSpaces(
+        objectsToUpdate,
+        spacesToAdd,
+        spacesToRemove
+      );
+      updateResult.objects.forEach(({ id: objectId, error }) => {
+        const jobId = jobObjectIdMap.get(objectId)!;
+        if (error) {
+          results[jobId] = {
             success: false,
             error: getSavedObjectClientError(error),
           };
+        } else {
+          results[jobId] = {
+            success: true,
+          };
         }
-      }
+      });
+    } catch (error) {
+      // If the entire operation failed, return success: false for each job
+      const clientError = getSavedObjectClientError(error);
+      objectsToUpdate.forEach(({ id: objectId }) => {
+        const jobId = jobObjectIdMap.get(objectId)!;
+        results[jobId] = {
+          success: false,
+          error: clientError,
+        };
+      });
     }
+
     return results;
   }
 
@@ -372,8 +381,7 @@ export function jobSavedObjectServiceFactory(
     filterJobIdsForSpace,
     filterDatafeedsForSpace,
     filterDatafeedIdsForSpace,
-    assignJobsToSpaces,
-    removeJobsFromSpaces,
+    updateJobsSpaces,
     bulkCreateJobs,
     getAllJobObjectsForAllSpaces,
     canCreateGlobalJobs,

@@ -17,7 +17,7 @@ export default function ({ getService, getPageObjects }) {
     const { setup, tearDown } = getLifecycleMethods(getService, getPageObjects);
 
     before(async () => {
-      await setup('monitoring/multicluster', {
+      await setup('x-pack/test/functional/es_archives/monitoring/multicluster', {
         from: 'Aug 15, 2017 @ 21:00:00.000',
         to: 'Aug 16, 2017 @ 00:00:00.000',
       });

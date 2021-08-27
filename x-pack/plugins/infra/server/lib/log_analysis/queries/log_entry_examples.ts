@@ -13,7 +13,7 @@ import { defaultRequestParameters } from './common';
 
 export const createLogEntryExamplesQuery = (
   indices: string,
-  runtimeMappings: estypes.RuntimeFields,
+  runtimeMappings: estypes.MappingRuntimeFields,
   timestampField: string,
   tiebreakerField: string,
   startTime: number,
@@ -62,7 +62,7 @@ export const createLogEntryExamplesQuery = (
                   match: {
                     message: {
                       query: categoryQuery,
-                      operator: 'AND' as const,
+                      operator: 'and' as const,
                     },
                   },
                 },

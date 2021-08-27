@@ -21,21 +21,27 @@ import { useKibana } from '../common/lib/kibana';
 import { useAgentStatus } from '../agents/use_agent_status';
 import { useAgentPolicy } from '../agent_policies/use_agent_policy';
 import { ConfirmDeployAgentPolicyModal } from './form/confirmation_modal';
+import { useErrorToast } from '../common/hooks/use_error_toast';
 
 const StyledEuiLoadingSpinner = styled(EuiLoadingSpinner)`
   margin-right: ${({ theme }) => theme.eui.paddingSizes.s};
 `;
 
 interface ActiveStateSwitchProps {
+  disabled?: boolean;
   item: PackagePolicy;
 }
 
 const ActiveStateSwitchComponent: React.FC<ActiveStateSwitchProps> = ({ item }) => {
   const queryClient = useQueryClient();
   const {
+    application: {
+      capabilities: { osquery: permissions },
+    },
     http,
     notifications: { toasts },
   } = useKibana().services;
+  const setErrorToast = useErrorToast();
   const [confirmationModal, setConfirmationModal] = useState(false);
 
   const hideConfirmationModal = useCallback(() => setConfirmationModal(false), []);
@@ -51,6 +57,7 @@ const ActiveStateSwitchComponent: React.FC<ActiveStateSwitchProps> = ({ item }) 
     {
       onSuccess: (response) => {
         queryClient.invalidateQueries('scheduledQueries');
+        setErrorToast();
         toasts.addSuccess(
           response.item.enabled
             ? i18n.translate(
@@ -72,6 +79,10 @@ const ActiveStateSwitchComponent: React.FC<ActiveStateSwitchProps> = ({ item }) 
                 }
               )
         );
+      },
+      onError: (error) => {
+        // @ts-expect-error update types
+        setErrorToast(error, { title: error.body.error, toastMessage: error.body.message });
       },
     }
   );
@@ -119,7 +130,7 @@ const ActiveStateSwitchComponent: React.FC<ActiveStateSwitchProps> = ({ item }) 
       {isLoading && <StyledEuiLoadingSpinner />}
       <EuiSwitch
         checked={item.enabled}
-        disabled={isLoading}
+        disabled={!permissions.writePacks || isLoading}
         showLabel={false}
         label=""
         onChange={handleToggleActiveClick}

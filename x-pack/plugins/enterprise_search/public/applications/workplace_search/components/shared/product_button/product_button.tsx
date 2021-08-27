@@ -35,7 +35,7 @@ export const ProductButton: React.FC = () => {
     <EuiButton {...buttonProps}>
       <FormattedMessage
         id="xpack.enterpriseSearch.workplaceSearch.productCta"
-        defaultMessage="Launch Workplace Search"
+        defaultMessage="Open Workplace Search"
       />
     </EuiButton>
   );

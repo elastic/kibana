@@ -13,12 +13,9 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiButtonEmpty,
   EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPageContent,
   EuiPageContentBody,
+  EuiPageHeader,
   EuiSpacer,
-  EuiTitle,
 } from '@elastic/eui';
 
 import { APP_CREATE_TRANSFORM_CLUSTER_PRIVILEGES } from '../../../../common/constants';
@@ -42,42 +39,44 @@ export const CreateTransformSection: FC<Props> = ({ match }) => {
 
   const { error: searchItemsError, searchItems } = useSearchItems(match.params.savedObjectId);
 
+  const docsLink = (
+    <EuiButtonEmpty
+      href={esTransform}
+      target="_blank"
+      iconType="help"
+      data-test-subj="documentationLink"
+    >
+      <FormattedMessage
+        id="xpack.transform.transformsWizard.transformDocsLinkText"
+        defaultMessage="Transform docs"
+      />
+    </EuiButtonEmpty>
+  );
+
   return (
     <PrivilegesWrapper privileges={APP_CREATE_TRANSFORM_CLUSTER_PRIVILEGES}>
-      <EuiPageContent data-test-subj="transformPageCreateTransform">
-        <EuiTitle size="l">
-          <EuiFlexGroup alignItems="center">
-            <EuiFlexItem grow={true}>
-              <h1>
-                <FormattedMessage
-                  id="xpack.transform.transformsWizard.createTransformTitle"
-                  defaultMessage="Create transform"
-                />
-              </h1>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                href={esTransform}
-                target="_blank"
-                iconType="help"
-                data-test-subj="documentationLink"
-              >
-                <FormattedMessage
-                  id="xpack.transform.transformsWizard.transformDocsLinkText"
-                  defaultMessage="Transform docs"
-                />
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiTitle>
-        <EuiPageContentBody>
-          <EuiSpacer size="l" />
-          {searchItemsError !== undefined && (
+      <EuiPageHeader
+        pageTitle={
+          <FormattedMessage
+            id="xpack.transform.transformsWizard.createTransformTitle"
+            defaultMessage="Create transform"
+          />
+        }
+        rightSideItems={[docsLink]}
+        bottomBorder
+      />
+
+      <EuiSpacer size="l" />
+
+      <EuiPageContentBody data-test-subj="transformPageCreateTransform">
+        {searchItemsError !== undefined && (
+          <>
             <EuiCallOut title={searchItemsError} color="danger" iconType="alert" />
-          )}
-          {searchItems !== undefined && <Wizard searchItems={searchItems} />}
-        </EuiPageContentBody>
-      </EuiPageContent>
+            <EuiSpacer size="l" />
+          </>
+        )}
+        {searchItems !== undefined && <Wizard searchItems={searchItems} />}
+      </EuiPageContentBody>
     </PrivilegesWrapper>
   );
 };

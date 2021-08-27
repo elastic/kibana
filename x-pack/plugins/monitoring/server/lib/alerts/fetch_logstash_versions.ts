@@ -20,7 +20,7 @@ export async function fetchLogstashVersions(
 ): Promise<AlertVersions[]> {
   const params = {
     index,
-    filterPath: ['aggregations'],
+    filter_path: ['aggregations'],
     body: {
       size: 0,
       query: {

@@ -13,15 +13,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
 
   describe('When on the Trusted Apps list', function () {
-    this.tags('ciGroup7');
-
     before(async () => {
       await pageObjects.trustedApps.navigateToTrustedAppsList();
     });
 
     it('should show page title', async () => {
       expect(await testSubjects.getVisibleText('header-page-title')).to.equal(
-        'Trusted Applications'
+        'Trusted applications'
       );
     });
 

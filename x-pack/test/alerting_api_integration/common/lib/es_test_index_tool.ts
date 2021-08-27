@@ -59,41 +59,54 @@ export class ESTestIndexTool {
   }
 
   async destroy() {
-    return await this.es.indices.delete({ index: this.index, ignore: [404] });
+    const indexExists = (await this.es.indices.exists({ index: this.index })).body;
+    if (indexExists) {
+      return await this.es.indices.delete({ index: this.index });
+    }
   }
 
-  async search(source: string, reference: string) {
-    return await this.es.search({
+  async search(source: string, reference?: string) {
+    const body = reference
+      ? {
+          query: {
+            bool: {
+              must: [
+                {
+                  term: {
+                    source,
+                  },
+                },
+                {
+                  term: {
+                    reference,
+                  },
+                },
+              ],
+            },
+          },
+        }
+      : {
+          query: {
+            term: {
+              source,
+            },
+          },
+        };
+    const params = {
       index: this.index,
       size: 1000,
-      body: {
-        query: {
-          bool: {
-            must: [
-              {
-                term: {
-                  source,
-                },
-              },
-              {
-                term: {
-                  reference,
-                },
-              },
-            ],
-          },
-        },
-      },
-    });
+      body,
+    };
+    return await this.es.search(params);
   }
 
   async waitForDocs(source: string, reference: string, numDocs: number = 1) {
     return await this.retry.try(async () => {
       const searchResult = await this.search(source, reference);
-      if (searchResult.hits.total.value < numDocs) {
-        throw new Error(`Expected ${numDocs} but received ${searchResult.hits.total.value}.`);
+      if (searchResult.body.hits.total.value < numDocs) {
+        throw new Error(`Expected ${numDocs} but received ${searchResult.body.hits.total.value}.`);
       }
-      return searchResult.hits.hits;
+      return searchResult.body.hits.hits;
     });
   }
 }

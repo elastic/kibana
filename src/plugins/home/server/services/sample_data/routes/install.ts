@@ -7,7 +7,12 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IRouter, Logger, IScopedClusterClient } from 'src/core/server';
+import type {
+  IRouter,
+  Logger,
+  IScopedClusterClient,
+  SavedObjectsBulkCreateObject,
+} from 'src/core/server';
 import { SampleDatasetSchema } from '../lib/sample_dataset_registry_types';
 import { createIndexName } from '../lib/create_index_name';
 import {
@@ -148,8 +153,9 @@ export function createInstallRoute(
 
         const client = getClient({ includedHiddenTypes });
 
+        const savedObjects = sampleDataset.savedObjects as SavedObjectsBulkCreateObject[];
         createResults = await client.bulkCreate(
-          sampleDataset.savedObjects.map(({ version, ...savedObject }) => savedObject),
+          savedObjects.map(({ version, ...savedObject }) => savedObject),
           { overwrite: true }
         );
       } catch (err) {

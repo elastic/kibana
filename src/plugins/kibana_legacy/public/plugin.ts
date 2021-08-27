@@ -8,7 +8,6 @@
 
 import { PluginInitializerContext, CoreStart, CoreSetup } from 'kibana/public';
 import { ConfigSchema } from '../config';
-import { getDashboardConfig } from './dashboard_config';
 import { injectHeaderStyle } from './utils/inject_header_style';
 
 export class KibanaLegacyPlugin {
@@ -22,16 +21,19 @@ export class KibanaLegacyPlugin {
     injectHeaderStyle(uiSettings);
     return {
       /**
-       * Used to power dashboard mode. Should be removed when dashboard mode is removed eventually.
-       * @deprecated
-       */
-      dashboardConfig: getDashboardConfig(!application.capabilities.dashboard.showWriteControls),
-      /**
        * Loads the font-awesome icon font. Should be removed once the last consumer has migrated to EUI
        * @deprecated
        */
       loadFontAwesome: async () => {
         await import('./font_awesome');
+      },
+      /**
+       * Loads angular bootstrap modules. Should be removed once the last consumer has migrated to EUI
+       * @deprecated
+       */
+      loadAngularBootstrap: async () => {
+        const { initAngularBootstrap } = await import('./angular_bootstrap');
+        initAngularBootstrap();
       },
       /**
        * @deprecated

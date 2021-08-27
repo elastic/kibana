@@ -5,14 +5,21 @@
  * 2.0.
  */
 
-import { SERVER_SIDE_EVENT_COUNT } from '../../screens/timeline';
+import {
+  ADD_FILTER,
+  SERVER_SIDE_EVENT_COUNT,
+  TIMELINE_KQLMODE_FILTER,
+  TIMELINE_KQLMODE_SEARCH,
+  TIMELINE_SEARCH_OR_FILTER,
+} from '../../screens/timeline';
 import { cleanKibana } from '../../tasks/common';
 
-import { loginAndWaitForPage } from '../../tasks/login';
+import { loginAndWaitForPage, loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
 import { openTimelineUsingToggle } from '../../tasks/security_main';
 import { executeTimelineKQL } from '../../tasks/timeline';
+import { waitForTimelinesPanelToBeLoaded } from '../../tasks/timelines';
 
-import { HOSTS_URL } from '../../urls/navigation';
+import { HOSTS_URL, TIMELINES_URL } from '../../urls/navigation';
 
 describe('timeline search or filter KQL bar', () => {
   beforeEach(() => {
@@ -26,5 +33,39 @@ describe('timeline search or filter KQL bar', () => {
     executeTimelineKQL(hostExistsQuery);
 
     cy.get(SERVER_SIDE_EVENT_COUNT).should(($count) => expect(+$count.text()).to.be.gt(0));
+  });
+});
+
+describe('Update kqlMode for timeline', () => {
+  before(() => {
+    cleanKibana();
+    loginAndWaitForPageWithoutDateRange(TIMELINES_URL);
+    waitForTimelinesPanelToBeLoaded();
+    openTimelineUsingToggle();
+  });
+
+  beforeEach(() => {
+    cy.intercept('PATCH', '/api/timeline').as('update');
+    cy.get(TIMELINE_SEARCH_OR_FILTER)
+      .pipe(($el) => $el.trigger('click'))
+      .should('exist');
+  });
+
+  it('should be able to update timeline kqlMode with filter', () => {
+    cy.get(TIMELINE_KQLMODE_FILTER).click();
+    cy.wait('@update').then(({ response }) => {
+      cy.wrap(response!.statusCode).should('eql', 200);
+      cy.wrap(response!.body.data.persistTimeline.timeline.kqlMode).should('eql', 'filter');
+      cy.get(ADD_FILTER).should('exist');
+    });
+  });
+
+  it('should be able to update timeline kqlMode with search', () => {
+    cy.get(TIMELINE_KQLMODE_SEARCH).click();
+    cy.wait('@update').then(({ response }) => {
+      cy.wrap(response!.statusCode).should('eql', 200);
+      cy.wrap(response!.body.data.persistTimeline.timeline.kqlMode).should('eql', 'search');
+      cy.get(ADD_FILTER).should('not.exist');
+    });
   });
 });

@@ -13,11 +13,10 @@ import {
   EuiForm,
   EuiLink,
   EuiPageContent,
+  EuiPageHeader,
   EuiSpacer,
-  EuiText,
-  EuiTitle,
 } from '@elastic/eui';
-import React, { Component, Fragment } from 'react';
+import React, { Component } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -96,17 +95,50 @@ export class EditRoleMappingPage extends Component<Props, State> {
 
     if (loadState === 'loading') {
       return (
-        <EuiPageContent>
+        <EuiPageContent horizontalPosition="center" verticalPosition="center" color="subdued">
           <SectionLoading />
         </EuiPageContent>
       );
     }
 
     return (
-      <div>
+      <>
+        <EuiPageHeader
+          bottomBorder
+          pageTitle={this.getFormTitle()}
+          description={
+            <>
+              <FormattedMessage
+                id="xpack.security.management.editRoleMapping.roleMappingDescription"
+                defaultMessage="Use role mappings to control which roles are assigned to your users. {learnMoreLink}"
+                values={{
+                  learnMoreLink: (
+                    <EuiLink
+                      href={this.props.docLinks.links.security.mappingRoles}
+                      external={true}
+                      target="_blank"
+                    >
+                      <FormattedMessage
+                        id="xpack.security.management.editRoleMapping.learnMoreLinkText"
+                        defaultMessage="Learn more about role mappings."
+                      />
+                    </EuiLink>
+                  ),
+                }}
+              />
+              {!this.state.hasCompatibleRealms && (
+                <>
+                  <EuiSpacer size="s" />
+                  <NoCompatibleRealms />
+                </>
+              )}
+            </>
+          }
+        />
+
+        <EuiSpacer size="l" />
+
         <EuiForm isInvalid={this.state.formError.isInvalid} error={this.state.formError.error}>
-          {this.getFormTitle()}
-          <EuiSpacer />
           <MappingInfoPanel
             roleMapping={this.state.roleMapping!}
             onChange={(roleMapping) => this.setState({ roleMapping })}
@@ -135,57 +167,24 @@ export class EditRoleMappingPage extends Component<Props, State> {
           <EuiSpacer />
           {this.getFormButtons()}
         </EuiForm>
-      </div>
+      </>
     );
   }
 
   private getFormTitle = () => {
+    if (this.editingExistingRoleMapping()) {
+      return (
+        <FormattedMessage
+          id="xpack.security.management.editRoleMapping.editRoleMappingTitle"
+          defaultMessage="Edit role mapping"
+        />
+      );
+    }
     return (
-      <Fragment>
-        <EuiTitle size="l">
-          <h1>
-            {this.editingExistingRoleMapping() ? (
-              <FormattedMessage
-                id="xpack.security.management.editRoleMapping.editRoleMappingTitle"
-                defaultMessage="Edit role mapping"
-              />
-            ) : (
-              <FormattedMessage
-                id="xpack.security.management.editRoleMapping.createRoleMappingTitle"
-                defaultMessage="Create role mapping"
-              />
-            )}
-          </h1>
-        </EuiTitle>
-        <EuiText color="subdued" size="s">
-          <p>
-            <FormattedMessage
-              id="xpack.security.management.editRoleMapping.roleMappingDescription"
-              defaultMessage="Use role mappings to control which roles are assigned to your users. {learnMoreLink}"
-              values={{
-                learnMoreLink: (
-                  <EuiLink
-                    href={this.props.docLinks.links.security.mappingRoles}
-                    external={true}
-                    target="_blank"
-                  >
-                    <FormattedMessage
-                      id="xpack.security.management.editRoleMapping.learnMoreLinkText"
-                      defaultMessage="Learn more."
-                    />
-                  </EuiLink>
-                ),
-              }}
-            />
-          </p>
-        </EuiText>
-        {!this.state.hasCompatibleRealms && (
-          <>
-            <EuiSpacer size="s" />
-            <NoCompatibleRealms />
-          </>
-        )}
-      </Fragment>
+      <FormattedMessage
+        id="xpack.security.management.editRoleMapping.createRoleMappingTitle"
+        defaultMessage="Create role mapping"
+      />
     );
   };
 

@@ -22,7 +22,21 @@ describe('csp collector', () => {
   const mockedFetchContext = createCollectorFetchContextMock();
 
   function updateCsp(config: Partial<ICspConfig>) {
-    httpMock.csp = new CspConfig(config);
+    httpMock.csp = new CspConfig({
+      ...CspConfig.DEFAULT,
+      style_src: [],
+      worker_src: [],
+      script_src: [],
+      connect_src: [],
+      default_src: [],
+      font_src: [],
+      frame_src: [],
+      img_src: [],
+      frame_ancestors: [],
+      report_uri: [],
+      report_to: [],
+      ...config,
+    });
   }
 
   beforeEach(() => {

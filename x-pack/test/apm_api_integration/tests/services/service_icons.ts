@@ -48,6 +48,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expectSnapshot(response.body).toMatchInline(`
           Object {
             "agentName": "java",
+            "cloudProvider": "gcp",
             "containerType": "Kubernetes",
           }
         `);

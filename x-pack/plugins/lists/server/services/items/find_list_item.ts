@@ -6,17 +6,17 @@
  */
 
 import { ElasticsearchClient } from 'kibana/server';
-
-import {
+import type {
   Filter,
   FoundListItemSchema,
   ListId,
   Page,
   PerPage,
-  SearchEsListItemSchema,
   SortFieldOrUndefined,
   SortOrderOrUndefined,
-} from '../../../common/schemas';
+} from '@kbn/securitysolution-io-ts-list-types';
+
+import { SearchEsListItemSchema } from '../../schemas/elastic_response';
 import { getList } from '../lists';
 import {
   encodeCursor,
@@ -76,7 +76,6 @@ export const findListItem = async ({
 
     const { body: respose } = await esClient.count({
       body: {
-        // @ts-expect-error GetQueryFilterReturn is not assignable to QueryContainer
         query,
       },
       ignore_unavailable: true,
@@ -89,7 +88,6 @@ export const findListItem = async ({
       // to explicitly define the type <T>.
       const { body: response } = await esClient.search<SearchEsListItemSchema>({
         body: {
-          // @ts-expect-error GetQueryFilterReturn is not assignable to QueryContainer
           query,
           search_after: scroll.searchAfter,
           sort: getSortWithTieBreaker({ sortField, sortOrder }),

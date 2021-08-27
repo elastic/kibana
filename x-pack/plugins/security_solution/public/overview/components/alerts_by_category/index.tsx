@@ -33,6 +33,7 @@ import { GlobalTimeArgs } from '../../../common/containers/use_global_time';
 import { SecurityPageName } from '../../../app/types';
 import { useFormatUrl } from '../../../common/components/link_to';
 import { LinkButton } from '../../../common/components/links';
+import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
 
 const ID = 'alertsByCategoryOverview';
 
@@ -67,7 +68,8 @@ const AlertsByCategoryComponent: React.FC<Props> = ({
   const goToHostAlerts = useCallback(
     (ev) => {
       ev.preventDefault();
-      navigateToApp(`${APP_ID}:${SecurityPageName.hosts}`, {
+      navigateToApp(APP_ID, {
+        deepLinkId: SecurityPageName.hosts,
         path: getTabsOnHostsUrl(HostsTableType.alerts, urlSearch),
       });
     },
@@ -100,7 +102,7 @@ const AlertsByCategoryComponent: React.FC<Props> = ({
     []
   );
 
-  const filterQuery = useMemo(
+  const [filterQuery, kqlError] = useMemo(
     () =>
       convertToBuildEsQuery({
         config: esQuery.getEsQueryConfig(uiSettings),
@@ -110,6 +112,8 @@ const AlertsByCategoryComponent: React.FC<Props> = ({
       }),
     [filters, indexPattern, uiSettings, query]
   );
+
+  useInvalidFilterQuery({ id: ID, filterQuery, kqlError, query, startDate: from, endDate: to });
 
   useEffect(() => {
     return () => {

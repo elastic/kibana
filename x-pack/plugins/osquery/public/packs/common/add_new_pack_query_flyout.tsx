@@ -8,7 +8,7 @@
 import { EuiFlyout, EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
 import React from 'react';
 
-import { SavedQueryForm } from '../../queries/form';
+import { SavedQueryForm } from '../../saved_queries/form';
 
 // @ts-expect-error update types
 const AddNewPackQueryFlyoutComponent = ({ handleClose, handleSubmit }) => (
@@ -19,7 +19,10 @@ const AddNewPackQueryFlyoutComponent = ({ handleClose, handleSubmit }) => (
       </EuiTitle>
     </EuiFlyoutHeader>
     <EuiFlyoutBody>
-      <SavedQueryForm handleSubmit={handleSubmit} />
+      {
+        // @ts-expect-error update types
+        <SavedQueryForm handleSubmit={handleSubmit} />
+      }
     </EuiFlyoutBody>
   </EuiFlyout>
 );

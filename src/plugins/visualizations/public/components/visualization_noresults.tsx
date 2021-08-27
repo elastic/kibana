@@ -48,3 +48,6 @@ export class VisualizationNoResults extends React.Component<VisualizationNoResul
     }
   }
 }
+
+// eslint-disable-next-line import/no-default-export
+export default VisualizationNoResults;

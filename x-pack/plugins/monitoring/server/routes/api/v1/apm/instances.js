@@ -44,6 +44,7 @@ export function apmInstancesRoute(server) {
         return {
           stats,
           apms,
+          cgroup: req.server.config().get('monitoring.ui.container.apm.enabled'),
         };
       } catch (err) {
         return handleError(err, req);

@@ -29,6 +29,7 @@ import {
   useGetFieldsByIssueTypeResponse,
 } from './mock';
 import { CreateCase } from '.';
+import { SECURITY_SOLUTION_OWNER } from '../../../common';
 
 jest.mock('../../containers/api');
 jest.mock('../../containers/use_get_tags');
@@ -91,7 +92,7 @@ describe('CreateCase case', () => {
   it('it renders', async () => {
     const wrapper = mount(
       <TestProviders>
-        <CreateCase {...defaultProps} />
+        <CreateCase {...defaultProps} owner={[SECURITY_SOLUTION_OWNER]} />
       </TestProviders>
     );
 
@@ -102,7 +103,7 @@ describe('CreateCase case', () => {
   it('should call cancel on cancel click', async () => {
     const wrapper = mount(
       <TestProviders>
-        <CreateCase {...defaultProps} />
+        <CreateCase {...defaultProps} owner={[SECURITY_SOLUTION_OWNER]} />
       </TestProviders>
     );
 
@@ -113,7 +114,7 @@ describe('CreateCase case', () => {
   it('should redirect to new case when posting the case', async () => {
     const wrapper = mount(
       <TestProviders>
-        <CreateCase {...defaultProps} />
+        <CreateCase {...defaultProps} owner={[SECURITY_SOLUTION_OWNER]} />
       </TestProviders>
     );
 

@@ -15,7 +15,7 @@ export const createLogEntryDatasetsQuery = (
   timestampField: string,
   startTime: number,
   endTime: number,
-  runtimeMappings: estypes.RuntimeFields,
+  runtimeMappings: estypes.MappingRuntimeFields,
   size: number,
   afterKey?: CompositeDatasetKey
 ) => ({

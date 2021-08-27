@@ -7,7 +7,7 @@
 
 /* eslint-disable import/no-default-export */
 
-import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
+import { FtrConfigProviderContext } from '@kbn/test';
 import { default as createTestConfig } from './config';
 
 export default async function (context: FtrConfigProviderContext) {

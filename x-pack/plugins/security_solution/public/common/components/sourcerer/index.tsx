@@ -128,7 +128,6 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
         iconType="arrowDown"
         isLoading={loading}
         onClick={setPopoverIsOpenCb}
-        size="l"
         title={i18n.SOURCERER}
       >
         {i18n.SOURCERER}
@@ -198,7 +197,6 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
                 data-test-subj="sourcerer-reset"
                 flush="left"
                 onClick={resetDataSources}
-                size="l"
                 title={i18n.INDEX_PATTERNS_RESET}
               >
                 {i18n.INDEX_PATTERNS_RESET}

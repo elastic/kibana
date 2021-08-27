@@ -7,12 +7,13 @@
  */
 
 import { identity } from 'lodash';
+import type { SerializableRecord } from '@kbn/utility-types';
 import { AnyExpressionFunctionDefinition } from './types';
 import { ExpressionFunctionParameter } from './expression_function_parameter';
 import { ExpressionValue } from '../expression_types/types';
 import { ExpressionAstFunction } from '../ast';
 import { SavedObjectReference } from '../../../../core/types';
-import { PersistableState, SerializableState } from '../../../kibana_utils/common';
+import { PersistableState } from '../../../kibana_utils/common';
 
 export class ExpressionFunction implements PersistableState<ExpressionAstFunction['arguments']> {
   /**
@@ -65,7 +66,7 @@ export class ExpressionFunction implements PersistableState<ExpressionAstFunctio
     references: SavedObjectReference[]
   ) => ExpressionAstFunction['arguments'];
   migrations: {
-    [key: string]: (state: SerializableState) => SerializableState;
+    [key: string]: (state: SerializableRecord) => SerializableRecord;
   };
 
   constructor(functionDefinition: AnyExpressionFunctionDefinition) {

@@ -3235,14 +3235,7 @@
           }
         },
         "number_of_replicas": "1",
-        "number_of_shards": "1",
-        "routing": {
-          "allocation": {
-            "include": {
-              "_tier": "data_hot"
-            }
-          }
-        }
+        "number_of_shards": "1"
       }
     }
   }

@@ -8,6 +8,10 @@
 
 import { i18n } from '@kbn/i18n';
 import { EmbeddablePersistableStateService } from 'src/plugins/embeddable/common';
+
+import { DashboardContainerInput } from '../..';
+import { DASHBOARD_CONTAINER_TYPE } from './dashboard_constants';
+import { DashboardContainer, DashboardContainerServices } from './dashboard_container';
 import {
   Container,
   ErrorEmbeddable,
@@ -15,12 +19,6 @@ import {
   EmbeddableFactory,
   EmbeddableFactoryDefinition,
 } from '../../services/embeddable';
-import {
-  DashboardContainer,
-  DashboardContainerInput,
-  DashboardContainerServices,
-} from './dashboard_container';
-import { DASHBOARD_CONTAINER_TYPE } from './dashboard_constants';
 import {
   createExtract,
   createInject,

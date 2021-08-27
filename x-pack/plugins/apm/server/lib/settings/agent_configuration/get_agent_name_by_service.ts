@@ -9,7 +9,6 @@ import { ProcessorEvent } from '../../../../common/processor_event';
 import { Setup } from '../../helpers/setup_request';
 import { SERVICE_NAME } from '../../../../common/elasticsearch_fieldnames';
 import { AGENT_NAME } from '../../../../common/elasticsearch_fieldnames';
-import { withApmSpan } from '../../../utils/with_apm_span';
 
 export async function getAgentNameByService({
   serviceName,
@@ -18,35 +17,36 @@ export async function getAgentNameByService({
   serviceName: string;
   setup: Setup;
 }) {
-  return withApmSpan('get_agent_name_by_service', async () => {
-    const { apmEventClient } = setup;
+  const { apmEventClient } = setup;
 
-    const params = {
-      terminateAfter: 1,
-      apm: {
-        events: [
-          ProcessorEvent.transaction,
-          ProcessorEvent.error,
-          ProcessorEvent.metric,
-        ],
-      },
-      body: {
-        size: 0,
-        query: {
-          bool: {
-            filter: [{ term: { [SERVICE_NAME]: serviceName } }],
-          },
-        },
-        aggs: {
-          agent_names: {
-            terms: { field: AGENT_NAME, size: 1 },
-          },
+  const params = {
+    terminateAfter: 1,
+    apm: {
+      events: [
+        ProcessorEvent.transaction,
+        ProcessorEvent.error,
+        ProcessorEvent.metric,
+      ],
+    },
+    body: {
+      size: 0,
+      query: {
+        bool: {
+          filter: [{ term: { [SERVICE_NAME]: serviceName } }],
         },
       },
-    };
+      aggs: {
+        agent_names: {
+          terms: { field: AGENT_NAME, size: 1 },
+        },
+      },
+    },
+  };
 
-    const { aggregations } = await apmEventClient.search(params);
-    const agentName = aggregations?.agent_names.buckets[0]?.key;
-    return agentName as string | undefined;
-  });
+  const { aggregations } = await apmEventClient.search(
+    'get_agent_name_by_service',
+    params
+  );
+  const agentName = aggregations?.agent_names.buckets[0]?.key;
+  return agentName as string | undefined;
 }

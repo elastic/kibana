@@ -39,6 +39,7 @@ interface Props extends EuiFlyoutProps {
 
 export const CreateAgentPolicyFlyout: React.FunctionComponent<Props> = ({
   onClose,
+  as,
   ...restOfProps
 }) => {
   const { notifications } = useStartServices();

@@ -7,10 +7,13 @@
  */
 import type { Assign } from '@kbn/utility-types';
 import type { FetchedIndexPattern, IndexPatternValue } from '../../../../../common/types';
+import type { IndexPattern } from '../../../../../../data/common';
 
 /** @internal **/
 export interface SelectIndexComponentProps {
-  fetchedIndex: FetchedIndexPattern;
+  fetchedIndex: FetchedIndexPattern & {
+    defaultIndex?: IndexPattern | null;
+  };
   onIndexChange: (value: IndexPatternValue) => void;
   onModeChange: (useKibanaIndexes: boolean, index?: FetchedIndexPattern) => void;
   'data-test-subj': string;

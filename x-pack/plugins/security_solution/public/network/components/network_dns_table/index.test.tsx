@@ -25,6 +25,8 @@ import { useMountAppended } from '../../../common/utils/use_mount_appended';
 import { NetworkDnsTable } from '.';
 import { mockData } from './mock';
 
+jest.mock('../../../common/lib/kibana');
+
 describe('NetworkTopNFlow Table Component', () => {
   const loadPage = jest.fn();
   const state: State = mockGlobalState;

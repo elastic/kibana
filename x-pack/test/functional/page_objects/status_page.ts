@@ -5,38 +5,17 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
-import { FtrProviderContext } from '../ftr_provider_context';
+import { FtrService } from '../ftr_provider_context';
 
-export function StatusPagePageProvider({ getService }: FtrProviderContext) {
-  const retry = getService('retry');
-  const log = getService('log');
-  const browser = getService('browser');
-  const find = getService('find');
-  const deployment = getService('deployment');
+export class StatusPageObject extends FtrService {
+  private readonly log = this.ctx.getService('log');
+  private readonly find = this.ctx.getService('find');
 
-  class StatusPage {
-    async initTests() {
-      log.debug('StatusPage:initTests');
-    }
-
-    async navigateToPage() {
-      return await retry.try(async () => {
-        const url = deployment.getHostPort() + '/status';
-        log.info(`StatusPage:navigateToPage(): ${url}`);
-        await browser.get(url);
-      });
-    }
-
-    async expectStatusPage(): Promise<void> {
-      return await retry.try(async () => {
-        log.debug(`expectStatusPage()`);
-        await find.byCssSelector('[data-test-subj="statusPageRoot"]', 20000);
-        const url = await browser.getCurrentUrl();
-        expect(url).to.contain(`/status`);
-      });
-    }
+  async initTests() {
+    this.log.debug('StatusPage:initTests');
   }
 
-  return new StatusPage();
+  async expectStatusPage(): Promise<void> {
+    await this.find.byCssSelector('[data-test-subj="statusPageRoot"]', 20000);
+  }
 }

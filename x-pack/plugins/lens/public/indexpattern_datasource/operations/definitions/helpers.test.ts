@@ -37,7 +37,7 @@ describe('helpers', () => {
         createMockedIndexPattern()
       );
       expect(messages).toHaveLength(1);
-      expect(messages![0]).toEqual('Field timestamp was not found');
+      expect(messages![0]).toEqual('Field timestamp is of the wrong type');
     });
 
     it('returns no message if all fields are matching', () => {

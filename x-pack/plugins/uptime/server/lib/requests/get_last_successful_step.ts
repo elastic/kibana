@@ -7,7 +7,7 @@
 
 import { estypes } from '@elastic/elasticsearch';
 import { UMElasticsearchQueryFn } from '../adapters/framework';
-import { Ping } from '../../../common/runtime_types/ping';
+import { JourneyStep } from '../../../common/runtime_types/ping';
 
 export interface GetStepScreenshotParams {
   monitorId: string;
@@ -17,7 +17,7 @@ export interface GetStepScreenshotParams {
 
 export const getStepLastSuccessfulStep: UMElasticsearchQueryFn<
   GetStepScreenshotParams,
-  any
+  JourneyStep | null
 > = async ({ uptimeEsClient, monitorId, stepIndex, timestamp }) => {
   const lastSuccessCheckParams: estypes.SearchRequest['body'] = {
     size: 1,
@@ -65,11 +65,11 @@ export const getStepLastSuccessfulStep: UMElasticsearchQueryFn<
 
   const { body: result } = await uptimeEsClient.search({ body: lastSuccessCheckParams });
 
-  if (result?.hits?.total.value < 1) {
+  if (result.hits.total.value < 1) {
     return null;
   }
 
-  const step = result?.hits.hits[0]._source as Ping & { '@timestamp': string };
+  const step = result.hits.hits[0]._source as JourneyStep & { '@timestamp': string };
 
   return {
     ...step,

@@ -46,6 +46,8 @@
 
   @include kbnThemeStyle('v8') {
     padding-bottom: $euiSizeS + 1px;
+    // Firefox adds margin to textarea
+    margin: 0;
 
     &.kbnQueryBar__textarea--hasPrepend {
       border-top-left-radius: 0;

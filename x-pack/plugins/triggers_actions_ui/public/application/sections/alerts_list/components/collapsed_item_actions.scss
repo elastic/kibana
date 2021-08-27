@@ -4,20 +4,6 @@
   }
 }
 
-.actCollapsedItemActions__item {
-  padding: $euiSizeM;
-}
-
-.actCollapsedItemActions__delete {
-  display: flex;
-
-  .actCollapsedItemActions__deleteIcon {
-    width: $euiSwitchWidthCompressed;
-    text-align: center;
-  }
-
-  .actCollapsedItemActions__deleteLabel {
-    padding-left: $euiSizeS;
-    padding-top: $euiSizeXS * .5;
-  }
+button[data-test-subj='deleteAlert'] {
+  color: $euiColorDanger;
 }

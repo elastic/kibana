@@ -263,6 +263,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
       dateRange: { fromDate: 'now-1d', toDate: 'now' },
       columnId: 'col1',
       layerId: 'first',
+      layerType: 'data',
       uniqueLabel: 'stuff',
       groupId: 'group1',
       filterOperations: () => true,
@@ -284,6 +285,8 @@ describe('IndexPatternDimensionEditorPanel', () => {
       } as unknown) as DataPublicPluginStart,
       core: {} as CoreSetup,
       dimensionGroups: [],
+      isFullscreen: false,
+      toggleFullscreen: () => {},
     };
 
     jest.clearAllMocks();
@@ -904,7 +907,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
           layers: {
             first: {
               ...testState.layers.first,
-              columnOrder: ['ref1', 'col1', 'ref1Copy', 'col1Copy'],
+              columnOrder: ['col1', 'ref1', 'ref1Copy', 'col1Copy'],
               columns: {
                 ref1: testState.layers.first.columns.ref1,
                 col1: testState.layers.first.columns.col1,
@@ -974,7 +977,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
           layers: {
             first: {
               ...testState.layers.first,
-              columnOrder: ['ref1', 'ref2', 'col1', 'ref1Copy', 'ref2Copy', 'col1Copy'],
+              columnOrder: ['col1', 'ref1', 'ref2', 'ref1Copy', 'col1Copy', 'ref2Copy'],
               columns: {
                 ref1: testState.layers.first.columns.ref1,
                 ref2: testState.layers.first.columns.ref2,
@@ -1061,8 +1064,8 @@ describe('IndexPatternDimensionEditorPanel', () => {
                 'col1',
                 'innerRef1Copy',
                 'ref1Copy',
-                'ref2Copy',
                 'col1Copy',
+                'ref2Copy',
               ],
               columns: {
                 innerRef1: testState.layers.first.columns.innerRef1,

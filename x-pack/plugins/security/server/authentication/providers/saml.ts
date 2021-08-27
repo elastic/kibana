@@ -624,9 +624,9 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
       await this.options.client.asInternalUser.transport.request({
         method: 'POST',
         path: '/_security/saml/invalidate',
-        // Elasticsearch expects `queryString` without leading `?`, so we should strip it with `slice`.
+        // Elasticsearch expects `query_string` without leading `?`, so we should strip it with `slice`.
         body: {
-          queryString: request.url.search ? request.url.search.slice(1) : '',
+          query_string: request.url.search ? request.url.search.slice(1) : '',
           realm: this.realm,
         },
       })

@@ -9,7 +9,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { TimeseriesVisData } from '../../../../common/types';
+import type { TimeseriesVisData } from '../../../../common/types';
 import { FormValidationContext } from '../../contexts/form_validation_context';
 import { VisDataContext } from '../../contexts/vis_data_context';
 import { PanelModelContext } from '../../contexts/panel_model_context';

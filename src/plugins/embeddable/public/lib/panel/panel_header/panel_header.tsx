@@ -36,7 +36,7 @@ export interface PanelHeaderProps {
   embeddable: IEmbeddable;
   headerId?: string;
   showPlaceholderTitle?: boolean;
-  customizeTitle: CustomizePanelTitleAction;
+  customizeTitle?: CustomizePanelTitleAction;
 }
 
 function renderBadges(badges: Array<Action<EmbeddableContext>>, embeddable: IEmbeddable) {
@@ -177,7 +177,7 @@ export function PanelHeader({
         >
           {title || placeholderTitle}
         </span>
-      ) : (
+      ) : customizeTitle ? (
         <EuiLink
           color="text"
           data-test-subj={'embeddablePanelTitleLink'}
@@ -193,7 +193,7 @@ export function PanelHeader({
         >
           {title || placeholderTitle}
         </EuiLink>
-      );
+      ) : null;
     }
     return description ? (
       <EuiToolTip

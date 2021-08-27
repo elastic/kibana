@@ -49,6 +49,7 @@ test('render', () => {
       offset={1}
       paramValues={{}}
       replaceTemplateStrings={() => {}}
+      isCloudEnabled={false}
     />
   );
   expect(component).toMatchSnapshot(); // eslint-disable-line
@@ -74,6 +75,7 @@ describe('statusCheckState', () => {
         statusCheckConfig={statusCheckConfig}
         replaceTemplateStrings={() => {}}
         statusCheckState={StatusCheckStates.FETCHING}
+        isCloudEnabled={false}
       />
     );
     expect(component).toMatchSnapshot(); // eslint-disable-line
@@ -90,6 +92,7 @@ describe('statusCheckState', () => {
         statusCheckConfig={statusCheckConfig}
         replaceTemplateStrings={() => {}}
         statusCheckState={StatusCheckStates.FETCHING}
+        isCloudEnabled={false}
       />
     );
     expect(component).toMatchSnapshot(); // eslint-disable-line
@@ -106,6 +109,7 @@ describe('statusCheckState', () => {
         statusCheckConfig={statusCheckConfig}
         replaceTemplateStrings={() => {}}
         statusCheckState={StatusCheckStates.ERROR}
+        isCloudEnabled={false}
       />
     );
     expect(component).toMatchSnapshot(); // eslint-disable-line
@@ -122,6 +126,7 @@ describe('statusCheckState', () => {
         statusCheckConfig={statusCheckConfig}
         replaceTemplateStrings={() => {}}
         statusCheckState={StatusCheckStates.NO_DATA}
+        isCloudEnabled={false}
       />
     );
     expect(component).toMatchSnapshot(); // eslint-disable-line
@@ -138,6 +143,7 @@ describe('statusCheckState', () => {
         statusCheckConfig={statusCheckConfig}
         replaceTemplateStrings={() => {}}
         statusCheckState={StatusCheckStates.HAS_DATA}
+        isCloudEnabled={false}
       />
     );
     expect(component).toMatchSnapshot(); // eslint-disable-line

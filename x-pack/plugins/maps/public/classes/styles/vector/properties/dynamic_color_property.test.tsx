@@ -642,7 +642,7 @@ test('Should read out ordinal type correctly', async () => {
 });
 
 describe('renderDataMappingPopover', () => {
-  test('Should enable toggle when field is backed by geojson-source', () => {
+  test('Should render OrdinalDataMappingPopover', () => {
     const colorStyle = makeProperty(
       {
         color: 'Blues',
@@ -651,25 +651,6 @@ describe('renderDataMappingPopover', () => {
       },
       undefined,
       mockField
-    );
-
-    const legendRow = colorStyle.renderDataMappingPopover(() => {});
-    expect(legendRow).toMatchSnapshot();
-  });
-
-  test('Should disable toggle when field is not backed by geojson source', () => {
-    const nonGeoJsonField = Object.create(mockField);
-    nonGeoJsonField.canReadFromGeoJson = () => {
-      return false;
-    };
-    const colorStyle = makeProperty(
-      {
-        color: 'Blues',
-        type: undefined,
-        fieldMetaOptions,
-      },
-      undefined,
-      nonGeoJsonField
     );
 
     const legendRow = colorStyle.renderDataMappingPopover(() => {});

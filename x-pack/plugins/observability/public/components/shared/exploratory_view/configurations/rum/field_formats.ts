@@ -12,6 +12,7 @@ import {
   LCP_FIELD,
   TBT_FIELD,
   TRANSACTION_DURATION,
+  TRANSACTION_TIME_TO_FIRST_BYTE,
 } from '../constants/elasticsearch_fieldnames';
 
 export const rumFieldFormats: FieldFormat[] = [
@@ -24,6 +25,7 @@ export const rumFieldFormats: FieldFormat[] = [
         outputFormat: 'asSeconds',
         showSuffix: true,
         outputPrecision: 1,
+        useShortSuffix: true,
       },
     },
   },
@@ -33,8 +35,9 @@ export const rumFieldFormats: FieldFormat[] = [
       id: 'duration',
       params: {
         inputFormat: 'milliseconds',
-        outputFormat: 'asSeconds',
+        outputFormat: 'humanizePrecise',
         showSuffix: true,
+        useShortSuffix: true,
       },
     },
   },
@@ -44,8 +47,9 @@ export const rumFieldFormats: FieldFormat[] = [
       id: 'duration',
       params: {
         inputFormat: 'milliseconds',
-        outputFormat: 'asSeconds',
+        outputFormat: 'humanizePrecise',
         showSuffix: true,
+        useShortSuffix: true,
       },
     },
   },
@@ -55,8 +59,9 @@ export const rumFieldFormats: FieldFormat[] = [
       id: 'duration',
       params: {
         inputFormat: 'milliseconds',
-        outputFormat: 'asSeconds',
+        outputFormat: 'humanizePrecise',
         showSuffix: true,
+        useShortSuffix: true,
       },
     },
   },
@@ -66,8 +71,21 @@ export const rumFieldFormats: FieldFormat[] = [
       id: 'duration',
       params: {
         inputFormat: 'milliseconds',
-        outputFormat: 'asSeconds',
+        outputFormat: 'humanizePrecise',
         showSuffix: true,
+        useShortSuffix: true,
+      },
+    },
+  },
+  {
+    field: TRANSACTION_TIME_TO_FIRST_BYTE,
+    format: {
+      id: 'duration',
+      params: {
+        inputFormat: 'milliseconds',
+        outputFormat: 'humanizePrecise',
+        showSuffix: true,
+        useShortSuffix: true,
       },
     },
   },

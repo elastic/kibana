@@ -12,16 +12,15 @@ import { rollupBadgeExtension, rollupToggleExtension } from './extend_index_mana
 import { RollupIndexPatternCreationConfig } from './index_pattern_creation/rollup_index_pattern_creation_config';
 // @ts-ignore
 import { RollupIndexPatternListConfig } from './index_pattern_list/rollup_index_pattern_list_config';
-import { CONFIG_ROLLUPS, UIM_APP_NAME } from '../common';
+import { UIM_APP_NAME } from '../common';
 import {
   FeatureCatalogueCategory,
   HomePublicPluginSetup,
 } from '../../../../src/plugins/home/public';
 import { ManagementSetup } from '../../../../src/plugins/management/public';
 import { IndexManagementPluginSetup } from '../../index_management/public';
-import { IndexPatternManagementSetup } from '../../../../src/plugins/index_pattern_management/public';
 // @ts-ignore
-import { setEsBaseAndXPackBase, setHttp } from './crud_app/services/index';
+import { setHttp, init as initDocumentation } from './crud_app/services/index';
 import { setNotifications, setFatalErrors, setUiStatsReporter } from './kibana_services';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
 
@@ -29,20 +28,13 @@ export interface RollupPluginSetupDependencies {
   home?: HomePublicPluginSetup;
   management: ManagementSetup;
   indexManagement?: IndexManagementPluginSetup;
-  indexPatternManagement: IndexPatternManagementSetup;
   usageCollection?: UsageCollectionSetup;
 }
 
 export class RollupPlugin implements Plugin {
   setup(
     core: CoreSetup,
-    {
-      home,
-      management,
-      indexManagement,
-      indexPatternManagement,
-      usageCollection,
-    }: RollupPluginSetupDependencies
+    { home, management, indexManagement, usageCollection }: RollupPluginSetupDependencies
   ) {
     setFatalErrors(core.fatalErrors);
     if (usageCollection) {
@@ -52,13 +44,6 @@ export class RollupPlugin implements Plugin {
     if (indexManagement) {
       indexManagement.extensionsService.addBadge(rollupBadgeExtension);
       indexManagement.extensionsService.addToggle(rollupToggleExtension);
-    }
-
-    const isRollupIndexPatternsEnabled = core.uiSettings.get(CONFIG_ROLLUPS);
-
-    if (isRollupIndexPatternsEnabled) {
-      indexPatternManagement.creation.addCreationConfig(RollupIndexPatternCreationConfig);
-      indexPatternManagement.list.addListConfig(RollupIndexPatternListConfig);
     }
 
     if (home) {
@@ -108,6 +93,6 @@ export class RollupPlugin implements Plugin {
   start(core: CoreStart) {
     setHttp(core.http);
     setNotifications(core.notifications);
-    setEsBaseAndXPackBase(core.docLinks.ELASTIC_WEBSITE_URL, core.docLinks.DOC_LINK_VERSION);
+    initDocumentation(core.docLinks);
   }
 }

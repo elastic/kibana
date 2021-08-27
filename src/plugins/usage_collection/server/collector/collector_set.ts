@@ -13,12 +13,13 @@ import type {
   SavedObjectsClientContract,
   KibanaRequest,
 } from 'src/core/server';
-import { Collector, CollectorOptions } from './collector';
+import { Collector } from './collector';
+import type { ICollector, CollectorOptions } from './types';
 import { UsageCollector, UsageCollectorOptions } from './usage_collector';
 
 // Needed for the general array containing all the collectors. We don't really care about their types here
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-type AnyCollector = Collector<any, any>;
+type AnyCollector = ICollector<any, any>;
 
 interface CollectorSetConfig {
   logger: Logger;
@@ -85,11 +86,6 @@ export class CollectorSet {
     }
 
     this.collectors.set(collector.type, collector);
-
-    if (collector.init) {
-      this.logger.debug(`Initializing ${collector.type} collector`);
-      collector.init();
-    }
   };
 
   public getCollectorByType = (type: string) => {

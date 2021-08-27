@@ -21,12 +21,14 @@ import {
   EuiPortal,
   EuiPagination,
   EuiHideFor,
+  keys,
 } from '@elastic/eui';
 import { DocViewer } from '../doc_viewer/doc_viewer';
 import { IndexPattern } from '../../../kibana_services';
 import { DocViewFilterFn, ElasticSearchHit } from '../../doc_views/doc_views_types';
 import { DiscoverServices } from '../../../build_services';
 import { getContextUrl } from '../../helpers/get_context_url';
+import { getSingleDocUrl } from '../../helpers/get_single_doc_url';
 
 interface Props {
   columns: string[];
@@ -87,9 +89,25 @@ export function DiscoverGridFlyout({
     [hits, setExpandedDoc]
   );
 
+  const onKeyDown = useCallback(
+    (ev: React.KeyboardEvent) => {
+      if (ev.key === keys.ARROW_LEFT || ev.key === keys.ARROW_RIGHT) {
+        ev.preventDefault();
+        ev.stopPropagation();
+        setPage(activePage + (ev.key === keys.ARROW_RIGHT ? 1 : -1));
+      }
+    },
+    [activePage, setPage]
+  );
+
   return (
     <EuiPortal>
-      <EuiFlyout onClose={onClose} size="m" data-test-subj="docTableDetailsFlyout">
+      <EuiFlyout
+        onClose={onClose}
+        size="m"
+        data-test-subj="docTableDetailsFlyout"
+        onKeyDown={onKeyDown}
+      >
         <EuiFlyoutHeader hasBorder>
           <EuiTitle
             size="s"
@@ -121,11 +139,7 @@ export function DiscoverGridFlyout({
                 size="xs"
                 iconType="document"
                 flush="left"
-                href={services.addBasePath(
-                  `/app/discover#/doc/${indexPattern.id}/${hit._index}?id=${encodeURIComponent(
-                    hit._id as string
-                  )}`
-                )}
+                href={services.addBasePath(getSingleDocUrl(indexPattern.id!, hit._index, hit._id))}
                 data-test-subj="docTableRowAction"
               >
                 {i18n.translate('discover.grid.tableRow.viewSingleDocumentLinkTextSimple', {

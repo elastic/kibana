@@ -17,8 +17,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const inspector = getService('inspector');
   const PageObjects = getPageObjects(['visualize', 'visEditor', 'visChart', 'timePicker']);
 
-  describe('metric chart', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/106121
+  describe.skip('metric chart', function () {
     before(async function () {
+      await PageObjects.visualize.initTests();
       log.debug('navigateToApp visualize');
       await PageObjects.visualize.navigateToNewAggBasedVisualization();
       log.debug('clickMetric');

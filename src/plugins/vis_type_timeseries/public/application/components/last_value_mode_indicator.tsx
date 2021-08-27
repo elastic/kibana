@@ -13,12 +13,13 @@ import { EuiFlexItem, EuiToolTip, EuiFlexGroup, EuiBadge } from '@elastic/eui';
 import { getUISettings } from '../../services';
 import { convertIntervalIntoUnit, isAutoInterval, isGteInterval } from './lib/get_interval';
 import { createIntervalBasedFormatter } from './lib/create_interval_based_formatter';
-import { PanelData } from '../../../common/types';
+import type { PanelData } from '../../../common/types';
 
 interface LastValueModeIndicatorProps {
   seriesData?: PanelData['data'];
   panelInterval: number;
   modelInterval: string;
+  ignoreDaylightTime: boolean;
 }
 
 const lastValueLabel = i18n.translate('visTypeTimeseries.lastValueModeIndicator.lastValue', {
@@ -29,6 +30,7 @@ export const LastValueModeIndicator = ({
   seriesData,
   panelInterval,
   modelInterval,
+  ignoreDaylightTime,
 }: LastValueModeIndicatorProps) => {
   if (!seriesData?.length) return <EuiBadge>{lastValueLabel}</EuiBadge>;
 
@@ -40,7 +42,12 @@ export const LastValueModeIndicator = ({
     return interval && `${interval.unitValue}${interval.unitString}`;
   };
 
-  const formatter = createIntervalBasedFormatter(panelInterval, scaledDataFormat, dateFormat);
+  const formatter = createIntervalBasedFormatter(
+    panelInterval,
+    scaledDataFormat,
+    dateFormat,
+    ignoreDaylightTime
+  );
   const lastBucketDate = formatter(seriesData[seriesData.length - 1][0]);
   const formattedPanelInterval =
     (isAutoInterval(modelInterval) || isGteInterval(modelInterval)) && getFormattedPanelInterval();

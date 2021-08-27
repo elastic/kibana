@@ -67,8 +67,12 @@ export default function ({ getService }) {
   ];
 
   describe('fields_for_wildcard_route response', () => {
-    before(() => esArchiver.load('index_patterns/basic_index'));
-    after(() => esArchiver.unload('index_patterns/basic_index'));
+    before(() =>
+      esArchiver.load('test/api_integration/fixtures/es_archiver/index_patterns/basic_index')
+    );
+    after(() =>
+      esArchiver.unload('test/api_integration/fixtures/es_archiver/index_patterns/basic_index')
+    );
 
     it('returns a flattened version of the fields in es', async () => {
       await supertest

@@ -6,56 +6,17 @@
  */
 
 import { find, uniqBy } from 'lodash';
-import {
-  ENVIRONMENT_ALL,
-  ENVIRONMENT_NOT_DEFINED,
-} from '../../../common/environment_filter_values';
-import {
-  SERVICE_ENVIRONMENT,
-  SERVICE_NAME,
-} from '../../../common/elasticsearch_fieldnames';
 import { Connection, ConnectionNode } from '../../../common/service_map';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { fetchServicePathsFromTraceIds } from './fetch_service_paths_from_trace_ids';
 
 export function getConnections({
   paths,
-  serviceName,
-  environment,
 }: {
   paths: ConnectionNode[][] | undefined;
-  serviceName: string | undefined;
-  environment: string | undefined;
 }) {
   if (!paths) {
     return [];
-  }
-
-  if (serviceName || environment) {
-    paths = paths.filter((path) => {
-      return (
-        path
-          // Only apply the filter on node that contains service name, this filters out external nodes
-          .filter((node) => {
-            return node[SERVICE_NAME];
-          })
-          .some((node) => {
-            if (serviceName && node[SERVICE_NAME] !== serviceName) {
-              return false;
-            }
-
-            if (!environment || environment === ENVIRONMENT_ALL.value) {
-              return true;
-            }
-
-            if (environment === ENVIRONMENT_NOT_DEFINED.value) {
-              return !node[SERVICE_ENVIRONMENT];
-            }
-
-            return node[SERVICE_ENVIRONMENT] === environment;
-          })
-      );
-    });
   }
 
   const connectionsArr = paths.flatMap((path) => {
@@ -81,13 +42,9 @@ export function getConnections({
 export async function getServiceMapFromTraceIds({
   setup,
   traceIds,
-  serviceName,
-  environment,
 }: {
   setup: Setup & SetupTimeRange;
   traceIds: string[];
-  serviceName?: string;
-  environment?: string;
 }) {
   const serviceMapFromTraceIdsScriptResponse = await fetchServicePathsFromTraceIds(
     setup,
@@ -100,8 +57,6 @@ export async function getServiceMapFromTraceIds({
   return {
     connections: getConnections({
       paths: serviceMapScriptedAggValue?.paths,
-      serviceName,
-      environment,
     }),
     discoveredServices: serviceMapScriptedAggValue?.discoveredServices ?? [],
   };

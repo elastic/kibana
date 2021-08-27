@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { EsDeprecationsContent } from './es_deprecations';
+export { EsDeprecations } from './es_deprecations';

@@ -34,6 +34,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     );
 
   describe('area charts', function indexPatternCreation() {
+    let isNewChartsLibraryEnabled = false;
+    before(async () => {
+      isNewChartsLibraryEnabled = await PageObjects.visChart.isNewChartsLibraryEnabled();
+      await PageObjects.visualize.initTests(isNewChartsLibraryEnabled);
+    });
     const initAreaChart = async () => {
       log.debug('navigateToApp visualize');
       await PageObjects.visualize.navigateToNewAggBasedVisualization();
@@ -87,6 +92,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.visualize.saveVisualizationExpectSuccessAndBreadcrumb(await getVizName());
       await PageObjects.visualize.loadSavedVisualization(await getVizName());
       await PageObjects.visChart.waitForVisualization();
+    });
+
+    // Should be removed when this issue is closed https://github.com/elastic/kibana/issues/103209
+    it('should show/hide a deprecation warning depending on the library selected', async () => {
+      await PageObjects.visualize.getDeprecationWarningStatus();
     });
 
     it('should have inspector enabled', async function () {
@@ -505,7 +515,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         it('should show error when calendar interval invalid', async () => {
-          await PageObjects.visEditor.setInterval('14d', { type: 'custom' });
+          await PageObjects.visEditor.setInterval('2w', { type: 'custom' });
           const intervalErrorMessage = await find.byCssSelector(
             '[data-test-subj="visEditorInterval"] + .euiFormErrorText'
           );

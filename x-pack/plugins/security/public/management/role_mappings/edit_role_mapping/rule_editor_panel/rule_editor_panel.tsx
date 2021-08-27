@@ -76,7 +76,7 @@ export class RuleEditorPanel extends Component<Props, State> {
     }
 
     return (
-      <EuiPanel>
+      <EuiPanel hasShadow={false} hasBorder={true}>
         <EuiTitle>
           <h2>
             <FormattedMessage

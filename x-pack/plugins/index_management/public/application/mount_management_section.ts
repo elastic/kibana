@@ -62,7 +62,7 @@ export async function mountManagementSection(
     uiSettings,
   } = core;
 
-  const { urlGenerators } = startDependencies.share;
+  const { url } = startDependencies.share;
   docTitle.change(PLUGIN.getI18nName(i18n));
 
   breadcrumbService.setup(setBreadcrumbs);
@@ -86,7 +86,7 @@ export async function mountManagementSection(
     history,
     setBreadcrumbs,
     uiSettings,
-    urlGenerators,
+    url,
     docLinks,
   };
 

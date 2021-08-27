@@ -24,6 +24,7 @@ describe('plain_row_renderer', () => {
     const children = plainRowRenderer.renderRow({
       browserFields: mockBrowserFields,
       data: mockDatum,
+      isDraggable: true,
       timelineId: 'test',
     });
     const wrapper = shallow(<span>{children}</span>);
@@ -38,6 +39,7 @@ describe('plain_row_renderer', () => {
     const children = plainRowRenderer.renderRow({
       browserFields: mockBrowserFields,
       data: mockDatum,
+      isDraggable: true,
       timelineId: 'test',
     });
     const wrapper = mount(<span>{children}</span>);

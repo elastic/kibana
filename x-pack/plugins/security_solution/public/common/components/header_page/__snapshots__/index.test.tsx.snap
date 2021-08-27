@@ -1,13 +1,12 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`HeaderPage it renders 1`] = `
-<Header
-  border={true}
->
-  <EuiFlexGroup
+<Fragment>
+  <EuiPageHeader
     alignItems="center"
+    bottomBorder={true}
   >
-    <FlexItem>
+    <HeaderSection>
       <Memo(TitleComponent)
         badgeOptions={
           Object {
@@ -26,18 +25,20 @@ exports[`HeaderPage it renders 1`] = `
         data-test-subj="header-page-subtitle-2"
         items="Test subtitle 2"
       />
-    </FlexItem>
-    <FlexItem
+    </HeaderSection>
+    <EuiPageHeaderSection
       data-test-subj="header-page-supplements"
-      grow={false}
     >
       <p>
         Test supplement
       </p>
-    </FlexItem>
-  </EuiFlexGroup>
-  <Sourcerer
-    scope="default"
+    </EuiPageHeaderSection>
+    <Sourcerer
+      scope="default"
+    />
+  </EuiPageHeader>
+  <EuiSpacer
+    size="l"
   />
-</Header>
+</Fragment>
 `;

@@ -8,8 +8,8 @@
 
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { PanelSchema } from '../../../../common/types';
-import { buildProcessorFunction } from '../build_processor_function';
+import type { Panel } from '../../../../common/types';
+import { _legacyBuildProcessorFunction } from '../build_processor_function';
 // @ts-expect-error
 import { processors } from '../response_processors/series';
 import {
@@ -19,7 +19,7 @@ import {
 import { VisTypeTimeseriesVisDataRequest } from '../../../types';
 
 export function handleResponseBody(
-  panel: PanelSchema,
+  panel: Panel,
   req: VisTypeTimeseriesVisDataRequest,
   services: FieldsFetcherServices
 ) {
@@ -49,7 +49,14 @@ export function handleResponseBody(
 
     const extractFields = createFieldsFetcher(req, services);
 
-    const processor = buildProcessorFunction(processors, resp, panel, series, meta, extractFields);
+    const processor = _legacyBuildProcessorFunction(
+      processors,
+      resp,
+      panel,
+      series,
+      meta,
+      extractFields
+    );
 
     return await processor([]);
   };

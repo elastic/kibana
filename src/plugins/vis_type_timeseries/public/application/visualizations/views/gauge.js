@@ -11,7 +11,7 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import classNames from 'classnames';
 import { isBackgroundInverted, isBackgroundDark } from '../../lib/set_is_reversed';
-import { getLastValue } from '../../../../common/get_last_value';
+import { getLastValue } from '../../../../common/last_value_utils';
 import { getValueBy } from '../lib/get_value_by';
 import { GaugeVis } from './gauge_vis';
 import reactcss from 'reactcss';
@@ -61,7 +61,7 @@ export class Gauge extends Component {
   render() {
     const { metric, type } = this.props;
     const { scale, translateX, translateY } = this.state;
-    const value = metric && getLastValue(metric.data);
+    const value = getLastValue(metric?.data);
     const max = (metric && getValueBy('max', metric.data)) || 1;
     const formatter =
       (metric && (metric.tickFormatter || metric.formatter)) ||
@@ -76,16 +76,13 @@ export class Gauge extends Component {
             left: this.state.left || 0,
             transform: `matrix(${scale}, 0, 0, ${scale}, ${translateX}, ${translateY})`,
           },
-        },
-        valueColor: {
-          value: {
+          valueColor: {
             color: this.props.valueColor,
           },
         },
       },
       this.props
     );
-
     const gaugeProps = {
       value,
       reversed: isBackgroundDark(this.props.backgroundColor),
@@ -111,10 +108,15 @@ export class Gauge extends Component {
           ref={(el) => (this.inner = el)}
           style={styles.inner}
         >
-          <div className="tvbVisGauge__label" ref="title">
+          <div className="tvbVisGauge__label" ref="title" data-test-subj="gaugeLabel">
             {title}
           </div>
-          <div className="tvbVisGauge__value" style={styles.value} ref="label">
+          <div
+            className="tvbVisGauge__value"
+            style={styles.valueColor}
+            ref="label"
+            data-test-subj="gaugeValue"
+          >
             {formatter(value)}
           </div>
           {additionalLabel}
@@ -127,10 +129,15 @@ export class Gauge extends Component {
           ref={(el) => (this.inner = el)}
           style={styles.inner}
         >
-          <div className="tvbVisGauge__value" style={styles.value} ref="label">
+          <div
+            className="tvbVisGauge__value"
+            style={styles.valueColor}
+            ref="label"
+            data-test-subj="gaugeValue"
+          >
             {formatter(value)}
           </div>
-          <div className="tvbVisGauge__label" ref="title">
+          <div className="tvbVisGauge__label" ref="title" data-test-subj="gaugeLabel">
             {title}
           </div>
           {additionalLabel}

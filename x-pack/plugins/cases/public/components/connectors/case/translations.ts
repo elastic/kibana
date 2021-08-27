@@ -22,39 +22,10 @@ export const CASE_CONNECTOR_TITLE = i18n.translate(
     defaultMessage: 'Cases',
   }
 );
-
-export const CASE_CONNECTOR_COMMENT_LABEL = i18n.translate(
-  'xpack.cases.components.connectors.cases.commentLabel',
-  {
-    defaultMessage: 'Comment',
-  }
-);
-
-export const CASE_CONNECTOR_COMMENT_REQUIRED = i18n.translate(
-  'xpack.cases.components.connectors.cases.commentRequired',
-  {
-    defaultMessage: 'Comment is required.',
-  }
-);
-
 export const CASE_CONNECTOR_CASES_DROPDOWN_ROW_LABEL = i18n.translate(
   'xpack.cases.components.connectors.cases.casesDropdownRowLabel',
   {
     defaultMessage: 'Case allowing sub-cases',
-  }
-);
-
-export const CASE_CONNECTOR_CASES_DROPDOWN_PLACEHOLDER = i18n.translate(
-  'xpack.cases.components.connectors.cases.casesDropdownPlaceholder',
-  {
-    defaultMessage: 'Select case',
-  }
-);
-
-export const CASE_CONNECTOR_CASES_OPTION_NEW_CASE = i18n.translate(
-  'xpack.cases.components.connectors.cases.optionAddNewCase',
-  {
-    defaultMessage: 'Add to a new case',
   }
 );
 
@@ -98,12 +69,5 @@ export const CREATE_CASE = i18n.translate(
   'xpack.cases.components.connectors.cases.createCaseLabel',
   {
     defaultMessage: 'Create case',
-  }
-);
-
-export const CONNECTED_CASE = i18n.translate(
-  'xpack.cases.components.connectors.cases.connectedCaseLabel',
-  {
-    defaultMessage: 'Connected case',
   }
 );

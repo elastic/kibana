@@ -13,6 +13,7 @@ import {
   optionalModelIdSchema,
 } from './schemas/inference_schema';
 import { modelsProvider } from '../models/data_frame_analytics';
+import { TrainedModelConfigResponse } from '../../common/types/trained_models';
 
 export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization) {
   /**
@@ -38,18 +39,37 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
         const { modelId } = request.params;
         const { with_pipelines: withPipelines, ...query } = request.query;
         const { body } = await mlClient.getTrainedModels({
+          // @ts-expect-error @elastic-elasticsearch not sure why this is an error, size is a number
           size: 1000,
           ...query,
           ...(modelId ? { model_id: modelId } : {}),
         });
-        const result = body.trained_model_configs;
+        const result = body.trained_model_configs as TrainedModelConfigResponse[];
         try {
           if (withPipelines) {
+            const modelIdsAndAliases: string[] = Array.from(
+              new Set(
+                result
+                  .map(({ model_id: id, metadata }) => {
+                    return [id, ...(metadata?.model_aliases ?? [])];
+                  })
+                  .flat()
+              )
+            );
+
             const pipelinesResponse = await modelsProvider(client).getModelsPipelines(
-              result.map(({ model_id: id }: { model_id: string }) => id)
+              modelIdsAndAliases
             );
             for (const model of result) {
-              model.pipelines = pipelinesResponse.get(model.model_id)!;
+              model.pipelines = {
+                ...(pipelinesResponse.get(model.model_id) ?? {}),
+                ...(model.metadata?.model_aliases ?? []).reduce((acc, alias) => {
+                  return {
+                    ...acc,
+                    ...(pipelinesResponse.get(alias) ?? {}),
+                  };
+                }, {}),
+              };
             }
           }
         } catch (e) {

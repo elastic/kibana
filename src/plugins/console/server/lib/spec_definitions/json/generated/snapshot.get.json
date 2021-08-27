@@ -3,7 +3,12 @@
     "url_params": {
       "master_timeout": "",
       "ignore_unavailable": "__flag__",
-      "verbose": "__flag__"
+      "index_details": "__flag__",
+      "verbose": "__flag__",
+      "sort": ["start_time", "duration", "name", "index_count"],
+      "size": "",
+      "order": "",
+      "after": ""
     },
     "methods": [
       "GET"

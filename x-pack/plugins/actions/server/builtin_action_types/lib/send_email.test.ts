@@ -76,7 +76,9 @@ describe('send_email module', () => {
       },
       {
         proxyUrl: 'https://example.com',
-        proxyRejectUnauthorizedCertificates: false,
+        proxySSLSettings: {
+          verificationMode: 'none',
+        },
         proxyBypassHosts: undefined,
         proxyOnlyHosts: undefined,
       }
@@ -119,7 +121,7 @@ describe('send_email module', () => {
     `);
   });
 
-  test('rejectUnauthorized default setting email using not secure host/port', async () => {
+  test('verificationMode default setting email using not secure host/port', async () => {
     const sendEmailOptions = getSendEmailOptions({
       transport: {
         host: 'example.com',
@@ -236,7 +238,9 @@ describe('send_email module', () => {
       },
       {
         proxyUrl: 'https://proxy.com',
-        proxyRejectUnauthorizedCertificates: false,
+        proxySSLSettings: {
+          verificationMode: 'none',
+        },
         proxyBypassHosts: new Set(['example.com']),
         proxyOnlyHosts: undefined,
       }
@@ -268,7 +272,9 @@ describe('send_email module', () => {
       },
       {
         proxyUrl: 'https://proxy.com',
-        proxyRejectUnauthorizedCertificates: false,
+        proxySSLSettings: {
+          verificationMode: 'none',
+        },
         proxyBypassHosts: new Set(['not-example.com']),
         proxyOnlyHosts: undefined,
       }
@@ -302,7 +308,9 @@ describe('send_email module', () => {
       },
       {
         proxyUrl: 'https://proxy.com',
-        proxyRejectUnauthorizedCertificates: false,
+        proxySSLSettings: {
+          verificationMode: 'none',
+        },
         proxyBypassHosts: undefined,
         proxyOnlyHosts: new Set(['example.com']),
       }
@@ -336,7 +344,7 @@ describe('send_email module', () => {
       },
       {
         proxyUrl: 'https://proxy.com',
-        proxyRejectUnauthorizedCertificates: false,
+        proxySSLSettings: {},
         proxyBypassHosts: undefined,
         proxyOnlyHosts: new Set(['not-example.com']),
       }
@@ -369,7 +377,7 @@ describe('send_email module', () => {
       undefined,
       {
         url: 'smtp://example.com:1025',
-        tls: {
+        ssl: {
           certificateAuthoritiesData: 'ca cert data goes here',
         },
         smtp: {
@@ -411,7 +419,7 @@ describe('send_email module', () => {
       undefined,
       {
         url: 'smtp://example.com:1025',
-        tls: {
+        ssl: {
           certificateAuthoritiesData: 'ca cert data goes here',
           rejectUnauthorized: true,
         },
@@ -453,13 +461,13 @@ describe('send_email module', () => {
       },
       {
         proxyUrl: 'https://proxy.com',
-        proxyRejectUnauthorizedCertificates: false,
+        proxySSLSettings: {},
         proxyBypassHosts: undefined,
         proxyOnlyHosts: undefined,
       },
       {
         url: 'smtp://example.com:1025',
-        tls: {
+        ssl: {
           certificateAuthoritiesData: 'ca cert data goes here',
           rejectUnauthorized: true,
         },

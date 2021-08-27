@@ -5,33 +5,19 @@
  * 2.0.
  */
 
-import rison from 'rison-node';
 import { IBasePath } from 'kibana/public';
-import moment from 'moment-timezone';
-import { fetch } from '../../../../common/lib/fetch';
+import rison from 'rison-node';
 import { CanvasWorkpad } from '../../../../types';
-import { url } from '../../../../../../../src/plugins/kibana_utils/public';
 
-interface PageCount {
+export interface CanvasWorkpadSharingData {
+  workpad: Pick<CanvasWorkpad, 'id' | 'name' | 'height' | 'width'>;
   pageCount: number;
 }
 
-export type LayoutType = 'canvas' | 'preserve_layout';
-
-type Arguments = [CanvasWorkpad, LayoutType, PageCount, IBasePath];
-
-interface PdfUrlData {
-  createPdfUri: string;
-  createPdfPayload: { jobParams: string };
-}
-
-function getPdfUrlParts(
-  { id, name: title, width, height }: CanvasWorkpad,
-  layoutType: LayoutType,
-  { pageCount }: PageCount,
+export function getPdfJobParams(
+  { workpad: { id, name: title, width, height }, pageCount }: CanvasWorkpadSharingData,
   basePath: IBasePath
-): PdfUrlData {
-  const reportingEntry = basePath.prepend('/api/reporting/generate');
+) {
   const urlPrefix = basePath.get().replace(basePath.serverBasePath, ''); // for Spaces prefix, which is included in basePath.get()
   const canvasEntry = `${urlPrefix}/app/canvas#`;
 
@@ -51,34 +37,13 @@ function getPdfUrlParts(
     workpadUrls.push(rison.encode(`${canvasEntry}/export/workpad/pdf/${id}/page/${i}`));
   }
 
-  const jobParams = {
-    browserTimezone: moment.tz.guess(),
+  return {
     layout: {
       dimensions: { width, height },
-      id: layoutType,
+      id: 'canvas',
     },
     objectType: 'canvas workpad',
     relativeUrls: workpadUrls,
     title,
   };
-
-  return {
-    createPdfUri: `${reportingEntry}/printablePdf`,
-    createPdfPayload: {
-      jobParams: rison.encode(jobParams),
-    },
-  };
-}
-
-export function getPdfUrl(...args: Arguments): string {
-  const urlParts = getPdfUrlParts(...args);
-  const param = (key: string, val: any) =>
-    url.encodeUriQuery(key, true) + (val === true ? '' : '=' + url.encodeUriQuery(val, true));
-
-  return `${urlParts.createPdfUri}?${param('jobParams', urlParts.createPdfPayload.jobParams)}`;
-}
-
-export function createPdf(...args: Arguments) {
-  const { createPdfUri, createPdfPayload } = getPdfUrlParts(...args);
-  return fetch.post(createPdfUri, createPdfPayload);
 }

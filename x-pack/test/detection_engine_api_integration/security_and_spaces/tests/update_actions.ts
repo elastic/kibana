@@ -26,6 +26,7 @@ import {
   createNewAction,
   findImmutableRuleById,
   getPrePackagedRulesStatus,
+  getSimpleRuleOutput,
 } from '../../utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -35,15 +36,21 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('update_actions', () => {
     describe('updating actions', () => {
+      before(async () => {
+        await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
+      });
+
+      after(async () => {
+        await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
+      });
+
       beforeEach(async () => {
-        await esArchiver.load('auditbeat/hosts');
         await createSignalsIndex(supertest);
       });
 
       afterEach(async () => {
         await deleteSignalsIndex(supertest);
         await deleteAllAlerts(supertest);
-        await esArchiver.unload('auditbeat/hosts');
       });
 
       it('should be able to create a new webhook action and update a rule with the webhook action', async () => {
@@ -57,6 +64,21 @@ export default ({ getService }: FtrProviderContext) => {
         const expected = {
           ...getSimpleRuleOutputWithWebHookAction(`${bodyToCompare.actions?.[0].id}`),
           version: 2, // version bump is required since this is an updated rule and this is part of the testing that we do bump the version number on update
+        };
+        expect(bodyToCompare).to.eql(expected);
+      });
+
+      it('should be able to add a new webhook action and then remove the action from the rule again', async () => {
+        const hookAction = await createNewAction(supertest);
+        const rule = getSimpleRule();
+        await createRule(supertest, rule);
+        const ruleToUpdate = getRuleWithWebHookAction(hookAction.id, false, rule);
+        await updateRule(supertest, ruleToUpdate);
+        const ruleAfterActionRemoved = await updateRule(supertest, rule);
+        const bodyToCompare = removeServerGeneratedProperties(ruleAfterActionRemoved);
+        const expected = {
+          ...getSimpleRuleOutput(),
+          version: 3, // version bump is required since this is an updated rule and this is part of the testing that we do bump the version number on update
         };
         expect(bodyToCompare).to.eql(expected);
       });

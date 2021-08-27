@@ -8,18 +8,26 @@
 import React, { useState, useCallback } from 'react';
 import { EuiModal, EuiModalBody, EuiModalHeader, EuiModalHeaderTitle } from '@elastic/eui';
 import styled from 'styled-components';
-import { Case, CaseStatuses, CommentRequestAlertType, SubCase } from '../../../../common';
+import {
+  Case,
+  CaseStatusWithAllStatus,
+  CommentRequestAlertType,
+  SubCase,
+} from '../../../../common';
 import { CasesNavigation } from '../../links';
 import * as i18n from '../../../common/translations';
 import { AllCasesGeneric } from '../all_cases_generic';
+import { Owner } from '../../../types';
+import { OwnerProvider } from '../../owner_context';
 
-export interface AllCasesSelectorModalProps {
+export interface AllCasesSelectorModalProps extends Owner {
   alertData?: Omit<CommentRequestAlertType, 'type'>;
   createCaseNavigation: CasesNavigation;
-  disabledStatuses?: CaseStatuses[];
+  hiddenStatuses?: CaseStatusWithAllStatus[];
   onRowClick: (theCase?: Case | SubCase) => void;
   updateCase?: (newCase: Case) => void;
   userCanCrud: boolean;
+  onClose?: () => void;
 }
 
 const Modal = styled(EuiModal)`
@@ -29,16 +37,22 @@ const Modal = styled(EuiModal)`
   `}
 `;
 
-export const AllCasesSelectorModal: React.FC<AllCasesSelectorModalProps> = ({
+const AllCasesSelectorModalComponent: React.FC<AllCasesSelectorModalProps> = ({
   alertData,
   createCaseNavigation,
-  disabledStatuses,
+  hiddenStatuses,
   onRowClick,
   updateCase,
   userCanCrud,
+  onClose,
 }) => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(true);
-  const closeModal = useCallback(() => setIsModalOpen(false), []);
+  const closeModal = useCallback(() => {
+    if (onClose) {
+      onClose();
+    }
+    setIsModalOpen(false);
+  }, [onClose]);
   const onClick = useCallback(
     (theCase?: Case | SubCase) => {
       closeModal();
@@ -55,7 +69,7 @@ export const AllCasesSelectorModal: React.FC<AllCasesSelectorModalProps> = ({
         <AllCasesGeneric
           alertData={alertData}
           createCaseNavigation={createCaseNavigation}
-          disabledStatuses={disabledStatuses}
+          hiddenStatuses={hiddenStatuses}
           isSelectorView={true}
           onRowClick={onClick}
           userCanCrud={userCanCrud}
@@ -65,5 +79,13 @@ export const AllCasesSelectorModal: React.FC<AllCasesSelectorModalProps> = ({
     </Modal>
   ) : null;
 };
+
+export const AllCasesSelectorModal: React.FC<AllCasesSelectorModalProps> = React.memo((props) => {
+  return (
+    <OwnerProvider owner={props.owner}>
+      <AllCasesSelectorModalComponent {...props} />
+    </OwnerProvider>
+  );
+});
 // eslint-disable-next-line import/no-default-export
 export { AllCasesSelectorModal as default };

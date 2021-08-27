@@ -6,32 +6,31 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, useContext, useCallback, useEffect } from 'react';
+import React, { useContext, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { EuiFormRow, EuiText, EuiLink, htmlIdGenerator } from '@elastic/eui';
-import { getCoreStart, getDataStart } from '../../../../services';
+import { getCoreStart } from '../../../../services';
 import { PanelModelContext } from '../../../contexts/panel_model_context';
-
-import {
-  isStringTypeIndexPattern,
-  fetchIndexPattern,
-} from '../../../../../common/index_patterns_utils';
 
 import { FieldTextSelect } from './field_text_select';
 import { ComboBoxSelect } from './combo_box_select';
 
 import type { IndexPatternValue, FetchedIndexPattern } from '../../../../../common/types';
-import { DefaultIndexPatternContext } from '../../../contexts/default_index_context';
 import { USE_KIBANA_INDEXES_KEY } from '../../../../../common/constants';
+import { IndexPattern } from '../../../../../../data/common';
 
-interface IndexPatternSelectProps {
-  value: IndexPatternValue;
+export interface IndexPatternSelectProps {
   indexPatternName: string;
   onChange: Function;
   disabled?: boolean;
   allowIndexSwitchingMode?: boolean;
+  fetchedIndex:
+    | (FetchedIndexPattern & {
+        defaultIndex?: IndexPattern | null;
+      })
+    | null;
 }
 
 const defaultIndexPatternHelpText = i18n.translate(
@@ -53,17 +52,15 @@ const indexPatternLabel = i18n.translate('visTypeTimeseries.indexPatternSelect.l
 });
 
 export const IndexPatternSelect = ({
-  value,
   indexPatternName,
   onChange,
   disabled,
+  fetchedIndex,
   allowIndexSwitchingMode,
 }: IndexPatternSelectProps) => {
   const htmlId = htmlIdGenerator();
   const panelModel = useContext(PanelModelContext);
-  const defaultIndex = useContext(DefaultIndexPatternContext);
 
-  const [fetchedIndex, setFetchedIndex] = useState<FetchedIndexPattern | null>();
   const useKibanaIndices = Boolean(panelModel?.[USE_KIBANA_INDEXES_KEY]);
   const Component = useKibanaIndices ? ComboBoxSelect : FieldTextSelect;
 
@@ -98,25 +95,6 @@ export const IndexPatternSelect = ({
     });
   }, [fetchedIndex]);
 
-  useEffect(() => {
-    async function fetchIndex() {
-      const { indexPatterns } = getDataStart();
-
-      setFetchedIndex(
-        value
-          ? await fetchIndexPattern(value, indexPatterns, {
-              fetchKibabaIndexForStringIndexes: true,
-            })
-          : {
-              indexPattern: undefined,
-              indexPatternString: undefined,
-            }
-      );
-    }
-
-    fetchIndex();
-  }, [value]);
-
   if (!fetchedIndex) {
     return null;
   }
@@ -126,13 +104,11 @@ export const IndexPatternSelect = ({
       id={htmlId('indexPattern')}
       label={indexPatternLabel}
       helpText={
-        !value && defaultIndexPatternHelpText + (!useKibanaIndices ? queryAllIndexesHelpText : '')
+        fetchedIndex.defaultIndex &&
+        defaultIndexPatternHelpText + (!useKibanaIndices ? queryAllIndexesHelpText : '')
       }
       labelAppend={
-        value &&
-        allowIndexSwitchingMode &&
-        isStringTypeIndexPattern(value) &&
-        !fetchedIndex.indexPattern ? (
+        fetchedIndex.indexPatternString && !fetchedIndex.indexPattern ? (
           <EuiLink onClick={navigateToCreateIndexPatternPage}>
             <EuiText size="xs">
               <FormattedMessage
@@ -150,7 +126,7 @@ export const IndexPatternSelect = ({
         allowSwitchMode={allowIndexSwitchingMode}
         onIndexChange={onIndexChange}
         onModeChange={onModeChange}
-        placeholder={defaultIndex?.title ?? ''}
+        placeholder={fetchedIndex.defaultIndex?.title ?? ''}
         data-test-subj="metricsIndexPatternInput"
       />
     </EuiFormRow>

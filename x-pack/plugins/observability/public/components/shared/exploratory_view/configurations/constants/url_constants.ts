@@ -13,4 +13,5 @@ export enum URL_KEYS {
   BREAK_DOWN = 'bd',
   FILTERS = 'ft',
   REPORT_DEFINITIONS = 'rdf',
+  SELECTED_METRIC = 'mt',
 }

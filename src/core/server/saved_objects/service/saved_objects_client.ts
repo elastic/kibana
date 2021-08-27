@@ -11,6 +11,11 @@ import type {
   ISavedObjectsPointInTimeFinder,
   SavedObjectsCreatePointInTimeFinderOptions,
   SavedObjectsCreatePointInTimeFinderDependencies,
+  SavedObjectsCollectMultiNamespaceReferencesObject,
+  SavedObjectsCollectMultiNamespaceReferencesOptions,
+  SavedObjectsCollectMultiNamespaceReferencesResponse,
+  SavedObjectsUpdateObjectsSpacesObject,
+  SavedObjectsUpdateObjectsSpacesOptions,
 } from './lib';
 import {
   SavedObject,
@@ -58,7 +63,11 @@ export interface SavedObjectsCreateOptions extends SavedObjectsBaseOptions {
    * Optional initial namespaces for the object to be created in. If this is defined, it will supersede the namespace ID that is in
    * {@link SavedObjectsCreateOptions}.
    *
-   * Note: this can only be used for multi-namespace object types.
+   * * For shareable object types (registered with `namespaceType: 'multiple'`): this option can be used to specify one or more spaces,
+   *   including the "All spaces" identifier (`'*'`).
+   * * For isolated object types (registered with `namespaceType: 'single'` or `namespaceType: 'multiple-isolated'`): this option can only
+   *   be used to specify a single space, and the "All spaces" identifier (`'*'`) is not allowed.
+   * * For global object types (registered with `namespaceType: 'agnostic'`): this option cannot be used.
    */
   initialNamespaces?: string[];
 }
@@ -91,7 +100,11 @@ export interface SavedObjectsBulkCreateObject<T = unknown> {
    * Optional initial namespaces for the object to be created in. If this is defined, it will supersede the namespace ID that is in
    * {@link SavedObjectsCreateOptions}.
    *
-   * Note: this can only be used for multi-namespace object types.
+   * * For shareable object types (registered with `namespaceType: 'multiple'`): this option can be used to specify one or more spaces,
+   *   including the "All spaces" identifier (`'*'`).
+   * * For isolated object types (registered with `namespaceType: 'single'` or `namespaceType: 'multiple-isolated'`): this option can only
+   *   be used to specify a single space, and the "All spaces" identifier (`'*'`) is not allowed.
+   * * For global object types (registered with `namespaceType: 'agnostic'`): this option cannot be used.
    */
   initialNamespaces?: string[];
 }
@@ -222,44 +235,6 @@ export interface SavedObjectsUpdateOptions<Attributes = unknown> extends SavedOb
  *
  * @public
  */
-export interface SavedObjectsAddToNamespacesOptions extends SavedObjectsBaseOptions {
-  /** An opaque version number which changes on each successful write operation. Can be used for implementing optimistic concurrency control. */
-  version?: string;
-  /** The Elasticsearch Refresh setting for this operation */
-  refresh?: MutatingOperationRefreshSetting;
-}
-
-/**
- *
- * @public
- */
-export interface SavedObjectsAddToNamespacesResponse {
-  /** The namespaces the object exists in after this operation is complete. */
-  namespaces: string[];
-}
-
-/**
- *
- * @public
- */
-export interface SavedObjectsDeleteFromNamespacesOptions extends SavedObjectsBaseOptions {
-  /** The Elasticsearch Refresh setting for this operation */
-  refresh?: MutatingOperationRefreshSetting;
-}
-
-/**
- *
- * @public
- */
-export interface SavedObjectsDeleteFromNamespacesResponse {
-  /** The namespaces the object exists in after this operation is complete. An empty array indicates the object was deleted. */
-  namespaces: string[];
-}
-
-/**
- *
- * @public
- */
 export interface SavedObjectsRemoveReferencesToOptions extends SavedObjectsBaseOptions {
   /** The Elasticsearch Refresh setting for this operation. Defaults to `true` */
   refresh?: boolean;
@@ -303,6 +278,17 @@ export interface SavedObjectsBulkGetObject {
   type: string;
   /** SavedObject fields to include in the response */
   fields?: string[];
+  /**
+   * Optional namespace(s) for the object to be retrieved in. If this is defined, it will supersede the namespace ID that is in the
+   * top-level options.
+   *
+   * * For shareable object types (registered with `namespaceType: 'multiple'`): this option can be used to specify one or more spaces,
+   *   including the "All spaces" identifier (`'*'`).
+   * * For isolated object types (registered with `namespaceType: 'single'` or `namespaceType: 'multiple-isolated'`): this option can only
+   *   be used to specify a single space, and the "All spaces" identifier (`'*'`) is not allowed.
+   * * For global object types (registered with `namespaceType: 'agnostic'`): this option cannot be used.
+   */
+  namespaces?: string[];
 }
 
 /**
@@ -336,6 +322,9 @@ export interface SavedObjectsUpdateResponse<T = unknown>
  * @public
  */
 export interface SavedObjectsResolveResponse<T = unknown> {
+  /**
+   * The saved object that was found.
+   */
   saved_object: SavedObject<T>;
   /**
    * The outcome for a successful `resolve` call is one of the following values:
@@ -350,13 +339,13 @@ export interface SavedObjectsResolveResponse<T = unknown> {
   /**
    * The ID of the object that the legacy URL alias points to. This is only defined when the outcome is `'aliasMatch'` or `'conflict'`.
    */
-  aliasTargetId?: string;
+  alias_target_id?: string;
 }
 
 /**
  * @public
  */
-export interface SavedObjectsOpenPointInTimeOptions extends SavedObjectsBaseOptions {
+export interface SavedObjectsOpenPointInTimeOptions {
   /**
    * Optionally specify how long ES should keep the PIT alive until the next request. Defaults to `5m`.
    */
@@ -365,6 +354,15 @@ export interface SavedObjectsOpenPointInTimeOptions extends SavedObjectsBaseOpti
    * An optional ES preference value to be used for the query.
    */
   preference?: string;
+  /**
+   * An optional list of namespaces to be used when opening the PIT.
+   *
+   * When the spaces plugin is enabled:
+   *  - this will default to the user's current space (as determined by the URL)
+   *  - if specified, the user's current space will be ignored
+   *  - `['*']` will search across all available spaces
+   */
+  namespaces?: string[];
 }
 
 /**
@@ -537,40 +535,6 @@ export class SavedObjectsClient {
   }
 
   /**
-   * Adds namespaces to a SavedObject
-   *
-   * @param type
-   * @param id
-   * @param namespaces
-   * @param options
-   */
-  async addToNamespaces(
-    type: string,
-    id: string,
-    namespaces: string[],
-    options: SavedObjectsAddToNamespacesOptions = {}
-  ): Promise<SavedObjectsAddToNamespacesResponse> {
-    return await this._repository.addToNamespaces(type, id, namespaces, options);
-  }
-
-  /**
-   * Removes namespaces from a SavedObject
-   *
-   * @param type
-   * @param id
-   * @param namespaces
-   * @param options
-   */
-  async deleteFromNamespaces(
-    type: string,
-    id: string,
-    namespaces: string[],
-    options: SavedObjectsDeleteFromNamespacesOptions = {}
-  ): Promise<SavedObjectsDeleteFromNamespacesResponse> {
-    return await this._repository.deleteFromNamespaces(type, id, namespaces, options);
-  }
-
-  /**
    * Bulk Updates multiple SavedObject at once
    *
    * @param objects
@@ -665,14 +629,49 @@ export class SavedObjectsClient {
    * }
    * ```
    */
-  createPointInTimeFinder(
+  createPointInTimeFinder<T = unknown, A = unknown>(
     findOptions: SavedObjectsCreatePointInTimeFinderOptions,
     dependencies?: SavedObjectsCreatePointInTimeFinderDependencies
-  ): ISavedObjectsPointInTimeFinder {
+  ): ISavedObjectsPointInTimeFinder<T, A> {
     return this._repository.createPointInTimeFinder(findOptions, {
       client: this,
       // Include dependencies last so that SO client wrappers have their settings applied.
       ...dependencies,
     });
+  }
+
+  /**
+   * Gets all references and transitive references of the listed objects. Ignores any object that is not a multi-namespace type.
+   *
+   * @param objects
+   * @param options
+   */
+  async collectMultiNamespaceReferences(
+    objects: SavedObjectsCollectMultiNamespaceReferencesObject[],
+    options?: SavedObjectsCollectMultiNamespaceReferencesOptions
+  ): Promise<SavedObjectsCollectMultiNamespaceReferencesResponse> {
+    return await this._repository.collectMultiNamespaceReferences(objects, options);
+  }
+
+  /**
+   * Updates one or more objects to add and/or remove them from specified spaces.
+   *
+   * @param objects
+   * @param spacesToAdd
+   * @param spacesToRemove
+   * @param options
+   */
+  async updateObjectsSpaces(
+    objects: SavedObjectsUpdateObjectsSpacesObject[],
+    spacesToAdd: string[],
+    spacesToRemove: string[],
+    options?: SavedObjectsUpdateObjectsSpacesOptions
+  ) {
+    return await this._repository.updateObjectsSpaces(
+      objects,
+      spacesToAdd,
+      spacesToRemove,
+      options
+    );
   }
 }

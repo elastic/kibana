@@ -13,7 +13,8 @@ export default function ({ getService }) {
   const esArchiver = getService('esArchiver');
 
   describe('es_and_kibana_exclusive mb', () => {
-    const archive = 'monitoring/setup/collection/es_and_kibana_exclusive_mb';
+    const archive =
+      'x-pack/test/functional/es_archives/monitoring/setup/collection/es_and_kibana_exclusive_mb';
     const timeRange = {
       min: '2019-04-09T00:00:00.741Z',
       max: '2019-04-09T23:59:59.741Z',

@@ -7,13 +7,11 @@
 
 import React from 'react';
 import { fireEvent, screen, waitFor } from '@testing-library/react';
-import { mockUrlStorage, render } from '../../rtl_helpers';
+import { render } from '../../rtl_helpers';
 import { SeriesChartTypesSelect, XYChartTypesSelect } from './chart_types';
 
 describe.skip('SeriesChartTypesSelect', function () {
   it('should render properly', async function () {
-    mockUrlStorage({});
-
     render(<SeriesChartTypesSelect seriesId={'series-id'} defaultChartType={'line'} />);
 
     await waitFor(() => {
@@ -22,9 +20,9 @@ describe.skip('SeriesChartTypesSelect', function () {
   });
 
   it('should call set series on change', async function () {
-    const { setSeries } = mockUrlStorage({});
-
-    render(<SeriesChartTypesSelect seriesId={'series-id'} defaultChartType={'line'} />);
+    const { setSeries } = render(
+      <SeriesChartTypesSelect seriesId={'series-id'} defaultChartType={'line'} />
+    );
 
     await waitFor(() => {
       screen.getByText(/chart type/i);
@@ -44,8 +42,6 @@ describe.skip('SeriesChartTypesSelect', function () {
 
   describe('XYChartTypesSelect', function () {
     it('should render properly', async function () {
-      mockUrlStorage({});
-
       render(<XYChartTypesSelect value={'line'} onChange={jest.fn()} label={'Chart type'} />);
 
       await waitFor(() => {

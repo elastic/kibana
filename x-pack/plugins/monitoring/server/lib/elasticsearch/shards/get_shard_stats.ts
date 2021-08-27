@@ -43,7 +43,7 @@ export function handleResponse(
       'elasticsearch.cluster.stats.state.master_node',
       get(cluster, 'cluster_state.master_node')
     );
-    nodes = resp.aggregations.nodes.buckets.reduce(normalizeNodeShards(masterNode), {});
+    nodes = resp.aggregations?.nodes.buckets.reduce(normalizeNodeShards(masterNode), {}) ?? [];
   }
 
   return {
@@ -96,7 +96,7 @@ export function getShardStats(
   const params = {
     index: esIndexPattern,
     size: 0,
-    ignoreUnavailable: true,
+    ignore_unavailable: true,
     body: {
       sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
       query: createQuery({

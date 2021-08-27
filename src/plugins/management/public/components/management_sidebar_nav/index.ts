@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { ManagementSidebarNav } from './management_sidebar_nav';
+export { managementSidebarNav } from './management_sidebar_nav';

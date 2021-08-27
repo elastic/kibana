@@ -143,6 +143,29 @@ describe('alert reducer', () => {
     );
   });
 
+  test('if the existing alert action params property was set to undefined (when other connector was selected)', () => {
+    initialAlert.actions.push({
+      id: '',
+      actionTypeId: 'testId',
+      group: 'Alert',
+      params: {
+        testActionParam: 'some value',
+      },
+    });
+    const updatedAlert = alertReducer(
+      { alert: initialAlert },
+      {
+        command: { type: 'setAlertActionParams' },
+        payload: {
+          key: 'testActionParam',
+          value: undefined,
+          index: 0,
+        },
+      }
+    );
+    expect(updatedAlert.alert.actions[0].params.testActionParam).toBe(undefined);
+  });
+
   test('if alert action property was updated', () => {
     initialAlert.actions.push({
       id: '',

@@ -7,6 +7,7 @@
 
 import React, { useState, useCallback, useMemo } from 'react';
 import { Case, CaseType } from '../../../common';
+import { useOwnerContext } from '../owner_context/use_owner_context';
 import { CreateCaseModal } from './create_case_modal';
 
 export interface UseCreateCaseModalProps {
@@ -26,6 +27,7 @@ export const useCreateCaseModal = ({
   onCaseCreated,
   hideConnectorServiceNowSir = false,
 }: UseCreateCaseModalProps) => {
+  const owner = useOwnerContext();
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const closeModal = useCallback(() => setIsModalOpen(false), []);
   const openModal = useCallback(() => setIsModalOpen(true), []);
@@ -46,12 +48,13 @@ export const useCreateCaseModal = ({
           isModalOpen={isModalOpen}
           onCloseCaseModal={closeModal}
           onSuccess={onSuccess}
+          owner={owner[0]}
         />
       ),
       isModalOpen,
       closeModal,
       openModal,
     }),
-    [caseType, closeModal, hideConnectorServiceNowSir, isModalOpen, onSuccess, openModal]
+    [caseType, closeModal, hideConnectorServiceNowSir, isModalOpen, onSuccess, openModal, owner]
   );
 };

@@ -6,10 +6,15 @@
  */
 
 import moment from 'moment';
+import type {
+  EndpointEntriesArray,
+  EntriesArray,
+  Entry,
+  EntryMatch,
+  EntryNested,
+  OsTypeArray,
+} from '@kbn/securitysolution-io-ts-list-types';
 
-import { OsTypeArray } from './schemas/common';
-import { EntriesArray, Entry, EntryMatch, EntryNested } from './schemas/types';
-import { EndpointEntriesArray } from './schemas/types/endpoint';
 export const DATE_NOW = '2020-04-20T15:25:31.830Z';
 export const OLD_DATE_RELATIVE_TO_DATE_NOW = '2020-04-19T15:25:31.830Z';
 export const USER = 'some user';

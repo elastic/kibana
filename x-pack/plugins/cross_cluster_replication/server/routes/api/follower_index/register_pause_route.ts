@@ -15,7 +15,7 @@ import { RouteDependencies } from '../../../types';
 export const registerPauseRoute = ({
   router,
   license,
-  lib: { isEsError, formatEsError },
+  lib: { handleEsError },
 }: RouteDependencies) => {
   const paramsSchema = schema.object({ id: schema.string() });
 
@@ -27,29 +27,20 @@ export const registerPauseRoute = ({
       },
     },
     license.guardApiRoute(async (context, request, response) => {
+      const { client } = context.core.elasticsearch;
       const { id } = request.params;
       const ids = id.split(',');
 
       const itemsPaused: string[] = [];
       const errors: Array<{ id: string; error: any }> = [];
 
-      const formatError = (err: any) => {
-        if (isEsError(err)) {
-          return response.customError(formatEsError(err));
-        }
-        // Case: default
-        return response.customError({ statusCode: 500, body: err });
-      };
-
       await Promise.all(
         ids.map((_id: string) =>
-          context
-            .crossClusterReplication!.client.callAsCurrentUser('ccr.pauseFollowerIndex', {
-              id: _id,
-            })
+          client.asCurrentUser.ccr
+            .pauseFollow({ index: _id })
             .then(() => itemsPaused.push(_id))
-            .catch((err) => {
-              errors.push({ id: _id, error: formatError(err) });
+            .catch((error) => {
+              errors.push({ id: _id, error: handleEsError({ error, response }) });
             })
         )
       );

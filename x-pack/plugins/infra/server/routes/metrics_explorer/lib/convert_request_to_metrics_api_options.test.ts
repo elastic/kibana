@@ -28,7 +28,7 @@ const BASE_METRICS_UI_OPTIONS: MetricsAPIRequest = {
     interval: '1m',
   },
   limit: 9,
-  dropLastBucket: true,
+  dropPartialBuckets: true,
   indexPattern: 'metrics-*',
   metrics: [
     { id: 'metric_0', aggregations: { metric_0: { avg: { field: 'system.cpu.user.pct' } } } },

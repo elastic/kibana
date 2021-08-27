@@ -50,7 +50,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(await settings.applyButtonIsDisabled()).to.eql(true);
     });
 
-    // Failing: https://github.com/elastic/kibana/issues/60863
     it('changing index pattern setting is reflected elsewhere in UI', async () => {
       const settings = uptimeService.settings;
 

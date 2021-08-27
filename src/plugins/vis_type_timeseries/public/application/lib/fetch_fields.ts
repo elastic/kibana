@@ -9,7 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import { getCoreStart, getDataStart } from '../../services';
 import { ROUTES } from '../../../common/constants';
-import { SanitizedFieldType, IndexPatternValue } from '../../../common/types';
+import type { SanitizedFieldType, IndexPatternValue } from '../../../common/types';
 import { getIndexPatternKey } from '../../../common/index_patterns_utils';
 import { toSanitizedFieldType } from '../../../common/fields_utils';
 
@@ -22,9 +22,9 @@ export async function fetchFields(
   const patterns = Array.isArray(indexes) ? indexes : [indexes];
   const coreStart = getCoreStart();
   const dataStart = getDataStart();
+  const defaultIndex = coreStart.uiSettings.get('defaultIndex');
 
   try {
-    const defaultIndexPattern = await dataStart.indexPatterns.getDefault();
     const indexFields = await Promise.all(
       patterns.map(async (pattern) => {
         if (typeof pattern !== 'string' && pattern?.id) {
@@ -42,17 +42,14 @@ export async function fetchFields(
       })
     );
 
-    const fields: VisFields = patterns.reduce(
-      (cumulatedFields, currentPattern, index) => ({
+    const fields: VisFields = patterns.reduce((cumulatedFields, currentPattern, index) => {
+      const key = getIndexPatternKey(currentPattern);
+      return {
         ...cumulatedFields,
-        [getIndexPatternKey(currentPattern)]: indexFields[index],
-      }),
-      {}
-    );
-
-    if (defaultIndexPattern) {
-      fields[''] = toSanitizedFieldType(await defaultIndexPattern.getNonScriptedFields());
-    }
+        [key]: indexFields[index],
+        ...(key === defaultIndex ? { '': indexFields[index] } : {}),
+      };
+    }, {});
 
     return fields;
   } catch (error) {

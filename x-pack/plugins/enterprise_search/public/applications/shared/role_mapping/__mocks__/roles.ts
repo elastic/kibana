@@ -9,6 +9,8 @@ import { engines } from '../../../app_search/__mocks__/engines.mock';
 
 import { AttributeName } from '../../types';
 
+import { elasticsearchUsers } from './elasticsearch_users';
+
 export const asRoleMapping = {
   id: 'sdgfasdgadf123',
   attributeName: 'role' as AttributeName,
@@ -69,4 +71,21 @@ export const wsRoleMapping = {
       usersCount: 2,
     },
   ],
+};
+
+export const invitation = {
+  email: 'foo@example.com',
+  code: '123fooqwe',
+};
+
+export const wsSingleUserRoleMapping = {
+  invitation,
+  elasticsearchUser: elasticsearchUsers[0],
+  roleMapping: wsRoleMapping,
+};
+
+export const asSingleUserRoleMapping = {
+  invitation,
+  elasticsearchUser: elasticsearchUsers[0],
+  roleMapping: asRoleMapping,
 };

@@ -10,7 +10,7 @@ import moment from 'moment-timezone';
 import { useCallback, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { DEFAULT_DATE_FORMAT, DEFAULT_DATE_FORMAT_TZ } from '../../../../common/constants';
+import { DEFAULT_DATE_FORMAT, DEFAULT_DATE_FORMAT_TZ } from '../../../../common';
 import { AuthenticatedUser } from '../../../../../security/common/model';
 import { convertToCamelCase } from '../../../containers/utils';
 import { StartServices } from '../../../types';
@@ -103,30 +103,4 @@ export const useCurrentUser = (): AuthenticatedElasticUser | null => {
     fetchUser();
   }, [fetchUser]);
   return user;
-};
-
-export interface UseGetUserSavedObjectPermissions {
-  crud: boolean;
-  read: boolean;
-}
-
-export const useGetUserSavedObjectPermissions = () => {
-  const [
-    savedObjectsPermissions,
-    setSavedObjectsPermissions,
-  ] = useState<UseGetUserSavedObjectPermissions | null>(null);
-  const uiCapabilities = useKibana().services.application.capabilities;
-
-  useEffect(() => {
-    const capabilitiesCanUserCRUD: boolean =
-      typeof uiCapabilities.siem.crud === 'boolean' ? uiCapabilities.siem.crud : false;
-    const capabilitiesCanUserRead: boolean =
-      typeof uiCapabilities.siem.show === 'boolean' ? uiCapabilities.siem.show : false;
-    setSavedObjectsPermissions({
-      crud: capabilitiesCanUserCRUD,
-      read: capabilitiesCanUserRead,
-    });
-  }, [uiCapabilities]);
-
-  return savedObjectsPermissions;
 };

@@ -20,4 +20,7 @@
   object_type: integer
 - name: invalidarray
   type: array
+- name: cycle_type
+  type: constant_keyword
+  value: bicycle
 

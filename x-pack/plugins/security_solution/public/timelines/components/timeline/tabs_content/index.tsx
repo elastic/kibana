@@ -6,11 +6,17 @@
  */
 
 import { EuiBadge, EuiLoadingContent, EuiTabs, EuiTab } from '@elastic/eui';
+import { isEmpty } from 'lodash/fp';
 import React, { lazy, memo, Suspense, useCallback, useEffect, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
-import { TimelineTabs, TimelineId, TimelineType } from '../../../../../common/types/timeline';
+import {
+  RowRenderer,
+  TimelineTabs,
+  TimelineId,
+  TimelineType,
+} from '../../../../../common/types/timeline';
 import {
   useShallowEqualSelector,
   useDeepEqualSelector,
@@ -20,7 +26,6 @@ import {
   TimelineEventsCountBadge,
 } from '../../../../common/hooks/use_timeline_events_count';
 import { timelineActions } from '../../../store/timeline';
-import { RowRenderer } from '../body/renderers/row_renderer';
 import { CellValueElementProps } from '../cell_rendering';
 import {
   getActiveTabSelector,
@@ -55,6 +60,7 @@ interface BasicTimelineTab {
   timelineId: TimelineId;
   timelineType: TimelineType;
   graphEventId?: string;
+  timelineDescription: string;
 }
 
 const QueryTab: React.FC<{
@@ -146,14 +152,20 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
      */
     return (
       <>
-        <HideShowContainer $isVisible={TimelineTabs.query === activeTimelineTab}>
+        <HideShowContainer
+          $isVisible={TimelineTabs.query === activeTimelineTab}
+          data-test-subj={`timeline-tab-content-${TimelineTabs.query}`}
+        >
           <QueryTab
             renderCellValue={renderCellValue}
             rowRenderers={rowRenderers}
             timelineId={timelineId}
           />
         </HideShowContainer>
-        <HideShowContainer $isVisible={TimelineTabs.pinned === activeTimelineTab}>
+        <HideShowContainer
+          $isVisible={TimelineTabs.pinned === activeTimelineTab}
+          data-test-subj={`timeline-tab-content-${TimelineTabs.pinned}`}
+        >
           <PinnedTab
             renderCellValue={renderCellValue}
             rowRenderers={rowRenderers}
@@ -161,7 +173,10 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
           />
         </HideShowContainer>
         {timelineType === TimelineType.default && (
-          <HideShowContainer $isVisible={TimelineTabs.eql === activeTimelineTab}>
+          <HideShowContainer
+            $isVisible={TimelineTabs.eql === activeTimelineTab}
+            data-test-subj={`timeline-tab-content-${TimelineTabs.eql}`}
+          >
             <EqlTab
               renderCellValue={renderCellValue}
               rowRenderers={rowRenderers}
@@ -169,7 +184,10 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
             />
           </HideShowContainer>
         )}
-        <HideShowContainer $isVisible={isGraphOrNotesTabs}>
+        <HideShowContainer
+          $isVisible={isGraphOrNotesTabs}
+          data-test-subj={`timeline-tab-content-${TimelineTabs.graph}-${TimelineTabs.notes}`}
+        >
           {isGraphOrNotesTabs && getTab(activeTimelineTab)}
         </HideShowContainer>
       </>
@@ -206,6 +224,7 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
   timelineFullScreen,
   timelineType,
   graphEventId,
+  timelineDescription,
 }) => {
   const dispatch = useDispatch();
   const getActiveTab = useMemo(() => getActiveTabSelector(), []);
@@ -217,6 +236,7 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
 
   const activeTab = useShallowEqualSelector((state) => getActiveTab(state, timelineId));
   const showTimeline = useShallowEqualSelector((state) => getShowTimeline(state, timelineId));
+
   const numberOfPinnedEvents = useShallowEqualSelector((state) =>
     getNumberOfPinnedEvents(state, timelineId)
   );
@@ -237,8 +257,10 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
   }, [globalTimelineNoteIds, eventIdToNoteIds]);
 
   const numberOfNotes = useMemo(
-    () => appNotes.filter((appNote) => allTimelineNoteIds.includes(appNote.id)).length,
-    [appNotes, allTimelineNoteIds]
+    () =>
+      appNotes.filter((appNote) => allTimelineNoteIds.includes(appNote.id)).length +
+      (isEmpty(timelineDescription) ? 0 : 1),
+    [appNotes, allTimelineNoteIds, timelineDescription]
   );
 
   const setQueryAsActiveTab = useCallback(() => {
@@ -346,6 +368,7 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
         rowRenderers={rowRenderers}
         timelineId={timelineId}
         timelineType={timelineType}
+        timelineDescription={timelineDescription}
       />
     </>
   );

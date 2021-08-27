@@ -7,6 +7,8 @@
  */
 
 import { parse } from 'hjson';
+import { ElasticsearchClient, SavedObject } from 'src/core/server';
+
 import type {
   SavedObject,
   SavedObjectsClientContract,
@@ -36,7 +38,7 @@ const getDefaultVegaVisualizations = (home: UsageCollectorDependencies['home']) 
   const sampleDataSets = home?.sampleData.getSampleDatasets() ?? [];
 
   sampleDataSets.forEach((sampleDataSet) =>
-    sampleDataSet.savedObjects.forEach((savedObject: SavedObject<any>) => {
+    sampleDataSet.savedObjects.forEach((savedObject) => {
       try {
         if (savedObject.type === 'visualization') {
           const visState = JSON.parse(savedObject.attributes?.visState);

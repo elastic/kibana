@@ -46,6 +46,18 @@ export const CREATED_BY = i18n.translate('xpack.securitySolution.exceptions.crea
   defaultMessage: 'Created by',
 });
 
+export const NAME = i18n.translate('xpack.securitySolution.exceptions.nameLabel', {
+  defaultMessage: 'Name',
+});
+
+export const DATE_MODIFIED = i18n.translate('xpack.securitySolution.exceptions.dateModifiedLabel', {
+  defaultMessage: 'Date modified',
+});
+
+export const MODIFIED_BY = i18n.translate('xpack.securitySolution.exceptions.modifiedByLabel', {
+  defaultMessage: 'Modified by',
+});
+
 export const COMMENT = i18n.translate('xpack.securitySolution.exceptions.commentLabel', {
   defaultMessage: 'Comment',
 });
@@ -259,6 +271,13 @@ export const OPERATING_SYSTEM_MAC = i18n.translate(
   'xpack.securitySolution.exceptions.operatingSystemMac',
   {
     defaultMessage: 'macOS',
+  }
+);
+
+export const OPERATING_SYSTEM_WINDOWS_AND_MAC = i18n.translate(
+  'xpack.securitySolution.exceptions.operatingSystemWindowsAndMac',
+  {
+    defaultMessage: 'Windows and macOS',
   }
 );
 

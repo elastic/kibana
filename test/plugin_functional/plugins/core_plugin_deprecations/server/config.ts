@@ -26,6 +26,11 @@ const configSecretDeprecation: ConfigDeprecation = (settings, fromPath, addDepre
       message:
         'Kibana plugin functional tests will no longer allow corePluginDeprecations.secret ' +
         'config to be set to anything except 42.',
+      correctiveActions: {
+        manualSteps: [
+          `This is an intentional deprecation for testing with no intention for having it fixed!`,
+        ],
+      },
     });
   }
   return settings;

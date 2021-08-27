@@ -18,10 +18,12 @@ import { HostsPluginState } from '../../hosts/store';
 import { DragAndDropState } from './drag_and_drop/reducer';
 import { TimelinePluginState } from '../../timelines/store/timeline';
 import { NetworkPluginState } from '../../network/store';
+import { UebaPluginState } from '../../ueba/store';
 import { ManagementPluginState } from '../../management';
 
 export type StoreState = HostsPluginState &
   NetworkPluginState &
+  UebaPluginState &
   TimelinePluginState &
   ManagementPluginState & {
     app: AppState;
@@ -36,18 +38,6 @@ export type StoreState = HostsPluginState &
  * `CombinedState` is required for redux to know what keys to make optional when preloaded state into a store.
  */
 export type State = CombinedState<StoreState>;
-
-export type KueryFilterQueryKind = 'kuery' | 'lucene' | 'eql';
-
-export interface KueryFilterQuery {
-  kind: KueryFilterQueryKind;
-  expression: string;
-}
-
-export interface SerializedFilterQuery {
-  kuery: KueryFilterQuery | null;
-  serializedQuery: string;
-}
 
 /**
  * like redux's `MiddlewareAPI` but `getState` returns an `Immutable` version of

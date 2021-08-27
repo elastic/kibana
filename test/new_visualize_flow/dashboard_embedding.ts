@@ -34,7 +34,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('Dashboard Embedding', function describeIndexTests() {
     before(async () => {
-      await esArchiver.load('kibana');
+      await esArchiver.load('test/new_visualize_flow/fixtures/es_archiver/kibana');
       await kibanaServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });

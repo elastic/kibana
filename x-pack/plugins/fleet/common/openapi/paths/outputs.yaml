@@ -1,0 +1,22 @@
+get:
+  summary: Outputs
+  tags: []
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              items:
+                type: array
+                items:
+                  $ref: ../components/schemas/output.yaml
+              total:
+                type: integer
+              page:
+                type: integer
+              perPage:
+                type: integer
+  operationId: get-outputs

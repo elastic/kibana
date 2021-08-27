@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { IndexMapping } from '../../../mappings';
 import {
   isRootLevelAttribute,
   rewriteRootLevelAttribute,
@@ -14,7 +13,7 @@ import {
   rewriteObjectTypeAttribute,
 } from './validation_utils';
 
-const mockMappings: IndexMapping = {
+const mockMappings = {
   properties: {
     updated_at: {
       type: 'date',
@@ -28,7 +27,7 @@ const mockMappings: IndexMapping = {
           type: 'text',
         },
         bytes: {
-          type: 'number',
+          type: 'integer',
         },
       },
     },
@@ -70,7 +69,7 @@ const mockMappings: IndexMapping = {
       },
     },
   },
-};
+} as const;
 
 describe('isRootLevelAttribute', () => {
   it('returns true when referring to a path to a valid root level field', () => {

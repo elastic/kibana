@@ -9,9 +9,11 @@ import React, { memo } from 'react';
 import { PackagePolicyCreateExtensionComponentProps } from '../../../../fleet/public';
 import { SyntheticsPolicyCreateExtension } from './synthetics_policy_create_extension';
 import {
-  SimpleFieldsContextProvider,
-  HTTPAdvancedFieldsContextProvider,
-  TCPAdvancedFieldsContextProvider,
+  MonitorTypeContextProvider,
+  TCPContextProvider,
+  ICMPSimpleFieldsContextProvider,
+  HTTPContextProvider,
+  BrowserContextProvider,
   TLSFieldsContextProvider,
 } from './contexts';
 
@@ -22,15 +24,19 @@ import {
 export const SyntheticsPolicyCreateExtensionWrapper = memo<PackagePolicyCreateExtensionComponentProps>(
   ({ newPolicy, onChange }) => {
     return (
-      <SimpleFieldsContextProvider>
-        <HTTPAdvancedFieldsContextProvider>
-          <TCPAdvancedFieldsContextProvider>
+      <MonitorTypeContextProvider>
+        <HTTPContextProvider>
+          <TCPContextProvider>
             <TLSFieldsContextProvider>
-              <SyntheticsPolicyCreateExtension newPolicy={newPolicy} onChange={onChange} />
+              <ICMPSimpleFieldsContextProvider>
+                <BrowserContextProvider>
+                  <SyntheticsPolicyCreateExtension newPolicy={newPolicy} onChange={onChange} />
+                </BrowserContextProvider>
+              </ICMPSimpleFieldsContextProvider>
             </TLSFieldsContextProvider>
-          </TCPAdvancedFieldsContextProvider>
-        </HTTPAdvancedFieldsContextProvider>
-      </SimpleFieldsContextProvider>
+          </TCPContextProvider>
+        </HTTPContextProvider>
+      </MonitorTypeContextProvider>
     );
   }
 );

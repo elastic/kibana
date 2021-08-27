@@ -11,7 +11,12 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const { visualBuilder, timePicker } = getPageObjects(['visualBuilder', 'timePicker']);
+  const { visualBuilder, timePicker, visualize, visChart } = getPageObjects([
+    'visualBuilder',
+    'timePicker',
+    'visualize',
+    'visChart',
+  ]);
   const retry = getService('retry');
 
   async function cleanupMarkdownData(variableName: 'variable' | 'label', checkedValue: string) {
@@ -31,6 +36,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   describe('visual builder', function describeIndexTests() {
     describe('markdown', () => {
       before(async () => {
+        await visualize.initTests();
         await visualBuilder.resetPage();
         await visualBuilder.clickMarkdown();
         await timePicker.setAbsoluteRange(
@@ -69,6 +75,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await visualBuilder.enterMarkdown(html);
         const markdownText = await visualBuilder.getMarkdownText();
         expect(markdownText).to.be(html);
+      });
+
+      it('markdown variables should be clickable', async () => {
+        await visualBuilder.clearMarkdown();
+        const [firstVariable] = await visualBuilder.getMarkdownTableVariables();
+        await firstVariable.selector.click();
+        await visChart.waitForVisualizationRenderingStabilized();
+        const markdownText = await visualBuilder.getMarkdownText();
+        expect(markdownText).to.be('46');
       });
 
       it('should render mustache list', async () => {
