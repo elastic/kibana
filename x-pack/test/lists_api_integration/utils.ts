@@ -5,19 +5,18 @@
  * 2.0.
  */
 
-import { SuperTest } from 'supertest';
-import supertestAsPromised from 'supertest-as-promised';
+import type SuperTest from 'supertest';
 import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
 
-import { Type } from '@kbn/securitysolution-io-ts-list-types';
-import { getImportListItemAsBuffer } from '../../plugins/lists/common/schemas/request/import_list_item_schema.mock';
-import {
+import type {
+  Type,
+  ListSchema,
   ListItemSchema,
   ExceptionListSchema,
   ExceptionListItemSchema,
-} from '../../plugins/lists/common/schemas';
-import { ListSchema } from '../../plugins/lists/common';
-import { LIST_INDEX, LIST_ITEM_URL } from '../../plugins/lists/common/constants';
+} from '@kbn/securitysolution-io-ts-list-types';
+import { LIST_INDEX, LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
+import { getImportListItemAsBuffer } from '../../plugins/lists/common/schemas/request/import_list_item_schema.mock';
 import { countDownES, countDownTest } from '../detection_engine_api_integration/utils';
 
 /**
@@ -26,7 +25,7 @@ import { countDownES, countDownTest } from '../detection_engine_api_integration/
  * @param supertest The supertest client library
  */
 export const createListsIndex = async (
-  supertest: SuperTest<supertestAsPromised.Test>
+  supertest: SuperTest.SuperTest<SuperTest.Test>
 ): Promise<void> => {
   return countDownTest(async () => {
     await supertest.post(LIST_INDEX).set('kbn-xsrf', 'true').send();
@@ -39,7 +38,7 @@ export const createListsIndex = async (
  * @param supertest The supertest client library
  */
 export const deleteListsIndex = async (
-  supertest: SuperTest<supertestAsPromised.Test>
+  supertest: SuperTest.SuperTest<SuperTest.Test>
 ): Promise<void> => {
   return countDownTest(async () => {
     await supertest.delete(LIST_INDEX).set('kbn-xsrf', 'true').send();
@@ -53,7 +52,7 @@ export const deleteListsIndex = async (
  * @param supertest The supertest client library
  */
 export const createExceptionListsIndex = async (
-  supertest: SuperTest<supertestAsPromised.Test>
+  supertest: SuperTest.SuperTest<SuperTest.Test>
 ): Promise<void> => {
   return countDownTest(async () => {
     await supertest.post(LIST_INDEX).set('kbn-xsrf', 'true').send();
@@ -161,7 +160,6 @@ export const deleteAllExceptions = async (es: KibanaClient): Promise<void> => {
   return countDownES(async () => {
     return es.deleteByQuery({
       index: '.kibana',
-      // @ts-expect-error @elastic/elasticsearch DeleteByQueryRequest doesn't accept q parameter
       q: 'type:exception-list or type:exception-list-agnostic',
       wait_for_completion: true,
       refresh: true,
@@ -180,7 +178,7 @@ export const deleteAllExceptions = async (es: KibanaClient): Promise<void> => {
  * @param testValues Optional test values in case you're using CIDR or range based lists
  */
 export const importFile = async (
-  supertest: SuperTest<supertestAsPromised.Test>,
+  supertest: SuperTest.SuperTest<SuperTest.Test>,
   type: Type,
   contents: string[],
   fileName: string,
@@ -209,7 +207,7 @@ export const importFile = async (
  * @param fileName filename to import as
  */
 export const importTextFile = async (
-  supertest: SuperTest<supertestAsPromised.Test>,
+  supertest: SuperTest.SuperTest<SuperTest.Test>,
   type: Type,
   contents: string[],
   fileName: string
@@ -234,7 +232,7 @@ export const importTextFile = async (
  * @param itemValue The item value to wait for
  */
 export const waitForListItem = async (
-  supertest: SuperTest<supertestAsPromised.Test>,
+  supertest: SuperTest.SuperTest<SuperTest.Test>,
   itemValue: string,
   fileName: string
 ): Promise<void> => {
@@ -255,7 +253,7 @@ export const waitForListItem = async (
  * @param itemValue The item value to wait for
  */
 export const waitForListItems = async (
-  supertest: SuperTest<supertestAsPromised.Test>,
+  supertest: SuperTest.SuperTest<SuperTest.Test>,
   itemValues: string[],
   fileName: string
 ): Promise<void> => {
@@ -270,7 +268,7 @@ export const waitForListItems = async (
  * @param itemValue The item value to wait for
  */
 export const waitForTextListItem = async (
-  supertest: SuperTest<supertestAsPromised.Test>,
+  supertest: SuperTest.SuperTest<SuperTest.Test>,
   itemValue: string,
   fileName: string
 ): Promise<void> => {
@@ -297,7 +295,7 @@ export const waitForTextListItem = async (
  * @param itemValue The item value to wait for
  */
 export const waitForTextListItems = async (
-  supertest: SuperTest<supertestAsPromised.Test>,
+  supertest: SuperTest.SuperTest<SuperTest.Test>,
   itemValues: string[],
   fileName: string
 ): Promise<void> => {

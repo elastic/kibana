@@ -19,9 +19,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     servers: functionalConfig.get('servers'),
     esTestCluster: functionalConfig.get('esTestCluster'),
     apps: {},
-    esArchiver: {
-      directory: path.resolve(__dirname, '../functional/fixtures/es_archiver'),
-    },
     snapshots: {
       directory: path.resolve(__dirname, 'snapshots'),
     },

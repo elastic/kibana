@@ -16,12 +16,12 @@ import {
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import styled from 'styled-components';
 
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { ExceptionDetails } from './exception_details';
 import { ExceptionEntries } from './exception_entries';
 import { getFormattedComments } from '../../helpers';
 import { getFormattedEntries } from '../helpers';
 import type { FormattedEntry, ExceptionListItemIdentifiers } from '../../types';
-import type { ExceptionListItemSchema } from '../../../../../../public/shared_imports';
 
 const MyFlexItem = styled(EuiFlexItem)`
   &.comments--show {
@@ -84,7 +84,7 @@ const ExceptionItemComponent = ({
   }, [loadingItemIds, exceptionItem.id]);
 
   return (
-    <EuiPanel paddingSize="none" data-test-subj={dataTestSubj}>
+    <EuiPanel paddingSize="none" data-test-subj={dataTestSubj} hasBorder hasShadow={false}>
       <EuiFlexGroup direction="column" gutterSize="none">
         <EuiFlexItem>
           <EuiFlexGroup direction="row">

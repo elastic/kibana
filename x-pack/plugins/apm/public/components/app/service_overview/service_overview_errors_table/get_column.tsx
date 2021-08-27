@@ -9,12 +9,12 @@ import { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { asInteger } from '../../../../../common/utils/formatters';
-import { px, unit } from '../../../../style/variables';
+import { APIReturnType } from '../../../../services/rest/createCallApmApi';
+import { unit } from '../../../../utils/style';
 import { SparkPlot } from '../../../shared/charts/spark_plot';
 import { ErrorDetailLink } from '../../../shared/Links/apm/ErrorDetailLink';
 import { TimestampTooltip } from '../../../shared/TimestampTooltip';
 import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
-import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 
 type ErrorGroupMainStatistics = APIReturnType<'GET /api/apm/services/{serviceName}/error_groups/main_statistics'>;
 type ErrorGroupDetailedStatistics = APIReturnType<'GET /api/apm/services/{serviceName}/error_groups/detailed_statistics'>;
@@ -51,17 +51,18 @@ export function getColumns({
       },
     },
     {
-      field: 'last_seen',
+      field: 'lastSeen',
       name: i18n.translate(
         'xpack.apm.serviceOverview.errorsTableColumnLastSeen',
         {
           defaultMessage: 'Last seen',
         }
       ),
-      render: (_, { last_seen: lastSeen }) => {
+      render: (_, { lastSeen }) => {
         return <TimestampTooltip time={lastSeen} timeUnit="minutes" />;
       },
-      width: px(unit * 9),
+      width: `${unit * 9}px`,
+      align: 'right',
     },
     {
       field: 'occurrences',
@@ -71,7 +72,7 @@ export function getColumns({
           defaultMessage: 'Occurrences',
         }
       ),
-      width: px(unit * 12),
+      width: `${unit * 12}px`,
       render: (_, { occurrences, group_id: errorGroupId }) => {
         const currentPeriodTimeseries =
           errorGroupDetailedStatistics?.currentPeriod?.[errorGroupId]

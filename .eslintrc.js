@@ -445,6 +445,8 @@ module.exports = {
                   '(src|x-pack)/plugins/**/(public|server)/**/*',
                   '!(src|x-pack)/plugins/**/(public|server)/mocks/index.{js,mjs,ts}',
                   '!(src|x-pack)/plugins/**/(public|server)/(index|mocks).{js,mjs,ts,tsx}',
+                  '!(src|x-pack)/plugins/**/__stories__/index.{js,mjs,ts,tsx}',
+                  '!(src|x-pack)/plugins/**/__fixtures__/index.{js,mjs,ts,tsx}',
                 ],
                 allowSameFolder: true,
                 errorMessage: 'Plugins may only import from top-level public and server modules.',
@@ -467,11 +469,6 @@ module.exports = {
                 ],
                 errorMessage:
                   'Server modules cannot be imported into client modules or shared modules.',
-              },
-              {
-                target: ['src/**/*'],
-                from: ['x-pack/**/*'],
-                errorMessage: 'OSS cannot import x-pack files.',
               },
               {
                 target: ['src/core/**/*'],
@@ -712,6 +709,33 @@ module.exports = {
                 message: 'Please use @elastic/safer-lodash-set instead',
               },
               {
+                name: 'lodash',
+                importNames: ['template'],
+                message:
+                  'lodash.template is unsafe, and not compatible with our content security policy.',
+              },
+              {
+                name: 'lodash.template',
+                message:
+                  'lodash.template is unsafe, and not compatible with our content security policy.',
+              },
+              {
+                name: 'lodash/template',
+                message:
+                  'lodash.template is unsafe, and not compatible with our content security policy.',
+              },
+              {
+                name: 'lodash/fp',
+                importNames: ['template'],
+                message:
+                  'lodash.template is unsafe, and not compatible with our content security policy.',
+              },
+              {
+                name: 'lodash/fp/template',
+                message:
+                  'lodash.template is unsafe, and not compatible with our content security policy.',
+              },
+              {
                 name: 'react-use',
                 message: 'Please use react-use/lib/{method} instead.',
               },
@@ -731,12 +755,22 @@ module.exports = {
                 message: 'Please use @elastic/safer-lodash-set instead',
               },
               {
+                name: 'lodash.template',
+                message:
+                  'lodash.template is unsafe, and not compatible with our content security policy.',
+              },
+              {
                 name: 'lodash/set',
                 message: 'Please use @elastic/safer-lodash-set instead',
               },
               {
                 name: 'lodash/setWith',
                 message: 'Please use @elastic/safer-lodash-set instead',
+              },
+              {
+                name: 'lodash/template',
+                message:
+                  'lodash.template is unsafe, and not compatible with our content security policy.',
               },
             ],
           },
@@ -752,6 +786,18 @@ module.exports = {
             object: '_',
             property: 'set',
             message: 'Please use @elastic/safer-lodash-set instead',
+          },
+          {
+            object: 'lodash',
+            property: 'template',
+            message:
+              'lodash.template is unsafe, and not compatible with our content security policy.',
+          },
+          {
+            object: '_',
+            property: 'template',
+            message:
+              'lodash.template is unsafe, and not compatible with our content security policy.',
           },
           {
             object: 'lodash',
@@ -808,6 +854,18 @@ module.exports = {
         'react-hooks/exhaustive-deps': ['error', { additionalHooks: '^useFetcher$' }],
       },
     },
+    {
+      files: ['x-pack/plugins/apm/**/*.stories.*', 'x-pack/plugins/observability/**/*.stories.*'],
+      rules: {
+        'react/function-component-definition': [
+          'off',
+          {
+            namedComponents: 'function-declaration',
+            unnamedComponents: 'arrow-function',
+          },
+        ],
+      },
+    },
 
     /**
      * Fleet overrides
@@ -827,6 +885,17 @@ module.exports = {
     },
 
     /**
+     * Cases overrides
+     */
+    {
+      files: ['x-pack/plugins/cases/**/*.{js,mjs,ts,tsx}'],
+      rules: {
+        'no-duplicate-imports': 'off',
+        '@typescript-eslint/no-duplicate-imports': ['error'],
+      },
+    },
+
+    /**
      * Security Solution overrides
      */
     {
@@ -834,9 +903,13 @@ module.exports = {
       files: [
         'x-pack/plugins/security_solution/public/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/security_solution/common/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/timelines/public/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/timelines/common/**/*.{js,mjs,ts,tsx}',
       ],
       rules: {
         'import/no-nodejs-modules': 'error',
+        'no-duplicate-imports': 'off',
+        '@typescript-eslint/no-duplicate-imports': ['error'],
         'no-restricted-imports': [
           'error',
           {
@@ -848,7 +921,10 @@ module.exports = {
     },
     {
       // typescript only for front and back end
-      files: ['x-pack/plugins/security_solution/**/*.{ts,tsx}'],
+      files: [
+        'x-pack/plugins/security_solution/**/*.{ts,tsx}',
+        'x-pack/plugins/timelines/**/*.{ts,tsx}',
+      ],
       rules: {
         '@typescript-eslint/no-this-alias': 'error',
         '@typescript-eslint/no-explicit-any': 'error',
@@ -858,7 +934,10 @@ module.exports = {
     },
     {
       // typescript and javascript for front and back end
-      files: ['x-pack/plugins/security_solution/**/*.{js,mjs,ts,tsx}'],
+      files: [
+        'x-pack/plugins/security_solution/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/timelines/**/*.{js,mjs,ts,tsx}',
+      ],
       plugins: ['eslint-plugin-node', 'react'],
       env: {
         jest: true,
@@ -873,7 +952,7 @@ module.exports = {
         'no-continue': 'error',
         'no-dupe-keys': 'error',
         'no-duplicate-case': 'error',
-        'no-duplicate-imports': 'error',
+        'no-duplicate-imports': 'off',
         'no-empty-character-class': 'error',
         'no-empty-pattern': 'error',
         'no-ex-assign': 'error',
@@ -944,6 +1023,7 @@ module.exports = {
         'require-atomic-updates': 'error',
         'symbol-description': 'error',
         'vars-on-top': 'error',
+        '@typescript-eslint/no-duplicate-imports': ['error'],
       },
     },
 
@@ -1321,7 +1401,7 @@ module.exports = {
     {
       // Source files only - allow `any` in test/mock files
       files: ['x-pack/plugins/enterprise_search/**/*.{ts,tsx}'],
-      excludedFiles: ['x-pack/plugins/enterprise_search/**/*.{test,mock}.{ts,tsx}'],
+      excludedFiles: ['x-pack/plugins/enterprise_search/**/*.{test,mock,test_helper}.{ts,tsx}'],
       rules: {
         '@typescript-eslint/no-explicit-any': 'error',
       },
@@ -1412,7 +1492,7 @@ module.exports = {
       },
     },
     {
-      files: ['packages/kbn-ui-shared-deps/flot_charts/**/*.js'],
+      files: ['packages/kbn-ui-shared-deps/src/flot_charts/**/*.js'],
       env: {
         jquery: true,
       },
@@ -1487,7 +1567,7 @@ module.exports = {
     {
       files: [
         'src/plugins/security_oss/**/*.{js,mjs,ts,tsx}',
-        'src/plugins/spaces_oss/**/*.{js,mjs,ts,tsx}',
+        'src/plugins/interactive_setup/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/encrypted_saved_objects/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/security/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/spaces/**/*.{js,mjs,ts,tsx}',
@@ -1574,21 +1654,6 @@ module.exports = {
       ],
       rules: {
         '@typescript-eslint/prefer-ts-expect-error': 'error',
-      },
-    },
-    {
-      files: [
-        '**/public/**/*.{js,mjs,ts,tsx}',
-        '**/common/**/*.{js,mjs,ts,tsx}',
-        'packages/**/*.{js,mjs,ts,tsx}',
-      ],
-      rules: {
-        'no-restricted-imports': [
-          'error',
-          {
-            patterns: ['lodash/*', '!lodash/fp', 'rxjs/internal-compatibility'],
-          },
-        ],
       },
     },
   ],

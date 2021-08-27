@@ -80,17 +80,16 @@ life-cycle of a PR looks like the following:
    backported later. The checklist in the PR description template can be used
    to guide the progress of the PR.
 2. **Label the PR**: To ensure that a newly created PR gets the attention of
-   the @elastic/infra-logs-ui team, the following label should be applied to
+   the @elastic/logs-metrics-ui team, the following label should be applied to
    PRs:
-   * `Team:infra-logs-ui`
-   * `Feature:Infra UI` if it relates to the *Intrastructure UI*
+   * `Team:logs-metrics-ui`
+   * `Feature:Metrics UI` if it relates to the *Metrics UI*
    * `Feature:Logs UI` if it relates to the *Logs UI*
-   * `[zube]: In Progress` to track the stage of the PR
    * Version labels for merge and backport targets (see [Kibana's contribution
-     procedures]), usually:
+     procedures](https://www.elastic.co/guide/en/kibana/master/contributing.html)), usually:
      * the version that `master` currently represents
      * the version of the next minor release
-   * Release note labels (see [Kibana's contribution procedures])
+   * Release note labels (see [Kibana's contribution procedures](https://www.elastic.co/guide/en/kibana/master/contributing.html#kibana-release-notes-process))
      * `release_note:enhancement` if the PR contains a new feature or enhancement
      * `release_note:fix` if the PR contains an external-facing fix
      * `release_note:breaking` if the PR contains a breaking change
@@ -100,14 +99,13 @@ life-cycle of a PR looks like the following:
        to unreleased code or documentation changes
 3. **Satisfy CI**: The PR will automatically be picked up by the CI system,
    which will run the full test suite as well as some additional checks. A
-   comment containing `jenkins, test this` can be used to manually trigger a CI
+   comment containing `@elasticmachine merge upstream` or `retest` can be used to manually trigger a CI
    run. The result will be reported on the PR itself. Out of courtesy for the
    reviewers the checks should pass before requesting reviews.
 4. **Request reviews**: Once the PR is ready for reviews it can be marked as
-   such by [changing the PR state to ready].  In addition the label `[zube]: In
-   Progress` should be replaced with `[zube]: In Review` and `review`. If the
+   such by [changing the PR state to ready]. If the
    GitHub automation doesn't automatically request a review from
-   `@elastic/infra-logs-ui` it should be requested manually.
+   `@elastic/logs-metrics-ui` it should be requested manually.
 5. **Incorporate review feedback**: Usually one reviewer's approval is
    sufficient. Particularly complicated or cross-cutting concerns might warrant
    multiple reviewers.

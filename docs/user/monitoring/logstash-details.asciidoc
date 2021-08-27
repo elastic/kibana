@@ -12,16 +12,10 @@ Logstash nodes.
 [role="screenshot"]
 image::user/monitoring/images/monitoring-logstash-overview.png["Logstash Overview",link="images/monitoring-logstash-overview.png"]
 
-To view Logstash node metrics, click **Nodes**. The Nodes section shows the
+. To view Logstash node metrics, click **Nodes**. The Nodes section shows the
 status of each Logstash node.
 
-[role="screenshot"]
-image::user/monitoring/images/monitoring-logstash-nodes.png["Logstash Nodes",link="images/monitoring-logstash-nodes.png"]
+. Click the name of a node to view its statistics over time.
 
-Click the name of a node to view its statistics over time.
-
-[role="screenshot"]
-image::user/monitoring/images/monitoring-logstash-node.png["Logstash Node View",link="images/monitoring-logstash-node.png"]
-
-For more information, see
+For more information, refer to
 {logstash-ref}/monitoring-logstash.html[Monitoring Logstash].

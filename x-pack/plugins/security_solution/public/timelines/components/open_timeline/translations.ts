@@ -369,7 +369,7 @@ export const SUCCESSFULLY_IMPORTED_TIMELINES = (totalCount: number) =>
     {
       values: { totalCount },
       defaultMessage:
-        'Successfully imported {totalCount} {totalCount, plural, =1 {timeline} other {timelines}}',
+        'Successfully imported {totalCount} {totalCount, plural, =1 {item} other {items}}',
     }
   );
 

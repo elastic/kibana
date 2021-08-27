@@ -358,7 +358,7 @@ describe('Session', () => {
       session = new Session({
         logger: loggingSystemMock.createLogger(),
         config: createConfig(
-          ConfigSchema.validate({ session: { idleTimeout: 123 } }),
+          ConfigSchema.validate({ session: { idleTimeout: 123, lifespan: null } }),
           loggingSystemMock.createLogger(),
           { isTLSEnabled: false }
         ),
@@ -398,7 +398,7 @@ describe('Session', () => {
         session = new Session({
           logger: loggingSystemMock.createLogger(),
           config: createConfig(
-            ConfigSchema.validate({ session: { lifespan } }),
+            ConfigSchema.validate({ session: { idleTimeout: null, lifespan } }),
             loggingSystemMock.createLogger(),
             { isTLSEnabled: false }
           ),
@@ -472,9 +472,11 @@ describe('Session', () => {
 
       session = new Session({
         logger: loggingSystemMock.createLogger(),
-        config: createConfig(ConfigSchema.validate({}), loggingSystemMock.createLogger(), {
-          isTLSEnabled: false,
-        }),
+        config: createConfig(
+          ConfigSchema.validate({ session: { idleTimeout: null, lifespan: null } }),
+          loggingSystemMock.createLogger(),
+          { isTLSEnabled: false }
+        ),
         sessionCookie: mockSessionCookie,
         sessionIndex: mockSessionIndex,
       });
@@ -527,7 +529,7 @@ describe('Session', () => {
         session = new Session({
           logger: loggingSystemMock.createLogger(),
           config: createConfig(
-            ConfigSchema.validate({ session: { idleTimeout: 123 } }),
+            ConfigSchema.validate({ session: { idleTimeout: 123, lifespan: null } }),
             loggingSystemMock.createLogger(),
             { isTLSEnabled: false }
           ),
@@ -718,7 +720,7 @@ describe('Session', () => {
         session = new Session({
           logger: loggingSystemMock.createLogger(),
           config: createConfig(
-            ConfigSchema.validate({ session: { lifespan } }),
+            ConfigSchema.validate({ session: { idleTimeout: null, lifespan } }),
             loggingSystemMock.createLogger(),
             { isTLSEnabled: false }
           ),

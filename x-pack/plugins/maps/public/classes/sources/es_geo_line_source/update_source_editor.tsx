@@ -18,7 +18,7 @@ import { MetricsEditor } from '../../../components/metrics_editor';
 import { getIndexPatternService } from '../../../kibana_services';
 import { GeoLineForm } from './geo_line_form';
 import { AggDescriptor } from '../../../../common/descriptor_types';
-import { OnSourceChangeArgs } from '../../../connected_components/layer_panel/view';
+import { OnSourceChangeArgs } from '../source';
 
 interface Props {
   indexPatternId: string;

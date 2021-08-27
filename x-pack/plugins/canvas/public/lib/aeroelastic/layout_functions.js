@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { getId as rawGetId } from '../get_id';
+
 import { insideAABB, landmarkPoint, shapesAt } from './geometry';
 
 import {
@@ -39,8 +41,6 @@ import {
   not,
   removeDuplicates,
 } from './functional';
-
-import { getId as rawGetId } from './../../lib/get_id';
 
 const idMap = {};
 const getId = (name, extension) => {

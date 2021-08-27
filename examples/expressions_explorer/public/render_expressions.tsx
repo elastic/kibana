@@ -34,7 +34,9 @@ interface Props {
 }
 
 export function RenderExpressionsExample({ expressions, inspector }: Props) {
-  const [expression, updateExpression] = useState('markdown "## expressions explorer rendering"');
+  const [expression, updateExpression] = useState(
+    'markdownVis "## expressions explorer rendering"'
+  );
 
   const expressionChanged = (value: string) => {
     updateExpression(value);

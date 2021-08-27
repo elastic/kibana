@@ -23,10 +23,13 @@ export { SpacesPluginSetup, SpacesPluginStart } from './plugin';
 export { SpacesServiceSetup, SpacesServiceStart } from './spaces_service';
 export { ISpacesClient, SpacesClientRepositoryFactory, SpacesClientWrapper } from './spaces_client';
 
-export { GetAllSpacesOptions, GetAllSpacesPurpose, GetSpaceResult } from '../common';
-
-// re-export types from oss definition
-export type { Space } from 'src/plugins/spaces_oss/common';
+export type {
+  Space,
+  GetAllSpacesOptions,
+  GetAllSpacesPurpose,
+  GetSpaceResult,
+  LegacyUrlAliasTarget,
+} from '../common';
 
 export const config: PluginConfigDescriptor = {
   schema: ConfigSchema,

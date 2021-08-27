@@ -16,6 +16,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const PageObjects = getPageObjects(['reporting', 'common', 'discover', 'timePicker']);
   const filterBar = getService('filterBar');
+  const ecommerceSOPath = 'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce.json';
 
   const setFieldsFromSource = async (setValue: boolean) => {
     await kibanaServer.uiSettings.update({ 'discover:searchFieldsFromSource': setValue });
@@ -24,13 +25,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('Discover CSV Export', () => {
     before('initialize tests', async () => {
       log.debug('ReportingPage:initTests');
-      await esArchiver.load('reporting/ecommerce');
-      await esArchiver.load('reporting/ecommerce_kibana');
+      await esArchiver.load('x-pack/test/functional/es_archives/reporting/ecommerce');
+      await kibanaServer.importExport.load(ecommerceSOPath);
       await browser.setWindowSize(1600, 850);
     });
     after('clean up archives', async () => {
-      await esArchiver.unload('reporting/ecommerce');
-      await esArchiver.unload('reporting/ecommerce_kibana');
+      await esArchiver.unload('x-pack/test/functional/es_archives/reporting/ecommerce');
+      await kibanaServer.importExport.unload(ecommerceSOPath);
       await es.deleteByQuery({
         index: '.reporting-*',
         refresh: true,
@@ -55,6 +56,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('remains available regardless of the saved search state', async () => {
         // create new search, csv export is not available
         await PageObjects.discover.clickNewSearchButton();
+        await PageObjects.reporting.setTimepickerInDataRange();
         await PageObjects.reporting.openCsvReportingPanel();
         expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
         // save search, csv export is available
@@ -74,7 +76,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('Generate CSV: new search', () => {
       beforeEach(async () => {
-        await esArchiver.load('reporting/ecommerce_kibana'); // reload the archive to wipe out changes made by each test
+        await kibanaServer.importExport.load(ecommerceSOPath);
         await PageObjects.common.navigateToApp('discover');
       });
 
@@ -150,13 +152,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       };
 
       before(async () => {
-        await esArchiver.load('reporting/ecommerce');
-        await esArchiver.load('reporting/ecommerce_kibana');
+        await esArchiver.load('x-pack/test/functional/es_archives/reporting/ecommerce');
+        await kibanaServer.importExport.load(ecommerceSOPath);
       });
 
       after(async () => {
-        await esArchiver.unload('reporting/ecommerce');
-        await esArchiver.unload('reporting/ecommerce_kibana');
+        await esArchiver.unload('x-pack/test/functional/es_archives/reporting/ecommerce');
+        await kibanaServer.importExport.unload(ecommerceSOPath);
       });
 
       beforeEach(() => PageObjects.common.navigateToApp('discover'));

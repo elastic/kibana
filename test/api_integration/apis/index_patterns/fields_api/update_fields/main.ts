@@ -18,10 +18,11 @@ export default function ({ getService }: FtrProviderContext) {
     let indexPattern: any;
 
     before(async () => {
-      await esArchiver.load('index_patterns/basic_index');
+      await esArchiver.load('test/api_integration/fixtures/es_archiver/index_patterns/basic_index');
 
       indexPattern = (
         await supertest.post('/api/index_patterns/index_pattern').send({
+          override: true,
           index_pattern: {
             title: basicIndex,
           },
@@ -30,7 +31,9 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     after(async () => {
-      await esArchiver.unload('index_patterns/basic_index');
+      await esArchiver.unload(
+        'test/api_integration/fixtures/es_archiver/index_patterns/basic_index'
+      );
 
       if (indexPattern) {
         await supertest.delete('/api/index_patterns/index_pattern/' + indexPattern.id);

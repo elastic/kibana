@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { List } from '@kbn/securitysolution-io-ts-list-types';
+import type { List } from '@kbn/securitysolution-io-ts-list-types';
 import {
   RiskScoreMapping,
   ThreatIndex,

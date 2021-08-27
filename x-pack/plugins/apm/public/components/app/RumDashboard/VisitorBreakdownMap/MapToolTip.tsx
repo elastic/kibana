@@ -59,7 +59,11 @@ function MapToolTipComponent({
   useEffect(() => {
     const loadRegionInfo = async () => {
       if (loadFeatureProperties) {
-        const items = await loadFeatureProperties({ layerId, featureId });
+        const items = await loadFeatureProperties({
+          layerId,
+          featureId,
+          mbProperties: {},
+        });
         items.forEach((item) => {
           if (
             item.getPropertyKey() === COUNTRY_NAME ||

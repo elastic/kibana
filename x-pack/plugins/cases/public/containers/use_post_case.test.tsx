@@ -8,7 +8,7 @@
 import { renderHook, act } from '@testing-library/react-hooks';
 import { usePostCase, UsePostCase } from './use_post_case';
 import * as api from './api';
-import { ConnectorTypes } from '../../common';
+import { ConnectorTypes, SECURITY_SOLUTION_OWNER } from '../../common';
 import { basicCasePost } from './mock';
 
 jest.mock('./api');
@@ -29,6 +29,7 @@ describe('usePostCase', () => {
     settings: {
       syncAlerts: true,
     },
+    owner: SECURITY_SOLUTION_OWNER,
   };
   beforeEach(() => {
     jest.clearAllMocks();

@@ -10,31 +10,36 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 import { AppDataType } from '../../types';
 import { useAppIndexPatternContext } from '../../hooks/use_app_index_pattern';
-import { useUrlStorage } from '../../hooks/use_url_storage';
-import { ReportToDataTypeMap } from '../../configurations/constants';
+import { useSeriesStorage } from '../../hooks/use_series_storage';
 
 export const dataTypes: Array<{ id: AppDataType; label: string }> = [
   { id: 'synthetics', label: 'Synthetic Monitoring' },
   { id: 'ux', label: 'User Experience (RUM)' },
+  { id: 'mobile', label: 'Mobile Experience' },
   // { id: 'infra_logs', label: 'Logs' },
   // { id: 'infra_metrics', label: 'Metrics' },
   // { id: 'apm', label: 'APM' },
 ];
 
 export function DataTypesCol({ seriesId }: { seriesId: string }) {
-  const { series, setSeries, removeSeries } = useUrlStorage(seriesId);
+  const { getSeries, setSeries, removeSeries } = useSeriesStorage();
 
+  const series = getSeries(seriesId);
   const { loading } = useAppIndexPatternContext();
 
   const onDataTypeChange = (dataType?: AppDataType) => {
     if (!dataType) {
       removeSeries(seriesId);
     } else {
-      setSeries(seriesId || `${dataType}-series`, { dataType } as any);
+      setSeries(seriesId || `${dataType}-series`, {
+        dataType,
+        isNew: true,
+        time: series.time,
+      } as any);
     }
   };
 
-  const selectedDataType = series.dataType ?? ReportToDataTypeMap[series.reportType];
+  const selectedDataType = series.dataType;
 
   return (
     <FlexGroup direction="column" gutterSize="xs">

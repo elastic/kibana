@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { kqlQuery, rangeQuery } from '../../../../../observability/server';
 import {
   AGENT_NAME,
   SERVICE_ENVIRONMENT,
@@ -15,29 +16,23 @@ import {
   TRANSACTION_PAGE_LOAD,
   TRANSACTION_REQUEST,
 } from '../../../../common/transaction_types';
-import {
-  environmentQuery,
-  rangeQuery,
-  kqlQuery,
-} from '../../../../server/utils/queries';
+import { environmentQuery } from '../../../../common/utils/environment_query';
 import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import {
   getDocumentTypeFilterForAggregatedTransactions,
   getProcessorEventForAggregatedTransactions,
   getTransactionDurationFieldForAggregatedTransactions,
 } from '../../helpers/aggregated_transactions';
-import { getBucketSize } from '../../helpers/get_bucket_size';
 import { calculateThroughput } from '../../helpers/calculate_throughput';
 import {
-  calculateTransactionErrorPercentage,
+  calculateFailedTransactionRate,
   getOutcomeAggregation,
 } from '../../helpers/transaction_error_rate';
 import { ServicesItemsSetup } from './get_services_items';
-import { withApmSpan } from '../../../utils/with_apm_span';
 
 interface AggregationParams {
-  environment?: string;
-  kuery?: string;
+  environment: string;
+  kuery: string;
   setup: ServicesItemsSetup;
   searchAggregatedTransactions: boolean;
   maxNumServices: number;
@@ -50,23 +45,24 @@ export async function getServiceTransactionStats({
   searchAggregatedTransactions,
   maxNumServices,
 }: AggregationParams) {
-  return withApmSpan('get_service_transaction_stats', async () => {
-    const { apmEventClient, start, end } = setup;
+  const { apmEventClient, start, end } = setup;
 
-    const outcomes = getOutcomeAggregation();
+  const outcomes = getOutcomeAggregation();
 
-    const metrics = {
-      avg_duration: {
-        avg: {
-          field: getTransactionDurationFieldForAggregatedTransactions(
-            searchAggregatedTransactions
-          ),
-        },
+  const metrics = {
+    avg_duration: {
+      avg: {
+        field: getTransactionDurationFieldForAggregatedTransactions(
+          searchAggregatedTransactions
+        ),
       },
-      outcomes,
-    };
+    },
+    outcomes,
+  };
 
-    const response = await apmEventClient.search({
+  const response = await apmEventClient.search(
+    'get_service_transaction_stats',
+    {
       apm: {
         events: [
           getProcessorEventForAggregatedTransactions(
@@ -114,83 +110,42 @@ export async function getServiceTransactionStats({
                       },
                     },
                   },
-                  timeseries: {
-                    date_histogram: {
-                      field: '@timestamp',
-                      fixed_interval: getBucketSize({
-                        start,
-                        end,
-                        numBuckets: 20,
-                      }).intervalString,
-                      min_doc_count: 0,
-                      extended_bounds: { min: start, max: end },
-                    },
-                    aggs: metrics,
-                  },
                 },
               },
             },
           },
         },
       },
-    });
+    }
+  );
 
-    return (
-      response.aggregations?.services.buckets.map((bucket) => {
-        const topTransactionTypeBucket =
-          bucket.transactionType.buckets.find(
-            ({ key }) =>
-              key === TRANSACTION_REQUEST || key === TRANSACTION_PAGE_LOAD
-          ) ?? bucket.transactionType.buckets[0];
+  return (
+    response.aggregations?.services.buckets.map((bucket) => {
+      const topTransactionTypeBucket =
+        bucket.transactionType.buckets.find(
+          ({ key }) =>
+            key === TRANSACTION_REQUEST || key === TRANSACTION_PAGE_LOAD
+        ) ?? bucket.transactionType.buckets[0];
 
-        return {
-          serviceName: bucket.key as string,
-          transactionType: topTransactionTypeBucket.key as string,
-          environments: topTransactionTypeBucket.environments.buckets.map(
-            (environmentBucket) => environmentBucket.key as string
-          ),
-          agentName: topTransactionTypeBucket.sample.top[0].metrics[
-            AGENT_NAME
-          ] as AgentName,
-          avgResponseTime: {
-            value: topTransactionTypeBucket.avg_duration.value,
-            timeseries: topTransactionTypeBucket.timeseries.buckets.map(
-              (dateBucket) => ({
-                x: dateBucket.key,
-                y: dateBucket.avg_duration.value,
-              })
-            ),
-          },
-          transactionErrorRate: {
-            value: calculateTransactionErrorPercentage(
-              topTransactionTypeBucket.outcomes
-            ),
-            timeseries: topTransactionTypeBucket.timeseries.buckets.map(
-              (dateBucket) => ({
-                x: dateBucket.key,
-                y: calculateTransactionErrorPercentage(dateBucket.outcomes),
-              })
-            ),
-          },
-          transactionsPerMinute: {
-            value: calculateThroughput({
-              start,
-              end,
-              value: topTransactionTypeBucket.doc_count,
-            }),
-            timeseries: topTransactionTypeBucket.timeseries.buckets.map(
-              (dateBucket) => ({
-                x: dateBucket.key,
-                y: calculateThroughput({
-                  start,
-                  end,
-                  value: dateBucket.doc_count,
-                }),
-              })
-            ),
-          },
-        };
-      }) ?? []
-    );
-  });
+      return {
+        serviceName: bucket.key as string,
+        transactionType: topTransactionTypeBucket.key as string,
+        environments: topTransactionTypeBucket.environments.buckets.map(
+          (environmentBucket) => environmentBucket.key as string
+        ),
+        agentName: topTransactionTypeBucket.sample.top[0].metrics[
+          AGENT_NAME
+        ] as AgentName,
+        latency: topTransactionTypeBucket.avg_duration.value,
+        transactionErrorRate: calculateFailedTransactionRate(
+          topTransactionTypeBucket.outcomes
+        ),
+        throughput: calculateThroughput({
+          start,
+          end,
+          value: topTransactionTypeBucket.doc_count,
+        }),
+      };
+    }) ?? []
+  );
 }

@@ -12,6 +12,7 @@ import {
   EsaggsExpressionFunctionDefinition,
   IndexPatternLoadExpressionFunctionDefinition,
 } from '../../../../../src/plugins/data/public';
+import { queryToAst } from '../../../../../src/plugins/data/common';
 import {
   buildExpression,
   buildExpressionFunction,
@@ -22,8 +23,9 @@ import {
 import { IndexPatternColumn } from './indexpattern';
 import { operationDefinitionMap } from './operations';
 import { IndexPattern, IndexPatternPrivateState, IndexPatternLayer } from './types';
-import { OriginalColumn } from './rename_columns';
 import { dateHistogramOperation } from './operations/definitions';
+
+type OriginalColumn = { id: string } & IndexPatternColumn;
 
 function getExpressionForLayer(
   layer: IndexPatternLayer,
@@ -54,6 +56,22 @@ function getExpressionForLayer(
         }
       });
     }
+
+    if (
+      'references' in column &&
+      rootDef.shiftable &&
+      rootDef.input === 'fullReference' &&
+      column.timeShift
+    ) {
+      // inherit time shift to all referenced operations
+      column.references.forEach((referenceColumnId) => {
+        const referencedColumn = columns[referenceColumnId];
+        const referenceDef = operationDefinitionMap[column.operationType];
+        if (referenceDef.shiftable) {
+          columns[referenceColumnId] = { ...referencedColumn, timeShift: column.timeShift };
+        }
+      });
+    }
   });
 
   const columnEntries = columnOrder.map((colId) => [colId, columns[colId]] as const);
@@ -77,33 +95,36 @@ function getExpressionForLayer(
       }
     });
 
-    esAggEntries.forEach(([colId, col]) => {
+    const orderedColumnIds = esAggEntries.map(([colId]) => colId);
+    esAggEntries.forEach(([colId, col], index) => {
       const def = operationDefinitionMap[col.operationType];
       if (def.input !== 'fullReference' && def.input !== 'managedReference') {
         const wrapInFilter = Boolean(def.filterable && col.filter);
         let aggAst = def.toEsAggsFn(
           col,
-          wrapInFilter ? `${colId}-metric` : colId,
+          wrapInFilter ? `${index}-metric` : String(index),
           indexPattern,
           layer,
-          uiSettings
+          uiSettings,
+          orderedColumnIds
         );
         if (wrapInFilter) {
           aggAst = buildExpressionFunction<AggFunctionsMapping['aggFilteredMetric']>(
             'aggFilteredMetric',
             {
-              id: colId,
+              id: String(index),
               enabled: true,
               schema: 'metric',
               customBucket: buildExpression([
                 buildExpressionFunction<AggFunctionsMapping['aggFilter']>('aggFilter', {
-                  id: `${colId}-filter`,
+                  id: `${index}-filter`,
                   enabled: true,
                   schema: 'bucket',
-                  filter: JSON.stringify(col.filter),
+                  filter: col.filter && queryToAst(col.filter),
                 }),
               ]),
               customMetric: buildExpression({ type: 'expression', chain: [aggAst] }),
+              timeShift: col.timeShift,
             }
           ).toAst();
         }
@@ -116,12 +137,8 @@ function getExpressionForLayer(
       }
     });
 
-    if (esAggEntries.length === 0) {
-      // Return early if there are no aggs, for example if the user has an empty formula
-      return null;
-    }
     const idMap = esAggEntries.reduce((currentIdMap, [colId, column], index) => {
-      const esAggsId = `col-${index}-${colId}`;
+      const esAggsId = `col-${index}-${index}`;
       return {
         ...currentIdMap,
         [esAggsId]: {
@@ -214,6 +231,26 @@ function getExpressionForLayer(
         return [scalingCall, formatCall];
       }
     );
+
+    if (esAggEntries.length === 0) {
+      return {
+        type: 'expression',
+        chain: [
+          {
+            type: 'function',
+            function: 'createTable',
+            arguments: {
+              ids: [],
+              names: [],
+              rowCount: [1],
+            },
+          },
+          ...expressions,
+          ...formatterOverrides,
+          ...timeScaleFunctions,
+        ],
+      };
+    }
 
     const allDateHistogramFields = Object.values(columns)
       .map((column) =>

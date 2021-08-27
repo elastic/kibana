@@ -1,7 +1,8 @@
 ## Font usage
 
-Kibana packages two fonts:
+Kibana packages three fonts:
 
+* [Inter](https://rsms.me/inter/) fonts were pulled from their site and are at v3.18
 * [Inter UI](https://rsms.me/inter/) fonts were pulled from their site and are at v3.2
 * [Roboto Mono](https://fonts.google.com/specimen/Roboto+Mono) was pulled from the Google Fonts website on January 22, 2019.
 

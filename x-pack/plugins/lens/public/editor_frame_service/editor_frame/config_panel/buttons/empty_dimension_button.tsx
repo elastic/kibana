@@ -108,13 +108,13 @@ export function EmptyDimensionButton({
           <EuiButtonEmpty
             className="lnsLayerPanel__triggerText"
             color="text"
-            size="xs"
+            size="s"
             iconType="plusInCircleFilled"
             contentProps={{
               className: 'lnsLayerPanel__triggerTextContent',
             }}
             aria-label={i18n.translate('xpack.lens.indexPattern.removeColumnAriaLabel', {
-              defaultMessage: 'Drop a field or click to add to {groupLabel}',
+              defaultMessage: 'Add or drag and drop a field to {groupLabel}',
               values: { groupLabel: group.groupLabel },
             })}
             data-test-subj="lns-empty-dimension"
@@ -124,7 +124,7 @@ export function EmptyDimensionButton({
           >
             <FormattedMessage
               id="xpack.lens.configure.emptyConfig"
-              defaultMessage="Drop a field or click to add"
+              defaultMessage="Add or drag and drop a field"
             />
           </EuiButtonEmpty>
         </div>

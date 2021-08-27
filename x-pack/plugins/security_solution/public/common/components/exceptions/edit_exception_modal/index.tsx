@@ -26,6 +26,8 @@ import type {
   ExceptionListType,
   OsTypeArray,
   OsType,
+  ExceptionListItemSchema,
+  CreateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import {
   hasEqlSequenceQuery,
@@ -35,11 +37,7 @@ import {
 import { useFetchIndex } from '../../../containers/source';
 import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
 import { useRuleAsync } from '../../../../detections/containers/detection_engine/rules/use_rule_async';
-import {
-  ExceptionListItemSchema,
-  CreateExceptionListItemSchema,
-  ExceptionBuilder,
-} from '../../../../../public/shared_imports';
+import { ExceptionBuilder } from '../../../../../public/shared_imports';
 
 import * as i18n from './translations';
 import * as sharedI18n from '../translations';

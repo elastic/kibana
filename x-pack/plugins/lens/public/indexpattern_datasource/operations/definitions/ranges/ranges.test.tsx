@@ -102,6 +102,10 @@ const defaultOptions = {
     ]),
   },
   operationDefinitionMap: {},
+  isFullscreen: false,
+  toggleFullscreen: jest.fn(),
+  setIsCloseable: jest.fn(),
+  layerId: '1',
 };
 
 describe('ranges', () => {
@@ -172,7 +176,8 @@ describe('ranges', () => {
         'col1',
         {} as IndexPattern,
         layer,
-        uiSettingsMock
+        uiSettingsMock,
+        []
       );
       expect(esAggsFn).toMatchInlineSnapshot(`
         Object {
@@ -181,7 +186,16 @@ describe('ranges', () => {
               true,
             ],
             "extended_bounds": Array [
-              "{\\"min\\":\\"\\",\\"max\\":\\"\\"}",
+              Object {
+                "chain": Array [
+                  Object {
+                    "arguments": Object {},
+                    "function": "extendedBounds",
+                    "type": "function",
+                  },
+                ],
+                "type": "expression",
+              },
             ],
             "field": Array [
               "MyField",
@@ -219,7 +233,8 @@ describe('ranges', () => {
         'col1',
         {} as IndexPattern,
         layer,
-        uiSettingsMock
+        uiSettingsMock,
+        []
       );
 
       expect(esAggsFn).toEqual(
@@ -240,7 +255,8 @@ describe('ranges', () => {
         'col1',
         {} as IndexPattern,
         layer,
-        uiSettingsMock
+        uiSettingsMock,
+        []
       );
 
       expect(esAggsFn).toEqual(
@@ -261,12 +277,16 @@ describe('ranges', () => {
         'col1',
         {} as IndexPattern,
         layer,
-        uiSettingsMock
+        uiSettingsMock,
+        []
       );
 
-      expect((esAggsFn as { arguments: unknown }).arguments).toEqual(
+      expect(esAggsFn).toHaveProperty(
+        'arguments.ranges.0.chain.0.arguments',
         expect.objectContaining({
-          ranges: [JSON.stringify([{ from: 0, to: 100, label: 'customlabel' }])],
+          from: [0],
+          to: [100],
+          label: ['customlabel'],
         })
       );
     });

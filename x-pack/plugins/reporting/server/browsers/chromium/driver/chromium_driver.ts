@@ -10,7 +10,11 @@ import { map, truncate } from 'lodash';
 import open from 'opn';
 import puppeteer, { ElementHandle, EvaluateFn, SerializableOrJSHandle } from 'puppeteer';
 import { parse as parseUrl } from 'url';
+import type { LocatorParams } from '../../../../common/types';
+import { REPORTING_REDIRECT_LOCATOR_STORE_KEY } from '../../../../common/constants';
 import { getDisallowedOutgoingUrlError } from '../';
+import { ReportingCore } from '../../..';
+import { KBN_SCREENSHOT_MODE_HEADER } from '../../../../../../../src/plugins/screenshot_mode/server';
 import { ConditionalHeaders, ConditionalHeadersConditions } from '../../../export_types/common';
 import { LevelLogger } from '../../../lib';
 import { ViewZoomWidthHeight } from '../../../lib/layouts/layout';
@@ -59,8 +63,14 @@ export class HeadlessChromiumDriver {
 
   private listenersAttached = false;
   private interceptedCount = 0;
+  private core: ReportingCore;
 
-  constructor(page: puppeteer.Page, { inspect, networkPolicy }: ChromiumDriverOptions) {
+  constructor(
+    core: ReportingCore,
+    page: puppeteer.Page,
+    { inspect, networkPolicy }: ChromiumDriverOptions
+  ) {
+    this.core = core;
     this.page = page;
     this.inspect = inspect;
     this.networkPolicy = networkPolicy;
@@ -86,10 +96,12 @@ export class HeadlessChromiumDriver {
       conditionalHeaders,
       waitForSelector: pageLoadSelector,
       timeout,
+      locator,
     }: {
       conditionalHeaders: ConditionalHeaders;
       waitForSelector: string;
       timeout: number;
+      locator?: LocatorParams;
     },
     logger: LevelLogger
   ): Promise<void> {
@@ -97,6 +109,27 @@ export class HeadlessChromiumDriver {
 
     // Reset intercepted request count
     this.interceptedCount = 0;
+
+    /**
+     * Integrate with the screenshot mode plugin contract by calling this function before any other
+     * scripts have run on the browser page.
+     */
+    await this.page.evaluateOnNewDocument(this.core.getEnableScreenshotMode());
+
+    if (locator) {
+      await this.page.evaluateOnNewDocument(
+        (key: string, value: unknown) => {
+          Object.defineProperty(window, key, {
+            configurable: false,
+            writable: false,
+            enumerable: true,
+            value,
+          });
+        },
+        REPORTING_REDIRECT_LOCATOR_STORE_KEY,
+        locator
+      );
+    }
 
     await this.page.setRequestInterception(true);
 
@@ -127,7 +160,7 @@ export class HeadlessChromiumDriver {
   /*
    * Call Page.screenshot and return a base64-encoded string of the image
    */
-  public async screenshot(elementPosition: ElementPosition): Promise<string | void> {
+  public async screenshot(elementPosition: ElementPosition): Promise<Buffer | undefined> {
     const { boundingClientRect, scroll } = elementPosition;
     const screenshot = await this.page.screenshot({
       clip: {
@@ -138,10 +171,15 @@ export class HeadlessChromiumDriver {
       },
     });
 
-    if (screenshot) {
-      return screenshot.toString('base64');
+    if (Buffer.isBuffer(screenshot)) {
+      return screenshot;
     }
-    return screenshot;
+
+    if (typeof screenshot === 'string') {
+      return Buffer.from(screenshot, 'base64');
+    }
+
+    return undefined;
   }
 
   public async evaluate(
@@ -261,6 +299,7 @@ export class HeadlessChromiumDriver {
           {
             ...interceptedRequest.request.headers,
             ...conditionalHeaders.headers,
+            [KBN_SCREENSHOT_MODE_HEADER]: 'true',
           },
           (value, name) => ({
             name,

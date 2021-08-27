@@ -23,6 +23,7 @@ import { AddDeleteButtons } from './add_delete_buttons';
 import { collectionActions } from './lib/collection_actions';
 import { ColorPicker, ColorPickerProps } from './color_picker';
 import { TimeseriesVisParams } from '../../types';
+import { Operator } from '../../../common/operators_utils';
 
 export interface ColorRulesProps {
   name: keyof TimeseriesVisParams;
@@ -40,8 +41,15 @@ interface ColorRule {
   id: string;
   background_color?: string;
   color?: string;
-  operator?: string;
+  operator?: Operator;
   text?: string;
+}
+
+export interface ColorRulesOperator {
+  label: string;
+  method: Operator;
+  value?: unknown;
+  hideValueSelector?: boolean;
 }
 
 const defaultSecondaryName = i18n.translate(
@@ -54,32 +62,44 @@ const defaultPrimaryName = i18n.translate('visTypeTimeseries.colorRules.defaultP
   defaultMessage: 'background',
 });
 
-const operatorOptions = [
+export const colorRulesOperatorsList: ColorRulesOperator[] = [
   {
     label: i18n.translate('visTypeTimeseries.colorRules.greaterThanLabel', {
       defaultMessage: '> greater than',
     }),
-    value: 'gt',
+    method: Operator.Gt,
   },
   {
     label: i18n.translate('visTypeTimeseries.colorRules.greaterThanOrEqualLabel', {
       defaultMessage: '>= greater than or equal',
     }),
-    value: 'gte',
+    method: Operator.Gte,
   },
   {
     label: i18n.translate('visTypeTimeseries.colorRules.lessThanLabel', {
       defaultMessage: '< less than',
     }),
-    value: 'lt',
+    method: Operator.Lt,
   },
   {
     label: i18n.translate('visTypeTimeseries.colorRules.lessThanOrEqualLabel', {
       defaultMessage: '<= less than or equal',
     }),
-    value: 'lte',
+    method: Operator.Lte,
+  },
+  {
+    label: i18n.translate('visTypeTimeseries.colorRules.emptyLabel', {
+      defaultMessage: 'empty',
+    }),
+    method: Operator.Empty,
+    hideValueSelector: true,
   },
 ];
+
+const operatorOptions = colorRulesOperatorsList.map((operator) => ({
+  label: operator.label,
+  value: operator.method,
+}));
 
 export class ColorRules extends Component<ColorRulesProps> {
   constructor(props: ColorRulesProps) {
@@ -100,9 +120,14 @@ export class ColorRules extends Component<ColorRulesProps> {
 
   handleOperatorChange = (item: ColorRule) => {
     return (options: Array<EuiComboBoxOptionOption<string>>) => {
+      const selectedOperator = colorRulesOperatorsList.find(
+        (operator) => options[0]?.value === operator.method
+      );
+      const value = selectedOperator?.value ?? null;
       collectionActions.handleChange(this.props, {
         ...item,
-        operator: options[0].value,
+        operator: options[0]?.value,
+        value,
       });
     };
   };
@@ -119,7 +144,11 @@ export class ColorRules extends Component<ColorRulesProps> {
     const selectedOperatorOption = operatorOptions.find(
       (option) => model.operator === option.value
     );
+    const selectedOperator = colorRulesOperatorsList.find(
+      (operator) => model.operator === operator.method
+    );
 
+    const hideValueSelectorField = selectedOperator?.hideValueSelector ?? false;
     const labelStyle = { marginBottom: 0 };
 
     let secondary;
@@ -203,19 +232,19 @@ export class ColorRules extends Component<ColorRulesProps> {
             fullWidth
           />
         </EuiFlexItem>
-
-        <EuiFlexItem>
-          <EuiFieldNumber
-            aria-label={i18n.translate('visTypeTimeseries.colorRules.valueAriaLabel', {
-              defaultMessage: 'Value',
-            })}
-            value={model.value ?? ''}
-            onChange={this.handleValueChange(model)}
-            data-test-subj="colorRuleValue"
-            fullWidth
-          />
-        </EuiFlexItem>
-
+        {!hideValueSelectorField && (
+          <EuiFlexItem>
+            <EuiFieldNumber
+              aria-label={i18n.translate('visTypeTimeseries.colorRules.valueAriaLabel', {
+                defaultMessage: 'Value',
+              })}
+              value={model.value ?? ''}
+              onChange={this.handleValueChange(model)}
+              data-test-subj="colorRuleValue"
+              fullWidth
+            />
+          </EuiFlexItem>
+        )}
         <EuiFlexItem grow={false}>
           <AddDeleteButtons
             onAdd={handleAdd}

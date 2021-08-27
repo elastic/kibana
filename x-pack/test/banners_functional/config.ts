@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import path from 'path';
 import { FtrConfigProviderContext } from '@kbn/test';
 import { services, pageObjects } from './ftr_provider_context';
 
@@ -27,10 +26,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     esTestCluster: kibanaFunctionalConfig.get('esTestCluster'),
     apps: {
       ...kibanaFunctionalConfig.get('apps'),
-    },
-
-    esArchiver: {
-      directory: path.resolve(__dirname, '..', 'functional', 'es_archives'),
     },
 
     kbnTestServer: {

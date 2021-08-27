@@ -4,9 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { ConfigOptions } from 'elasticsearch';
-import { Logger, ILegacyCustomClusterClient } from 'kibana/server';
+import { Logger, ICustomClusterClient, ElasticsearchClientConfig } from 'kibana/server';
 // @ts-ignore
 import { monitoringBulk } from '../kibana_monitoring/lib/monitoring_bulk';
 import { monitoringEndpointDisableWatches } from './monitoring_endpoint_disable_watches';
@@ -18,15 +16,15 @@ import { MonitoringElasticsearchConfig } from '../config';
  * Kibana itself is connected to a production cluster.
  */
 
-type ESClusterConfig = MonitoringElasticsearchConfig & Pick<ConfigOptions, 'plugins'>;
+type ESClusterConfig = MonitoringElasticsearchConfig;
 
 export function instantiateClient(
   elasticsearchConfig: MonitoringElasticsearchConfig,
   log: Logger,
   createClient: (
     type: string,
-    clientConfig?: Partial<ESClusterConfig>
-  ) => ILegacyCustomClusterClient
+    clientConfig?: Partial<ElasticsearchClientConfig> | undefined
+  ) => ICustomClusterClient
 ) {
   const isMonitoringCluster = hasMonitoringCluster(elasticsearchConfig);
   const cluster = createClient('monitoring', {

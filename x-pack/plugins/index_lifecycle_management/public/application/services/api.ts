@@ -7,13 +7,14 @@
 
 import { METRIC_TYPE } from '@kbn/analytics';
 
+import { IndexSettings } from '../../../../index_management/common';
+
 import {
   PolicyFromES,
   SerializedPolicy,
   ListNodesRouteResponse,
   ListSnapshotReposResponse,
 } from '../../../common/types';
-
 import {
   UIM_POLICY_DELETE,
   UIM_POLICY_ATTACH_INDEX,
@@ -23,7 +24,6 @@ import {
 } from '../constants';
 import { trackUiMetric } from './ui_metric';
 import { sendGet, sendPost, sendDelete, useRequest } from './http';
-import { IndexSettings } from '../../../../index_management/common/types';
 
 export const useLoadNodes = () => {
   return useRequest<ListNodesRouteResponse>({
@@ -49,15 +49,14 @@ export const useLoadIndexTemplates = (legacy: boolean = false) => {
   });
 };
 
-export async function loadPolicies(withIndices: boolean) {
-  return await sendGet('policies', { withIndices });
+export async function loadPolicies() {
+  return await sendGet('policies');
 }
 
-export const useLoadPoliciesList = (withIndices: boolean) => {
+export const useLoadPoliciesList = () => {
   return useRequest<PolicyFromES[]>({
     path: `policies`,
     method: 'get',
-    query: { withIndices },
   });
 };
 

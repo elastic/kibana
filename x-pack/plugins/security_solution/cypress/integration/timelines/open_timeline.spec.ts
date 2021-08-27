@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { timeline } from '../../objects/timeline';
+import { getTimeline } from '../../objects/timeline';
 
 import { TIMELINE_DESCRIPTION, TIMELINE_TITLE, OPEN_TIMELINE_MODAL } from '../../screens/timeline';
 import {
@@ -39,7 +39,7 @@ describe('Open timeline', () => {
     loginAndWaitForPageWithoutDateRange(TIMELINES_URL);
     waitForTimelinesPanelToBeLoaded();
 
-    createTimeline(timeline)
+    createTimeline(getTimeline())
       .then((response) => response.body.data.persistTimeline.timeline.savedObjectId)
       .then((timelineId: string) => {
         refreshTimelinesUntilTimeLinePresent(timelineId)
@@ -47,7 +47,7 @@ describe('Open timeline', () => {
           // request responses and indeterminism since on clicks to activates URL's.
           .then(() => cy.wait(1000))
           .then(() =>
-            addNoteToTimeline(timeline.notes, timelineId).should((response) =>
+            addNoteToTimeline(getTimeline().notes, timelineId).should((response) =>
               expect(response.status).to.equal(200)
             )
           )
@@ -71,11 +71,11 @@ describe('Open timeline', () => {
     });
 
     it('should display timeline info - title', () => {
-      cy.contains(timeline.title).should('exist');
+      cy.contains(getTimeline().title).should('exist');
     });
 
     it('should display timeline info - description', () => {
-      cy.get(TIMELINES_DESCRIPTION).first().should('have.text', timeline.description);
+      cy.get(TIMELINES_DESCRIPTION).first().should('have.text', getTimeline().description);
     });
 
     it('should display timeline info - pinned event count', () => {
@@ -91,11 +91,11 @@ describe('Open timeline', () => {
     });
 
     it('should display timeline content - title', () => {
-      cy.get(TIMELINE_TITLE).should('have.text', timeline.title);
+      cy.get(TIMELINE_TITLE).should('have.text', getTimeline().title);
     });
 
     it('should display timeline content - description', () => {
-      cy.get(TIMELINE_DESCRIPTION).should('have.text', timeline.description);
+      cy.get(TIMELINE_DESCRIPTION).should('have.text', getTimeline().description);
     });
   });
 });

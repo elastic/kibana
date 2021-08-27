@@ -89,7 +89,11 @@ export function IngestManagerCreatePackagePolicy({
 
     async setPackagePolicyDescription(desc: string) {
       await this.scrollToCenterOfWindow('packagePolicyDescriptionInput');
-      await testSubjects.setValue('packagePolicyDescriptionInput', desc);
+      const packagePolicyDescriptionInput = await testSubjects.find(
+        'packagePolicyDescriptionInput'
+      );
+      await packagePolicyDescriptionInput.clearValueWithKeyboard();
+      await packagePolicyDescriptionInput.type(desc);
     },
 
     /**

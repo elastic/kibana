@@ -15,9 +15,6 @@ import type {
   PluginInitializerContext,
   SavedObjectsServiceStart,
   HttpServiceSetup,
-  SavedObjectsClientContract,
-  RequestHandlerContext,
-  KibanaRequest,
 } from 'kibana/server';
 import type { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 
@@ -30,12 +27,8 @@ import type {
 } from '../../encrypted_saved_objects/server';
 import type { SecurityPluginSetup, SecurityPluginStart } from '../../security/server';
 import type { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
-import type {
-  EsAssetReference,
-  FleetConfigType,
-  NewPackagePolicy,
-  UpdatePackagePolicy,
-} from '../common';
+import type { FleetConfigType } from '../common';
+import { INTEGRATIONS_PLUGIN_ID } from '../common';
 import type { CloudSetup } from '../../cloud/server';
 
 import {
@@ -62,6 +55,8 @@ import {
   registerAppRoutes,
   registerPreconfigurationRoutes,
 } from './routes';
+
+import type { ExternalCallback } from './types';
 import type {
   ESIndexPatternService,
   AgentService,
@@ -77,6 +72,7 @@ import {
 } from './services';
 import {
   getAgentStatusById,
+  getAgentStatusForAgentPolicy,
   authenticateAgentWithAccessToken,
   getAgentsByKuery,
   getAgentById,
@@ -130,29 +126,6 @@ const allSavedObjectTypes = [
   ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE,
   PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
 ];
-
-/**
- * Callbacks supported by the Fleet plugin
- */
-export type ExternalCallback =
-  | [
-      'packagePolicyCreate',
-      (
-        newPackagePolicy: NewPackagePolicy,
-        context: RequestHandlerContext,
-        request: KibanaRequest
-      ) => Promise<NewPackagePolicy>
-    ]
-  | [
-      'packagePolicyUpdate',
-      (
-        newPackagePolicy: UpdatePackagePolicy,
-        context: RequestHandlerContext,
-        request: KibanaRequest
-      ) => Promise<UpdatePackagePolicy>
-    ];
-
-export type ExternalCallbacksStorage = Map<ExternalCallback[0], Set<ExternalCallback[1]>>;
 
 /**
  * Describes public Fleet plugin contract returned at the `startup` stage.
@@ -223,14 +196,14 @@ export class FleetPlugin
     if (deps.features) {
       deps.features.registerKibanaFeature({
         id: PLUGIN_ID,
-        name: 'Fleet',
+        name: 'Fleet and Integrations',
         category: DEFAULT_APP_CATEGORIES.management,
-        app: [PLUGIN_ID, 'kibana'],
+        app: [PLUGIN_ID, INTEGRATIONS_PLUGIN_ID, 'kibana'],
         catalogue: ['fleet'],
         privileges: {
           all: {
             api: [`${PLUGIN_ID}-read`, `${PLUGIN_ID}-all`],
-            app: [PLUGIN_ID, 'kibana'],
+            app: [PLUGIN_ID, INTEGRATIONS_PLUGIN_ID, 'kibana'],
             catalogue: ['fleet'],
             savedObject: {
               all: allSavedObjectTypes,
@@ -240,7 +213,7 @@ export class FleetPlugin
           },
           read: {
             api: [`${PLUGIN_ID}-read`],
-            app: [PLUGIN_ID, 'kibana'],
+            app: [PLUGIN_ID, INTEGRATIONS_PLUGIN_ID, 'kibana'],
             catalogue: ['fleet'], // TODO: check if this is actually available to read user
             savedObject: {
               all: [],
@@ -308,18 +281,13 @@ export class FleetPlugin
         }),
       esIndexPatternService: new ESIndexPatternSavedObjectService(),
       packageService: {
-        getInstalledEsAssetReferences: async (
-          savedObjectsClient: SavedObjectsClientContract,
-          pkgName: string
-        ): Promise<EsAssetReference[]> => {
-          const installation = await getInstallation({ savedObjectsClient, pkgName });
-          return installation?.installed_es || [];
-        },
+        getInstallation,
       },
       agentService: {
         getAgent: getAgentById,
         listAgents: getAgentsByKuery,
         getAgentStatusById,
+        getAgentStatusForAgentPolicy,
         authenticateAgentWithAccessToken,
       },
       agentPolicyService: {
@@ -327,6 +295,7 @@ export class FleetPlugin
         list: agentPolicyService.list,
         getDefaultAgentPolicyId: agentPolicyService.getDefaultAgentPolicyId,
         getFullAgentPolicy: agentPolicyService.getFullAgentPolicy,
+        getByIds: agentPolicyService.getByIDs,
       },
       packagePolicyService,
       registerExternalCallback: (type: ExternalCallback[0], callback: ExternalCallback[1]) => {

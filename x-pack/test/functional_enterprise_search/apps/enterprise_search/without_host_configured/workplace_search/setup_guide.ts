@@ -19,9 +19,9 @@ export default function enterpriseSearchSetupGuideTests({
   const PageObjects = getPageObjects(['workplaceSearch']);
 
   describe('Setup Guide', function () {
-    before(async () => await esArchiver.load('empty_kibana'));
+    before(async () => await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana'));
     after(async () => {
-      await esArchiver.unload('empty_kibana');
+      await esArchiver.unload('x-pack/test/functional/es_archives/empty_kibana');
     });
 
     describe('when no enterpriseSearch.host is configured', () => {

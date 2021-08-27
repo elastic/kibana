@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import { omit } from 'lodash';
+import { i18n } from '@kbn/i18n';
+import semverLte from 'semver/functions/lte';
+import { getFlattenedObject } from '@kbn/std';
 import type { KibanaRequest } from 'src/core/server';
 import type {
   ElasticsearchClient,
@@ -16,11 +20,15 @@ import uuid from 'uuid';
 import type { AuthenticatedUser } from '../../../security/server';
 import {
   packageToPackagePolicy,
+  packageToPackagePolicyInputs,
   isPackageLimited,
   doesAgentPolicyAlreadyIncludePackage,
+  validatePackagePolicy,
+  validationHasErrors,
 } from '../../common';
 import type {
   DeletePackagePoliciesResponse,
+  UpgradePackagePolicyResponse,
   PackagePolicyInput,
   NewPackagePolicyInput,
   PackagePolicyConfigRecordEntry,
@@ -28,6 +36,7 @@ import type {
   PackageInfo,
   ListWithKuery,
   ListResult,
+  UpgradePackagePolicyDryRunResponseItem,
 } from '../../common';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../constants';
 import {
@@ -42,6 +51,7 @@ import type {
   PackagePolicy,
   PackagePolicySOAttributes,
   RegistryPackage,
+  DryRunPackagePolicy,
 } from '../types';
 import type { ExternalCallback } from '..';
 
@@ -53,6 +63,10 @@ import { getAssetsData } from './epm/packages/assets';
 import { compileTemplate } from './epm/agent/agent';
 import { normalizeKuery } from './saved_object';
 import { appContextService } from '.';
+
+export type InputsOverride = Partial<NewPackagePolicyInput> & {
+  vars?: Array<NewPackagePolicyInput['vars'] & { name: string }>;
+};
 
 const SAVED_OBJECT_TYPE = PACKAGE_POLICY_SAVED_OBJECT_TYPE;
 
@@ -108,9 +122,10 @@ class PackagePolicyService {
       else {
         const [, packageInfo] = await Promise.all([
           ensureInstalledPackage({
+            esClient,
             savedObjectsClient: soClient,
             pkgName: packagePolicy.package.name,
-            esClient,
+            pkgVersion: packagePolicy.package.version,
           }),
           pkgInfoPromise,
         ]);
@@ -128,7 +143,7 @@ class PackagePolicyService {
         }
       }
 
-      inputs = await this.compilePackagePolicyInputs(pkgInfo, inputs);
+      inputs = await this.compilePackagePolicyInputs(pkgInfo, packagePolicy.vars || {}, inputs);
     }
 
     const isoDate = new Date().toISOString();
@@ -356,7 +371,7 @@ class PackagePolicyService {
         pkgVersion: packagePolicy.package.version,
       });
 
-      inputs = await this.compilePackagePolicyInputs(pkgInfo, inputs);
+      inputs = await this.compilePackagePolicyInputs(pkgInfo, packagePolicy.vars || {}, inputs);
     }
 
     await soClient.update<PackagePolicySOAttributes>(
@@ -413,6 +428,11 @@ class PackagePolicyService {
           id,
           name: packagePolicy.name,
           success: true,
+          package: {
+            name: packagePolicy.package?.name || '',
+            title: packagePolicy.package?.title || '',
+            version: packagePolicy.package?.version || '',
+          },
         });
       } catch (error) {
         result.push({
@@ -426,13 +446,190 @@ class PackagePolicyService {
     return result;
   }
 
+  public async getUpgradePackagePolicyInfo(
+    soClient: SavedObjectsClientContract,
+    id: string,
+    packageVersion?: string
+  ) {
+    const packagePolicy = await this.get(soClient, id);
+    if (!packagePolicy) {
+      throw new IngestManagerError(
+        i18n.translate('xpack.fleet.packagePolicy.policyNotFoundError', {
+          defaultMessage: 'Package policy with id {id} not found',
+          values: { id },
+        })
+      );
+    }
+
+    if (!packagePolicy.package?.name) {
+      throw new IngestManagerError(
+        i18n.translate('xpack.fleet.packagePolicy.packageNotFoundError', {
+          defaultMessage: 'Package policy with id {id} has no named package',
+          values: { id },
+        })
+      );
+    }
+
+    let packageInfo: PackageInfo;
+
+    if (packageVersion) {
+      packageInfo = await getPackageInfo({
+        savedObjectsClient: soClient,
+        pkgName: packagePolicy.package.name,
+        pkgVersion: packageVersion,
+      });
+    } else {
+      const installedPackage = await getInstallation({
+        savedObjectsClient: soClient,
+        pkgName: packagePolicy.package.name,
+      });
+
+      if (!installedPackage) {
+        throw new IngestManagerError(
+          i18n.translate('xpack.fleet.packagePolicy.packageNotInstalledError', {
+            defaultMessage: 'Package {name} is not installed',
+            values: {
+              name: packagePolicy.package.name,
+            },
+          })
+        );
+      }
+
+      packageInfo = await getPackageInfo({
+        savedObjectsClient: soClient,
+        pkgName: packagePolicy.package.name,
+        pkgVersion: installedPackage?.version ?? '',
+      });
+
+      const isInstalledVersionLessThanOrEqualToPolicyVersion = semverLte(
+        installedPackage?.version ?? '',
+        packagePolicy.package.version
+      );
+
+      if (isInstalledVersionLessThanOrEqualToPolicyVersion) {
+        throw new IngestManagerError(
+          i18n.translate('xpack.fleet.packagePolicy.ineligibleForUpgradeError', {
+            defaultMessage:
+              "Package policy {id}'s package version {version} of package {name} is up to date with the installed package. Please install the latest version of {name}.",
+            values: {
+              id: packagePolicy.id,
+              name: packagePolicy.package.name,
+              version: packagePolicy.package.version,
+            },
+          })
+        );
+      }
+    }
+
+    return {
+      packagePolicy: packagePolicy as Required<PackagePolicy>,
+      packageInfo,
+    };
+  }
+
+  public async upgrade(
+    soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
+    ids: string[],
+    options?: { user?: AuthenticatedUser }
+  ): Promise<UpgradePackagePolicyResponse> {
+    const result: UpgradePackagePolicyResponse = [];
+
+    for (const id of ids) {
+      try {
+        const { packagePolicy, packageInfo } = await this.getUpgradePackagePolicyInfo(soClient, id);
+
+        const updatePackagePolicy = overridePackageInputs(
+          {
+            ...omit(packagePolicy, 'id'),
+            inputs: packagePolicy.inputs,
+            package: {
+              ...packagePolicy.package,
+              version: packageInfo.version,
+            },
+          },
+          packageInfo,
+          packageToPackagePolicyInputs(packageInfo) as InputsOverride[]
+        );
+
+        updatePackagePolicy.inputs = await this.compilePackagePolicyInputs(
+          packageInfo,
+          updatePackagePolicy.vars || {},
+          updatePackagePolicy.inputs as PackagePolicyInput[]
+        );
+
+        await this.update(soClient, esClient, id, updatePackagePolicy, options);
+        result.push({
+          id,
+          name: packagePolicy.name,
+          success: true,
+        });
+      } catch (error) {
+        result.push({
+          id,
+          success: false,
+          ...ingestErrorToResponseOptions(error),
+        });
+      }
+    }
+
+    return result;
+  }
+
+  public async getUpgradeDryRunDiff(
+    soClient: SavedObjectsClientContract,
+    id: string,
+    packageVersion?: string
+  ): Promise<UpgradePackagePolicyDryRunResponseItem> {
+    try {
+      const { packagePolicy, packageInfo } = await this.getUpgradePackagePolicyInfo(
+        soClient,
+        id,
+        packageVersion
+      );
+
+      const updatedPackagePolicy = overridePackageInputs(
+        {
+          ...omit(packagePolicy, 'id'),
+          inputs: packagePolicy.inputs,
+          package: {
+            ...packagePolicy.package,
+            version: packageInfo.version,
+          },
+        },
+        packageInfo,
+        packageToPackagePolicyInputs(packageInfo) as InputsOverride[],
+        true
+      );
+
+      updatedPackagePolicy.inputs = await this.compilePackagePolicyInputs(
+        packageInfo,
+        updatedPackagePolicy.vars || {},
+        updatedPackagePolicy.inputs as PackagePolicyInput[]
+      );
+
+      const hasErrors = 'errors' in updatedPackagePolicy;
+
+      return {
+        name: updatedPackagePolicy.name,
+        diff: [packagePolicy, updatedPackagePolicy],
+        hasErrors,
+      };
+    } catch (error) {
+      return {
+        hasErrors: true,
+        ...ingestErrorToResponseOptions(error),
+      };
+    }
+  }
+
   public async buildPackagePolicyFromPackage(
     soClient: SavedObjectsClientContract,
     pkgName: string
   ): Promise<NewPackagePolicy | undefined> {
     const pkgInstall = await getInstallation({ savedObjectsClient: soClient, pkgName });
     if (pkgInstall) {
-      const [pkgInfo, defaultOutputId] = await Promise.all([
+      const [packageInfo, defaultOutputId] = await Promise.all([
         getPackageInfo({
           savedObjectsClient: soClient,
           pkgName: pkgInstall.name,
@@ -440,23 +637,24 @@ class PackagePolicyService {
         }),
         outputService.getDefaultOutputId(soClient),
       ]);
-      if (pkgInfo) {
+      if (packageInfo) {
         if (!defaultOutputId) {
           throw new Error('Default output is not set');
         }
-        return packageToPackagePolicy(pkgInfo, '', defaultOutputId);
+        return packageToPackagePolicy(packageInfo, '', defaultOutputId);
       }
     }
   }
 
   public async compilePackagePolicyInputs(
     pkgInfo: PackageInfo,
+    vars: PackagePolicy['vars'],
     inputs: PackagePolicyInput[]
   ): Promise<PackagePolicyInput[]> {
     const registryPkgInfo = await Registry.fetchInfo(pkgInfo.name, pkgInfo.version);
     const inputsPromises = inputs.map(async (input) => {
-      const compiledInput = await _compilePackagePolicyInput(registryPkgInfo, pkgInfo, input);
-      const compiledStreams = await _compilePackageStreams(registryPkgInfo, pkgInfo, input);
+      const compiledInput = await _compilePackagePolicyInput(registryPkgInfo, pkgInfo, vars, input);
+      const compiledStreams = await _compilePackageStreams(registryPkgInfo, pkgInfo, vars, input);
       return {
         ...input,
         compiled_input: compiledInput,
@@ -467,30 +665,68 @@ class PackagePolicyService {
     return Promise.all(inputsPromises);
   }
 
-  public async runExternalCallbacks(
-    externalCallbackType: ExternalCallback[0],
-    newPackagePolicy: NewPackagePolicy,
+  public async runExternalCallbacks<A extends ExternalCallback[0]>(
+    externalCallbackType: A,
+    packagePolicy: A extends 'postPackagePolicyDelete'
+      ? DeletePackagePoliciesResponse
+      : NewPackagePolicy,
     context: RequestHandlerContext,
     request: KibanaRequest
-  ): Promise<NewPackagePolicy> {
-    let newData = newPackagePolicy;
+  ): Promise<A extends 'postPackagePolicyDelete' ? void : NewPackagePolicy>;
+  public async runExternalCallbacks(
+    externalCallbackType: ExternalCallback[0],
+    packagePolicy: NewPackagePolicy | DeletePackagePoliciesResponse,
+    context: RequestHandlerContext,
+    request: KibanaRequest
+  ): Promise<NewPackagePolicy | void> {
+    if (externalCallbackType === 'postPackagePolicyDelete') {
+      return await this.runDeleteExternalCallbacks(packagePolicy as DeletePackagePoliciesResponse);
+    } else {
+      if (!Array.isArray(packagePolicy)) {
+        let newData = packagePolicy;
+        const externalCallbacks = appContextService.getExternalCallbacks(externalCallbackType);
+        if (externalCallbacks && externalCallbacks.size > 0) {
+          let updatedNewData = newData;
+          for (const callback of externalCallbacks) {
+            const result = await callback(updatedNewData, context, request);
+            if (externalCallbackType === 'packagePolicyCreate') {
+              updatedNewData = NewPackagePolicySchema.validate(result);
+            } else if (externalCallbackType === 'packagePolicyUpdate') {
+              updatedNewData = UpdatePackagePolicySchema.validate(result);
+            }
+          }
 
-    const externalCallbacks = appContextService.getExternalCallbacks(externalCallbackType);
+          newData = updatedNewData;
+        }
+        return newData;
+      }
+    }
+  }
+
+  public async runDeleteExternalCallbacks(
+    deletedPackagePolicies: DeletePackagePoliciesResponse
+  ): Promise<void> {
+    const externalCallbacks = appContextService.getExternalCallbacks('postPackagePolicyDelete');
+    const errorsThrown: Error[] = [];
+
     if (externalCallbacks && externalCallbacks.size > 0) {
-      let updatedNewData: NewPackagePolicy = newData;
-
       for (const callback of externalCallbacks) {
-        const result = await callback(updatedNewData, context, request);
-        if (externalCallbackType === 'packagePolicyCreate') {
-          updatedNewData = NewPackagePolicySchema.validate(result);
-        } else if (externalCallbackType === 'packagePolicyUpdate') {
-          updatedNewData = UpdatePackagePolicySchema.validate(result);
+        // Failures from an external callback should not prevent other external callbacks from being
+        // executed. Errors (if any) will be collected and `throw`n after processing the entire set
+        try {
+          await callback(deletedPackagePolicies);
+        } catch (error) {
+          errorsThrown.push(error);
         }
       }
 
-      newData = updatedNewData;
+      if (errorsThrown.length > 0) {
+        throw new IngestManagerError(
+          `${errorsThrown.length} encountered while executing package delete external callbacks`,
+          errorsThrown
+        );
+      }
     }
-    return newData;
   }
 }
 
@@ -506,13 +742,20 @@ function assignStreamIdToInput(packagePolicyId: string, input: NewPackagePolicyI
 async function _compilePackagePolicyInput(
   registryPkgInfo: RegistryPackage,
   pkgInfo: PackageInfo,
+  vars: PackagePolicy['vars'],
   input: PackagePolicyInput
 ) {
-  if ((!input.enabled || !pkgInfo.policy_templates?.[0]?.inputs?.length) ?? 0 > 0) {
+  const packagePolicyTemplate = input.policy_template
+    ? pkgInfo.policy_templates?.find(
+        (policyTemplate) => policyTemplate.name === input.policy_template
+      )
+    : pkgInfo.policy_templates?.[0];
+
+  if (!input.enabled || !packagePolicyTemplate || !packagePolicyTemplate.inputs?.length) {
     return undefined;
   }
 
-  const packageInputs = pkgInfo.policy_templates[0].inputs;
+  const packageInputs = packagePolicyTemplate.inputs;
   const packageInput = packageInputs.find((pkgInput) => pkgInput.type === input.type);
   if (!packageInput) {
     throw new Error(`Input template not found, unable to find input type ${input.type}`);
@@ -531,8 +774,8 @@ async function _compilePackagePolicyInput(
   }
 
   return compileTemplate(
-    // Populate template variables from input vars
-    Object.assign({}, input.vars),
+    // Populate template variables from package- and input-level vars
+    Object.assign({}, vars, input.vars),
     pkgInputTemplate.buffer.toString()
   );
 }
@@ -540,10 +783,11 @@ async function _compilePackagePolicyInput(
 async function _compilePackageStreams(
   registryPkgInfo: RegistryPackage,
   pkgInfo: PackageInfo,
+  vars: PackagePolicy['vars'],
   input: PackagePolicyInput
 ) {
   const streamsPromises = input.streams.map((stream) =>
-    _compilePackageStream(registryPkgInfo, pkgInfo, input, stream)
+    _compilePackageStream(registryPkgInfo, pkgInfo, vars, input, stream)
   );
 
   return await Promise.all(streamsPromises);
@@ -552,6 +796,7 @@ async function _compilePackageStreams(
 async function _compilePackageStream(
   registryPkgInfo: RegistryPackage,
   pkgInfo: PackageInfo,
+  vars: PackagePolicy['vars'],
   input: PackagePolicyInput,
   stream: PackagePolicyInputStream
 ) {
@@ -600,8 +845,8 @@ async function _compilePackageStream(
   }
 
   const yaml = compileTemplate(
-    // Populate template variables from input vars and stream vars
-    Object.assign({}, input.vars, stream.vars),
+    // Populate template variables from package-, input-, and stream-level vars
+    Object.assign({}, vars, input.vars, stream.vars),
     pkgStreamTemplate.buffer.toString()
   );
 
@@ -638,11 +883,16 @@ function _enforceFrozenVars(
   newVars: Record<string, PackagePolicyConfigRecordEntry>
 ) {
   const resultVars: Record<string, PackagePolicyConfigRecordEntry> = {};
-  for (const [key, val] of Object.entries(oldVars)) {
-    if (val.frozen) {
-      resultVars[key] = val;
+  for (const [key, val] of Object.entries(newVars)) {
+    if (oldVars[key]?.frozen) {
+      resultVars[key] = oldVars[key];
     } else {
-      resultVars[key] = newVars[key];
+      resultVars[key] = val;
+    }
+  }
+  for (const [key, val] of Object.entries(oldVars)) {
+    if (!newVars[key] && val.frozen) {
+      resultVars[key] = val;
     }
   }
   return resultVars;
@@ -652,3 +902,141 @@ export type PackagePolicyServiceInterface = PackagePolicyService;
 export const packagePolicyService = new PackagePolicyService();
 
 export type { PackagePolicyService };
+
+export function overridePackageInputs(
+  basePackagePolicy: NewPackagePolicy,
+  packageInfo: PackageInfo,
+  inputsOverride?: InputsOverride[],
+  dryRun?: boolean
+): DryRunPackagePolicy {
+  if (!inputsOverride) return basePackagePolicy;
+
+  const availablePolicyTemplates = packageInfo.policy_templates ?? [];
+
+  const inputs = [
+    ...basePackagePolicy.inputs.filter((input) => {
+      if (!input.policy_template) {
+        return true;
+      }
+
+      const policyTemplate = availablePolicyTemplates.find(
+        ({ name }) => name === input.policy_template
+      );
+
+      // Ignore any policy template removes in the new package version
+      if (!policyTemplate) {
+        return false;
+      }
+
+      // Ignore any inputs removed from this policy template in the new package version
+      const policyTemplateStillIncludesInput =
+        policyTemplate.inputs?.some(
+          (policyTemplateInput) => policyTemplateInput.type === input.type
+        ) ?? false;
+
+      return policyTemplateStillIncludesInput;
+    }),
+  ];
+
+  for (const override of inputsOverride) {
+    let originalInput = inputs.find((i) => i.type === override.type);
+
+    // If there's no corresponding input on the original package policy, just
+    // take the override value from the new package as-is. This case typically
+    // occurs when inputs or package policies are added/removed between versions.
+    if (!originalInput) {
+      inputs.push(override as NewPackagePolicyInput);
+      continue;
+    }
+
+    if (typeof override.enabled !== 'undefined') {
+      originalInput.enabled = override.enabled;
+    }
+
+    if (typeof override.keep_enabled !== 'undefined') {
+      originalInput.keep_enabled = override.keep_enabled;
+    }
+
+    if (override.vars) {
+      originalInput = deepMergeVars(originalInput, override);
+    }
+
+    if (override.streams) {
+      for (const stream of override.streams) {
+        let originalStream = originalInput?.streams.find(
+          (s) => s.data_stream.dataset === stream.data_stream.dataset
+        );
+
+        if (typeof stream.enabled !== 'undefined' && originalStream) {
+          originalStream.enabled = stream.enabled;
+        }
+
+        if (stream.vars) {
+          originalStream = deepMergeVars(originalStream, stream as InputsOverride);
+        }
+      }
+    }
+  }
+
+  const resultingPackagePolicy: NewPackagePolicy = {
+    ...basePackagePolicy,
+    inputs,
+  };
+
+  const validationResults = validatePackagePolicy(resultingPackagePolicy, packageInfo);
+
+  if (validationHasErrors(validationResults)) {
+    const responseFormattedValidationErrors = Object.entries(getFlattenedObject(validationResults))
+      .map(([key, value]) => ({
+        key,
+        message: value,
+      }))
+      .filter(({ message }) => !!message);
+
+    if (responseFormattedValidationErrors.length) {
+      if (dryRun) {
+        return { ...resultingPackagePolicy, errors: responseFormattedValidationErrors };
+      }
+
+      throw new IngestManagerError(
+        i18n.translate('xpack.fleet.packagePolicyInvalidError', {
+          defaultMessage: 'Package policy is invalid: {errors}',
+          values: {
+            errors: responseFormattedValidationErrors
+              .map(({ key, message }) => `${key}: ${message}`)
+              .join('\n'),
+          },
+        })
+      );
+    }
+  }
+
+  return resultingPackagePolicy;
+}
+
+function deepMergeVars(original: any, override: any): any {
+  const result = { ...original };
+
+  if (!result.vars || !override.vars) {
+    return;
+  }
+
+  const overrideVars = Array.isArray(override.vars)
+    ? override.vars
+    : Object.entries(override.vars!).map(([key, rest]) => ({
+        name: key,
+        ...(rest as any),
+      }));
+
+  for (const { name, ...overrideVal } of overrideVars) {
+    const originalVar = original.vars[name];
+
+    if (!result.vars) {
+      result.vars = {};
+    }
+
+    result.vars[name] = { ...overrideVal, ...originalVar };
+  }
+
+  return result;
+}

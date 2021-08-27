@@ -30,7 +30,7 @@ export async function fetchNodesFromClusterStats(
 ): Promise<AlertClusterStatsNodes[]> {
   const params = {
     index,
-    filterPath: ['aggregations.clusters.buckets'],
+    filter_path: ['aggregations.clusters.buckets'],
     body: {
       size: 0,
       sort: [
@@ -90,7 +90,7 @@ export async function fetchNodesFromClusterStats(
 
   const { body: response } = await esClient.search(params);
   const nodes: AlertClusterStatsNodes[] = [];
-  // @ts-expect-error @elastic/elasticsearch Aggregate does not define buckets
+  // @ts-expect-error declare type for aggregations explicitly
   const clusterBuckets = response.aggregations?.clusters?.buckets;
   if (!clusterBuckets?.length) {
     return nodes;

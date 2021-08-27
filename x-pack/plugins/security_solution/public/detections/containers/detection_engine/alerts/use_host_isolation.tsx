@@ -12,17 +12,18 @@ import { createHostIsolation } from './api';
 
 interface HostIsolationStatus {
   loading: boolean;
+  /** Boolean return will indicate if isolation action was created successful */
   isolateHost: () => Promise<boolean>;
 }
 
 interface UseHostIsolationProps {
-  agentId: string;
+  endpointId: string;
   comment: string;
   caseIds?: string[];
 }
 
 export const useHostIsolation = ({
-  agentId,
+  endpointId,
   comment,
   caseIds,
 }: UseHostIsolationProps): HostIsolationStatus => {
@@ -32,7 +33,7 @@ export const useHostIsolation = ({
   const isolateHost = useCallback(async () => {
     try {
       setLoading(true);
-      const isolationStatus = await createHostIsolation({ agentId, comment, caseIds });
+      const isolationStatus = await createHostIsolation({ endpointId, comment, caseIds });
       setLoading(false);
       return isolationStatus.action ? true : false;
     } catch (error) {
@@ -40,6 +41,6 @@ export const useHostIsolation = ({
       addError(error.message, { title: HOST_ISOLATION_FAILURE });
       return false;
     }
-  }, [agentId, comment, caseIds, addError]);
+  }, [endpointId, comment, caseIds, addError]);
   return { loading, isolateHost };
 };

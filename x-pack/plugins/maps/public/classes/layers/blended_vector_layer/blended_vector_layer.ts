@@ -22,7 +22,6 @@ import {
   LAYER_STYLE_TYPE,
   FIELD_ORIGIN,
 } from '../../../../common/constants';
-import { isTotalHitsGreaterThan, TotalHits } from '../../../../common/elasticsearch_util';
 import { ESGeoGridSource } from '../../sources/es_geo_grid_source/es_geo_grid_source';
 import { canSkipSourceUpdate } from '../../util/can_skip_fetch';
 import { IESSource } from '../../sources/es_source';
@@ -35,6 +34,7 @@ import {
   DynamicStylePropertyOptions,
   StylePropertyOptions,
   LayerDescriptor,
+  Timeslice,
   VectorLayerDescriptor,
   VectorSourceRequestMeta,
   VectorStylePropertiesDescriptor,
@@ -45,10 +45,6 @@ import { ESSearchSource } from '../../sources/es_search_source/es_search_source'
 import { isSearchSourceAbortError } from '../../sources/es_source/es_source';
 
 const ACTIVE_COUNT_DATA_ID = 'ACTIVE_COUNT_DATA_ID';
-
-interface CountData {
-  isSyncClustered: boolean;
-}
 
 function getAggType(
   dynamicProperty: IDynamicStyleProperty<DynamicStylePropertyOptions>
@@ -188,9 +184,9 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
 
   private readonly _isClustered: boolean;
   private readonly _clusterSource: ESGeoGridSource;
-  private readonly _clusterStyle: IVectorStyle;
+  private readonly _clusterStyle: VectorStyle;
   private readonly _documentSource: ESSearchSource;
-  private readonly _documentStyle: IVectorStyle;
+  private readonly _documentStyle: VectorStyle;
 
   constructor(options: BlendedVectorLayerArguments) {
     super({
@@ -199,7 +195,7 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
     });
 
     this._documentSource = this._source as ESSearchSource; // VectorLayer constructor sets _source as document source
-    this._documentStyle = this._style as IVectorStyle; // VectorLayer constructor sets _style as document source
+    this._documentStyle = this._style; // VectorLayer constructor sets _style as document source
 
     this._clusterSource = getClusterSource(this._documentSource, this._documentStyle);
     const clusterStyleDescriptor = getClusterStyleDescriptor(
@@ -216,7 +212,7 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
     let isClustered = false;
     const countDataRequest = this.getDataRequest(ACTIVE_COUNT_DATA_ID);
     if (countDataRequest) {
-      const requestData = countDataRequest.getData() as CountData;
+      const requestData = countDataRequest.getData() as { isSyncClustered: boolean };
       if (requestData && requestData.isSyncClustered) {
         isClustered = true;
       }
@@ -283,7 +279,7 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
     return this._documentSource;
   }
 
-  getCurrentStyle(): IVectorStyle {
+  getCurrentStyle(): VectorStyle {
     return this._isClustered ? this._clusterStyle : this._documentStyle;
   }
 
@@ -294,7 +290,7 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
   async syncData(syncContext: DataRequestContext) {
     const dataRequestId = ACTIVE_COUNT_DATA_ID;
     const requestToken = Symbol(`layer-active-count:${this.getId()}`);
-    const searchFilters: VectorSourceRequestMeta = this._getSearchFilters(
+    const searchFilters: VectorSourceRequestMeta = await this._getSearchFilters(
       syncContext.dataFilters,
       this.getSource(),
       this.getCurrentStyle()
@@ -305,6 +301,9 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
       prevDataRequest: this.getDataRequest(dataRequestId),
       nextMeta: searchFilters,
       extentAware: source.isFilterByMapBounds(),
+      getUpdateDueToTimeslice: (timeslice?: Timeslice) => {
+        return this._getUpdateDueToTimesliceFromSourceRequestMeta(source, timeslice);
+      },
     });
 
     let activeSource;
@@ -322,22 +321,11 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
       let isSyncClustered;
       try {
         syncContext.startLoading(dataRequestId, requestToken, searchFilters);
-        const abortController = new AbortController();
-        syncContext.registerCancelCallback(requestToken, () => abortController.abort());
-        const maxResultWindow = await this._documentSource.getMaxResultWindow();
-        const searchSource = await this._documentSource.makeSearchSource(searchFilters, 0);
-        searchSource.setField('trackTotalHits', maxResultWindow + 1);
-        const resp = await searchSource.fetch({
-          abortSignal: abortController.signal,
-          sessionId: syncContext.dataFilters.searchSessionId,
-          legacyHitsTotal: false,
-        });
-        isSyncClustered = isTotalHitsGreaterThan(
-          (resp.hits.total as unknown) as TotalHits,
-          maxResultWindow
-        );
-        const countData = { isSyncClustered } as CountData;
-        syncContext.stopLoading(dataRequestId, requestToken, countData, searchFilters);
+        isSyncClustered = !(await this._documentSource.canLoadAllDocuments(
+          searchFilters,
+          syncContext.registerCancelCallback.bind(null, requestToken)
+        ));
+        syncContext.stopLoading(dataRequestId, requestToken, { isSyncClustered }, searchFilters);
       } catch (error) {
         if (!(error instanceof DataRequestAbortError) || !isSearchSourceAbortError(error)) {
           syncContext.onLoadError(dataRequestId, requestToken, error.message);

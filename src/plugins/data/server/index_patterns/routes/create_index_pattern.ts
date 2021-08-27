@@ -9,15 +9,18 @@
 import { schema } from '@kbn/config-schema';
 import { IndexPatternSpec } from 'src/plugins/data/common';
 import { handleErrors } from './util/handle_errors';
-import { fieldSpecSchema, serializedFieldFormatSchema } from './util/schemas';
+import {
+  fieldSpecSchema,
+  runtimeFieldSpecSchema,
+  serializedFieldFormatSchema,
+} from './util/schemas';
 import { IRouter, StartServicesAccessor } from '../../../../../core/server';
 import type { DataPluginStart, DataPluginStartDependencies } from '../../plugin';
 
 const indexPatternSpecSchema = schema.object({
   title: schema.string(),
-
-  id: schema.maybe(schema.string()),
   version: schema.maybe(schema.string()),
+  id: schema.maybe(schema.string()),
   type: schema.maybe(schema.string()),
   timeFieldName: schema.maybe(schema.string()),
   sourceFilters: schema.maybe(
@@ -40,6 +43,7 @@ const indexPatternSpecSchema = schema.object({
     )
   ),
   allowNoIndex: schema.maybe(schema.boolean()),
+  runtimeFieldMap: schema.maybe(schema.recordOf(schema.string(), runtimeFieldSpecSchema)),
 });
 
 export const registerCreateIndexPatternRoute = (
@@ -67,6 +71,7 @@ export const registerCreateIndexPatternRoute = (
           elasticsearchClient
         );
         const body = req.body;
+
         const indexPattern = await indexPatternsService.createAndSave(
           body.index_pattern as IndexPatternSpec,
           body.override,

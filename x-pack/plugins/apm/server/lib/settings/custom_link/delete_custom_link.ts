@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { withApmSpan } from '../../../utils/with_apm_span';
 import { Setup } from '../../helpers/setup_request';
 
 export function deleteCustomLink({
@@ -15,15 +14,13 @@ export function deleteCustomLink({
   customLinkId: string;
   setup: Setup;
 }) {
-  return withApmSpan('delete_custom_link', () => {
-    const { internalClient, indices } = setup;
+  const { internalClient, indices } = setup;
 
-    const params = {
-      refresh: 'wait_for' as const,
-      index: indices.apmCustomLinkIndex,
-      id: customLinkId,
-    };
+  const params = {
+    refresh: 'wait_for' as const,
+    index: indices.apmCustomLinkIndex,
+    id: customLinkId,
+  };
 
-    return internalClient.delete(params);
-  });
+  return internalClient.delete('delete_custom_link', params);
 }

@@ -10,14 +10,12 @@ const windowObj = {
   location: null,
   localStorage: {} as Window['localStorage'],
   sessionStorage: {} as Window['sessionStorage'],
+  innerWidth: 0,
+  innerHeight: 0,
+  addEventListener: () => {},
+  removeEventListener: () => {},
 };
 
-export const getWindow = ():
-  | Window
-  | {
-      location: Location | null;
-      localStorage: Window['localStorage'];
-      sessionStorage: Window['sessionStorage'];
-    } => {
+export const getWindow = (): Window | typeof windowObj => {
   return typeof window === 'undefined' ? windowObj : window;
 };

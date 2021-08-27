@@ -5,4 +5,12 @@
  * 2.0.
  */
 
+Cypress.on('uncaught:exception', (err, runnable) => {
+  // @see https://stackoverflow.com/a/50387233/434980
+  // ResizeObserver error can be safely ignored
+  if (err.message.includes('ResizeObserver loop limit exceeded')) {
+    return false;
+  }
+});
+
 import './commands';

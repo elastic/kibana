@@ -15,7 +15,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const uptime = getService('uptime');
   const esArchiver = getService('esArchiver');
 
-  const archive = 'uptime/blank';
+  const archive = 'x-pack/test/functional/es_archives/uptime/blank';
 
   const monitor = () => uptime.monitor;
 

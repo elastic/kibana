@@ -26,7 +26,7 @@ import {
 } from '@kbn/securitysolution-io-ts-alerting-types';
 import { Version } from '@kbn/securitysolution-io-ts-types';
 
-import { ListArrayOrUndefined } from '@kbn/securitysolution-io-ts-list-types';
+import type { ListArrayOrUndefined } from '@kbn/securitysolution-io-ts-list-types';
 import {
   AnomalyThresholdOrUndefined,
   Description,
@@ -52,7 +52,6 @@ import {
   EventCategoryOverrideOrUndefined,
 } from '../../../common/detection_engine/schemas/common/schemas';
 
-import { LegacyCallAPIOptions } from '../../../../../../src/core/server';
 import { Filter } from '../../../../../../src/plugins/data/server';
 import { AlertTypeParams } from '../../../../alerting/common';
 
@@ -103,12 +102,5 @@ export interface RuleTypeParams extends AlertTypeParams {
   concurrentSearches?: ConcurrentSearchesOrUndefined;
   itemsPerSearch?: ItemsPerSearchOrUndefined;
 }
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type CallWithRequest<T extends Record<string, any>, V> = (
-  endpoint: string,
-  params: T,
-  options?: LegacyCallAPIOptions
-) => Promise<V>;
 
 export type RefreshTypes = false | 'wait_for';

@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { ScrollResponse, Hit } from '@elastic/elasticsearch/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 import { IScopedClusterClient } from 'kibana/server';
 import { get } from 'lodash';
 import { ES_SCROLL_SETTINGS } from '../../../common/constants';
 
 export function fetchAllFromScroll(
-  searchResults: ScrollResponse<unknown>,
+  searchResults: estypes.ScrollResponse<unknown>,
   dataClient: IScopedClusterClient,
-  hits: Hit[] = []
-): Promise<ScrollResponse['hits']['hits']> {
+  hits: estypes.SearchHit[] = []
+): Promise<estypes.ScrollResponse['hits']['hits']> {
   const newHits = get(searchResults, 'hits.hits', []);
   const scrollId = get(searchResults, '_scroll_id');
 
@@ -25,7 +25,7 @@ export function fetchAllFromScroll(
       .scroll({
         body: {
           scroll: ES_SCROLL_SETTINGS.KEEPALIVE,
-          scroll_id: scrollId,
+          scroll_id: scrollId!,
         },
       })
       .then(({ body: innerResponse }) => {

@@ -7,12 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const LEAVE_UNASSIGNED_FIELD = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.contentSources.displaySettings.leaveUnassigned.field',
-  {
-    defaultMessage: 'Leave unassigned',
-  }
-);
+export const LEAVE_UNASSIGNED_FIELD = '';
 
 export const SUCCESS_MESSAGE = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.contentSources.displaySettings.success.message',

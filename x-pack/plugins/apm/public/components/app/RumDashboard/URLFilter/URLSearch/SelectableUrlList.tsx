@@ -27,7 +27,6 @@ import {
   EuiIcon,
   EuiBadge,
   EuiButtonIcon,
-  EuiOutsideClickDetector,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -67,9 +66,9 @@ interface Props {
   loading: boolean;
   onInputChange: (e: FormEvent<HTMLInputElement>) => void;
   onTermChange: () => void;
+  onApply: () => void;
   onChange: (updatedOptions: UrlOption[]) => void;
   searchValue: string;
-  onClose: () => void;
   popoverIsOpen: boolean;
   initialValue?: string;
   setPopoverIsOpen: React.Dispatch<SetStateAction<boolean>>;
@@ -81,8 +80,8 @@ export function SelectableUrlList({
   onInputChange,
   onTermChange,
   onChange,
+  onApply,
   searchValue,
-  onClose,
   popoverIsOpen,
   setPopoverIsOpen,
   initialValue,
@@ -93,21 +92,21 @@ export function SelectableUrlList({
 
   const titleRef = useRef<HTMLDivElement>(null);
 
+  const formattedOptions = formatOptions(data.items ?? []);
+
   const onEnterKey = (evt: KeyboardEvent<HTMLInputElement>) => {
     if (evt.key.toLowerCase() === 'enter') {
       onTermChange();
+      onApply();
       setPopoverIsOpen(false);
-      if (searchRef) {
-        searchRef.blur();
-      }
     }
   };
 
-  // @ts-ignore - not sure, why it's not working
-  useEvent('keydown', onEnterKey, searchRef);
-
   const onInputClick = (e: React.MouseEvent<HTMLInputElement>) => {
     setPopoverIsOpen(true);
+    if (searchRef) {
+      searchRef.focus();
+    }
   };
 
   const onSearchInput = (e: React.FormEvent<HTMLInputElement>) => {
@@ -115,15 +114,13 @@ export function SelectableUrlList({
     setPopoverIsOpen(true);
   };
 
-  const formattedOptions = formatOptions(data.items ?? []);
-
   const closePopover = () => {
     setPopoverIsOpen(false);
-    onClose();
-    if (searchRef) {
-      searchRef.blur();
-    }
   };
+
+  // @ts-ignore - not sure, why it's not working
+  useEvent('keydown', onEnterKey, searchRef);
+  useEvent('escape', () => setPopoverIsOpen(false), searchRef);
 
   useEffect(() => {
     if (searchRef && initialValue) {
@@ -188,7 +185,8 @@ export function SelectableUrlList({
         onClick: onInputClick,
         onInput: onSearchInput,
         inputRef: setSearchRef,
-        placeholder: I18LABELS.searchByUrl,
+        placeholder: I18LABELS.filterByUrl,
+        'aria-label': I18LABELS.filterByUrl,
       }}
       listProps={{
         rowHeight: 68,
@@ -198,59 +196,66 @@ export function SelectableUrlList({
       loadingMessage={loadingMessage}
       emptyMessage={emptyMessage}
       noMatchesMessage={emptyMessage}
+      allowExclusions={true}
     >
       {(list, search) => (
-        <EuiOutsideClickDetector onOutsideClick={() => closePopover()}>
-          <EuiPopover
-            panelPaddingSize="none"
-            isOpen={popoverIsOpen}
-            display={'block'}
-            button={search}
-            closePopover={closePopover}
-            style={{ minWidth: 200 }}
+        <EuiPopover
+          panelPaddingSize="none"
+          isOpen={popoverIsOpen}
+          display={'block'}
+          button={search}
+          closePopover={closePopover}
+          style={{ minWidth: 400 }}
+          anchorPosition="downLeft"
+          ownFocus={false}
+        >
+          <div
+            style={{
+              width: searchRef?.getBoundingClientRect().width ?? 600,
+              maxWidth: '100%',
+            }}
           >
-            <div style={{ width: 600, maxWidth: '100%' }}>
-              <PopOverTitle />
-              {searchValue && (
-                <StyledRow darkMode={darkMode}>
-                  <EuiText size="s">
-                    <FormattedMessage
-                      id="xpack.apm.ux.url.hitEnter.include"
-                      defaultMessage="Hit {icon} or click apply to include all urls matching {searchValue}"
-                      values={{
-                        searchValue: <strong>{searchValue}</strong>,
-                        icon: (
-                          <EuiBadge color="hollow">
-                            Enter <EuiIcon type="returnKey" />
-                          </EuiBadge>
-                        ),
-                      }}
-                    />
-                  </EuiText>
-                </StyledRow>
-              )}
-              {list}
-              <EuiPopoverFooter paddingSize="s">
-                <EuiFlexGroup style={{ justifyContent: 'flex-end' }}>
-                  <EuiFlexItem grow={false}>
-                    <EuiButton
-                      fill
-                      size="s"
-                      onClick={() => {
-                        onTermChange();
-                        closePopover();
-                      }}
-                    >
-                      {i18n.translate('xpack.apm.apply.label', {
-                        defaultMessage: 'Apply',
-                      })}
-                    </EuiButton>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiPopoverFooter>
-            </div>
-          </EuiPopover>
-        </EuiOutsideClickDetector>
+            <PopOverTitle />
+            {searchValue && (
+              <StyledRow darkMode={darkMode}>
+                <EuiText size="s">
+                  <FormattedMessage
+                    id="xpack.apm.ux.url.hitEnter.include"
+                    defaultMessage="Hit {icon} or click apply to include all urls matching {searchValue}"
+                    values={{
+                      searchValue: <strong>{searchValue}</strong>,
+                      icon: (
+                        <EuiBadge color="hollow">
+                          Enter <EuiIcon type="returnKey" />
+                        </EuiBadge>
+                      ),
+                    }}
+                  />
+                </EuiText>
+              </StyledRow>
+            )}
+            {list}
+            <EuiPopoverFooter paddingSize="s">
+              <EuiFlexGroup style={{ justifyContent: 'flex-end' }}>
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    fill
+                    size="s"
+                    onClick={() => {
+                      onTermChange();
+                      onApply();
+                      closePopover();
+                    }}
+                  >
+                    {i18n.translate('xpack.apm.apply.label', {
+                      defaultMessage: 'Apply',
+                    })}
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiPopoverFooter>
+          </div>
+        </EuiPopover>
       )}
     </EuiSelectable>
   );

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { estypes } from '@elastic/elasticsearch';
 import expect from '@kbn/expect';
 import { SuperTest } from 'supertest';
 import { EsArchiver } from '@kbn/es-archiver';
@@ -93,9 +93,12 @@ export function copyToSpaceTestSuiteFactory(
       },
     });
 
+    const aggs = response.aggregations as Record<
+      string,
+      estypes.AggregationsMultiBucketAggregate<SpaceBucket>
+    >;
     return {
-      // @ts-expect-error @elastic/elasticsearch doesn't defined `count.buckets`.
-      buckets: response.aggregations?.count.buckets as SpaceBucket[],
+      buckets: aggs.count.buckets,
     };
   };
 
@@ -568,15 +571,18 @@ export function copyToSpaceTestSuiteFactory(
               expectNewCopyResponse(response, ambiguousConflictId, title);
             } else {
               // It doesn't matter if overwrite is enabled or not, the object will not be copied because there are two matches in the destination space
-              const updatedAt = '2017-09-21T18:59:16.270Z';
               const destinations = [
-                // response should be sorted by updatedAt in descending order
+                // response destinations should be sorted by updatedAt in descending order, then ID in ascending order
+                {
+                  id: 'conflict_2_all',
+                  title: 'A shared saved-object in all spaces',
+                  updatedAt: '2017-09-21T18:59:16.270Z',
+                },
                 {
                   id: 'conflict_2_space_2',
                   title: 'A shared saved-object in one space',
-                  updatedAt,
+                  updatedAt: '2017-09-21T18:59:16.270Z',
                 },
-                { id: 'conflict_2_all', title: 'A shared saved-object in all spaces', updatedAt },
               ];
               expect(success).to.eql(false);
               expect(successCount).to.eql(0);
@@ -613,8 +619,16 @@ export function copyToSpaceTestSuiteFactory(
       });
 
       describe('single-namespace types', () => {
-        beforeEach(() => esArchiver.load('saved_objects/spaces'));
-        afterEach(() => esArchiver.unload('saved_objects/spaces'));
+        beforeEach(() =>
+          esArchiver.load(
+            'x-pack/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
+          )
+        );
+        afterEach(() =>
+          esArchiver.unload(
+            'x-pack/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
+          )
+        );
 
         const dashboardObject = { type: 'dashboard', id: 'cts_dashboard' };
 
@@ -755,8 +769,16 @@ export function copyToSpaceTestSuiteFactory(
         const spaces = ['space_2'];
         const includeReferences = false;
         describe(`multi-namespace types with overwrite=${overwrite} and createNewCopies=${createNewCopies}`, () => {
-          before(() => esArchiver.load('saved_objects/spaces'));
-          after(() => esArchiver.unload('saved_objects/spaces'));
+          before(() =>
+            esArchiver.load(
+              'x-pack/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
+            )
+          );
+          after(() =>
+            esArchiver.unload(
+              'x-pack/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
+            )
+          );
 
           const testCases = tests.multiNamespaceTestCases(overwrite, createNewCopies);
           testCases.forEach(({ testTitle, objects, statusCode, response }) => {

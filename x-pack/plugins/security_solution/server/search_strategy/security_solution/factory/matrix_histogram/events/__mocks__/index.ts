@@ -14,6 +14,7 @@ import {
 export const mockOptions: MatrixHistogramRequestOptions = {
   defaultIndex: [
     'apm-*-transaction*',
+    'traces-apm*',
     'auditbeat-*',
     'endgame-*',
     'filebeat-*',
@@ -31,6 +32,7 @@ export const mockOptions: MatrixHistogramRequestOptions = {
 export const expectedDsl = {
   index: [
     'apm-*-transaction*',
+    'traces-apm*',
     'auditbeat-*',
     'endgame-*',
     'filebeat-*',
@@ -85,6 +87,7 @@ export const expectedDsl = {
 export const expectedThresholdDsl = {
   index: [
     'apm-*-transaction*',
+    'traces-apm*',
     'auditbeat-*',
     'endgame-*',
     'filebeat-*',
@@ -141,6 +144,7 @@ export const expectedThresholdDsl = {
 export const expectedThresholdMissingFieldDsl = {
   index: [
     'apm-*-transaction*',
+    'traces-apm*',
     'auditbeat-*',
     'endgame-*',
     'filebeat-*',
@@ -243,6 +247,7 @@ export const expectedThresholdWithCardinalityDsl = {
   ignoreUnavailable: true,
   index: [
     'apm-*-transaction*',
+    'traces-apm*',
     'auditbeat-*',
     'endgame-*',
     'filebeat-*',
@@ -256,6 +261,7 @@ export const expectedThresholdWithCardinalityDsl = {
 export const expectedThresholdWithGroupFieldsAndCardinalityDsl = {
   index: [
     'apm-*-transaction*',
+    'traces-apm*',
     'auditbeat-*',
     'endgame-*',
     'filebeat-*',
@@ -362,6 +368,7 @@ export const expectedThresholdGroupWithCardinalityDsl = {
   ignoreUnavailable: true,
   index: [
     'apm-*-transaction*',
+    'traces-apm*',
     'auditbeat-*',
     'endgame-*',
     'filebeat-*',
@@ -375,6 +382,7 @@ export const expectedThresholdGroupWithCardinalityDsl = {
 export const expectedIpIncludingMissingDataDsl = {
   index: [
     'apm-*-transaction*',
+    'traces-apm*',
     'auditbeat-*',
     'endgame-*',
     'filebeat-*',
@@ -437,6 +445,7 @@ export const expectedIpIncludingMissingDataDsl = {
 export const expectedIpNotIncludingMissingDataDsl = {
   index: [
     'apm-*-transaction*',
+    'traces-apm*',
     'auditbeat-*',
     'endgame-*',
     'filebeat-*',

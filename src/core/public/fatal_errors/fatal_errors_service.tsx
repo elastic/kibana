@@ -51,7 +51,7 @@ export interface FatalErrorsSetup {
  */
 export type FatalErrorsStart = FatalErrorsSetup;
 
-/** @interal */
+/** @internal */
 export class FatalErrorsService {
   private readonly errorInfo$ = new Rx.ReplaySubject<FatalErrorInfo>();
   private fatalErrors?: FatalErrorsSetup;

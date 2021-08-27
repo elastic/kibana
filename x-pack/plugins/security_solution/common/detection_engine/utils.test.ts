@@ -7,12 +7,13 @@
 
 import {
   hasEqlSequenceQuery,
-  hasLargeValueList,
   hasNestedEntry,
   isThreatMatchRule,
   normalizeMachineLearningJobIds,
   normalizeThresholdField,
 } from './utils';
+
+import { hasLargeValueList } from '@kbn/securitysolution-list-utils';
 
 import type { EntriesArray } from '@kbn/securitysolution-io-ts-list-types';
 

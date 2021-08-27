@@ -29,7 +29,7 @@ import {
   getThreatMatchingSchemaMock,
   getRulesEqlSchemaMock,
 } from './rules_schema.mocks';
-import { ListArray } from '@kbn/securitysolution-io-ts-list-types';
+import type { ListArray } from '@kbn/securitysolution-io-ts-list-types';
 
 export const ANCHOR_DATE = '2020-02-20T03:57:54.037Z';
 

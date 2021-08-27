@@ -15,8 +15,8 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
     this.tags('ciGroup3');
 
     before(async () => {
-      await esArchiver.loadIfNeeded('logstash_functional');
-      await esArchiver.load('dashboard/async_search');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
+      await esArchiver.load('x-pack/test/functional/es_archives/dashboard/async_search');
       await kibanaServer.uiSettings.replace({ defaultIndex: 'logstash-*' });
       await kibanaServer.uiSettings.replace({ 'search:timeout': 10000 });
     });

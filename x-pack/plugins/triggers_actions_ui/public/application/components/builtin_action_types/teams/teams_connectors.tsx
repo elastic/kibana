@@ -20,6 +20,9 @@ const TeamsActionFields: React.FunctionComponent<
   const { webhookUrl } = action.secrets;
   const { docLinks } = useKibana().services;
 
+  const isWebhookUrlInvalid: boolean =
+    errors.webhookUrl !== undefined && errors.webhookUrl.length > 0 && webhookUrl !== undefined;
+
   return (
     <>
       <EuiFormRow
@@ -34,7 +37,7 @@ const TeamsActionFields: React.FunctionComponent<
           </EuiLink>
         }
         error={errors.webhookUrl}
-        isInvalid={errors.webhookUrl.length > 0 && webhookUrl !== undefined}
+        isInvalid={isWebhookUrlInvalid}
         label={i18n.translate(
           'xpack.triggersActionsUI.components.builtinActionTypes.teamsAction.webhookUrlTextFieldLabel',
           {
@@ -54,7 +57,7 @@ const TeamsActionFields: React.FunctionComponent<
           )}
           <EuiFieldText
             fullWidth
-            isInvalid={errors.webhookUrl.length > 0 && webhookUrl !== undefined}
+            isInvalid={isWebhookUrlInvalid}
             name="webhookUrl"
             readOnly={readOnly}
             value={webhookUrl || ''}

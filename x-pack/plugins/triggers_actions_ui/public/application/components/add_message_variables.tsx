@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, Fragment } from 'react';
+import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiPopover,
@@ -62,7 +62,7 @@ export const AddMessageVariables: React.FunctionComponent<Props> = ({
   );
 
   if ((messageVariables?.length ?? 0) === 0) {
-    return <Fragment />;
+    return <></>;
   }
 
   return (

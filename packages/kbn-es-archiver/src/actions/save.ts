@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { resolve } from 'path';
+import { resolve, relative } from 'path';
 import { createWriteStream, mkdirSync } from 'fs';
 import { Readable, Writable } from 'stream';
 import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog, REPO_ROOT } from '@kbn/dev-utils';
 import { createListStream, createPromiseFromStreams } from '@kbn/utils';
 
 import {
@@ -22,23 +22,21 @@ import {
 } from '../lib';
 
 export async function saveAction({
-  name,
+  outputDir,
   indices,
   client,
-  dataDir,
   log,
   raw,
   query,
 }: {
-  name: string;
+  outputDir: string;
   indices: string | string[];
   client: KibanaClient;
-  dataDir: string;
   log: ToolingLog;
   raw: boolean;
   query?: Record<string, any>;
 }) {
-  const outputDir = resolve(dataDir, name);
+  const name = relative(REPO_ROOT, outputDir);
   const stats = createStats(name, log);
 
   log.info('[%s] Creating archive of %j', name, indices);

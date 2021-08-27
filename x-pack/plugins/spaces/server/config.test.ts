@@ -13,7 +13,7 @@ import { spacesConfigDeprecationProvider } from './config';
 const applyConfigDeprecations = (settings: Record<string, any> = {}) => {
   const deprecations = spacesConfigDeprecationProvider(configDeprecationFactory);
   const deprecationMessages: string[] = [];
-  const migrated = applyDeprecations(
+  const { config: migrated } = applyDeprecations(
     settings,
     deprecations.map((deprecation) => ({
       deprecation,

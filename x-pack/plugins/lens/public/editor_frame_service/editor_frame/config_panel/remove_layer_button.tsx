@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiButtonEmpty } from '@elastic/eui';
+import { EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Visualization } from '../../../types';
 
@@ -22,13 +22,9 @@ export function RemoveLayerButton({
   activeVisualization: Visualization;
 }) {
   let ariaLabel;
-  let componentText;
 
   if (!activeVisualization.removeLayer) {
     ariaLabel = i18n.translate('xpack.lens.resetVisualizationAriaLabel', {
-      defaultMessage: 'Reset visualization',
-    });
-    componentText = i18n.translate('xpack.lens.resetVisualization', {
       defaultMessage: 'Reset visualization',
     });
   } else if (isOnlyLayer) {
@@ -36,26 +32,21 @@ export function RemoveLayerButton({
       defaultMessage: 'Reset layer {index}',
       values: { index: layerIndex + 1 },
     });
-    componentText = i18n.translate('xpack.lens.resetLayer', {
-      defaultMessage: 'Reset layer',
-    });
   } else {
     ariaLabel = i18n.translate('xpack.lens.deleteLayerAriaLabel', {
       defaultMessage: `Delete layer {index}`,
       values: { index: layerIndex + 1 },
     });
-    componentText = i18n.translate('xpack.lens.deleteLayer', {
-      defaultMessage: `Delete layer`,
-    });
   }
 
   return (
-    <EuiButtonEmpty
+    <EuiButtonIcon
       size="xs"
-      iconType="trash"
+      iconType={isOnlyLayer ? 'eraser' : 'trash'}
       color="danger"
       data-test-subj="lnsLayerRemove"
       aria-label={ariaLabel}
+      title={ariaLabel}
       onClick={() => {
         // If we don't blur the remove / clear button, it remains focused
         // which is a strange UX in this case. e.target.blur doesn't work
@@ -69,8 +60,6 @@ export function RemoveLayerButton({
 
         onRemoveLayer();
       }}
-    >
-      {componentText}
-    </EuiButtonEmpty>
+    />
   );
 }

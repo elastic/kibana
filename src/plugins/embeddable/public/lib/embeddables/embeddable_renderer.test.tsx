@@ -9,13 +9,38 @@
 import React from 'react';
 import { waitFor } from '@testing-library/dom';
 import { render } from '@testing-library/react';
+import { renderHook } from '@testing-library/react-hooks';
 import {
   HelloWorldEmbeddable,
   HelloWorldEmbeddableFactoryDefinition,
   HELLO_WORLD_EMBEDDABLE,
 } from '../../tests/fixtures';
-import { EmbeddableRenderer } from './embeddable_renderer';
+import { EmbeddableRenderer, useEmbeddableFactory } from './embeddable_renderer';
 import { embeddablePluginMock } from '../../mocks';
+
+describe('useEmbeddableFactory', () => {
+  it('should update upstream value changes', async () => {
+    const { setup, doStart } = embeddablePluginMock.createInstance();
+    const getFactory = setup.registerEmbeddableFactory(
+      HELLO_WORLD_EMBEDDABLE,
+      new HelloWorldEmbeddableFactoryDefinition()
+    );
+    doStart();
+
+    const { result, waitForNextUpdate } = renderHook(() =>
+      useEmbeddableFactory({ factory: getFactory(), input: { id: 'hello' } })
+    );
+
+    const [, loading] = result.current;
+
+    expect(loading).toBe(true);
+
+    await waitForNextUpdate();
+
+    const [embeddable] = result.current;
+    expect(embeddable).toBeDefined();
+  });
+});
 
 describe('<EmbeddableRenderer/>', () => {
   test('Render embeddable', () => {

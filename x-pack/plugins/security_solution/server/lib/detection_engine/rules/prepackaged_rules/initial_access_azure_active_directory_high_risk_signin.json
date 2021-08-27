@@ -13,7 +13,7 @@
   "license": "Elastic License v2",
   "name": "Azure Active Directory High Risk Sign-in",
   "note": "## Config\n\nThe Azure Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
-  "query": "event.dataset:azure.signinlogs and azure.signinlogs.properties.risk_level_during_signin:high and event.outcome:(success or Success)",
+  "query": "event.dataset:azure.signinlogs and\n  azure.signinlogs.properties.risk_level_during_signin:high and\n  event.outcome:(success or Success)\n",
   "references": [
     "https://docs.microsoft.com/en-us/azure/active-directory/conditional-access/howto-conditional-access-policy-risk",
     "https://docs.microsoft.com/en-us/azure/active-directory/identity-protection/overview-identity-protection",

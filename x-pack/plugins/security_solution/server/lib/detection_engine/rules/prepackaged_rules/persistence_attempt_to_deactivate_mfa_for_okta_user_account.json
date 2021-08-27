@@ -14,7 +14,7 @@
   "license": "Elastic License v2",
   "name": "Attempt to Deactivate MFA for an Okta User Account",
   "note": "## Config\n\nThe Okta Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
-  "query": "event.dataset:okta.system and event.action:user.mfa.factor.deactivate",
+  "query": "event.dataset:okta.system and event.action:user.mfa.factor.deactivate\n",
   "references": [
     "https://developer.okta.com/docs/reference/api/system-log/",
     "https://developer.okta.com/docs/reference/api/event-types/"

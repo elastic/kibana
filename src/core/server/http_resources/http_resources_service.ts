@@ -15,10 +15,11 @@ import {
   InternalHttpServiceSetup,
   KibanaRequest,
   KibanaResponseFactory,
+  InternalHttpServicePreboot,
 } from '../http';
 
 import { Logger } from '../logging';
-import { InternalRenderingServiceSetup } from '../rendering';
+import { InternalRenderingServicePreboot, InternalRenderingServiceSetup } from '../rendering';
 import { CoreService } from '../../types';
 
 import {
@@ -30,6 +31,11 @@ import {
   HttpResourcesServiceToolkit,
 } from './types';
 import { getApmConfig } from './get_apm_config';
+
+export interface PrebootDeps {
+  http: InternalHttpServicePreboot;
+  rendering: InternalRenderingServicePreboot;
+}
 
 export interface SetupDeps {
   http: InternalHttpServiceSetup;
@@ -43,6 +49,13 @@ export class HttpResourcesService implements CoreService<InternalHttpResourcesSe
     this.logger = core.logger.get('http-resources');
   }
 
+  preboot(deps: PrebootDeps) {
+    this.logger.debug('prebooting HttpResourcesService');
+    return {
+      createRegistrar: this.createRegistrar.bind(this, deps),
+    };
+  }
+
   setup(deps: SetupDeps) {
     this.logger.debug('setting up HttpResourcesService');
     return {
@@ -54,7 +67,7 @@ export class HttpResourcesService implements CoreService<InternalHttpResourcesSe
 
   stop() {}
 
-  private createRegistrar(deps: SetupDeps, router: IRouter): HttpResources {
+  private createRegistrar(deps: SetupDeps | PrebootDeps, router: IRouter): HttpResources {
     return {
       register: <P, Q, B, Context extends RequestHandlerContext = RequestHandlerContext>(
         route: RouteConfig<P, Q, B, 'get'>,
@@ -71,7 +84,7 @@ export class HttpResourcesService implements CoreService<InternalHttpResourcesSe
   }
 
   private createResponseToolkit(
-    deps: SetupDeps,
+    deps: SetupDeps | PrebootDeps,
     context: RequestHandlerContext,
     request: KibanaRequest,
     response: KibanaResponseFactory

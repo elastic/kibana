@@ -1,10 +1,26 @@
 [[vega]]
 === Vega
 
-*Vega* and *Vega-Lite* are both grammars for creating custom visualizations.
-They are recommended for advanced users who are comfortable writing {es} queries manually.
-*Vega-Lite* is a good starting point for users who are new to both grammars, but they are
-not compatible.
+*Vega* and *Vega-Lite* are both grammars for creating custom visualizations. They are recommended for advanced users who are comfortable writing {es} queries manually.
+*Vega-Lite* is a good starting point for users who are new to both grammars, but they are not compatible.
+
+*Vega* and *Vega-Lite* panels can display one or more data sources, including {es}, Elastic Map Service,
+URL, or static data, and support <<reference-for-kibana-extensions,{kib} extensions>> that allow you to embed the panels on your dashboard and add interactive tools.
+
+Use *Vega* or *Vega-Lite* when you want to create visualizations with:
+
+* Aggregations that use `nested` or `parent/child` mapping
+* Aggregations without an index pattern
+* Queries that use custom time filters
+* Complex calculations
+* Extracted data from _source instead of aggregations
+* Scatter charts, sankey charts, and custom maps
+* An unsupported visual theme
+
+These grammars have some limitations: they do not support tables, and can't run queries conditionally.
+
+[role="screenshot"]
+image::images/vega.png[Vega UI]
 
 Both *Vega* and *Vega-Lite* use JSON, but {kib} has made this simpler to type by integrating
 https://hjson.github.io/[HJSON]. HJSON supports the following:
@@ -37,13 +53,11 @@ Before starting, add the eCommerce sample data that you'll use in your spec, the
 
 Open *Vega-Lite* and change the time range.
 
-. On the dashboard, click *Create panel*.
-
-. On the *New visualization* window, click *Custom visualization*.
+. On the dashboard, click *All types*, then select *Custom visualization*.
 +
 A pre-populated line chart displays the total number of documents. 
 
-. Change the <<set-time-filter,time range>> to *Last 7 days*.
+. Make sure the <<set-time-filter,time filter>> is *Last 7 days*.
 
 [float]
 [[vega-tutorial-create-a-stacked-area-chart]]
@@ -215,12 +229,12 @@ To debug the warning, compare `source_0` and `data_0`.
 . From the dropdown, select *source_0*.
 +
 [role="screenshot"]
-image::visualize/images/vega_lite_tutorial_4.png[Table for data_0 with columns key, doc_count and array of time_buckets]
+image::images/vega_lite_tutorial_4.png[Table for data_0 with columns key, doc_count and array of time_buckets]
 
 . To compare to the visually encoded data, select *data_0* from the dropdown.
 +
 [role="screenshot"]
-image::visualize/images/vega_lite_tutorial_5.png[Table for data_0 where the key is NaN instead of a string]
+image::images/vega_lite_tutorial_5.png[Table for data_0 where the key is NaN instead of a string]
 +
 *key* is unable to convert because the property is category (`Men's Clothing`, `Women's Clothing`, etc.) instead of a timestamp.
 
@@ -249,7 +263,7 @@ In the *Vega-Lite* spec, add the `encoding` block:
 . From the dropdown, select *data_0*.
 +
 [role="screenshot"]
-image::visualize/images/vega_lite_tutorial_6.png[Table for data_0 showing that the column time_buckets.buckets.key is undefined]
+image::images/vega_lite_tutorial_6.png[Table for data_0 showing that the column time_buckets.buckets.key is undefined]
 
 *Vega-Lite* is unable to extract the `time_buckets.buckets` inner array.
 
@@ -273,7 +287,7 @@ In the *Vega-Lite* spec, add a `transform` block, then click *Update*:
 . From the dropdown, select *data_0*.
 +
 [role="screenshot"]
-image::visualize/images/vega_lite_tutorial_7.png[Table showing data_0 with multiple pages of results, but undefined values in the column time_buckets.buckets.key]
+image::images/vega_lite_tutorial_7.png[Table showing data_0 with multiple pages of results, but undefined values in the column time_buckets.buckets.key]
 +
 Vega-Lite displays *undefined* values because there are duplicate names. 
 
@@ -398,7 +412,7 @@ Move your cursor around the stacked area chart. The points are able to
 indicate the nearest point.
 
 [role="screenshot"]
-image::visualize/images/vega_lite_tutorial_2.png[Vega-Lite tutorial selection enabled]
+image::images/vega_lite_tutorial_2.png[Vega-Lite tutorial selection enabled]
 
 The selection is controlled by a signal. To view the signal, click *Inspect* in the toolbar.
 
@@ -595,9 +609,9 @@ Add the {es} search query with the `data` block, then click *Update*:
 ```
 
 [float]
-===== Change the X- and Y-axes
+===== Change the x- and y-axes
 
-Display labels for the X- and Y-axes. 
+Display labels for the x- and y-axes. 
 
 In the *Vega* spec, add the `scales` block, then click *Update*:
 
@@ -651,7 +665,7 @@ Add the `key` and `doc_count` fields as the X- and Y-axis values, then click *Up
 ```
 
 [role="screenshot"]
-image::visualize/images/vega_tutorial_3.png[]
+image::images/vega_tutorial_3.png[]
 
 [float]
 ===== Add a block to the `marks` section
@@ -742,7 +756,7 @@ then update the `point` and add `cursor: { value: "pointer" }` to
 To allow users to filter based on a time range, add a drag interaction, which requires additional signals and a rectangle overlay.
 
 [role="screenshot"]
-image::visualize/images/vega_tutorial_4.png[]
+image::images/vega_tutorial_4.png[]
 
 In the *Vega* spec, add a `signal` to track the X position of the cursor:
 

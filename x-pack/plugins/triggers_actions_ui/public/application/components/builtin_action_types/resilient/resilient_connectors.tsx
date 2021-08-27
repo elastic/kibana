@@ -30,14 +30,19 @@ const ResilientConnectorFields: React.FC<ActionConnectorFieldsProps<ResilientAct
   readOnly,
 }) => {
   const { apiUrl, orgId } = action.config;
-  const isApiUrlInvalid: boolean = errors.apiUrl.length > 0 && apiUrl !== undefined;
+  const isApiUrlInvalid: boolean =
+    apiUrl !== undefined && errors.apiUrl !== undefined && errors.apiUrl.length > 0;
 
   const { apiKeyId, apiKeySecret } = action.secrets;
 
-  const isOrgIdInvalid: boolean = errors.orgId.length > 0 && orgId !== undefined;
-  const isApiKeyInvalid: boolean = errors.apiKeyId.length > 0 && apiKeyId !== undefined;
+  const isOrgIdInvalid: boolean =
+    orgId !== undefined && errors.orgId !== undefined && errors.orgId.length > 0;
+  const isApiKeyInvalid: boolean =
+    apiKeyId !== undefined && errors.apiKeyId !== undefined && errors.apiKeyId.length > 0;
   const isApiKeySecretInvalid: boolean =
-    errors.apiKeySecret.length > 0 && apiKeySecret !== undefined;
+    apiKeySecret !== undefined &&
+    errors.apiKeySecret !== undefined &&
+    errors.apiKeySecret.length > 0;
 
   const handleOnChangeActionConfig = useCallback(
     (key: string, value: string) => editActionConfig(key, value),

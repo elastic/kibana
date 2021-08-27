@@ -8,17 +8,7 @@
 import React, { useEffect } from 'react';
 import { Route, RouteComponentProps, Switch } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
-import {
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPageBody,
-  EuiPageContent,
-  EuiSpacer,
-  EuiTab,
-  EuiTabs,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiButtonEmpty, EuiPageHeader, EuiSpacer } from '@elastic/eui';
 import { documentationService } from '../../services/documentation';
 import { DataStreamList } from './data_stream_list';
 import { IndexList } from './index_list';
@@ -93,73 +83,59 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
   }, []);
 
   return (
-    <EuiPageBody>
-      <EuiPageContent>
-        <EuiTitle size="l">
-          <EuiFlexGroup alignItems="center">
-            <EuiFlexItem grow={true}>
-              <h1 data-test-subj="appTitle">
-                <FormattedMessage
-                  id="xpack.idxMgmt.home.appTitle"
-                  defaultMessage="Index Management"
-                />
-              </h1>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                href={documentationService.getIdxMgmtDocumentationLink()}
-                target="_blank"
-                iconType="help"
-                data-test-subj="documentationLink"
-              >
-                <FormattedMessage
-                  id="xpack.idxMgmt.home.idxMgmtDocsLinkText"
-                  defaultMessage="Index Management docs"
-                />
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiTitle>
+    <>
+      <EuiPageHeader
+        pageTitle={
+          <span data-test-subj="appTitle">
+            <FormattedMessage id="xpack.idxMgmt.home.appTitle" defaultMessage="Index Management" />
+          </span>
+        }
+        bottomBorder
+        rightSideItems={[
+          <EuiButtonEmpty
+            href={documentationService.getIdxMgmtDocumentationLink()}
+            target="_blank"
+            iconType="help"
+            data-test-subj="documentationLink"
+          >
+            <FormattedMessage
+              id="xpack.idxMgmt.home.idxMgmtDocsLinkText"
+              defaultMessage="Index Management docs"
+            />
+          </EuiButtonEmpty>,
+        ]}
+        tabs={tabs.map((tab) => ({
+          onClick: () => onSectionChange(tab.id),
+          isSelected: tab.id === section,
+          key: tab.id,
+          'data-test-subj': `${tab.id}Tab`,
+          label: tab.name,
+        }))}
+      />
 
-        <EuiSpacer size="m" />
+      <EuiSpacer size="l" />
 
-        <EuiTabs>
-          {tabs.map((tab) => (
-            <EuiTab
-              onClick={() => onSectionChange(tab.id)}
-              isSelected={tab.id === section}
-              key={tab.id}
-              data-test-subj={`${tab.id}Tab`}
-            >
-              {tab.name}
-            </EuiTab>
-          ))}
-        </EuiTabs>
-
-        <EuiSpacer size="m" />
-
-        <Switch>
-          <Route
-            exact
-            path={[`/${Section.DataStreams}`, `/${Section.DataStreams}/:dataStreamName?`]}
-            component={DataStreamList}
-          />
-          <Route exact path={`/${Section.Indices}`} component={IndexList} />
-          <Route
-            exact
-            path={[`/${Section.IndexTemplates}`, `/${Section.IndexTemplates}/:templateName?`]}
-            component={TemplateList}
-          />
-          <Route
-            exact
-            path={[
-              `/${Section.ComponentTemplates}`,
-              `/${Section.ComponentTemplates}/:componentTemplateName?`,
-            ]}
-            component={ComponentTemplateList}
-          />
-        </Switch>
-      </EuiPageContent>
-    </EuiPageBody>
+      <Switch>
+        <Route
+          exact
+          path={[`/${Section.DataStreams}`, `/${Section.DataStreams}/:dataStreamName?`]}
+          component={DataStreamList}
+        />
+        <Route exact path={`/${Section.Indices}`} component={IndexList} />
+        <Route
+          exact
+          path={[`/${Section.IndexTemplates}`, `/${Section.IndexTemplates}/:templateName?`]}
+          component={TemplateList}
+        />
+        <Route
+          exact
+          path={[
+            `/${Section.ComponentTemplates}`,
+            `/${Section.ComponentTemplates}/:componentTemplateName?`,
+          ]}
+          component={ComponentTemplateList}
+        />
+      </Switch>
+    </>
   );
 };

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { estypes } from '@elastic/elasticsearch';
-import { AggregationOptionsByType } from '../../../../../typings/elasticsearch';
+import { AggregationOptionsByType } from '../../../../../src/core/types/elasticsearch';
 import { APMEventESSearchRequest } from '../lib/helpers/create_es_client/create_apm_event_client';
 
 export type Projection = Omit<APMEventESSearchRequest, 'body'> & {
@@ -16,7 +16,7 @@ export type Projection = Omit<APMEventESSearchRequest, 'body'> & {
     aggs?: {
       [key: string]: {
         terms: AggregationOptionsByType['terms'] & { field: string };
-        aggs?: Record<string, estypes.AggregationContainer>;
+        aggs?: Record<string, estypes.AggregationsAggregationContainer>;
       };
     };
   };

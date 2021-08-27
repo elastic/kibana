@@ -8,16 +8,22 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { AppMountParameters, CoreStart } from '../../../../src/core/public';
-import { StartDeps } from './types';
 import { ReportingExampleApp } from './components/app';
+import { SetupDeps, StartDeps, MyForwardableState } from './types';
 
 export const renderApp = (
   coreStart: CoreStart,
-  startDeps: StartDeps,
-  { appBasePath, element }: AppMountParameters
+  deps: Omit<StartDeps & SetupDeps, 'developerExamples'>,
+  { appBasePath, element }: AppMountParameters, // FIXME: appBasePath is deprecated
+  forwardedParams: MyForwardableState
 ) => {
   ReactDOM.render(
-    <ReportingExampleApp basename={appBasePath} {...coreStart} {...startDeps} />,
+    <ReportingExampleApp
+      basename={appBasePath}
+      {...coreStart}
+      {...deps}
+      forwardedParams={forwardedParams}
+    />,
     element
   );
 

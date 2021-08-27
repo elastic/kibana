@@ -11,12 +11,14 @@ import { EuiComboBox, EuiFormControlLayout, EuiComboBoxOptionOption } from '@ela
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 import { FieldValueSelectionProps } from './types';
+export const ALL_VALUES_SELECTED = 'ALL_VALUES';
+const formatOptions = (values?: string[], allowAllValuesSelection?: boolean) => {
+  const uniqueValues = Array.from(
+    new Set(allowAllValuesSelection ? ['ALL_VALUES', ...(values ?? [])] : values)
+  );
 
-const formatOptions = (values?: string[]) => {
-  const uniqueValues = Array.from(new Set(values));
-
-  return (uniqueValues ?? []).map((val) => ({
-    label: val,
+  return (uniqueValues ?? []).map((label) => ({
+    label,
   }));
 };
 
@@ -28,15 +30,25 @@ export function FieldValueCombobox({
   loading,
   values,
   setQuery,
+  compressed = true,
+  allowAllValuesSelection,
   onChange: onSelectionChange,
 }: FieldValueSelectionProps) {
-  const [options, setOptions] = useState<ValueOption[]>(
-    formatOptions(union(values ?? [], selectedValue ?? []))
+  const [options, setOptions] = useState<ValueOption[]>(() =>
+    formatOptions(
+      union(values?.map(({ label: lb }) => lb) ?? [], selectedValue ?? []),
+      allowAllValuesSelection
+    )
   );
 
   useEffect(() => {
-    setOptions(formatOptions(union(values ?? [], selectedValue ?? [])));
-  }, [selectedValue, values]);
+    setOptions(
+      formatOptions(
+        union(values?.map(({ label: lb }) => lb) ?? [], selectedValue ?? []),
+        allowAllValuesSelection
+      )
+    );
+  }, [allowAllValuesSelection, selectedValue, values]);
 
   const onChange = (selectedValuesN: ValueOption[]) => {
     onSelectionChange(selectedValuesN.map(({ label: lbl }) => lbl));
@@ -47,7 +59,7 @@ export function FieldValueCombobox({
       <EuiFormControlLayout fullWidth prepend={label} compressed>
         <EuiComboBox
           fullWidth
-          compressed
+          compressed={compressed}
           placeholder={i18n.translate(
             'xpack.observability.fieldValueSelection.placeholder.search',
             {

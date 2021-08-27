@@ -25,7 +25,7 @@ describe('ConfigurationIntro', () => {
     const wrapper = shallow(<ConfigurationIntro {...props} />);
 
     expect(wrapper.find('[data-test-subj="ConfigureStepButton"]')).toHaveLength(1);
-    expect(wrapper.find(EuiText)).toHaveLength(5);
-    expect(wrapper.find(EuiTitle)).toHaveLength(1);
+    expect(wrapper.find(EuiText)).toHaveLength(3);
+    expect(wrapper.find(EuiTitle)).toHaveLength(3);
   });
 });

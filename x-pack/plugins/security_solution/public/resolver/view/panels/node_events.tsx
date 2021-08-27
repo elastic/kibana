@@ -30,13 +30,13 @@ export function NodeEvents({ nodeID }: { nodeID: string }) {
 
   if (processEvent === undefined || nodeStats === undefined) {
     return (
-      <StyledPanel>
+      <StyledPanel hasBorder>
         <PanelLoading />
       </StyledPanel>
     );
   } else {
     return (
-      <StyledPanel>
+      <StyledPanel hasBorder>
         <NodeEventsBreadcrumbs
           nodeName={event.processNameSafeVersion(processEvent)}
           nodeID={nodeID}

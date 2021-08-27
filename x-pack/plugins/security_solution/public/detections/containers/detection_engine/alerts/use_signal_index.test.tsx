@@ -4,20 +4,23 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
 import { renderHook, act } from '@testing-library/react-hooks';
+import { TestProvidersWithPrivileges } from '../../../../common/mock';
 import { useSignalIndex, ReturnSignalIndex } from './use_signal_index';
 import * as api from './api';
 import { useAppToastsMock } from '../../../../common/hooks/use_app_toasts.mock';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
-import { UserPrivilegesProvider } from '../../../components/user_privileges';
 
 jest.mock('./api');
 jest.mock('../../../../common/hooks/use_app_toasts');
-
-const Wrapper = ({ children }: { children?: React.ReactNode }) => (
-  <UserPrivilegesProvider>{children}</UserPrivilegesProvider>
-);
+jest.mock('../../../../common/components/user_privileges/use_endpoint_privileges');
+jest.mock('@kbn/alerts', () => ({
+  useGetUserAlertsPermissions: () => ({
+    loading: false,
+    crud: true,
+    read: true,
+  }),
+}));
 
 describe('useSignalIndex', () => {
   let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;
@@ -33,7 +36,9 @@ describe('useSignalIndex', () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<void, ReturnSignalIndex>(
         () => useSignalIndex(),
-        { wrapper: Wrapper }
+        {
+          wrapper: TestProvidersWithPrivileges,
+        }
       );
       await waitForNextUpdate();
       expect(result.current).toEqual({
@@ -50,7 +55,9 @@ describe('useSignalIndex', () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<void, ReturnSignalIndex>(
         () => useSignalIndex(),
-        { wrapper: Wrapper }
+        {
+          wrapper: TestProvidersWithPrivileges,
+        }
       );
       await waitForNextUpdate();
       await waitForNextUpdate();
@@ -69,7 +76,9 @@ describe('useSignalIndex', () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<void, ReturnSignalIndex>(
         () => useSignalIndex(),
-        { wrapper: Wrapper }
+        {
+          wrapper: TestProvidersWithPrivileges,
+        }
       );
       await waitForNextUpdate();
       await waitForNextUpdate();
@@ -93,7 +102,9 @@ describe('useSignalIndex', () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<void, ReturnSignalIndex>(
         () => useSignalIndex(),
-        { wrapper: Wrapper }
+        {
+          wrapper: TestProvidersWithPrivileges,
+        }
       );
       await waitForNextUpdate();
       await waitForNextUpdate();
@@ -114,7 +125,9 @@ describe('useSignalIndex', () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<void, ReturnSignalIndex>(
         () => useSignalIndex(),
-        { wrapper: Wrapper }
+        {
+          wrapper: TestProvidersWithPrivileges,
+        }
       );
       await waitForNextUpdate();
       await waitForNextUpdate();
@@ -140,7 +153,9 @@ describe('useSignalIndex', () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<void, ReturnSignalIndex>(
         () => useSignalIndex(),
-        { wrapper: Wrapper }
+        {
+          wrapper: TestProvidersWithPrivileges,
+        }
       );
       await waitForNextUpdate();
       await waitForNextUpdate();

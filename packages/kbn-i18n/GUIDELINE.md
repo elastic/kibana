@@ -19,6 +19,7 @@ Ids should end with:
 - ErrorMessage (if it's an error message),
 - LinkText (if it's `<a>` tag),
 - ToggleSwitch and etc.
+- `.markdown` (if it's markdown)
 
 There is one more complex case, when we have to divide a single expression into different labels.
 
@@ -110,7 +111,7 @@ Currently, we support the following AngluarJS `i18n` tools, but they will be rem
 ### Naming convention
 
 The message ids chosen for message keys should always be descriptive of the string, and its role in the interface (button label, title, etc.). Think of them as long variable names. When you have to change a message id, adding a progressive number to the existing key should always be used as a last resort.
-Here's a rule of id maning:
+Here's a rule of id naming:
 
 `{plugin}.{area}.[{sub-area}].{element}`
 
@@ -138,6 +139,7 @@ Here's a rule of id maning:
   'kbn.management.createIndexPattern.includeSystemIndicesToggleSwitch'
   'kbn.management.editIndexPattern.wrongTypeErrorMessage'
   'kbn.management.editIndexPattern.scripted.table.nameDescription'
+  'xpack.lens.formulaDocumentation.filterRatioDescription.markdown'
   ```
 
 - For complex messages, which are divided into several parts, use the following approach:
@@ -192,6 +194,7 @@ Each message id should end with a type of the message.
 | tooltip | `kbn.management.editIndexPattern.removeTooltip` |
 | error message | `kbn.management.createIndexPattern.step.invalidCharactersErrorMessage` |
 | toggleSwitch | `kbn.management.createIndexPattern.includeSystemIndicesToggleSwitch` |
+| markdown | `xpack.lens.formulaDocumentation.filterRatioDescription.markdown` |
 
 For example:
 
@@ -278,6 +281,27 @@ For example:
         id="kbn.management.createIndexPattern.includeSystemIndicesToggleSwitch"
         defaultMessage="Include system indices"
       />}
+  />
+  ```
+
+- for markdown
+  ```js
+  import { Markdown } from '@elastic/eui';
+  
+  <Markdown
+      markdown={
+        i18n.translate('xpack.lens.formulaDocumentation.filterRatioDescription.markdown', {
+        defaultMessage: `### Filter ratio:
+        
+          Use \`kql=''\` to filter one set of documents and compare it to other documents within the same grouping.
+          For example, to see how the error rate changes over time:
+          
+          \`\`\`
+          count(kql='response.status_code > 400') / count()
+          \`\`\`
+        `,
+        })
+      }
   />
   ```
 
@@ -372,6 +396,82 @@ Here is an example of message translation depending on a plural category:
 
 When `conflictFieldsLength` equals 1, the result string will be `"A field is defined as several types (string, integer, etc) across the indices that match this pattern."`. In cases when `conflictFieldsLength` has value of 2 or more, the result string - `"2 fields are defined as several types (string, integer, etc) across the indices that match this pattern."`.
 
+### Text with markdown
+
+There is some support for using markdown and you can use any of the following syntax:
+
+#### Headers
+
+```md
+# This is an <h1> tag
+## This is an <h2> tag
+###### This is an <h6> tag
+```
+
+#### Emphasis
+
+```md
+*This text will be italic*
+_This will also be italic_
+
+**This text will be bold**
+__This will also be bold__
+
+_You **can** combine them_
+```
+
+#### Lists
+  ##### Unordered
+
+```md
+* Item 1
+* Item 2
+  * Item 2a
+  * Item 2b
+```
+  ##### Ordered
+
+```md
+1. Item 1
+1. Item 2
+1. Item 3
+  1. Item 3a
+  1. Item 3b
+```
+#### Images
+
+```md
+![Github Logo](/images/logo.png)
+Format: ![Alt Text](url)
+```
+  
+#### Links
+
+```md
+http://github.com - automatic!
+[GitHub](http://github.com)
+```
+  
+#### Blockquotes
+
+```md
+As Kanye West said:
+
+> We're living the future so
+> the present is our past.
+```
+#### Code Blocks
+
+```md
+var a = 13;
+```
+
+#### Inline code
+
+```md
+I think you should use an
+`<addr>` element here instead
+```
 ### Splitting
 
 Splitting sentences into several keys often inadvertently presumes a grammar, a sentence structure, and such composite strings are often very difficult to translate.
@@ -384,6 +484,12 @@ Splitting sentences into several keys often inadvertently presumes a grammar, a 
   `The following dialogue box indicates progress. You can close it and the process will continue to run in the background.`
 
   If this group of sentences is separated it’s possible that the context of the `'it'` in `'close it'` will be lost.
+
+### Large paragraphs
+
+Try to avoid using large paragraphs of text. They are difficult to maintain and often need small changes when the information becomes out of date.
+
+If you have no other choice, you can split paragraphs into a _few_ i18n chunks. Chunks should be split at logical points to ensure they contain enough context to be intelligible on their own.
 
 ### Unit tests
 

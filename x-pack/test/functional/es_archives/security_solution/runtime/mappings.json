@@ -1,0 +1,36 @@
+{
+  "type": "index",
+  "value": {
+    "index": "runtime",
+    "mappings": {
+      "dynamic": "strict",
+      "runtime": {
+        "host.hostname": {
+          "type": "keyword",
+          "script": {
+            "source": "emit(doc['host.name'].value)"
+          }
+        }
+      },
+      "properties": {
+        "@timestamp": {
+          "type": "date"
+        },
+        "host": {
+          "properties": {
+            "name": {
+              "type": "keyword"
+            }
+          }
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "refresh_interval": "1s",
+        "number_of_replicas": "1",
+        "number_of_shards": "1"
+      }
+    }
+  }
+}

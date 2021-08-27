@@ -1,0 +1,77 @@
+{
+  "id": "security_auth",
+  "title": "Security: Authentication",
+  "description": "Detect anomalous activity in your ECS-compatible authentication logs.",
+  "type": "auth data",
+  "logoFile": "logo.json",
+  "defaultIndexPattern": "auditbeat-*,logs-*,filebeat-*,winlogbeat-*",
+  "query": {
+    "bool": {
+      "filter": [
+        {
+          "term": {
+            "event.category": "authentication"
+          }
+        }
+      ]
+    }
+  },
+  "jobs": [
+    {
+      "id": "auth_high_count_logon_events_for_a_source_ip",
+      "file": "auth_high_count_logon_events_for_a_source_ip.json"
+    },
+    {
+      "id": "auth_high_count_logon_fails",
+      "file": "auth_high_count_logon_fails.json"
+    },
+    {
+      "id": "auth_high_count_logon_events",
+      "file": "auth_high_count_logon_events.json"
+    },
+    {
+      "id": "auth_rare_hour_for_a_user",
+      "file": "auth_rare_hour_for_a_user.json"
+    },
+    {
+      "id": "auth_rare_source_ip_for_a_user",
+      "file": "auth_rare_source_ip_for_a_user.json"
+    },
+    {
+      "id": "auth_rare_user",
+      "file": "auth_rare_user.json"
+    }
+  ],
+  "datafeeds": [
+    {
+      "id": "datafeed-auth_high_count_logon_events_for_a_source_ip",
+      "file": "datafeed_auth_high_count_logon_events_for_a_source_ip.json",
+      "job_id": "auth_high_count_logon_events_for_a_source_ip"
+    },
+    {
+      "id": "datafeed-auth_high_count_logon_fails",
+      "file": "datafeed_auth_high_count_logon_fails.json",
+      "job_id": "auth_high_count_logon_fails"
+    },
+    {
+      "id": "datafeed-auth_high_count_logon_events",
+      "file": "datafeed_auth_high_count_logon_events.json",
+      "job_id": "auth_high_count_logon_events"
+    },
+    {
+      "id": "datafeed-auth_rare_hour_for_a_user",
+      "file": "datafeed_auth_rare_hour_for_a_user.json",
+      "job_id": "auth_rare_hour_for_a_user"
+    },
+    {
+      "id": "datafeed-auth_rare_source_ip_for_a_user",
+      "file": "datafeed_auth_rare_source_ip_for_a_user.json",
+      "job_id": "auth_rare_source_ip_for_a_user"
+    },
+    {
+      "id": "datafeed-auth_rare_user",
+      "file": "datafeed_auth_rare_user.json",
+      "job_id": "auth_rare_user"
+    }
+  ]
+}

@@ -5,12 +5,15 @@
  * 2.0.
  */
 
+const { argv } = require('yargs');
 const childProcess = require('child_process');
 const path = require('path');
+
+const { grep } = argv;
 
 const e2eDir = path.join(__dirname, '../../ftr_e2e');
 
 childProcess.execSync(
-  `node ../../../../scripts/functional_tests --config ./cypress_run.ts`,
+  `node ../../../../scripts/functional_tests --config ./cypress_run.ts --grep ${grep}`,
   { cwd: e2eDir, stdio: 'inherit' }
 );

@@ -16,7 +16,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { List } from '@kbn/securitysolution-io-ts-list-types';
+import type { List } from '@kbn/securitysolution-io-ts-list-types';
 import { HttpSetup } from '../../../../../../../src/core/public';
 import { Rule } from '../../../detections/containers/detection_engine/rules/types';
 import * as i18n from './translations';

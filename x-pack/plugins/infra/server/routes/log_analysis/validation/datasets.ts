@@ -43,7 +43,7 @@ export const initValidateLogAnalysisDatasetsRoute = ({
               indexName,
               startTime,
               endTime,
-              runtimeMappings as estypes.RuntimeFields
+              runtimeMappings as estypes.MappingRuntimeFields
             );
 
             return {

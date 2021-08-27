@@ -17,7 +17,7 @@ export default function ({ loadTestFile, getService, getPageObjects }: FtrProvid
     this.tags('ciGroup3');
 
     before(async () => {
-      await esArchiver.loadIfNeeded('logstash_functional');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
       await kibanaServer.uiSettings.replace({ defaultIndex: 'logstash-*' });
       await PageObjects.common.navigateToApp('discover');
     });

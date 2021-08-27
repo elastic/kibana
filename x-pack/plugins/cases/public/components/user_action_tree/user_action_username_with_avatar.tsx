@@ -20,26 +20,24 @@ interface UserActionUsernameWithAvatarProps {
 const UserActionUsernameWithAvatarComponent = ({
   username,
   fullName,
-}: UserActionUsernameWithAvatarProps) => {
-  return (
-    <EuiFlexGroup
-      responsive={false}
-      alignItems="center"
-      gutterSize="s"
-      data-test-subj="user-action-username-with-avatar"
-    >
-      <EuiFlexItem grow={false}>
-        <EuiAvatar
-          size="s"
-          name={(isEmpty(fullName) ? username : fullName) ?? i18n.UNKNOWN}
-          data-test-subj="user-action-username-avatar"
-        />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <UserActionUsername username={username} fullName={fullName} />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-};
+}: UserActionUsernameWithAvatarProps) => (
+  <EuiFlexGroup
+    responsive={false}
+    alignItems="center"
+    gutterSize="s"
+    data-test-subj="user-action-username-with-avatar"
+  >
+    <EuiFlexItem grow={false}>
+      <EuiAvatar
+        size="s"
+        name={(isEmpty(fullName) ? username : fullName) ?? i18n.UNKNOWN}
+        data-test-subj="user-action-username-avatar"
+      />
+    </EuiFlexItem>
+    <EuiFlexItem grow={false}>
+      <UserActionUsername username={username} fullName={fullName} />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+);
 
 export const UserActionUsernameWithAvatar = memo(UserActionUsernameWithAvatarComponent);

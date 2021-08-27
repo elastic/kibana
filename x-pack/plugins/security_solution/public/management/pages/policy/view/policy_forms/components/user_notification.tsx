@@ -24,7 +24,7 @@ import {
   ProtectionModes,
   UIPolicyConfig,
 } from '../../../../../../../common/endpoint/types';
-import { PolicyProtection, MacPolicyProtection } from '../../../types';
+import { PolicyProtection, MacPolicyProtection, LinuxPolicyProtection } from '../../../types';
 import { ConfigFormHeading } from '../../components/config_form';
 import { usePolicyDetailsSelector } from '../../policy_hooks';
 import { policyConfig } from '../../../store/policy_details/selectors';
@@ -57,6 +57,9 @@ export const UserNotification = React.memo(
             } else if (os === 'mac') {
               newPayload[os].popup[protection as MacPolicyProtection].enabled =
                 event.target.checked;
+            } else if (os === 'linux') {
+              newPayload[os].popup[protection as LinuxPolicyProtection].enabled =
+                event.target.checked;
             }
           }
           dispatch({
@@ -77,6 +80,9 @@ export const UserNotification = React.memo(
               newPayload[os].popup[protection].message = event.target.value;
             } else if (os === 'mac') {
               newPayload[os].popup[protection as MacPolicyProtection].message = event.target.value;
+            } else if (os === 'linux') {
+              newPayload[os].popup[protection as LinuxPolicyProtection].message =
+                event.target.value;
             }
           }
           dispatch({

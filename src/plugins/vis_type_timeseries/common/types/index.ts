@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { IndexPattern, Query } from '../../../data/common';
+import { Filter, IndexPattern, Query } from '../../../data/common';
 import { Panel } from './panel_model';
 
-export { Metric, Series, Panel } from './panel_model';
+export { Metric, Series, Panel, MetricType } from './panel_model';
 export { TimeseriesVisData, PanelData, SeriesData, TableData } from './vis_data';
 
 export interface FetchedIndexPattern {
@@ -40,7 +40,7 @@ export interface Annotation {
 }
 
 export interface VisPayload {
-  filters: unknown[];
+  filters: Filter[];
   panels: Panel[];
   // general
   query: Query[];

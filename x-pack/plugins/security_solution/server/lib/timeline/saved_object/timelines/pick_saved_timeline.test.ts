@@ -7,13 +7,20 @@
 
 import { AuthenticatedUser } from '../../../../../../security/common/model';
 
-import { TimelineStatus, TimelineType } from '../../../../../common/types/timeline';
+import { TimelineStatus, TimelineType, SavedTimeline } from '../../../../../common/types/timeline';
+import { NoteSavedObject } from '../../../../../common/types/timeline/note';
 
 import { pickSavedTimeline } from './pick_saved_timeline';
 
 describe('pickSavedTimeline', () => {
   const mockDateNow = new Date('2020-04-03T23:00:00.000Z').valueOf();
-  const getMockSavedTimeline = () => ({
+  const getMockSavedTimeline = (): SavedTimeline & {
+    savedObjectId?: string | null;
+    version?: string;
+    eventNotes?: NoteSavedObject[];
+    globalNotes?: NoteSavedObject[];
+    pinnedEventIds?: [];
+  } => ({
     savedObjectId: '7af80430-03f4-11eb-9d9d-ffba20fabba8',
     version: 'WzQ0ODgsMV0=',
     created: 1601563413330,
@@ -91,7 +98,7 @@ describe('pickSavedTimeline', () => {
 
     test('Updating a timeline', () => {
       const savedTimeline = getMockSavedTimeline();
-      const timelineId = savedTimeline.savedObjectId;
+      const timelineId = savedTimeline.savedObjectId ?? null;
       const userInfo = { username: 'elastic' } as AuthenticatedUser;
       const result = pickSavedTimeline(timelineId, savedTimeline, userInfo);
 
@@ -113,7 +120,7 @@ describe('pickSavedTimeline', () => {
 
     test('Updating a timeline', () => {
       const savedTimeline = getMockSavedTimeline();
-      const timelineId = savedTimeline.savedObjectId;
+      const timelineId = savedTimeline.savedObjectId ?? null;
       const userInfo = { username: 'elastic' } as AuthenticatedUser;
       const result = pickSavedTimeline(timelineId, savedTimeline, userInfo);
 
@@ -143,7 +150,7 @@ describe('pickSavedTimeline', () => {
 
     test('Updating a timeline with a new title', () => {
       const savedTimeline = getMockSavedTimeline();
-      const timelineId = savedTimeline.savedObjectId;
+      const timelineId = savedTimeline.savedObjectId ?? null;
       const userInfo = { username: 'elastic' } as AuthenticatedUser;
       const result = pickSavedTimeline(timelineId, savedTimeline, userInfo);
 
@@ -152,7 +159,7 @@ describe('pickSavedTimeline', () => {
 
     test('Updating a timeline without title', () => {
       const savedTimeline = getMockSavedTimeline();
-      const timelineId = savedTimeline.savedObjectId;
+      const timelineId = savedTimeline.savedObjectId ?? null;
       const userInfo = { username: 'elastic' } as AuthenticatedUser;
       const result = pickSavedTimeline(timelineId, savedTimeline, userInfo);
 
@@ -161,7 +168,7 @@ describe('pickSavedTimeline', () => {
 
     test('Updating an immutable timeline with a new title', () => {
       const savedTimeline = { ...getMockSavedTimeline(), status: TimelineStatus.immutable };
-      const timelineId = savedTimeline.savedObjectId;
+      const timelineId = savedTimeline.savedObjectId ?? null;
       const userInfo = { username: 'elastic' } as AuthenticatedUser;
       const result = pickSavedTimeline(timelineId, savedTimeline, userInfo);
 
@@ -192,7 +199,7 @@ describe('pickSavedTimeline', () => {
 
     test('Updating an untitled draft timeline with a title', () => {
       const savedTimeline = { ...getMockSavedTimeline(), status: TimelineStatus.draft };
-      const timelineId = savedTimeline.savedObjectId;
+      const timelineId = savedTimeline.savedObjectId ?? null;
       const userInfo = { username: 'elastic' } as AuthenticatedUser;
       const result = pickSavedTimeline(timelineId, savedTimeline, userInfo);
 
@@ -201,7 +208,7 @@ describe('pickSavedTimeline', () => {
 
     test('Updating a draft timeline with a new title', () => {
       const savedTimeline = { ...getMockSavedTimeline(), status: TimelineStatus.draft };
-      const timelineId = savedTimeline.savedObjectId;
+      const timelineId = savedTimeline.savedObjectId ?? null;
       const userInfo = { username: 'elastic' } as AuthenticatedUser;
       const result = pickSavedTimeline(timelineId, savedTimeline, userInfo);
 
@@ -210,7 +217,7 @@ describe('pickSavedTimeline', () => {
 
     test('Updating a draft timeline without title', () => {
       const savedTimeline = { ...getMockSavedTimeline(), status: TimelineStatus.draft };
-      const timelineId = savedTimeline.savedObjectId;
+      const timelineId = savedTimeline.savedObjectId ?? null;
       const userInfo = { username: 'elastic' } as AuthenticatedUser;
       const result = pickSavedTimeline(timelineId, savedTimeline, userInfo);
 

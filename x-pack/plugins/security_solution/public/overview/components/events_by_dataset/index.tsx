@@ -36,6 +36,7 @@ import * as i18n from '../../pages/translations';
 import { SecurityPageName } from '../../../app/types';
 import { useFormatUrl } from '../../../common/components/link_to';
 import { LinkButton } from '../../../common/components/links';
+import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
 
 const DEFAULT_STACK_BY = 'event.dataset';
 
@@ -96,7 +97,8 @@ const EventsByDatasetComponent: React.FC<Props> = ({
   const goToHostEvents = useCallback(
     (ev) => {
       ev.preventDefault();
-      navigateToApp(`${APP_ID}:${SecurityPageName.hosts}`, {
+      navigateToApp(APP_ID, {
+        deepLinkId: SecurityPageName.hosts,
         path: getTabsOnHostsUrl(HostsTableType.events, urlSearch),
       });
     },
@@ -115,18 +117,26 @@ const EventsByDatasetComponent: React.FC<Props> = ({
     [goToHostEvents, formatUrl]
   );
 
-  const filterQuery = useMemo(
-    () =>
-      combinedQueries == null
-        ? convertToBuildEsQuery({
-            config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
-            indexPattern,
-            queries: [query],
-            filters,
-          })
-        : combinedQueries,
-    [combinedQueries, kibana, indexPattern, query, filters]
-  );
+  const [filterQuery, kqlError] = useMemo(() => {
+    if (combinedQueries == null) {
+      return convertToBuildEsQuery({
+        config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
+        indexPattern,
+        queries: [query],
+        filters,
+      });
+    }
+    return [combinedQueries];
+  }, [combinedQueries, kibana, indexPattern, query, filters]);
+
+  useInvalidFilterQuery({
+    id: uniqueQueryId,
+    filterQuery,
+    kqlError,
+    query,
+    startDate: from,
+    endDate: to,
+  });
 
   const eventsByDatasetHistogramConfigs: MatrixHistogramConfigs = useMemo(
     () => ({
@@ -170,6 +180,7 @@ const EventsByDatasetComponent: React.FC<Props> = ({
       setAbsoluteRangeDatePickerTarget={setAbsoluteRangeDatePickerTarget}
       setQuery={setQuery}
       showSpacer={showSpacer}
+      skip={filterQuery === undefined}
       startDate={from}
       timelineId={timelineId}
       {...eventsByDatasetHistogramConfigs}

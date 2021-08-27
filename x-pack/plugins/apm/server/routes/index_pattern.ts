@@ -32,12 +32,12 @@ const staticIndexPatternRoute = createApmServerRoute({
 
     const spaceId = spaces?.setup.spacesService.getSpaceId(request);
 
-    const didCreateIndexPattern = await createStaticIndexPattern(
+    const didCreateIndexPattern = await createStaticIndexPattern({
       setup,
       config,
       savedObjectsClient,
-      spaceId
-    );
+      spaceId,
+    });
 
     return { created: didCreateIndexPattern };
   },

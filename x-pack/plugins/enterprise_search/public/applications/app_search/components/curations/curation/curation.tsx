@@ -10,26 +10,19 @@ import { useParams } from 'react-router-dom';
 
 import { useValues, useActions } from 'kea';
 
-import { EuiPageHeader, EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
-
-import { FlashMessages } from '../../../../shared/flash_messages';
-import { SetAppSearchChrome as SetPageChrome } from '../../../../shared/kibana_chrome';
-import { BreadcrumbTrail } from '../../../../shared/kibana_chrome/generate_breadcrumbs';
-import { Loading } from '../../../../shared/loading';
+import { EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
 
 import { RESTORE_DEFAULTS_BUTTON_LABEL } from '../../../constants';
+import { AppSearchPageTemplate } from '../../layout';
 import { MANAGE_CURATION_TITLE, RESTORE_CONFIRMATION } from '../constants';
+import { getCurationsBreadcrumbs } from '../utils';
 
 import { CurationLogic } from './curation_logic';
 import { PromotedDocuments, OrganicDocuments, HiddenDocuments } from './documents';
 import { ActiveQuerySelect, ManageQueriesModal } from './queries';
 import { AddResultLogic, AddResultFlyout } from './results';
 
-interface Props {
-  curationsBreadcrumb: BreadcrumbTrail;
-}
-
-export const Curation: React.FC<Props> = ({ curationsBreadcrumb }) => {
+export const Curation: React.FC = () => {
   const { curationId } = useParams() as { curationId: string };
   const { loadCuration, resetCuration } = useActions(CurationLogic({ curationId }));
   const { dataLoading, queries } = useValues(CurationLogic({ curationId }));
@@ -39,14 +32,12 @@ export const Curation: React.FC<Props> = ({ curationsBreadcrumb }) => {
     loadCuration();
   }, [curationId]);
 
-  if (dataLoading) return <Loading />;
-
   return (
-    <>
-      <SetPageChrome trail={[...curationsBreadcrumb, queries.join(', ')]} />
-      <EuiPageHeader
-        pageTitle={MANAGE_CURATION_TITLE}
-        rightSideItems={[
+    <AppSearchPageTemplate
+      pageChrome={getCurationsBreadcrumbs([queries.join(', ')])}
+      pageHeader={{
+        pageTitle: MANAGE_CURATION_TITLE,
+        rightSideItems: [
           <EuiButton
             color="danger"
             onClick={() => {
@@ -55,10 +46,10 @@ export const Curation: React.FC<Props> = ({ curationsBreadcrumb }) => {
           >
             {RESTORE_DEFAULTS_BUTTON_LABEL}
           </EuiButton>,
-        ]}
-        responsive={false}
-      />
-
+        ],
+      }}
+      isLoading={dataLoading}
+    >
       <EuiFlexGroup alignItems="flexEnd" gutterSize="xl" responsive={false}>
         <EuiFlexItem>
           <ActiveQuerySelect />
@@ -69,7 +60,6 @@ export const Curation: React.FC<Props> = ({ curationsBreadcrumb }) => {
       </EuiFlexGroup>
 
       <EuiSpacer size="xl" />
-      <FlashMessages />
 
       <PromotedDocuments />
       <EuiSpacer />
@@ -78,6 +68,6 @@ export const Curation: React.FC<Props> = ({ curationsBreadcrumb }) => {
       <HiddenDocuments />
 
       {isFlyoutOpen && <AddResultFlyout />}
-    </>
+    </AppSearchPageTemplate>
   );
 };

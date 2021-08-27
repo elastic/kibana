@@ -13,13 +13,9 @@ import {
   ISearchSource,
   IndexPatternsContract,
   EsQuerySortValue,
+  IndexPattern,
 } from '../../../../../../data/public';
 import { EsHitRecord } from './context';
-
-export interface AnchorHitRecord extends EsHitRecord {
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  $$_isAnchor: boolean;
-}
 
 export function fetchAnchorProvider(
   indexPatterns: IndexPatternsContract,
@@ -30,33 +26,14 @@ export function fetchAnchorProvider(
     indexPatternId: string,
     anchorId: string,
     sort: EsQuerySortValue[]
-  ): Promise<AnchorHitRecord> {
+  ): Promise<EsHitRecord> {
     const indexPattern = await indexPatterns.get(indexPatternId);
-    searchSource
-      .setParent(undefined)
-      .setField('index', indexPattern)
-      .setField('version', true)
-      .setField('size', 1)
-      .setField('query', {
-        query: {
-          constant_score: {
-            filter: {
-              ids: {
-                values: [anchorId],
-              },
-            },
-          },
-        },
-        language: 'lucene',
-      })
-      .setField('sort', sort);
-    if (useNewFieldsApi) {
-      searchSource.removeField('fieldsFromSource');
-      searchSource.setField('fields', [{ field: '*', include_unmapped: 'true' }]);
-    }
-    const response = await searchSource.fetch();
+    updateSearchSource(searchSource, anchorId, sort, useNewFieldsApi, indexPattern);
 
-    if (get(response, ['hits', 'total'], 0) < 1) {
+    const response = await searchSource.fetch();
+    const doc = get(response, ['hits', 'hits', 0]);
+
+    if (!doc) {
       throw new Error(
         i18n.translate('discover.context.failedToLoadAnchorDocumentErrorDescription', {
           defaultMessage: 'Failed to load anchor document.',
@@ -65,9 +42,41 @@ export function fetchAnchorProvider(
     }
 
     return {
-      ...get(response, ['hits', 'hits', 0]),
-      // eslint-disable-next-line @typescript-eslint/naming-convention
-      $$_isAnchor: true,
-    } as AnchorHitRecord;
+      ...doc,
+      isAnchor: true,
+    } as EsHitRecord;
   };
+}
+
+export function updateSearchSource(
+  searchSource: ISearchSource,
+  anchorId: string,
+  sort: EsQuerySortValue[],
+  useNewFieldsApi: boolean,
+  indexPattern: IndexPattern
+) {
+  searchSource
+    .setParent(undefined)
+    .setField('index', indexPattern)
+    .setField('version', true)
+    .setField('size', 1)
+    .setField('query', {
+      query: {
+        constant_score: {
+          filter: {
+            ids: {
+              values: [anchorId],
+            },
+          },
+        },
+      },
+      language: 'lucene',
+    })
+    .setField('sort', sort)
+    .setField('trackTotalHits', false);
+  if (useNewFieldsApi) {
+    searchSource.removeField('fieldsFromSource');
+    searchSource.setField('fields', [{ field: '*', include_unmapped: 'true' }]);
+  }
+  return searchSource;
 }

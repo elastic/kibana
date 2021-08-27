@@ -9,3 +9,10 @@ import { BrowserField } from '../../containers/source';
 import { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
 
 export type EventFieldsData = BrowserField & TimelineEventsDetailsItem;
+
+export interface FieldsData {
+  field: string;
+  format: string;
+  type: string;
+  isObjectArray: boolean;
+}

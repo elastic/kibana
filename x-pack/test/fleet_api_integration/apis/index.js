@@ -30,6 +30,7 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./package_policy/update'));
     loadTestFile(require.resolve('./package_policy/get'));
     loadTestFile(require.resolve('./package_policy/delete'));
+    loadTestFile(require.resolve('./package_policy/upgrade'));
 
     // Agent policies
     loadTestFile(require.resolve('./agent_policy/index'));
@@ -48,5 +49,8 @@ export default function ({ loadTestFile }) {
 
     // Outputs
     loadTestFile(require.resolve('./outputs'));
+
+    // Telemetry
+    loadTestFile(require.resolve('./fleet_telemetry'));
   });
 }

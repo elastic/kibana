@@ -10,9 +10,7 @@ import {
   getIndexExists,
   getPolicyExists,
   deletePolicy,
-  getTemplateExists,
   deleteAllIndex,
-  deleteTemplate,
 } from '@kbn/securitysolution-es-utils';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_INDEX_URL } from '../../../../../common/constants';
@@ -22,6 +20,7 @@ import { buildSiemResponse } from '../utils';
  * Deletes all of the indexes, template, ilm policies, and aliases. You can check
  * this by looking at each of these settings from ES after a deletion:
  * GET /_template/.siem-signals-default
+ * GET /_index_template/.siem-signals-default
  * GET /.siem-signals-default-000001/
  * GET /_ilm/policy/.signals-default
  * GET /_alias/.siem-signals-default
@@ -63,9 +62,13 @@ export const deleteIndexRoute = (router: SecuritySolutionPluginRouter) => {
           if (policyExists) {
             await deletePolicy(esClient, index);
           }
-          const templateExists = await getTemplateExists(esClient, index);
+          const templateExists = await esClient.indices.existsIndexTemplate({ name: index });
           if (templateExists) {
-            await deleteTemplate(esClient, index);
+            await esClient.indices.deleteIndexTemplate({ name: index });
+          }
+          const legacyTemplateExists = await esClient.indices.existsTemplate({ name: index });
+          if (legacyTemplateExists) {
+            await esClient.indices.deleteTemplate({ name: index });
           }
           return response.ok({ body: { acknowledged: true } });
         }

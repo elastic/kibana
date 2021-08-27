@@ -130,10 +130,11 @@ export const math: ExpressionFunctionDefinition<
       throw errors.emptyExpression();
     }
 
+    // Use unique ID if available, otherwise fall back to names
     const mathContext = isDatatable(input)
       ? pivotObjectArray(
           input.rows,
-          input.columns.map((col) => col.name)
+          input.columns.map((col) => col.id)
         )
       : { value: input };
 

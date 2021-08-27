@@ -47,7 +47,7 @@ describe('When event filters delete modal is shown', () => {
       renderResult = mockedContext.render(<EventFilterDeleteModal />);
 
       await act(async () => {
-        history.push('/event_filters');
+        history.push('/administration/event_filters');
 
         await waitForAction('userChangedUrl');
 
@@ -64,7 +64,6 @@ describe('When event filters delete modal is shown', () => {
     };
 
     waitForAction = mockedContext.middlewareSpy.waitForAction;
-    mockedContext.setExperimentalFlag({ eventFilteringEnabled: true });
   });
 
   it('should display name of event filter in body message', async () => {

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ElasticsearchClient } from 'kibana/server';
 import sinon from 'sinon';
 import {
   fetchHighLevelStats,
@@ -13,12 +14,13 @@ import {
 } from './get_high_level_stats';
 
 describe('get_high_level_stats', () => {
-  const callWith = sinon.stub();
+  const searchMock = sinon.stub();
+  const callCluster = ({ search: searchMock } as unknown) as ElasticsearchClient;
   const product = 'xyz';
   const cloudName = 'bare-metal';
   const start = new Date().toISOString();
   const end = new Date().toISOString();
-  const response = {
+  const body = {
     hits: {
       hits: [
         {
@@ -232,26 +234,26 @@ describe('get_high_level_stats', () => {
 
   describe('getHighLevelStats', () => {
     it('returns clusters', async () => {
-      callWith.withArgs('search').returns(Promise.resolve(response));
+      searchMock.returns(Promise.resolve({ body }));
 
       expect(
-        await getHighLevelStats(callWith, clusterUuids, start, end, product, maxBucketSize)
+        await getHighLevelStats(callCluster, clusterUuids, start, end, product, maxBucketSize)
       ).toStrictEqual(expectedClusters);
     });
   });
 
   describe('fetchHighLevelStats', () => {
     it('searches for clusters', async () => {
-      callWith.returns(Promise.resolve(response));
+      searchMock.returns(Promise.resolve({ body }));
 
       expect(
-        await fetchHighLevelStats(callWith, clusterUuids, start, end, product, maxBucketSize)
-      ).toStrictEqual(response);
+        await fetchHighLevelStats(callCluster, clusterUuids, start, end, product, maxBucketSize)
+      ).toStrictEqual(body);
     });
   });
 
   describe('handleHighLevelStatsResponse', () => {
-    // filterPath makes it easy to ignore anything unexpected because it will come back empty
+    // filter_path makes it easy to ignore anything unexpected because it will come back empty
     it('handles unexpected response', () => {
       const clusters = handleHighLevelStatsResponse({} as any, product);
 
@@ -259,7 +261,7 @@ describe('get_high_level_stats', () => {
     });
 
     it('handles valid response', () => {
-      const clusters = handleHighLevelStatsResponse(response as any, product);
+      const clusters = handleHighLevelStatsResponse(body as any, product);
 
       expect(clusters).toStrictEqual(expectedClusters);
     });

@@ -8,7 +8,8 @@
 import { i18n } from '@kbn/i18n';
 import { useQuery } from 'react-query';
 
-import { GetAgentsResponse, agentRouteService } from '../../../fleet/common';
+import { GetAgentsResponse } from '../../../fleet/common';
+import { useErrorToast } from '../common/hooks/use_error_toast';
 import { useKibana } from '../common/lib/kibana';
 
 interface UseAllAgents {
@@ -28,42 +29,36 @@ export const useAllAgents = (
   opts: RequestOptions = { perPage: 9000 }
 ) => {
   const { perPage } = opts;
-  const {
-    http,
-    notifications: { toasts },
-  } = useKibana().services;
-  const { isLoading: agentsLoading, data: agentData } = useQuery<GetAgentsResponse>(
+  const { http } = useKibana().services;
+  const setErrorToast = useErrorToast();
+
+  return useQuery<GetAgentsResponse>(
     ['agents', osqueryPolicies, searchValue, perPage],
     () => {
-      const kueryFragments: string[] = [];
-      if (osqueryPolicies.length) {
-        kueryFragments.push(`${osqueryPolicies.map((p) => `policy_id:${p}`).join(' or ')}`);
-      }
+      let kuery = `${osqueryPolicies.map((p) => `policy_id:${p}`).join(' or ')}`;
 
       if (searchValue) {
-        kueryFragments.push(
-          `local_metadata.host.hostname:*${searchValue}* or local_metadata.elastic.agent.id:*${searchValue}*`
-        );
+        kuery += ` and (local_metadata.host.hostname:*${searchValue}* or local_metadata.elastic.agent.id:*${searchValue}*)`;
       }
 
-      return http.get(agentRouteService.getListPath(), {
+      return http.get(`/internal/osquery/fleet_wrapper/agents`, {
         query: {
-          kuery: kueryFragments.map((frag) => `(${frag})`).join(' and '),
+          kuery,
           perPage,
-          showInactive: true,
         },
       });
     },
     {
-      enabled: !osqueryPoliciesLoading,
+      // @ts-expect-error update types
+      select: (data) => data?.agents || [],
+      enabled: !osqueryPoliciesLoading && osqueryPolicies.length > 0,
+      onSuccess: () => setErrorToast(),
       onError: (error) =>
-        toasts.addError(error as Error, {
+        setErrorToast(error as Error, {
           title: i18n.translate('xpack.osquery.agents.fetchError', {
             defaultMessage: 'Error while fetching agents',
           }),
         }),
     }
   );
-
-  return { agentsLoading, agents: agentData?.list };
 };

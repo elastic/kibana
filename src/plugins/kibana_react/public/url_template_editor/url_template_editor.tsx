@@ -9,17 +9,9 @@
 import * as React from 'react';
 import { monaco } from '@kbn/monaco';
 import { Props as CodeEditorProps } from '../code_editor/code_editor';
-import { CodeEditor } from '../code_editor';
-import { LANG } from './constants';
-import { language, conf } from './language';
+import { CodeEditor, HandlebarsLang } from '../code_editor';
 
 import './styles.scss';
-
-monaco.languages.register({
-  id: LANG,
-});
-monaco.languages.setMonarchTokensProvider(LANG, language);
-monaco.languages.setLanguageConfiguration(LANG, conf);
 
 export interface UrlTemplateEditorVariable {
   label: string;
@@ -74,7 +66,7 @@ export const UrlTemplateEditor: React.FC<UrlTemplateEditorProps> = ({
       return;
     }
 
-    const { dispose } = monaco.languages.registerCompletionItemProvider(LANG, {
+    const { dispose } = monaco.languages.registerCompletionItemProvider(HandlebarsLang.ID, {
       triggerCharacters: ['{', '/', '?', '&', '='],
       provideCompletionItems(model, position, context, token) {
         const { lineNumber } = position;
@@ -132,7 +124,7 @@ export const UrlTemplateEditor: React.FC<UrlTemplateEditorProps> = ({
   return (
     <div className={'urlTemplateEditor__container'} onKeyDown={handleKeyDown}>
       <Editor
-        languageId={LANG}
+        languageId={HandlebarsLang.ID}
         height={height}
         value={value}
         onChange={onChange}

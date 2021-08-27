@@ -22,6 +22,7 @@ const SystemSocketExampleComponent: React.FC = () => {
       {systemSocketRowRenderer.renderRow({
         browserFields: {},
         data: mockEndgameIpv4ConnectionAcceptEvent,
+        isDraggable: false,
         timelineId: ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID,
       })}
     </>

@@ -116,6 +116,10 @@ const createStartContractMock = () => {
             maxImportExportSize: 10000,
             maxImportPayloadBytes: 26214400,
           },
+          deprecatedKeys: {
+            set: ['path.to.a.prop'],
+            unset: [],
+          },
         },
         environment: {
           memory: {
@@ -135,6 +139,12 @@ const createStartContractMock = () => {
                 storeSizeBytes: 1,
               },
             ],
+            legacyUrlAliases: {
+              inactiveCount: 1,
+              activeCount: 1,
+              disabledCount: 1,
+              totalCount: 3,
+            },
           },
         },
       })

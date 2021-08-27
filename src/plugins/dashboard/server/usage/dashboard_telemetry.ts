@@ -27,6 +27,16 @@ interface LensPanel extends SavedDashboardPanel730ToLatest {
         visualization?: {
           preferredSeriesType?: string;
         };
+        datasourceStates?: {
+          indexpattern?: {
+            layers: Record<
+              string,
+              {
+                columns: Record<string, { operationType: string }>;
+              }
+            >;
+          };
+        };
       };
     };
   };
@@ -41,6 +51,9 @@ export interface DashboardCollectorData {
   visualizationByValue: {
     [key: string]: number;
   };
+  embeddable: {
+    [key: string]: number;
+  };
 }
 
 export const getEmptyTelemetryData = (): DashboardCollectorData => ({
@@ -48,6 +61,7 @@ export const getEmptyTelemetryData = (): DashboardCollectorData => ({
   panelsByValue: 0,
   lensByValue: {},
   visualizationByValue: {},
+  embeddable: {},
 });
 
 type DashboardCollectorFunction = (
@@ -105,6 +119,19 @@ export const collectByValueLensInfo: DashboardCollectorFunction = (panels, colle
       }
 
       collectorData.lensByValue[type] = collectorData.lensByValue[type] + 1;
+
+      const hasFormula = Object.values(
+        lensPanel.embeddableConfig.attributes.state?.datasourceStates?.indexpattern?.layers || {}
+      ).some((layer) =>
+        Object.values(layer.columns).some((column) => column.operationType === 'formula')
+      );
+
+      if (hasFormula && !collectorData.lensByValue.formula) {
+        collectorData.lensByValue.formula = 0;
+      }
+      if (hasFormula) {
+        collectorData.lensByValue.formula++;
+      }
     }
   }
 };
@@ -113,6 +140,23 @@ export const collectForPanels: DashboardCollectorFunction = (panels, collectorDa
   collectDashboardInfo(panels, collectorData);
   collectByValueVisualizationInfo(panels, collectorData);
   collectByValueLensInfo(panels, collectorData);
+};
+
+export const collectEmbeddableData = (
+  panels: SavedDashboardPanel730ToLatest[],
+  collectorData: DashboardCollectorData,
+  embeddableService: EmbeddablePersistableStateService
+) => {
+  for (const panel of panels) {
+    collectorData.embeddable = embeddableService.telemetry(
+      {
+        ...panel.embeddableConfig,
+        id: panel.id || '',
+        type: panel.type,
+      },
+      collectorData.embeddable
+    );
+  }
 };
 
 export async function collectDashboardTelemetry(
@@ -134,6 +178,7 @@ export async function collectDashboardTelemetry(
     ) as unknown) as SavedDashboardPanel730ToLatest[];
 
     collectForPanels(panels, collectorData);
+    collectEmbeddableData(panels, collectorData, embeddableService);
   }
 
   return collectorData;

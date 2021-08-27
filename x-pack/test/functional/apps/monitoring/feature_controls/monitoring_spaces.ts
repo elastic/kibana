@@ -17,11 +17,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('spaces', () => {
     before(async () => {
-      await esArchiver.load('empty_kibana');
+      await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
     });
 
     after(async () => {
-      await esArchiver.unload('empty_kibana');
+      await esArchiver.unload('x-pack/test/functional/es_archives/empty_kibana');
       await PageObjects.common.navigateToApp('home');
       await PageObjects.security.forceLogout();
     });

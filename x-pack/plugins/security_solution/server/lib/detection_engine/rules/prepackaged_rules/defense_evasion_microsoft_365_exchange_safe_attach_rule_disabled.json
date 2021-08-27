@@ -15,7 +15,7 @@
   "license": "Elastic License v2",
   "name": "Microsoft 365 Exchange Safe Attachment Rule Disabled",
   "note": "## Config\n\nThe Microsoft 365 Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
-  "query": "event.dataset:o365.audit and event.provider:Exchange and event.category:web and event.action:\"Disable-SafeAttachmentRule\" and event.outcome:success",
+  "query": "event.dataset:o365.audit and event.provider:Exchange and event.category:web and event.action:\"Disable-SafeAttachmentRule\" and event.outcome:success\n",
   "references": [
     "https://docs.microsoft.com/en-us/powershell/module/exchange/disable-safeattachmentrule?view=exchange-ps"
   ],

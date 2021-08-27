@@ -8,6 +8,15 @@
 
 import { fetchStreaming } from './fetch_streaming';
 import { mockXMLHttpRequest } from '../test_helpers/xhr';
+import { of } from 'rxjs';
+import { promisify } from 'util';
+import { deflate } from 'zlib';
+const pDeflate = promisify(deflate);
+
+const compressResponse = async (resp: any) => {
+  const gzipped = await pDeflate(JSON.stringify(resp));
+  return gzipped.toString('base64');
+};
 
 const tick = () => new Promise((resolve) => setTimeout(resolve, 1));
 
@@ -21,6 +30,7 @@ test('returns XHR request', () => {
   setup();
   const { xhr } = fetchStreaming({
     url: 'http://example.com',
+    compressionDisabled$: of(true),
   });
   expect(typeof xhr.readyState).toBe('number');
 });
@@ -29,6 +39,7 @@ test('returns stream', () => {
   setup();
   const { stream } = fetchStreaming({
     url: 'http://example.com',
+    compressionDisabled$: of(true),
   });
   expect(typeof stream.subscribe).toBe('function');
 });
@@ -37,6 +48,7 @@ test('promise resolves when request completes', async () => {
   const env = setup();
   const { stream } = fetchStreaming({
     url: 'http://example.com',
+    compressionDisabled$: of(true),
   });
 
   let resolved = false;
@@ -65,10 +77,90 @@ test('promise resolves when request completes', async () => {
   expect(resolved).toBe(true);
 });
 
-test('streams incoming text as it comes through', async () => {
+test('promise resolves when compressed request completes', async () => {
   const env = setup();
   const { stream } = fetchStreaming({
     url: 'http://example.com',
+    compressionDisabled$: of(false),
+  });
+
+  let resolved = false;
+  let result;
+  stream.toPromise().then((r) => {
+    resolved = true;
+    result = r;
+  });
+
+  await tick();
+  expect(resolved).toBe(false);
+
+  const msg = { foo: 'bar' };
+
+  // Whole message in a response
+  (env.xhr as any).responseText = `${await compressResponse(msg)}\n`;
+  env.xhr.onprogress!({} as any);
+
+  await tick();
+  expect(resolved).toBe(false);
+
+  (env.xhr as any).readyState = 4;
+  (env.xhr as any).status = 200;
+  env.xhr.onreadystatechange!({} as any);
+
+  await tick();
+  expect(resolved).toBe(true);
+  expect(result).toStrictEqual(JSON.stringify(msg));
+});
+
+test('promise resolves when compressed chunked request completes', async () => {
+  const env = setup();
+  const { stream } = fetchStreaming({
+    url: 'http://example.com',
+    compressionDisabled$: of(false),
+  });
+
+  let resolved = false;
+  let result;
+  stream.toPromise().then((r) => {
+    resolved = true;
+    result = r;
+  });
+
+  await tick();
+  expect(resolved).toBe(false);
+
+  const msg = { veg: 'tomato' };
+  const msgToCut = await compressResponse(msg);
+  const part1 = msgToCut.substr(0, 3);
+
+  // Message and a half in a response
+  (env.xhr as any).responseText = part1;
+  env.xhr.onprogress!({} as any);
+
+  await tick();
+  expect(resolved).toBe(false);
+
+  // Half a message in a response
+  (env.xhr as any).responseText = `${msgToCut}\n`;
+  env.xhr.onprogress!({} as any);
+
+  await tick();
+  expect(resolved).toBe(false);
+
+  (env.xhr as any).readyState = 4;
+  (env.xhr as any).status = 200;
+  env.xhr.onreadystatechange!({} as any);
+
+  await tick();
+  expect(resolved).toBe(true);
+  expect(result).toStrictEqual(JSON.stringify(msg));
+});
+
+test('streams incoming text as it comes through, according to separators', async () => {
+  const env = setup();
+  const { stream } = fetchStreaming({
+    url: 'http://example.com',
+    compressionDisabled$: of(true),
   });
 
   const spy = jest.fn();
@@ -81,15 +173,21 @@ test('streams incoming text as it comes through', async () => {
   env.xhr.onprogress!({} as any);
 
   await tick();
-  expect(spy).toHaveBeenCalledTimes(1);
-  expect(spy).toHaveBeenCalledWith('foo');
+  expect(spy).toHaveBeenCalledTimes(0);
 
   (env.xhr as any).responseText = 'foo\nbar';
   env.xhr.onprogress!({} as any);
 
   await tick();
+  expect(spy).toHaveBeenCalledTimes(1);
+  expect(spy).toHaveBeenCalledWith('foo');
+
+  (env.xhr as any).responseText = 'foo\nbar\n';
+  env.xhr.onprogress!({} as any);
+
+  await tick();
   expect(spy).toHaveBeenCalledTimes(2);
-  expect(spy).toHaveBeenCalledWith('\nbar');
+  expect(spy).toHaveBeenCalledWith('bar');
 
   (env.xhr as any).readyState = 4;
   (env.xhr as any).status = 200;
@@ -103,6 +201,7 @@ test('completes stream observable when request finishes', async () => {
   const env = setup();
   const { stream } = fetchStreaming({
     url: 'http://example.com',
+    compressionDisabled$: of(true),
   });
 
   const spy = jest.fn();
@@ -127,6 +226,7 @@ test('completes stream observable when aborted', async () => {
   const { stream } = fetchStreaming({
     url: 'http://example.com',
     signal: abort.signal,
+    compressionDisabled$: of(true),
   });
 
   const spy = jest.fn();
@@ -152,6 +252,7 @@ test('promise throws when request errors', async () => {
   const env = setup();
   const { stream } = fetchStreaming({
     url: 'http://example.com',
+    compressionDisabled$: of(true),
   });
 
   const spy = jest.fn();
@@ -178,6 +279,7 @@ test('stream observable errors when request errors', async () => {
   const env = setup();
   const { stream } = fetchStreaming({
     url: 'http://example.com',
+    compressionDisabled$: of(true),
   });
 
   const spy = jest.fn();
@@ -210,6 +312,7 @@ test('sets custom headers', async () => {
       'Content-Type': 'text/plain',
       Authorization: 'Bearer 123',
     },
+    compressionDisabled$: of(true),
   });
 
   expect(env.xhr.setRequestHeader).toHaveBeenCalledWith('Content-Type', 'text/plain');
@@ -223,6 +326,7 @@ test('uses credentials', async () => {
 
   fetchStreaming({
     url: 'http://example.com',
+    compressionDisabled$: of(true),
   });
 
   expect(env.xhr.withCredentials).toBe(true);
@@ -238,6 +342,7 @@ test('opens XHR request and sends specified body', async () => {
     url: 'http://elastic.co',
     method: 'GET',
     body: 'foobar',
+    compressionDisabled$: of(true),
   });
 
   expect(env.xhr.open).toHaveBeenCalledTimes(1);
@@ -250,6 +355,7 @@ test('uses POST request method by default', async () => {
   const env = setup();
   fetchStreaming({
     url: 'http://elastic.co',
+    compressionDisabled$: of(true),
   });
   expect(env.xhr.open).toHaveBeenCalledWith('POST', 'http://elastic.co');
 });

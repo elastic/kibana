@@ -11,7 +11,7 @@
   "license": "Elastic License v2",
   "name": "Threat Detected by Okta ThreatInsight",
   "note": "## Config\n\nThe Okta Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
-  "query": "event.dataset:okta.system and event.action:security.threat.detected",
+  "query": "event.dataset:okta.system and event.action:security.threat.detected\n",
   "references": [
     "https://developer.okta.com/docs/reference/api/system-log/",
     "https://developer.okta.com/docs/reference/api/event-types/"

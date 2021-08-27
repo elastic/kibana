@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useState } from 'react';
-import { useDebounce } from 'react-use';
+import useDebounce from 'react-use/lib/useDebounce';
 import { useDispatch } from 'react-redux';
 import { Query } from 'src/plugins/data/common';
 import { useGetUrlParams, useUpdateKueryString, useUrlParams } from '../../../hooks';

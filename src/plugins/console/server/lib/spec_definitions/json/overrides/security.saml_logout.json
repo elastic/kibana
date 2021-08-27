@@ -1,0 +1,8 @@
+{
+  "security.saml_logout": {
+    "data_autocomplete_rules": {
+      "token": "",
+      "refresh_token": ""
+    }
+  }
+}

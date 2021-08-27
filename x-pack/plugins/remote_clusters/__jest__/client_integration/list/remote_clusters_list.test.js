@@ -181,6 +181,10 @@ describe('<RemoteClusterList />', () => {
       expect(exists('remoteClusterCreateButton')).toBe(true);
     });
 
+    test('should have link to documentation', () => {
+      expect(exists('documentationLink')).toBe(true);
+    });
+
     test('should list the remote clusters in the table', () => {
       expect(tableCellsValues.length).toEqual(remoteClusters.length);
       expect(tableCellsValues).toEqual([

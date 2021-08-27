@@ -5,17 +5,30 @@
  * 2.0.
  */
 
-import React, { memo, useContext } from 'react';
-import useDebounce from 'react-use/lib/useDebounce';
+import React, { memo } from 'react';
 import { PackagePolicyEditExtensionComponentProps } from '../../../../fleet/public';
 import { useTrackPageview } from '../../../../observability/public';
 import {
-  SimpleFieldsContext,
-  HTTPAdvancedFieldsContext,
-  TCPAdvancedFieldsContext,
-  TLSFieldsContext,
+  useMonitorTypeContext,
+  useTCPSimpleFieldsContext,
+  useTCPAdvancedFieldsContext,
+  useICMPSimpleFieldsContext,
+  useHTTPSimpleFieldsContext,
+  useHTTPAdvancedFieldsContext,
+  useTLSFieldsContext,
+  useBrowserSimpleFieldsContext,
+  useBrowserAdvancedFieldsContext,
 } from './contexts';
-import { Config, ConfigKeys, DataStream } from './types';
+import {
+  ICustomFields,
+  DataStream,
+  HTTPFields,
+  TCPFields,
+  ICMPFields,
+  BrowserFields,
+  ConfigKeys,
+  PolicyConfig,
+} from './types';
 import { CustomFields } from './custom_fields';
 import { useUpdatePolicy } from './use_update_policy';
 import { validate } from './validation';
@@ -23,7 +36,7 @@ import { validate } from './validation';
 interface SyntheticsPolicyEditExtensionProps {
   newPolicy: PackagePolicyEditExtensionComponentProps['newPolicy'];
   onChange: PackagePolicyEditExtensionComponentProps['onChange'];
-  defaultConfig: Config;
+  defaultConfig: Partial<ICustomFields>;
   isTLSEnabled: boolean;
 }
 /**
@@ -34,37 +47,50 @@ export const SyntheticsPolicyEditExtension = memo<SyntheticsPolicyEditExtensionP
   ({ newPolicy, onChange, defaultConfig, isTLSEnabled }) => {
     useTrackPageview({ app: 'fleet', path: 'syntheticsEdit' });
     useTrackPageview({ app: 'fleet', path: 'syntheticsEdit', delay: 15000 });
-    const { fields: simpleFields } = useContext(SimpleFieldsContext);
-    const { fields: httpAdvancedFields } = useContext(HTTPAdvancedFieldsContext);
-    const { fields: tcpAdvancedFields } = useContext(TCPAdvancedFieldsContext);
-    const { fields: tlsFields } = useContext(TLSFieldsContext);
-    const { config, setConfig } = useUpdatePolicy({ defaultConfig, newPolicy, onChange, validate });
+    const { monitorType } = useMonitorTypeContext();
+    const { fields: httpSimpleFields } = useHTTPSimpleFieldsContext();
+    const { fields: tcpSimpleFields } = useTCPSimpleFieldsContext();
+    const { fields: icmpSimpleFields } = useICMPSimpleFieldsContext();
+    const { fields: httpAdvancedFields } = useHTTPAdvancedFieldsContext();
+    const { fields: tcpAdvancedFields } = useTCPAdvancedFieldsContext();
+    const { fields: tlsFields } = useTLSFieldsContext();
+    const { fields: browserSimpleFields } = useBrowserSimpleFieldsContext();
+    const { fields: browserAdvancedFields } = useBrowserAdvancedFieldsContext();
 
-    useDebounce(
-      () => {
-        setConfig((prevConfig) => ({
-          ...prevConfig,
-          ...simpleFields,
-          ...httpAdvancedFields,
-          ...tcpAdvancedFields,
-          ...tlsFields,
-          // ensure proxyUrl is not overwritten
-          [ConfigKeys.PROXY_URL]:
-            simpleFields[ConfigKeys.MONITOR_TYPE] === DataStream.HTTP
-              ? httpAdvancedFields[ConfigKeys.PROXY_URL]
-              : tcpAdvancedFields[ConfigKeys.PROXY_URL],
-        }));
-      },
-      250,
-      [setConfig, simpleFields, httpAdvancedFields, tcpAdvancedFields, tlsFields]
-    );
+    const policyConfig: PolicyConfig = {
+      [DataStream.HTTP]: {
+        ...httpSimpleFields,
+        ...httpAdvancedFields,
+        ...tlsFields,
+        [ConfigKeys.NAME]: newPolicy.name,
+      } as HTTPFields,
+      [DataStream.TCP]: {
+        ...tcpSimpleFields,
+        ...tcpAdvancedFields,
+        ...tlsFields,
+        [ConfigKeys.NAME]: newPolicy.name,
+      } as TCPFields,
+      [DataStream.ICMP]: {
+        ...icmpSimpleFields,
+        [ConfigKeys.NAME]: newPolicy.name,
+      } as ICMPFields,
+      [DataStream.BROWSER]: {
+        ...browserSimpleFields,
+        ...browserAdvancedFields,
+        [ConfigKeys.NAME]: newPolicy.name,
+      } as BrowserFields,
+    };
 
-    return (
-      <CustomFields
-        isTLSEnabled={isTLSEnabled}
-        validate={validate[config[ConfigKeys.MONITOR_TYPE]]}
-      />
-    );
+    useUpdatePolicy({
+      defaultConfig,
+      config: policyConfig[monitorType],
+      newPolicy,
+      onChange,
+      validate,
+      monitorType,
+    });
+
+    return <CustomFields isTLSEnabled={isTLSEnabled} validate={validate[monitorType]} />;
   }
 );
 SyntheticsPolicyEditExtension.displayName = 'SyntheticsPolicyEditExtension';

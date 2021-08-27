@@ -11,7 +11,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { first } from 'lodash';
-import { EuiPopover } from '@elastic/eui';
+import { EuiPopover, EuiToolTip } from '@elastic/eui';
 import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
 import {
   InfraWaffleMapBounds,
@@ -64,13 +64,10 @@ export class Node extends React.PureComponent<Props, State> {
     const nodeBorder = this.state.isOverlayOpen ? { border: 'solid 4px #000' } : undefined;
 
     const button = (
-      <ConditionalToolTip
-        currentTime={currentTime}
-        formatter={formatter}
-        hidden={isPopoverOpen}
-        node={node}
-        options={options}
-        nodeType={nodeType}
+      <EuiToolTip
+        delay="regular"
+        position="right"
+        content={<ConditionalToolTip currentTime={currentTime} node={node} nodeType={nodeType} />}
       >
         <NodeContainer
           data-test-subj="nodeContainer"
@@ -94,7 +91,7 @@ export class Node extends React.PureComponent<Props, State> {
             </SquareInner>
           </SquareOuter>
         </NodeContainer>
-      </ConditionalToolTip>
+      </EuiToolTip>
     );
 
     return (

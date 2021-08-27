@@ -94,11 +94,11 @@ describe('unenrollAgents (plural)', () => {
     // calls ES update with correct values
     const calledWith = esClient.bulk.mock.calls[1][0];
     const ids = calledWith?.body
-      .filter((i: any) => i.update !== undefined)
+      ?.filter((i: any) => i.update !== undefined)
       .map((i: any) => i.update._id);
-    const docs = calledWith?.body.filter((i: any) => i.doc).map((i: any) => i.doc);
+    const docs = calledWith?.body?.filter((i: any) => i.doc).map((i: any) => i.doc);
     expect(ids).toEqual(idsToUnenroll);
-    for (const doc of docs) {
+    for (const doc of docs!) {
       expect(doc).toHaveProperty('unenrollment_started_at');
     }
   });
@@ -112,11 +112,11 @@ describe('unenrollAgents (plural)', () => {
     const onlyRegular = [agentInRegularDoc._id, agentInRegularDoc2._id];
     const calledWith = esClient.bulk.mock.calls[1][0];
     const ids = calledWith?.body
-      .filter((i: any) => i.update !== undefined)
+      ?.filter((i: any) => i.update !== undefined)
       .map((i: any) => i.update._id);
-    const docs = calledWith?.body.filter((i: any) => i.doc).map((i: any) => i.doc);
+    const docs = calledWith?.body?.filter((i: any) => i.doc).map((i: any) => i.doc);
     expect(ids).toEqual(onlyRegular);
-    for (const doc of docs) {
+    for (const doc of docs!) {
       expect(doc).toHaveProperty('unenrollment_started_at');
     }
   });
@@ -150,11 +150,11 @@ describe('unenrollAgents (plural)', () => {
     const onlyRegular = [agentInRegularDoc._id, agentInRegularDoc2._id];
     const calledWith = esClient.bulk.mock.calls[0][0];
     const ids = calledWith?.body
-      .filter((i: any) => i.update !== undefined)
+      ?.filter((i: any) => i.update !== undefined)
       .map((i: any) => i.update._id);
-    const docs = calledWith?.body.filter((i: any) => i.doc).map((i: any) => i.doc);
+    const docs = calledWith?.body?.filter((i: any) => i.doc).map((i: any) => i.doc);
     expect(ids).toEqual(onlyRegular);
-    for (const doc of docs) {
+    for (const doc of docs!) {
       expect(doc).toHaveProperty('unenrolled_at');
     }
   });
@@ -167,11 +167,11 @@ describe('unenrollAgents (plural)', () => {
     // calls ES update with correct values
     const calledWith = esClient.bulk.mock.calls[1][0];
     const ids = calledWith?.body
-      .filter((i: any) => i.update !== undefined)
+      ?.filter((i: any) => i.update !== undefined)
       .map((i: any) => i.update._id);
-    const docs = calledWith?.body.filter((i: any) => i.doc).map((i: any) => i.doc);
+    const docs = calledWith?.body?.filter((i: any) => i.doc).map((i: any) => i.doc);
     expect(ids).toEqual(idsToUnenroll);
-    for (const doc of docs) {
+    for (const doc of docs!) {
       expect(doc).toHaveProperty('unenrollment_started_at');
     }
   });
@@ -205,11 +205,11 @@ describe('unenrollAgents (plural)', () => {
     // calls ES update with correct values
     const calledWith = esClient.bulk.mock.calls[0][0];
     const ids = calledWith?.body
-      .filter((i: any) => i.update !== undefined)
+      ?.filter((i: any) => i.update !== undefined)
       .map((i: any) => i.update._id);
-    const docs = calledWith?.body.filter((i: any) => i.doc).map((i: any) => i.doc);
+    const docs = calledWith?.body?.filter((i: any) => i.doc).map((i: any) => i.doc);
     expect(ids).toEqual(idsToUnenroll);
-    for (const doc of docs) {
+    for (const doc of docs!) {
       expect(doc).toHaveProperty('unenrolled_at');
     }
   });

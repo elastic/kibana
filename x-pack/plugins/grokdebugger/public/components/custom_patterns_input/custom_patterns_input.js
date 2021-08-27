@@ -6,16 +6,11 @@
  */
 
 import React from 'react';
-import {
-  EuiAccordion,
-  EuiCallOut,
-  EuiCodeBlock,
-  EuiFormRow,
-  EuiCodeEditor,
-  EuiSpacer,
-} from '@elastic/eui';
-import { EDITOR } from '../../../common/constants';
+import { EuiAccordion, EuiCallOut, EuiCodeBlock, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+
+import { EDITOR } from '../../../common/constants';
+import { EuiCodeEditor } from '../../shared_imports';
 
 export function CustomPatternsInput({ value, onChange }) {
   const sampleCustomPatterns = `POSTFIX_QUEUEID [0-9A-F]{10,11}

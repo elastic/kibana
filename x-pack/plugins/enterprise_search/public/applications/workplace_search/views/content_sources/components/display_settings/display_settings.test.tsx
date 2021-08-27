@@ -7,7 +7,7 @@
 
 import '../../../../../__mocks__/shallow_useeffect.mock';
 
-import { setMockValues, setMockActions } from '../../../../../__mocks__';
+import { setMockValues, setMockActions } from '../../../../../__mocks__/kea_logic';
 import { exampleResult } from '../../../../__mocks__/content_sources.mock';
 
 import React from 'react';
@@ -16,7 +16,6 @@ import { shallow } from 'enzyme';
 
 import { EuiButton, EuiTabbedContent } from '@elastic/eui';
 
-import { Loading } from '../../../../../shared/loading';
 import { UnsavedChangesPrompt } from '../../../../../shared/unsaved_changes_prompt';
 import { ViewContentHeader } from '../../../../components/shared/view_content_header';
 
@@ -55,13 +54,6 @@ describe('DisplaySettings', () => {
 
     expect(wrapper.find(UnsavedChangesPrompt)).toHaveLength(1);
     expect(wrapper.find('form')).toHaveLength(1);
-  });
-
-  it('returns loading when loading', () => {
-    setMockValues({ ...values, dataLoading: true });
-    const wrapper = shallow(<DisplaySettings tabId={0} />);
-
-    expect(wrapper.find(Loading)).toHaveLength(1);
   });
 
   describe('tabbed content', () => {

@@ -32,7 +32,7 @@ export interface SortingType {
 
 interface AllRulesTablesProps {
   euiBasicTableSelectionProps: EuiTableSelectionType<Rule>;
-  hasNoPermissions: boolean;
+  hasPermissions: boolean;
   monitoringColumns: Array<EuiBasicTableColumn<RuleStatusRowItemType>>;
   pagination: {
     pageIndex: number;
@@ -55,7 +55,7 @@ const emptyPrompt = (
 
 export const AllRulesTablesComponent: React.FC<AllRulesTablesProps> = ({
   euiBasicTableSelectionProps,
-  hasNoPermissions,
+  hasPermissions,
   monitoringColumns,
   pagination,
   rules,
@@ -72,7 +72,7 @@ export const AllRulesTablesComponent: React.FC<AllRulesTablesProps> = ({
         <EuiBasicTable
           data-test-subj="rules-table"
           columns={rulesColumns}
-          isSelectable={!hasNoPermissions ?? false}
+          isSelectable={hasPermissions}
           itemId="id"
           items={rules ?? []}
           noItemsMessage={emptyPrompt}
@@ -80,14 +80,14 @@ export const AllRulesTablesComponent: React.FC<AllRulesTablesProps> = ({
           pagination={pagination}
           ref={tableRef}
           sorting={sorting}
-          selection={hasNoPermissions ? undefined : euiBasicTableSelectionProps}
+          selection={hasPermissions ? euiBasicTableSelectionProps : undefined}
         />
       )}
       {selectedTab === AllRulesTabs.monitoring && (
         <EuiBasicTable
           data-test-subj="monitoring-table"
           columns={monitoringColumns}
-          isSelectable={!hasNoPermissions ?? false}
+          isSelectable={hasPermissions}
           itemId="id"
           items={rulesStatuses}
           noItemsMessage={emptyPrompt}

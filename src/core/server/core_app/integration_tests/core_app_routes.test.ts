@@ -15,11 +15,13 @@ describe('Core app routes', () => {
   beforeAll(async function () {
     root = kbnTestServer.createRoot({
       plugins: { initialize: false },
+      elasticsearch: { skipStartupConnectionCheck: true },
       server: {
         basePath: '/base-path',
       },
     });
 
+    await root.preboot();
     await root.setup();
     await root.start();
   });

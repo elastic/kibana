@@ -14,10 +14,7 @@
       "tags": [],
       "label": "SecurityOssPluginSetup",
       "description": [],
-      "source": {
-        "path": "src/plugins/security_oss/public/plugin.ts",
-        "lineNumber": 25
-      },
+      "path": "src/plugins/security_oss/public/plugin.ts",
       "deprecated": false,
       "children": [
         {
@@ -30,10 +27,7 @@
           "signature": [
             "InsecureClusterServiceSetup"
           ],
-          "source": {
-            "path": "src/plugins/security_oss/public/plugin.ts",
-            "lineNumber": 26
-          },
+          "path": "src/plugins/security_oss/public/plugin.ts",
           "deprecated": false
         }
       ],
@@ -47,10 +41,7 @@
       "tags": [],
       "label": "SecurityOssPluginStart",
       "description": [],
-      "source": {
-        "path": "src/plugins/security_oss/public/plugin.ts",
-        "lineNumber": 29
-      },
+      "path": "src/plugins/security_oss/public/plugin.ts",
       "deprecated": false,
       "children": [
         {
@@ -63,10 +54,7 @@
           "signature": [
             "InsecureClusterServiceStart"
           ],
-          "source": {
-            "path": "src/plugins/security_oss/public/plugin.ts",
-            "lineNumber": 30
-          },
+          "path": "src/plugins/security_oss/public/plugin.ts",
           "deprecated": false
         },
         {
@@ -81,10 +69,7 @@
             "Capabilities",
             ">; }"
           ],
-          "source": {
-            "path": "src/plugins/security_oss/public/plugin.ts",
-            "lineNumber": 31
-          },
+          "path": "src/plugins/security_oss/public/plugin.ts",
           "deprecated": false
         }
       ],
@@ -106,10 +91,7 @@
       "tags": [],
       "label": "SecurityOssPluginSetup",
       "description": [],
-      "source": {
-        "path": "src/plugins/security_oss/server/plugin.ts",
-        "lineNumber": 25
-      },
+      "path": "src/plugins/security_oss/server/plugin.ts",
       "deprecated": false,
       "children": [
         {
@@ -125,10 +107,7 @@
             "BehaviorSubject",
             "<boolean>"
           ],
-          "source": {
-            "path": "src/plugins/security_oss/server/plugin.ts",
-            "lineNumber": 29
-          },
+          "path": "src/plugins/security_oss/server/plugin.ts",
           "deprecated": false
         },
         {
@@ -145,11 +124,26 @@
             "AnonymousAccessService",
             ") => void"
           ],
-          "source": {
-            "path": "src/plugins/security_oss/server/plugin.ts",
-            "lineNumber": 35
-          },
-          "deprecated": false
+          "path": "src/plugins/security_oss/server/plugin.ts",
+          "deprecated": false,
+          "children": [
+            {
+              "parentPluginId": "securityOss",
+              "id": "def-server.SecurityOssPluginSetup.setAnonymousAccessServiceProvider.$1",
+              "type": "Function",
+              "tags": [],
+              "label": "provider",
+              "description": [],
+              "signature": [
+                "() => ",
+                "AnonymousAccessService"
+              ],
+              "path": "src/plugins/security_oss/server/plugin.ts",
+              "deprecated": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
         }
       ],
       "lifecycle": "setup",
@@ -169,10 +163,7 @@
         "description": [
           "\nDefines Security OSS application state."
         ],
-        "source": {
-          "path": "src/plugins/security_oss/common/app_state.ts",
-          "lineNumber": 12
-        },
+        "path": "src/plugins/security_oss/common/app_state.ts",
         "deprecated": false,
         "children": [
           {
@@ -185,10 +176,7 @@
             "signature": [
               "{ displayAlert: boolean; }"
             ],
-            "source": {
-              "path": "src/plugins/security_oss/common/app_state.ts",
-              "lineNumber": 13
-            },
+            "path": "src/plugins/security_oss/common/app_state.ts",
             "deprecated": false
           },
           {
@@ -201,10 +189,7 @@
             "signature": [
               "{ isEnabled: boolean; accessURLParameters: Record<string, string> | null; }"
             ],
-            "source": {
-              "path": "src/plugins/security_oss/common/app_state.ts",
-              "lineNumber": 14
-            },
+            "path": "src/plugins/security_oss/common/app_state.ts",
             "deprecated": false
           }
         ],

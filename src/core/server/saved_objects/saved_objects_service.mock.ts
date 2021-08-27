@@ -73,6 +73,7 @@ const createInternalSetupContractMock = () => {
       level: ServiceStatusLevels.available,
       summary: `SavedObjects is available`,
     }),
+    getTypeRegistry: jest.fn(),
   };
   return internalSetupContract;
 };

@@ -11,33 +11,34 @@ import styled from 'styled-components';
 import { HttpStart } from 'kibana/public';
 import { addIdToItem } from '@kbn/securitysolution-utils';
 import {
+  CreateExceptionListItemSchema,
+  ExceptionListItemSchema,
   ExceptionListType,
   NamespaceType,
   ListOperatorEnum as OperatorEnum,
   ListOperatorTypeEnum as OperatorTypeEnum,
   OsTypeArray,
   entriesNested,
-} from '@kbn/securitysolution-io-ts-list-types';
-
-import {
-  CreateExceptionListItemSchema,
-  ExceptionListItemSchema,
   exceptionListItemSchema,
-} from '../../../../common/schemas';
-import { AutocompleteStart, IIndexPattern } from '../../../../../../../src/plugins/data/public';
-import { AndOrBadge } from '../and_or_badge';
-
-import { CreateExceptionListItemBuilderSchema, ExceptionsBuilderExceptionItem } from './types';
-import { BuilderExceptionListItemComponent } from './exception_item_renderer';
-import { BuilderLogicButtons } from './logic_buttons';
-import { State, exceptionsBuilderReducer } from './reducer';
+} from '@kbn/securitysolution-io-ts-list-types';
 import {
+  CreateExceptionListItemBuilderSchema,
+  ExceptionsBuilderExceptionItem,
+  OperatorOption,
   containsValueListEntry,
   filterExceptionItems,
   getDefaultEmptyEntry,
   getDefaultNestedEmptyEntry,
   getNewExceptionItem,
-} from './helpers';
+} from '@kbn/securitysolution-list-utils';
+import { IndexPatternBase } from '@kbn/es-query';
+
+import { AutocompleteStart } from '../../../../../../../src/plugins/data/public';
+import { AndOrBadge } from '../and_or_badge';
+
+import { BuilderExceptionListItemComponent } from './exception_item_renderer';
+import { BuilderLogicButtons } from './logic_buttons';
+import { State, exceptionsBuilderReducer } from './reducer';
 
 const MyInvisibleAndBadge = styled(EuiFlexItem)`
   visibility: hidden;
@@ -76,7 +77,7 @@ export interface ExceptionBuilderProps {
   exceptionListItems: ExceptionsBuilderExceptionItem[];
   httpService: HttpStart;
   osTypes?: OsTypeArray;
-  indexPatterns: IIndexPattern;
+  indexPatterns: IndexPatternBase;
   isAndDisabled: boolean;
   isNestedDisabled: boolean;
   isOrDisabled: boolean;
@@ -84,12 +85,13 @@ export interface ExceptionBuilderProps {
   listNamespaceType: NamespaceType;
   listType: ExceptionListType;
   listTypeSpecificIndexPatternFilter?: (
-    pattern: IIndexPattern,
+    pattern: IndexPatternBase,
     type: ExceptionListType
-  ) => IIndexPattern;
+  ) => IndexPatternBase;
   onChange: (arg: OnChangeProps) => void;
   ruleName: string;
   isDisabled?: boolean;
+  operatorsList?: OperatorOption[];
 }
 
 export const ExceptionBuilderComponent = ({
@@ -109,6 +111,7 @@ export const ExceptionBuilderComponent = ({
   ruleName,
   isDisabled = false,
   osTypes,
+  operatorsList,
 }: ExceptionBuilderProps): JSX.Element => {
   const [
     {
@@ -413,6 +416,7 @@ export const ExceptionBuilderComponent = ({
                 setErrorsExist={setErrorsExist}
                 osTypes={osTypes}
                 isDisabled={isDisabled}
+                operatorsList={operatorsList}
               />
             </EuiFlexItem>
           </EuiFlexGroup>

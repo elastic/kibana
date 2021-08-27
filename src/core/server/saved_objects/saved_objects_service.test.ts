@@ -159,6 +159,16 @@ describe('SavedObjectsService', () => {
         expect(typeRegistryInstanceMock.registerType).toHaveBeenCalledWith(type);
       });
     });
+
+    describe('#getTypeRegistry', () => {
+      it('returns the internal type registry of the service', async () => {
+        const coreContext = createCoreContext({ skipMigration: false });
+        const soService = new SavedObjectsService(coreContext);
+        const { getTypeRegistry } = await soService.setup(createSetupDeps());
+
+        expect(getTypeRegistry()).toBe(typeRegistryInstanceMock);
+      });
+    });
   });
 
   describe('#start()', () => {

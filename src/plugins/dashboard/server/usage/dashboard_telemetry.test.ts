@@ -72,6 +72,22 @@ const lensXYSeriesB = ({
         visualization: {
           preferredSeriesType: 'seriesB',
         },
+        datasourceStates: {
+          indexpattern: {
+            layers: {
+              first: {
+                columns: {
+                  first: {
+                    operationType: 'terms',
+                  },
+                  second: {
+                    operationType: 'formula',
+                  },
+                },
+              },
+            },
+          },
+        },
       },
     },
   },
@@ -144,6 +160,7 @@ describe('dashboard telemetry', () => {
       expect(collectorData.lensByValue.a).toBe(3);
       expect(collectorData.lensByValue.seriesA).toBe(2);
       expect(collectorData.lensByValue.seriesB).toBe(1);
+      expect(collectorData.lensByValue.formula).toBe(1);
     });
 
     it('handles misshapen lens panels', () => {

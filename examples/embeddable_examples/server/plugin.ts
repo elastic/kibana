@@ -9,11 +9,19 @@
 import { Plugin, CoreSetup, CoreStart } from 'kibana/server';
 import { todoSavedObject } from './todo_saved_object';
 import { bookSavedObject } from './book_saved_object';
+import { searchableListSavedObject } from './searchable_list_saved_object';
+import { EmbeddableSetup } from '../../../src/plugins/embeddable/server';
 
-export class EmbeddableExamplesPlugin implements Plugin {
-  public setup(core: CoreSetup) {
+export interface EmbeddableExamplesSetupDependencies {
+  embeddable: EmbeddableSetup;
+}
+
+export class EmbeddableExamplesPlugin
+  implements Plugin<void, void, EmbeddableExamplesSetupDependencies> {
+  public setup(core: CoreSetup, { embeddable }: EmbeddableExamplesSetupDependencies) {
     core.savedObjects.registerType(todoSavedObject);
     core.savedObjects.registerType(bookSavedObject);
+    core.savedObjects.registerType(searchableListSavedObject(embeddable));
   }
 
   public start(core: CoreStart) {}

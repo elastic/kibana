@@ -19,11 +19,12 @@ import React from 'react';
 import { Subscription } from 'rxjs';
 import ReactGridLayout, { Layout } from 'react-grid-layout';
 import { GridData } from '../../../../common';
-import { ViewMode, EmbeddableChildPanel } from '../../../services/embeddable';
+import { ViewMode } from '../../../services/embeddable';
 import { DASHBOARD_GRID_COLUMN_COUNT, DASHBOARD_GRID_HEIGHT } from '../dashboard_constants';
 import { DashboardPanelState } from '../types';
 import { withKibana } from '../../../services/kibana_react';
 import { DashboardContainer, DashboardReactContextValue } from '../dashboard_container';
+import { DashboardGridItem } from './dashboard_grid_item';
 
 let lastValidGridSize = 0;
 
@@ -123,9 +124,6 @@ interface PanelLayout extends Layout {
 class DashboardGridUi extends React.Component<DashboardGridProps, State> {
   private subscription?: Subscription;
   private mounted: boolean = false;
-  // A mapping of panelIndexes to grid items so we can set the zIndex appropriately on the last focused
-  // item.
-  private gridItems = {} as { [key: string]: HTMLDivElement | null };
 
   constructor(props: DashboardGridProps) {
     super(props);
@@ -222,13 +220,20 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
     }
   };
 
-  public renderPanels() {
-    const { focusedPanelIndex, panels, expandedPanelId } = this.state;
+  public render() {
+    if (this.state.isLayoutInvalid) {
+      return null;
+    }
+
+    const { container, kibana } = this.props;
+    const { focusedPanelIndex, panels, expandedPanelId, viewMode } = this.state;
+    const isViewMode = viewMode === ViewMode.VIEW;
 
     // Part of our unofficial API - need to render in a consistent order for plugins.
     const panelsInOrder = Object.keys(panels).map(
       (key: string) => panels[key] as DashboardPanelState
     );
+
     panelsInOrder.sort((panelA, panelB) => {
       if (panelA.gridData.y === panelB.gridData.y) {
         return panelA.gridData.x - panelB.gridData.x;
@@ -237,55 +242,27 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
       }
     });
 
-    return _.map(panelsInOrder, (panel) => {
-      const expandPanel =
-        expandedPanelId !== undefined && expandedPanelId === panel.explicitInput.id;
-      const hidePanel = expandedPanelId !== undefined && expandedPanelId !== panel.explicitInput.id;
-      const classes = classNames({
-        // eslint-disable-next-line @typescript-eslint/naming-convention
-        'dshDashboardGrid__item--expanded': expandPanel,
-        // eslint-disable-next-line @typescript-eslint/naming-convention
-        'dshDashboardGrid__item--hidden': hidePanel,
-      });
-      return (
-        <div
-          style={{ zIndex: focusedPanelIndex === panel.explicitInput.id ? 2 : 'auto' }}
-          className={classes}
-          // This key is required for the ReactGridLayout to work properly
-          key={panel.explicitInput.id}
-          data-test-subj="dashboardPanel"
-          ref={(reactGridItem) => {
-            this.gridItems[panel.explicitInput.id] = reactGridItem;
-          }}
-        >
-          <EmbeddableChildPanel
-            // This key is used to force rerendering on embeddable type change while the id remains the same
-            key={panel.type}
-            embeddableId={panel.explicitInput.id}
-            container={this.props.container}
-            PanelComponent={this.props.kibana.services.embeddable.EmbeddablePanel}
-          />
-        </div>
-      );
-    });
-  }
+    const dashboardPanels = _.map(panelsInOrder, ({ explicitInput, type }) => (
+      <DashboardGridItem
+        id={explicitInput.id}
+        key={explicitInput.id}
+        type={type}
+        container={container}
+        PanelComponent={kibana.services.embeddable.EmbeddablePanel}
+        expandedPanelId={expandedPanelId}
+        focusedPanelId={focusedPanelIndex}
+      />
+    ));
 
-  public render() {
-    if (this.state.isLayoutInvalid) {
-      return null;
-    }
-
-    const { viewMode } = this.state;
-    const isViewMode = viewMode === ViewMode.VIEW;
     return (
       <ResponsiveSizedGrid
         isViewMode={isViewMode}
         layout={this.buildLayoutFromPanels()}
         onLayoutChange={this.onLayoutChange}
-        maximizedPanelId={this.state.expandedPanelId}
+        maximizedPanelId={expandedPanelId}
         useMargins={this.state.useMargins}
       >
-        {this.renderPanels()}
+        {dashboardPanels}
       </ResponsiveSizedGrid>
     );
   }

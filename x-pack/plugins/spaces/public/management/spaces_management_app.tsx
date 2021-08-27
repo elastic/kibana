@@ -12,12 +12,13 @@ import { Route, Router, Switch, useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import type { StartServicesAccessor } from 'src/core/public';
 import type { RegisterManagementAppArgs } from 'src/plugins/management/public';
-import type { Space } from 'src/plugins/spaces_oss/common';
 
+import { APP_WRAPPER_CLASS } from '../../../../../src/core/public';
 import {
   KibanaContextProvider,
   RedirectAppLinks,
 } from '../../../../../src/plugins/kibana_react/public';
+import type { Space } from '../../common';
 import type { PluginsStart } from '../plugin';
 import type { SpacesManager } from '../spaces_manager';
 
@@ -80,6 +81,7 @@ export const spacesManagementApp = Object.freeze({
               text: i18n.translate('xpack.spaces.management.createSpaceBreadcrumb', {
                 defaultMessage: 'Create',
               }),
+              href: '/create',
             },
           ]);
 
@@ -90,7 +92,6 @@ export const spacesManagementApp = Object.freeze({
               notifications={notifications}
               spacesManager={spacesManager}
               history={history}
-              getUrlForApp={application.getUrlForApp}
             />
           );
         };
@@ -117,7 +118,6 @@ export const spacesManagementApp = Object.freeze({
               spaceId={spaceId}
               onLoadSpace={onLoadSpace}
               history={history}
-              getUrlForApp={application.getUrlForApp}
             />
           );
         };
@@ -125,7 +125,7 @@ export const spacesManagementApp = Object.freeze({
         render(
           <KibanaContextProvider services={coreStart}>
             <i18nStart.Context>
-              <RedirectAppLinks application={application}>
+              <RedirectAppLinks application={application} className={APP_WRAPPER_CLASS}>
                 <Router history={history}>
                   <Switch>
                     <Route path={['', '/']} exact>

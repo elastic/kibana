@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import React, { useEffect, useState, Fragment } from 'react';
+import React, { useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { RouteComponentProps } from 'react-router-dom';
 
-import { EuiCallOut, EuiPageBody, EuiPageContent, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiCallOut, EuiPageContentBody, EuiPageHeader, EuiSpacer } from '@elastic/eui';
 import { Repository, EmptyRepository } from '../../../../common/types';
 
-import { SectionError, Error } from '../../../shared_imports';
-import { RepositoryForm, SectionLoading } from '../../components';
+import { PageError, SectionError, Error } from '../../../shared_imports';
+import { RepositoryForm, PageLoading } from '../../components';
 import { BASE_PATH, Section } from '../../constants';
 import { useServices } from '../../app_context';
 import { breadcrumbService, docTitleService } from '../../services/navigation';
@@ -79,12 +79,12 @@ export const RepositoryEdit: React.FunctionComponent<RouteComponentProps<MatchPa
 
   const renderLoading = () => {
     return (
-      <SectionLoading>
+      <PageLoading>
         <FormattedMessage
           id="xpack.snapshotRestore.editRepository.loadingRepositoryDescription"
           defaultMessage="Loading repository details…"
         />
-      </SectionLoading>
+      </PageLoading>
     );
   };
 
@@ -106,7 +106,7 @@ export const RepositoryEdit: React.FunctionComponent<RouteComponentProps<MatchPa
         }
       : repositoryError;
     return (
-      <SectionError
+      <PageError
         title={
           <FormattedMessage
             id="xpack.snapshotRestore.editRepository.loadingRepositoryErrorTitle"
@@ -116,6 +116,20 @@ export const RepositoryEdit: React.FunctionComponent<RouteComponentProps<MatchPa
         error={errorObject as Error}
       />
     );
+  };
+
+  if (loadingRepository) {
+    return renderLoading();
+  }
+
+  if (repositoryError) {
+    return renderError();
+  }
+
+  const { isManagedRepository } = repositoryData;
+
+  const clearSaveError = () => {
+    setSaveError(null);
   };
 
   const renderSaveError = () => {
@@ -132,65 +146,47 @@ export const RepositoryEdit: React.FunctionComponent<RouteComponentProps<MatchPa
     ) : null;
   };
 
-  const clearSaveError = () => {
-    setSaveError(null);
-  };
-
-  const renderContent = () => {
-    if (loadingRepository) {
-      return renderLoading();
-    }
-    if (repositoryError) {
-      return renderError();
-    }
-
-    const { isManagedRepository } = repositoryData;
-
-    return (
-      <Fragment>
-        {isManagedRepository ? (
-          <Fragment>
-            <EuiCallOut
-              size="m"
-              color="warning"
-              iconType="iInCircle"
-              title={
-                <FormattedMessage
-                  id="xpack.snapshotRestore.editRepository.managedRepositoryWarningTitle"
-                  defaultMessage="This is a managed repository. Changing this repository might affect other systems that use it. Proceed with caution."
-                />
-              }
-            />
-            <EuiSpacer size="l" />
-          </Fragment>
-        ) : null}
-        <RepositoryForm
-          repository={repository}
-          isManagedRepository={isManagedRepository}
-          isEditing={true}
-          isSaving={isSaving}
-          saveError={renderSaveError()}
-          clearSaveError={clearSaveError}
-          onSave={onSave}
-        />
-      </Fragment>
-    );
-  };
-
   return (
-    <EuiPageBody>
-      <EuiPageContent>
-        <EuiTitle size="l">
-          <h1>
+    <EuiPageContentBody restrictWidth style={{ width: '100%' }}>
+      <EuiPageHeader
+        pageTitle={
+          <span data-test-subj="pageTitle">
             <FormattedMessage
               id="xpack.snapshotRestore.editRepositoryTitle"
               defaultMessage="Edit repository"
             />
-          </h1>
-        </EuiTitle>
-        <EuiSpacer size="l" />
-        {renderContent()}
-      </EuiPageContent>
-    </EuiPageBody>
+          </span>
+        }
+      />
+
+      <EuiSpacer size="l" />
+
+      {isManagedRepository ? (
+        <>
+          <EuiCallOut
+            size="m"
+            color="warning"
+            iconType="iInCircle"
+            title={
+              <FormattedMessage
+                id="xpack.snapshotRestore.editRepository.managedRepositoryWarningTitle"
+                defaultMessage="This is a managed repository. Changing this repository might affect other systems that use it. Proceed with caution."
+              />
+            }
+          />
+          <EuiSpacer size="l" />
+        </>
+      ) : null}
+
+      <RepositoryForm
+        repository={repository}
+        isManagedRepository={isManagedRepository}
+        isEditing={true}
+        isSaving={isSaving}
+        saveError={renderSaveError()}
+        clearSaveError={clearSaveError}
+        onSave={onSave}
+      />
+    </EuiPageContentBody>
   );
 };

@@ -43,12 +43,15 @@ const querystringStringify = <ExpectedType, ArgType>(
 type EndpointDetailsUrlProps = Omit<EndpointIndexUIQueryParams, 'selected_endpoint'> &
   Required<Pick<EndpointIndexUIQueryParams, 'selected_endpoint'>>;
 
+/** URL search params that are only applicable to the list page */
+type EndpointListUrlProps = Omit<EndpointIndexUIQueryParams, 'selected_endpoint' | 'show'>;
+
 export const getEndpointListPath = (
-  props: { name: 'default' | 'endpointList' } & EndpointIndexUIQueryParams,
+  props: { name: 'default' | 'endpointList' } & EndpointListUrlProps,
   search?: string
 ) => {
   const { name, ...queryParams } = props;
-  const urlQueryParams = querystringStringify<EndpointIndexUIQueryParams, typeof queryParams>(
+  const urlQueryParams = querystringStringify<EndpointListUrlProps, typeof queryParams>(
     queryParams
   );
   const urlSearch = `${urlQueryParams && !isEmpty(search) ? '&' : ''}${search ?? ''}`;
@@ -62,14 +65,39 @@ export const getEndpointListPath = (
 };
 
 export const getEndpointDetailsPath = (
-  props: { name: 'endpointDetails' | 'endpointPolicyResponse' } & EndpointIndexUIQueryParams &
+  props: {
+    name:
+      | 'endpointDetails'
+      | 'endpointPolicyResponse'
+      | 'endpointIsolate'
+      | 'endpointUnIsolate'
+      | 'endpointActivityLog';
+  } & EndpointIndexUIQueryParams &
     EndpointDetailsUrlProps,
   search?: string
 ) => {
-  const { name, ...queryParams } = props;
-  queryParams.show = (props.name === 'endpointPolicyResponse'
-    ? 'policy_response'
-    : '') as EndpointIndexUIQueryParams['show'];
+  const { name, show, ...rest } = props;
+
+  const queryParams: EndpointDetailsUrlProps = { ...rest };
+
+  switch (props.name) {
+    case 'endpointDetails':
+      queryParams.show = 'details';
+      break;
+    case 'endpointIsolate':
+      queryParams.show = 'isolate';
+      break;
+    case 'endpointUnIsolate':
+      queryParams.show = 'unisolate';
+      break;
+    case 'endpointPolicyResponse':
+      queryParams.show = 'policy_response';
+      break;
+    case 'endpointActivityLog':
+      queryParams.show = 'activity_log';
+      break;
+  }
+
   const urlQueryParams = querystringStringify<EndpointDetailsUrlProps, typeof queryParams>(
     queryParams
   );
@@ -112,6 +140,12 @@ const normalizeTrustedAppsPageLocation = (
       ...(!isDefaultOrMissing(location.show, undefined) ? { show: location.show } : {}),
       ...(!isDefaultOrMissing(location.id, undefined) ? { id: location.id } : {}),
       ...(!isDefaultOrMissing(location.filter, '') ? { filter: location.filter } : ''),
+      ...(!isDefaultOrMissing(location.included_policies, '')
+        ? { included_policies: location.included_policies }
+        : ''),
+      ...(!isDefaultOrMissing(location.excluded_policies, '')
+        ? { excluded_policies: location.excluded_policies }
+        : ''),
     };
   } else {
     return {};
@@ -168,10 +202,24 @@ const extractFilter = (query: querystring.ParsedUrlQuery): string => {
   return extractFirstParamValue(query, 'filter') || '';
 };
 
+const extractIncludedPolicies = (query: querystring.ParsedUrlQuery): string => {
+  return extractFirstParamValue(query, 'included_policies') || '';
+};
+
+const extractExcludedPolicies = (query: querystring.ParsedUrlQuery): string => {
+  return extractFirstParamValue(query, 'excluded_policies') || '';
+};
+
 export const extractListPaginationParams = (query: querystring.ParsedUrlQuery) => ({
   page_index: extractPageIndex(query),
   page_size: extractPageSize(query),
   filter: extractFilter(query),
+});
+
+export const extractTrustedAppsListPaginationParams = (query: querystring.ParsedUrlQuery) => ({
+  ...extractListPaginationParams(query),
+  included_policies: extractIncludedPolicies(query),
+  excluded_policies: extractExcludedPolicies(query),
 });
 
 export const extractTrustedAppsListPageLocation = (
@@ -183,7 +231,7 @@ export const extractTrustedAppsListPageLocation = (
   ) as TrustedAppsListPageLocation['show'];
 
   return {
-    ...extractListPaginationParams(query),
+    ...extractTrustedAppsListPaginationParams(query),
     view_type: extractFirstParamValue(query, 'view_type') === 'list' ? 'list' : 'grid',
     show:
       showParamValue && ['edit', 'create'].includes(showParamValue) ? showParamValue : undefined,

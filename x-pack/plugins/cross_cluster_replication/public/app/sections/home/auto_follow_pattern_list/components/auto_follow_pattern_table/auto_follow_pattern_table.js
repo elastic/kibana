@@ -8,13 +8,17 @@
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+
 import {
   EuiInMemoryTable,
+  EuiButton,
   EuiLink,
   EuiLoadingKibana,
   EuiOverlayMask,
   EuiHealth,
 } from '@elastic/eui';
+import { reactRouterNavigate } from '../../../../../../../../../../src/plugins/kibana_react/public';
 import { API_STATUS, UIM_AUTO_FOLLOW_PATTERN_SHOW_DETAILS_CLICK } from '../../../../../constants';
 import {
   AutoFollowPatternDeleteProvider,
@@ -305,6 +309,19 @@ export class AutoFollowPatternTable extends PureComponent {
           )}
         />
       ) : undefined,
+      toolsRight: (
+        <EuiButton
+          {...reactRouterNavigate(routing._reactRouter.history, `/auto_follow_patterns/add`)}
+          fill
+          iconType="plusInCircle"
+          data-test-subj="createAutoFollowPatternButton"
+        >
+          <FormattedMessage
+            id="xpack.crossClusterReplication.autoFollowPatternList.addAutoFollowPatternButtonLabel"
+            defaultMessage="Create an auto-follow pattern"
+          />
+        </EuiButton>
+      ),
       onChange: this.onSearch,
       box: {
         incremental: true,

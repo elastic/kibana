@@ -40,13 +40,15 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('Exports and Spaces', () => {
     before(async () => {
-      await esArchiver.load('reporting/ecommerce');
-      await esArchiver.load('reporting/ecommerce_kibana_spaces'); // multiple spaces with different config settings
+      await esArchiver.load('x-pack/test/functional/es_archives/reporting/ecommerce');
+      await esArchiver.load('x-pack/test/functional/es_archives/reporting/ecommerce_kibana_spaces'); // multiple spaces with different config settings
     });
 
     after(async () => {
-      await esArchiver.unload('reporting/ecommerce');
-      await esArchiver.unload('reporting/ecommerce_kibana_spaces');
+      await esArchiver.unload('x-pack/test/functional/es_archives/reporting/ecommerce');
+      await esArchiver.unload(
+        'x-pack/test/functional/es_archives/reporting/ecommerce_kibana_spaces'
+      );
       await reportingAPI.deleteAllReports();
     });
 

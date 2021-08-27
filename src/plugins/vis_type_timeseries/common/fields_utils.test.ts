@@ -12,7 +12,7 @@ import type { FieldSpec } from '../../data/common';
 describe('fields_utils', () => {
   describe('toSanitizedFieldType', () => {
     const mockedField = {
-      lang: 'lang',
+      lang: 'painless',
       conflictDescriptions: {},
       aggregatable: true,
       name: 'name',

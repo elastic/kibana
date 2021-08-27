@@ -1,0 +1,14 @@
+{
+  "type": "doc",
+  "value": {
+    "index": "myfakeindex-5",
+    "source": {
+      "@timestamp": 1608131778,
+      "message": "hello world 4",
+      "event": {
+        "ingested": 1622676795
+      }
+    },
+    "type": "_doc"
+  }
+}

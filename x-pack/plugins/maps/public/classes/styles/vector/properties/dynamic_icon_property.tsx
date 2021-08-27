@@ -8,7 +8,7 @@
 import _ from 'lodash';
 import React from 'react';
 import { EuiTextColor } from '@elastic/eui';
-import { Map as MbMap } from 'mapbox-gl';
+import type { Map as MbMap } from '@kbn/mapbox-gl';
 import { DynamicStyleProperty } from './dynamic_style_property';
 // @ts-expect-error
 import { getIconPalette, getMakiIconId, getMakiSymbolAnchor } from '../symbol_utils';

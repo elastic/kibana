@@ -38,7 +38,10 @@ import { ActionsConfig, getValidatedConfig } from './config';
 import { resolveCustomHosts } from './lib/custom_host_settings';
 import { ActionsClient } from './actions_client';
 import { ActionTypeRegistry } from './action_type_registry';
-import { createExecutionEnqueuerFunction } from './create_execute_function';
+import {
+  createExecutionEnqueuerFunction,
+  createEphemeralExecutionEnqueuerFunction,
+} from './create_execute_function';
 import { registerBuiltInActionTypes } from './builtin_action_types';
 import { registerActionsUsageCollector } from './usage';
 import {
@@ -93,6 +96,7 @@ export interface PluginSetupContract {
   >(
     actionType: ActionType<Config, Secrets, Params, ExecutorResultData>
   ): void;
+  isPreconfiguredConnector(connectorId: string): boolean;
 }
 
 export interface PluginStartContract {
@@ -152,7 +156,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
   private readonly kibanaIndexConfig: { kibana: { index: string } };
 
   constructor(initContext: PluginInitializerContext) {
-    this.logger = initContext.logger.get('actions');
+    this.logger = initContext.logger.get();
     this.actionsConfig = getValidatedConfig(
       this.logger,
       resolveCustomHosts(this.logger, initContext.config.get<ActionsConfig>())
@@ -222,7 +226,13 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
     this.actionExecutor = actionExecutor;
     this.security = plugins.security;
 
-    setupSavedObjects(core.savedObjects, plugins.encryptedSavedObjects, this.actionTypeRegistry!);
+    setupSavedObjects(
+      core.savedObjects,
+      plugins.encryptedSavedObjects,
+      this.actionTypeRegistry!,
+      plugins.taskManager.index,
+      this.preconfiguredActions
+    );
 
     registerBuiltInActionTypes({
       logger: this.logger,
@@ -280,6 +290,11 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
         ensureSufficientLicense(actionType);
         actionTypeRegistry.register(actionType);
       },
+      isPreconfiguredConnector: (connectorId: string): boolean => {
+        return !!this.preconfiguredActions.find(
+          (preconfigured) => preconfigured.id === connectorId
+        );
+      },
     };
   }
 
@@ -332,6 +347,12 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
           await getAuthorizationModeBySource(unsecuredSavedObjectsClient, authorizationContext)
         ),
         actionExecutor: actionExecutor!,
+        ephemeralExecutionEnqueuer: createEphemeralExecutionEnqueuerFunction({
+          taskManager: plugins.taskManager,
+          actionTypeRegistry: actionTypeRegistry!,
+          isESOCanEncrypt: isESOCanEncrypt!,
+          preconfiguredActions,
+        }),
         executionEnqueuer: createExecutionEnqueuerFunction({
           taskManager: plugins.taskManager,
           actionTypeRegistry: actionTypeRegistry!,
@@ -492,6 +513,12 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
             request,
             authorization: instantiateAuthorization(request),
             actionExecutor: actionExecutor!,
+            ephemeralExecutionEnqueuer: createEphemeralExecutionEnqueuerFunction({
+              taskManager,
+              actionTypeRegistry: actionTypeRegistry!,
+              isESOCanEncrypt: isESOCanEncrypt!,
+              preconfiguredActions,
+            }),
             executionEnqueuer: createExecutionEnqueuerFunction({
               taskManager,
               actionTypeRegistry: actionTypeRegistry!,

@@ -5,23 +5,20 @@
  * 2.0.
  */
 import type { estypes } from '@elastic/elasticsearch';
-import { SortResults } from '@elastic/elasticsearch/api/types';
 import { isEmpty } from 'lodash';
-import {
-  SortOrderOrUndefined,
-  TimestampOverrideOrUndefined,
-} from '../../../../common/detection_engine/schemas/common/schemas';
+import { TimestampOverrideOrUndefined } from '../../../../common/detection_engine/schemas/common/schemas';
 
 interface BuildEventsSearchQuery {
-  aggregations?: Record<string, estypes.AggregationContainer>;
+  aggregations?: Record<string, estypes.AggregationsAggregationContainer>;
   index: string[];
   from: string;
   to: string;
-  filter?: estypes.QueryContainer;
+  filter: estypes.QueryDslQueryContainer;
   size: number;
-  sortOrder?: SortOrderOrUndefined;
-  searchAfterSortIds: SortResults | undefined;
+  sortOrder?: estypes.SearchSortOrder;
+  searchAfterSortIds: estypes.SearchSortResults | undefined;
   timestampOverride: TimestampOverrideOrUndefined;
+  trackTotalHits?: boolean;
 }
 
 export const buildEventsSearchQuery = ({
@@ -34,6 +31,7 @@ export const buildEventsSearchQuery = ({
   searchAfterSortIds,
   sortOrder,
   timestampOverride,
+  trackTotalHits,
 }: BuildEventsSearchQuery) => {
   const defaultTimeFields = ['@timestamp'];
   const timestamps =
@@ -43,7 +41,7 @@ export const buildEventsSearchQuery = ({
     format: 'strict_date_optional_time',
   }));
 
-  const rangeFilter: estypes.QueryContainer[] =
+  const rangeFilter: estypes.QueryDslQueryContainer[] =
     timestampOverride != null
       ? [
           {
@@ -63,7 +61,6 @@ export const buildEventsSearchQuery = ({
                     '@timestamp': {
                       lte: to,
                       gte: from,
-                      // @ts-expect-error
                       format: 'strict_date_optional_time',
                     },
                   },
@@ -93,20 +90,34 @@ export const buildEventsSearchQuery = ({
           },
         ];
 
-  const filterWithTime: estypes.QueryContainer[] = [
-    // but tests contain undefined, so I suppose it's desired behaviour
-    // @ts-expect-error undefined in not assignable to QueryContainer
+  const filterWithTime: estypes.QueryDslQueryContainer[] = [
     filter,
     { bool: { filter: [{ bool: { should: [...rangeFilter], minimum_should_match: 1 } }] } },
   ];
+
+  const sort: estypes.SearchSort = [];
+  if (timestampOverride) {
+    sort.push({
+      [timestampOverride]: {
+        order: sortOrder ?? 'asc',
+        unmapped_type: 'date',
+      },
+    });
+  }
+  sort.push({
+    '@timestamp': {
+      order: sortOrder ?? 'asc',
+      unmapped_type: 'date',
+    },
+  });
 
   const searchQuery = {
     allow_no_indices: true,
     index,
     size,
     ignore_unavailable: true,
+    track_total_hits: trackTotalHits,
     body: {
-      docvalue_fields: docFields,
       query: {
         bool: {
           filter: [
@@ -122,33 +133,10 @@ export const buildEventsSearchQuery = ({
           field: '*',
           include_unmapped: true,
         },
+        ...docFields,
       ],
       ...(aggregations ? { aggregations } : {}),
-      sort: [
-        ...(timestampOverride != null
-          ? [
-              {
-                [timestampOverride]: {
-                  order: sortOrder ?? 'asc',
-                  unmapped_type: 'date',
-                },
-              },
-              {
-                '@timestamp': {
-                  order: sortOrder ?? 'asc',
-                  unmapped_type: 'date',
-                },
-              },
-            ]
-          : [
-              {
-                '@timestamp': {
-                  order: sortOrder ?? 'asc',
-                  unmapped_type: 'date',
-                },
-              },
-            ]),
-      ],
+      sort,
     },
   };
 

@@ -14,6 +14,7 @@ import {
   Append,
   Bytes,
   Circle,
+  CommunityId,
   Convert,
   CSV,
   DateProcessor,
@@ -23,6 +24,7 @@ import {
   Drop,
   Enrich,
   Fail,
+  Fingerprint,
   Foreach,
   GeoIP,
   Grok,
@@ -33,6 +35,7 @@ import {
   Json,
   Kv,
   Lowercase,
+  NetworkDirection,
   Pipeline,
   RegisteredDomain,
   Remove,
@@ -122,6 +125,20 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
         values: {
           field,
         },
+      }),
+  },
+  community_id: {
+    FieldsComponent: CommunityId,
+    docLinkPath: '/community-id-processor.html',
+    label: i18n.translate('xpack.ingestPipelines.processors.label.communityId', {
+      defaultMessage: 'Community ID',
+    }),
+    typeDescription: i18n.translate('xpack.ingestPipelines.processors.description.communityId', {
+      defaultMessage: 'Computes the Community ID for network flow data.',
+    }),
+    getDefaultDescription: () =>
+      i18n.translate('xpack.ingestPipelines.processors.defaultDescription.communityId', {
+        defaultMessage: 'Computes the Community ID for network flow data.',
       }),
   },
   convert: {
@@ -306,6 +323,20 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     getDefaultDescription: () =>
       i18n.translate('xpack.ingestPipelines.processors.defaultDescription.fail', {
         defaultMessage: 'Raises an exception that halts execution',
+      }),
+  },
+  fingerprint: {
+    FieldsComponent: Fingerprint,
+    docLinkPath: '/fingerprint-processor.html',
+    label: i18n.translate('xpack.ingestPipelines.processors.label.fingerprint', {
+      defaultMessage: 'Fingerprint',
+    }),
+    typeDescription: i18n.translate('xpack.ingestPipelines.processors.description.fingerprint', {
+      defaultMessage: 'Computes a hash of the document’s content.',
+    }),
+    getDefaultDescription: () =>
+      i18n.translate('xpack.ingestPipelines.processors.defaultDescription.fingerprint', {
+        defaultMessage: 'Computes a hash of the document’s content.',
       }),
   },
   foreach: {
@@ -502,6 +533,23 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
         },
       }),
   },
+  network_direction: {
+    FieldsComponent: NetworkDirection,
+    docLinkPath: '/network-direction-processor.html',
+    label: i18n.translate('xpack.ingestPipelines.processors.label.networkDirection', {
+      defaultMessage: 'Network Direction',
+    }),
+    typeDescription: i18n.translate(
+      'xpack.ingestPipelines.processors.description.networkDirection',
+      {
+        defaultMessage: 'Calculates the network direction given a source IP address.',
+      }
+    ),
+    getDefaultDescription: () =>
+      i18n.translate('xpack.ingestPipelines.processors.defaultDescription.networkDirection', {
+        defaultMessage: 'Calculates the network direction given a source IP address.',
+      }),
+  },
   pipeline: {
     FieldsComponent: Pipeline,
     docLinkPath: '/pipeline-processor.html',
@@ -596,14 +644,25 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     typeDescription: i18n.translate('xpack.ingestPipelines.processors.description.set', {
       defaultMessage: 'Sets the value of a field.',
     }),
-    getDefaultDescription: ({ field, value }) =>
-      i18n.translate('xpack.ingestPipelines.processors.defaultDescription.set', {
+    getDefaultDescription: ({ field, value, copy_from: copyFrom }) => {
+      if (copyFrom) {
+        return i18n.translate('xpack.ingestPipelines.processors.defaultDescription.setCopyFrom', {
+          defaultMessage: 'Sets value of "{field}" to the value of "{copyFrom}"',
+          values: {
+            field,
+            copyFrom,
+          },
+        });
+      }
+
+      return i18n.translate('xpack.ingestPipelines.processors.defaultDescription.set', {
         defaultMessage: 'Sets value of "{field}" to "{value}"',
         values: {
           field,
           value,
         },
-      }),
+      });
+    },
   },
   set_security_user: {
     FieldsComponent: SetSecurityUser,

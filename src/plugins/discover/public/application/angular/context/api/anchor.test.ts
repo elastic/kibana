@@ -8,22 +8,23 @@
 
 import { EsQuerySortValue, SortDirection } from '../../../../../../data/public';
 import { createIndexPatternsStub, createSearchSourceStub } from './_stubs';
-import { AnchorHitRecord, fetchAnchorProvider } from './anchor';
+import { fetchAnchorProvider, updateSearchSource } from './anchor';
+import { EsHitRecord, EsHitRecordList } from './context';
+import { indexPatternMock } from '../../../../__mocks__/index_pattern';
+import { savedSearchMock } from '../../../../__mocks__/saved_search';
 
 describe('context app', function () {
   let fetchAnchor: (
     indexPatternId: string,
     anchorId: string,
     sort: EsQuerySortValue[]
-  ) => Promise<AnchorHitRecord>;
+  ) => Promise<EsHitRecord>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let searchSourceStub: any;
 
   describe('function fetchAnchor', function () {
     beforeEach(() => {
-      searchSourceStub = createSearchSourceStub([
-        { _id: 'hit1', fields: [], sort: [], _source: {} },
-      ]);
+      searchSourceStub = createSearchSourceStub(([{ _id: 'hit1' }] as unknown) as EsHitRecordList);
       fetchAnchor = fetchAnchorProvider(createIndexPatternsStub(), searchSourceStub);
     });
 
@@ -115,6 +116,32 @@ describe('context app', function () {
       });
     });
 
+    it('should update search source correctly when useNewFieldsApi set to false', function () {
+      const searchSource = updateSearchSource(
+        savedSearchMock.searchSource,
+        'id',
+        [],
+        false,
+        indexPatternMock
+      );
+      const searchRequestBody = searchSource.getSearchRequestBody();
+      expect(searchRequestBody._source).toBeInstanceOf(Object);
+      expect(searchRequestBody.track_total_hits).toBe(false);
+    });
+
+    it('should update search source correctly when useNewFieldsApi set to true', function () {
+      const searchSource = updateSearchSource(
+        savedSearchMock.searchSource,
+        'id',
+        [],
+        true,
+        indexPatternMock
+      );
+      const searchRequestBody = searchSource.getSearchRequestBody();
+      expect(searchRequestBody._source).toBe(false);
+      expect(searchRequestBody.track_total_hits).toBe(false);
+    });
+
     it('should reject with an error when no hits were found', function () {
       searchSourceStub._stubHits = [];
 
@@ -139,16 +166,14 @@ describe('context app', function () {
         { _doc: SortDirection.desc },
       ]).then((anchorDocument) => {
         expect(anchorDocument).toHaveProperty('property1', 'value1');
-        expect(anchorDocument).toHaveProperty('$$_isAnchor', true);
+        expect(anchorDocument).toHaveProperty('isAnchor', true);
       });
     });
   });
 
   describe('useNewFields API', () => {
     beforeEach(() => {
-      searchSourceStub = createSearchSourceStub([
-        { _id: 'hit1', fields: [], sort: [], _source: {} },
-      ]);
+      searchSourceStub = createSearchSourceStub(([{ _id: 'hit1' }] as unknown) as EsHitRecordList);
       fetchAnchor = fetchAnchorProvider(createIndexPatternsStub(), searchSourceStub, true);
     });
 

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React from 'react';
 import { renderHook, act } from '@testing-library/react-hooks';
 import {
   initialState,
@@ -15,6 +16,7 @@ import {
 import { mappings, caseConfigurationCamelCaseResponseMock } from './mock';
 import * as api from './api';
 import { ConnectorTypes } from '../../../common';
+import { TestProviders } from '../../common/mock';
 
 const mockErrorToast = jest.fn();
 const mockSuccessToast = jest.fn();
@@ -49,8 +51,11 @@ describe('useConfigure', () => {
 
   test('init', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, ReturnUseCaseConfigure>(() =>
-        useCaseConfigure()
+      const { result, waitForNextUpdate } = renderHook<string, ReturnUseCaseConfigure>(
+        () => useCaseConfigure(),
+        {
+          wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+        }
       );
       await waitForNextUpdate();
       expect(result.current).toEqual({
@@ -67,8 +72,11 @@ describe('useConfigure', () => {
 
   test('fetch case configuration', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, ReturnUseCaseConfigure>(() =>
-        useCaseConfigure()
+      const { result, waitForNextUpdate } = renderHook<string, ReturnUseCaseConfigure>(
+        () => useCaseConfigure(),
+        {
+          wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+        }
       );
       await waitForNextUpdate();
       await waitForNextUpdate();
@@ -90,6 +98,7 @@ describe('useConfigure', () => {
         setCurrentConfiguration: result.current.setCurrentConfiguration,
         setMappings: result.current.setMappings,
         version: caseConfigurationCamelCaseResponseMock.version,
+        id: caseConfigurationCamelCaseResponseMock.id,
       });
     });
   });
@@ -98,8 +107,11 @@ describe('useConfigure', () => {
     const spyOnGetCaseConfigure = jest.spyOn(api, 'getCaseConfigure');
 
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, ReturnUseCaseConfigure>(() =>
-        useCaseConfigure()
+      const { result, waitForNextUpdate } = renderHook<string, ReturnUseCaseConfigure>(
+        () => useCaseConfigure(),
+        {
+          wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+        }
       );
       await waitForNextUpdate();
       await waitForNextUpdate();
@@ -110,8 +122,11 @@ describe('useConfigure', () => {
 
   test('correctly sets mappings', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, ReturnUseCaseConfigure>(() =>
-        useCaseConfigure()
+      const { result, waitForNextUpdate } = renderHook<string, ReturnUseCaseConfigure>(
+        () => useCaseConfigure(),
+        {
+          wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+        }
       );
       await waitForNextUpdate();
       await waitForNextUpdate();
@@ -123,8 +138,11 @@ describe('useConfigure', () => {
 
   test('set isLoading to true when fetching case configuration', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, ReturnUseCaseConfigure>(() =>
-        useCaseConfigure()
+      const { result, waitForNextUpdate } = renderHook<string, ReturnUseCaseConfigure>(
+        () => useCaseConfigure(),
+        {
+          wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+        }
       );
       await waitForNextUpdate();
       await waitForNextUpdate();
@@ -136,8 +154,11 @@ describe('useConfigure', () => {
 
   test('persist case configuration', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, ReturnUseCaseConfigure>(() =>
-        useCaseConfigure()
+      const { result, waitForNextUpdate } = renderHook<string, ReturnUseCaseConfigure>(
+        () => useCaseConfigure(),
+        {
+          wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+        }
       );
       await waitForNextUpdate();
       await waitForNextUpdate();
@@ -165,8 +186,11 @@ describe('useConfigure', () => {
     );
 
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, ReturnUseCaseConfigure>(() =>
-        useCaseConfigure()
+      const { result, waitForNextUpdate } = renderHook<string, ReturnUseCaseConfigure>(
+        () => useCaseConfigure(),
+        {
+          wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+        }
       );
       await waitForNextUpdate();
       await waitForNextUpdate();
@@ -191,8 +215,11 @@ describe('useConfigure', () => {
     );
 
     await act(async () => {
-      const { waitForNextUpdate } = renderHook<string, ReturnUseCaseConfigure>(() =>
-        useCaseConfigure()
+      const { waitForNextUpdate } = renderHook<string, ReturnUseCaseConfigure>(
+        () => useCaseConfigure(),
+        {
+          wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+        }
       );
       await waitForNextUpdate();
       await waitForNextUpdate();
@@ -220,8 +247,11 @@ describe('useConfigure', () => {
     );
 
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, ReturnUseCaseConfigure>(() =>
-        useCaseConfigure()
+      const { result, waitForNextUpdate } = renderHook<string, ReturnUseCaseConfigure>(
+        () => useCaseConfigure(),
+        {
+          wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+        }
       );
       await waitForNextUpdate();
       await waitForNextUpdate();
@@ -244,8 +274,11 @@ describe('useConfigure', () => {
     );
 
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, ReturnUseCaseConfigure>(() =>
-        useCaseConfigure()
+      const { result, waitForNextUpdate } = renderHook<string, ReturnUseCaseConfigure>(
+        () => useCaseConfigure(),
+        {
+          wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+        }
       );
       await waitForNextUpdate();
       await waitForNextUpdate();
@@ -265,8 +298,11 @@ describe('useConfigure', () => {
     });
 
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, ReturnUseCaseConfigure>(() =>
-        useCaseConfigure()
+      const { result, waitForNextUpdate } = renderHook<string, ReturnUseCaseConfigure>(
+        () => useCaseConfigure(),
+        {
+          wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+        }
       );
 
       await waitForNextUpdate();
@@ -292,6 +328,7 @@ describe('useConfigure', () => {
       Promise.resolve({
         ...caseConfigurationCamelCaseResponseMock,
         version: '',
+        id: '',
       })
     );
     const spyOnPostCaseConfigure = jest.spyOn(api, 'postCaseConfigure');
@@ -300,8 +337,11 @@ describe('useConfigure', () => {
     });
 
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, ReturnUseCaseConfigure>(() =>
-        useCaseConfigure()
+      const { result, waitForNextUpdate } = renderHook<string, ReturnUseCaseConfigure>(
+        () => useCaseConfigure(),
+        {
+          wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+        }
       );
 
       await waitForNextUpdate();

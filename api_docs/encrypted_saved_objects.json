@@ -27,10 +27,7 @@
           },
           " extends Error"
         ],
-        "source": {
-          "path": "x-pack/plugins/encrypted_saved_objects/server/crypto/encryption_error.ts",
-          "lineNumber": 16
-        },
+        "path": "x-pack/plugins/encrypted_saved_objects/server/crypto/encryption_error.ts",
         "deprecated": false,
         "children": [
           {
@@ -43,10 +40,7 @@
             "signature": [
               "any"
             ],
-            "source": {
-              "path": "x-pack/plugins/encrypted_saved_objects/server/crypto/encryption_error.ts",
-              "lineNumber": 17
-            },
+            "path": "x-pack/plugins/encrypted_saved_objects/server/crypto/encryption_error.ts",
             "deprecated": false,
             "children": [
               {
@@ -59,10 +53,7 @@
                 "signature": [
                   "string"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/encrypted_saved_objects/server/crypto/encryption_error.ts",
-                  "lineNumber": 18
-                },
+                "path": "x-pack/plugins/encrypted_saved_objects/server/crypto/encryption_error.ts",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -76,10 +67,7 @@
                 "signature": [
                   "string"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/encrypted_saved_objects/server/crypto/encryption_error.ts",
-                  "lineNumber": 19
-                },
+                "path": "x-pack/plugins/encrypted_saved_objects/server/crypto/encryption_error.ts",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -93,10 +81,7 @@
                 "signature": [
                   "EncryptionErrorOperation"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/encrypted_saved_objects/server/crypto/encryption_error.ts",
-                  "lineNumber": 20
-                },
+                "path": "x-pack/plugins/encrypted_saved_objects/server/crypto/encryption_error.ts",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -110,10 +95,7 @@
                 "signature": [
                   "Error | undefined"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/encrypted_saved_objects/server/crypto/encryption_error.ts",
-                  "lineNumber": 21
-                },
+                "path": "x-pack/plugins/encrypted_saved_objects/server/crypto/encryption_error.ts",
                 "deprecated": false,
                 "isRequired": false
               }
@@ -130,10 +112,7 @@
             "signature": [
               "() => { message: string; }"
             ],
-            "source": {
-              "path": "x-pack/plugins/encrypted_saved_objects/server/crypto/encryption_error.ts",
-              "lineNumber": 30
-            },
+            "path": "x-pack/plugins/encrypted_saved_objects/server/crypto/encryption_error.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -151,10 +130,7 @@
         "tags": [],
         "label": "EncryptedSavedObjectsClient",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/encrypted_saved_objects/server/saved_objects/index.ts",
-          "lineNumber": 40
-        },
+        "path": "x-pack/plugins/encrypted_saved_objects/server/saved_objects/index.ts",
         "deprecated": false,
         "children": [
           {
@@ -177,11 +153,60 @@
               "SavedObject",
               "<T>>"
             ],
-            "source": {
-              "path": "x-pack/plugins/encrypted_saved_objects/server/saved_objects/index.ts",
-              "lineNumber": 41
-            },
-            "deprecated": false
+            "path": "x-pack/plugins/encrypted_saved_objects/server/saved_objects/index.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "encryptedSavedObjects",
+                "id": "def-server.EncryptedSavedObjectsClient.getDecryptedAsInternalUser.$1",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/plugins/encrypted_saved_objects/server/saved_objects/index.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "encryptedSavedObjects",
+                "id": "def-server.EncryptedSavedObjectsClient.getDecryptedAsInternalUser.$2",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/plugins/encrypted_saved_objects/server/saved_objects/index.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "encryptedSavedObjects",
+                "id": "def-server.EncryptedSavedObjectsClient.getDecryptedAsInternalUser.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "core",
+                    "scope": "server",
+                    "docId": "kibCoreSavedObjectsPluginApi",
+                    "section": "def-server.SavedObjectsBaseOptions",
+                    "text": "SavedObjectsBaseOptions"
+                  },
+                  " | undefined"
+                ],
+                "path": "x-pack/plugins/encrypted_saved_objects/server/saved_objects/index.ts",
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -195,10 +220,7 @@
         "description": [
           "\nDescribes the registration entry for the saved object type that contain attributes that need to\nbe encrypted."
         ],
-        "source": {
-          "path": "x-pack/plugins/encrypted_saved_objects/server/crypto/encrypted_saved_objects_service.ts",
-          "lineNumber": 33
-        },
+        "path": "x-pack/plugins/encrypted_saved_objects/server/crypto/encrypted_saved_objects_service.ts",
         "deprecated": false,
         "children": [
           {
@@ -208,10 +230,7 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/encrypted_saved_objects/server/crypto/encrypted_saved_objects_service.ts",
-              "lineNumber": 34
-            },
+            "path": "x-pack/plugins/encrypted_saved_objects/server/crypto/encrypted_saved_objects_service.ts",
             "deprecated": false
           },
           {
@@ -226,10 +245,7 @@
               "AttributeToEncrypt",
               ">"
             ],
-            "source": {
-              "path": "x-pack/plugins/encrypted_saved_objects/server/crypto/encrypted_saved_objects_service.ts",
-              "lineNumber": 35
-            },
+            "path": "x-pack/plugins/encrypted_saved_objects/server/crypto/encrypted_saved_objects_service.ts",
             "deprecated": false
           },
           {
@@ -242,10 +258,7 @@
             "signature": [
               "ReadonlySet<string> | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/encrypted_saved_objects/server/crypto/encrypted_saved_objects_service.ts",
-              "lineNumber": 36
-            },
+            "path": "x-pack/plugins/encrypted_saved_objects/server/crypto/encrypted_saved_objects_service.ts",
             "deprecated": false
           }
         ],
@@ -253,7 +266,77 @@
       }
     ],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "encryptedSavedObjects",
+        "id": "def-server.IsMigrationNeededPredicate",
+        "type": "Type",
+        "tags": [],
+        "label": "IsMigrationNeededPredicate",
+        "description": [],
+        "signature": [
+          "(encryptedDoc: ",
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCoreSavedObjectsPluginApi",
+            "section": "def-server.SavedObjectUnsanitizedDoc",
+            "text": "SavedObjectUnsanitizedDoc"
+          },
+          "<InputAttributes> | ",
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCoreSavedObjectsPluginApi",
+            "section": "def-server.SavedObjectUnsanitizedDoc",
+            "text": "SavedObjectUnsanitizedDoc"
+          },
+          "<MigratedAttributes>) => encryptedDoc is ",
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCoreSavedObjectsPluginApi",
+            "section": "def-server.SavedObjectUnsanitizedDoc",
+            "text": "SavedObjectUnsanitizedDoc"
+          },
+          "<InputAttributes>"
+        ],
+        "path": "x-pack/plugins/encrypted_saved_objects/server/create_migration.ts",
+        "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "encryptedSavedObjects",
+            "id": "def-server.encryptedDoc",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "encryptedDoc",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectUnsanitizedDoc",
+                "text": "SavedObjectUnsanitizedDoc"
+              },
+              "<InputAttributes> | ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectUnsanitizedDoc",
+                "text": "SavedObjectUnsanitizedDoc"
+              },
+              "<MigratedAttributes>"
+            ],
+            "path": "x-pack/plugins/encrypted_saved_objects/server/create_migration.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "objects": [],
     "setup": {
       "parentPluginId": "encryptedSavedObjects",
@@ -262,10 +345,7 @@
       "tags": [],
       "label": "EncryptedSavedObjectsPluginSetup",
       "description": [],
-      "source": {
-        "path": "x-pack/plugins/encrypted_saved_objects/server/plugin.ts",
-        "lineNumber": 31
-      },
+      "path": "x-pack/plugins/encrypted_saved_objects/server/plugin.ts",
       "deprecated": false,
       "children": [
         {
@@ -277,10 +357,7 @@
           "description": [
             "\nIndicates if Saved Object encryption is possible. Requires an encryption key to be explicitly set via `xpack.encryptedSavedObjects.encryptionKey`."
           ],
-          "source": {
-            "path": "x-pack/plugins/encrypted_saved_objects/server/plugin.ts",
-            "lineNumber": 35
-          },
+          "path": "x-pack/plugins/encrypted_saved_objects/server/plugin.ts",
           "deprecated": false
         },
         {
@@ -301,11 +378,31 @@
             },
             ") => void"
           ],
-          "source": {
-            "path": "x-pack/plugins/encrypted_saved_objects/server/plugin.ts",
-            "lineNumber": 36
-          },
-          "deprecated": false
+          "path": "x-pack/plugins/encrypted_saved_objects/server/plugin.ts",
+          "deprecated": false,
+          "children": [
+            {
+              "parentPluginId": "encryptedSavedObjects",
+              "id": "def-server.EncryptedSavedObjectsPluginSetup.registerType.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "typeRegistration",
+              "description": [],
+              "signature": [
+                {
+                  "pluginId": "encryptedSavedObjects",
+                  "scope": "server",
+                  "docId": "kibEncryptedSavedObjectsPluginApi",
+                  "section": "def-server.EncryptedSavedObjectTypeRegistration",
+                  "text": "EncryptedSavedObjectTypeRegistration"
+                }
+              ],
+              "path": "x-pack/plugins/encrypted_saved_objects/server/plugin.ts",
+              "deprecated": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
         },
         {
           "parentPluginId": "encryptedSavedObjects",
@@ -315,13 +412,29 @@
           "label": "createMigration",
           "description": [],
           "signature": [
-            "CreateEncryptedSavedObjectsMigrationFn"
+            "<InputAttributes = unknown, MigratedAttributes = InputAttributes>(opts: ",
+            "CreateEncryptedSavedObjectsMigrationFnOpts",
+            "<InputAttributes, MigratedAttributes>) => SavedObjectOptionalMigrationFn<InputAttributes, MigratedAttributes>"
           ],
-          "source": {
-            "path": "x-pack/plugins/encrypted_saved_objects/server/plugin.ts",
-            "lineNumber": 37
-          },
-          "deprecated": false
+          "path": "x-pack/plugins/encrypted_saved_objects/server/plugin.ts",
+          "deprecated": false,
+          "returnComment": [],
+          "children": [
+            {
+              "parentPluginId": "encryptedSavedObjects",
+              "id": "def-server.opts",
+              "type": "Object",
+              "tags": [],
+              "label": "opts",
+              "description": [],
+              "signature": [
+                "CreateEncryptedSavedObjectsMigrationFnOpts",
+                "<InputAttributes, MigratedAttributes>"
+              ],
+              "path": "x-pack/plugins/encrypted_saved_objects/server/create_migration.ts",
+              "deprecated": false
+            }
+          ]
         }
       ],
       "lifecycle": "setup",
@@ -334,10 +447,7 @@
       "tags": [],
       "label": "EncryptedSavedObjectsPluginStart",
       "description": [],
-      "source": {
-        "path": "x-pack/plugins/encrypted_saved_objects/server/plugin.ts",
-        "lineNumber": 40
-      },
+      "path": "x-pack/plugins/encrypted_saved_objects/server/plugin.ts",
       "deprecated": false,
       "children": [
         {
@@ -350,11 +460,25 @@
           "signature": [
             "(error: Error) => boolean"
           ],
-          "source": {
-            "path": "x-pack/plugins/encrypted_saved_objects/server/plugin.ts",
-            "lineNumber": 41
-          },
-          "deprecated": false
+          "path": "x-pack/plugins/encrypted_saved_objects/server/plugin.ts",
+          "deprecated": false,
+          "children": [
+            {
+              "parentPluginId": "encryptedSavedObjects",
+              "id": "def-server.EncryptedSavedObjectsPluginStart.isEncryptionError.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "error",
+              "description": [],
+              "signature": [
+                "Error"
+              ],
+              "path": "x-pack/plugins/encrypted_saved_objects/server/plugin.ts",
+              "deprecated": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
         },
         {
           "parentPluginId": "encryptedSavedObjects",
@@ -364,13 +488,36 @@
           "label": "getClient",
           "description": [],
           "signature": [
-            "ClientInstanciator"
+            "(options?: ",
+            "EncryptedSavedObjectsClientOptions",
+            " | undefined) => ",
+            {
+              "pluginId": "encryptedSavedObjects",
+              "scope": "server",
+              "docId": "kibEncryptedSavedObjectsPluginApi",
+              "section": "def-server.EncryptedSavedObjectsClient",
+              "text": "EncryptedSavedObjectsClient"
+            }
           ],
-          "source": {
-            "path": "x-pack/plugins/encrypted_saved_objects/server/plugin.ts",
-            "lineNumber": 42
-          },
-          "deprecated": false
+          "path": "x-pack/plugins/encrypted_saved_objects/server/plugin.ts",
+          "deprecated": false,
+          "returnComment": [],
+          "children": [
+            {
+              "parentPluginId": "encryptedSavedObjects",
+              "id": "def-server.options",
+              "type": "Object",
+              "tags": [],
+              "label": "options",
+              "description": [],
+              "signature": [
+                "EncryptedSavedObjectsClientOptions",
+                " | undefined"
+              ],
+              "path": "x-pack/plugins/encrypted_saved_objects/server/saved_objects/index.ts",
+              "deprecated": false
+            }
+          ]
         }
       ],
       "lifecycle": "start",

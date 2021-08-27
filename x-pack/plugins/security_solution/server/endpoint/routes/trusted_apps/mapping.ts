@@ -14,11 +14,10 @@ import type {
   EntryNested,
   NestedEntriesArray,
   OsType,
+  ExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 
-import type { ExceptionListItemSchema } from '../../../../../lists/common';
-
-import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '../../../../../lists/common/constants';
+import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '@kbn/securitysolution-list-constants';
 import type {
   CreateExceptionListItemOptions,
   UpdateExceptionListItemOptions,

@@ -24,10 +24,11 @@ export const contentSources = [
     errorReason: null,
     allowsReauth: true,
     boost: 1,
+    activities: [],
   },
   {
     id: '124',
-    serviceType: 'jira',
+    serviceType: 'jira_cloud',
     searchable: true,
     supportedByLicense: true,
     status: 'synced',
@@ -38,8 +39,27 @@ export const contentSources = [
     errorReason: null,
     allowsReauth: true,
     boost: 0.5,
+    activities: [],
   },
 ];
+
+const defaultIndexing = {
+  enabled: true,
+  defaultAction: 'include',
+  rules: [],
+  schedule: {
+    intervals: [],
+    blocked: [],
+  },
+  features: {
+    contentExtraction: {
+      enabled: true,
+    },
+    thumbnails: {
+      enabled: true,
+    },
+  },
+};
 
 export const fullContentSources = [
   {
@@ -64,8 +84,11 @@ export const fullContentSources = [
         type: 'summary',
       },
     ],
+    indexing: defaultIndexing,
     groups,
     custom: false,
+    isIndexedSource: true,
+    areThumbnailsConfigEnabled: true,
     accessToken: '123token',
     urlField: 'myLink',
     titleField: 'heading',
@@ -83,7 +106,10 @@ export const fullContentSources = [
     details: [],
     summary: [],
     groups: [],
+    indexing: defaultIndexing,
     custom: true,
+    isIndexedSource: true,
+    areThumbnailsConfigEnabled: true,
     accessToken: '123token',
     urlField: 'url',
     titleField: 'title',
@@ -301,21 +327,30 @@ export const exampleResult = {
     titleField: 'otherTitle',
     subtitleField: 'otherSubtitle',
     urlField: 'myLink',
+    urlFieldIsLinkable: true,
     color: '#e3e3e3',
     descriptionField: 'about',
+    typeField: 'otherType',
+    mediaTypeField: 'otherMediaType',
+    createdByField: 'otherCreatedBy',
+    updatedByField: 'otherUpdatedBy',
     detailFields: [
       { fieldName: 'cats', label: 'Felines' },
       { fieldName: 'dogs', label: 'Canines' },
     ],
   },
-  titleFieldHover: false,
-  urlFieldHover: false,
   exampleDocuments: [
     {
       myLink: 'http://foo',
       otherTitle: 'foo',
+      content_source_id: '60e85e7ea2564c265a88a4f0',
+      external_id: 'doc-60e85eb7a2564c937a88a4f3',
+      last_updated: '2021-07-09T14:35:35+00:00',
+      updated_at: '2021-07-09T14:35:35+00:00',
+      source: 'custom',
     },
   ],
+  schemaFields: {},
 };
 
 export const mostRecentIndexJob = {

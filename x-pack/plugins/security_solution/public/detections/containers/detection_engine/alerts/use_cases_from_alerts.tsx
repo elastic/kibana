@@ -7,6 +7,7 @@
 
 import { isEmpty } from 'lodash';
 import { useEffect, useState } from 'react';
+import { APP_ID } from '../../../../../common/constants';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { getCaseIdsFromAlertId } from './api';
 import { CASES_FROM_ALERTS_FAILURE } from './translations';
@@ -14,7 +15,7 @@ import { CasesFromAlertsResponse } from './types';
 
 interface CasesFromAlertsStatus {
   loading: boolean;
-  caseIds: CasesFromAlertsResponse;
+  casesInfo: CasesFromAlertsResponse;
 }
 
 export const useCasesFromAlerts = ({ alertId }: { alertId: string }): CasesFromAlertsStatus => {
@@ -28,7 +29,7 @@ export const useCasesFromAlerts = ({ alertId }: { alertId: string }): CasesFromA
     setLoading(true);
     const fetchData = async () => {
       try {
-        const casesResponse = await getCaseIdsFromAlertId({ alertId });
+        const casesResponse = await getCaseIdsFromAlertId({ alertId, owner: [APP_ID] });
         if (isMounted) {
           setCases(casesResponse);
         }
@@ -47,5 +48,5 @@ export const useCasesFromAlerts = ({ alertId }: { alertId: string }): CasesFromA
       isMounted = false;
     };
   }, [alertId, addError]);
-  return { loading, caseIds: cases };
+  return { loading, casesInfo: cases };
 };

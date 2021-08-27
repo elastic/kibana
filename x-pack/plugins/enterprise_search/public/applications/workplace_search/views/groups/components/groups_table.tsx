@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { AppLogic } from '../../../app_logic';
+import { ACTIONS_HEADER } from '../../../../shared/constants';
 import { TablePaginationBar } from '../../../components/shared/table_pagination_bar';
 import { GroupsLogic } from '../groups_logic';
 
@@ -37,12 +37,6 @@ const SOURCES_TABLE_HEADER = i18n.translate(
     defaultMessage: 'Content sources',
   }
 );
-const USERS_TABLE_HEADER = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.groups.groupsTable.usersTableHeader',
-  {
-    defaultMessage: 'Users',
-  }
-);
 
 export const GroupsTable: React.FC<{}> = () => {
   const { setActivePage } = useActions(GroupsLogic);
@@ -53,7 +47,6 @@ export const GroupsTable: React.FC<{}> = () => {
     groups,
     hasFiltersSet,
   } = useValues(GroupsLogic);
-  const { isFederatedAuth } = useValues(AppLogic);
 
   const clearFiltersLink = hasFiltersSet ? <ClearFiltersLink /> : undefined;
 
@@ -79,8 +72,7 @@ export const GroupsTable: React.FC<{}> = () => {
         <EuiTableHeader>
           <EuiTableHeaderCell>{GROUP_TABLE_HEADER}</EuiTableHeaderCell>
           <EuiTableHeaderCell>{SOURCES_TABLE_HEADER}</EuiTableHeaderCell>
-          {!isFederatedAuth && <EuiTableHeaderCell>{USERS_TABLE_HEADER}</EuiTableHeaderCell>}
-          <EuiTableHeaderCell />
+          <EuiTableHeaderCell align="right">{ACTIONS_HEADER}</EuiTableHeaderCell>
         </EuiTableHeader>
         <EuiTableBody>
           {groups.map((group, index) => (

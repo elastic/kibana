@@ -29,7 +29,7 @@ import type {
   SavedObjectsUpdateOptions,
 } from 'src/core/server';
 
-import { SavedObjectsUtils } from '../../../../../src/core/server';
+import { SavedObjectsErrorHelpers, SavedObjectsUtils } from '../../../../../src/core/server';
 import { ALL_SPACES_ID, UNKNOWN_SPACE } from '../../common/constants';
 import type { AuditLogger, SecurityAuditLogger } from '../audit';
 import { SavedObjectAction, savedObjectEvent } from '../audit';
@@ -41,7 +41,11 @@ import type {
   EnsureAuthorizedOptions,
   EnsureAuthorizedResult,
 } from './ensure_authorized';
-import { ensureAuthorized, getEnsureAuthorizedActionResult } from './ensure_authorized';
+import {
+  ensureAuthorized,
+  getEnsureAuthorizedActionResult,
+  isAuthorizedForObjectInAllSpaces,
+} from './ensure_authorized';
 
 interface SecureSavedObjectsClientWrapperOptions {
   actions: Actions;
@@ -71,10 +75,12 @@ interface LegacyEnsureAuthorizedResult {
   status: 'fully_authorized' | 'partially_authorized' | 'unauthorized';
   typeMap: Map<string, LegacyEnsureAuthorizedTypeResult>;
 }
+
 interface LegacyEnsureAuthorizedTypeResult {
   authorizedSpaces: string[];
   isGloballyAuthorized?: boolean;
 }
+
 export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContract {
   private readonly actions: Actions;
   private readonly legacyAuditLogger: PublicMethodsOf<SecurityAuditLogger>;
@@ -232,11 +238,6 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
         `_find across namespaces is not permitted when the Spaces plugin is disabled.`
       );
     }
-    if (options.pit && Array.isArray(options.namespaces) && options.namespaces.length > 1) {
-      throw this.errors.createBadRequestError(
-        '_find across namespaces is not permitted when using the `pit` option.'
-      );
-    }
 
     const args = { options };
     const { status, typeMap } = await this.legacyEnsureAuthorized(
@@ -286,11 +287,15 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     options: SavedObjectsBaseOptions = {}
   ) {
     try {
+      const namespaces = objects.reduce(
+        (acc, { namespaces: objNamespaces = [] }) => acc.concat(objNamespaces),
+        [options.namespace]
+      );
       const args = { objects, options };
       await this.legacyEnsureAuthorized(
         this.getUniqueObjectTypes(objects),
         'bulk_get',
-        options.namespace,
+        namespaces,
         {
           args,
         }
@@ -504,22 +509,27 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     type: string | string[],
     options: SavedObjectsOpenPointInTimeOptions
   ) {
-    try {
-      const args = { type, options };
-      await this.legacyEnsureAuthorized(type, 'open_point_in_time', options?.namespace, {
+    const args = { type, options };
+    const { status, typeMap } = await this.legacyEnsureAuthorized(
+      type,
+      'open_point_in_time',
+      options?.namespaces,
+      {
         args,
         // Partial authorization is acceptable in this case because this method is only designed
         // to be used with `find`, which already allows for partial authorization.
         requireFullAuthorization: false,
-      });
-    } catch (error) {
+      }
+    );
+
+    if (status === 'unauthorized') {
       this.auditLogger.log(
         savedObjectEvent({
           action: SavedObjectAction.OPEN_POINT_IN_TIME,
-          error,
+          error: new Error(status),
         })
       );
-      throw error;
+      throw SavedObjectsErrorHelpers.decorateForbiddenError(new Error(status));
     }
 
     this.auditLogger.log(
@@ -529,7 +539,8 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
       })
     );
 
-    return await this.baseClient.openPointInTimeForType(type, options);
+    const allowedTypes = [...typeMap.keys()]; // only allow the user to open a PIT against indices for type(s) they are authorized to access
+    return await this.baseClient.openPointInTimeForType(allowedTypes, options);
   }
 
   public async closePointInTime(id: string, options?: SavedObjectsClosePointInTimeOptions) {
@@ -1069,20 +1080,6 @@ function namespaceComparator(a: string, b: string) {
     return -1;
   }
   return A > B ? 1 : A < B ? -1 : 0;
-}
-
-function isAuthorizedForObjectInAllSpaces<T extends string>(
-  objectType: string,
-  action: T,
-  typeActionMap: EnsureAuthorizedResult<T>['typeActionMap'],
-  spacesToAuthorizeFor: string[]
-) {
-  const actionResult = getEnsureAuthorizedActionResult(objectType, action, typeActionMap);
-  const { authorizedSpaces, isGloballyAuthorized } = actionResult;
-  const authorizedSpacesSet = new Set(authorizedSpaces);
-  return (
-    isGloballyAuthorized || spacesToAuthorizeFor.every((space) => authorizedSpacesSet.has(space))
-  );
 }
 
 function getRedactedSpaces<T extends string>(

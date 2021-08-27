@@ -8,6 +8,7 @@
 import moment from 'moment';
 import { Page } from 'puppeteer';
 import * as Rx from 'rxjs';
+import { ReportingCore } from '..';
 import { chromium, HeadlessChromiumDriver, HeadlessChromiumDriverFactory } from '../browsers';
 import { LevelLogger } from '../lib';
 import { ElementsPositionAndAttribute } from '../lib/screenshots';
@@ -79,10 +80,7 @@ mockBrowserEvaluate.mockImplementation(() => {
   }
   throw new Error(mockCall);
 });
-const mockScreenshot = jest.fn();
-mockScreenshot.mockImplementation((item: ElementsPositionAndAttribute) => {
-  return Promise.resolve(`allyourBase64`);
-});
+const mockScreenshot = jest.fn(async () => Buffer.from('screenshot'));
 const getCreatePage = (driver: HeadlessChromiumDriver) =>
   jest.fn().mockImplementation(() => Rx.of({ driver, exit$: Rx.never() }));
 
@@ -96,6 +94,7 @@ const defaultOpts: CreateMockBrowserDriverFactoryOpts = {
 };
 
 export const createMockBrowserDriverFactory = async (
+  core: ReportingCore,
   logger: LevelLogger,
   opts: Partial<CreateMockBrowserDriverFactoryOpts> = {}
 ): Promise<HeadlessChromiumDriverFactory> => {
@@ -122,9 +121,9 @@ export const createMockBrowserDriverFactory = async (
   };
 
   const binaryPath = '/usr/local/share/common/secure/super_awesome_binary';
-  const mockBrowserDriverFactory = chromium.createDriverFactory(binaryPath, captureConfig, logger);
+  const mockBrowserDriverFactory = chromium.createDriverFactory(core, binaryPath, logger);
   const mockPage = ({ setViewport: () => {} } as unknown) as Page;
-  const mockBrowserDriver = new HeadlessChromiumDriver(mockPage, {
+  const mockBrowserDriver = new HeadlessChromiumDriver(core, mockPage, {
     inspect: true,
     networkPolicy: captureConfig.networkPolicy,
   });

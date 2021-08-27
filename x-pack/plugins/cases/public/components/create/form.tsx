@@ -38,6 +38,7 @@ const MySpinner = styled(EuiLoadingSpinner)`
 
 interface Props {
   connectors?: ActionConnector[];
+  disableAlerts?: boolean;
   hideConnectorServiceNowSir?: boolean;
   isLoadingConnectors?: boolean;
   withSteps?: boolean;
@@ -46,6 +47,7 @@ const empty: ActionConnector[] = [];
 export const CreateCaseForm: React.FC<Props> = React.memo(
   ({
     connectors = empty,
+    disableAlerts = false,
     isLoadingConnectors = false,
     hideConnectorServiceNowSir = false,
     withSteps = true,
@@ -99,11 +101,10 @@ export const CreateCaseForm: React.FC<Props> = React.memo(
       [connectors, hideConnectorServiceNowSir, isLoadingConnectors, isSubmitting]
     );
 
-    const allSteps = useMemo(() => [firstStep, secondStep, thirdStep], [
-      firstStep,
-      secondStep,
-      thirdStep,
-    ]);
+    const allSteps = useMemo(
+      () => [firstStep, ...(!disableAlerts ? [secondStep] : []), thirdStep],
+      [disableAlerts, firstStep, secondStep, thirdStep]
+    );
 
     return (
       <>
@@ -117,7 +118,7 @@ export const CreateCaseForm: React.FC<Props> = React.memo(
         ) : (
           <>
             {firstStep.children}
-            {secondStep.children}
+            {!disableAlerts && secondStep.children}
             {thirdStep.children}
           </>
         )}

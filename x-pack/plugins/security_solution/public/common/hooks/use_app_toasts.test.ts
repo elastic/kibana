@@ -7,9 +7,10 @@
 
 import { renderHook } from '@testing-library/react-hooks';
 import { IEsError } from 'src/plugins/data/public';
+import { KibanaError, SecurityAppError } from '@kbn/securitysolution-t-grid';
 
 import { useToasts } from '../lib/kibana';
-import { KibanaError, SecurityAppError } from '../utils/api';
+
 import {
   appErrorToErrorStack,
   convertErrorToEnumerable,

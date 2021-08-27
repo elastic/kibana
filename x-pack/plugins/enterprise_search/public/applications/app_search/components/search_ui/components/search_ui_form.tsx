@@ -11,6 +11,7 @@ import { useValues, useActions } from 'kea';
 
 import { EuiForm, EuiFormRow, EuiSelect, EuiComboBox, EuiButton } from '@elastic/eui';
 
+import { EngineLogic } from '../../engine';
 import {
   TITLE_FIELD_LABEL,
   TITLE_FIELD_HELP_TEXT,
@@ -21,18 +22,23 @@ import {
   URL_FIELD_LABEL,
   URL_FIELD_HELP_TEXT,
   GENERATE_PREVIEW_BUTTON_LABEL,
+  THUMBNAIL_FIELD_LABEL,
+  THUMBNAIL_FIELD_HELP_TEXT,
 } from '../i18n';
 import { SearchUILogic } from '../search_ui_logic';
 import { ActiveField } from '../types';
 import { generatePreviewUrl } from '../utils';
 
 export const SearchUIForm: React.FC = () => {
+  const { searchKey } = useValues(EngineLogic);
   const {
+    dataLoading,
     validFields,
     validSortFields,
     validFacetFields,
     titleField,
     urlField,
+    thumbnailField,
     facetFields,
     sortFields,
   } = useValues(SearchUILogic);
@@ -42,11 +48,13 @@ export const SearchUIForm: React.FC = () => {
     onSortFieldsChange,
     onTitleFieldChange,
     onUrlFieldChange,
+    onThumbnailFieldChange,
   } = useActions(SearchUILogic);
 
   const previewHref = generatePreviewUrl({
     titleField,
     urlField,
+    thumbnailField,
     facets: facetFields,
     sortFields,
   });
@@ -66,13 +74,16 @@ export const SearchUIForm: React.FC = () => {
   const facetOptionFields = formatMultiOptions(validFacetFields);
   const selectedTitleOption = formatSelectOption(titleField);
   const selectedURLOption = formatSelectOption(urlField);
+  const selectedThumbnailOption = formatSelectOption(thumbnailField);
   const selectedSortOptions = formatMultiOptions(sortFields);
   const selectedFacetOptions = formatMultiOptions(facetFields);
 
   return (
-    <EuiForm>
+    <EuiForm component="form" action={previewHref} target="_blank" method="POST">
+      <input type="hidden" id="searchKey" name="searchKey" value={searchKey} />
       <EuiFormRow label={TITLE_FIELD_LABEL} helpText={TITLE_FIELD_HELP_TEXT} fullWidth>
         <EuiSelect
+          disabled={dataLoading}
           options={optionFields}
           value={selectedTitleOption && selectedTitleOption.value}
           onChange={(e) => onTitleFieldChange(e.target.value)}
@@ -85,6 +96,7 @@ export const SearchUIForm: React.FC = () => {
       </EuiFormRow>
       <EuiFormRow label={FILTER_FIELD_LABEL} helpText={FILTER_FIELD_HELP_TEXT} fullWidth>
         <EuiComboBox
+          isDisabled={dataLoading}
           options={facetOptionFields}
           selectedOptions={selectedFacetOptions}
           onChange={(newValues) => onFacetFieldsChange(newValues.map((field) => field.value!))}
@@ -96,6 +108,7 @@ export const SearchUIForm: React.FC = () => {
       </EuiFormRow>
       <EuiFormRow label={SORT_FIELD_LABEL} helpText={SORT_FIELD_HELP_TEXT} fullWidth>
         <EuiComboBox
+          isDisabled={dataLoading}
           options={sortOptionFields}
           selectedOptions={selectedSortOptions}
           onChange={(newValues) => onSortFieldsChange(newValues.map((field) => field.value!))}
@@ -105,9 +118,9 @@ export const SearchUIForm: React.FC = () => {
           data-test-subj="selectSort"
         />
       </EuiFormRow>
-
       <EuiFormRow label={URL_FIELD_LABEL} helpText={URL_FIELD_HELP_TEXT} fullWidth>
         <EuiSelect
+          disabled={dataLoading}
           options={optionFields}
           value={selectedURLOption && selectedURLOption.value}
           onChange={(e) => onUrlFieldChange(e.target.value)}
@@ -118,9 +131,22 @@ export const SearchUIForm: React.FC = () => {
           data-test-subj="selectUrl"
         />
       </EuiFormRow>
+      <EuiFormRow label={THUMBNAIL_FIELD_LABEL} helpText={THUMBNAIL_FIELD_HELP_TEXT} fullWidth>
+        <EuiSelect
+          disabled={dataLoading}
+          options={optionFields}
+          value={selectedThumbnailOption && selectedThumbnailOption.value}
+          onChange={(e) => onThumbnailFieldChange(e.target.value)}
+          fullWidth
+          onFocus={() => onActiveFieldChange(ActiveField.Thumb)}
+          onBlur={() => onActiveFieldChange(ActiveField.None)}
+          hasNoInitialSelection
+          data-test-subj="selectThumbnail"
+        />
+      </EuiFormRow>
       <EuiButton
-        href={previewHref}
-        target="_blank"
+        disabled={dataLoading}
+        type="submit"
         fill
         iconType="popout"
         iconSide="right"

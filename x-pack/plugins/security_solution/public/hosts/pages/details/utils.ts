@@ -37,8 +37,9 @@ export const getBreadcrumbs = (
   let breadcrumb = [
     {
       text: i18n.PAGE_TITLE,
-      href: getUrlForApp(`${APP_ID}:${SecurityPageName.hosts}`, {
+      href: getUrlForApp(APP_ID, {
         path: !isEmpty(search[0]) ? search[0] : '',
+        deepLinkId: SecurityPageName.hosts,
       }),
     },
   ];
@@ -48,12 +49,14 @@ export const getBreadcrumbs = (
       ...breadcrumb,
       {
         text: params.detailName,
-        href: getUrlForApp(`${APP_ID}:${SecurityPageName.hosts}`, {
+        href: getUrlForApp(APP_ID, {
           path: getHostDetailsUrl(params.detailName, !isEmpty(search[0]) ? search[0] : ''),
+          deepLinkId: SecurityPageName.hosts,
         }),
       },
     ];
   }
+
   if (params.tabName != null) {
     const tabName = get('tabName', params);
     if (!tabName) return breadcrumb;

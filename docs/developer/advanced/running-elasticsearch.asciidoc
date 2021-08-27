@@ -25,7 +25,7 @@ See all available options, like how to specify a specific license, with the `--h
 yarn es snapshot --help
 ----
 
-`trial` will give you access to all capabilities.
+`--license trial` will give you access to all capabilities.
 
 **Keeping data between snapshots**
 

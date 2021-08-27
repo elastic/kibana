@@ -512,8 +512,14 @@ Array [
   Object {
     "privilege": Object {
       "alerting": Object {
-        "all": Array [],
-        "read": Array [],
+        "alert": Object {
+          "all": Array [],
+          "read": Array [],
+        },
+        "rule": Object {
+          "all": Array [],
+          "read": Array [],
+        },
       },
       "api": Array [
         "store_search_session",
@@ -522,6 +528,10 @@ Array [
         "dashboards",
         "kibana",
       ],
+      "cases": Object {
+        "all": Array [],
+        "read": Array [],
+      },
       "catalogue": Array [
         "dashboard",
       ],
@@ -651,16 +661,27 @@ Array [
   Object {
     "privilege": Object {
       "alerting": Object {
-        "all": Array [],
-        "read": Array [],
+        "alert": Object {
+          "all": Array [],
+          "read": Array [],
+        },
+        "rule": Object {
+          "all": Array [],
+          "read": Array [],
+        },
       },
       "api": Array [
+        "fileUpload:analyzeFile",
         "store_search_session",
       ],
       "app": Array [
         "discover",
         "kibana",
       ],
+      "cases": Object {
+        "all": Array [],
+        "read": Array [],
+      },
       "catalogue": Array [
         "discover",
       ],
@@ -673,11 +694,12 @@ Array [
         "all": Array [
           "search",
           "query",
-          "index-pattern",
           "url",
           "search-session",
         ],
-        "read": Array [],
+        "read": Array [
+          "index-pattern",
+        ],
       },
       "ui": Array [
         "show",
@@ -888,8 +910,14 @@ Array [
   Object {
     "privilege": Object {
       "alerting": Object {
-        "all": Array [],
-        "read": Array [],
+        "alert": Object {
+          "all": Array [],
+          "read": Array [],
+        },
+        "rule": Object {
+          "all": Array [],
+          "read": Array [],
+        },
       },
       "api": Array [],
       "app": Array [
@@ -897,6 +925,10 @@ Array [
         "lens",
         "kibana",
       ],
+      "cases": Object {
+        "all": Array [],
+        "read": Array [],
+      },
       "catalogue": Array [
         "visualize",
       ],
@@ -1010,8 +1042,14 @@ Array [
   Object {
     "privilege": Object {
       "alerting": Object {
-        "all": Array [],
-        "read": Array [],
+        "alert": Object {
+          "all": Array [],
+          "read": Array [],
+        },
+        "rule": Object {
+          "all": Array [],
+          "read": Array [],
+        },
       },
       "api": Array [
         "store_search_session",
@@ -1020,6 +1058,10 @@ Array [
         "dashboards",
         "kibana",
       ],
+      "cases": Object {
+        "all": Array [],
+        "read": Array [],
+      },
       "catalogue": Array [
         "dashboard",
       ],
@@ -1149,16 +1191,27 @@ Array [
   Object {
     "privilege": Object {
       "alerting": Object {
-        "all": Array [],
-        "read": Array [],
+        "alert": Object {
+          "all": Array [],
+          "read": Array [],
+        },
+        "rule": Object {
+          "all": Array [],
+          "read": Array [],
+        },
       },
       "api": Array [
+        "fileUpload:analyzeFile",
         "store_search_session",
       ],
       "app": Array [
         "discover",
         "kibana",
       ],
+      "cases": Object {
+        "all": Array [],
+        "read": Array [],
+      },
       "catalogue": Array [
         "discover",
       ],
@@ -1171,11 +1224,12 @@ Array [
         "all": Array [
           "search",
           "query",
-          "index-pattern",
           "url",
           "search-session",
         ],
-        "read": Array [],
+        "read": Array [
+          "index-pattern",
+        ],
       },
       "ui": Array [
         "show",
@@ -1386,8 +1440,14 @@ Array [
   Object {
     "privilege": Object {
       "alerting": Object {
-        "all": Array [],
-        "read": Array [],
+        "alert": Object {
+          "all": Array [],
+          "read": Array [],
+        },
+        "rule": Object {
+          "all": Array [],
+          "read": Array [],
+        },
       },
       "api": Array [],
       "app": Array [
@@ -1395,6 +1455,10 @@ Array [
         "lens",
         "kibana",
       ],
+      "cases": Object {
+        "all": Array [],
+        "read": Array [],
+      },
       "catalogue": Array [
         "visualize",
       ],

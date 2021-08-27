@@ -6,30 +6,21 @@
  * Side Public License, v 1.
  */
 
-import { IUiSettingsClient } from 'kibana/server';
-import { EsQueryConfig } from 'src/plugins/data/server';
-import type { Annotation, FetchedIndexPattern, Panel } from '../../../../common/types';
-import { VisTypeTimeseriesVisDataRequest } from '../../../types';
-import { DefaultSearchCapabilities } from '../../search_strategies';
 import { buildProcessorFunction } from '../build_processor_function';
-// @ts-expect-error
-import { processors } from '../request_processors/annotations';
+import { query, dateHistogram, topHits } from '../request_processors/annotations';
 
-/**
- * Builds annotation request body
- */
-export async function buildAnnotationRequest(
-  ...args: [
-    VisTypeTimeseriesVisDataRequest,
-    Panel,
-    Annotation,
-    EsQueryConfig,
-    FetchedIndexPattern,
-    DefaultSearchCapabilities,
-    IUiSettingsClient
-  ]
-) {
-  const processor = buildProcessorFunction(processors, ...args);
-  const doc = await processor({});
-  return doc;
+import type {
+  AnnotationSearchRequest,
+  AnnotationsRequestProcessorsFunction,
+  AnnotationsRequestProcessorsParams,
+} from '../request_processors/annotations/types';
+
+export function buildAnnotationRequest(params: AnnotationsRequestProcessorsParams) {
+  const processor = buildProcessorFunction<
+    AnnotationsRequestProcessorsFunction,
+    AnnotationsRequestProcessorsParams,
+    AnnotationSearchRequest
+  >([query, dateHistogram, topHits], params);
+
+  return processor({});
 }

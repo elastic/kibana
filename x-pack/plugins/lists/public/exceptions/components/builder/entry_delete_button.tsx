@@ -8,8 +8,7 @@
 import React, { useCallback } from 'react';
 import { EuiButtonIcon, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
-
-import { BuilderEntry } from './types';
+import type { BuilderEntry } from '@kbn/securitysolution-list-utils';
 
 const MyFirstRowContainer = styled(EuiFlexItem)`
   padding-top: 20px;

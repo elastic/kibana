@@ -263,6 +263,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
       dateRange: { fromDate: 'now-1d', toDate: 'now' },
       columnId: 'col1',
       layerId: 'first',
+      layerType: 'data',
       uniqueLabel: 'stuff',
       groupId: 'group1',
       filterOperations: () => true,
@@ -284,6 +285,8 @@ describe('IndexPatternDimensionEditorPanel', () => {
       } as unknown) as DataPublicPluginStart,
       core: {} as CoreSetup,
       dimensionGroups: [],
+      isFullscreen: false,
+      toggleFullscreen: () => {},
     };
 
     jest.clearAllMocks();

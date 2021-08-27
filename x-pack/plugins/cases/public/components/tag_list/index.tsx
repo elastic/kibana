@@ -27,8 +27,8 @@ import { Tags } from './tags';
 
 const CommonUseField = getUseField({ component: Field });
 
-interface TagListProps {
-  disabled?: boolean;
+export interface TagListProps {
+  userCanCrud?: boolean;
   isLoading: boolean;
   onSubmit: (a: string[]) => void;
   tags: string[];
@@ -36,6 +36,7 @@ interface TagListProps {
 
 const MyFlexGroup = styled(EuiFlexGroup)`
   ${({ theme }) => css`
+    width: 100%;
     margin-top: ${theme.eui.euiSizeM};
     p {
       font-size: ${theme.eui.euiSizeM};
@@ -43,8 +44,19 @@ const MyFlexGroup = styled(EuiFlexGroup)`
   `}
 `;
 
+const ColumnFlexGroup = styled(EuiFlexGroup)`
+  ${({ theme }) => css`
+    & {
+      max-width: 100%;
+      @media only screen and (max-width: ${theme.eui.euiBreakpoints.m}) {
+        flex-direction: row;
+      }
+    }
+  `}
+`;
+
 export const TagList = React.memo(
-  ({ disabled = false, isLoading, onSubmit, tags }: TagListProps) => {
+  ({ userCanCrud = true, isLoading, onSubmit, tags }: TagListProps) => {
     const initialState = { tags };
     const { form } = useForm({
       defaultValue: initialState,
@@ -80,16 +92,20 @@ export const TagList = React.memo(
     );
     return (
       <EuiText>
-        <EuiFlexGroup alignItems="center" gutterSize="xs" justifyContent="spaceBetween">
+        <EuiFlexGroup
+          alignItems="center"
+          gutterSize="xs"
+          justifyContent="spaceBetween"
+          responsive={false}
+        >
           <EuiFlexItem grow={false}>
             <h4>{i18n.TAGS}</h4>
           </EuiFlexItem>
           {isLoading && <EuiLoadingSpinner data-test-subj="tag-list-loading" />}
-          {!isLoading && (
+          {!isLoading && userCanCrud && (
             <EuiFlexItem data-test-subj="tag-list-edit" grow={false}>
               <EuiButtonIcon
                 data-test-subj="tag-list-edit-button"
-                isDisabled={disabled}
                 aria-label={i18n.EDIT_TAGS_ARIA}
                 iconType={'pencil'}
                 onClick={setIsEditTags.bind(null, true)}
@@ -100,9 +116,13 @@ export const TagList = React.memo(
         <EuiHorizontalRule margin="xs" />
         <MyFlexGroup gutterSize="none" data-test-subj="case-tags">
           {tags.length === 0 && !isEditTags && <p data-test-subj="no-tags">{i18n.NO_TAGS}</p>}
-          {!isEditTags && <Tags tags={tags} color="hollow" />}
+          {!isEditTags && (
+            <EuiFlexItem>
+              <Tags tags={tags} color="hollow" />
+            </EuiFlexItem>
+          )}
           {isEditTags && (
-            <EuiFlexGroup data-test-subj="edit-tags" direction="column">
+            <ColumnFlexGroup data-test-subj="edit-tags" direction="column">
               <EuiFlexItem>
                 <Form form={form}>
                   <CommonUseField
@@ -140,7 +160,7 @@ export const TagList = React.memo(
                 </Form>
               </EuiFlexItem>
               <EuiFlexItem>
-                <EuiFlexGroup gutterSize="s" alignItems="center">
+                <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
                   <EuiFlexItem grow={false}>
                     <EuiButton
                       color="secondary"
@@ -165,7 +185,7 @@ export const TagList = React.memo(
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiFlexItem>
-            </EuiFlexGroup>
+            </ColumnFlexGroup>
           )}
         </MyFlexGroup>
       </EuiText>

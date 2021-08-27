@@ -10,20 +10,17 @@ import {
   created_at,
   created_by,
   description,
+  deserializerOrUndefined,
+  immutable,
   metaOrUndefined,
   name,
+  serializerOrUndefined,
+  tie_breaker_id,
   type,
   updated_at,
   updated_by,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { version } from '@kbn/securitysolution-io-ts-types';
-
-import {
-  deserializerOrUndefined,
-  immutable,
-  serializerOrUndefined,
-  tie_breaker_id,
-} from '../../../common/schemas';
 
 export const searchEsListSchema = t.exact(
   t.type({

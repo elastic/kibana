@@ -7,19 +7,9 @@
 
 import { Transform } from 'stream';
 import { has, isString } from 'lodash/fp';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { fold } from 'fp-ts/lib/Either';
-import * as t from 'io-ts';
 import { createMapStream, createFilterStream } from '@kbn/utils';
 
-import { exactCheck, formatErrors } from '@kbn/securitysolution-io-ts-utils';
-import { BadRequestError } from '@kbn/securitysolution-es-utils';
-import { importRuleValidateTypeDependents } from '../../../common/detection_engine/schemas/request/import_rules_type_dependents';
-import {
-  ImportRulesSchemaDecoded,
-  importRulesSchema,
-  ImportRulesSchema,
-} from '../../../common/detection_engine/schemas/request/import_rules_schema';
+import { ImportRulesSchemaDecoded } from '../../../common/detection_engine/schemas/request/import_rules_schema';
 
 export interface RulesObjectsExportResultDetails {
   /** number of successfully exported objects */
@@ -42,29 +32,6 @@ export const filterExportedCounts = (): Transform => {
   return createFilterStream<ImportRulesSchemaDecoded | RulesObjectsExportResultDetails>(
     (obj) => obj != null && !has('exported_count', obj)
   );
-};
-
-export const validateRules = (): Transform => {
-  return createMapStream((obj: ImportRulesSchema) => {
-    if (!(obj instanceof Error)) {
-      const decoded = importRulesSchema.decode(obj);
-      const checked = exactCheck(obj, decoded);
-      const onLeft = (errors: t.Errors): BadRequestError | ImportRulesSchemaDecoded => {
-        return new BadRequestError(formatErrors(errors).join());
-      };
-      const onRight = (schema: ImportRulesSchema): BadRequestError | ImportRulesSchemaDecoded => {
-        const validationErrors = importRuleValidateTypeDependents(schema);
-        if (validationErrors.length) {
-          return new BadRequestError(validationErrors.join());
-        } else {
-          return schema as ImportRulesSchemaDecoded;
-        }
-      };
-      return pipe(checked, fold(onLeft, onRight));
-    } else {
-      return obj;
-    }
-  });
 };
 
 // Adaptation from: saved_objects/import/create_limit_stream.ts

@@ -7,28 +7,38 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { map } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import styled from 'styled-components';
-import { ReportViewTypeId, SeriesUrl } from '../../types';
-import { useUrlStorage } from '../../hooks/use_url_storage';
+import { ReportViewType, SeriesUrl } from '../../types';
+import { useSeriesStorage } from '../../hooks/use_series_storage';
 import { DEFAULT_TIME } from '../../configurations/constants';
 import { useAppIndexPatternContext } from '../../hooks/use_app_index_pattern';
+import { ReportTypeItem } from '../series_builder';
 
 interface Props {
   seriesId: string;
-  reportTypes: Array<{ id: ReportViewTypeId; label: string }>;
+  reportTypes: ReportTypeItem[];
 }
 
 export function ReportTypesCol({ seriesId, reportTypes }: Props) {
-  const {
-    series: { reportType: selectedReportType, ...restSeries },
-    setSeries,
-  } = useUrlStorage(seriesId);
+  const { setSeries, getSeries, firstSeries, firstSeriesId } = useSeriesStorage();
 
-  const { loading, hasData, selectedApp } = useAppIndexPatternContext();
+  const { reportType: selectedReportType, ...restSeries } = getSeries(seriesId);
 
-  if (!loading && !hasData && selectedApp) {
+  const { loading, hasData } = useAppIndexPatternContext(restSeries.dataType);
+
+  if (!restSeries.dataType) {
+    return (
+      <FormattedMessage
+        id="xpack.observability.expView.seriesBuilder.selectDataType"
+        defaultMessage="No data type selected"
+      />
+    );
+  }
+
+  if (!loading && !hasData) {
     return (
       <FormattedMessage
         id="xpack.observability.reportTypeCol.nodata"
@@ -37,9 +47,16 @@ export function ReportTypesCol({ seriesId, reportTypes }: Props) {
     );
   }
 
+  const disabledReportTypes: ReportViewType[] = map(
+    reportTypes.filter(
+      ({ reportType }) => firstSeriesId !== seriesId && reportType !== firstSeries.reportType
+    ),
+    'reportType'
+  );
+
   return reportTypes?.length > 0 ? (
     <FlexGroup direction="column" gutterSize="xs">
-      {reportTypes.map(({ id: reportType, label }) => (
+      {reportTypes.map(({ reportType, label }) => (
         <EuiFlexItem key={reportType}>
           <Button
             fullWidth
@@ -48,19 +65,20 @@ export function ReportTypesCol({ seriesId, reportTypes }: Props) {
             iconType="arrowRight"
             color={selectedReportType === reportType ? 'primary' : 'text'}
             fill={selectedReportType === reportType}
-            isDisabled={loading}
+            isDisabled={loading || disabledReportTypes.includes(reportType)}
             onClick={() => {
               if (reportType === selectedReportType) {
                 setSeries(seriesId, {
                   dataType: restSeries.dataType,
                   time: DEFAULT_TIME,
+                  isNew: true,
                 } as SeriesUrl);
               } else {
                 setSeries(seriesId, {
                   ...restSeries,
                   reportType,
-                  operationType: undefined,
-                  reportDefinitions: {},
+                  selectedMetricField: undefined,
+                  breakdown: undefined,
                   time: restSeries?.time ?? DEFAULT_TIME,
                 });
               }

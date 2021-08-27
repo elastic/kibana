@@ -140,6 +140,42 @@
 {
   "type": "doc",
   "value": {
+    "id": "999",
+    "index": "drawing_data",
+    "source": {
+      "geometry": {
+        "coordinates": [
+          [
+            [
+              100,
+              5
+            ],
+            [
+              95,
+              -5
+            ],
+            [
+              105,
+              -5
+            ],
+            [
+              100,
+              5
+            ]
+          ]
+        ],
+        "type": "polygon"
+      },
+      "name": "doc-to-delete",
+      "prop1": 9
+    }
+  }
+}
+
+
+{
+  "type": "doc",
+  "value": {
     "id": "1",
     "index": "meta_for_geo_shapes",
     "source": {

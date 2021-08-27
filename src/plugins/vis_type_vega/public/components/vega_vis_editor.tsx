@@ -7,13 +7,13 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiCodeEditor } from '@elastic/eui';
 import compactStringify from 'json-stringify-pretty-compact';
 import hjson from 'hjson';
 import 'brace/mode/hjson';
 import { i18n } from '@kbn/i18n';
 
 import { VisEditorOptionsProps } from 'src/plugins/visualizations/public';
+import { EuiCodeEditor } from '../../../es_ui_shared/public';
 import { getNotifications } from '../services';
 import { VisParams } from '../vega_fn';
 import { VegaHelpMenu } from './vega_help_menu';

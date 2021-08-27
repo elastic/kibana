@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Map as MbMap } from 'mapbox-gl';
+import type { Map as MbMap } from '@kbn/mapbox-gl';
 import { StaticStyleProperty } from './static_style_property';
 // @ts-expect-error
 import { getMakiSymbolAnchor, getMakiIconId } from '../symbol_utils';

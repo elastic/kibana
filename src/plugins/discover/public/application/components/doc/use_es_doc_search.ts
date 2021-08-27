@@ -6,22 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { useEffect, useState, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { estypes } from '@elastic/elasticsearch';
-import { IndexPattern, getServices } from '../../../kibana_services';
+import { getServices, IndexPattern } from '../../../kibana_services';
 import { DocProps } from './doc';
 import { ElasticSearchHit } from '../../doc_views/doc_views_types';
 import { SEARCH_FIELDS_FROM_SOURCE } from '../../../../common';
+import { ElasticRequestState } from './elastic_request_state';
 
 type RequestBody = Pick<estypes.SearchRequest, 'body'>;
-
-export enum ElasticRequestState {
-  Loading,
-  NotFound,
-  Found,
-  Error,
-  NotFoundIndexPattern,
-}
 
 /**
  * helper function to build a query body for Elasticsearch
@@ -30,10 +23,11 @@ export enum ElasticRequestState {
 export function buildSearchBody(
   id: string,
   indexPattern: IndexPattern,
-  useNewFieldsApi: boolean
+  useNewFieldsApi: boolean,
+  requestAllFields?: boolean
 ): RequestBody | undefined {
   const computedFields = indexPattern.getComputedFields();
-  const runtimeFields = computedFields.runtimeFields as estypes.RuntimeFields;
+  const runtimeFields = computedFields.runtimeFields as estypes.MappingRuntimeFields;
   const request: RequestBody = {
     body: {
       query: {
@@ -43,6 +37,7 @@ export function buildSearchBody(
       },
       stored_fields: computedFields.storedFields,
       script_fields: computedFields.scriptFields,
+      version: true,
     },
   };
   if (!request.body) {
@@ -52,6 +47,9 @@ export function buildSearchBody(
     // @ts-expect-error
     request.body.fields = [{ field: '*', include_unmapped: 'true' }];
     request.body.runtime_mappings = runtimeFields ? runtimeFields : {};
+    if (requestAllFields) {
+      request.body._source = true;
+    }
   } else {
     request.body._source = true;
   }
@@ -67,47 +65,50 @@ export function useEsDocSearch({
   index,
   indexPatternId,
   indexPatternService,
-}: DocProps): [ElasticRequestState, ElasticSearchHit | null, IndexPattern | null] {
+  requestSource,
+}: DocProps): [ElasticRequestState, ElasticSearchHit | null, IndexPattern | null, () => void] {
   const [indexPattern, setIndexPattern] = useState<IndexPattern | null>(null);
   const [status, setStatus] = useState(ElasticRequestState.Loading);
   const [hit, setHit] = useState<ElasticSearchHit | null>(null);
   const { data, uiSettings } = useMemo(() => getServices(), []);
   const useNewFieldsApi = useMemo(() => !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [uiSettings]);
 
-  useEffect(() => {
-    async function requestData() {
-      try {
-        const indexPatternEntity = await indexPatternService.get(indexPatternId);
-        setIndexPattern(indexPatternEntity);
+  const requestData = useCallback(async () => {
+    try {
+      const indexPatternEntity = await indexPatternService.get(indexPatternId);
+      setIndexPattern(indexPatternEntity);
 
-        const { rawResponse } = await data.search
-          .search({
-            params: {
-              index,
-              body: buildSearchBody(id, indexPatternEntity, useNewFieldsApi)?.body,
-            },
-          })
-          .toPromise();
+      const { rawResponse } = await data.search
+        .search({
+          params: {
+            index,
+            body: buildSearchBody(id, indexPatternEntity, useNewFieldsApi, requestSource)?.body,
+          },
+        })
+        .toPromise();
 
-        const hits = rawResponse.hits;
+      const hits = rawResponse.hits;
 
-        if (hits?.hits?.[0]) {
-          setStatus(ElasticRequestState.Found);
-          setHit(hits.hits[0]);
-        } else {
-          setStatus(ElasticRequestState.NotFound);
-        }
-      } catch (err) {
-        if (err.savedObjectId) {
-          setStatus(ElasticRequestState.NotFoundIndexPattern);
-        } else if (err.status === 404) {
-          setStatus(ElasticRequestState.NotFound);
-        } else {
-          setStatus(ElasticRequestState.Error);
-        }
+      if (hits?.hits?.[0]) {
+        setStatus(ElasticRequestState.Found);
+        setHit(hits.hits[0]);
+      } else {
+        setStatus(ElasticRequestState.NotFound);
+      }
+    } catch (err) {
+      if (err.savedObjectId) {
+        setStatus(ElasticRequestState.NotFoundIndexPattern);
+      } else if (err.status === 404) {
+        setStatus(ElasticRequestState.NotFound);
+      } else {
+        setStatus(ElasticRequestState.Error);
       }
     }
+  }, [id, index, indexPatternId, indexPatternService, data.search, useNewFieldsApi, requestSource]);
+
+  useEffect(() => {
     requestData();
-  }, [id, index, indexPatternId, indexPatternService, data.search, useNewFieldsApi]);
-  return [status, hit, indexPattern];
+  }, [requestData]);
+
+  return [status, hit, indexPattern, requestData];
 }

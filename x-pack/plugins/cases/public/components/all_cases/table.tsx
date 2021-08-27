@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React, { FunctionComponent, MutableRefObject } from 'react';
 import {
   EuiEmptyPrompt,
   EuiLoadingContent,
@@ -40,6 +40,7 @@ interface CasesTableProps {
   selection: EuiTableSelectionType<Case>;
   showActions: boolean;
   sorting: EuiBasicTableProps<Case>['sorting'];
+  tableRef: MutableRefObject<_EuiBasicTable | undefined>;
   tableRowProps: EuiBasicTableProps<Case>['rowProps'];
   userCanCrud: boolean;
 }
@@ -92,6 +93,7 @@ export const CasesTable: FunctionComponent<CasesTableProps> = ({
   selection,
   showActions,
   sorting,
+  tableRef,
   tableRowProps,
   userCanCrud,
 }) =>
@@ -110,6 +112,7 @@ export const CasesTable: FunctionComponent<CasesTableProps> = ({
         refreshCases={refreshCases}
       />
       <BasicTable
+        className={classnames({ isSelectorView })}
         columns={columns}
         data-test-subj="cases-table"
         isSelectable={showActions}
@@ -121,28 +124,30 @@ export const CasesTable: FunctionComponent<CasesTableProps> = ({
           <EuiEmptyPrompt
             title={<h3>{i18n.NO_CASES}</h3>}
             titleSize="xs"
-            body={i18n.NO_CASES_BODY}
+            body={userCanCrud ? i18n.NO_CASES_BODY : i18n.NO_CASES_BODY_READ_ONLY}
             actions={
-              <LinkButton
-                isDisabled={!userCanCrud}
-                fill
-                size="s"
-                onClick={goToCreateCase}
-                href={createCaseNavigation.href}
-                iconType="plusInCircle"
-                data-test-subj="cases-table-add-case"
-              >
-                {i18n.ADD_NEW_CASE}
-              </LinkButton>
+              userCanCrud && (
+                <LinkButton
+                  isDisabled={!userCanCrud}
+                  fill
+                  size="s"
+                  onClick={goToCreateCase}
+                  href={createCaseNavigation.href}
+                  iconType="plusInCircle"
+                  data-test-subj="cases-table-add-case"
+                >
+                  {i18n.ADD_NEW_CASE}
+                </LinkButton>
+              )
             }
           />
         }
         onChange={onChange}
         pagination={pagination}
+        ref={tableRef}
         rowProps={tableRowProps}
         selection={showActions ? selection : undefined}
         sorting={sorting}
-        className={classnames({ isSelectorView })}
       />
     </Div>
   );

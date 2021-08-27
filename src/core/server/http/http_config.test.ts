@@ -8,7 +8,7 @@
 
 import uuid from 'uuid';
 import { config, HttpConfig } from './http_config';
-import { CspConfig } from '../csp';
+import { config as cspConfig } from '../csp';
 import { ExternalUrlConfig } from '../external_url';
 
 const validHostnames = ['www.example.com', '8.8.8.8', '::1', 'localhost', '0.0.0.0'];
@@ -459,7 +459,8 @@ describe('HttpConfig', () => {
         },
       },
     });
-    const httpConfig = new HttpConfig(rawConfig, CspConfig.DEFAULT, ExternalUrlConfig.DEFAULT);
+    const rawCspConfig = cspConfig.schema.validate({});
+    const httpConfig = new HttpConfig(rawConfig, rawCspConfig, ExternalUrlConfig.DEFAULT);
 
     expect(httpConfig.customResponseHeaders).toEqual({
       string: 'string',

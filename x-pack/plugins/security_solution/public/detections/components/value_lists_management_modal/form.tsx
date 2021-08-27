@@ -18,8 +18,8 @@ import {
   EuiSelectOption,
 } from '@elastic/eui';
 
-import type { Type } from '@kbn/securitysolution-io-ts-list-types';
-import { useImportList, ListSchema } from '../../../shared_imports';
+import type { Type, ListSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { useImportList } from '@kbn/securitysolution-list-hooks';
 
 import * as i18n from './translations';
 import { useKibana } from '../../../common/lib/kibana';

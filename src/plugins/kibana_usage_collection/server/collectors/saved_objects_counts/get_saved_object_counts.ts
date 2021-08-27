@@ -26,6 +26,6 @@ export async function getSavedObjectsCounts(
     },
   };
   const { body } = await esClient.search(savedObjectCountSearchParams);
-  // @ts-expect-error @elastic/elasticsearch Aggregate does not include `buckets`
+  // @ts-expect-error declare type for aggregations explicitly
   return body.aggregations?.types?.buckets || [];
 }

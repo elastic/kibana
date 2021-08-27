@@ -63,7 +63,7 @@ export default function ({ getService }: FtrProviderContext) {
         );
       });
       after('unload test docs', () => {
-        esArchiver.unload('uptime/blank');
+        esArchiver.unload('x-pack/test/functional/es_archives/uptime/blank');
       });
 
       it('retrieves expected cert data', async () => {

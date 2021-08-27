@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { resolve } from 'path';
-
 import { FtrConfigProviderContext } from '@kbn/test';
 
 import { CA_CERT_PATH } from '@kbn/dev-utils';
@@ -23,10 +21,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
   return {
     ...kibanaCommonTestsConfig.getAll(),
-
-    esArchiver: {
-      directory: resolve(__dirname, 'es_archives'),
-    },
 
     browser: {
       type: 'firefox',

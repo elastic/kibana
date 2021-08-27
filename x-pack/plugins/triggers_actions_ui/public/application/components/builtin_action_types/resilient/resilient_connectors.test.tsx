@@ -12,7 +12,7 @@ import { ResilientActionConnector } from './types';
 jest.mock('../../../../common/lib/kibana');
 
 describe('ResilientActionConnectorFields renders', () => {
-  test('alerting Resilient connector fields is rendered', () => {
+  test('alerting Resilient connector fields are rendered', () => {
     const actionConnector = {
       secrets: {
         apiKeyId: 'key',

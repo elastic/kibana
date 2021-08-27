@@ -128,7 +128,7 @@ export function FieldSelect({
       selectedOptions = [{ label: value!, id: 'INVALID_FIELD' }];
     }
   } else {
-    if (value && !selectedOptions.length) {
+    if (value && fields[fieldsSelector] && !selectedOptions.length) {
       onChange([]);
     }
   }

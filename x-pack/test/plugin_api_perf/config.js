@@ -24,9 +24,6 @@ export default async function ({ readConfigFile }) {
     servers: integrationConfig.get('servers'),
     esTestCluster: integrationConfig.get('esTestCluster'),
     apps: integrationConfig.get('apps'),
-    esArchiver: {
-      directory: path.resolve(__dirname, '../functional/es_archives'),
-    },
     screenshots: integrationConfig.get('screenshots'),
     junit: {
       reportName: 'Plugin Functional Tests',

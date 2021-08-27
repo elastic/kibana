@@ -10,7 +10,7 @@ import { pipe } from 'fp-ts/lib/pipeable';
 
 import { SavedObjectsClientContract } from 'src/core/server';
 import { validateTaskEither } from '@kbn/securitysolution-io-ts-utils';
-import { toError, toPromise } from '../../../../common/fp_utils';
+import { toError, toPromise } from '@kbn/securitysolution-list-api';
 import { signalsMigrationSOClient } from './saved_objects_client';
 import {
   signalsMigrationSO,

@@ -5,20 +5,10 @@
  * 2.0.
  */
 
-import {
-  EuiButton,
-  EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPageBody,
-  EuiPageContent,
-  EuiPageContentBody,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiButton, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
-import { euiStyled } from '../../../../../src/plugins/kibana_react/common';
-import { FlexPage } from './page';
+import { PageTemplate } from './page_template';
 
 interface Props {
   detailedMessage?: React.ReactNode;
@@ -26,51 +16,40 @@ interface Props {
   shortMessage: React.ReactNode;
 }
 
-export const ErrorPage: React.FC<Props> = ({ detailedMessage, retry, shortMessage }) => (
-  <FlexPage>
-    <EuiPageBody>
-      <MinimumPageContent
-        horizontalPosition="center"
-        verticalPosition="center"
-        panelPaddingSize="none"
+// Represents a fully constructed page, including page template.
+export const ErrorPage: React.FC<Props> = ({ detailedMessage, retry, shortMessage }) => {
+  return (
+    <PageTemplate isEmptyState={true}>
+      <EuiCallOut
+        color="danger"
+        iconType="cross"
+        title={
+          <FormattedMessage
+            id="xpack.infra.errorPage.errorOccurredTitle"
+            defaultMessage="An error occurred"
+          />
+        }
       >
-        <EuiPageContentBody>
-          <EuiCallOut
-            color="danger"
-            iconType="cross"
-            title={
-              <FormattedMessage
-                id="xpack.infra.errorPage.errorOccurredTitle"
-                defaultMessage="An error occurred"
-              />
-            }
-          >
-            <EuiFlexGroup alignItems="center">
-              <EuiFlexItem>{shortMessage}</EuiFlexItem>
-              {retry ? (
-                <EuiFlexItem grow={false}>
-                  <EuiButton onClick={retry} iconType="refresh">
-                    <FormattedMessage
-                      id="xpack.infra.errorPage.tryAgainButtonLabel"
-                      defaultMessage="Try again"
-                    />
-                  </EuiButton>
-                </EuiFlexItem>
-              ) : null}
-            </EuiFlexGroup>
-            {detailedMessage ? (
-              <>
-                <EuiSpacer />
-                <div>{detailedMessage}</div>
-              </>
-            ) : null}
-          </EuiCallOut>
-        </EuiPageContentBody>
-      </MinimumPageContent>
-    </EuiPageBody>
-  </FlexPage>
-);
-
-const MinimumPageContent = euiStyled(EuiPageContent)`
-  min-width: 50vh;
-`;
+        <EuiFlexGroup alignItems="center">
+          <EuiFlexItem>{shortMessage}</EuiFlexItem>
+          {retry ? (
+            <EuiFlexItem grow={false}>
+              <EuiButton onClick={retry} iconType="refresh">
+                <FormattedMessage
+                  id="xpack.infra.errorPage.tryAgainButtonLabel"
+                  defaultMessage="Try again"
+                />
+              </EuiButton>
+            </EuiFlexItem>
+          ) : null}
+        </EuiFlexGroup>
+        {detailedMessage ? (
+          <>
+            <EuiSpacer />
+            <div>{detailedMessage}</div>
+          </>
+        ) : null}
+      </EuiCallOut>
+    </PageTemplate>
+  );
+};

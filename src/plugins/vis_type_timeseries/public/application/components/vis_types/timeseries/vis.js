@@ -51,7 +51,9 @@ class TimeseriesVisualization extends Component {
   };
 
   applyDocTo = (template) => (doc) => {
-    const vars = replaceVars(template, null, doc);
+    const vars = replaceVars(template, null, doc, {
+      noEscape: true,
+    });
 
     if (vars instanceof Error) {
       this.showToastNotification = vars.error.caused_by;
@@ -236,6 +238,8 @@ class TimeseriesVisualization extends Component {
             showGrid={Boolean(model.show_grid)}
             legend={Boolean(model.show_legend)}
             legendPosition={model.legend_position}
+            truncateLegend={Boolean(model.truncate_legend)}
+            maxLegendLines={model.max_lines_legend}
             tooltipMode={model.tooltip_mode}
             xAxisFormatter={this.xAxisFormatter(interval)}
             annotations={this.prepareAnnotations()}

@@ -7,9 +7,12 @@
 import { createSelector } from 'reselect';
 import { Pagination } from '@elastic/eui';
 
+import type {
+  ExceptionListItemSchema,
+  FoundExceptionListItemSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
 import { EventFiltersListPageState, EventFiltersServiceGetListOptions } from '../types';
 
-import { ExceptionListItemSchema } from '../../../../shared_imports';
 import { ServerApiError } from '../../../../common/types';
 import {
   isLoadingResourceState,
@@ -18,7 +21,6 @@ import {
   isUninitialisedResourceState,
   getLastLoadedResourceState,
 } from '../../../state/async_resource_state';
-import { FoundExceptionListItemSchema } from '../../../../../../lists/common/schemas';
 import {
   MANAGEMENT_DEFAULT_PAGE_SIZE,
   MANAGEMENT_PAGE_SIZE_OPTIONS,
@@ -57,6 +59,13 @@ export const getListItems: EventFiltersSelector<
   return apiResponseData?.data || [];
 });
 
+export const getTotalCountListItems: EventFiltersSelector<Immutable<number>> = createSelector(
+  getListApiSuccessResponse,
+  (apiResponseData) => {
+    return apiResponseData?.total || 0;
+  }
+);
+
 /**
  * Will return the query that was used with the currently displayed list of content. If a new page
  * of content is being loaded, this selector will then attempt to use the previousState to return
@@ -88,24 +97,21 @@ export const getListFetchError: EventFiltersSelector<
   return (isFailedResourceState(listPageDataState) && listPageDataState.error) || undefined;
 });
 
-export const getListIsLoading: EventFiltersSelector<boolean> = createSelector(
-  getCurrentListPageDataState,
-  (listDataState) => isLoadingResourceState(listDataState)
-);
-
 export const getListPageDataExistsState: EventFiltersSelector<
   StoreState['listPage']['dataExist']
 > = ({ listPage: { dataExist } }) => dataExist;
 
+export const getListIsLoading: EventFiltersSelector<boolean> = createSelector(
+  getCurrentListPageDataState,
+  getListPageDataExistsState,
+  (listDataState, dataExists) =>
+    isLoadingResourceState(listDataState) || isLoadingResourceState(dataExists)
+);
+
 export const getListPageDoesDataExist: EventFiltersSelector<boolean> = createSelector(
   getListPageDataExistsState,
   (dataExistsState) => {
-    if (isLoadedResourceState(dataExistsState)) {
-      return dataExistsState.data;
-    }
-
-    // Until we know for sure that data exists (LoadedState), we assume `true`
-    return true;
+    return !!getLastLoadedResourceState(dataExistsState)?.data;
   }
 );
 
@@ -178,8 +184,7 @@ export const listDataNeedsRefresh: EventFiltersSelector<boolean> = createSelecto
     return (
       forceRefresh ||
       location.page_index + 1 !== currentQuery.page ||
-      location.page_size !== currentQuery.perPage ||
-      (!!location.filter && location.filter !== currentQuery.filter)
+      location.page_size !== currentQuery.perPage
     );
   }
 );

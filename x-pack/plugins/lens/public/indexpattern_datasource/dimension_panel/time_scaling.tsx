@@ -15,8 +15,8 @@ import {
   IndexPatternColumn,
   operationDefinitionMap,
 } from '../operations';
-import { unitSuffixesLong } from '../suffix_formatter';
-import { TimeScaleUnit } from '../time_scale';
+import type { TimeScaleUnit } from '../../../common/expressions';
+import { unitSuffixesLong } from '../../../common/suffix_formatter';
 import { IndexPatternLayer } from '../types';
 
 export function setTimeScaling(
@@ -27,7 +27,13 @@ export function setTimeScaling(
   const currentColumn = layer.columns[columnId];
   const label = currentColumn.customLabel
     ? currentColumn.label
-    : adjustTimeScaleLabelSuffix(currentColumn.label, currentColumn.timeScale, timeScale);
+    : adjustTimeScaleLabelSuffix(
+        currentColumn.label,
+        currentColumn.timeScale,
+        timeScale,
+        currentColumn.timeShift,
+        currentColumn.timeShift
+      );
   return {
     ...layer,
     columns: {

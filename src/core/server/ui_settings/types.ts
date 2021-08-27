@@ -7,14 +7,11 @@
  */
 import { SavedObjectsClientContract } from '../saved_objects/types';
 import { UiSettingsParams, UserProvidedValues, PublicUiSettingsParams } from '../../types';
+
 export type {
   UiSettingsParams,
   PublicUiSettingsParams,
-  StringValidationRegexString,
-  StringValidationRegex,
-  StringValidation,
   DeprecationSettings,
-  ImageValidation,
   UiSettingsType,
   UserProvidedValues,
 } from '../../types';
@@ -68,6 +65,14 @@ export interface IUiSettingsClient {
    * Shows whether the uiSetting is a sensitive value. Used by telemetry to not send sensitive values.
    */
   isSensitive: (key: string) => boolean;
+}
+
+/** @internal */
+export interface InternalUiSettingsServicePreboot {
+  /**
+   * Creates a {@link IUiSettingsClient} that returns default values for the Core uiSettings.
+   */
+  createDefaultsClient(): IUiSettingsClient;
 }
 
 /** @internal */

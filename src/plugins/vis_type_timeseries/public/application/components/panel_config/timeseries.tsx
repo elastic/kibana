@@ -23,14 +23,14 @@ import {
   EuiFieldText,
   EuiTitle,
   EuiHorizontalRule,
+  EuiFieldNumber,
 } from '@elastic/eui';
 
 // @ts-expect-error not typed yet
 import { SeriesEditor } from '../series_editor';
 // @ts-expect-error not typed yet
-import { AnnotationsEditor } from '../annotations_editor';
-// @ts-expect-error not typed yet
 import { IndexPattern } from '../index_pattern';
+import { AnnotationsEditor } from '../annotations_editor';
 import { createSelectHandler } from '../lib/create_select_handler';
 import { ColorPicker } from '../color_picker';
 import { YesNo } from '../yes_no';
@@ -103,6 +103,9 @@ const legendPositionOptions = [
   },
 ];
 
+const MAX_TRUNCATE_LINES = 5;
+const MIN_TRUNCATE_LINES = 1;
+
 export class TimeseriesPanelConfig extends Component<
   PanelConfigProps,
   { selectedTab: PANEL_CONFIG_TABS }
@@ -162,7 +165,6 @@ export class TimeseriesPanelConfig extends Component<
         <AnnotationsEditor
           fields={this.props.fields}
           model={this.props.model}
-          name="annotations"
           onChange={this.props.onChange}
         />
       );
@@ -210,6 +212,7 @@ export class TimeseriesPanelConfig extends Component<
                       this.props.onChange({ filter });
                     }}
                     indexPatterns={[model.index_pattern]}
+                    data-test-subj="panelFilterQueryBar"
                   />
                 </EuiFormRow>
               </EuiFlexItem>
@@ -345,7 +348,7 @@ export class TimeseriesPanelConfig extends Component<
                   />
                 </EuiFormLabel>
               </EuiFlexItem>
-              <EuiFlexItem>
+              <EuiFlexItem grow={false}>
                 <ColorPicker
                   onChange={this.props.onChange}
                   name="background_color"
@@ -353,47 +356,15 @@ export class TimeseriesPanelConfig extends Component<
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiFormRow
-                  label={i18n.translate('visTypeTimeseries.timeseries.optionsTab.showLegendLabel', {
-                    defaultMessage: 'Show legend?',
-                  })}
-                >
-                  <YesNo
-                    value={model.show_legend}
-                    name="show_legend"
-                    onChange={this.props.onChange}
-                  />
-                </EuiFormRow>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiFormLabel htmlFor={htmlId('legendPos')}>
+                <EuiFormLabel>
                   <FormattedMessage
-                    id="visTypeTimeseries.timeseries.optionsTab.legendPositionLabel"
-                    defaultMessage="Legend position"
+                    id="visTypeTimeseries.timeseries.optionsTab.displayGridLabel"
+                    defaultMessage="Display grid"
                   />
                 </EuiFormLabel>
               </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiComboBox
-                  isClearable={false}
-                  id={htmlId('legendPos')}
-                  options={legendPositionOptions}
-                  selectedOptions={selectedLegendPosOption ? [selectedLegendPosOption] : []}
-                  onChange={handleSelectChange('legend_position')}
-                  singleSelection={{ asPlainText: true }}
-                />
-              </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiFormRow
-                  label={i18n.translate(
-                    'visTypeTimeseries.timeseries.optionsTab.displayGridLabel',
-                    {
-                      defaultMessage: 'Display grid',
-                    }
-                  )}
-                >
-                  <YesNo value={model.show_grid} name="show_grid" onChange={this.props.onChange} />
-                </EuiFormRow>
+                <YesNo value={model.show_grid} name="show_grid" onChange={this.props.onChange} />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiFormLabel>
@@ -403,13 +374,91 @@ export class TimeseriesPanelConfig extends Component<
                   />
                 </EuiFormLabel>
               </EuiFlexItem>
-              <EuiFlexItem>
+              <EuiFlexItem grow={false}>
                 <EuiComboBox
                   isClearable={false}
                   id={htmlId('tooltipMode')}
                   options={tooltipModeOptions}
                   selectedOptions={selectedTooltipMode ? [selectedTooltipMode] : []}
                   onChange={handleSelectChange('tooltip_mode')}
+                  singleSelection={{ asPlainText: true }}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiFlexGroup responsive={false} wrap={true} alignItems="center">
+              <EuiFlexItem grow={false}>
+                <EuiFormLabel>
+                  <FormattedMessage
+                    id="visTypeTimeseries.timeseries.optionsTab.showLegendLabel"
+                    defaultMessage="Show legend?"
+                  />
+                </EuiFormLabel>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <YesNo
+                  value={model.show_legend}
+                  name="show_legend"
+                  onChange={this.props.onChange}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiFormLabel>
+                  <FormattedMessage
+                    id="visTypeTimeseries.timeseries.optionsTab.truncateLegendLabel"
+                    defaultMessage="Truncate legend?"
+                  />
+                </EuiFormLabel>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <YesNo
+                  value={model.truncate_legend}
+                  name="truncate_legend"
+                  onChange={this.props.onChange}
+                  data-test-subj="timeSeriesEditorDataTruncateLegendSwitch"
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiFormLabel>
+                  <FormattedMessage
+                    id="visTypeTimeseries.timeseries.optionsTab.maxLinesLabel"
+                    defaultMessage="Maximum legend lines"
+                  />
+                </EuiFormLabel>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiFieldNumber
+                  data-test-subj="timeSeriesEditorDataMaxLegendLines"
+                  value={model.max_lines_legend}
+                  min={MIN_TRUNCATE_LINES}
+                  max={MAX_TRUNCATE_LINES}
+                  compressed
+                  disabled={!Boolean(model.truncate_legend)}
+                  onChange={(e) => {
+                    const val = Number(e.target.value);
+                    this.props.onChange({
+                      max_lines_legend: Math.min(
+                        MAX_TRUNCATE_LINES,
+                        Math.max(val, MIN_TRUNCATE_LINES)
+                      ),
+                    });
+                  }}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiFormLabel htmlFor={htmlId('legendPos')}>
+                  <FormattedMessage
+                    id="visTypeTimeseries.timeseries.optionsTab.legendPositionLabel"
+                    defaultMessage="Legend position"
+                  />
+                </EuiFormLabel>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiComboBox
+                  isClearable={false}
+                  id={htmlId('legendPos')}
+                  options={legendPositionOptions}
+                  selectedOptions={selectedLegendPosOption ? [selectedLegendPosOption] : []}
+                  onChange={handleSelectChange('legend_position')}
                   singleSelection={{ asPlainText: true }}
                 />
               </EuiFlexItem>
@@ -444,6 +493,7 @@ export class TimeseriesPanelConfig extends Component<
           <EuiTab
             isSelected={selectedTab === PANEL_CONFIG_TABS.ANNOTATIONS}
             onClick={() => this.switchTab(PANEL_CONFIG_TABS.ANNOTATIONS)}
+            data-test-subj="timeSeriesEditorAnnotationsBtn"
           >
             <FormattedMessage
               id="visTypeTimeseries.timeseries.annotationsTab.annotationsButtonLabel"

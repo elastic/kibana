@@ -8,12 +8,20 @@
 import React, { ReactNode, MouseEventHandler } from 'react';
 import PropTypes from 'prop-types';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+
 import { TooltipIcon, IconType } from '../tooltip_icon';
 
-import { ComponentStrings } from '../../../i18n';
-
-const { ArgFormArgSimpleForm: strings } = ComponentStrings;
-
+const strings = {
+  getRemoveAriaLabel: () =>
+    i18n.translate('xpack.canvas.argFormArgSimpleForm.removeAriaLabel', {
+      defaultMessage: 'Remove',
+    }),
+  getRequiredTooltip: () =>
+    i18n.translate('xpack.canvas.argFormArgSimpleForm.requiredTooltip', {
+      defaultMessage: 'This argument is required, you should specify a value.',
+    }),
+};
 interface Props {
   children?: ReactNode;
   required?: boolean;

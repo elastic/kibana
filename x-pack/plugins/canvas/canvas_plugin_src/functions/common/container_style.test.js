@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { functionWrapper } from '../../../test_helpers/function_wrapper';
-import { elasticLogo } from '../../lib/elastic_logo';
+import {
+  functionWrapper,
+  getElasticLogo,
+} from '../../../../../../src/plugins/presentation_util/common/lib';
 import { getFunctionErrors } from '../../../i18n';
 import { containerStyle } from './containerStyle';
 
@@ -15,14 +17,21 @@ const errors = getFunctionErrors().containerStyle;
 describe('containerStyle', () => {
   const fn = functionWrapper(containerStyle);
 
-  describe('default output', () => {
-    const result = fn(null);
+  let elasticLogo;
+  beforeEach(async () => {
+    elasticLogo = (await getElasticLogo()).elasticLogo;
+  });
 
+  describe('default output', () => {
     it('returns a containerStyle', () => {
+      const result = fn(null);
+
       expect(result).toHaveProperty('type', 'containerStyle');
     });
 
     it('all style properties except `overflow` are omitted if args not provided', () => {
+      const result = fn(null);
+
       expect(Object.keys(result)).toHaveLength(2);
       expect(result).toHaveProperty('type');
       expect(result).toHaveProperty('overflow');

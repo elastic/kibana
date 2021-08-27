@@ -7,4 +7,4 @@
 
 import { estypes } from '@elastic/elasticsearch';
 
-export type DatafeedStats = estypes.DatafeedStats;
+export type DatafeedStats = estypes.MlDatafeedStats;

@@ -101,6 +101,7 @@ export const analysisConfigSchema = schema.object({
       stop_on_warn: schema.maybe(schema.boolean()),
     })
   ),
+  model_prune_window: schema.maybe(schema.string()),
 });
 
 export const anomalyDetectionJobSchema = {
@@ -123,7 +124,7 @@ export const anomalyDetectionJobSchema = {
   job_id: schema.string(),
   job_type: schema.maybe(schema.string()),
   job_version: schema.maybe(schema.string()),
-  groups: schema.arrayOf(schema.maybe(schema.string())),
+  groups: schema.maybe(schema.arrayOf(schema.maybe(schema.string()))),
   model_plot_config: schema.maybe(schema.any()),
   model_plot: schema.maybe(schema.any()),
   model_size_stats: schema.maybe(schema.any()),
@@ -186,6 +187,7 @@ export const getOverallBucketsSchema = schema.object({
   bucketSpan: schema.string(),
   start: schema.number(),
   end: schema.number(),
+  overall_score: schema.maybe(schema.number()),
 });
 
 export const getCategoriesSchema = schema.object({
@@ -217,3 +219,13 @@ export const updateModelSnapshotBodySchema = schema.object({
 });
 
 export const forecastAnomalyDetector = schema.object({ duration: schema.any() });
+
+export const jobResetQuerySchema = schema.object({
+  /** wait for completion */
+  wait_for_completion: schema.maybe(schema.boolean()),
+});
+
+export const forceQuerySchema = schema.object({
+  /** force close */
+  force: schema.maybe(schema.boolean()),
+});

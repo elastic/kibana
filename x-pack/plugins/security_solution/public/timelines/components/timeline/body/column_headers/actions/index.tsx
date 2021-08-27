@@ -8,7 +8,7 @@
 import { EuiButtonIcon } from '@elastic/eui';
 import React, { useCallback } from 'react';
 
-import { ColumnHeaderOptions } from '../../../../../../timelines/store/timeline/model';
+import { ColumnHeaderOptions } from '../../../../../../../common';
 import { OnColumnRemoved } from '../../../events';
 import { EventsHeadingExtra, EventsLoading } from '../../../styles';
 import { Sort } from '../../sort';

@@ -11,7 +11,7 @@ import {
   TRANSACTION_TYPE,
 } from '../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../common/processor_event';
-import { rangeQuery } from '../../../server/utils/queries';
+import { rangeQuery } from '../../../../observability/server';
 import { TRANSACTION_PAGE_LOAD } from '../../../common/transaction_types';
 
 export async function hasRumData({
@@ -51,7 +51,7 @@ export async function hasRumData({
 
     const { apmEventClient } = setup;
 
-    const response = await apmEventClient.search(params);
+    const response = await apmEventClient.search('has_rum_data', params);
     return {
       indices: setup.indices['apm_oss.transactionIndices']!,
       hasData: response.hits.total.value > 0,

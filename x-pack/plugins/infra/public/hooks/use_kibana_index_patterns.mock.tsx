@@ -21,7 +21,7 @@ import { Pick2 } from '../../common/utility_types';
 
 type MockIndexPattern = Pick<
   IndexPattern,
-  'id' | 'title' | 'type' | 'getTimeField' | 'isTimeBased' | 'getFieldByName'
+  'id' | 'title' | 'type' | 'getTimeField' | 'isTimeBased' | 'getFieldByName' | 'getComputedFields'
 >;
 export type MockIndexPatternSpec = Pick<
   IIndexPattern,
@@ -35,23 +35,7 @@ export const MockIndexPatternsKibanaContextProvider: React.FC<{
   mockIndexPatterns: MockIndexPatternSpec[];
 }> = ({ asyncDelay, children, mockIndexPatterns }) => {
   const indexPatterns = useMemo(
-    () =>
-      createIndexPatternsMock(
-        asyncDelay,
-        mockIndexPatterns.map(({ id, title, type = undefined, fields, timeFieldName }) => {
-          const indexPatternFields = fields.map((fieldSpec) => new IndexPatternField(fieldSpec));
-
-          return {
-            id,
-            title,
-            type,
-            getTimeField: () => indexPatternFields.find(({ name }) => name === timeFieldName),
-            isTimeBased: () => timeFieldName != null,
-            getFieldByName: (fieldName) =>
-              indexPatternFields.find(({ name }) => name === fieldName),
-          };
-        })
-      ),
+    () => createIndexPatternsMock(asyncDelay, mockIndexPatterns.map(createIndexPatternMock)),
     [asyncDelay, mockIndexPatterns]
   );
 
@@ -71,7 +55,7 @@ export const MockIndexPatternsKibanaContextProvider: React.FC<{
   );
 };
 
-const createIndexPatternsMock = (
+export const createIndexPatternsMock = (
   asyncDelay: number,
   indexPatterns: MockIndexPattern[]
 ): {
@@ -91,5 +75,38 @@ const createIndexPatternsMock = (
       );
       return await indexPatterns$.pipe(delay(asyncDelay)).toPromise();
     },
+  };
+};
+
+export const createIndexPatternMock = ({
+  id,
+  title,
+  type = undefined,
+  fields,
+  timeFieldName,
+}: MockIndexPatternSpec): MockIndexPattern => {
+  const indexPatternFields = fields.map((fieldSpec) => new IndexPatternField(fieldSpec));
+
+  return {
+    id,
+    title,
+    type,
+    getTimeField: () => indexPatternFields.find(({ name }) => name === timeFieldName),
+    isTimeBased: () => timeFieldName != null,
+    getFieldByName: (fieldName) => indexPatternFields.find(({ name }) => name === fieldName),
+    getComputedFields: () => ({
+      docvalueFields: [],
+      runtimeFields: indexPatternFields.reduce((accumulatedRuntimeFields, field) => {
+        if (field.runtimeField != null) {
+          return {
+            ...accumulatedRuntimeFields,
+            [field.name]: field.runtimeField,
+          };
+        }
+        return accumulatedRuntimeFields;
+      }, {}),
+      scriptFields: {},
+      storedFields: [],
+    }),
   };
 };

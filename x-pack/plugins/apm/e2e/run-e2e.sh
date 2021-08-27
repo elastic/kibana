@@ -147,7 +147,7 @@ $WAIT_ON_BIN -i 500 -w 500 http-get://admin:changeme@localhost:$KIBANA_PORT/api/
 ## Workaround to wait for the http server running
 ## See: https://github.com/elastic/kibana/issues/66326
 if [ -e kibana.log ] ; then
-    grep -m 1 "http server running" <(tail -f -n +1 kibana.log)
+    grep -m 1 "Kibana is now available" <(tail -f -n +1 kibana.log)
     echo "✅ Kibana server running..."
     grep -m 1 "bundles compiled successfully" <(tail -f -n +1 kibana.log)
     echo "✅ Kibana bundles have been compiled..."

@@ -6,20 +6,12 @@
  */
 
 import expect from '@kbn/expect';
-import { REPO_ROOT } from '@kbn/utils';
-import path from 'path';
 import { FtrProviderContext } from '../ftr_provider_context';
 import * as GenerationUrls from '../services/generation_urls';
 import { ReportingUsageStats } from '../services/usage';
 
-const OSS_KIBANA_ARCHIVE_PATH = path.resolve(
-  REPO_ROOT,
-  'test/functional/fixtures/es_archiver/dashboard/current/kibana'
-);
-const OSS_DATA_ARCHIVE_PATH = path.resolve(
-  REPO_ROOT,
-  'test/functional/fixtures/es_archiver/dashboard/current/data'
-);
+const OSS_KIBANA_ARCHIVE_PATH = 'test/functional/fixtures/es_archiver/dashboard/current/kibana';
+const OSS_DATA_ARCHIVE_PATH = 'test/functional/fixtures/es_archiver/dashboard/current/data';
 
 interface UsageStats {
   reporting: ReportingUsageStats;
@@ -86,7 +78,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('from archive data', () => {
       it('generated from 6.2', async () => {
-        await esArchiver.load('reporting/bwc/6_2');
+        await esArchiver.load('x-pack/test/functional/es_archives/reporting/bwc/6_2');
         const usage = await usageAPI.getUsageStats();
 
         reportingAPI.expectRecentJobTypeTotalStats(usage, 'csv', 0);
@@ -105,11 +97,11 @@ export default function ({ getService }: FtrProviderContext) {
         reportingAPI.expectAllTimePdfLayoutStats(usage, 'preserve_layout', 0);
         reportingAPI.expectAllTimePdfLayoutStats(usage, 'print', 0);
 
-        await esArchiver.unload('reporting/bwc/6_2');
+        await esArchiver.unload('x-pack/test/functional/es_archives/reporting/bwc/6_2');
       });
 
       it('generated from 6.3', async () => {
-        await esArchiver.load('reporting/bwc/6_3');
+        await esArchiver.load('x-pack/test/functional/es_archives/reporting/bwc/6_3');
         const usage = await usageAPI.getUsageStats();
 
         reportingAPI.expectRecentJobTypeTotalStats(usage, 'csv', 0);
@@ -126,7 +118,7 @@ export default function ({ getService }: FtrProviderContext) {
         reportingAPI.expectAllTimePdfLayoutStats(usage, 'preserve_layout', 3);
         reportingAPI.expectAllTimePdfLayoutStats(usage, 'print', 3);
 
-        await esArchiver.unload('reporting/bwc/6_3');
+        await esArchiver.unload('x-pack/test/functional/es_archives/reporting/bwc/6_3');
       });
     });
 

@@ -86,6 +86,10 @@ exports[`EPM template tests loading base.yml: base.yml 1`] = `
         },
         "validarray": {
           "type": "integer"
+        },
+        "cycle_type": {
+          "type": "constant_keyword",
+          "value": "bicycle"
         }
       },
       "_meta": {
@@ -98,7 +102,9 @@ exports[`EPM template tests loading base.yml: base.yml 1`] = `
     }
   },
   "data_stream": {},
-  "composed_of": [],
+  "composed_of": [
+    ".fleet_component_template-1"
+  ],
   "_meta": {
     "package": {
       "name": "nginx"
@@ -212,7 +218,9 @@ exports[`EPM template tests loading coredns.logs.yml: coredns.logs.yml 1`] = `
     }
   },
   "data_stream": {},
-  "composed_of": [],
+  "composed_of": [
+    ".fleet_component_template-1"
+  ],
   "_meta": {
     "package": {
       "name": "coredns"
@@ -1738,7 +1746,9 @@ exports[`EPM template tests loading system.yml: system.yml 1`] = `
     }
   },
   "data_stream": {},
-  "composed_of": [],
+  "composed_of": [
+    ".fleet_component_template-1"
+  ],
   "_meta": {
     "package": {
       "name": "system"

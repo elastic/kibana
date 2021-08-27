@@ -8,10 +8,10 @@
 import type React from 'react';
 import uuid from 'uuid';
 import { isError } from 'lodash/fp';
+import { isAppError } from '@kbn/securitysolution-t-grid';
 
 import { AppToast, ActionToaster } from './';
 import { isToasterError } from './errors';
-import { isAppError } from '../../utils/api';
 
 /**
  * Displays an error toast for the provided title and message

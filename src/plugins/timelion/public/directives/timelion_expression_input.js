@@ -31,8 +31,6 @@
 
 import _ from 'lodash';
 import $ from 'jquery';
-import PEG from 'pegjs';
-import grammar from 'raw-loader!../../../vis_type_timelion/common/chain.peg';
 import timelionExpressionInputTemplate from './timelion_expression_input.html';
 import {
   SUGGESTION_TYPE,
@@ -41,8 +39,6 @@ import {
   insertAtLocation,
 } from './timelion_expression_input_helpers';
 import { comboBoxKeyCodes } from '@elastic/eui';
-
-const Parser = PEG.generate(grammar);
 
 export function timelionExpInput(deps) {
   return ($http, $timeout) => {
@@ -144,7 +140,6 @@ export function timelionExpInput(deps) {
           const suggestions = await suggest(
             scope.sheet,
             functionReference.list,
-            Parser,
             getCursorPosition(),
             argValueSuggestions
           );

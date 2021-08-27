@@ -14,6 +14,6 @@ export const technicalComponentTemplate: ClusterPutComponentTemplateBody = {
     settings: {
       number_of_shards: 1,
     },
-    mappings: mappingFromFieldMap(technicalRuleFieldMap),
+    mappings: mappingFromFieldMap(technicalRuleFieldMap, 'strict'),
   },
 };

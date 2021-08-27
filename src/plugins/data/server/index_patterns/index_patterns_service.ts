@@ -22,12 +22,13 @@ import { registerRoutes } from './routes';
 import { indexPatternSavedObjectType } from '../saved_objects';
 import { capabilitiesProvider } from './capabilities_provider';
 import { IndexPatternsCommonService } from '../';
-import { FieldFormatsStart } from '../field_formats';
+import { FieldFormatsStart } from '../../../field_formats/server';
 import { getIndexPatternLoad } from './expressions';
 import { UiSettingsServerToCommon } from './ui_settings_wrapper';
 import { IndexPatternsApiServer } from './index_patterns_api_client';
 import { SavedObjectsClientServerToCommon } from './saved_objects_client_wrapper';
 import { registerIndexPatternsUsageCollector } from './register_index_pattern_usage_collection';
+import { createScriptedFieldsDeprecationsConfig } from './deprecations';
 
 export interface IndexPatternsServiceStart {
   indexPatternsServiceFactory: (
@@ -65,7 +66,7 @@ export const indexPatternsServiceFactory = ({
   return new IndexPatternsCommonService({
     uiSettings: new UiSettingsServerToCommon(uiSettingsClient),
     savedObjectsClient: new SavedObjectsClientServerToCommon(savedObjectsClient),
-    apiClient: new IndexPatternsApiServer(elasticsearchClient),
+    apiClient: new IndexPatternsApiServer(elasticsearchClient, savedObjectsClient),
     fieldFormats: formats,
     onError: (error) => {
       logger.error(error);
@@ -88,6 +89,7 @@ export class IndexPatternsServiceProvider implements Plugin<void, IndexPatternsS
 
     expressions.registerFunction(getIndexPatternLoad({ getStartServices: core.getStartServices }));
     registerIndexPatternsUsageCollector(core.getStartServices, usageCollection);
+    core.deprecations.registerDeprecations(createScriptedFieldsDeprecationsConfig(core));
   }
 
   public start(core: CoreStart, { fieldFormats, logger }: IndexPatternsServiceStartDeps) {

@@ -22,7 +22,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('creation_saved_search', function () {
     before(async () => {
-      await esArchiver.loadIfNeeded('ml/farequote');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
       await transform.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');
       await transform.testResources.createSavedSearchFarequoteFilterIfNeeded();
       await transform.testResources.setKibanaTimeZoneToUTC();
@@ -279,6 +279,7 @@ export default function ({ getService }: FtrProviderContext) {
           await transform.table.assertTransformRowFields(testData.transformId, {
             id: testData.transformId,
             description: testData.transformDescription,
+            type: testData.type,
             status: testData.expected.row.status,
             mode: testData.expected.row.mode,
             progress: testData.expected.row.progress,

@@ -47,7 +47,6 @@ export type HttpQueryTabBodyProps = QueryTabBodyProps & {
 
 export type NetworkRoutesProps = GlobalTimeArgs & {
   docValueFields: DocValueFields[];
-  networkPagePath: string;
   type: networkModel.NetworkType;
   filterQuery?: string | ESTermQuery;
   indexPattern: IIndexPattern;

@@ -6,7 +6,18 @@
  */
 
 import { useEffect, useState } from 'react';
-import { List, ListArray } from '@kbn/securitysolution-io-ts-list-types';
+import type {
+  List,
+  ListArray,
+  ExceptionListSchema,
+  CreateExceptionListSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
+import {
+  fetchExceptionListById,
+  addExceptionList,
+  addEndpointExceptionList,
+} from '@kbn/securitysolution-list-api';
+import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
 import { HttpStart } from '../../../../../../../src/core/public';
 
 import { Rule } from '../../../detections/containers/detection_engine/rules/types';
@@ -14,16 +25,6 @@ import {
   fetchRuleById,
   patchRule,
 } from '../../../detections/containers/detection_engine/rules/api';
-import {
-  fetchExceptionListById,
-  addExceptionList,
-  addEndpointExceptionList,
-} from '../../../shared_imports';
-import {
-  ExceptionListSchema,
-  CreateExceptionListSchema,
-  ENDPOINT_LIST_ID,
-} from '../../../../common/shared_imports';
 
 export type ReturnUseFetchOrCreateRuleExceptionList = [boolean, ExceptionListSchema | null];
 

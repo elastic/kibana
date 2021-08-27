@@ -33,6 +33,9 @@ Object {
         "description": Array [
           "",
         ],
+        "fillOpacity": Array [
+          0.3,
+        ],
         "fittingFunction": Array [
           "Carry",
         ],
@@ -61,6 +64,28 @@ Object {
         "hideEndzones": Array [
           true,
         ],
+        "labelsOrientation": Array [
+          Object {
+            "chain": Array [
+              Object {
+                "arguments": Object {
+                  "x": Array [
+                    0,
+                  ],
+                  "yLeft": Array [
+                    -90,
+                  ],
+                  "yRight": Array [
+                    -45,
+                  ],
+                },
+                "function": "lens_xy_labelsOrientationConfig",
+                "type": "function",
+              },
+            ],
+            "type": "expression",
+          },
+        ],
         "layers": Array [
           Object {
             "chain": Array [
@@ -81,6 +106,9 @@ Object {
                   ],
                   "layerId": Array [
                     "first",
+                  ],
+                  "layerType": Array [
+                    "data",
                   ],
                   "seriesType": Array [
                     "area",
@@ -111,13 +139,21 @@ Object {
             "chain": Array [
               Object {
                 "arguments": Object {
+                  "floatingColumns": Array [],
+                  "horizontalAlignment": Array [],
+                  "isInside": Array [],
                   "isVisible": Array [
                     true,
                   ],
+                  "maxLines": Array [],
                   "position": Array [
                     "bottom",
                   ],
+                  "shouldTruncate": Array [
+                    true,
+                  ],
                   "showSingleSeries": Array [],
+                  "verticalAlignment": Array [],
                 },
                 "function": "lens_xy_legendConfig",
                 "type": "function",
@@ -153,6 +189,9 @@ Object {
         ],
         "valueLabels": Array [
           "hide",
+        ],
+        "valuesInLegend": Array [
+          false,
         ],
         "xTitle": Array [
           "",

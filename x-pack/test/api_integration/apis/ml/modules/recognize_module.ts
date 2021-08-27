@@ -19,7 +19,7 @@ export default ({ getService }: FtrProviderContext) => {
   const testDataList = [
     {
       testTitleSuffix: 'for sample logs dataset',
-      sourceDataArchive: 'ml/module_sample_logs',
+      sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_sample_logs',
       indexPattern: 'ft_module_sample_logs',
       user: USER.ML_POWERUSER,
       expected: {
@@ -29,7 +29,7 @@ export default ({ getService }: FtrProviderContext) => {
     },
     {
       testTitleSuffix: 'for apache dataset',
-      sourceDataArchive: 'ml/module_apache',
+      sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_apache',
       indexPattern: 'ft_module_apache',
       user: USER.ML_POWERUSER,
       expected: {
@@ -39,7 +39,7 @@ export default ({ getService }: FtrProviderContext) => {
     },
     {
       testTitleSuffix: 'for apm dataset',
-      sourceDataArchive: 'ml/module_apm',
+      sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_apm',
       indexPattern: 'ft_module_apm',
       user: USER.ML_POWERUSER,
       expected: {
@@ -49,7 +49,7 @@ export default ({ getService }: FtrProviderContext) => {
     },
     {
       testTitleSuffix: 'for logs dataset',
-      sourceDataArchive: 'ml/module_logs',
+      sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_logs',
       indexPattern: 'ft_module_logs',
       user: USER.ML_POWERUSER,
       expected: {
@@ -59,7 +59,7 @@ export default ({ getService }: FtrProviderContext) => {
     },
     {
       testTitleSuffix: 'for nginx dataset',
-      sourceDataArchive: 'ml/module_nginx',
+      sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_nginx',
       indexPattern: 'ft_module_nginx',
       user: USER.ML_POWERUSER,
       expected: {
@@ -69,7 +69,7 @@ export default ({ getService }: FtrProviderContext) => {
     },
     {
       testTitleSuffix: 'for sample ecommerce dataset',
-      sourceDataArchive: 'ml/module_sample_ecommerce',
+      sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_sample_ecommerce',
       indexPattern: 'ft_module_sample_ecommerce',
       user: USER.ML_POWERUSER,
       expected: {
@@ -79,17 +79,17 @@ export default ({ getService }: FtrProviderContext) => {
     },
     {
       testTitleSuffix: 'for siem auditbeat dataset',
-      sourceDataArchive: 'ml/module_siem_auditbeat',
+      sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_siem_auditbeat',
       indexPattern: 'ft_module_siem_auditbeat',
       user: USER.ML_POWERUSER,
       expected: {
         responseCode: 200,
-        moduleIds: ['siem_auditbeat', 'siem_auditbeat_auth'],
+        moduleIds: ['security_auth', 'siem_auditbeat', 'siem_auditbeat_auth'],
       },
     },
     {
       testTitleSuffix: 'for siem packetbeat dataset',
-      sourceDataArchive: 'ml/module_siem_packetbeat',
+      sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_siem_packetbeat',
       indexPattern: 'ft_module_siem_packetbeat',
       user: USER.ML_POWERUSER,
       expected: {
@@ -99,12 +99,13 @@ export default ({ getService }: FtrProviderContext) => {
     },
     {
       testTitleSuffix: 'for siem winlogbeat dataset',
-      sourceDataArchive: 'ml/module_siem_winlogbeat',
+      sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_siem_winlogbeat',
       indexPattern: 'ft_module_siem_winlogbeat',
       user: USER.ML_POWERUSER,
       expected: {
         responseCode: 200,
         moduleIds: [
+          'security_auth',
           'security_network',
           'security_windows',
           'siem_winlogbeat',
@@ -123,7 +124,7 @@ export default ({ getService }: FtrProviderContext) => {
     },
     {
       testTitleSuffix: 'for heartbeat dataset',
-      sourceDataArchive: 'ml/module_heartbeat',
+      sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_heartbeat',
       indexPattern: 'ft_module_heartbeat',
       user: USER.ML_POWERUSER,
       expected: {
@@ -133,7 +134,7 @@ export default ({ getService }: FtrProviderContext) => {
     },
     {
       testTitleSuffix: 'for auditbeat dataset',
-      sourceDataArchive: 'ml/module_auditbeat',
+      sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_auditbeat',
       indexPattern: 'ft_module_auditbeat',
       user: USER.ML_POWERUSER,
       expected: {
@@ -143,17 +144,17 @@ export default ({ getService }: FtrProviderContext) => {
     },
     {
       testTitleSuffix: 'for security endpoint dataset',
-      sourceDataArchive: 'ml/module_security_endpoint',
+      sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_security_endpoint',
       indexPattern: 'ft_logs-endpoint.events.*',
       user: USER.ML_POWERUSER,
       expected: {
         responseCode: 200,
-        moduleIds: ['security_linux', 'security_network', 'security_windows'],
+        moduleIds: ['security_auth', 'security_linux', 'security_network', 'security_windows'],
       },
     },
     {
       testTitleSuffix: 'for metricbeat dataset',
-      sourceDataArchive: 'ml/module_metricbeat',
+      sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_metricbeat',
       indexPattern: 'ft_module_metricbeat',
       user: USER.ML_POWERUSER,
       expected: {
@@ -163,7 +164,7 @@ export default ({ getService }: FtrProviderContext) => {
     },
     {
       testTitleSuffix: 'for siem clodutrail dataset',
-      sourceDataArchive: 'ml/module_siem_cloudtrail',
+      sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_siem_cloudtrail',
       indexPattern: 'ft_module_siem_cloudtrail',
       user: USER.ML_POWERUSER,
       expected: {
@@ -173,7 +174,7 @@ export default ({ getService }: FtrProviderContext) => {
     },
     {
       testTitleSuffix: 'for metrics ui dataset',
-      sourceDataArchive: 'ml/module_metrics_ui',
+      sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_metrics_ui',
       indexPattern: 'ft_module_metrics_ui',
       user: USER.ML_POWERUSER,
       expected: {
@@ -183,7 +184,7 @@ export default ({ getService }: FtrProviderContext) => {
     },
     {
       testTitleSuffix: 'for apache data stream dataset',
-      sourceDataArchive: 'ml/module_apache_data_stream',
+      sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_apache_data_stream',
       indexPattern: 'ft_module_apache_data_stream',
       user: USER.ML_POWERUSER,
       expected: {
@@ -193,7 +194,7 @@ export default ({ getService }: FtrProviderContext) => {
     },
     {
       testTitleSuffix: 'for nginx data stream dataset',
-      sourceDataArchive: 'ml/module_nginx_data_stream',
+      sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_nginx_data_stream',
       indexPattern: 'ft_module_nginx_data_stream',
       user: USER.ML_POWERUSER,
       expected: {
