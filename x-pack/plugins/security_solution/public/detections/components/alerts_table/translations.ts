@@ -73,6 +73,13 @@ export const ALERTS_HEADERS_RULE_NAME = i18n.translate(
   }
 );
 
+export const ALERTS_HEADERS_RULE_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.eventsViewer.alerts.defaultHeaders.ruleDescriptionTitle',
+  {
+    defaultMessage: 'Rule description',
+  }
+);
+
 export const ALERTS_HEADERS_VERSION = i18n.translate(
   'xpack.securitySolution.eventsViewer.alerts.defaultHeaders.versionTitle',
   {
