@@ -2,7 +2,7 @@
   "author": [
     "Elastic"
   ],
-  "description": "Identifies an executable created by a Microsoft Office application and subsequently executed. These processes are often launched via scripts inside documents or during exploitation of MS Office applications.",
+  "description": "Identifies an executable created by a Microsoft Office application and subsequently executed. These processes are often launched via scripts inside documents or during exploitation of Microsoft Office applications.",
   "from": "now-120m",
   "index": [
     "logs-endpoint.events.*",
@@ -63,5 +63,5 @@
     }
   ],
   "type": "eql",
-  "version": 4
+  "version": 5
 }
