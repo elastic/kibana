@@ -29,7 +29,7 @@ const createObject = (type: string, id: string): SavedObjectType => ({
 const getResultMock = {
   conflict: (type: string, id: string) => {
     const error = SavedObjectsErrorHelpers.createConflictError(type, id).output.payload;
-    return { type, id, error };
+    return { type, id, error: { ...error, status_code: error.statusCode } };
   },
   unresolvableConflict: (type: string, id: string) => {
     const conflictMock = getResultMock.conflict(type, id);
@@ -38,7 +38,7 @@ const getResultMock = {
   },
   invalidType: (type: string, id: string) => {
     const error = SavedObjectsErrorHelpers.createUnsupportedTypeError(type).output.payload;
-    return { type, id, error };
+    return { type, id, error: { ...error, status_code: error.statusCode } };
   },
 };
 
@@ -154,8 +154,20 @@ describe('#checkConflicts', () => {
     const _objects = [...objects, obj5];
     const retries = [
       { id: obj1.id, type: obj1.type }, // find no conflict for obj1
-      { id: obj2.id, type: obj2.type, destinationId: 'some-object-id' }, // find a conflict for obj2, and return it with the specified destinationId
-      { id: obj3.id, type: obj3.type, destinationId: 'another-object-id', createNewCopy: true }, // find an unresolvable conflict for obj3, regenerate the destinationId, and then omit originId because of the createNewCopy flag
+      {
+        id: obj2.id,
+        type: obj2.type,
+        destinationId: 'some-object-id',
+        destination_id: 'some-object-id',
+      }, // find a conflict for obj2, and return it with the specified destinationId
+      {
+        id: obj3.id,
+        type: obj3.type,
+        destinationId: 'another-object-id',
+        destination_id: 'another-object-id',
+        createNewCopy: true,
+        create_new_copy: true,
+      }, // find an unresolvable conflict for obj3, regenerate the destinationId, and then omit originId because of the createNewCopy flag
       { id: obj4.id, type: obj4.type }, // get an unknown error for obj4
       { id: obj5.id, type: obj5.type, overwrite: true }, // find a conflict for obj5, but ignore it because of the overwrite flag
     ] as SavedObjectsImportRetry[];
@@ -178,7 +190,11 @@ describe('#checkConflicts', () => {
           ...obj2Error,
           title: obj2.attributes.title,
           meta: { title: obj2.attributes.title },
-          error: { type: 'conflict', destinationId: 'some-object-id' },
+          error: {
+            type: 'conflict',
+            destinationId: 'some-object-id',
+            destination_id: 'some-object-id',
+          },
         },
         {
           ...obj4Error,

@@ -31,6 +31,17 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'utf8'
       );
 
+      const successResults = [
+        {
+          type: 'test-hidden-importable-exportable',
+          id: 'ff3733a0-9fty-11e7-ahb3-3dcb94193fab',
+          meta: {
+            title: 'new title!',
+          },
+          overwrite: true,
+        },
+      ];
+
       await supertest
         .post('/api/saved_objects/_resolve_import_errors')
         .set('kbn-xsrf', 'true')
@@ -49,18 +60,11 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         .then((resp) => {
           expect(resp.body).to.eql({
             successCount: 1,
+            success_count: 1,
+            successResults,
+            success_results: successResults,
             success: true,
             warnings: [],
-            successResults: [
-              {
-                type: 'test-hidden-importable-exportable',
-                id: 'ff3733a0-9fty-11e7-ahb3-3dcb94193fab',
-                meta: {
-                  title: 'new title!',
-                },
-                overwrite: true,
-              },
-            ],
           });
         });
     });
@@ -89,6 +93,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         .then((resp) => {
           expect(resp.body).to.eql({
             successCount: 0,
+            success_count: 0,
             success: false,
             warnings: [],
             errors: [

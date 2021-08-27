@@ -24,6 +24,8 @@ export type {
   SavedObjectsImportHookResult,
   SavedObjectsImportSimpleWarning,
   SavedObjectsImportActionRequiredWarning,
+  SavedObjectsImportActionRequiredWarningConfig,
   SavedObjectsImportWarning,
+  SavedObjectsImportWarningConfig,
 } from './types';
 export { SavedObjectsImportError } from './errors';

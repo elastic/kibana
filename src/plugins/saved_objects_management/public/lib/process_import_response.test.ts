@@ -19,6 +19,7 @@ describe('processImportResponse()', () => {
   test('works when no errors exist in the response', () => {
     const response: SavedObjectsImportResponse = {
       success: true,
+      success_count: 0,
       successCount: 0,
       warnings: [],
     };
@@ -30,6 +31,7 @@ describe('processImportResponse()', () => {
   test('conflict errors get added to failedImports and result in idle status', () => {
     const response: SavedObjectsImportResponse = {
       success: false,
+      success_count: 0,
       successCount: 0,
       errors: [
         {
@@ -64,6 +66,7 @@ describe('processImportResponse()', () => {
   test('ambiguous conflict errors get added to failedImports and result in idle status', () => {
     const response: SavedObjectsImportResponse = {
       success: false,
+      success_count: 0,
       successCount: 0,
       errors: [
         {
@@ -98,6 +101,7 @@ describe('processImportResponse()', () => {
   test('unknown errors get added to failedImports and result in success status', () => {
     const response: SavedObjectsImportResponse = {
       success: false,
+      success_count: 0,
       successCount: 0,
       errors: [
         {
@@ -132,6 +136,7 @@ describe('processImportResponse()', () => {
   test('missing references get added to failedImports and result in idle status', () => {
     const response: SavedObjectsImportResponse = {
       success: false,
+      success_count: 0,
       successCount: 0,
       errors: [
         {
@@ -178,6 +183,7 @@ describe('processImportResponse()', () => {
   test('missing references get added to unmatchedReferences, but are not duplicated', () => {
     const response: SavedObjectsImportResponse = {
       success: false,
+      success_count: 0,
       successCount: 0,
       errors: [
         {
@@ -206,6 +212,7 @@ describe('processImportResponse()', () => {
   test('success results get added to successfulImports and result in success status', () => {
     const response: SavedObjectsImportResponse = {
       success: true,
+      success_count: 1,
       successCount: 1,
       successResults: [{ type: 'a', id: '1', meta: {} }],
       warnings: [],
@@ -226,12 +233,15 @@ describe('processImportResponse()', () => {
   test('warnings from the response get returned', () => {
     const response: SavedObjectsImportResponse = {
       success: true,
+      success_count: 1,
       successCount: 1,
+      success_results: [{ type: 'a', id: '1', meta: {} }],
       successResults: [{ type: 'a', id: '1', meta: {} }],
       warnings: [
         {
           type: 'action_required',
           message: 'foo',
+          action_path: '/somewhere',
           actionPath: '/somewhere',
         },
       ],

@@ -357,7 +357,9 @@ export type {
   SavedObjectsImportHookResult,
   SavedObjectsImportSimpleWarning,
   SavedObjectsImportActionRequiredWarning,
+  SavedObjectsImportActionRequiredWarningConfig,
   SavedObjectsImportWarning,
+  SavedObjectsImportWarningConfig,
 } from './saved_objects';
 
 export type {

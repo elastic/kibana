@@ -7,7 +7,7 @@
  */
 
 import { SavedObject } from '../../types';
-import { SavedObjectsImportHook, SavedObjectsImportWarning } from '../types';
+import { SavedObjectsImportHook, SavedObjectsImportWarningConfig } from '../types';
 
 interface ExecuteImportHooksOptions {
   objects: SavedObject[];
@@ -17,9 +17,9 @@ interface ExecuteImportHooksOptions {
 export const executeImportHooks = async ({
   objects,
   importHooks,
-}: ExecuteImportHooksOptions): Promise<SavedObjectsImportWarning[]> => {
+}: ExecuteImportHooksOptions): Promise<SavedObjectsImportWarningConfig[]> => {
   const objsByType = splitByType(objects);
-  let warnings: SavedObjectsImportWarning[] = [];
+  let warnings: SavedObjectsImportWarningConfig[] = [];
 
   for (const [type, typeObjs] of Object.entries(objsByType)) {
     const hooks = importHooks[type] ?? [];

@@ -59,15 +59,17 @@ const transformObjectsToAmbiguousConflictFields = (
   objects: Array<SavedObject<{ title?: string }>>
 ) =>
   objects
-    .map(({ id, attributes, updated_at: updatedAt }) => ({
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    .map(({ id, attributes, updated_at }) => ({
       id,
       title: attributes?.title,
-      updatedAt,
+      updated_at,
+      updatedAt: updated_at, // deprecated
     }))
     // Sort to ensure that integration tests are not flaky
     .sort((a, b) => {
-      const aUpdatedAt = a.updatedAt ?? '';
-      const bUpdatedAt = b.updatedAt ?? '';
+      const aUpdatedAt = a.updated_at ?? '';
+      const bUpdatedAt = b.updated_at ?? '';
       if (aUpdatedAt !== bUpdatedAt) {
         return aUpdatedAt < bUpdatedAt ? 1 : -1; // descending
       }
@@ -185,7 +187,8 @@ export async function checkOriginConflicts({ objects, ...params }: CheckOriginCo
           meta: { title },
           error: {
             type: 'conflict',
-            destinationId: destinations[0].id,
+            destination_id: destinations[0].id,
+            destinationId: destinations[0].id, // deprecated
           },
         });
       }

@@ -107,7 +107,13 @@ const createFailureUnresolvable = ({ type, id, meta }: ObjectProperties): Failed
   return {
     obj: { type, id, meta },
     // currently, unresolvable errors are 'unsupported_type' and 'unknown'; either would work for this test case
-    error: { type: 'unknown', message: 'some error message', statusCode: 400 },
+    error: {
+      type: 'unknown',
+      message: 'some error message',
+      error: 'some error message',
+      statusCode: 400,
+      status_code: 400,
+    },
   };
 };
 

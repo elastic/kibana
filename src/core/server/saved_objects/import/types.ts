@@ -43,7 +43,9 @@ export interface SavedObjectsImportRetry {
  */
 export interface SavedObjectsImportConflictError {
   type: 'conflict';
+  /** @deprecated Use `destination_id` */
   destinationId?: string;
+  destination_id?: string;
 }
 
 /**
@@ -52,7 +54,13 @@ export interface SavedObjectsImportConflictError {
  */
 export interface SavedObjectsImportAmbiguousConflictError {
   type: 'ambiguous_conflict';
-  destinations: Array<{ id: string; title?: string; updatedAt?: string }>;
+  destinations: Array<{
+    id: string;
+    title?: string;
+    /** @deprecated Use `updated_at` */
+    updatedAt?: string;
+    updated_at?: string;
+  }>;
 }
 
 /**
@@ -70,7 +78,13 @@ export interface SavedObjectsImportUnsupportedTypeError {
 export interface SavedObjectsImportUnknownError {
   type: 'unknown';
   message: string;
+  /** @deprecated Use `status_code` */
   statusCode: number;
+  status_code: number;
+  /** @deprecated */
+  error: string;
+  /** @deprecated */
+  metadata?: Record<string, unknown>;
 }
 
 /**
@@ -113,17 +127,21 @@ export interface SavedObjectsImportFailure {
 export interface SavedObjectsImportSuccess {
   id: string;
   type: string;
-  /**
-   * If `destinationId` is specified, the new object has a new ID that is different from the import ID.
-   */
+  /** @deprecated Use `destination_id` */
   destinationId?: string;
   /**
-   * @deprecated
+   * If `destination_id` is specified, the new object has a new ID that is different from the import ID.
+   */
+  destination_id?: string;
+  /**
+   * @deprecated Use `create_new_copy`
+   *
    * If `createNewCopy` is specified, the new object has a new (undefined) origin ID. This is only needed for the case where
    * `createNewCopies` mode is disabled and ambiguous source conflicts are detected. When `createNewCopies` mode is permanently enabled,
    * this field will be redundant and can be removed.
    */
   createNewCopy?: boolean;
+  create_new_copy?: boolean;
   meta: {
     title?: string;
     icon?: string;
@@ -140,8 +158,12 @@ export interface SavedObjectsImportSuccess {
  */
 export interface SavedObjectsImportResponse {
   success: boolean;
+  /** @deprecated Use `success_count` */
   successCount: number;
+  success_count: number;
+  /** @deprecated Use `success_results` */
   successResults?: SavedObjectsImportSuccess[];
+  success_results?: SavedObjectsImportSuccess[];
   warnings: SavedObjectsImportWarning[];
   errors?: SavedObjectsImportFailure[];
 }
@@ -185,7 +207,7 @@ export type CreatedObject<T> = SavedObject<T> & { destinationId?: string };
  */
 export interface SavedObjectsImportSimpleWarning {
   type: 'simple';
-  /** The translated message to display to the user */
+  /** The translated message to display to the user. */
   message: string;
 }
 
@@ -193,11 +215,14 @@ export interface SavedObjectsImportSimpleWarning {
  * A warning meant to notify that a specific user action is required to finalize the import
  * of some type of object.
  *
+ * This represents the object that is used to configure the warning.
+ * For the type used in the http response, see {@link SavedObjectsImportActionRequiredWarning}.
+ *
  * @remark The `actionUrl` must be a path relative to the basePath, and not include it.
  *
  * @public
  */
-export interface SavedObjectsImportActionRequiredWarning {
+export interface SavedObjectsImportActionRequiredWarningConfig {
   type: 'action_required';
   /** The translated message to display to the user. */
   message: string;
@@ -208,7 +233,41 @@ export interface SavedObjectsImportActionRequiredWarning {
 }
 
 /**
- * Composite type of all the possible types of import warnings.
+ * Composite type of all the possible types of import warning configurations.
+ *
+ * See {@link SavedObjectsImportSimpleWarning} and {@link SavedObjectsImportActionRequiredWarningConfig}
+ * for more details.
+ *
+ * For the type used in the http response, see {@link SavedObjectsImportWarning}.
+ *
+ * @public
+ */
+export type SavedObjectsImportWarningConfig =
+  | SavedObjectsImportSimpleWarning
+  | SavedObjectsImportActionRequiredWarningConfig;
+
+/**
+ * A warning meant to notify that a specific user action is required to finalize the import
+ * of some type of object. Used in the http response.
+ *
+ * @public
+ */
+export interface SavedObjectsImportActionRequiredWarning {
+  type: 'action_required';
+  /** The translated message to display to the user. */
+  message: string;
+  /** The path (without the basePath) that the user should be redirect to address this warning. */
+  action_path: string;
+  /** @deprecated Use `action_path` */
+  actionPath: string;
+  /** An optional label to use for the link button. If unspecified, a default label will be used. */
+  button_label?: string;
+  /** @deprecated Use `button_label` */
+  buttonLabel?: string;
+}
+
+/**
+ * Composite type of all the possible types of import warnings. Used in the http response.
  *
  * See {@link SavedObjectsImportSimpleWarning} and {@link SavedObjectsImportActionRequiredWarning}
  * for more details.
@@ -220,6 +279,18 @@ export type SavedObjectsImportWarning =
   | SavedObjectsImportActionRequiredWarning;
 
 /**
+ * Type guard to distinguish between {@link SavedObjectsImportSimpleWarning}
+ * and {@link SavedObjectsImportActionRequiredWarning}.
+ *
+ * @internal
+ */
+export function isSavedObjectsImportSimpleWarning(
+  warning: SavedObjectsImportWarning | SavedObjectsImportWarningConfig
+): warning is SavedObjectsImportSimpleWarning {
+  return warning.type === 'simple';
+}
+
+/**
  * Result from a {@link SavedObjectsImportHook | import hook}
  *
  * @public
@@ -228,7 +299,7 @@ export interface SavedObjectsImportHookResult {
   /**
    * An optional list of warnings to display in the UI when the import succeeds.
    */
-  warnings?: SavedObjectsImportWarning[];
+  warnings?: SavedObjectsImportWarningConfig[];
 }
 
 /**

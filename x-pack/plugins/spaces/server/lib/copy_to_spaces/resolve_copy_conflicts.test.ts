@@ -111,7 +111,9 @@ describe('resolveCopySavedObjectsToSpacesConflicts', () => {
 
         const response: SavedObjectsImportResponse = {
           success: true,
+          success_count: filteredObjects.length,
           successCount: filteredObjects.length,
+          success_results: [('Some success(es) occurred!' as unknown) as SavedObjectsImportSuccess],
           successResults: [('Some success(es) occurred!' as unknown) as SavedObjectsImportSuccess],
           warnings: [],
         };
@@ -213,7 +215,9 @@ describe('resolveCopySavedObjectsToSpacesConflicts', () => {
         await expectStreamToContainObjects(opts.readStream, filteredObjects);
         return Promise.resolve({
           success: true,
+          success_count: filteredObjects.length,
           successCount: filteredObjects.length,
+          success_results: [('Some success(es) occurred!' as unknown) as SavedObjectsImportSuccess],
           successResults: [('Some success(es) occurred!' as unknown) as SavedObjectsImportSuccess],
           warnings: [],
         });

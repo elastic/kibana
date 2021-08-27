@@ -24,8 +24,10 @@ export type {
   SavedObjectsImportFailure,
   SavedObjectsImportRetry,
   SavedObjectsImportActionRequiredWarning,
+  SavedObjectsImportActionRequiredWarningConfig,
   SavedObjectsImportSimpleWarning,
   SavedObjectsImportWarning,
+  SavedObjectsImportWarningConfig,
 } from './import/types';
 
 import { SavedObject } from '../../types';

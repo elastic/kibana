@@ -30,6 +30,15 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         '{"id":"some-id-1","type":"test-hidden-importable-exportable","attributes":{"title":"my title"},"references":[]}',
         'utf8'
       );
+      const successResults = [
+        {
+          type: 'test-hidden-importable-exportable',
+          id: 'some-id-1',
+          meta: {
+            title: 'my title',
+          },
+        },
+      ];
       await supertest
         .post('/api/saved_objects/_import')
         .set('kbn-xsrf', 'true')
@@ -38,17 +47,11 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         .then((resp) => {
           expect(resp.body).to.eql({
             successCount: 1,
+            success_count: 1,
+            successResults,
+            success_results: successResults,
             success: true,
             warnings: [],
-            successResults: [
-              {
-                type: 'test-hidden-importable-exportable',
-                id: 'some-id-1',
-                meta: {
-                  title: 'my title',
-                },
-              },
-            ],
           });
         });
     });
@@ -66,6 +69,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         .then((resp) => {
           expect(resp.body).to.eql({
             successCount: 0,
+            success_count: 0,
             success: false,
             warnings: [],
             errors: [

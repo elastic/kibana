@@ -155,6 +155,7 @@ describe('#checkOriginConflicts', () => {
         id,
         title: attributes?.title,
         updatedAt,
+        updated_at: updatedAt,
       }));
     const createAmbiguousConflictError = (
       object: SavedObjectType,
@@ -180,6 +181,7 @@ describe('#checkOriginConflicts', () => {
       error: {
         type: 'conflict',
         ...(destinationId && { destinationId }),
+        ...(destinationId && { destination_id: destinationId }),
       },
     });
 

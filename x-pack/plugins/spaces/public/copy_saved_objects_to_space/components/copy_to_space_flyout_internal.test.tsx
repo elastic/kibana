@@ -184,11 +184,13 @@ describe.skip('CopyToSpaceFlyout', () => {
     mockSpacesManager.copySavedObjects.mockResolvedValue({
       'space-1': {
         success: true,
+        success_count: 3,
         successCount: 3,
         warnings: [],
       },
       'space-2': {
         success: false,
+        success_count: 1,
         successCount: 1,
         errors: [
           {
@@ -269,11 +271,13 @@ describe.skip('CopyToSpaceFlyout', () => {
       'space-1': {
         success: true,
         successCount: 3,
+        success_count: 3,
         warnings: [],
       },
       'space-2': {
         success: true,
         successCount: 3,
+        success_count: 3,
         warnings: [],
       },
     });
@@ -331,24 +335,29 @@ describe.skip('CopyToSpaceFlyout', () => {
       'space-1': {
         success: true,
         successCount: 5,
+        success_count: 5,
         warnings: [],
       },
       'space-2': {
         success: false,
         successCount: 1,
+        success_count: 1,
         errors: [
-          // regular conflict without destinationId
+          // regular conflict without destination_id
           {
             type: 'index-pattern',
             id: 'conflicting-ip',
             error: { type: 'conflict' },
             meta: {},
           },
-          // regular conflict with destinationId
+          // regular conflict with destination_id
           {
             type: 'search',
             id: 'conflicting-search',
-            error: { type: 'conflict', destinationId: 'another-search' },
+            error: {
+              type: 'conflict',
+              destination_id: 'another-search',
+            },
             meta: {},
           },
           // ambiguous conflict
@@ -358,8 +367,8 @@ describe.skip('CopyToSpaceFlyout', () => {
             error: {
               type: 'ambiguous_conflict',
               destinations: [
-                { id: 'another-canvas', title: 'foo', updatedAt: undefined },
-                { id: 'yet-another-canvas', title: 'bar', updatedAt: undefined },
+                { id: 'another-canvas', title: 'foo', updated_at: undefined },
+                { id: 'yet-another-canvas', title: 'bar', updated_at: undefined },
               ],
             },
             meta: {},
@@ -380,6 +389,7 @@ describe.skip('CopyToSpaceFlyout', () => {
       'space-2': {
         success: true,
         successCount: 2,
+        success_count: 2,
         warnings: [],
       },
     });
@@ -445,13 +455,13 @@ describe.skip('CopyToSpaceFlyout', () => {
             type: 'search',
             id: 'conflicting-search',
             overwrite: true,
-            destinationId: 'another-search',
+            destination_id: 'another-search',
           },
           {
             type: 'canvas-workpad',
             id: 'conflicting-canvas',
             overwrite: true,
-            destinationId: 'another-canvas',
+            destination_id: 'another-canvas',
           },
         ],
       },
@@ -476,6 +486,7 @@ describe.skip('CopyToSpaceFlyout', () => {
       'space-1': {
         success: false,
         successCount: 1,
+        success_count: 1,
         errors: [
           // my-viz-1 just has a missing_references error
           {
@@ -505,6 +516,7 @@ describe.skip('CopyToSpaceFlyout', () => {
           },
         ],
         successResults: [{ type: savedObjectToCopy.type, id: savedObjectToCopy.id, meta: {} }],
+        success_results: [{ type: savedObjectToCopy.type, id: savedObjectToCopy.id, meta: {} }],
         warnings: [],
       },
     });
@@ -587,16 +599,24 @@ describe.skip('CopyToSpaceFlyout', () => {
       'space-1': {
         success: true,
         successCount: 3,
+        success_count: 3,
         warnings: [],
       },
       'space-2': {
         success: false,
         successCount: 1,
+        success_count: 1,
         errors: [
           {
             type: 'visualization',
             id: 'my-viz',
-            error: { type: 'unknown', message: 'some error message', statusCode: 400 },
+            error: {
+              type: 'unknown',
+              error: 'some error message',
+              message: 'some error message',
+              statusCode: 400,
+              status_code: 400,
+            },
             meta: {},
           },
         ],

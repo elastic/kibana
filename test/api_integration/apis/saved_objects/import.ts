@@ -76,6 +76,7 @@ export default function ({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               success: false,
               successCount: 0,
+              success_count: 0,
               errors: [
                 createConflictError(indexPattern),
                 createConflictError(visualization),
@@ -87,6 +88,12 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should return 200 when conflicts exist but overwrite is passed in', async () => {
+        const successResults = [
+          { ...indexPattern, overwrite: true },
+          { ...visualization, overwrite: true },
+          { ...dashboard, overwrite: true },
+        ];
+
         await supertest
           .post('/api/saved_objects/_import')
           .query({ overwrite: true })
@@ -96,11 +103,9 @@ export default function ({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               success: true,
               successCount: 3,
-              successResults: [
-                { ...indexPattern, overwrite: true },
-                { ...visualization, overwrite: true },
-                { ...dashboard, overwrite: true },
-              ],
+              success_count: 3,
+              successResults,
+              success_results: successResults,
               warnings: [],
             });
           });
@@ -119,6 +124,7 @@ export default function ({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               success: false,
               successCount: 0,
+              success_count: 0,
               errors: [
                 {
                   id: '1',
@@ -146,27 +152,31 @@ export default function ({ getService }: FtrProviderContext) {
           .attach('file', fileBuffer, 'export.ndjson')
           .expect(200);
 
+        const successResults = [
+          {
+            id: 'dashboard-b',
+            meta: {
+              icon: 'dashboardApp',
+              title: 'dashboard-b',
+            },
+            type: 'dashboard',
+          },
+          {
+            id: 'dashboard-a',
+            meta: {
+              icon: 'dashboardApp',
+              title: 'dashboard-a',
+            },
+            type: 'dashboard',
+          },
+        ];
+
         expect(resp.body).to.eql({
           success: true,
           successCount: 2,
-          successResults: [
-            {
-              id: 'dashboard-b',
-              meta: {
-                icon: 'dashboardApp',
-                title: 'dashboard-b',
-              },
-              type: 'dashboard',
-            },
-            {
-              id: 'dashboard-a',
-              meta: {
-                icon: 'dashboardApp',
-                title: 'dashboard-a',
-              },
-              type: 'dashboard',
-            },
-          ],
+          success_count: 2,
+          successResults,
+          success_results: successResults,
           warnings: [],
         });
       });
@@ -217,6 +227,7 @@ export default function ({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               success: false,
               successCount: 0,
+              success_count: 0,
               errors: [
                 {
                   type: 'visualization',

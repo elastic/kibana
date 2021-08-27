@@ -6,11 +6,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { SavedObject, SavedObjectsImportWarning } from 'kibana/server';
+import { SavedObject, SavedObjectsImportWarningConfig } from 'kibana/server';
 
 export function getImportWarnings(
   rulesSavedObjects: Array<SavedObject<unknown>>
-): SavedObjectsImportWarning[] {
+): SavedObjectsImportWarningConfig[] {
   if (rulesSavedObjects.length === 0) {
     return [];
   }
@@ -27,7 +27,7 @@ export function getImportWarnings(
       message,
       actionPath: '/app/management/insightsAndAlerting/triggersActions/rules',
       buttonLabel: GO_TO_RULES_BUTTON_LABLE,
-    } as SavedObjectsImportWarning,
+    },
   ];
 }
 

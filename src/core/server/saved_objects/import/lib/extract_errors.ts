@@ -34,7 +34,8 @@ export function extractErrors(
           meta: { title },
           error: {
             type: 'conflict',
-            ...(destinationId && { destinationId }),
+            ...(destinationId && { destination_id: destinationId }),
+            ...(destinationId && { destinationId }), // deprecated
           },
         });
         continue;
@@ -45,8 +46,12 @@ export function extractErrors(
         title,
         meta: { title },
         error: {
-          ...savedObject.error,
           type: 'unknown',
+          message: savedObject.error.message,
+          status_code: savedObject.error.statusCode,
+          statusCode: savedObject.error.statusCode, // deprecated
+          error: savedObject.error.error, // deprecated
+          ...(savedObject.error.metadata && { metadata: savedObject.error.metadata }), // deprecated
         },
       });
     }

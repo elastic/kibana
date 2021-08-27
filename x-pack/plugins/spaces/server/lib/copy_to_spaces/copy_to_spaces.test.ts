@@ -142,7 +142,9 @@ describe('copySavedObjectsToSpaces', () => {
       await expectStreamToEqualObjects(opts.readStream, expectedObjects);
       const response: SavedObjectsImportResponse = {
         success: true,
+        success_count: expectedObjects.length,
         successCount: expectedObjects.length,
+        success_results: [('Some success(es) occurred!' as unknown) as SavedObjectsImportSuccess],
         successResults: [('Some success(es) occurred!' as unknown) as SavedObjectsImportSuccess],
         warnings: [],
       };

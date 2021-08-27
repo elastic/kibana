@@ -10,6 +10,7 @@ import { Readable } from 'stream';
 import { SavedObject, SavedObjectsClientContract, SavedObjectsImportRetry } from '../types';
 import { ISavedObjectTypeRegistry } from '../saved_objects_type_registry';
 import {
+  isSavedObjectsImportSimpleWarning,
   SavedObjectsImportFailure,
   SavedObjectsImportHook,
   SavedObjectsImportResponse,
@@ -180,13 +181,18 @@ export async function resolveSavedObjectsImportErrors({
           title: getTitle ? getTitle(createdObject) : createdObject.attributes.title,
           icon: typeRegistry.getType(type)?.management?.icon,
         };
+        const deprecatedResponseFields = {
+          ...(destinationId && { destinationId }),
+          ...(destinationId && !originId && !createNewCopies && { createNewCopy: true }),
+        };
         return {
           type,
           id,
           meta,
           ...(overwrite && { overwrite }),
-          ...(destinationId && { destinationId }),
-          ...(destinationId && !originId && !createNewCopies && { createNewCopy: true }),
+          ...(destinationId && { destination_id: destinationId }),
+          ...(destinationId && !originId && !createNewCopies && { create_new_copy: true }),
+          ...deprecatedResponseFields,
         };
       }),
     ];
@@ -212,11 +218,29 @@ export async function resolveSavedObjectsImportErrors({
     importHooks,
   });
 
-  return {
+  const deprecatedResponseFields = {
     successCount,
-    success: errorAccumulator.length === 0,
-    warnings,
     ...(successResults.length && { successResults }),
+  };
+
+  return {
+    success_count: successCount,
+    success: errorAccumulator.length === 0,
+    warnings: warnings.map((w) => {
+      if (isSavedObjectsImportSimpleWarning(w)) {
+        return w;
+      }
+      return {
+        type: w.type,
+        message: w.message,
+        action_path: w.actionPath,
+        actionPath: w.actionPath, // deprecated
+        ...(w.buttonLabel && { button_label: w.buttonLabel }),
+        ...(w.buttonLabel && { buttonLabel: w.buttonLabel }), // deprecated
+      };
+    }),
+    ...(successResults.length && { success_results: successResults }),
     ...(errorResults.length && { errors: errorResults }),
+    ...deprecatedResponseFields,
   };
 }

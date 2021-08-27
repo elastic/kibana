@@ -50,11 +50,22 @@ export default function ({ getService }: FtrProviderContext) {
           .attach('file', join(__dirname, '../../fixtures/import.ndjson'))
           .expect(200)
           .then((resp) => {
-            expect(resp.body).to.eql({ success: true, successCount: 0, warnings: [] });
+            expect(resp.body).to.eql({
+              success: true,
+              successCount: 0,
+              success_count: 0,
+              warnings: [],
+            });
           });
       });
 
       it('should return 200 when manually overwriting each object', async () => {
+        const successResults = [
+          { ...indexPattern, overwrite: true },
+          { ...visualization, overwrite: true },
+          { ...dashboard, overwrite: true },
+        ];
+
         await supertest
           .post(`/s/${SPACE_ID}/api/saved_objects/_resolve_import_errors`)
           .field(
@@ -83,17 +94,17 @@ export default function ({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               success: true,
               successCount: 3,
-              successResults: [
-                { ...indexPattern, overwrite: true },
-                { ...visualization, overwrite: true },
-                { ...dashboard, overwrite: true },
-              ],
+              success_count: 3,
+              successResults,
+              success_results: successResults,
               warnings: [],
             });
           });
       });
 
       it('should return 200 with only one record when overwriting 1 and skipping 1', async () => {
+        const successResults = [{ ...visualization, overwrite: true }];
+
         await supertest
           .post(`/s/${SPACE_ID}/api/saved_objects/_resolve_import_errors`)
           .field(
@@ -112,7 +123,9 @@ export default function ({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               success: true,
               successCount: 1,
-              successResults: [{ ...visualization, overwrite: true }],
+              success_count: 1,
+              successResults,
+              success_results: successResults,
               warnings: [],
             });
           });
@@ -134,6 +147,14 @@ export default function ({ getService }: FtrProviderContext) {
             },
           ],
         };
+        const successResults = [
+          {
+            type: 'visualization',
+            id: '1',
+            meta: { title: 'My favorite vis', icon: 'visualizeApp' },
+          },
+        ];
+
         await supertest
           .post(`/s/${SPACE_ID}/api/saved_objects/_resolve_import_errors`)
           .field(
@@ -158,13 +179,9 @@ export default function ({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               success: true,
               successCount: 1,
-              successResults: [
-                {
-                  type: 'visualization',
-                  id: '1',
-                  meta: { title: 'My favorite vis', icon: 'visualizeApp' },
-                },
-              ],
+              success_count: 1,
+              successResults,
+              success_results: successResults,
               warnings: [],
             });
           });

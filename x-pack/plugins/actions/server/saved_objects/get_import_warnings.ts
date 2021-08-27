@@ -6,12 +6,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { SavedObject, SavedObjectsImportWarning } from 'kibana/server';
+import { SavedObject, SavedObjectsImportWarningConfig } from 'kibana/server';
 import { RawAction } from '../types';
 
 export function getImportWarnings(
   connectors: Array<SavedObject<RawAction>>
-): SavedObjectsImportWarning[] {
+): SavedObjectsImportWarningConfig[] {
   const connectorsWithSecrets = connectors.filter(
     (connector) => connector.attributes.isMissingSecrets
   );
@@ -31,7 +31,7 @@ export function getImportWarnings(
       message,
       actionPath: '/app/management/insightsAndAlerting/triggersActions/connectors',
       buttonLabel: GO_TO_CONNECTORS_BUTTON_LABLE,
-    } as SavedObjectsImportWarning,
+    },
   ];
 }
 

@@ -114,7 +114,7 @@ describe(`POST ${URL}`, () => {
       )
       .expect(200);
 
-    expect(result.body).toEqual({ success: true, successCount: 0, warnings: [] });
+    expect(result.body).toEqual({ success: true, successCount: 0, success_count: 0, warnings: [] });
     expect(savedObjectsClient.bulkCreate).not.toHaveBeenCalled(); // no objects were created
     expect(coreUsageStatsClient.incrementSavedObjectsResolveImportErrors).toHaveBeenCalledWith({
       request: expect.anything(),
@@ -153,7 +153,9 @@ describe(`POST ${URL}`, () => {
     expect(result.body).toEqual({
       success: true,
       successCount: 1,
+      success_count: 1,
       successResults: [{ type, id, meta }],
+      success_results: [{ type, id, meta }],
       warnings: [],
     });
     expect(savedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1); // successResults objects were created because no resolvable errors are present
@@ -191,7 +193,9 @@ describe(`POST ${URL}`, () => {
     expect(result.body).toEqual({
       success: true,
       successCount: 1,
+      success_count: 1,
       successResults: [{ type, id, meta }],
+      success_results: [{ type, id, meta }],
       warnings: [],
     });
     expect(savedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1); // successResults objects were created because no resolvable errors are present
@@ -230,7 +234,9 @@ describe(`POST ${URL}`, () => {
     expect(result.body).toEqual({
       success: true,
       successCount: 1,
+      success_count: 1,
       successResults: [{ type, id, meta, overwrite: true }],
+      success_results: [{ type, id, meta, overwrite: true }],
       warnings: [],
     });
     expect(savedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1); // successResults objects were created because no resolvable errors are present
@@ -264,17 +270,20 @@ describe(`POST ${URL}`, () => {
       )
       .expect(200);
 
+    const successResults = [
+      {
+        type: 'visualization',
+        id: 'my-vis',
+        meta: { title: 'Look at my visualization', icon: 'visualization-icon' },
+      },
+    ];
     const { type, id, attributes, references } = mockVisualization;
     expect(result.body).toEqual({
       success: true,
       successCount: 1,
-      successResults: [
-        {
-          type: 'visualization',
-          id: 'my-vis',
-          meta: { title: 'Look at my visualization', icon: 'visualization-icon' },
-        },
-      ],
+      success_count: 1,
+      successResults,
+      success_results: successResults,
       warnings: [],
     });
     expect(savedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1); // successResults objects were created because no resolvable errors are present
@@ -312,18 +321,21 @@ describe(`POST ${URL}`, () => {
       )
       .expect(200);
 
+    const successResults = [
+      {
+        type: 'visualization',
+        id: 'my-vis',
+        meta: { title: 'Look at my visualization', icon: 'visualization-icon' },
+      },
+    ];
     const { type, id, attributes } = mockVisualization;
     const references = [{ name: 'ref_0', type: 'index-pattern', id: 'missing' }];
     expect(result.body).toEqual({
       success: true,
       successCount: 1,
-      successResults: [
-        {
-          type: 'visualization',
-          id: 'my-vis',
-          meta: { title: 'Look at my visualization', icon: 'visualization-icon' },
-        },
-      ],
+      success_count: 1,
+      successResults,
+      success_results: successResults,
       warnings: [],
     });
     expect(savedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1); // successResults objects were created because no resolvable errors are present
@@ -372,23 +384,29 @@ describe(`POST ${URL}`, () => {
         )
         .expect(200);
 
+      const successResults = [
+        {
+          type: obj1.type,
+          id: 'my-vis',
+          meta: { title: obj1.attributes.title, icon: 'visualization-icon' },
+          destinationId: obj1.id,
+          destination_id: obj1.id,
+        },
+        {
+          type: obj2.type,
+          id: 'my-dashboard',
+          meta: { title: obj2.attributes.title, icon: 'dashboard-icon' },
+          destinationId: obj2.id,
+          destination_id: obj2.id,
+        },
+      ];
+
       expect(result.body).toEqual({
         success: true,
         successCount: 2,
-        successResults: [
-          {
-            type: obj1.type,
-            id: 'my-vis',
-            meta: { title: obj1.attributes.title, icon: 'visualization-icon' },
-            destinationId: obj1.id,
-          },
-          {
-            type: obj2.type,
-            id: 'my-dashboard',
-            meta: { title: obj2.attributes.title, icon: 'dashboard-icon' },
-            destinationId: obj2.id,
-          },
-        ],
+        success_count: 2,
+        successResults,
+        success_results: successResults,
         warnings: [],
       });
       expect(savedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1); // successResults objects were created because no resolvable errors are present

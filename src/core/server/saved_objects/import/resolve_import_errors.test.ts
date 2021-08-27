@@ -457,7 +457,7 @@ describe('#importSavedObjectsFromStream', () => {
       const options = setupOptions();
 
       const result = await resolveSavedObjectsImportErrors(options);
-      expect(result).toEqual({ success: true, successCount: 0, warnings: [] });
+      expect(result).toEqual({ success: true, successCount: 0, success_count: 0, warnings: [] });
     });
 
     test('returns success=false if an error occurred', async () => {
@@ -472,6 +472,7 @@ describe('#importSavedObjectsFromStream', () => {
       expect(result).toEqual({
         success: false,
         successCount: 0,
+        success_count: 0,
         errors: [expect.any(Object)],
         warnings: [],
       });
@@ -530,13 +531,16 @@ describe('#importSavedObjectsFromStream', () => {
           id: obj2.id,
           meta: { title: obj2.attributes.title, icon: `${obj2.type}-icon` },
           destinationId: obj2.destinationId,
+          destination_id: obj2.destinationId,
         },
         {
           type: obj3.type,
           id: obj3.id,
           meta: { title: obj3.attributes.title, icon: `${obj3.type}-icon` },
           destinationId: obj3.destinationId,
+          destination_id: obj3.destinationId,
           createNewCopy: true,
+          create_new_copy: true,
         },
       ];
       const errors = [
@@ -546,7 +550,9 @@ describe('#importSavedObjectsFromStream', () => {
       expect(result).toEqual({
         success: false,
         successCount: 3,
+        success_count: 3,
         successResults,
+        success_results: successResults,
         errors,
         warnings: [],
       });
@@ -599,7 +605,9 @@ describe('#importSavedObjectsFromStream', () => {
       expect(result).toEqual({
         success: true,
         successCount: 2,
+        success_count: 2,
         successResults,
+        success_results: successResults,
         warnings: [],
       });
     });
@@ -627,6 +635,7 @@ describe('#importSavedObjectsFromStream', () => {
       expect(result).toEqual({
         success: false,
         successCount: 0,
+        success_count: 0,
         errors: expectedErrors,
         warnings: [],
       });

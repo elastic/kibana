@@ -79,9 +79,26 @@ export async function checkConflicts({
       importIdMap.set(`${type}:${id}`, { id: uuidv4(), omitOriginId });
       filteredObjects.push(object);
     } else if (errorObj && errorObj.statusCode !== 409) {
-      errors.push({ type, id, title, meta: { title }, error: { ...errorObj, type: 'unknown' } });
+      errors.push({
+        type,
+        id,
+        title,
+        meta: { title },
+        error: {
+          type: 'unknown',
+          message: errorObj.message,
+          status_code: errorObj.statusCode,
+          statusCode: errorObj.statusCode, // deprecated
+          error: errorObj.error, // deprecated
+          ...(errorObj.metadata && { metadata: errorObj.metadata }), // deprecated
+        },
+      });
     } else if (errorObj?.statusCode === 409 && !ignoreRegularConflicts && !overwrite) {
-      const error = { type: 'conflict' as 'conflict', ...(destinationId && { destinationId }) };
+      const error = {
+        type: 'conflict' as 'conflict',
+        ...(destinationId && { destination_id: destinationId }),
+        ...(destinationId && { destinationId }), // deprecated
+      };
       errors.push({ type, id, title, meta: { title }, error });
     } else {
       filteredObjects.push(object);

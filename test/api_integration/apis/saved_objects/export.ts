@@ -60,7 +60,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post(`/s/${SPACE_ID}/api/saved_objects/_export`)
           .send({
             type: ['index-pattern', 'search', 'visualization', 'dashboard'],
-            excludeExportDetails: true,
+            exclude_export_details: true,
           })
           .expect(200)
           .then((resp) => {
@@ -79,7 +79,7 @@ export default function ({ getService }: FtrProviderContext) {
         await supertest
           .post(`/s/${SPACE_ID}/api/saved_objects/_export`)
           .send({
-            includeReferencesDeep: true,
+            include_references_deep: true,
             objects: [
               {
                 type: 'dashboard',
@@ -107,7 +107,7 @@ export default function ({ getService }: FtrProviderContext) {
         await supertest
           .post(`/s/${SPACE_ID}/api/saved_objects/_export`)
           .send({
-            includeReferencesDeep: true,
+            include_references_deep: true,
             type: ['dashboard'],
           })
           .expect(200)
@@ -130,7 +130,7 @@ export default function ({ getService }: FtrProviderContext) {
         await supertest
           .post(`/s/${SPACE_ID}/api/saved_objects/_export`)
           .send({
-            includeReferencesDeep: true,
+            include_references_deep: true,
             type: ['dashboard'],
             search: 'Requests*',
           })
@@ -318,7 +318,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post(`/s/${SPACE_ID}/api/saved_objects/_export`)
           .send({
             type: 'dashboard',
-            excludeExportDetails: true,
+            exclude_export_details: true,
           })
           .expect(200)
           .then((resp) => {
@@ -379,7 +379,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post(`/s/${SPACE_ID}/api/saved_objects/_export`)
           .send({
             type: ['dashboard'],
-            excludeExportDetails: true,
+            exclude_export_details: true,
           })
           .expect(200)
           .then((resp) => {
@@ -444,7 +444,7 @@ export default function ({ getService }: FtrProviderContext) {
                 id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
               },
             ],
-            excludeExportDetails: true,
+            exclude_export_details: true,
           })
           .expect(200)
           .then((resp) => {
@@ -510,7 +510,7 @@ export default function ({ getService }: FtrProviderContext) {
                 id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
               },
             ],
-            excludeExportDetails: true,
+            exclude_export_details: true,
           })
           .expect(400)
           .then((resp) => {
@@ -527,7 +527,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post(`/s/${SPACE_ID}/api/saved_objects/_export`)
           .send({
             type: ['dashboard', 'visualization', 'search', 'index-pattern'],
-            excludeExportDetails: true,
+            exclude_export_details: true,
           })
           .expect(200)
           .then((resp) => {
@@ -557,7 +557,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post(`/s/${SPACE_ID}/api/saved_objects/_export`)
           .send({
             type: ['dashboard', 'visualization', 'search', 'index-pattern'],
-            excludeExportDetails: true,
+            exclude_export_details: true,
           })
           .expect(400)
           .then((resp) => {
