@@ -41,7 +41,6 @@ import { LayerDescriptor, VectorLayerDescriptor } from '../../common/descriptor_
 import { ILayer } from '../classes/layers/layer';
 import { Filter } from '../../../../../src/plugins/data/public';
 import { ESSearchSource } from '../classes/sources/es_search_source';
-import expect from '../../../../../packages/kbn-expect';
 
 describe('getDataFilters', () => {
   const mapExtent = {
