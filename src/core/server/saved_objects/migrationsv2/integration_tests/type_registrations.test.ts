@@ -90,6 +90,7 @@ const previouslyRegisteredTypes = [
   'spaces-usage-stats',
   'tag',
   'task',
+  'timelion-sheet',
   'telemetry',
   'tsvb-validation-telemetry',
   'ui-counter',

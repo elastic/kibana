@@ -10,13 +10,9 @@ import { PluginConfigDescriptor, PluginInitializerContext } from '../../../../sr
 import { configSchema, ConfigSchema } from '../config';
 import { TimelionPlugin } from './plugin';
 
-export { PluginSetupContract } from './plugin';
-
 export const config: PluginConfigDescriptor<ConfigSchema> = {
   schema: configSchema,
-  exposeToBrowser: {
-    ui: true,
-  },
 };
+
 export const plugin = (initializerContext: PluginInitializerContext) =>
   new TimelionPlugin(initializerContext);
