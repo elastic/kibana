@@ -26,7 +26,7 @@ import { TelemetryLogic } from '../../../shared/telemetry';
 import { AppLogic } from '../../app_logic';
 import sharedSourcesIcon from '../../components/shared/assets/source_icons/share_circle.svg';
 import { ContentSection } from '../../components/shared/content_section';
-import { SOURCES_PATH, USERS_AND_ROLES_PATH, ORG_SETTINGS_PATH } from '../../routes';
+import { ADD_SOURCE_PATH, USERS_AND_ROLES_PATH, ORG_SETTINGS_PATH } from '../../routes';
 
 import { OnboardingCard } from './onboarding_card';
 import { OverviewLogic } from './overview_logic';
@@ -59,19 +59,9 @@ const ONBOARDING_USERS_CARD_DESCRIPTION = i18n.translate(
 export const OnboardingSteps: React.FC = () => {
   const {
     organization: { name, defaultOrgName },
-    account: { isCurated, canCreateInvitations },
   } = useValues(AppLogic);
 
-  const {
-    hasUsers,
-    hasOrgSources,
-    canCreateContentSources,
-    accountsCount,
-    sourcesCount,
-  } = useValues(OverviewLogic);
-
-  const accountsPath = canCreateInvitations || isCurated ? USERS_AND_ROLES_PATH : undefined;
-  const sourcesPath = canCreateContentSources || isCurated ? SOURCES_PATH : undefined;
+  const { hasUsers, hasOrgSources, accountsCount, sourcesCount } = useValues(OverviewLogic);
 
   const SOURCES_CARD_DESCRIPTION = i18n.translate(
     'xpack.enterpriseSearch.workplaceSearch.sourcesOnboardingCard.description',
@@ -99,7 +89,7 @@ export const OnboardingSteps: React.FC = () => {
               values: { label: sourcesCount > 0 ? 'more' : '' },
             }
           )}
-          actionPath={sourcesPath}
+          actionPath={ADD_SOURCE_PATH}
           complete={hasOrgSources}
         />
         <OnboardingCard
@@ -114,7 +104,7 @@ export const OnboardingSteps: React.FC = () => {
               values: { label: accountsCount > 0 ? 'more' : '' },
             }
           )}
-          actionPath={accountsPath}
+          actionPath={USERS_AND_ROLES_PATH}
           complete={hasUsers}
         />
       </EuiFlexGrid>

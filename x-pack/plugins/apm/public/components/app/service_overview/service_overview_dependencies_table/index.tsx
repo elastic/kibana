@@ -14,6 +14,7 @@ import { useApmServiceContext } from '../../../../context/apm_service/use_apm_se
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useFetcher } from '../../../../hooks/use_fetcher';
+import { useTimeRange } from '../../../../hooks/use_time_range';
 import { BackendLink } from '../../../shared/backend_link';
 import { DependenciesTable } from '../../../shared/dependencies_table';
 import { ServiceLink } from '../../../shared/service_link';
@@ -29,18 +30,14 @@ export function ServiceOverviewDependenciesTable({
   link,
 }: ServiceOverviewDependenciesTableProps) {
   const {
-    urlParams: {
-      start,
-      end,
-      comparisonEnabled,
-      comparisonType,
-      latencyAggregationType,
-    },
+    urlParams: { comparisonEnabled, comparisonType, latencyAggregationType },
   } = useUrlParams();
 
   const {
     query: { environment, kuery, rangeFrom, rangeTo },
   } = useApmParams('/services/:serviceName/*');
+
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const { offset } = getTimeRangeComparison({
     start,

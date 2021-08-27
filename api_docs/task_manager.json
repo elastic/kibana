@@ -191,7 +191,7 @@
             "label": "start",
             "description": [],
             "signature": [
-              "({ savedObjects, elasticsearch }: ",
+              "({ savedObjects, elasticsearch, executionContext, }: ",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -216,7 +216,7 @@
                 "id": "def-server.TaskManagerPlugin.start.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{ savedObjects, elasticsearch }",
+                "label": "{\n    savedObjects,\n    elasticsearch,\n    executionContext,\n  }",
                 "description": [],
                 "signature": [
                   {
