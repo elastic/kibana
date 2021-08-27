@@ -4,15 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { schema } from '@kbn/config-schema';
-import type { AlertingRouter } from '../../types';
-
-import { ILicenseState } from '../../lib/license_state';
-import { verifyApiAccess } from '../../lib/license_api_access';
 import { LEGACY_BASE_ALERT_API_PATH } from '../../../common';
-import { renameKeys } from './../lib/rename_keys';
-import { FindOptions } from '../../rules_client';
+import { verifyApiAccess } from '../../lib/license_api_access';
+import type { ILicenseState } from '../../lib/license_state';
+import type { FindOptions } from '../../rules_client/rules_client';
+import type { AlertingRouter } from '../../types';
+import { renameKeys } from '../lib/rename_keys';
 
 // config definition
 const querySchema = schema.object({

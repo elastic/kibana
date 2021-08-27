@@ -4,37 +4,36 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { useMemo } from 'react';
 import {
-  EuiTitle,
-  EuiSpacer,
   EuiAccordion,
   EuiFilterGroup,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiSpacer,
+  EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ESFilter } from 'src/core/types/elasticsearch';
-import { useLocalUIFilters } from '../hooks/useLocalUIFilters';
-import {
-  uxFiltersByName,
-  UxLocalUIFilterName,
-  uxLocalUIFilterNames,
-} from '../../../../../common/ux_ui_filter';
-import { useBreakPoints } from '../../../../hooks/use_break_points';
-import { FieldValueSuggestions } from '../../../../../../observability/public';
-import { URLFilter } from '../URLFilter';
-import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
-import { SelectedFilters } from './SelectedFilters';
+import React, { useMemo } from 'react';
+import type { ESFilter } from '../../../../../../../../src/core/types/elasticsearch';
+import { FieldValueSuggestions } from '../../../../../../observability/public/components/shared';
 import {
   SERVICE_NAME,
   TRANSACTION_TYPE,
 } from '../../../../../common/elasticsearch_fieldnames';
-import { TRANSACTION_PAGE_LOAD } from '../../../../../common/transaction_types';
-import { useIndexPattern } from './use_index_pattern';
-import { environmentQuery } from './queries';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
+import { TRANSACTION_PAGE_LOAD } from '../../../../../common/transaction_types';
+import type { UxLocalUIFilterName } from '../../../../../common/ux_ui_filter';
+import {
+  uxFiltersByName,
+  uxLocalUIFilterNames,
+} from '../../../../../common/ux_ui_filter';
+import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
+import { useBreakPoints } from '../../../../hooks/use_break_points';
+import { useLocalUIFilters } from '../hooks/useLocalUIFilters';
+import { URLFilter } from '../URLFilter';
+import { environmentQuery } from './queries';
+import { SelectedFilters } from './SelectedFilters';
+import { useIndexPattern } from './use_index_pattern';
 
 const filterNames: UxLocalUIFilterName[] = [
   'location',

@@ -4,21 +4,22 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { LogMeta } from '@kbn/logging';
 import { isString } from 'lodash/fp';
-import {
-  LogMeta,
-  SavedObjectMigrationMap,
-  SavedObjectUnsanitizedDoc,
-  SavedObjectMigrationFn,
+import type {
   SavedObjectMigrationContext,
-  SavedObjectAttributes,
+  SavedObjectMigrationFn,
+  SavedObjectMigrationMap,
+} from '../../../../../src/core/server/saved_objects/migrations/types';
+import type { SavedObjectUnsanitizedDoc } from '../../../../../src/core/server/saved_objects/serialization/types';
+import type {
   SavedObjectAttribute,
+  SavedObjectAttributes,
   SavedObjectReference,
-} from '../../../../../src/core/server';
-import { RawAlert, RawAlertAction } from '../types';
-import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
-import type { IsMigrationNeededPredicate } from '../../../encrypted_saved_objects/server';
+} from '../../../../../src/core/types/saved_objects';
+import type { IsMigrationNeededPredicate } from '../../../encrypted_saved_objects/server/create_migration';
+import type { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server/plugin';
+import type { RawAlert, RawAlertAction } from '../types';
 
 const SIEM_APP_ID = 'securitySolution';
 const SIEM_SERVER_APP_ID = 'siem';

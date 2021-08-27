@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { Logger } from 'src/core/server';
-import { AlertTaskState, AlertExecutionStatus, RawAlertExecutionStatus } from '../types';
+import type { Logger } from '@kbn/logging';
+import type { AlertExecutionStatus, AlertExecutionStatuses } from '../../common/alert';
+import type { AlertTaskState } from '../../common/alert_task_instance';
+import type { RawAlertExecutionStatus } from '../types';
+import { getEsErrorMessage } from './errors/es_error_parser';
 import { getReasonFromError } from './error_with_reason';
-import { getEsErrorMessage } from './errors';
-import { AlertExecutionStatuses } from '../../common';
 
 export function executionStatusFromState(state: AlertTaskState): AlertExecutionStatus {
   const instanceIds = Object.keys(state.alertInstances ?? {});

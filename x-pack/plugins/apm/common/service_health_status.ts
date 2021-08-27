@@ -4,9 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { i18n } from '@kbn/i18n';
-import { EuiTheme } from '../../../../src/plugins/kibana_react/common';
+import type { EuiTheme } from '../../../../src/plugins/kibana_react/common/eui_styled_components';
 import { ANOMALY_SEVERITY } from './ml_constants';
 
 export enum ServiceHealthStatus {

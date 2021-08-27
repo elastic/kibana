@@ -5,12 +5,9 @@
  * 2.0.
  */
 
+import type { EuiSelectOption } from '@elastic/eui';
+import { EuiDescribedFormGroup, EuiFormRow } from '@elastic/eui';
 import React from 'react';
-import {
-  EuiDescribedFormGroup,
-  EuiSelectOption,
-  EuiFormRow,
-} from '@elastic/eui';
 import { SelectWithPlaceholder } from '../../../../../shared/SelectWithPlaceholder';
 
 interface Props {

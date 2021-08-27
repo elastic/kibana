@@ -4,15 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import {
-  EuiBasicTableColumn,
-  EuiButtonIcon,
-  RIGHT_ALIGNMENT,
-} from '@elastic/eui';
+import type { EuiBasicTableColumn } from '@elastic/eui';
+import { EuiButtonIcon, RIGHT_ALIGNMENT } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { ReactNode } from 'react';
-import { ActionMenu } from '../../../../../../observability/public';
+import type { ReactNode } from 'react';
+import React from 'react';
+import { ActionMenu } from '../../../../../../observability/public/components/shared/action_menu';
 import { isJavaAgentName } from '../../../../../common/agent_name';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 import {
@@ -21,16 +18,16 @@ import {
 } from '../../../../../common/service_nodes';
 import {
   asMillisecondDuration,
-  asPercent,
   asTransactionRate,
-} from '../../../../../common/utils/formatters';
-import { APIReturnType } from '../../../../services/rest/createCallApmApi';
+} from '../../../../../common/utils/formatters/duration';
+import { asPercent } from '../../../../../common/utils/formatters/formatters';
+import type { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import { unit } from '../../../../utils/style';
 import { SparkPlot } from '../../../shared/charts/spark_plot';
 import { MetricOverviewLink } from '../../../shared/Links/apm/MetricOverviewLink';
 import { ServiceNodeMetricOverviewLink } from '../../../shared/Links/apm/ServiceNodeMetricOverviewLink';
-import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
 import { getLatencyColumnLabel } from '../../../shared/transactions_table/get_latency_column_label';
+import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
 import { InstanceActionsMenu } from './instance_actions_menu';
 
 type ServiceInstanceMainStatistics = APIReturnType<'GET /api/apm/services/{serviceName}/service_overview_instances/main_statistics'>;

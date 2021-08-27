@@ -4,20 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { BreakPoints } from '../../../../hooks/use_break_points';
+import { getServiceColumns, ServiceList } from '.';
+import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import { ServiceHealthStatus } from '../../../../../common/service_health_status';
 import { MockApmPluginContextWrapper } from '../../../../context/apm_plugin/mock_apm_plugin_context';
-import { mockMoment, renderWithTheme } from '../../../../utils/testHelpers';
-import { getServiceColumns, ServiceList } from './';
-import { items } from './__fixtures__/service_api_mock_data';
-import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
+import type { BreakPoints } from '../../../../hooks/use_break_points';
 import {
   getCallApmApiSpy,
   getCreateCallApmApiSpy,
 } from '../../../../services/rest/callApmApiSpy';
+import { mockMoment, renderWithTheme } from '../../../../utils/testHelpers';
+import { items } from './__fixtures__/service_api_mock_data';
 
 function Wrapper({ children }: { children?: ReactNode }) {
   return (

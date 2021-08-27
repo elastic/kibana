@@ -4,8 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { useState } from 'react';
 import {
   EuiButton,
   EuiFlexGroup,
@@ -14,14 +12,15 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import React, { useState } from 'react';
+import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public/context/context';
+import { createExploratoryViewUrl } from '../../../../../../observability/public/components/shared/exploratory_view/configurations/utils';
+import type { BreakdownItem } from '../../../../../typings/ui_filters';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { useFetcher } from '../../../../hooks/use_fetcher';
-import { I18LABELS } from '../translations';
 import { BreakdownFilter } from '../Breakdowns/BreakdownFilter';
 import { PageViewsChart } from '../Charts/PageViewsChart';
-import { BreakdownItem } from '../../../../../typings/ui_filters';
-import { createExploratoryViewUrl } from '../../../../../../observability/public';
-import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
+import { I18LABELS } from '../translations';
 
 export function PageViewsTrend() {
   const {

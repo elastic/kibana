@@ -4,15 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { KibanaRequest } from 'src/core/server';
+import { KibanaRequest } from '../../../../src/core/server/http/router/request';
+import type { Space } from '../../../../src/plugins/spaces_oss/common/types';
+import type { PluginStartContract as FeaturesPluginStart } from '../../features/server/plugin';
+import type { SecurityPluginSetup, SecurityPluginStart } from '../../security/server/plugin';
 import { ALERTS_FEATURE_ID } from '../common';
-import { RuleTypeRegistry } from './types';
-import { SecurityPluginSetup, SecurityPluginStart } from '../../security/server';
-import { PluginStartContract as FeaturesPluginStart } from '../../features/server';
 import { AlertingAuthorization } from './authorization/alerting_authorization';
 import { AlertingAuthorizationAuditLogger } from './authorization/audit_logger';
-import { Space } from '../../spaces/server';
+import type { RuleTypeRegistry } from './types';
 
 export interface AlertingAuthorizationClientFactoryOpts {
   ruleTypeRegistry: RuleTypeRegistry;

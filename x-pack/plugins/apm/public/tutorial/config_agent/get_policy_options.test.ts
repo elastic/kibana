@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { APIReturnType } from '../../services/rest/createCallApmApi';
 import { getPolicyOptions } from './get_policy_options';
-import { APIReturnType } from '../../services/rest/createCallApmApi';
 
 type APIResponseType = APIReturnType<'GET /api/apm/fleet/agents'>;
 

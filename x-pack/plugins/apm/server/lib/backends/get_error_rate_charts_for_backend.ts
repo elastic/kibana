@@ -4,18 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { EventOutcome } from '../../../common/event_outcome';
+import {
+  kqlQuery,
+  rangeQuery,
+} from '../../../../observability/server/utils/queries';
 import {
   EVENT_OUTCOME,
   SPAN_DESTINATION_SERVICE_RESOURCE,
 } from '../../../common/elasticsearch_fieldnames';
-import { environmentQuery } from '../../../common/utils/environment_query';
-import { kqlQuery, rangeQuery } from '../../../../observability/server';
+import { EventOutcome } from '../../../common/event_outcome';
 import { ProcessorEvent } from '../../../common/processor_event';
-import { Setup } from '../helpers/setup_request';
-import { getMetricsDateHistogramParams } from '../helpers/metrics';
+import { environmentQuery } from '../../../common/utils/environment_query';
 import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
+import { getMetricsDateHistogramParams } from '../helpers/metrics';
+import type { Setup } from '../helpers/setup_request';
 
 export async function getErrorRateChartsForBackend({
   backendName,

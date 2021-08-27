@@ -4,11 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { shallow } from 'enzyme';
 import React from 'react';
-import { EuiThemeProvider } from '../../../../../../../../../src/plugins/kibana_react/common';
-import { AgentMark } from '../../../../app/transaction_details/waterfall_with_summary/waterfall_container/Marks/get_agent_marks';
+import { EuiThemeProvider } from '../../../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
+import type { AgentMark } from '../../../../app/transaction_details/waterfall_with_summary/waterfall_container/Marks/get_agent_marks';
 import { AgentMarker } from './agent_marker';
 
 describe('AgentMarker', () => {

@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import {
   EuiCard,
   EuiFlexGroup,
@@ -14,8 +13,8 @@ import {
 } from '@elastic/eui';
 import type { Story } from '@storybook/react';
 import React from 'react';
+import { SpanIcon } from '.';
 import { getSpanIcon, spanTypeIcons } from './get_span_icon';
-import { SpanIcon } from './index';
 
 const spanTypes = Object.keys(spanTypeIcons);
 

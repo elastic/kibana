@@ -4,20 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { omit } from 'lodash';
 import { useHistory } from 'react-router-dom';
-import {
-  uxFiltersByName,
+import type {
   UxLocalUIFilter,
   UxLocalUIFilterName,
 } from '../../../../../common/ux_ui_filter';
-import {
-  fromQuery,
-  toQuery,
-} from '../../../../components/shared/Links/url_helpers';
+import { uxFiltersByName } from '../../../../../common/ux_ui_filter';
 import { removeUndefinedProps } from '../../../../context/url_params_context/helpers';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
+import { fromQuery, toQuery } from '../../../shared/Links/url_helpers';
 import { getExcludedName } from '../LocalUIFilters';
 
 export type FiltersUIHook = ReturnType<typeof useLocalUIFilters>;

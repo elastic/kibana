@@ -4,17 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { size } from 'lodash';
 import { tint } from 'polished';
 import React from 'react';
-import { Light as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { default as SyntaxHighlighter } from 'react-syntax-highlighter';
 import javascript from 'react-syntax-highlighter/dist/cjs/languages/hljs/javascript';
 import python from 'react-syntax-highlighter/dist/cjs/languages/hljs/python';
 import ruby from 'react-syntax-highlighter/dist/cjs/languages/hljs/ruby';
 import xcode from 'react-syntax-highlighter/dist/cjs/styles/hljs/xcode';
-import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
-import { StackframeWithLineContext } from '../../../../typings/es_schemas/raw/fields/stackframe';
+import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
+import type { StackframeWithLineContext } from '../../../../typings/es_schemas/raw/fields/stackframe';
 
 SyntaxHighlighter.registerLanguage('javascript', javascript);
 SyntaxHighlighter.registerLanguage('python', python);

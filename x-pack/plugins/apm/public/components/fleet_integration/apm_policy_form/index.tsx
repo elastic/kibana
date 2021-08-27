@@ -6,10 +6,10 @@
  */
 import { EuiSpacer } from '@elastic/eui';
 import React from 'react';
-import { OnFormChangeFn, PackagePolicyVars } from './typings';
 import { APMSettingsForm } from './settings/apm_settings';
 import { RUMSettingsForm } from './settings/rum_settings';
 import { TLSSettingsForm } from './settings/tls_settings';
+import type { OnFormChangeFn, PackagePolicyVars } from './typings';
 
 interface Props {
   onChange: OnFormChangeFn;

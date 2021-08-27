@@ -5,15 +5,15 @@
  * 2.0.
  */
 import Mustache from 'mustache';
+import { django } from './django';
+import { dotnet } from './dotnet';
+import { flask } from './flask';
+import { go } from './go';
 import { java } from './java';
 import { node } from './node';
-import { django } from './django';
-import { flask } from './flask';
-import { rails } from './rails';
-import { rack } from './rack';
-import { go } from './go';
-import { dotnet } from './dotnet';
 import { php } from './php';
+import { rack } from './rack';
+import { rails } from './rails';
 import { rum, rumScript } from './rum';
 
 const commandsMap: Record<string, string> = {

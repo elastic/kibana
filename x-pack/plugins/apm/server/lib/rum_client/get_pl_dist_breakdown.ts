@@ -4,22 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { getRumPageLoadTransactionsProjection } from '../../projections/rum_page_load_transactions';
-import { ProcessorEvent } from '../../../common/processor_event';
-import { mergeProjection } from '../../projections/util/merge_projection';
-import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import {
   CLIENT_GEO_COUNTRY_ISO_CODE,
+  TRANSACTION_DURATION,
   USER_AGENT_DEVICE,
   USER_AGENT_NAME,
   USER_AGENT_OS,
-  TRANSACTION_DURATION,
 } from '../../../common/elasticsearch_fieldnames';
+import { ProcessorEvent } from '../../../common/processor_event';
+import { getRumPageLoadTransactionsProjection } from '../../projections/rum_page_load_transactions';
+import { mergeProjection } from '../../projections/util/merge_projection';
+import type { Setup, SetupTimeRange } from '../helpers/setup_request';
 import {
   getPLDChartSteps,
-  MICRO_TO_SEC,
   microToSec,
+  MICRO_TO_SEC,
   removeZeroesFromTail,
 } from './get_page_load_distribution';
 

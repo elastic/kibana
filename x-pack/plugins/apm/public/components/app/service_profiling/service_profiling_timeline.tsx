@@ -13,17 +13,17 @@ import {
   ScaleType,
   Settings,
 } from '@elastic/charts';
-import { EuiButtonEmpty } from '@elastic/eui';
 import {
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiText,
   euiPaletteColorBlind,
+  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useChartTheme } from '../../../../../observability/public';
+import { useChartTheme } from '../../../../../observability/public/hooks/use_chart_theme';
 import {
   getValueTypeConfig,
   ProfilingValueType,

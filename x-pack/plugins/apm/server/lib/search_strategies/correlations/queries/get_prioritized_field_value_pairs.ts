@@ -4,10 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { FIELDS_TO_ADD_AS_CANDIDATE } from '../constants';
-import { hasPrefixToInclude } from '../utils';
-
+import { hasPrefixToInclude } from '../utils/has_prefix_to_include';
 import type { FieldValuePairs } from './query_field_value_pairs';
 
 export const getPrioritizedFieldValuePairs = (

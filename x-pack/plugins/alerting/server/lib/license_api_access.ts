@@ -6,7 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
-import { ILicenseState } from './license_state';
+import type { ILicenseState } from './license_state';
 
 export function verifyApiAccess(licenseState: ILicenseState) {
   const licenseCheckResults = licenseState.getLicenseInformation();

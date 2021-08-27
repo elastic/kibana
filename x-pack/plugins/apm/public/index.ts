@@ -4,12 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import {
-  PluginInitializer,
-  PluginInitializerContext,
-} from '../../../../src/core/public';
-import { ApmPlugin, ApmPluginSetup, ApmPluginStart } from './plugin';
+import type { PluginInitializer } from '../../../../src/core/public/plugins/plugin';
+import type { PluginInitializerContext } from '../../../../src/core/public/plugins/plugin_context';
+import type { ApmPluginSetup, ApmPluginStart } from './plugin';
+import { ApmPlugin } from './plugin';
 
 export interface ConfigSchema {
   serviceMapEnabled: boolean;

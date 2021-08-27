@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -14,17 +13,16 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
-import {
-  getSeverity,
-  ServiceAnomalyStats,
-} from '../../../../../common/anomaly_detection';
+import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
+import type { ServiceAnomalyStats } from '../../../../../common/anomaly_detection';
+import { getSeverity } from '../../../../../common/anomaly_detection';
 import {
   getServiceHealthStatus,
   getServiceHealthStatusColor,
 } from '../../../../../common/service_health_status';
 import { TRANSACTION_REQUEST } from '../../../../../common/transaction_types';
-import { asDuration, asInteger } from '../../../../../common/utils/formatters';
+import { asDuration } from '../../../../../common/utils/formatters/duration';
+import { asInteger } from '../../../../../common/utils/formatters/formatters';
 import { useTheme } from '../../../../hooks/use_theme';
 import { MLSingleMetricLink } from '../../../shared/Links/MachineLearningLinks/MLSingleMetricLink';
 import { popoverWidth } from '../cytoscape_options';

@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { useFetcher } from '../../hooks/use_fetcher';
 import { useApmPluginContext } from '../apm_plugin/use_apm_plugin_context';
 import { useUrlParams } from '../url_params_context/use_url_params';
-import { useFetcher } from '../../hooks/use_fetcher';
 import type { APMServiceAlert } from './apm_service_context';
 
 export function useServiceAlertsFetcher({

@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { i18n } from '@kbn/i18n';
-import { SavedObject, SavedObjectsImportWarning } from 'kibana/server';
+import type { SavedObjectsImportWarning } from '../../../../../src/core/server/saved_objects/import/types';
+import type { SavedObject } from '../../../../../src/core/types/saved_objects';
 
 export function getImportWarnings(
   rulesSavedObjects: Array<SavedObject<unknown>>

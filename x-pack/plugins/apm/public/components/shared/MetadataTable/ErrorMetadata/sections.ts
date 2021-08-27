@@ -4,22 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { Section } from '../sections';
 import {
-  Section,
-  ERROR,
-  LABELS,
-  HTTP,
-  HOST,
-  CONTAINER,
-  SERVICE,
-  PROCESS,
   AGENT,
-  URL,
-  USER,
+  CONTAINER,
   CUSTOM_ERROR,
+  ERROR,
+  HOST,
+  HTTP,
+  LABELS,
+  PROCESS,
+  SERVICE,
   TRACE,
   TRANSACTION,
+  URL,
+  USER,
 } from '../sections';
 
 export const ERROR_METADATA_SECTIONS: Section[] = [

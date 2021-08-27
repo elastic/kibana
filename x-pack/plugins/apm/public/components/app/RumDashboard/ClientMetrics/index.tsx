@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import * as React from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
-  EuiTitle,
   EuiSpacer,
+  EuiTitle,
 } from '@elastic/eui';
+import * as React from 'react';
+import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { I18LABELS } from '../translations';
 import { getPercentileLabel } from '../UXMetrics/translations';
-import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { Metrics } from './Metrics';
 
 export function ClientMetrics() {

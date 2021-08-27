@@ -4,25 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { schema } from '@kbn/config-schema';
-import { validateDurationSchema, AlertTypeDisabledError } from '../lib';
-import { CreateOptions } from '../rules_client';
-import {
-  RewriteRequestCase,
-  RewriteResponseCase,
-  handleDisabledApiKeysError,
-  verifyAccessAndContext,
-  countUsageOfPredefinedIds,
-} from './lib';
-import {
-  SanitizedAlert,
-  validateNotifyWhenType,
-  AlertTypeParams,
-  BASE_ALERTING_API_PATH,
-  AlertNotifyWhenType,
-} from '../types';
-import { RouteOptions } from '.';
+import type { RouteOptions } from '.';
+import { BASE_ALERTING_API_PATH } from '../../common';
+import type { AlertTypeParams, SanitizedAlert } from '../../common/alert';
+import type { AlertNotifyWhenType } from '../../common/alert_notify_when_type';
+import { validateNotifyWhenType } from '../../common/alert_notify_when_type';
+import { validateDurationSchema } from '../../common/parse_duration';
+import { AlertTypeDisabledError } from '../lib/errors/alert_type_disabled';
+import type { CreateOptions } from '../rules_client/rules_client';
+import { countUsageOfPredefinedIds } from './lib/count_usage_of_predefined_ids';
+import { handleDisabledApiKeysError } from './lib/error_handler';
+import type { RewriteRequestCase, RewriteResponseCase } from './lib/rewrite_request_case';
+import { verifyAccessAndContext } from './lib/verify_access_and_context';
 
 export const bodySchema = schema.object({
   name: schema.string(),

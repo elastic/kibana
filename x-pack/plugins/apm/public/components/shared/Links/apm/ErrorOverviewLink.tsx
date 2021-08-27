@@ -8,8 +8,9 @@
 import React from 'react';
 import { pickKeys } from '../../../../../common/utils/pick_keys';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
-import { APMQueryParams } from '../url_helpers';
-import { APMLink, APMLinkExtendProps, useAPMHref } from './APMLink';
+import type { APMQueryParams } from '../url_helpers';
+import type { APMLinkExtendProps } from './APMLink';
+import { APMLink, useAPMHref } from './APMLink';
 
 const persistedFilters: Array<keyof APMQueryParams> = [
   'host',

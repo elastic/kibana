@@ -4,13 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { EuiToolTip } from '@elastic/eui';
 import React from 'react';
-import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
-import { asDuration } from '../../../../../../common/utils/formatters';
+import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
+import { asDuration } from '../../../../../../common/utils/formatters/duration';
 import { useTheme } from '../../../../../hooks/use_theme';
-import { AgentMark } from '../../../../app/transaction_details/waterfall_with_summary/waterfall_container/Marks/get_agent_marks';
+import type { AgentMark } from '../../../../app/transaction_details/waterfall_with_summary/waterfall_container/Marks/get_agent_marks';
 import { Legend } from '../legend';
 
 const NameContainer = euiStyled.div`

@@ -4,12 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { Setup, SetupTimeRange } from '../helpers/setup_request';
-import { getJavaMetricsCharts } from './by_agent/java';
-import { getDefaultMetricsCharts } from './by_agent/default';
-import { GenericMetricsChart } from './transform_metrics_chart';
 import { isJavaAgentName } from '../../../common/agent_name';
+import type { Setup, SetupTimeRange } from '../helpers/setup_request';
+import { getDefaultMetricsCharts } from './by_agent/default';
+import { getJavaMetricsCharts } from './by_agent/java';
+import type { GenericMetricsChart } from './transform_metrics_chart';
 
 export interface MetricsChartsByAgentAPIResponse {
   charts: GenericMetricsChart[];

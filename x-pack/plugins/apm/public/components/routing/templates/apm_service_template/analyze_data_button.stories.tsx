@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import type { Story, StoryContext } from '@storybook/react';
-import React, { ComponentType } from 'react';
-import { CoreStart } from '../../../../../../../../src/core/public';
-import { createKibanaReactContext } from '../../../../../../../../src/plugins/kibana_react/public';
+import type { ComponentType } from 'react';
+import React from 'react';
+import type { CoreStart } from '../../../../../../../../src/core/public';
+import { createKibanaReactContext } from '../../../../../../../../src/plugins/kibana_react/public/context/context';
 import { APMServiceContext } from '../../../../context/apm_service/apm_service_context';
 import { MockUrlParamsContextProvider } from '../../../../context/url_params_context/mock_url_params_context_provider';
 import { AnalyzeDataButton } from './analyze_data_button';

@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { fireEvent, render } from '@testing-library/react';
-import React, { ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { EuiThemeProvider } from '../../../../../../../../../../src/plugins/kibana_react/common';
+import { EuiThemeProvider } from '../../../../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
 import { MockApmPluginContextWrapper } from '../../../../../../context/apm_plugin/mock_apm_plugin_context';
 import * as apmApi from '../../../../../../services/rest/createCallApmApi';
 import { DeleteButton } from './DeleteButton';

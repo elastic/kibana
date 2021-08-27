@@ -6,7 +6,6 @@
  */
 
 import { PluginInitializerContext, PluginInitializer } from 'kibana/public';
-import { lazy } from 'react';
 import {
   Plugin,
   ObservabilityPublicPluginsStart,
@@ -55,7 +54,8 @@ export {
   METRIC_TYPE,
 } from './hooks/use_track_metric';
 
-export const LazyAlertsFlyout = lazy(() => import('./pages/alerts/alerts_flyout'));
+export { LazyAlertsFlyout } from './pages/alerts/alerts_flyout';
+
 export { useFetcher, FETCH_STATUS } from './hooks/use_fetcher';
 
 export * from './typings';

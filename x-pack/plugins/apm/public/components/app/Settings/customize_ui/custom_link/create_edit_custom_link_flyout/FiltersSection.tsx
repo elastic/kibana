@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import {
   EuiButtonEmpty,
   EuiFieldText,
@@ -18,7 +17,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import React from 'react';
-import {
+import type {
   Filter,
   FilterKey,
 } from '../../../../../../../common/custom_link/custom_link_types';

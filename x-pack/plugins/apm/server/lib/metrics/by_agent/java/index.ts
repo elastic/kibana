@@ -4,16 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { withApmSpan } from '../../../../utils/with_apm_span';
-import { getHeapMemoryChart } from './heap_memory';
-import { Setup, SetupTimeRange } from '../../../helpers/setup_request';
-import { getNonHeapMemoryChart } from './non_heap_memory';
-import { getThreadCountChart } from './thread_count';
+import type { Setup, SetupTimeRange } from '../../../helpers/setup_request';
 import { getCPUChartData } from '../shared/cpu';
 import { getMemoryChartData } from '../shared/memory';
 import { getGcRateChart } from './gc/get_gc_rate_chart';
 import { getGcTimeChart } from './gc/get_gc_time_chart';
+import { getHeapMemoryChart } from './heap_memory';
+import { getNonHeapMemoryChart } from './non_heap_memory';
+import { getThreadCountChart } from './thread_count';
 
 export function getJavaMetricsCharts({
   environment,

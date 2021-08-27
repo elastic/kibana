@@ -4,31 +4,22 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { Logger } from '@kbn/logging';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type {
-  Logger,
-  KibanaRequest,
-  ISavedObjectsRepository,
-  IBasePath,
-  ExecutionContextStart,
-} from '../../../../../src/core/server';
-import { RunContext } from '../../../task_manager/server';
-import { EncryptedSavedObjectsClient } from '../../../encrypted_saved_objects/server';
-import { PluginStartContract as ActionsPluginStartContract } from '../../../actions/server';
-import {
-  AlertTypeParams,
-  RuleTypeRegistry,
-  GetServicesFunction,
-  SpaceIdToNamespaceFunction,
-  AlertTypeState,
-  AlertInstanceState,
-  AlertInstanceContext,
-} from '../types';
+import type { ExecutionContextStart } from '../../../../../src/core/server/execution_context/execution_context_service';
+import type { IBasePath } from '../../../../../src/core/server/http/base_path_service';
+import { KibanaRequest } from '../../../../../src/core/server/http/router/request';
+import type { ISavedObjectsRepository } from '../../../../../src/core/server/saved_objects/service/lib/repository';
+import type { PluginStartContract as ActionsPluginStartContract } from '../../../actions/server/plugin';
+import type { EncryptedSavedObjectsClient } from '../../../encrypted_saved_objects/server/saved_objects';
+import type { IEventLogger } from '../../../event_log/server/types';
+import type { RunContext } from '../../../task_manager/server/task';
+import type { AlertTypeParams, AlertTypeState } from '../../common/alert';
+import type { AlertInstanceContext, AlertInstanceState } from '../../common/alert_instance';
+import { RulesClient } from '../rules_client/rules_client';
+import type { NormalizedAlertType } from '../rule_type_registry';
+import type { GetServicesFunction, RuleTypeRegistry, SpaceIdToNamespaceFunction } from '../types';
 import { TaskRunner } from './task_runner';
-import { IEventLogger } from '../../../event_log/server';
-import { RulesClient } from '../rules_client';
-import { NormalizedAlertType } from '../rule_type_registry';
 
 export interface TaskRunnerContext {
   logger: Logger;

@@ -4,29 +4,25 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { useEffect, useState, useRef } from 'react';
-import uuid from 'uuid';
+import React, { useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
-
-import {
-  MapEmbeddable,
-  MapEmbeddableInput,
-} from '../../../../../../maps/public';
-import { MAP_SAVED_OBJECT_TYPE } from '../../../../../../maps/common/constants';
-import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
+import uuid from 'uuid';
+import { ViewMode } from '../../../../../../../../src/plugins/embeddable/common/types';
 import {
   ErrorEmbeddable,
-  ViewMode,
   isErrorEmbeddable,
-} from '../../../../../../../../src/plugins/embeddable/public';
-import { useLayerList } from './useLayerList';
-import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
+} from '../../../../../../../../src/plugins/embeddable/public/lib/embeddables/error_embeddable';
+import type { EmbeddableStart } from '../../../../../../../../src/plugins/embeddable/public/plugin';
+import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public/context/context';
+import { MAP_SAVED_OBJECT_TYPE } from '../../../../../../maps/common/constants';
+import type { RenderTooltipContentParams } from '../../../../../../maps/public/classes/tooltips/tooltip_property';
+import { MapEmbeddable } from '../../../../../../maps/public/embeddable/map_embeddable';
+import type { MapEmbeddableInput } from '../../../../../../maps/public/embeddable/types';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
-import type { RenderTooltipContentParams } from '../../../../../../maps/public';
+import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { MapToolTip } from './MapToolTip';
+import { useLayerList } from './useLayerList';
 import { useMapFilters } from './useMapFilters';
-import { EmbeddableStart } from '../../../../../../../../src/plugins/embeddable/public';
 
 const EmbeddedPanel = styled.div`
   z-index: auto;

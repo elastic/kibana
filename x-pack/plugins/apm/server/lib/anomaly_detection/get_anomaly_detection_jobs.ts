@@ -4,13 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { Logger } from 'kibana/server';
 import Boom from '@hapi/boom';
+import type { Logger } from '@kbn/logging';
 import { ML_ERRORS } from '../../../common/anomaly_detection';
-import { Setup } from '../helpers/setup_request';
-import { getMlJobsWithAPMGroup } from './get_ml_jobs_with_apm_group';
 import { withApmSpan } from '../../utils/with_apm_span';
+import type { Setup } from '../helpers/setup_request';
+import { getMlJobsWithAPMGroup } from './get_ml_jobs_with_apm_group';
 
 export function getAnomalyDetectionJobs(setup: Setup, logger: Logger) {
   const { ml } = setup;

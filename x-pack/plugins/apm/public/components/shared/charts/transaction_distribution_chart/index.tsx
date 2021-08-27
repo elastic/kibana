@@ -4,37 +4,32 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { useMemo } from 'react';
+import type {
+  BrushEndListener,
+  LineAnnotationDatum,
+  LineAnnotationStyle,
+  TickFormatter,
+} from '@elastic/charts';
 import {
   AnnotationDomainType,
   AreaSeries,
   Axis,
-  BrushEndListener,
   Chart,
   CurveType,
   LineAnnotation,
-  LineAnnotationDatum,
-  LineAnnotationStyle,
   Position,
   RectAnnotation,
   ScaleType,
   Settings,
-  TickFormatter,
 } from '@elastic/charts';
-
 import { euiPaletteColorBlind } from '@elastic/eui';
-
 import { i18n } from '@kbn/i18n';
-
-import { useChartTheme } from '../../../../../../observability/public';
-
-import { getDurationFormatter } from '../../../../../common/utils/formatters';
-import { HistogramItem } from '../../../../../common/search_strategies/correlations/types';
-
+import React, { useMemo } from 'react';
+import { useChartTheme } from '../../../../../../observability/public/hooks/use_chart_theme';
+import type { HistogramItem } from '../../../../../common/search_strategies/correlations/types';
+import { getDurationFormatter } from '../../../../../common/utils/formatters/duration';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { useTheme } from '../../../../hooks/use_theme';
-
 import { ChartContainer } from '../chart_container';
 
 interface TransactionDistributionChartProps {

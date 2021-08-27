@@ -7,16 +7,16 @@
 
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
-import {
-  METRIC_JAVA_NON_HEAP_MEMORY_MAX,
-  METRIC_JAVA_NON_HEAP_MEMORY_COMMITTED,
-  METRIC_JAVA_NON_HEAP_MEMORY_USED,
-  AGENT_NAME,
-} from '../../../../../../common/elasticsearch_fieldnames';
-import { Setup, SetupTimeRange } from '../../../../helpers/setup_request';
-import { ChartBase } from '../../../types';
-import { fetchAndTransformMetrics } from '../../../fetch_and_transform_metrics';
 import { JAVA_AGENT_NAMES } from '../../../../../../common/agent_name';
+import {
+  AGENT_NAME,
+  METRIC_JAVA_NON_HEAP_MEMORY_COMMITTED,
+  METRIC_JAVA_NON_HEAP_MEMORY_MAX,
+  METRIC_JAVA_NON_HEAP_MEMORY_USED,
+} from '../../../../../../common/elasticsearch_fieldnames';
+import type { Setup, SetupTimeRange } from '../../../../helpers/setup_request';
+import { fetchAndTransformMetrics } from '../../../fetch_and_transform_metrics';
+import type { ChartBase } from '../../../types';
 
 const series = {
   nonHeapMemoryUsed: {

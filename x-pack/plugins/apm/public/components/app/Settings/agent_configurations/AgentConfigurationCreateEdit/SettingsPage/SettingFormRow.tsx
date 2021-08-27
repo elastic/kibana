@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import React from 'react';
 import {
-  EuiFormRow,
-  EuiFieldText,
-  EuiFieldNumber,
+  EuiCode,
   EuiDescribedFormGroup,
+  EuiFieldNumber,
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiCode,
-  EuiSpacer,
+  EuiFormRow,
   EuiIconTip,
+  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { SettingDefinition } from '../../../../../../../common/agent_configuration/setting_definitions/types';
-import { validateSetting } from '../../../../../../../common/agent_configuration/setting_definitions';
+import React from 'react';
 import {
-  amountAndUnitToString,
   amountAndUnitToObject,
+  amountAndUnitToString,
 } from '../../../../../../../common/agent_configuration/amount_and_unit';
+import { validateSetting } from '../../../../../../../common/agent_configuration/setting_definitions';
+import type { SettingDefinition } from '../../../../../../../common/agent_configuration/setting_definitions/types';
 import { SelectWithPlaceholder } from '../../../../../shared/SelectWithPlaceholder';
 
 function FormRow({

@@ -4,9 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { AgentName } from '../typings/es_schemas/ui/fields/agent';
-
 /*
  * Agent names can be any string. This list only defines the official agents
  * that we might want to target specifically eg. linking to their documentation
@@ -14,6 +11,7 @@ import { AgentName } from '../typings/es_schemas/ui/fields/agent';
  * definitions in mappings.json (for telemetry), the AgentName type, and the
  * AGENT_NAMES array.
  */
+import type { AgentName } from '../typings/es_schemas/ui/fields/agent';
 
 export const OPEN_TELEMETRY_AGENT_NAMES: AgentName[] = [
   'otlp',

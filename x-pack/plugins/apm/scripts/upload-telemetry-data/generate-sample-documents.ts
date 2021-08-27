@@ -4,23 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { DeepPartial } from 'utility-types';
 import {
+  defaultsDeep,
+  flatten,
+  isPlainObject,
+  mapValues,
   merge,
   omit,
-  defaultsDeep,
   range,
-  mapValues,
-  isPlainObject,
-  flatten,
 } from 'lodash';
+import type { DeepPartial } from 'utility-types';
 import uuid from 'uuid';
-import {
-  CollectTelemetryParams,
-  collectDataTelemetry,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../server/lib/apm_telemetry/collect_data_telemetry';
+import type { CollectTelemetryParams } from '../../server/lib/apm_telemetry/collect_data_telemetry';
+import { collectDataTelemetry } from '../../server/lib/apm_telemetry/collect_data_telemetry';
 
 interface GenerateOptions {
   days: number;

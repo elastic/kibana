@@ -4,17 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { IndicesStats } from '@elastic/elasticsearch/api/requestParams';
+import type { Logger } from '@kbn/logging';
 import { merge } from 'lodash';
-import { Logger } from 'kibana/server';
-import { IndicesStats } from '@elastic/elasticsearch/api/requestParams';
-import {
+import type {
   ESSearchRequest,
   ESSearchResponse,
 } from '../../../../../../../src/core/types/elasticsearch';
-import { ApmIndicesConfig } from '../../settings/apm_indices/get_apm_indices';
+import type { ApmIndicesConfig } from '../../../../../observability/common/typings';
+import type { APMDataTelemetry } from '../types';
 import { tasks } from './tasks';
-import { APMDataTelemetry } from '../types';
 
 type TelemetryTaskExecutor = (params: {
   indices: ApmIndicesConfig;

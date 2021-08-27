@@ -4,15 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { TransportRequestPromise } from '@elastic/elasticsearch/lib/Transport';
-import type { estypes } from '@elastic/elasticsearch';
-import { unwrapEsResponse } from '../../../../../../observability/server';
-import { APMRouteHandlerResources } from '../../../../routes/typings';
-import {
-  ESSearchResponse,
+import { estypes } from '@elastic/elasticsearch';
+import type { TransportRequestPromise } from '@elastic/elasticsearch/lib/Transport';
+import type {
   ESSearchRequest,
+  ESSearchResponse,
 } from '../../../../../../../../src/core/types/elasticsearch';
+import { unwrapEsResponse } from '../../../../../../observability/server/utils/unwrap_es_response';
+import type { APMRouteHandlerResources } from '../../../../routes/typings';
 import {
   callAsyncWithDebug,
   getDebugBody,

@@ -4,45 +4,48 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { get } from 'lodash';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { RulesClient as RulesClientClass } from './rules_client';
-import { PluginConfigDescriptor, PluginInitializerContext } from '../../../../src/core/server';
-import { AlertingPlugin } from './plugin';
+import { get } from 'lodash';
+import type {
+  PluginConfigDescriptor,
+  PluginInitializerContext,
+} from '../../../../src/core/server/plugins/types';
 import { configSchema } from './config';
-import { AlertsConfigType } from './types';
+import { AlertingPlugin } from './plugin';
+import { RulesClient as RulesClientClass } from './rules_client/rules_client';
+import type { AlertsConfigType } from './types';
 
 export type RulesClient = PublicMethodsOf<RulesClientClass>;
 
-export type {
-  AlertType,
-  ActionGroup,
-  ActionGroupIdsOf,
-  AlertingPlugin,
-  AlertExecutorOptions,
-  AlertActionParams,
-  AlertServices,
-  AlertTypeState,
-  AlertTypeParams,
-  PartialAlert,
-  AlertInstanceState,
-  AlertInstanceContext,
-  AlertingApiRequestHandlerContext,
-  RuleParamsAndRefs,
-} from './types';
-export { DEFAULT_MAX_EPHEMERAL_ACTIONS_PER_ALERT } from './config';
-export { PluginSetupContract, PluginStartContract } from './plugin';
-export { FindResult } from './rules_client';
 export { PublicAlertInstance as AlertInstance } from './alert_instance';
+export {
+  AlertingAuthorization,
+  AlertingAuthorizationEntity,
+  AlertingAuthorizationFilterType,
+  ReadOperations,
+  WriteOperations,
+} from './authorization';
+export { DEFAULT_MAX_EPHEMERAL_ACTIONS_PER_ALERT } from './config';
 export { parseDuration } from './lib';
 export { getEsErrorMessage } from './lib/errors';
-export {
-  ReadOperations,
-  AlertingAuthorizationFilterType,
-  AlertingAuthorization,
-  WriteOperations,
-  AlertingAuthorizationEntity,
-} from './authorization';
+export { PluginSetupContract, PluginStartContract } from './plugin';
+export { FindResult } from './rules_client';
+export type {
+  ActionGroup,
+  ActionGroupIdsOf,
+  AlertActionParams,
+  AlertExecutorOptions,
+  AlertingApiRequestHandlerContext,
+  AlertingPlugin,
+  AlertInstanceContext,
+  AlertInstanceState,
+  AlertServices,
+  AlertType,
+  AlertTypeParams,
+  AlertTypeState,
+  PartialAlert,
+  RuleParamsAndRefs,
+} from './types';
 
 export const plugin = (initContext: PluginInitializerContext) => new AlertingPlugin(initContext);
 

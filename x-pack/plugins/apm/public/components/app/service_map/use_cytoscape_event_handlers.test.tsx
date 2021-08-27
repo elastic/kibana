@@ -4,14 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { renderHook } from '@testing-library/react-hooks';
 import cytoscape from 'cytoscape';
 import dagre from 'cytoscape-dagre';
-import { EuiTheme } from '../../../../../../../src/plugins/kibana_react/common';
-import { useUiTracker } from '../../../../../observability/public';
-import { useCytoscapeEventHandlers } from './use_cytoscape_event_handlers';
 import lodash from 'lodash';
+import type { EuiTheme } from '../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
+import { useUiTracker } from '../../../../../observability/public/hooks/use_track_metric';
+import { useCytoscapeEventHandlers } from './use_cytoscape_event_handlers';
 
 jest.mock('../../../../../observability/public');
 

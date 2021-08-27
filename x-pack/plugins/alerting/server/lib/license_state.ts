@@ -7,22 +7,18 @@
 
 import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
-import type { PublicMethodsOf } from '@kbn/utility-types';
 import { assertNever } from '@kbn/std';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { capitalize } from 'lodash';
 import { Observable, Subscription } from 'rxjs';
-import { LicensingPluginStart } from '../../../licensing/server';
-import { ILicense, LicenseType } from '../../../licensing/common/types';
+import type { ILicense, LicenseType } from '../../../licensing/common/types';
+import type { LicensingPluginStart } from '../../../licensing/server/types';
+import type { AlertTypeParams, AlertTypeState } from '../../common/alert';
+import type { AlertInstanceContext, AlertInstanceState } from '../../common/alert_instance';
 import { PLUGIN } from '../constants/plugin';
-import { getAlertTypeFeatureUsageName } from './get_alert_type_feature_usage_name';
-import {
-  AlertType,
-  AlertTypeParams,
-  AlertTypeState,
-  AlertInstanceState,
-  AlertInstanceContext,
-} from '../types';
+import type { AlertType } from '../types';
 import { AlertTypeDisabledError } from './errors/alert_type_disabled';
+import { getAlertTypeFeatureUsageName } from './get_alert_type_feature_usage_name';
 
 export type ILicenseState = PublicMethodsOf<LicenseState>;
 

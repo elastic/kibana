@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
+import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EuiToolTip, EuiBadge } from '@elastic/eui';
-import { statusCodes } from './statusCodes';
+import React from 'react';
 import { httpStatusCodeToColor } from '../../../../utils/httpStatusCodeToColor';
+import { statusCodes } from './statusCodes';
 
 interface HttpStatusBadgeProps {
   status: number;

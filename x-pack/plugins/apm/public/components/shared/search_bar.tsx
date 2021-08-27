@@ -4,20 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
+import type { EuiFlexGroupProps } from '@elastic/eui';
 import {
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
   EuiSpacer,
-  EuiFlexGroupProps,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
-import { enableInspectEsQueries } from '../../../../observability/public';
+import { enableInspectEsQueries } from '../../../../observability/common/ui_settings_keys';
 import { useApmPluginContext } from '../../context/apm_plugin/use_apm_plugin_context';
 import { useKibanaUrl } from '../../hooks/useKibanaUrl';
 import { useBreakPoints } from '../../hooks/use_break_points';

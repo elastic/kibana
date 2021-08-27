@@ -7,9 +7,9 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { getIntegerRt } from '../../../../../common/agent_configuration/runtime_types/integer_rt';
-import { OnFormChangeFn, PackagePolicyVars } from '../typings';
+import type { OnFormChangeFn, PackagePolicyVars } from '../typings';
 import { SettingsForm } from './settings_form';
-import { SettingDefinition } from './typings';
+import type { SettingDefinition } from './typings';
 import { isSettingsFormValid, mergeNewVars, OPTIONAL_LABEL } from './utils';
 
 const ENABLE_RUM_KEY = 'enable_rum';

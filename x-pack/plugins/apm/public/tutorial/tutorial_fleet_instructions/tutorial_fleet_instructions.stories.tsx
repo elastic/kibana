@@ -4,11 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { Story } from '@storybook/react';
+import type { Story } from '@storybook/react';
 import React from 'react';
-import { HttpStart } from 'kibana/public';
 import TutorialFleetInstructions from '.';
+import type { HttpStart } from '../../../../../../src/core/public/http/types';
 
 interface Args {
   hasFleetPoliciesWithApmIntegration: boolean;

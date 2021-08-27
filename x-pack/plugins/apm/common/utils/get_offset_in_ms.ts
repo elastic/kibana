@@ -5,7 +5,7 @@
  * 2.0.
  */
 import moment from 'moment';
-import { parseInterval } from '../../../../../src/plugins/data/common';
+import { parseInterval } from '../../../../../src/plugins/data/common/search/aggs/utils/date_interval_utils/parse_interval';
 
 export function getOffsetInMs({
   start,

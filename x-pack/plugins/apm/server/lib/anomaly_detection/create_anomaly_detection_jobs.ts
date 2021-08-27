@@ -4,21 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { Logger } from 'kibana/server';
-import uuid from 'uuid/v4';
-import { snakeCase } from 'lodash';
 import Boom from '@hapi/boom';
+import type { Logger } from '@kbn/logging';
+import { snakeCase } from 'lodash';
+import uuid from 'uuid/v4';
 import { ML_ERRORS } from '../../../common/anomaly_detection';
+import {
+  PROCESSOR_EVENT,
+  TRANSACTION_DURATION,
+} from '../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../common/processor_event';
 import { environmentQuery } from '../../../common/utils/environment_query';
-import { Setup } from '../helpers/setup_request';
-import {
-  TRANSACTION_DURATION,
-  PROCESSOR_EVENT,
-} from '../../../common/elasticsearch_fieldnames';
-import { APM_ML_JOB_GROUP, ML_MODULE_ID_APM_TRANSACTION } from './constants';
 import { withApmSpan } from '../../utils/with_apm_span';
+import type { Setup } from '../helpers/setup_request';
+import { APM_ML_JOB_GROUP, ML_MODULE_ID_APM_TRANSACTION } from './constants';
 import { getAnomalyDetectionJobs } from './get_anomaly_detection_jobs';
 
 export async function createAnomalyDetectionJobs(

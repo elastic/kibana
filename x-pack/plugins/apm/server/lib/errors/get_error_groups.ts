@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import {
   ERROR_CULPRIT,
   ERROR_EXC_HANDLED,
@@ -16,7 +15,7 @@ import {
 import { getErrorGroupsProjection } from '../../projections/errors';
 import { mergeProjection } from '../../projections/util/merge_projection';
 import { getErrorName } from '../helpers/get_error_name';
-import { Setup, SetupTimeRange } from '../helpers/setup_request';
+import type { Setup, SetupTimeRange } from '../helpers/setup_request';
 
 export async function getErrorGroups({
   environment,

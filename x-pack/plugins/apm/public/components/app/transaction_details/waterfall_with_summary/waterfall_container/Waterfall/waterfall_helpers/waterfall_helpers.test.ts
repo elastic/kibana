@@ -4,20 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { groupBy } from 'lodash';
-import { Span } from '../../../../../../../../typings/es_schemas/ui/span';
-import { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
+import type { APMError } from '../../../../../../../../typings/es_schemas/ui/apm_error';
+import type { Span } from '../../../../../../../../typings/es_schemas/ui/span';
+import type { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
+import type {
+  IWaterfallError,
+  IWaterfallItem,
+  IWaterfallSpanOrTransaction,
+  IWaterfallTransaction,
+} from './waterfall_helpers';
 import {
   getClockSkew,
   getOrderedWaterfallItems,
   getWaterfall,
-  IWaterfallItem,
-  IWaterfallTransaction,
-  IWaterfallError,
-  IWaterfallSpanOrTransaction,
 } from './waterfall_helpers';
-import { APMError } from '../../../../../../../../typings/es_schemas/ui/apm_error';
 
 describe('waterfall_helpers', () => {
   describe('getWaterfall', () => {

@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
-import { Summary } from './';
+import { Summary } from '.';
+import type { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 import { TimestampTooltip } from '../TimestampTooltip';
 import { DurationSummaryItem } from './DurationSummaryItem';
 import { ErrorCountSummaryItemBadge } from './error_count_summary_item_badge';

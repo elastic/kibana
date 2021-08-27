@@ -4,20 +4,24 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
-import React from 'react';
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isString } from 'lodash';
-import { EuiButtonEmpty } from '@elastic/eui';
-import { AgentConfigurationIntake } from '../../../../../../../common/agent_configuration/configuration_types';
+import React from 'react';
 import {
-  omitAllOption,
   getOptionLabel,
+  omitAllOption,
 } from '../../../../../../../common/agent_configuration/all_option';
-import { useFetcher, FETCH_STATUS } from '../../../../../../hooks/use_fetcher';
-import { FormRowSelect } from './FormRowSelect';
+import type { AgentConfigurationIntake } from '../../../../../../../common/agent_configuration/configuration_types';
+import { FETCH_STATUS, useFetcher } from '../../../../../../hooks/use_fetcher';
 import { APMLink } from '../../../../../shared/Links/apm/APMLink';
+import { FormRowSelect } from './FormRowSelect';
 
 interface Props {
   newConfig: AgentConfigurationIntake;

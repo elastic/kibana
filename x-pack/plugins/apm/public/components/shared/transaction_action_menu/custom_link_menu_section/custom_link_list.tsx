@@ -10,9 +10,9 @@ import React from 'react';
 import {
   SectionLink,
   SectionLinks,
-} from '../../../../../../observability/public';
-import { CustomLink } from '../../../../../common/custom_link/custom_link_types';
-import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
+} from '../../../../../../observability/public/components/shared/action_menu';
+import type { CustomLink } from '../../../../../common/custom_link/custom_link_types';
+import type { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
 import { unit } from '../../../../utils/style';
 
 export function CustomLinkList({

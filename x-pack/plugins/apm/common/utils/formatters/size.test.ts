@@ -4,8 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { getFixedByteFormatter, asDynamicBytes } from './size';
+import { asDynamicBytes, getFixedByteFormatter } from './size';
 
 describe('size formatters', () => {
   describe('byte formatting', () => {

@@ -4,13 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import {
-  METRIC_TYPE,
-  useUiTracker,
-} from '../../../../../../../../../observability/public';
+import { METRIC_TYPE } from '@kbn/analytics';
+import { useUiTracker } from '../../../../../../../../../observability/public/hooks/use_track_metric';
 import {
   SERVICE_NAME,
   SPAN_DESTINATION_SERVICE_RESOURCE,
@@ -19,8 +16,8 @@ import {
 } from '../../../../../../../../common/elasticsearch_fieldnames';
 import { getNextEnvironmentUrlParam } from '../../../../../../../../common/environment_filter_values';
 import { NOT_AVAILABLE_LABEL } from '../../../../../../../../common/i18n';
-import { Span } from '../../../../../../../../typings/es_schemas/ui/span';
-import { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
+import type { Span } from '../../../../../../../../typings/es_schemas/ui/span';
+import type { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
 import { useApmParams } from '../../../../../../../hooks/use_apm_params';
 import { BackendLink } from '../../../../../../shared/backend_link';
 import { TransactionDetailLink } from '../../../../../../shared/Links/apm/transaction_detail_link';

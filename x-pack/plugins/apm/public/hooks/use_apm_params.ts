@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { TypeOf, PathsOf, useParams } from '@kbn/typed-react-router-config';
-import { ApmRoutes } from '../components/routing/apm_route_config';
+import type { PathsOf, TypeOf } from '@kbn/typed-react-router-config';
+import { useParams } from '@kbn/typed-react-router-config';
+import type { ApmRoutes } from '../components/routing/apm_route_config';
 
 export function useApmParams<TPath extends PathsOf<ApmRoutes>>(
   path: TPath,

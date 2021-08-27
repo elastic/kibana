@@ -4,9 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { isFinite } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { isFinite } from 'lodash';
 import { amountAndUnitToObject } from '../amount_and_unit';
 
 function getRangeType(min?: number, max?: number) {

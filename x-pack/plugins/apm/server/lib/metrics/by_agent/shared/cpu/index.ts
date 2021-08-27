@@ -8,12 +8,12 @@
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
 import {
-  METRIC_SYSTEM_CPU_PERCENT,
   METRIC_PROCESS_CPU_PERCENT,
+  METRIC_SYSTEM_CPU_PERCENT,
 } from '../../../../../../common/elasticsearch_fieldnames';
-import { Setup, SetupTimeRange } from '../../../../helpers/setup_request';
-import { ChartBase } from '../../../types';
+import type { Setup, SetupTimeRange } from '../../../../helpers/setup_request';
 import { fetchAndTransformMetrics } from '../../../fetch_and_transform_metrics';
+import type { ChartBase } from '../../../types';
 
 const series = {
   systemCPUMax: {

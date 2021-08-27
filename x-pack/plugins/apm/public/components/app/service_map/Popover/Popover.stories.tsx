@@ -4,14 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { Meta, Story } from '@storybook/react';
+import type { Meta, Story } from '@storybook/react';
 import cytoscape from 'cytoscape';
-import { CoreStart } from 'kibana/public';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { Popover } from '.';
-import { createKibanaReactContext } from '../../../../../../../../src/plugins/kibana_react/public';
+import type { CoreStart } from '../../../../../../../../src/core/public';
+import { createKibanaReactContext } from '../../../../../../../../src/plugins/kibana_react/public/context/context';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import { MockApmPluginContextWrapper } from '../../../../context/apm_plugin/mock_apm_plugin_context';
 import { MockUrlParamsContextProvider } from '../../../../context/url_params_context/mock_url_params_context_provider';

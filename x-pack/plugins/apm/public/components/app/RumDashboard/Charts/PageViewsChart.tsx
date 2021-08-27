@@ -4,20 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { BrushEndListener, SeriesNameFn } from '@elastic/charts';
 import {
   Axis,
   BarSeries,
-  BrushEndListener,
   Chart,
   DARK_THEME,
   LIGHT_THEME,
   niceTimeFormatByDay,
+  Position,
   ScaleType,
-  SeriesNameFn,
   Settings,
   timeFormatter,
-  Position,
 } from '@elastic/charts';
 import {
   EUI_CHARTS_THEME_DARK,
@@ -27,7 +25,7 @@ import numeral from '@elastic/numeral';
 import moment from 'moment';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import { useUiSetting$ } from '../../../../../../../../src/plugins/kibana_react/public';
+import { useUiSetting$ } from '../../../../../../../../src/plugins/kibana_react/public/ui_settings/use_ui_setting';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { fromQuery, toQuery } from '../../../shared/Links/url_helpers';
 import { ChartWrapper } from '../ChartWrapper';

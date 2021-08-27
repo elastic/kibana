@@ -4,11 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { isEmpty } from 'lodash';
-import { ErrorRaw } from '../../../../../../../typings/es_schemas/raw/error_raw';
-import { IWaterfallError } from '../Waterfall/waterfall_helpers/waterfall_helpers';
-import { Mark } from '.';
+import type { Mark } from '.';
+import type { ErrorRaw } from '../../../../../../../typings/es_schemas/raw/error_raw';
+import type { IWaterfallError } from '../Waterfall/waterfall_helpers/waterfall_helpers';
 
 export interface ErrorMark extends Mark {
   type: 'errorMark';

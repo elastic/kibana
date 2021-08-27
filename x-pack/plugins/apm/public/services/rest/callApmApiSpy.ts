@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import * as createCallApmApi from './createCallApmApi';
 import type { AbstractAPMClient } from './createCallApmApi';
+import * as createCallApmApi from './createCallApmApi';
 
 export type CallApmApiSpy = jest.SpyInstance<
   Promise<any>,

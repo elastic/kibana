@@ -4,40 +4,36 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import {
   ALERT_DURATION,
   ALERT_EVALUATION_THRESHOLD,
-  ALERT_RULE_TYPE_ID,
   ALERT_EVALUATION_VALUE,
   ALERT_ID,
+  ALERT_RULE_CATEGORY,
+  ALERT_RULE_NAME,
+  ALERT_RULE_PRODUCER,
+  ALERT_RULE_TYPE_ID,
+  ALERT_RULE_UUID,
   ALERT_SEVERITY,
   ALERT_START,
   ALERT_STATUS,
   ALERT_UUID,
-  ALERT_RULE_UUID,
-  ALERT_RULE_NAME,
-  ALERT_RULE_CATEGORY,
-  ALERT_RULE_PRODUCER,
 } from '@kbn/rule-data-utils';
-import { StoryContext } from '@storybook/react';
-import React, { ComponentType } from 'react';
+import type { StoryContext } from '@storybook/react';
+import type { ComponentType } from 'react';
+import React from 'react';
 import { MemoryRouter, Route } from 'react-router-dom';
-import { KibanaContextProvider } from '../../../../../../../../src/plugins/kibana_react/public';
+import { LatencyChart } from '.';
+import { KibanaContextProvider } from '../../../../../../../../src/plugins/kibana_react/public/context/context';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
-import {
-  ApmPluginContext,
-  ApmPluginContextValue,
-} from '../../../../context/apm_plugin/apm_plugin_context';
+import type { ApmPluginContextValue } from '../../../../context/apm_plugin/apm_plugin_context';
+import { ApmPluginContext } from '../../../../context/apm_plugin/apm_plugin_context';
 import { APMServiceContext } from '../../../../context/apm_service/apm_service_context';
 import { ChartPointerEventContextProvider } from '../../../../context/chart_pointer_event/chart_pointer_event_context';
 import { MockUrlParamsContextProvider } from '../../../../context/url_params_context/mock_url_params_context_provider';
-import {
-  APIReturnType,
-  createCallApmApi,
-} from '../../../../services/rest/createCallApmApi';
-import { LatencyChart } from './';
+import type { APIReturnType } from '../../../../services/rest/createCallApmApi';
+import { createCallApmApi } from '../../../../services/rest/createCallApmApi';
 
 interface Args {
   alertsResponse: APIReturnType<'GET /api/apm/services/{serviceName}/alerts'>;

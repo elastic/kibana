@@ -4,13 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { EuiButtonEmpty, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { History } from 'history';
+import type { History } from 'history';
 import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import { euiStyled } from '../../../../../../../../../../src/plugins/kibana_react/common';
+import { euiStyled } from '../../../../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
 import { Timeline } from '../../../../../shared/charts/Timeline';
 import { HeightRetainer } from '../../../../../shared/HeightRetainer';
 import { fromQuery, toQuery } from '../../../../../shared/Links/url_helpers';
@@ -18,7 +17,7 @@ import { getAgentMarks } from '../Marks/get_agent_marks';
 import { getErrorMarks } from '../Marks/get_error_marks';
 import { AccordionWaterfall } from './accordion_waterfall';
 import { WaterfallFlyout } from './waterfall_flyout';
-import {
+import type {
   IWaterfall,
   IWaterfallItem,
   IWaterfallSpanOrTransaction,

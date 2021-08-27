@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import {
@@ -12,7 +11,7 @@ import {
   TRANSACTION_NAME,
 } from '../../../../../../../common/elasticsearch_fieldnames';
 import { getNextEnvironmentUrlParam } from '../../../../../../../common/environment_filter_values';
-import { Transaction } from '../../../../../../../typings/es_schemas/ui/transaction';
+import type { Transaction } from '../../../../../../../typings/es_schemas/ui/transaction';
 import { useUrlParams } from '../../../../../../context/url_params_context/use_url_params';
 import { useApmParams } from '../../../../../../hooks/use_apm_params';
 import { TransactionDetailLink } from '../../../../../shared/Links/apm/transaction_detail_link';

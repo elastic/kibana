@@ -4,10 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { APMRouteHandlerResources } from '../../routes/typings';
 
-export function getApmIndexPatternTitle(
-  config: APMRouteHandlerResources['config']
-) {
-  return config['apm_oss.indexPattern'];
-}
+import { lazy } from 'react';
+
+export const LazyAlertsFlyout = lazy(() => import('./'));

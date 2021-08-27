@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import React from 'react';
 import { render as testLibRender } from '@testing-library/react';
-import { CoreStart } from 'kibana/public';
-import { of } from 'rxjs';
+import type { MemoryHistory } from 'history';
 import { createMemoryHistory } from 'history';
+import React from 'react';
 import { Router } from 'react-router-dom';
-import { MemoryHistory } from 'history';
-import { EuiThemeProvider } from '../../../../../../../../src/plugins/kibana_react/common';
-import { KibanaContextProvider } from '../../../../../../../../src/plugins/kibana_react/public';
+import { of } from 'rxjs';
+import type { CoreStart } from '../../../../../../../../src/core/public';
+import { EuiThemeProvider } from '../../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
+import { KibanaContextProvider } from '../../../../../../../../src/plugins/kibana_react/public/context/context';
 import { UrlParamsProvider } from '../../../../context/url_params_context/url_params_context';
 
 export const core = ({

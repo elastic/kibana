@@ -4,28 +4,27 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import {
   ALERT_DURATION,
   ALERT_EVALUATION_THRESHOLD,
-  ALERT_RULE_TYPE_ID,
   ALERT_EVALUATION_VALUE,
   ALERT_ID,
-  ALERT_RULE_PRODUCER,
+  ALERT_RULE_CATEGORY,
   ALERT_RULE_CONSUMER,
+  ALERT_RULE_NAME,
+  ALERT_RULE_PRODUCER,
+  ALERT_RULE_TYPE_ID,
+  ALERT_RULE_UUID,
   ALERT_SEVERITY,
   ALERT_START,
   ALERT_STATUS,
   ALERT_UUID,
   SPACE_IDS,
-  ALERT_RULE_UUID,
-  ALERT_RULE_NAME,
-  ALERT_RULE_CATEGORY,
 } from '@kbn/rule-data-utils';
-import { ValuesType } from 'utility-types';
-import { EuiTheme } from '../../../../../../../../src/plugins/kibana_react/common';
-import { ObservabilityRuleTypeRegistry } from '../../../../../../observability/public';
-import { APIReturnType } from '../../../../services/rest/createCallApmApi';
+import type { ValuesType } from 'utility-types';
+import type { EuiTheme } from '../../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
+import type { ObservabilityRuleTypeRegistry } from '../../../../../../observability/public/rules/create_observability_rule_type_registry';
+import type { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import { getAlertAnnotations } from './get_alert_annotations';
 
 type Alert = ValuesType<

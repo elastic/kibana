@@ -4,15 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { EuiCheckbox, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
-import { useUiTracker } from '../../../../../observability/public';
-import { getDateDifference } from '../../../../common/utils/formatters';
+import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
+import { useUiTracker } from '../../../../../observability/public/hooks/use_track_metric';
+import { getDateDifference } from '../../../../common/utils/formatters/datetime';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useBreakPoints } from '../../../hooks/use_break_points';
 import * as urlHelpers from '../../shared/Links/url_helpers';

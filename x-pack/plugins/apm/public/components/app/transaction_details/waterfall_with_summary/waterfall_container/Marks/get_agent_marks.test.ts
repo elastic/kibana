@@ -4,8 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { Transaction } from '../../../../../../../typings/es_schemas/ui/transaction';
+import type { Transaction } from '../../../../../../../typings/es_schemas/ui/transaction';
 import { getAgentMarks } from './get_agent_marks';
 
 describe('getAgentMarks', () => {

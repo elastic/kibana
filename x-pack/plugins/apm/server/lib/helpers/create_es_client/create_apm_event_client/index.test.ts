@@ -4,14 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import {
-  contextServiceMock,
-  executionContextServiceMock,
-} from '../../../../../../../../src/core/server/mocks';
-import { createHttpServer } from 'src/core/server/test_utils';
 import supertest from 'supertest';
 import { createApmEventClient } from '.';
+import { contextServiceMock } from '../../../../../../../../src/core/server/context/context_service.mock';
+import { executionContextServiceMock } from '../../../../../../../../src/core/server/execution_context/execution_context_service.mock';
+import { createHttpServer } from '../../../../../../../../src/core/server/http/test_utils';
 
 describe('createApmEventClient', () => {
   let server: ReturnType<typeof createHttpServer>;

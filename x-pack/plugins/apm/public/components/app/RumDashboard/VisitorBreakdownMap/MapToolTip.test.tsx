@@ -4,10 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { render, shallow } from 'enzyme';
 import React from 'react';
-
 import { MapToolTip } from './MapToolTip';
 
 describe('Map Tooltip', () => {

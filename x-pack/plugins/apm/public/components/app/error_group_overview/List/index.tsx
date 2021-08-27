@@ -4,20 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { EuiBadge, EuiIconTip, EuiToolTip } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
-import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
+import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
-import { APIReturnType } from '../../../../services/rest/createCallApmApi';
+import type { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import { truncate, unit } from '../../../../utils/style';
 import { ErrorDetailLink } from '../../../shared/Links/apm/ErrorDetailLink';
 import { ErrorOverviewLink } from '../../../shared/Links/apm/ErrorOverviewLink';
-import { APMQueryParams } from '../../../shared/Links/url_helpers';
-import { ITableColumn, ManagedTable } from '../../../shared/managed_table';
+import type { APMQueryParams } from '../../../shared/Links/url_helpers';
+import type { ITableColumn } from '../../../shared/managed_table';
+import { ManagedTable } from '../../../shared/managed_table';
 import { TimestampTooltip } from '../../../shared/TimestampTooltip';
 
 const GroupIdLink = euiStyled(ErrorDetailLink)`

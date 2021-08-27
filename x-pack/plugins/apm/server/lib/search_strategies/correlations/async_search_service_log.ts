@@ -4,8 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { currentTimeAsString } from './utils';
+import { currentTimeAsString } from './utils/current_time_as_string';
 
 interface LogMessage {
   timestamp: string;

@@ -4,17 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { EuiAccordion, EuiAccordionProps } from '@elastic/eui';
+import type { EuiAccordionProps } from '@elastic/eui';
+import { EuiAccordion } from '@elastic/eui';
 import { isEmpty } from 'lodash';
 import React, { useState } from 'react';
-import { euiStyled } from '../../../../../../../../../../src/plugins/kibana_react/common';
-import { Margins } from '../../../../../shared/charts/Timeline';
-import { WaterfallItem } from './waterfall_item';
-import {
+import { euiStyled } from '../../../../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
+import type { Margins } from '../../../../../shared/charts/Timeline';
+import type {
   IWaterfall,
   IWaterfallSpanOrTransaction,
 } from './waterfall_helpers/waterfall_helpers';
+import { WaterfallItem } from './waterfall_item';
 
 interface AccordionWaterfallProps {
   isOpen: boolean;

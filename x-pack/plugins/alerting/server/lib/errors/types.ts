@@ -4,7 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { KibanaResponseFactory, IKibanaResponse } from '../../../../../../src/core/server';
+import type {
+  IKibanaResponse,
+  KibanaResponseFactory,
+} from '../../../../../../src/core/server/http/router/response';
 
 export interface ErrorThatHandlesItsOwnResponse extends Error {
   sendResponse(res: KibanaResponseFactory): IKibanaResponse;

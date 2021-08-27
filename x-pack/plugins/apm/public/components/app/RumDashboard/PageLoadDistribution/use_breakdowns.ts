@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { useFetcher } from '../../../../hooks/use_fetcher';
+import type { PercentileRange } from '.';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
-import { PercentileRange } from './index';
+import { useFetcher } from '../../../../hooks/use_fetcher';
 
 interface Props {
   percentileRange?: PercentileRange;

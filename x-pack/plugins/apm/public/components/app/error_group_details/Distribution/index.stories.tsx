@@ -4,14 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { ComponentType } from 'react';
-import { KibanaContextProvider } from '../../../../../../../../src/plugins/kibana_react/public';
-import {
-  ApmPluginContext,
-  ApmPluginContextValue,
-} from '../../../../context/apm_plugin/apm_plugin_context';
-import { ErrorDistribution } from './';
+import type { ComponentType } from 'react';
+import React from 'react';
+import { ErrorDistribution } from '.';
+import { KibanaContextProvider } from '../../../../../../../../src/plugins/kibana_react/public/context/context';
+import type { ApmPluginContextValue } from '../../../../context/apm_plugin/apm_plugin_context';
+import { ApmPluginContext } from '../../../../context/apm_plugin/apm_plugin_context';
 
 export default {
   title: 'app/ErrorGroupDetails/Distribution',

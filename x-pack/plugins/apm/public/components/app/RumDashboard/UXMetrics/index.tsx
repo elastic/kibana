@@ -4,8 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { useContext, useMemo } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -14,13 +12,14 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
+import React, { useContext, useMemo } from 'react';
+import { getCoreVitalsComponent } from '../../../../../../observability/public/components/shared';
+import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
+import { useFetcher } from '../../../../hooks/use_fetcher';
+import { CsmSharedContext } from '../CsmSharedContext';
+import { useUxQuery } from '../hooks/useUxQuery';
 import { I18LABELS } from '../translations';
 import { KeyUXMetrics } from './KeyUXMetrics';
-import { useFetcher } from '../../../../hooks/use_fetcher';
-import { useUxQuery } from '../hooks/useUxQuery';
-import { getCoreVitalsComponent } from '../../../../../../observability/public';
-import { CsmSharedContext } from '../CsmSharedContext';
-import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { getPercentileLabel } from './translations';
 
 export function UXMetrics() {

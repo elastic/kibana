@@ -8,7 +8,6 @@ import { i18n } from '@kbn/i18n';
 import { Outlet } from '@kbn/typed-react-router-config';
 import * as t from 'io-ts';
 import React from 'react';
-import { RedirectTo } from '../redirect_to';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { environmentRt } from '../../../../common/environment_rt';
 import { BackendDetailOverview } from '../../app/backend_detail_overview';
@@ -17,6 +16,7 @@ import { Breadcrumb } from '../../app/breadcrumb';
 import { ServiceInventory } from '../../app/service_inventory';
 import { ServiceMapHome } from '../../app/service_map';
 import { TraceOverview } from '../../app/trace_overview';
+import { RedirectTo } from '../redirect_to';
 import { ApmMainTemplate } from '../templates/apm_main_template';
 
 function page<TPath extends string>({

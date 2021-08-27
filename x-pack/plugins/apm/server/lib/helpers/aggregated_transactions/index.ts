@@ -4,16 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { APMConfig } from '../../..';
+import {
+  kqlQuery,
+  rangeQuery,
+} from '../../../../../observability/server/utils/queries';
 import { SearchAggregatedTransactionSetting } from '../../../../common/aggregated_transactions';
-import { kqlQuery, rangeQuery } from '../../../../../observability/server';
-import { ProcessorEvent } from '../../../../common/processor_event';
 import {
   TRANSACTION_DURATION,
   TRANSACTION_DURATION_HISTOGRAM,
 } from '../../../../common/elasticsearch_fieldnames';
-import { APMConfig } from '../../..';
-import { APMEventClient } from '../create_es_client/create_apm_event_client';
+import { ProcessorEvent } from '../../../../common/processor_event';
+import type { APMEventClient } from '../create_es_client/create_apm_event_client';
 
 export async function getHasAggregatedTransactions({
   start,

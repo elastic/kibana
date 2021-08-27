@@ -4,12 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { AlertingRouter } from '../../types';
-import { ILicenseState } from '../../lib/license_state';
+import type { EncryptedSavedObjectsPluginSetup } from '../../../../encrypted_saved_objects/server/plugin';
+import type { AlertingFrameworkHealth } from '../../../common';
 import { verifyApiAccess } from '../../lib/license_api_access';
-import { AlertingFrameworkHealth } from '../../types';
-import { EncryptedSavedObjectsPluginSetup } from '../../../../encrypted_saved_objects/server';
+import type { ILicenseState } from '../../lib/license_state';
+import type { AlertingRouter } from '../../types';
 
 export function healthRoute(
   router: AlertingRouter,

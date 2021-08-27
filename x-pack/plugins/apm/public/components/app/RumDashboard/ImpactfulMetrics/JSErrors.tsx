@@ -4,24 +4,24 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { ReactText, useContext, useState } from 'react';
 import {
   EuiBasicTable,
-  EuiFlexItem,
   EuiFlexGroup,
+  EuiFlexItem,
   EuiSpacer,
-  EuiTitle,
   EuiStat,
+  EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { FormattedMessage } from '@kbn/i18n/react';
+import type { ReactText } from 'react';
+import React, { useContext, useState } from 'react';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { useFetcher } from '../../../../hooks/use_fetcher';
-import { I18LABELS } from '../translations';
-import { CsmSharedContext } from '../CsmSharedContext';
 import { ErrorDetailLink } from '../../../shared/Links/apm/ErrorDetailLink';
+import { CsmSharedContext } from '../CsmSharedContext';
+import { I18LABELS } from '../translations';
 
 interface JSErrorItem {
   errorMessage: string;

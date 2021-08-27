@@ -4,13 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import type {
   AsyncSearchProviderProgress,
   SearchServiceValue,
 } from '../../../../common/search_strategies/correlations/types';
-
-import { HistogramItem } from './queries';
+import type { HistogramItem } from './queries/query_ranges';
 
 export const asyncSearchServiceStateProvider = () => {
   let ccsWarning = false;

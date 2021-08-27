@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { RecoveredActionGroup } from './builtin_action_groups';
 
 const DisabledActionGroupsByActionType: Record<string, string[]> = {

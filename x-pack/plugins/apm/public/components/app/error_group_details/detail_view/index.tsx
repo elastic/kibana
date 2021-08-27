@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import {
   EuiButtonEmpty,
   EuiIcon,
@@ -19,10 +18,10 @@ import { i18n } from '@kbn/i18n';
 import { first } from 'lodash';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
-import { APIReturnType } from '../../../../services/rest/createCallApmApi';
-import { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
+import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
+import type { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
 import type { IUrlParams } from '../../../../context/url_params_context/types';
+import type { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import { TransactionDetailLink } from '../../../shared/Links/apm/transaction_detail_link';
 import { DiscoverErrorLink } from '../../../shared/Links/DiscoverLinks/DiscoverErrorLink';
 import { fromQuery, toQuery } from '../../../shared/Links/url_helpers';
@@ -32,12 +31,8 @@ import { Summary } from '../../../shared/Summary';
 import { HttpInfoSummaryItem } from '../../../shared/Summary/http_info_summary_item';
 import { UserAgentSummaryItem } from '../../../shared/Summary/UserAgentSummaryItem';
 import { TimestampTooltip } from '../../../shared/TimestampTooltip';
-import {
-  ErrorTab,
-  exceptionStacktraceTab,
-  getTabs,
-  logStacktraceTab,
-} from './ErrorTabs';
+import type { ErrorTab } from './ErrorTabs';
+import { exceptionStacktraceTab, getTabs, logStacktraceTab } from './ErrorTabs';
 import { ExceptionStacktrace } from './exception_stacktrace';
 
 const HeaderContainer = euiStyled.div`

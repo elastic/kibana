@@ -4,13 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { IRouter } from 'kibana/server';
 import { schema } from '@kbn/config-schema';
-import { ILicenseState, AlertTypeDisabledError } from '../lib';
-import { MuteOptions } from '../rules_client';
-import { RewriteRequestCase, verifyAccessAndContext } from './lib';
-import { AlertingRequestHandlerContext, BASE_ALERTING_API_PATH } from '../types';
+import type { IRouter } from '../../../../../src/core/server/http/router/router';
+import { BASE_ALERTING_API_PATH } from '../../common';
+import { AlertTypeDisabledError } from '../lib/errors/alert_type_disabled';
+import type { ILicenseState } from '../lib/license_state';
+import type { MuteOptions } from '../rules_client/rules_client';
+import type { AlertingRequestHandlerContext } from '../types';
+import type { RewriteRequestCase } from './lib/rewrite_request_case';
+import { verifyAccessAndContext } from './lib/verify_access_and_context';
 
 const paramSchema = schema.object({
   rule_id: schema.string(),

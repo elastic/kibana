@@ -4,12 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { Client } from '@elastic/elasticsearch';
-import { ApiKeyAuth, BasicAuth } from '@elastic/elasticsearch/lib/pool';
-import {
-  ESSearchResponse,
+import type { ApiKeyAuth, BasicAuth } from '@elastic/elasticsearch/lib/pool';
+import type {
   ESSearchRequest,
+  ESSearchResponse,
 } from '../../../../../src/core/types/elasticsearch';
 
 export type ESClient = ReturnType<typeof getEsClient>;

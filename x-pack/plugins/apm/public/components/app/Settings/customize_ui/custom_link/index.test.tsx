@@ -4,20 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { fireEvent, render, RenderResult } from '@testing-library/react';
+import type { RenderResult } from '@testing-library/react';
+import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { getCallApmApiSpy } from '../../../../../services/rest/callApmApiSpy';
 import { CustomLinkOverview } from '.';
 import { License } from '../../../../../../../licensing/common/license';
-import { ApmPluginContextValue } from '../../../../../context/apm_plugin/apm_plugin_context';
+import type { ApmPluginContextValue } from '../../../../../context/apm_plugin/apm_plugin_context';
 import {
   mockApmPluginContextValue,
   MockApmPluginContextWrapper,
 } from '../../../../../context/apm_plugin/mock_apm_plugin_context';
 import { LicenseContext } from '../../../../../context/license/license_context';
 import * as hooks from '../../../../../hooks/use_fetcher';
+import { getCallApmApiSpy } from '../../../../../services/rest/callApmApiSpy';
 import {
   expectTextsInDocument,
   expectTextsNotInDocument,

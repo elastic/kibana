@@ -4,12 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { EuiPageHeaderProps } from '@elastic/eui';
 import {
   EuiBetaBadge,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPageHeaderProps,
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';

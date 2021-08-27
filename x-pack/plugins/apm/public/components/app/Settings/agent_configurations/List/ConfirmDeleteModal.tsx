@@ -4,17 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { useState } from 'react';
 import { EuiConfirmModal } from '@elastic/eui';
-import { NotificationsStart } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
+import React, { useState } from 'react';
+import type { NotificationsStart } from '../../../../../../../../../src/core/public/notifications/notifications_service';
 import { getOptionLabel } from '../../../../../../common/agent_configuration/all_option';
-import {
-  APIReturnType,
-  callApmApi,
-} from '../../../../../services/rest/createCallApmApi';
 import { useApmPluginContext } from '../../../../../context/apm_plugin/use_apm_plugin_context';
+import type { APIReturnType } from '../../../../../services/rest/createCallApmApi';
+import { callApmApi } from '../../../../../services/rest/createCallApmApi';
 
 type Config = APIReturnType<'GET /api/apm/settings/agent-configuration'>['configurations'][0];
 

@@ -4,18 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { TooltipInfo } from '@elastic/charts';
+import type { TooltipInfo } from '@elastic/charts';
 import { EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import { getServiceNodeName } from '../../../../../common/service_nodes';
-import {
-  asTransactionRate,
-  TimeFormatter,
-} from '../../../../../common/utils/formatters';
+import type { TimeFormatter } from '../../../../../common/utils/formatters/duration';
+import { asTransactionRate } from '../../../../../common/utils/formatters/duration';
 import { useTheme } from '../../../../hooks/use_theme';
+import type { APIReturnType } from '../../../../services/rest/createCallApmApi';
 
 type ServiceInstanceMainStatistics = APIReturnType<'GET /api/apm/services/{serviceName}/service_overview_instances/main_statistics'>;
 type MainStatsServiceInstanceItem = ServiceInstanceMainStatistics['currentPeriod'][0];

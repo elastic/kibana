@@ -5,71 +5,70 @@
  * 2.0.
  */
 
-import Semver from 'semver';
-import Boom from '@hapi/boom';
-import { omit, isEqual, map, uniq, pick, truncate, trim } from 'lodash';
-import { i18n } from '@kbn/i18n';
 import { estypes } from '@elastic/elasticsearch';
-import {
-  Logger,
-  SavedObjectsClientContract,
-  SavedObjectReference,
+import Boom from '@hapi/boom';
+import { i18n } from '@kbn/i18n';
+import type { Logger } from '@kbn/logging';
+import { isEqual, map, omit, pick, trim, truncate, uniq } from 'lodash';
+import Semver from 'semver';
+import type { PluginInitializerContext } from '../../../../../src/core/server/plugins/types';
+import { SavedObjectsUtils } from '../../../../../src/core/server/saved_objects/service/lib/utils';
+import type { SavedObjectsClientContract } from '../../../../../src/core/server/saved_objects/types';
+import type {
   SavedObject,
-  PluginInitializerContext,
-  SavedObjectsUtils,
   SavedObjectAttributes,
-} from '../../../../../src/core/server';
-import { esKuery } from '../../../../../src/plugins/data/server';
-import { ActionsClient, ActionsAuthorization } from '../../../actions/server';
-import {
-  Alert,
-  PartialAlert,
-  RawAlert,
-  RuleTypeRegistry,
-  AlertAction,
-  IntervalSchedule,
-  SanitizedAlert,
-  AlertTaskState,
-  AlertInstanceSummary,
-  AlertExecutionStatusValues,
-  AlertNotifyWhenType,
-  AlertTypeParams,
-  ResolvedSanitizedRule,
-} from '../types';
-import {
-  validateAlertTypeParams,
-  alertExecutionStatusFromRaw,
-  getAlertNotifyWhenType,
-} from '../lib';
-import {
+  SavedObjectReference,
+} from '../../../../../src/core/types/saved_objects';
+import type { KueryNode } from '../../../../../src/plugins/data/common/es_query';
+import { nodeBuilder } from '../../../../../src/plugins/data/common/es_query';
+import { esKuery } from '../../../../../src/plugins/data/server/deprecated';
+import type { ActionsAuthorization, ActionsClient } from '../../../actions/server';
+import type { EncryptedSavedObjectsClient } from '../../../encrypted_saved_objects/server/saved_objects';
+import type { IEvent } from '../../../event_log/generated/schemas';
+import type { IEventLogClient } from '../../../event_log/server/types';
+import type { AuditLogger } from '../../../security/server/audit/audit_service';
+import type {
   GrantAPIKeyResult as SecurityPluginGrantAPIKeyResult,
   InvalidateAPIKeyResult as SecurityPluginInvalidateAPIKeyResult,
-} from '../../../security/server';
-import { EncryptedSavedObjectsClient } from '../../../encrypted_saved_objects/server';
-import { TaskManagerStartContract } from '../../../task_manager/server';
-import { taskInstanceToAlertTaskInstance } from '../task_runner/alert_task_instance';
-import { RegistryRuleType, UntypedNormalizedAlertType } from '../rule_type_registry';
+} from '../../../security/server/authentication/api_keys/api_keys';
+import type { TaskManagerStartContract } from '../../../task_manager/server/plugin';
+import type {
+  Alert,
+  AlertAction,
+  AlertTypeParams,
+  IntervalSchedule,
+  ResolvedSanitizedRule,
+  SanitizedAlert,
+} from '../../common/alert';
+import { AlertExecutionStatusValues } from '../../common/alert';
+import type { AlertInstanceSummary } from '../../common/alert_instance_summary';
+import type { AlertNotifyWhenType } from '../../common/alert_notify_when_type';
+import type { AlertTaskState } from '../../common/alert_task_instance';
+import { parseDuration } from '../../common/parse_duration';
 import {
   AlertingAuthorization,
-  WriteOperations,
-  ReadOperations,
   AlertingAuthorizationEntity,
-  AlertingAuthorizationFilterType,
-  AlertingAuthorizationFilterOpts,
-} from '../authorization';
-import { IEventLogClient } from '../../../event_log/server';
-import { parseIsoOrRelativeDate } from '../lib/iso_or_relative_date';
-import { alertInstanceSummaryFromEventLog } from '../lib/alert_instance_summary_from_event_log';
-import { IEvent } from '../../../event_log/server';
-import { AuditLogger } from '../../../security/server';
-import { parseDuration } from '../../common/parse_duration';
-import { retryIfConflicts } from '../lib/retry_if_conflicts';
-import { partiallyUpdateAlert } from '../saved_objects';
+  ReadOperations,
+  WriteOperations,
+} from '../authorization/alerting_authorization';
+import type { AlertingAuthorizationFilterOpts } from '../authorization/alerting_authorization_kuery';
+import { AlertingAuthorizationFilterType } from '../authorization/alerting_authorization_kuery';
 import { markApiKeyForInvalidation } from '../invalidate_pending_api_keys/mark_api_key_for_invalidation';
-import { ruleAuditEvent, RuleAuditAction } from './audit_events';
-import { KueryNode, nodeBuilder } from '../../../../../src/plugins/data/common';
-import { mapSortField } from './lib';
-import { getAlertExecutionStatusPending } from '../lib/alert_execution_status';
+import {
+  alertExecutionStatusFromRaw,
+  getAlertExecutionStatusPending,
+} from '../lib/alert_execution_status';
+import { alertInstanceSummaryFromEventLog } from '../lib/alert_instance_summary_from_event_log';
+import { getAlertNotifyWhenType } from '../lib/get_alert_notify_when_type';
+import { parseIsoOrRelativeDate } from '../lib/iso_or_relative_date';
+import { retryIfConflicts } from '../lib/retry_if_conflicts';
+import { validateAlertTypeParams } from '../lib/validate_alert_type_params';
+import type { RegistryRuleType, UntypedNormalizedAlertType } from '../rule_type_registry';
+import { partiallyUpdateAlert } from '../saved_objects/partially_update_alert';
+import { taskInstanceToAlertTaskInstance } from '../task_runner/alert_task_instance';
+import type { PartialAlert, RawAlert, RuleTypeRegistry } from '../types';
+import { RuleAuditAction, ruleAuditEvent } from './audit_events';
+import { mapSortField } from './lib/map_sort_field';
 
 export interface RegistryAlertTypeWithAuth extends RegistryRuleType {
   authorizedConsumers: string[];

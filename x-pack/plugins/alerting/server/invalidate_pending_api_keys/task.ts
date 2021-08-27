@@ -4,26 +4,24 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import {
-  Logger,
-  CoreStart,
-  SavedObjectsFindResponse,
-  KibanaRequest,
-  SavedObjectsClientContract,
-} from 'kibana/server';
-import { EncryptedSavedObjectsClient } from '../../../encrypted_saved_objects/server';
-import { InvalidateAPIKeysParams, SecurityPluginStart } from '../../../security/server';
-import {
-  RunContext,
+import type { Logger } from '@kbn/logging';
+import type { CoreStart } from '../../../../../src/core/server';
+import { KibanaRequest } from '../../../../../src/core/server/http/router/request';
+import type { SavedObjectsFindResponse } from '../../../../../src/core/server/saved_objects/service/saved_objects_client';
+import type { SavedObjectsClientContract } from '../../../../../src/core/server/saved_objects/types';
+import type { EncryptedSavedObjectsClient } from '../../../encrypted_saved_objects/server/saved_objects';
+import type { InvalidateAPIKeysParams } from '../../../security/server/authentication/api_keys/api_keys';
+import type { SecurityPluginStart } from '../../../security/server/plugin';
+import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
-} from '../../../task_manager/server';
-import { InvalidateAPIKeyResult } from '../rules_client';
-import { AlertsConfig } from '../config';
+} from '../../../task_manager/server/plugin';
+import type { RunContext } from '../../../task_manager/server/task';
+import type { AlertsConfig } from '../config';
 import { timePeriodBeforeDate } from '../lib/get_cadence';
-import { AlertingPluginsStart } from '../plugin';
-import { InvalidatePendingApiKey } from '../types';
+import type { AlertingPluginsStart } from '../plugin';
+import type { InvalidateAPIKeyResult } from '../rules_client/rules_client';
+import type { InvalidatePendingApiKey } from '../types';
 
 const TASK_TYPE = 'alerts_invalidate_api_keys';
 export const TASK_ID = `Alerts-${TASK_TYPE}`;

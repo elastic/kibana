@@ -4,26 +4,24 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
 import { i18n } from '@kbn/i18n';
 import { uniqueId } from 'lodash';
 import React, { useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
-import {
-  esKuery,
-  IndexPattern,
-  QuerySuggestion,
-} from '../../../../../../../src/plugins/data/public';
+import { IndexPattern } from '../../../../../../../src/plugins/data/common/index_patterns/index_patterns/index_pattern';
+import type { QuerySuggestion } from '../../../../../../../src/plugins/data/public/autocomplete/providers/query_suggestion_provider';
+import { esKuery } from '../../../../../../../src/plugins/data/public/deprecated';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useDynamicIndexPatternFetcher } from '../../../hooks/use_dynamic_index_pattern';
 import { fromQuery, toQuery } from '../Links/url_helpers';
 import { getBoolFilter } from './get_bool_filter';
-// @ts-expect-error
 import { Typeahead } from './Typeahead';
 import { useProcessorEvent } from './use_processor_event';
+
+// @ts-expect-error
 
 interface State {
   suggestions: QuerySuggestion[];

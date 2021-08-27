@@ -4,9 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { ISavedObjectsRepository, SavedObjectsServiceStart } from 'src/core/server';
-import { AlertsHealth, HealthStatus, RawAlert, AlertExecutionStatusErrorReasons } from '../types';
+import type { SavedObjectsServiceStart } from '../../../../../src/core/server/saved_objects/saved_objects_service';
+import type { ISavedObjectsRepository } from '../../../../../src/core/server/saved_objects/service/lib/repository';
+import type { AlertsHealth } from '../../common/alert';
+import { AlertExecutionStatusErrorReasons, HealthStatus } from '../../common/alert';
+import type { RawAlert } from '../types';
 
 export const getHealth = async (
   internalSavedObjectsRepository: ISavedObjectsRepository

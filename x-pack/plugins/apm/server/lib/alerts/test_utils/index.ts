@@ -4,13 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { Logger } from 'kibana/server';
+import type { Logger } from '@kbn/logging';
 import { of } from 'rxjs';
-import { elasticsearchServiceMock } from 'src/core/server/mocks';
-import type { IRuleDataClient } from '../../../../../rule_registry/server';
-import { PluginSetupContract as AlertingPluginSetupContract } from '../../../../../alerting/server';
-import { APMConfig, APM_SERVER_FEATURE_ID } from '../../..';
+import type { APMConfig } from '../../..';
+import { elasticsearchServiceMock } from '../../../../../../../src/core/server/elasticsearch/elasticsearch_service.mock';
+import type { PluginSetupContract as AlertingPluginSetupContract } from '../../../../../alerting/server/plugin';
+import type { IRuleDataClient } from '../../../../../rule_registry/server/rule_data_client/types';
+import { APM_SERVER_FEATURE_ID } from '../../../../common/alert_types';
 
 export const createRuleTypeMocks = () => {
   let alertExecutor: (...args: any[]) => Promise<any>;

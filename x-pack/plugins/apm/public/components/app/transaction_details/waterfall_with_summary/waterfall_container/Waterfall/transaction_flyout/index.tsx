@@ -4,25 +4,24 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyoutBody,
   EuiFlyoutHeader,
+  EuiHorizontalRule,
   EuiPortal,
   EuiSpacer,
   EuiTitle,
-  EuiHorizontalRule,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
-import { TransactionActionMenu } from '../../../../../../shared/transaction_action_menu/TransactionActionMenu';
+import type { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
+import { TransactionMetadata } from '../../../../../../shared/MetadataTable/TransactionMetadata';
 import { TransactionSummary } from '../../../../../../shared/Summary/TransactionSummary';
+import { TransactionActionMenu } from '../../../../../../shared/transaction_action_menu/TransactionActionMenu';
 import { FlyoutTopLevelProperties } from '../FlyoutTopLevelProperties';
 import { ResponsiveFlyout } from '../ResponsiveFlyout';
-import { TransactionMetadata } from '../../../../../../shared/MetadataTable/TransactionMetadata';
 import { DroppedSpansWarning } from './DroppedSpansWarning';
 
 interface Props {

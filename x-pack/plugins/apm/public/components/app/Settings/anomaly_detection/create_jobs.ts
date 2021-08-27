@@ -4,9 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { i18n } from '@kbn/i18n';
-import { NotificationsStart } from 'kibana/public';
+import type { NotificationsStart } from '../../../../../../../../src/core/public/notifications/notifications_service';
 import { callApmApi } from '../../../../services/rest/createCallApmApi';
 
 const errorToastTitle = i18n.translate(

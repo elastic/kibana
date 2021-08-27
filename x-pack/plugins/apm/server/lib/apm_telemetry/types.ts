@@ -4,9 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { DeepPartial } from 'utility-types';
-import {
+import type { DeepPartial } from 'utility-types';
+import type {
   AgentName,
   ElasticAgentName,
 } from '../../../typings/es_schemas/ui/fields/agent';

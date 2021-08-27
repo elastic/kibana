@@ -8,7 +8,8 @@
 import lightTheme from '@elastic/eui/dist/eui_theme_light.json';
 import { render } from '@testing-library/react';
 import cytoscape from 'cytoscape';
-import React, { ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React from 'react';
 import { ThemeContext } from 'styled-components';
 import { MockApmPluginContextWrapper } from '../../../context/apm_plugin/mock_apm_plugin_context';
 import { Controls } from './Controls';

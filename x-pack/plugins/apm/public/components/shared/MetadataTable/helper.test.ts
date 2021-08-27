@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { getSectionsWithRows, filterSectionsByTerm } from './helper';
-import { LABELS, HTTP, SERVICE } from './sections';
-import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
+import type { Transaction } from '../../../../typings/es_schemas/ui/transaction';
+import { filterSectionsByTerm, getSectionsWithRows } from './helper';
+import { HTTP, LABELS, SERVICE } from './sections';
 
 describe('MetadataTable Helper', () => {
   const sections = [

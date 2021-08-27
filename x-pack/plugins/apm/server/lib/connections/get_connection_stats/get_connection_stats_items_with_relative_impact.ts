@@ -4,12 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { isFiniteNumber } from '../../../../common/utils/is_finite_number';
-import {
+import type {
   ConnectionStatsItem,
   ConnectionStatsItemWithImpact,
 } from '../../../../common/connections';
+import { isFiniteNumber } from '../../../../common/utils/is_finite_number';
 
 export function getConnectionStatsItemsWithRelativeImpact(
   items: ConnectionStatsItem[]

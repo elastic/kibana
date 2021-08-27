@@ -4,14 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { useContext, useEffect, useState } from 'react';
 import { EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
+import React, { useContext, useEffect, useState } from 'react';
+import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
+import { useTheme } from '../../../hooks/use_theme';
 import { ElasticDocsLink } from '../../shared/Links/ElasticDocsLink';
 import { CytoscapeContext } from './Cytoscape';
-import { useTheme } from '../../../hooks/use_theme';
 
 const EmptyBannerContainer = euiStyled.div`
   margin: ${({ theme }) => theme.eui.gutterTypes.gutterSmall};

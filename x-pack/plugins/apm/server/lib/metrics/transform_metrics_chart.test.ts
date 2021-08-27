@@ -4,9 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { ChartType, YUnit } from '../../../typings/timeseries';
 import { transformDataToMetricsChart } from './transform_metrics_chart';
-import { ChartType, YUnit } from '../../../typings/timeseries';
 
 test('transformDataToMetricsChart should transform an ES result into a chart object', () => {
   const response = {

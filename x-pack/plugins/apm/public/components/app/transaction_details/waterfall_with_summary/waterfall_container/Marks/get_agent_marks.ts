@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { sortBy } from 'lodash';
-import { Transaction } from '../../../../../../../typings/es_schemas/ui/transaction';
-import { Mark } from '.';
+import type { Mark } from '.';
+import type { Transaction } from '../../../../../../../typings/es_schemas/ui/transaction';
 
 // Extends Mark without adding new properties to it.
 export interface AgentMark extends Mark {

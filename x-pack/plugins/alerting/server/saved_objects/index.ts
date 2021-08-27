@@ -4,22 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type {
-  Logger,
-  SavedObject,
-  SavedObjectsExportTransformContext,
-  SavedObjectsServiceSetup,
-  SavedObjectsTypeMappingDefinition,
-} from 'kibana/server';
-import mappings from './mappings.json';
-import { getMigrations } from './migrations';
-import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
-import { transformRulesForExport } from './transform_rule_for_export';
-import { RawAlert } from '../types';
+import type { Logger } from '@kbn/logging';
+import type { SavedObjectsExportTransformContext } from '../../../../../src/core/server/saved_objects/export/types';
+import type { SavedObjectsTypeMappingDefinition } from '../../../../../src/core/server/saved_objects/mappings/types';
+import type { SavedObjectsServiceSetup } from '../../../../../src/core/server/saved_objects/saved_objects_service';
+import type { SavedObject } from '../../../../../src/core/types/saved_objects';
+import type { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server/plugin';
+import { RuleTypeRegistry } from '../rule_type_registry';
+import type { RawAlert } from '../types';
 import { getImportWarnings } from './get_import_warnings';
 import { isRuleExportable } from './is_rule_exportable';
-import { RuleTypeRegistry } from '../rule_type_registry';
+import mappings from './mappings.json';
+import { getMigrations } from './migrations';
+import { transformRulesForExport } from './transform_rule_for_export';
 
 export { partiallyUpdateAlert } from './partially_update_alert';
 

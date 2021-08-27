@@ -5,9 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiFlexItem, EuiStat, EuiFlexGroup, EuiIconTip } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiStat } from '@elastic/eui';
 import numeral from '@elastic/numeral';
+import React from 'react';
+import type { UXMetrics } from '../../../../../../observability/public/components/shared/core_web_vitals';
+import { useFetcher } from '../../../../hooks/use_fetcher';
+import { useUxQuery } from '../hooks/useUxQuery';
 import {
   DATA_UNDEFINED_LABEL,
   FCP_LABEL,
@@ -21,9 +24,6 @@ import {
   TBT_LABEL,
   TBT_TOOLTIP,
 } from './translations';
-import { useFetcher } from '../../../../hooks/use_fetcher';
-import { useUxQuery } from '../hooks/useUxQuery';
-import { UXMetrics } from '../../../../../../observability/public';
 
 export function formatToSec(
   value?: number | string,

@@ -4,16 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { IRouter } from 'kibana/server';
-import { ILicenseState } from '../lib';
-import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
-import { RewriteResponseCase, verifyAccessAndContext } from './lib';
-import {
-  AlertingRequestHandlerContext,
-  BASE_ALERTING_API_PATH,
-  AlertingFrameworkHealth,
-} from '../types';
+import type { IRouter } from '../../../../../src/core/server/http/router/router';
+import type { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server/plugin';
+import type { AlertingFrameworkHealth } from '../../common';
+import { BASE_ALERTING_API_PATH } from '../../common';
+import type { ILicenseState } from '../lib/license_state';
+import type { AlertingRequestHandlerContext } from '../types';
+import type { RewriteResponseCase } from './lib/rewrite_request_case';
+import { verifyAccessAndContext } from './lib/verify_access_and_context';
 
 const rewriteBodyRes: RewriteResponseCase<AlertingFrameworkHealth> = ({
   isSufficientlySecure,

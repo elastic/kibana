@@ -4,11 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { flatten, merge, sortBy, sum, pickBy } from 'lodash';
-import type { estypes } from '@elastic/elasticsearch';
-import { asMutableArray } from '../../../../common/utils/as_mutable_array';
-import { ProcessorEvent } from '../../../../common/processor_event';
-import { TelemetryTask } from '.';
+import { estypes } from '@elastic/elasticsearch';
+import { flatten, merge, pickBy, sortBy, sum } from 'lodash';
+import type { TelemetryTask } from '.';
 import { AGENT_NAMES, RUM_AGENT_NAMES } from '../../../../common/agent_name';
 import {
   AGENT_NAME,
@@ -39,11 +37,13 @@ import {
   TRANSACTION_TYPE,
   USER_AGENT_ORIGINAL,
 } from '../../../../common/elasticsearch_fieldnames';
-import { APMError } from '../../../../typings/es_schemas/ui/apm_error';
-import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
-import { Span } from '../../../../typings/es_schemas/ui/span';
-import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
-import { APMTelemetry } from '../types';
+import { ProcessorEvent } from '../../../../common/processor_event';
+import { asMutableArray } from '../../../../common/utils/as_mutable_array';
+import type { APMError } from '../../../../typings/es_schemas/ui/apm_error';
+import type { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
+import type { Span } from '../../../../typings/es_schemas/ui/span';
+import type { Transaction } from '../../../../typings/es_schemas/ui/transaction';
+import type { APMTelemetry } from '../types';
 
 const TIME_RANGES = ['1d', 'all'] as const;
 type TimeRange = typeof TIME_RANGES[number];

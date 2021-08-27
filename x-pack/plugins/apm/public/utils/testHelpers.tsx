@@ -6,27 +6,27 @@
  */
 
 /* global jest */
-
 import { render, waitFor } from '@testing-library/react';
-import { mount, MountRendererProps, ReactWrapper } from 'enzyme';
+import type { MountRendererProps } from 'enzyme';
+import { mount, ReactWrapper } from 'enzyme';
 import enzymeToJson from 'enzyme-to-json';
-import { Location } from 'history';
+import type { Location } from 'history';
 import moment from 'moment';
-import { Moment } from 'moment-timezone';
+import type { Moment } from 'moment-timezone';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { EuiThemeProvider } from '../../../../../src/plugins/kibana_react/common';
-import {
+import type {
   ESSearchRequest,
   ESSearchResponse,
 } from '../../../../../src/core/types/elasticsearch';
-import { PromiseReturnType } from '../../../observability/typings/common';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { APMConfig } from '../../server';
-import { UxUIFilters } from '../../typings/ui_filters';
+import { EuiThemeProvider } from '../../../../../src/plugins/kibana_react/common/eui_styled_components';
+import type { PromiseReturnType } from '../../../observability/typings/common';
+import type { APMConfig } from '../../server';
+import type { UxUIFilters } from '../../typings/ui_filters';
 import { MockApmPluginContextWrapper } from '../context/apm_plugin/mock_apm_plugin_context';
 import { UrlParamsProvider } from '../context/url_params_context/url_params_context';
 
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 const originalConsoleWarn = console.warn; // eslint-disable-line no-console
 /**
  *  A dependency we're using is using deprecated react methods. Override the

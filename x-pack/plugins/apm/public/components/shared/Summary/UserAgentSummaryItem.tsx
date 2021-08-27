@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
-import { UserAgent } from '../../../../typings/es_schemas/raw/fields/user_agent';
+import React from 'react';
+import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
+import type { UserAgent } from '../../../../typings/es_schemas/raw/fields/user_agent';
 
 type UserAgentSummaryItemProps = UserAgent;
 

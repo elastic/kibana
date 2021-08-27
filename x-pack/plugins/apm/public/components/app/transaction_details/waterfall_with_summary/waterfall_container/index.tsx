@@ -5,16 +5,14 @@
  * 2.0.
  */
 
-import React from 'react';
 import { keyBy } from 'lodash';
-import { IUrlParams } from '../../../../../context/url_params_context/types';
-import {
-  IWaterfall,
-  WaterfallLegendType,
-} from './Waterfall/waterfall_helpers/waterfall_helpers';
-import { Waterfall } from './Waterfall';
-import { WaterfallLegends } from './WaterfallLegends';
+import React from 'react';
 import { useApmServiceContext } from '../../../../../context/apm_service/use_apm_service_context';
+import type { IUrlParams } from '../../../../../context/url_params_context/types';
+import { Waterfall } from './Waterfall';
+import type { IWaterfall } from './Waterfall/waterfall_helpers/waterfall_helpers';
+import { WaterfallLegendType } from './Waterfall/waterfall_helpers/waterfall_helpers';
+import { WaterfallLegends } from './WaterfallLegends';
 
 interface Props {
   urlParams: IUrlParams;

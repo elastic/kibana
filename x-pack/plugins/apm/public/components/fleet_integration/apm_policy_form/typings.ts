@@ -4,18 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { PackagePolicyConfigRecordEntry } from '../../../../../fleet/common';
+import type { PackagePolicyConfigRecordEntry } from '../../../../../fleet/common/types/models/package_policy';
 
-export {
-  PackagePolicyCreateExtensionComponentProps,
-  PackagePolicyEditExtensionComponentProps,
-} from '../../../../../fleet/public';
-
-export {
+export type {
   NewPackagePolicy,
   PackagePolicy,
   PackagePolicyConfigRecordEntry,
 } from '../../../../../fleet/common';
+export type {
+  PackagePolicyCreateExtensionComponentProps,
+  PackagePolicyEditExtensionComponentProps,
+} from '../../../../../fleet/public';
 
 export type PackagePolicyVars = Record<string, PackagePolicyConfigRecordEntry>;
 

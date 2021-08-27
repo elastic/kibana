@@ -4,13 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import {
-  CoreSetup,
-  CoreStart,
-  SavedObjectsClientContract,
-} from 'kibana/server';
-import { APMPluginStartDependencies } from '../../types';
+import type { CoreSetup, CoreStart } from '../../../../../../src/core/server';
+import type { SavedObjectsClientContract } from '../../../../../../src/core/server/saved_objects/types';
+import type { APMPluginStartDependencies } from '../../types';
 import { getInternalSavedObjectsClient } from '../helpers/get_internal_saved_objects_client';
 
 export async function getApmPackgePolicies({

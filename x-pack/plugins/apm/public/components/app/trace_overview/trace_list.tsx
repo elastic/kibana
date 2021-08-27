@@ -4,22 +4,22 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { EuiIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
+import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
 import {
   asMillisecondDuration,
   asTransactionRate,
-} from '../../../../common/utils/formatters';
-import { APIReturnType } from '../../../services/rest/createCallApmApi';
+} from '../../../../common/utils/formatters/duration';
+import type { APIReturnType } from '../../../services/rest/createCallApmApi';
 import { truncate } from '../../../utils/style';
 import { EmptyMessage } from '../../shared/EmptyMessage';
 import { ImpactBar } from '../../shared/ImpactBar';
 import { TransactionDetailLink } from '../../shared/Links/apm/transaction_detail_link';
 import { LoadingStatePrompt } from '../../shared/LoadingStatePrompt';
-import { ITableColumn, ManagedTable } from '../../shared/managed_table';
+import type { ITableColumn } from '../../shared/managed_table';
+import { ManagedTable } from '../../shared/managed_table';
 
 type TraceGroup = APIReturnType<'GET /api/apm/traces'>['items'][0];
 

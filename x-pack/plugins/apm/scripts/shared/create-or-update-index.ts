@@ -4,8 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { ESClient } from './get_es_client';
+import type { ESClient } from './get_es_client';
 
 export async function createOrUpdateIndex({
   client,

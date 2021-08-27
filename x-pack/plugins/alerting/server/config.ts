@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { schema, TypeOf } from '@kbn/config-schema';
-import { validateDurationSchema } from './lib';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
+import { validateDurationSchema } from '../common/parse_duration';
 
 export const DEFAULT_MAX_EPHEMERAL_ACTIONS_PER_ALERT = 10;
 export const configSchema = schema.object({

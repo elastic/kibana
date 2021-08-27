@@ -4,9 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { i18n } from '@kbn/i18n';
-import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public';
+import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry';
 
 export const featureCatalogueEntry = {
   id: 'apm',

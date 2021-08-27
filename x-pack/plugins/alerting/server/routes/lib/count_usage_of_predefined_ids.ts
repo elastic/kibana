@@ -4,8 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { UsageCounter } from 'src/plugins/usage_collection/server';
+import type { IUsageCounter as UsageCounter } from '../../../../../../src/plugins/usage_collection/server/usage_counters/usage_counter';
 
 export interface CountUsageOfPredefinedIdsOptions {
   predefinedId?: string;

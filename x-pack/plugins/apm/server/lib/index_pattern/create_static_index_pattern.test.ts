@@ -4,12 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { createStaticIndexPattern } from './create_static_index_pattern';
-import { Setup } from '../helpers/setup_request';
+import type { APMConfig } from '../..';
+import type { InternalSavedObjectsClient } from '../helpers/get_internal_saved_objects_client';
+import type { Setup } from '../helpers/setup_request';
 import * as HistoricalAgentData from '../services/get_services/has_historical_agent_data';
-import { InternalSavedObjectsClient } from '../helpers/get_internal_saved_objects_client';
-import { APMConfig } from '../..';
+import { createStaticIndexPattern } from './create_static_index_pattern';
 
 function getMockSavedObjectsClient() {
   return ({

@@ -4,9 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { ElasticsearchClient } from 'kibana/server';
-import { AlertsUsage } from './types';
+import type { ElasticsearchClient } from '../../../../../src/core/server/elasticsearch/client/types';
+import type { AlertsUsage } from './types';
 
 const alertTypeMetric = {
   scripted_metric: {

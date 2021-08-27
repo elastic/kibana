@@ -4,14 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import {
-  AlertActionParams,
-  AlertInstanceState,
-  AlertInstanceContext,
-  AlertTypeParams,
-} from '../types';
-import { PluginStartContract as ActionsPluginStartContract } from '../../../actions/server';
+import type { PluginStartContract as ActionsPluginStartContract } from '../../../actions/server/plugin';
+import type { AlertActionParams, AlertTypeParams } from '../../common/alert';
+import type { AlertInstanceContext, AlertInstanceState } from '../../common/alert_instance';
 
 interface TransformActionParamsOptions {
   actionsPlugin: ActionsPluginStartContract;

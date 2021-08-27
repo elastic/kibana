@@ -4,9 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { Capabilities } from 'kibana/public';
-import { ApmPluginSetupDeps } from '../../plugin';
+import type { Capabilities } from '../../../../../../src/core/types/capabilities';
+import type { ApmPluginSetupDeps } from '../../plugin';
 
 export const getAlertingCapabilities = (
   plugins: ApmPluginSetupDeps,

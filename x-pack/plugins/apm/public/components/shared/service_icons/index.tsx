@@ -4,14 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { ReactChild, useState } from 'react';
-import { useTheme } from '../../../hooks/use_theme';
-import { ContainerType } from '../../../../common/service_metadata';
+import type { ReactChild } from 'react';
+import React, { useState } from 'react';
+import type { ContainerType } from '../../../../common/service_metadata';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
+import { useTheme } from '../../../hooks/use_theme';
 import { getAgentIcon } from '../agent_icon/get_agent_icon';
 import { CloudDetails } from './cloud_details';
 import { ContainerDetails } from './container_details';

@@ -4,14 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { i18n } from '@kbn/i18n';
-import { NotificationsStart } from 'kibana/public';
-import { AgentConfigurationIntake } from '../../../../../../../common/agent_configuration/configuration_types';
+import type { NotificationsStart } from '../../../../../../../../../../src/core/public/notifications/notifications_service';
 import {
   getOptionLabel,
   omitAllOption,
 } from '../../../../../../../common/agent_configuration/all_option';
+import type { AgentConfigurationIntake } from '../../../../../../../common/agent_configuration/configuration_types';
 import { callApmApi } from '../../../../../../services/rest/createCallApmApi';
 
 export async function saveConfig({

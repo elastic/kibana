@@ -4,12 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { setupRequest } from './setup_request';
-import { APMConfig } from '../..';
-import { APMRouteHandlerResources } from '../../routes/typings';
-import { ProcessorEvent } from '../../../common/processor_event';
+import type { APMConfig } from '../..';
 import { PROCESSOR_EVENT } from '../../../common/elasticsearch_fieldnames';
+import { ProcessorEvent } from '../../../common/processor_event';
+import type { APMRouteHandlerResources } from '../../routes/typings';
+import { setupRequest } from './setup_request';
 
 jest.mock('../settings/apm_indices/get_apm_indices', () => ({
   getApmIndices: async () => ({

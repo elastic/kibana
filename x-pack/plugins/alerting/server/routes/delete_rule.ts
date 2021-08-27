@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { IRouter } from 'kibana/server';
 import { schema } from '@kbn/config-schema';
-import { ILicenseState } from '../lib';
-import { verifyAccessAndContext } from './lib';
-import { AlertingRequestHandlerContext, BASE_ALERTING_API_PATH } from '../types';
+import type { IRouter } from '../../../../../src/core/server/http/router/router';
+import { BASE_ALERTING_API_PATH } from '../../common';
+import type { ILicenseState } from '../lib/license_state';
+import type { AlertingRequestHandlerContext } from '../types';
+import { verifyAccessAndContext } from './lib/verify_access_and_context';
 
 const paramSchema = schema.object({
   id: schema.string(),

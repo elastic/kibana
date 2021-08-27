@@ -4,13 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { AggregationOptionsByType } from '../../../../../../src/core/types/elasticsearch';
+import type { AggregateOf as AggregationResultOf } from '../../../../../../src/core/types/elasticsearch/search';
 import { EVENT_OUTCOME } from '../../../common/elasticsearch_fieldnames';
 import { EventOutcome } from '../../../common/event_outcome';
-import {
-  AggregationOptionsByType,
-  AggregationResultOf,
-} from '../../../../../../src/core/types/elasticsearch';
 
 export const getOutcomeAggregation = () => ({
   terms: {

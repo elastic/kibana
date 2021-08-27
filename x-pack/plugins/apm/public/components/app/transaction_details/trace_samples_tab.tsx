@@ -5,18 +5,14 @@
  * 2.0.
  */
 
-import React from 'react';
-
 import { EuiSpacer } from '@elastic/eui';
-
 import { i18n } from '@kbn/i18n';
-
+import React from 'react';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
-
 import { TransactionDistribution } from './distribution';
-import { useWaterfallFetcher } from './use_waterfall_fetcher';
 import type { TabContentProps } from './types';
+import { useWaterfallFetcher } from './use_waterfall_fetcher';
 import { WaterfallWithSummary } from './waterfall_with_summary';
 
 function TraceSamplesTab({

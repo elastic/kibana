@@ -5,18 +5,13 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
-import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
-import { ConcreteTaskInstance } from '../../../task_manager/server';
-import {
-  SanitizedAlert,
-  AlertTaskState,
-  alertParamsSchema,
-  alertStateSchema,
-  AlertTaskParams,
-  AlertTypeParams,
-} from '../../common';
+import { pipe } from 'fp-ts/lib/pipeable';
+import * as t from 'io-ts';
+import type { ConcreteTaskInstance } from '../../../task_manager/server/task';
+import type { AlertTypeParams, SanitizedAlert } from '../../common/alert';
+import type { AlertTaskParams, AlertTaskState } from '../../common/alert_task_instance';
+import { alertParamsSchema, alertStateSchema } from '../../common/alert_task_instance';
 
 export interface AlertTaskInstance extends ConcreteTaskInstance {
   state: AlertTaskState;

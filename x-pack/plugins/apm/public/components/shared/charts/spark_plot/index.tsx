@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import {
   AreaSeries,
   Chart,
@@ -16,8 +15,8 @@ import {
 import { EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import { merge } from 'lodash';
 import React from 'react';
-import { useChartTheme } from '../../../../../../observability/public';
-import { Coordinate } from '../../../../../typings/timeseries';
+import { useChartTheme } from '../../../../../../observability/public/hooks/use_chart_theme';
+import type { Coordinate } from '../../../../../typings/timeseries';
 import { useTheme } from '../../../../hooks/use_theme';
 import { unit } from '../../../../utils/style';
 import { getComparisonChartTheme } from '../../time_comparison/get_time_range_comparison';

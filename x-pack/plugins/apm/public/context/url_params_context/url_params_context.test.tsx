@@ -4,14 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { waitFor } from '@testing-library/react';
 import { mount } from 'enzyme';
-import { History, Location } from 'history';
+import type { History, Location } from 'history';
 import moment from 'moment-timezone';
 import * as React from 'react';
 import { MemoryRouter, Router } from 'react-router-dom';
-import { IUrlParams } from './types';
+import type { IUrlParams } from './types';
 import { UrlParamsContext, UrlParamsProvider } from './url_params_context';
 
 function mountParams(location: Location) {

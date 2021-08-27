@@ -4,9 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { Location } from 'history';
-import { IUrlParams } from '../../../../../context/url_params_context/types';
+import type { Location } from 'history';
+import type { IUrlParams } from '../../../../../context/url_params_context/types';
 
 export const location = {
   pathname: '/services/opbeans-go/transactions/view',

@@ -4,22 +4,23 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { useRef, useState } from 'react';
-import type { Subscription } from 'rxjs';
-import {
+import { Subscription } from 'rxjs';
+import type {
   IKibanaSearchRequest,
   IKibanaSearchResponse,
+} from '../../../../../src/plugins/data/common/search/types';
+import {
   isCompleteResponse,
   isErrorResponse,
-} from '../../../../../src/plugins/data/public';
+} from '../../../../../src/plugins/data/common/search/utils';
+import { useKibana } from '../../../../../src/plugins/kibana_react/public/context/context';
 import type {
   HistogramItem,
   SearchServiceParams,
   SearchServiceValue,
 } from '../../common/search_strategies/correlations/types';
-import { useKibana } from '../../../../../src/plugins/kibana_react/public';
-import { ApmPluginStartDeps } from '../plugin';
+import type { ApmPluginStartDeps } from '../plugin';
 
 interface RawResponse {
   percentileThresholdValue?: number;

@@ -4,27 +4,27 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { render, waitFor } from '@testing-library/react';
-import { CoreStart } from 'kibana/public';
 import { merge } from 'lodash';
-import React, { ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { EuiThemeProvider } from '../../../../../../../src/plugins/kibana_react/common';
-import { createKibanaReactContext } from '../../../../../../../src/plugins/kibana_react/public';
-import { ServiceHealthStatus } from '../../../../common/service_health_status';
 import { ServiceInventory } from '.';
-import { ApmPluginContextValue } from '../../../context/apm_plugin/apm_plugin_context';
+import type { CoreStart } from '../../../../../../../src/core/public';
+import { EuiThemeProvider } from '../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
+import { createKibanaReactContext } from '../../../../../../../src/plugins/kibana_react/public/context/context';
+import { ServiceHealthStatus } from '../../../../common/service_health_status';
+import * as hook from '../../../context/anomaly_detection_jobs/use_anomaly_detection_jobs_context';
+import type { ApmPluginContextValue } from '../../../context/apm_plugin/apm_plugin_context';
 import {
   mockApmPluginContextValue,
   MockApmPluginContextWrapper,
 } from '../../../context/apm_plugin/mock_apm_plugin_context';
+import { MockUrlParamsContextProvider } from '../../../context/url_params_context/mock_url_params_context_provider';
+import * as useDynamicIndexPatternHooks from '../../../hooks/use_dynamic_index_pattern';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { clearCache } from '../../../services/rest/callApi';
-import * as useDynamicIndexPatternHooks from '../../../hooks/use_dynamic_index_pattern';
 import { SessionStorageMock } from '../../../services/__mocks__/SessionStorageMock';
-import { MockUrlParamsContextProvider } from '../../../context/url_params_context/mock_url_params_context_provider';
-import * as hook from '../../../context/anomaly_detection_jobs/use_anomaly_detection_jobs_context';
 import { TimeRangeComparisonType } from '../../shared/time_comparison/get_time_range_comparison';
 
 const KibanaReactContext = createKibanaReactContext({

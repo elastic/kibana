@@ -4,11 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { EuiFlexGrid, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
-import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
-import { Maybe } from '../../../../typings/common';
+import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
+import type { Maybe } from '../../../../typings/common';
 
 interface Props {
   items: Array<Maybe<React.ReactElement>>;

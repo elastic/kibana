@@ -6,9 +6,9 @@
  */
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { OnFormChangeFn, PackagePolicyVars } from '../typings';
+import type { OnFormChangeFn, PackagePolicyVars } from '../typings';
 import { SettingsForm } from './settings_form';
-import { SettingDefinition } from './typings';
+import type { SettingDefinition } from './typings';
 import {
   isSettingsFormValid,
   mergeNewVars,

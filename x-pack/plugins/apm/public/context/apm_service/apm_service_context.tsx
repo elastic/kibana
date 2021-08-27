@@ -4,19 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { createContext, ReactNode } from 'react';
-import { ValuesType } from 'utility-types';
+import type { ReactNode } from 'react';
+import React, { createContext } from 'react';
+import type { ValuesType } from 'utility-types';
 import { isRumAgentName } from '../../../common/agent_name';
 import {
   TRANSACTION_PAGE_LOAD,
   TRANSACTION_REQUEST,
 } from '../../../common/transaction_types';
-import { useServiceTransactionTypesFetcher } from './use_service_transaction_types_fetcher';
-import { useServiceAgentFetcher } from './use_service_agent_fetcher';
-import { APIReturnType } from '../../services/rest/createCallApmApi';
-import { useServiceAlertsFetcher } from './use_service_alerts_fetcher';
 import { useApmParams } from '../../hooks/use_apm_params';
+import type { APIReturnType } from '../../services/rest/createCallApmApi';
+import { useServiceAgentFetcher } from './use_service_agent_fetcher';
+import { useServiceAlertsFetcher } from './use_service_alerts_fetcher';
+import { useServiceTransactionTypesFetcher } from './use_service_transaction_types_fetcher';
 
 export type APMServiceAlert = ValuesType<
   APIReturnType<'GET /api/apm/services/{serviceName}/alerts'>['alerts']

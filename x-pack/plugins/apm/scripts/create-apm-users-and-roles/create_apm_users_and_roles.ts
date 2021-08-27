@@ -4,12 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { AbortError, callKibana } from './helpers/call_kibana';
+import { createOrUpdateUser } from './helpers/create_or_update_user';
 import { createRole } from './helpers/create_role';
 import { powerUserRole } from './roles/power_user_role';
 import { readOnlyUserRole } from './roles/read_only_user_role';
-import { createOrUpdateUser } from './helpers/create_or_update_user';
 
 export interface Elasticsearch {
   username: string;

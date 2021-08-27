@@ -4,9 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { agentConfigurationIntakeRt } from './agent_configuration_intake_rt';
 import { isRight } from 'fp-ts/lib/Either';
+import { agentConfigurationIntakeRt } from './agent_configuration_intake_rt';
 
 describe('agentConfigurationIntakeRt', () => {
   it('is valid when "transaction_sample_rate" is string', () => {

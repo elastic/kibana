@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiToolTip } from '@elastic/eui';
 import moment from 'moment-timezone';
-import {
-  asAbsoluteDateTime,
-  TimeUnit,
-} from '../../../../common/utils/formatters';
+import React from 'react';
+import type { TimeUnit } from '../../../../common/utils/formatters/datetime';
+import { asAbsoluteDateTime } from '../../../../common/utils/formatters/datetime';
 
 interface Props {
   /**

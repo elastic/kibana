@@ -4,13 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { CoreSetup, CoreStart } from 'kibana/public';
 import { isString, startsWith } from 'lodash';
 import LRU from 'lru-cache';
 import hash from 'object-hash';
-import { enableInspectEsQueries } from '../../../../observability/public';
-import { FetchOptions } from '../../../common/fetch_options';
+import type { CoreSetup, CoreStart } from '../../../../../../src/core/public';
+import { enableInspectEsQueries } from '../../../../observability/common/ui_settings_keys';
+import type { FetchOptions } from '../../../common/fetch_options';
 
 function fetchOptionsWithDebug(
   fetchOptions: FetchOptions,

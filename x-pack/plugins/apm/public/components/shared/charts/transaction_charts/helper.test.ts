@@ -4,14 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { getResponseTimeTickFormatter, getMaxY } from './helper';
-
-import { TimeSeries, Coordinate } from '../../../../../typings/timeseries';
 import {
   getDurationFormatter,
   toMicroseconds,
-} from '../../../../../common/utils/formatters';
+} from '../../../../../common/utils/formatters/duration';
+import type { Coordinate, TimeSeries } from '../../../../../typings/timeseries';
+import { getMaxY, getResponseTimeTickFormatter } from './helper';
 
 describe('transaction chart helper', () => {
   describe('getResponseTimeTickFormatter', () => {

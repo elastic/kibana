@@ -25,13 +25,14 @@ const createTimer = () => {
 const timer = createTimer();
 
 const project = new Project({
-  tsConfigFilePath: Path.resolve('./src/plugins/field_formats/tsconfig.json'),
+  tsConfigFilePath: Path.resolve('./tsconfig.json'),
 });
 
 timer.measure('createProject');
 
 let dirsAlreadyProcessed = [
   'src/core',
+  'src/plugins/field_formats',
 ];
 
 let dirsToProcess = [

@@ -4,12 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { elasticsearchClientMock } from '../../../../../../src/core/server/elasticsearch/client/mocks';
 import { registerTransactionErrorRateAlertType } from './register_transaction_error_rate_alert_type';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
 import { createRuleTypeMocks } from './test_utils';
 
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 describe('Transaction error rate alert', () => {
   it("doesn't send an alert when rate is less than threshold", async () => {
     const { services, dependencies, executor } = createRuleTypeMocks();

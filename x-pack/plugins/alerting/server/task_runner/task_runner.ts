@@ -4,53 +4,58 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { PublicMethodsOf } from '@kbn/utility-types';
-import { Dictionary, pickBy, mapValues, without, cloneDeep } from 'lodash';
 import type { Request } from '@hapi/hapi';
-import { addSpaceIdToPath } from '../../../spaces/server';
-import { Logger, KibanaRequest } from '../../../../../src/core/server';
-import { TaskRunnerContext } from './task_runner_factory';
-import { ConcreteTaskInstance, throwUnrecoverableError } from '../../../task_manager/server';
-import { createExecutionHandler, ExecutionHandler } from './create_execution_handler';
-import { AlertInstance, createAlertInstanceFactory } from '../alert_instance';
-import {
-  validateAlertTypeParams,
-  executionStatusFromState,
-  executionStatusFromError,
-  alertExecutionStatusToRaw,
-  ErrorWithReason,
-  ElasticsearchError,
-} from '../lib';
-import {
-  RawAlert,
-  IntervalSchedule,
-  Services,
-  RawAlertInstance,
-  AlertTaskState,
+import type { Logger } from '@kbn/logging';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { Dictionary } from 'lodash';
+import { cloneDeep, mapValues, pickBy, without } from 'lodash';
+import { KibanaRequest } from '../../../../../src/core/server/http/router/request';
+import type { IEvent } from '../../../event_log/generated/schemas';
+import type { IEventLogger } from '../../../event_log/server/types';
+import { SAVED_OBJECT_REL_PRIMARY } from '../../../event_log/server/types';
+import { addSpaceIdToPath } from '../../../spaces/common/lib/spaces_url_parser';
+import type { ConcreteTaskInstance } from '../../../task_manager/server/task';
+import { throwUnrecoverableError } from '../../../task_manager/server/task_running/errors';
+import type {
   Alert,
-  SanitizedAlert,
   AlertExecutionStatus,
-  AlertExecutionStatusErrorReasons,
-  RuleTypeRegistry,
-} from '../types';
-import { promiseResult, map, Resultable, asOk, asErr, resolveErr } from '../lib/result_type';
-import { taskInstanceToAlertTaskInstance } from './alert_task_instance';
-import { EVENT_LOG_ACTIONS } from '../plugin';
-import { IEvent, IEventLogger, SAVED_OBJECT_REL_PRIMARY } from '../../../event_log/server';
-import { isAlertSavedObjectNotFoundError } from '../lib/is_alert_not_found_error';
-import { RulesClient } from '../rules_client';
-import { partiallyUpdateAlert } from '../saved_objects';
-import {
-  ActionGroup,
   AlertTypeParams,
   AlertTypeState,
-  AlertInstanceState,
+  IntervalSchedule,
+  SanitizedAlert,
+} from '../../common/alert';
+import { AlertExecutionStatusErrorReasons } from '../../common/alert';
+import type {
   AlertInstanceContext,
-  WithoutReservedActionGroups,
-} from '../../common';
-import { NormalizedAlertType } from '../rule_type_registry';
-import { getEsErrorMessage } from '../lib/errors';
+  AlertInstanceState,
+  RawAlertInstance,
+} from '../../common/alert_instance';
+import type { AlertTaskState } from '../../common/alert_task_instance';
+import type { ActionGroup } from '../../common/alert_type';
+import type { WithoutReservedActionGroups } from '../../common/builtin_action_groups';
+import { AlertInstance } from '../alert_instance/alert_instance';
+import { createAlertInstanceFactory } from '../alert_instance/create_alert_instance_factory';
+import {
+  alertExecutionStatusToRaw,
+  executionStatusFromError,
+  executionStatusFromState,
+} from '../lib/alert_execution_status';
+import { getEsErrorMessage } from '../lib/errors/es_error_parser';
+import type { ElasticsearchError } from '../lib/errors/types';
+import { ErrorWithReason } from '../lib/error_with_reason';
+import { isAlertSavedObjectNotFoundError } from '../lib/is_alert_not_found_error';
+import type { Resultable } from '../lib/result_type';
+import { asErr, asOk, map, promiseResult, resolveErr } from '../lib/result_type';
+import { validateAlertTypeParams } from '../lib/validate_alert_type_params';
+import { EVENT_LOG_ACTIONS } from '../plugin';
+import { RulesClient } from '../rules_client/rules_client';
+import type { NormalizedAlertType } from '../rule_type_registry';
+import { partiallyUpdateAlert } from '../saved_objects/partially_update_alert';
+import type { RawAlert, RuleTypeRegistry, Services } from '../types';
+import { taskInstanceToAlertTaskInstance } from './alert_task_instance';
+import type { ExecutionHandler } from './create_execution_handler';
+import { createExecutionHandler } from './create_execution_handler';
+import type { TaskRunnerContext } from './task_runner_factory';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
 

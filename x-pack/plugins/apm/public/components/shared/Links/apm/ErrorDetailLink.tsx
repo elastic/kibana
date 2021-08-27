@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { APMLink, APMLinkExtendProps } from './APMLink';
+import type { APMLinkExtendProps } from './APMLink';
+import { APMLink } from './APMLink';
 
 interface Props extends APMLinkExtendProps {
   serviceName: string;

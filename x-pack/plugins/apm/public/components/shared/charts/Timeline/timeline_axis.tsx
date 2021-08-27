@@ -4,16 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { inRange } from 'lodash';
-import React, { ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React from 'react';
 import { XAxis, XYPlot } from 'react-vis';
-import { getDurationFormatter } from '../../../../../common/utils/formatters';
+import type { Mark } from '.';
+import { getDurationFormatter } from '../../../../../common/utils/formatters/duration';
 import { useTheme } from '../../../../hooks/use_theme';
-import { Mark } from './';
 import { LastTickValue } from './LastTickValue';
 import { Marker } from './Marker';
-import { PlotValues } from './plotUtils';
+import type { PlotValues } from './plotUtils';
 
 // Remove any tick that is too close to topTraceDuration
 const getXAxisTickValues = (

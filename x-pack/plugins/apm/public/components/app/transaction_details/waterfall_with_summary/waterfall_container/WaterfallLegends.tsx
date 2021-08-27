@@ -4,17 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { EuiFlexGroup } from '@elastic/eui';
-import { EuiFlexItem } from '@elastic/eui';
-import { EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { Legend } from '../../../../shared/charts/Timeline/legend';
-import {
-  IWaterfallLegend,
-  WaterfallLegendType,
-} from './Waterfall/waterfall_helpers/waterfall_helpers';
+import type { IWaterfallLegend } from './Waterfall/waterfall_helpers/waterfall_helpers';
+import { WaterfallLegendType } from './Waterfall/waterfall_helpers/waterfall_helpers';
 
 interface Props {
   legends: IWaterfallLegend[];

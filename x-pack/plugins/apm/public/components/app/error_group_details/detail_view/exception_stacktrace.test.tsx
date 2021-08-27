@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { composeStories } from '@storybook/testing-react';
-import React from 'react';
 import { mount } from 'enzyme';
+import React from 'react';
 import * as stories from './exception_stacktrace.stories';
 
 const { JavaWithLongLines } = composeStories(stories);

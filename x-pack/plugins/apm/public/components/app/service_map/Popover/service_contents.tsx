@@ -6,18 +6,17 @@
  */
 
 /* eslint-disable @elastic/eui/href-or-on-click */
-
 import { EuiButton, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useApmParams } from '../../../../hooks/use_apm_params';
 import type { ContentsProps } from '.';
-import { NodeStats } from '../../../../../common/service_map';
+import type { NodeStats } from '../../../../../common/service_map';
+import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
+import { useTimeRange } from '../../../../hooks/use_time_range';
 import { AnomalyDetection } from './anomaly_detection';
 import { StatsList } from './stats_list';
-import { useTimeRange } from '../../../../hooks/use_time_range';
 
 export function ServiceContents({
   onFocusClick,

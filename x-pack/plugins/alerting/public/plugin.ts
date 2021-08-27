@@ -4,12 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { CoreSetup, Plugin, CoreStart } from 'src/core/public';
-
-import { AlertNavigationRegistry, AlertNavigationHandler } from './alert_navigation_registry';
+import type { CoreSetup, CoreStart } from '../../../../src/core/public';
+import type { Plugin } from '../../../../src/core/public/plugins/plugin';
+import type { Alert } from '../common/alert';
+import type { AlertNavigation } from '../common/alert_navigation';
 import { loadAlert, loadAlertType } from './alert_api';
-import { Alert, AlertNavigation } from '../common';
+import { AlertNavigationRegistry } from './alert_navigation_registry/alert_navigation_registry';
+import type { AlertNavigationHandler } from './alert_navigation_registry/types';
 
 export interface PluginSetupContract {
   /**

@@ -4,14 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { getErrorGroupSample } from './get_error_group_sample';
-import { getErrorGroups } from './get_error_groups';
-import {
-  SearchParamsMock,
-  inspectSearchParams,
-} from '../../utils/test_helpers';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
+import type { SearchParamsMock } from '../../utils/test_helpers';
+import { inspectSearchParams } from '../../utils/test_helpers';
+import { getErrorGroups } from './get_error_groups';
+import { getErrorGroupSample } from './get_error_group_sample';
 
 describe('error queries', () => {
   let mock: SearchParamsMock;

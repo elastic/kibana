@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { EuiLink, EuiLinkAnchorProps } from '@elastic/eui';
-import { IBasePath } from 'kibana/public';
+import type { EuiLinkAnchorProps } from '@elastic/eui';
+import { EuiLink } from '@elastic/eui';
 import React from 'react';
 import url from 'url';
-import { InfraAppId } from '../../../../../infra/public';
+import type { IBasePath } from '../../../../../../../src/core/public/http/types';
+import type { InfraAppId } from '../../../../../infra/public';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { fromQuery } from './url_helpers';
 

@@ -4,19 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { ReactNode } from 'react';
-import { i18n } from '@kbn/i18n';
+import type { EuiLinkButtonProps, EuiPopoverProps } from '@elastic/eui';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
-  EuiLinkButtonProps,
   EuiPopover,
-  EuiPopoverProps,
   EuiPopoverTitle,
   EuiText,
 } from '@elastic/eui';
-import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
+import { i18n } from '@kbn/i18n';
+import type { ReactNode } from 'react';
+import React from 'react';
+import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
 
 const PopoverContent = euiStyled(EuiText)`
   max-width: 480px;

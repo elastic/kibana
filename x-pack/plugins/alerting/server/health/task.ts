@@ -4,16 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { CoreStart, Logger } from 'kibana/server';
-import {
-  RunContext,
+import type { Logger } from '@kbn/logging';
+import type { CoreStart } from '../../../../../src/core/server';
+import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
-} from '../../../task_manager/server';
-import { AlertsConfig } from '../config';
-import { AlertingPluginsStart } from '../plugin';
-import { HealthStatus } from '../types';
+} from '../../../task_manager/server/plugin';
+import type { RunContext } from '../../../task_manager/server/task';
+import { HealthStatus } from '../../common/alert';
+import type { AlertsConfig } from '../config';
+import type { AlertingPluginsStart } from '../plugin';
 import { getAlertingHealthStatus } from './get_health';
 
 export const HEALTH_TASK_TYPE = 'alerting_health_check';

@@ -4,19 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { APMPlugin, APMRouteHandlerResources } from '../..';
-import {
-  PostPackagePolicyCreateCallback,
-  PutPackagePolicyUpdateCallback,
-} from '../../../../fleet/server';
-import {
+import type {
   NewPackagePolicy,
   UpdatePackagePolicy,
-} from '../../../../fleet/common';
-import { AgentConfiguration } from '../../../common/agent_configuration/configuration_types';
+} from '../../../../fleet/common/types/models/package_policy';
+import type {
+  PostPackagePolicyCreateCallback,
+  PutPackagePolicyUpdateCallback,
+} from '../../../../fleet/server/types/extensions';
+import type { AgentConfiguration } from '../../../common/agent_configuration/configuration_types';
 import { AGENT_NAME } from '../../../common/elasticsearch_fieldnames';
-import { APMPluginStartDependencies } from '../../types';
+import { APMPlugin } from '../../plugin';
+import type { APMRouteHandlerResources } from '../../routes/typings';
+import type { APMPluginStartDependencies } from '../../types';
 import { setupRequest } from '../helpers/setup_request';
 import { mergePackagePolicyWithApm } from './merge_package_policy_with_apm';
 

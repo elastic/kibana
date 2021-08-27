@@ -5,10 +5,9 @@
  * 2.0.
  */
 /* eslint-disable no-console */
-
-import { Role } from '../../../../security/common/model';
+import type { Role } from '../../../../security/common/model/role';
+import type { Elasticsearch, Kibana } from '../create_apm_users_and_roles';
 import { callKibana, isAxiosError } from './call_kibana';
-import { Elasticsearch, Kibana } from '../create_apm_users_and_roles';
 
 type Privilege = [] | ['read'] | ['all'];
 export interface KibanaPrivileges {

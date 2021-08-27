@@ -4,17 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { cloneDeep } from 'lodash';
-import { OBSERVER_VERSION_MAJOR } from '../../../../../common/elasticsearch_fieldnames';
-import {
-  ESSearchRequest,
-  ESFilter,
-} from '../../../../../../../../src/core/types/elasticsearch';
-
 /*
   Adds a range query to the ES request to exclude legacy data
 */
+import { cloneDeep } from 'lodash';
+import type {
+  ESFilter,
+  ESSearchRequest,
+} from '../../../../../../../../src/core/types/elasticsearch';
+import { OBSERVER_VERSION_MAJOR } from '../../../../../common/elasticsearch_fieldnames';
 
 export function addFilterToExcludeLegacyData(
   params: ESSearchRequest & {

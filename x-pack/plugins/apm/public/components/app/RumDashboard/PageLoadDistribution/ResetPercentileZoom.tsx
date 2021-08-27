@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import React from 'react';
 import {
   EuiButtonEmpty,
-  EuiHideFor,
-  EuiShowFor,
   EuiButtonIcon,
   EuiFlexItem,
+  EuiHideFor,
+  EuiShowFor,
 } from '@elastic/eui';
+import React from 'react';
+import type { PercentileRange } from '.';
 import { I18LABELS } from '../translations';
-import { PercentileRange } from './index';
 
 interface Props {
   percentileRange: PercentileRange;

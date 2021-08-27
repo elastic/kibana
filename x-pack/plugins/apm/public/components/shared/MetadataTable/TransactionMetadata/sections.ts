@@ -4,25 +4,24 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { Section } from '../sections';
 import {
-  Section,
-  TRANSACTION,
-  LABELS,
-  HTTP,
-  HOST,
+  AGENT,
   CLIENT,
   CONTAINER,
-  SERVICE,
-  PROCESS,
-  AGENT,
-  URL,
+  CUSTOM_TRANSACTION,
+  HOST,
+  HTTP,
+  LABELS,
+  MESSAGE_TRANSACTION,
   PAGE,
+  PROCESS,
+  SERVICE,
+  TRACE,
+  TRANSACTION,
+  URL,
   USER,
   USER_AGENT,
-  CUSTOM_TRANSACTION,
-  MESSAGE_TRANSACTION,
-  TRACE,
 } from '../sections';
 
 export const TRANSACTION_METADATA_SECTIONS: Section[] = [

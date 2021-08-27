@@ -4,44 +4,34 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, {
-  FormEvent,
-  SetStateAction,
-  useRef,
-  useState,
-  KeyboardEvent,
-  useEffect,
-} from 'react';
 import {
+  EuiBadge,
+  EuiButton,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiLoadingSpinner,
+  EuiOutsideClickDetector,
   EuiPopover,
+  EuiPopoverFooter,
   EuiPopoverTitle,
   EuiSelectable,
   EuiSelectableMessage,
-  EuiPopoverFooter,
-  EuiButton,
   EuiText,
-  EuiIcon,
-  EuiBadge,
-  EuiButtonIcon,
-  EuiOutsideClickDetector,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { i18n } from '@kbn/i18n';
-import styled from 'styled-components';
-import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
+import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+import type { FormEvent, KeyboardEvent, SetStateAction } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import useEvent from 'react-use/lib/useEvent';
-import {
-  formatOptions,
-  selectableRenderOptions,
-  UrlOption,
-} from './RenderOption';
+import styled from 'styled-components';
+import { useUiSetting$ } from '../../../../../../../../../src/plugins/kibana_react/public/ui_settings/use_ui_setting';
 import { I18LABELS } from '../../translations';
-import { useUiSetting$ } from '../../../../../../../../../src/plugins/kibana_react/public';
+import type { UrlOption } from './RenderOption';
+import { formatOptions, selectableRenderOptions } from './RenderOption';
 
 const StyledRow = styled.div<{
   darkMode: boolean;

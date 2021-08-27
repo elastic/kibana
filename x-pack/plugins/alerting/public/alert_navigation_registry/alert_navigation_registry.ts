@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { i18n } from '@kbn/i18n';
-import { AlertType } from '../../common';
-import { AlertNavigationHandler } from './types';
+import type { AlertType } from '../../common/alert_type';
+import type { AlertNavigationHandler } from './types';
 
 const DEFAULT_HANDLER = Symbol('*');
 export class AlertNavigationRegistry {

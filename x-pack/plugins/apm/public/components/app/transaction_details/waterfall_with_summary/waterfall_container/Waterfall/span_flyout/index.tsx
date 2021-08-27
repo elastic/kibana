@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import {
   EuiBadge,
   EuiButtonEmpty,
@@ -22,14 +21,14 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { Fragment } from 'react';
-import { CompositeSpanDurationSummaryItem } from '../../../../../../shared/Summary/CompositeSpanDurationSummaryItem';
-import { euiStyled } from '../../../../../../../../../../../src/plugins/kibana_react/common';
-import { Span } from '../../../../../../../../typings/es_schemas/ui/span';
-import { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
+import { euiStyled } from '../../../../../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
+import type { Span } from '../../../../../../../../typings/es_schemas/ui/span';
+import type { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
 import { DiscoverSpanLink } from '../../../../../../shared/Links/DiscoverLinks/DiscoverSpanLink';
 import { SpanMetadata } from '../../../../../../shared/MetadataTable/SpanMetadata';
 import { Stacktrace } from '../../../../../../shared/Stacktrace';
 import { Summary } from '../../../../../../shared/Summary';
+import { CompositeSpanDurationSummaryItem } from '../../../../../../shared/Summary/CompositeSpanDurationSummaryItem';
 import { DurationSummaryItem } from '../../../../../../shared/Summary/DurationSummaryItem';
 import { HttpInfoSummaryItem } from '../../../../../../shared/Summary/http_info_summary_item';
 import { TimestampTooltip } from '../../../../../../shared/TimestampTooltip';

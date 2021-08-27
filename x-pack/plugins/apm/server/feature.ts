@@ -4,16 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { i18n } from '@kbn/i18n';
-import { SubFeaturePrivilegeGroupType } from '../../features/common';
-import { LicenseType } from '../../licensing/common/types';
-import { AlertType, APM_SERVER_FEATURE_ID } from '../common/alert_types';
-import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
-import {
-  LicensingPluginSetup,
+import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils/default_app_categories';
+import type { SubFeaturePrivilegeGroupType } from '../../features/common/sub_feature';
+import type { LicenseType } from '../../licensing/common/types';
+import type {
   LicensingApiRequestHandlerContext,
-} from '../../licensing/server';
+  LicensingPluginSetup,
+} from '../../licensing/server/types';
+import { AlertType, APM_SERVER_FEATURE_ID } from '../common/alert_types';
 
 export const APM_FEATURE = {
   id: APM_SERVER_FEATURE_ID,

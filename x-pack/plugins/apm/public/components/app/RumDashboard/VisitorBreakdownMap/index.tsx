@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import React from 'react';
-import { EuiTitle, EuiSpacer } from '@elastic/eui';
-import { EmbeddedMap } from './EmbeddedMap';
 import { I18LABELS } from '../translations';
+import { EmbeddedMap } from './EmbeddedMap';
 
 export function VisitorBreakdownMap() {
   return (

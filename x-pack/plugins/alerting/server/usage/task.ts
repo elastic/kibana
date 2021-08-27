@@ -4,15 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { Logger, CoreSetup } from 'kibana/server';
+import type { Logger } from '@kbn/logging';
 import moment from 'moment';
-import {
-  RunContext,
+import type { CoreSetup } from '../../../../../src/core/server';
+import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
-} from '../../../task_manager/server';
-
+} from '../../../task_manager/server/plugin';
+import type { RunContext } from '../../../task_manager/server/task';
 import { getTotalCountAggregations, getTotalCountInUse } from './alerts_telemetry';
 
 export const TELEMETRY_TASK_TYPE = 'alerting_telemetry';

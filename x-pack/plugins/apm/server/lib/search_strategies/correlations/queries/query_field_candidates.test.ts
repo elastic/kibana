@@ -4,14 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { estypes } from '@elastic/elasticsearch';
-
-import type { ElasticsearchClient } from 'src/core/server';
+import { estypes } from '@elastic/elasticsearch';
+import type { ElasticsearchClient } from '../../../../../../../../src/core/server/elasticsearch/client/types';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
-
 import { hasPrefixToInclude } from '../utils/has_prefix_to_include';
-
 import {
   fetchTransactionDurationFieldCandidates,
   getRandomDocsRequest,

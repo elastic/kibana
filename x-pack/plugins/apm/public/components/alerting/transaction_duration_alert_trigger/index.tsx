@@ -4,16 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { defaults, map, omit } from 'lodash';
 import React from 'react';
+import type { CoreStart } from '../../../../../../../src/core/public';
+import { useKibana } from '../../../../../../../src/plugins/kibana_react/public/context/context';
+import { ForLastExpression } from '../../../../../triggers_actions_ui/public/common/expression_items';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
-import { CoreStart } from '../../../../../../../src/core/public';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
-import { ForLastExpression } from '../../../../../triggers_actions_ui/public';
-import { getDurationFormatter } from '../../../../common/utils/formatters';
+import { getDurationFormatter } from '../../../../common/utils/formatters/duration';
 import { useServiceTransactionTypesFetcher } from '../../../context/apm_service/use_service_transaction_types_fetcher';
 import { useEnvironmentsFetcher } from '../../../hooks/use_environments_fetcher';
 import { useFetcher } from '../../../hooks/use_fetcher';
@@ -29,7 +28,8 @@ import {
   ServiceField,
   TransactionTypeField,
 } from '../fields';
-import { AlertMetadata, getAbsoluteTimeRange } from '../helper';
+import type { AlertMetadata } from '../helper';
+import { getAbsoluteTimeRange } from '../helper';
 import { ServiceAlertTrigger } from '../service_alert_trigger';
 import { PopoverExpression } from '../service_alert_trigger/popover_expression';
 

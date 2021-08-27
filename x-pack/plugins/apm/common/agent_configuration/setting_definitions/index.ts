@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
-import { sortBy } from 'lodash';
 import { isRight } from 'fp-ts/lib/Either';
+import * as t from 'io-ts';
 import { PathReporter } from 'io-ts/lib/PathReporter';
-import { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
-import { booleanRt } from '../runtime_types/boolean_rt';
-import { getIntegerRt } from '../runtime_types/integer_rt';
+import { sortBy } from 'lodash';
+import type { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
 import { isRumAgentName } from '../../agent_name';
+import { booleanRt } from '../runtime_types/boolean_rt';
+import { getBytesRt } from '../runtime_types/bytes_rt';
+import { getDurationRt } from '../runtime_types/duration_rt';
 import { floatRt } from '../runtime_types/float_rt';
-import { RawSettingDefinition, SettingDefinition } from './types';
+import { getIntegerRt } from '../runtime_types/integer_rt';
 import { generalSettings } from './general_settings';
 import { javaSettings } from './java_settings';
-import { getDurationRt } from '../runtime_types/duration_rt';
-import { getBytesRt } from '../runtime_types/bytes_rt';
+import type { RawSettingDefinition, SettingDefinition } from './types';
 
 function getSettingDefaults(setting: RawSettingDefinition): SettingDefinition {
   switch (setting.type) {

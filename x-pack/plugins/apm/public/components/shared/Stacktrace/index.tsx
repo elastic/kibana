@@ -4,12 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { i18n } from '@kbn/i18n';
 import { isEmpty, last } from 'lodash';
 import React, { Fragment } from 'react';
-import { Stackframe } from '../../../../typings/es_schemas/raw/fields/stackframe';
-import { EmptyMessage } from '../../shared/EmptyMessage';
+import type { Stackframe } from '../../../../typings/es_schemas/raw/fields/stackframe';
+import { EmptyMessage } from '../EmptyMessage';
 import { LibraryStacktrace } from './library_stacktrace';
 import { Stackframe as StackframeComponent } from './Stackframe';
 

@@ -4,12 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import React, { useMemo } from 'react';
-import { SPAN_METADATA_SECTIONS } from './sections';
-import { Span } from '../../../../../typings/es_schemas/ui/span';
-import { getSectionsWithRows } from '../helper';
 import { MetadataTable } from '..';
+import type { Span } from '../../../../../typings/es_schemas/ui/span';
+import { getSectionsWithRows } from '../helper';
+import { SPAN_METADATA_SECTIONS } from './sections';
 
 interface Props {
   span: Span;

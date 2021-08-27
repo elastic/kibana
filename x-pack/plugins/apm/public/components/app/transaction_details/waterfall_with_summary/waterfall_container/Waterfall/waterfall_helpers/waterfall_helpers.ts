@@ -4,13 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { euiPaletteColorBlind } from '@elastic/eui';
 import { first, flatten, groupBy, isEmpty, sortBy, sum, uniq } from 'lodash';
-import { APIReturnType } from '../../../../../../../services/rest/createCallApmApi';
-import { APMError } from '../../../../../../../../typings/es_schemas/ui/apm_error';
-import { Span } from '../../../../../../../../typings/es_schemas/ui/span';
-import { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
+import type { APMError } from '../../../../../../../../typings/es_schemas/ui/apm_error';
+import type { Span } from '../../../../../../../../typings/es_schemas/ui/span';
+import type { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
+import type { APIReturnType } from '../../../../../../../services/rest/createCallApmApi';
 
 type TraceAPIResponse = APIReturnType<'GET /api/apm/traces/{traceId}'>;
 

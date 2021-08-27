@@ -4,12 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { Story } from '@storybook/react';
-import React, { ComponentType, useState } from 'react';
-import { AlertParams, TransactionDurationAlertTrigger } from '.';
-import { CoreStart } from '../../../../../../../src/core/public';
-import { createKibanaReactContext } from '../../../../../../../src/plugins/kibana_react/public';
+import type { Story } from '@storybook/react';
+import type { ComponentType } from 'react';
+import React, { useState } from 'react';
+import type { AlertParams } from '.';
+import { TransactionDurationAlertTrigger } from '.';
+import type { CoreStart } from '../../../../../../../src/core/public';
+import { createKibanaReactContext } from '../../../../../../../src/plugins/kibana_react/public/context/context';
 
 const KibanaReactContext = createKibanaReactContext(({
   notifications: { toasts: { add: () => {} } },

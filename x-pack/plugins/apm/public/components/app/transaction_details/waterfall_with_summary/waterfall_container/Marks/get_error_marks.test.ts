@@ -4,8 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { IWaterfallError } from '../Waterfall/waterfall_helpers/waterfall_helpers';
+import type { IWaterfallError } from '../Waterfall/waterfall_helpers/waterfall_helpers';
 import { getErrorMarks } from './get_error_marks';
 
 describe('getErrorMarks', () => {

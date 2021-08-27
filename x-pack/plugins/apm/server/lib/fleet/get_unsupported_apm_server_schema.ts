@@ -4,11 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { SavedObjectsClientContract } from 'kibana/server';
+import type { SavedObjectsClientContract } from '../../../../../../src/core/server/saved_objects/types';
 import {
-  APM_SERVER_SCHEMA_SAVED_OBJECT_TYPE,
   APM_SERVER_SCHEMA_SAVED_OBJECT_ID,
+  APM_SERVER_SCHEMA_SAVED_OBJECT_TYPE,
 } from '../../../common/apm_saved_object_constants';
 import { apmConfigMapping } from './get_apm_package_policy_definition';
 
