@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import {
   AnnotationDomainType,
   AreaSeries,
@@ -35,7 +35,14 @@ import { HistogramItem } from '../../../../../common/search_strategies/correlati
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { useTheme } from '../../../../hooks/use_theme';
 
-import { ChartContainer } from '../chart_container';
+import { ChartContainer, ChartContainerProps } from '../chart_container';
+
+export type TransactionDistributionChartLoadingState = Pick<
+  ChartContainerProps,
+  'hasData' | 'status'
+>;
+
+export type OnHasData = (hasData: boolean) => void;
 
 interface TransactionDistributionChartProps {
   field?: string;
@@ -46,6 +53,7 @@ interface TransactionDistributionChartProps {
   markerPercentile: number;
   overallHistogram?: HistogramItem[];
   onChartSelection?: BrushEndListener;
+  onHasData?: OnHasData;
   selection?: [number, number];
 }
 
@@ -103,6 +111,7 @@ export function TransactionDistributionChart({
   markerPercentile,
   overallHistogram,
   onChartSelection,
+  onHasData,
   selection,
 }: TransactionDistributionChartProps) {
   const chartTheme = useChartTheme();
@@ -154,6 +163,24 @@ export function TransactionDistributionChart({
         ]
       : undefined;
 
+  const chartLoadingState: TransactionDistributionChartLoadingState = useMemo(
+    () => ({
+      hasData:
+        Array.isArray(patchedOverallHistogram) &&
+        patchedOverallHistogram.length > 0,
+      status: Array.isArray(patchedOverallHistogram)
+        ? FETCH_STATUS.SUCCESS
+        : FETCH_STATUS.LOADING,
+    }),
+    [patchedOverallHistogram]
+  );
+
+  useEffect(() => {
+    if (onHasData) {
+      onHasData(chartLoadingState.hasData);
+    }
+  }, [chartLoadingState, onHasData]);
+
   return (
     <div
       data-test-subj="apmCorrelationsChart"
@@ -161,15 +188,8 @@ export function TransactionDistributionChart({
     >
       <ChartContainer
         height={250}
-        hasData={
-          Array.isArray(patchedOverallHistogram) &&
-          patchedOverallHistogram.length > 0
-        }
-        status={
-          Array.isArray(patchedOverallHistogram)
-            ? FETCH_STATUS.SUCCESS
-            : FETCH_STATUS.LOADING
-        }
+        hasData={chartLoadingState.hasData}
+        status={chartLoadingState.status}
       >
         <Chart>
           <Settings
@@ -282,7 +302,8 @@ export function TransactionDistributionChart({
             fieldName !== undefined &&
             fieldValue !== undefined && (
               <AreaSeries
-                id={`apmTransactionDistributionChartAreaSeries${fieldName}${fieldValue}`}
+                // id is used as the label for the legend
+                id={`${fieldName}:${fieldValue}`}
                 xScaleType={ScaleType.Log}
                 yScaleType={ScaleType.Log}
                 data={histogram}
