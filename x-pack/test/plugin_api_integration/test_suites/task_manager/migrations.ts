@@ -7,7 +7,6 @@
 
 import expect from '@kbn/expect';
 import type { ApiResponse, estypes } from '@elastic/elasticsearch';
-import { SavedObject } from 'kibana/server';
 import { TaskInstanceWithDeprecatedFields } from '../../../../plugins/task_manager/server/task';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
@@ -26,21 +25,21 @@ export default function createGetTests({ getService }: FtrProviderContext) {
 
     it('8.0.0 migrates actions tasks with legacy id to saved object ids', async () => {
       // NOTE: We hae to use elastic search directly against the ".kibana" index because alerts do not expose the references which we want to test exists
-      const response = await es.get<SavedObject<TaskInstanceWithDeprecatedFields>>({
-        index: '.kibana_task_manager_1',
+      const response = await es.get<{ task: TaskInstanceWithDeprecatedFields }>({
+        index: '.kibana_task_manager',
         id: 'task:be7e1250-3322-11eb-94c1-db6995e84f6a',
       });
       expect(response.statusCode).to.eql(200);
       expect(response.body._source?.task.params).to.eql(
-        '{"spaceId":"user1","alertId":"0359d7fcc04da9878ee9aadbda38ba55"}'
+        '{"spaceId":"user1","alertId":"4c0ff612-006a-590e-8bb5-ac42cf0a2878"}'
       );
     });
 
     it('8.0.0 migrates actions tasks from legacy id to saved object ids', async () => {
       const searchResult: ApiResponse<
-        estypes.SearchResponse<TaskInstanceWithDeprecatedFields>
+        estypes.SearchResponse<{ task: TaskInstanceWithDeprecatedFields }>
       > = await es.search({
-        index: '.kibana',
+        index: '.kibana_task_manager',
         body: {
           query: {
             term: {
@@ -52,7 +51,9 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       expect(searchResult.statusCode).to.equal(200);
       expect((searchResult.body.hits.total as estypes.SearchTotalHits).value).to.equal(1);
       const hit = searchResult.body.hits.hits[0];
-      expect(hit!._source!.params!).to.equal('74f3e6d7-b7bb-477d-ac28-92ee22728e6e');
+      expect(hit!._source!.task.params!).to.equal(
+        '{"spaceId":"user1","actionTaskParamsId":"c2d08bdf-ff59-51c1-a11a-d29a2140650a"}'
+      );
     });
   });
 }
