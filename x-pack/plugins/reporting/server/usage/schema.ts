@@ -31,10 +31,11 @@ const layoutCountsSchema: MakeSchemaFrom<LayoutCount> = {
 const countByAppSchema: MakeSchemaFrom<AppCounts> = {
   csv: appCountsSchema,
   csv_searchsource: appCountsSchema,
+  csv_searchsource_immediate: appCountsSchema,
   PNG: appCountsSchema,
+  PNGV2: appCountsSchema,
   printable_pdf: appCountsSchema,
   printable_pdf_v2: appCountsSchema,
-  PNGV2: appCountsSchema,
 };
 
 const availableTotalSchema: MakeSchemaFrom<AvailableTotal> = {
@@ -64,10 +65,11 @@ const statusByAppCountsSchema: MakeSchemaFrom<StatusByAppCounts> = {
 const jobTypesSchema: MakeSchemaFrom<AvailableTotals> = {
   csv: availableTotalSchema,
   csv_searchsource: availableTotalSchema,
+  csv_searchsource_immediate: availableTotalSchema,
   PNG: availableTotalSchema,
+  PNGV2: availableTotalSchema,
   printable_pdf: availableTotalSchema,
   printable_pdf_v2: availableTotalSchema,
-  PNGV2: availableTotalSchema,
 };
 
 const rangeStatsSchema: MakeSchemaFrom<RangeStats> = {

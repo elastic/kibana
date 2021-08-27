@@ -8,7 +8,9 @@
 import { uniq } from 'lodash';
 import { ALL_JOB_TYPES, DEPRECATED_JOB_TYPES, PDF_JOB_TYPE } from '../../common/constants';
 import type { JobType } from '../../common/types';
-import type { AvailableTotal, FeatureAvailabilityMap, RangeStats } from './types';
+import type { AvailableTotal, FeatureAvailabilityMap, RangeStats, StatusCounts } from './types';
+
+type AvailableTotalPDFAdditional = Pick<AvailableTotal, 'app' | 'layout'>;
 
 const jobTypeIsDeprecated = (jobType: string) => DEPRECATED_JOB_TYPES.includes(jobType);
 
@@ -16,7 +18,7 @@ function getAvailableTotal(
   range: Partial<RangeStats>,
   typeKey: JobType,
   featureAvailability: FeatureAvailabilityMap,
-  additionalDefault?: Pick<AvailableTotal, 'app' | 'layout'>
+  additionalDefault?: AvailableTotalPDFAdditional
 ) {
   const isAvailable = (feature: JobType) => !!featureAvailability[feature];
   const defaultAvailableTotal: AvailableTotal = {
@@ -28,7 +30,7 @@ function getAvailableTotal(
   const jobType = range[typeKey] || defaultAvailableTotal;
 
   // merge the additional stats for the jobType
-  const filledAdditional: typeof additionalDefault = {};
+  const filledAdditional: AvailableTotalPDFAdditional = {};
   if (additionalDefault?.app) {
     filledAdditional.app = { ...additionalDefault.app, ...jobType.app };
   }
@@ -48,7 +50,7 @@ function getAvailableTotal(
 }
 
 /*
- * Decorates range stats (stats for last day, last 7 days, etc) with feature
+ * Decorates time-based range stats (stats for all time, status for last 7 days) with feature
  * availability booleans, and zero-filling for unused features
  *
  * This function builds the result object for all export types found in the
@@ -66,30 +68,32 @@ export const decorateRangeStats = (
   } = rangeStats;
 
   // combine the known types with any unknown type found in reporting data
-  const keysBasic = uniq([ALL_JOB_TYPES, ...Object.keys(rangeStatsBasic)]) as JobType[];
-  const rangeBasic = keysBasic.reduce((accum, currentKey) => {
-    if (currentKey === PDF_JOB_TYPE) {
-      return accum;
-    }
+  const jobTypes = uniq([ALL_JOB_TYPES, ...Object.keys(rangeStatsBasic)]) as JobType[];
+  const jobTypeStats = jobTypes.reduce((accum, jobType) => {
     return {
       ...accum,
-      [currentKey]: getAvailableTotal(rangeStatsBasic, currentKey, featureAvailability),
+      [jobType]: getAvailableTotal(
+        rangeStats,
+        jobType,
+        featureAvailability,
+        jobType === PDF_JOB_TYPE ? additionalDefaultPDF : undefined
+      ),
     };
   }, {}) as Pick<RangeStats, JobType>;
-  const rangePdf = {
-    [PDF_JOB_TYPE]: getAvailableTotal(rangeStats, PDF_JOB_TYPE, featureAvailability, {
-      app: { dashboard: 0, visualization: 0 },
-      layout: { preserve_layout: 0, print: 0, canvas: 0 },
-    }),
-  };
 
   const resultStats = {
     _all: rangeAll || 0,
-    status: { completed: 0, failed: 0, ...rangeStatus },
+    status: { ...statusCountsDefault, ...rangeStatus },
     statuses: rangeStatusByApp,
-    ...rangeBasic,
-    ...rangePdf,
+    ...jobTypeStats,
   } as RangeStats;
 
   return resultStats;
+};
+
+const statusCountsDefault: StatusCounts = { completed: 0, failed: 0, pending: 0, processing: 0 };
+
+const additionalDefaultPDF: AvailableTotalPDFAdditional = {
+  app: { dashboard: 0, visualization: 0 },
+  layout: { preserve_layout: 0, print: 0, canvas: 0 },
 };
