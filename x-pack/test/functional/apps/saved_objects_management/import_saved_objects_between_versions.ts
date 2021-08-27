@@ -64,7 +64,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.savedObjects.clickImportDone();
       const importedSavedObjects = await testSubjects.getVisibleText('exportAllObjects');
       // verifying the count of saved objects after importing .ndjson
-      await expect(importedSavedObjects).to.be('Export 111 objects');
+      await expect(importedSavedObjects).to.be('Export 110 objects');
     });
   });
 }

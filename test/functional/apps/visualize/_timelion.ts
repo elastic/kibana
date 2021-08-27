@@ -223,7 +223,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             await monacoEditor.setCodeEditorValue('');
             await monacoEditor.typeCodeEditorValue('.es(index=', 'timelionCodeEditor');
             // wait for index patterns will be loaded
-            await common.sleep(300);
+            await common.sleep(500);
             const suggestions = await timelion.getSuggestionItemsText();
             expect(suggestions.length).not.to.eql(0);
             expect(suggestions[0].includes('log')).to.eql(true);
