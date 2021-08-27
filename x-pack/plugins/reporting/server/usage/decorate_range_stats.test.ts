@@ -6,12 +6,17 @@
  */
 
 import { decorateRangeStats } from './decorate_range_stats';
-import { FeatureAvailabilityMap } from './types';
+import { AvailableTotal, FeatureAvailabilityMap, LayoutCount, StatusByAppCounts } from './types';
 
 let featureMap: FeatureAvailabilityMap;
 
 beforeEach(() => {
-  featureMap = { PNG: true, csv: true, csv_searchsource: true, printable_pdf: true };
+  featureMap = {
+    PNG: true,
+    csv: true,
+    csv_searchsource: true,
+    printable_pdf: true,
+  } as FeatureAvailabilityMap;
 });
 
 test('Model of job status and status-by-pdf-app', () => {
@@ -22,7 +27,7 @@ test('Model of job status and status-by-pdf-app', () => {
         processing: { printable_pdf: { 'canvas workpad': 1 } },
         pending: { printable_pdf: { dashboard: 1, 'canvas workpad': 1 } },
         failed: { printable_pdf: { visualization: 2, dashboard: 2, 'canvas workpad': 1 } },
-      },
+      } as StatusByAppCounts,
     },
     featureMap
   );
@@ -62,14 +67,14 @@ test('Model of job status and status-by-pdf-app', () => {
 test('Model of jobTypes', () => {
   const result = decorateRangeStats(
     {
-      PNG: { available: true, total: 3 },
-      printable_pdf: {
+      PNG: { available: true, total: 3 } as AvailableTotal,
+      printable_pdf: ({
         available: true,
         total: 3,
         app: { dashboard: 0, visualization: 0, 'canvas workpad': 3 },
-        layout: { preserve_layout: 3, print: 0 },
-      },
-      csv_searchsource: { available: true, total: 3 },
+        layout: { preserve_layout: 3, print: 0 } as LayoutCount,
+      } as unknown) as Required<AvailableTotal>,
+      csv_searchsource: { available: true, total: 3 } as AvailableTotal,
     },
     featureMap
   );

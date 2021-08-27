@@ -26,9 +26,8 @@ export { runTaskFnFactory } from './execute_job';
 
 export const getExportType = (): ExportTypeDefinition<null, ImmediateExecuteFn> => ({
   ...metadata,
-  jobType: CSV_SEARCHSOURCE_IMMEDIATE_TYPE,
+  immediateType: CSV_SEARCHSOURCE_IMMEDIATE_TYPE,
   jobContentExtension: 'csv',
-  createJobFnFactory: null,
   runTaskFnFactory,
   validLicenses: [
     LICENSE_TYPE_TRIAL,

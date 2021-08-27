@@ -26,6 +26,7 @@ import {
 } from '../test_helpers';
 import { ExportTypeDefinition, ReportingRequestHandlerContext } from '../types';
 import { registerJobInfoRoutes } from './jobs';
+import { JobType } from '../../common/types';
 
 type SetupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
 
@@ -85,13 +86,13 @@ describe('GET /api/reporting/jobs/download', () => {
     exportTypesRegistry = new ExportTypesRegistry();
     exportTypesRegistry.register({
       id: 'unencoded',
-      jobType: 'unencodedJobType',
+      jobType: ('unencodedJobType' as unknown) as JobType,
       jobContentExtension: 'csv',
       validLicenses: ['basic', 'gold'],
     } as ExportTypeDefinition);
     exportTypesRegistry.register({
       id: 'base64Encoded',
-      jobType: 'base64EncodedJobType',
+      jobType: ('base64EncodedJobType' as unknown) as JobType,
       jobContentEncoding: 'base64',
       jobContentExtension: 'pdf',
       validLicenses: ['basic', 'gold'],
