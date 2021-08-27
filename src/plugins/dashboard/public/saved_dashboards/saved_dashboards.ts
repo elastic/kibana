@@ -5,12 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { SavedObjectsClientContract } from 'kibana/public';
-
-import { EmbeddableStart } from '../services/embeddable';
-import { SavedObjectLoader, SavedObjectsStart } from '../services/saved_objects';
-
+import type { SavedObjectsClientContract } from '../../../../core/public/saved_objects/saved_objects_client';
+import type { EmbeddableStart } from '../../../embeddable/public/plugin';
+import type { SavedObjectsStart } from '../../../saved_objects/public/plugin';
+import { SavedObjectLoader } from '../../../saved_objects/public/saved_object/saved_object_loader';
 import { createSavedDashboardClass } from './saved_dashboard';
 
 interface Services {

@@ -5,15 +5,15 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { ElasticsearchClient, SavedObjectsClientContract } from 'kibana/server';
-import {
+import type { ElasticsearchClient } from '../../../../core/server/elasticsearch/client/types';
+import type { SavedObjectsClientContract } from '../../../../core/server/saved_objects/types';
+import { IndexPatternMissingIndices } from '../../common/index_patterns/lib/errors';
+import type {
   GetFieldsOptions,
-  IIndexPatternsApiClient,
   GetFieldsOptionsTimePattern,
+  IIndexPatternsApiClient,
 } from '../../common/index_patterns/types';
-import { IndexPatternMissingIndices } from '../../common/index_patterns/lib';
-import { IndexPatternsFetcher } from './fetcher';
+import { IndexPatternsFetcher } from './fetcher/index_patterns_fetcher';
 import { hasUserIndexPattern } from './has_user_index_pattern';
 
 export class IndexPatternsApiServer implements IIndexPatternsApiClient {

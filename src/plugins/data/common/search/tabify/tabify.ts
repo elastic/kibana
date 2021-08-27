@@ -5,13 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { get } from 'lodash';
-import { TabbedAggResponseWriter } from './response_writer';
+import type { IAggConfigs } from '../aggs/agg_configs';
+import { AggGroupNames } from '../aggs/agg_groups';
 import { TabifyBuckets } from './buckets';
-import { TabbedResponseWriterOptions } from './types';
-import { AggResponseBucket } from './types';
-import { AggGroupNames, IAggConfigs } from '../aggs';
+import { TabbedAggResponseWriter } from './response_writer';
+import type { AggResponseBucket, TabbedResponseWriterOptions } from './types';
 
 /**
  * Sets up the ResponseWriter and kicks off bucket collection.

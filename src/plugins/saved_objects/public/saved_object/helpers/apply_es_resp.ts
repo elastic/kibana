@@ -5,16 +5,18 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { cloneDeep, defaults, forOwn, assign } from 'lodash';
-import { EsResponse, SavedObject, SavedObjectConfig, SavedObjectKibanaServices } from '../../types';
-import { SavedObjectNotFound } from '../../../../kibana_utils/public';
-import {
-  IndexPattern,
-  injectSearchSourceReferences,
-  parseSearchSourceJSON,
-} from '../../../../data/public';
-import { expandShorthand } from './field_mapping';
+import { assign, cloneDeep, defaults, forOwn } from 'lodash';
+import { IndexPattern } from '../../../../data/common/index_patterns/index_patterns/index_pattern';
+import { injectSearchSourceReferences } from '../../../../data/common/search/search_source/inject_references';
+import { parseSearchSourceJSON } from '../../../../data/common/search/search_source/parse_json';
+import { SavedObjectNotFound } from '../../../../kibana_utils/common/errors/errors';
+import type {
+  EsResponse,
+  SavedObject,
+  SavedObjectConfig,
+  SavedObjectKibanaServices,
+} from '../../types';
+import { expandShorthand } from './field_mapping/mapping_setup';
 
 /**
  * A given response of and ElasticSearch containing a plain saved object is applied to the given

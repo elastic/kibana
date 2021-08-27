@@ -5,9 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { TopNavMenuProps, TopNavMenuExtensionsRegistrySetup } from './top_nav_menu';
-import { DataPublicPluginStart } from '../../data/public';
+import type { DataPublicPluginStart } from '../../data/public/types';
+import type { TopNavMenuProps } from './top_nav_menu/top_nav_menu';
+import type { TopNavMenuExtensionsRegistrySetup } from './top_nav_menu/top_nav_menu_extensions_registry';
 
 export interface NavigationPublicPluginSetup {
   registerMenuItem: TopNavMenuExtensionsRegistrySetup['register'];

@@ -5,8 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import type { estypes, ApiResponse } from '@elastic/elasticsearch';
+import type { ApiResponse } from '@elastic/elasticsearch';
+import { estypes } from '@elastic/elasticsearch';
 
 interface MsearchHeaders {
   index: string;

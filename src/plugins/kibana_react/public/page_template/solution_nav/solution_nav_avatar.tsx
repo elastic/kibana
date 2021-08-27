@@ -5,12 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import './solution_nav_avatar.scss';
-
-import React, { FunctionComponent } from 'react';
+import type { DistributiveOmit, EuiAvatarProps } from '@elastic/eui';
+import { EuiAvatar } from '@elastic/eui';
 import classNames from 'classnames';
-
-import { DistributiveOmit, EuiAvatar, EuiAvatarProps } from '@elastic/eui';
+import type { FunctionComponent } from 'react';
+import React from 'react';
+import './solution_nav_avatar.scss';
 
 export type KibanaPageTemplateSolutionNavAvatarProps = DistributiveOmit<EuiAvatarProps, 'size'> & {
   /**

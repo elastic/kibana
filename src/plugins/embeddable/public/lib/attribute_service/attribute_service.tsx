@@ -6,20 +6,21 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { get, omit } from 'lodash';
-import { I18nStart, NotificationsStart } from 'src/core/public';
-import { SavedObjectSaveModal, OnSaveProps, SaveResult } from '../../../../saved_objects/public';
-import {
-  EmbeddableInput,
-  SavedObjectEmbeddableInput,
-  isSavedObjectEmbeddableInput,
-  IEmbeddable,
-  Container,
-  EmbeddableFactoryNotFoundError,
-  EmbeddableFactory,
-} from '../index';
+import React from 'react';
+import type { I18nStart } from '../../../../../core/public/i18n/i18n_service';
+import type { NotificationsStart } from '../../../../../core/public/notifications/notifications_service';
+import type { OnSaveProps } from '../../../../saved_objects/public/save_modal/saved_object_save_modal';
+import { SavedObjectSaveModal } from '../../../../saved_objects/public/save_modal/saved_object_save_modal';
+import type { SaveResult } from '../../../../saved_objects/public/save_modal/show_saved_object_save_modal';
+import type { SavedObjectEmbeddableInput } from '../../../common/lib/saved_object_embeddable';
+import { isSavedObjectEmbeddableInput } from '../../../common/lib/saved_object_embeddable';
+import type { EmbeddableInput } from '../../../common/types';
+import { Container } from '../containers/container';
+import type { EmbeddableFactory } from '../embeddables/embeddable_factory';
+import type { IEmbeddable } from '../embeddables/i_embeddable';
+import { EmbeddableFactoryNotFoundError } from '../errors';
 
 /**
  * The attribute service is a shared, generic service that embeddables can use to provide the functionality

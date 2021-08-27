@@ -4,15 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { ActionsConfigurationUtilities } from '../../actions_config';
-import {
+import type { ActionsConfigurationUtilities } from '../../actions_config';
+import * as i18n from './translations';
+import type {
+  ExternalServiceValidation,
   JiraPublicConfigurationType,
   JiraSecretConfigurationType,
-  ExternalServiceValidation,
 } from './types';
-
-import * as i18n from './translations';
 
 export const validateCommonConfig = (
   configurationUtilities: ActionsConfigurationUtilities,

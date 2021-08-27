@@ -5,9 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import React, { Component } from 'react';
-import PropTypes from 'prop-types';
 import {
   EuiIcon,
   EuiIconTip,
@@ -17,8 +14,10 @@ import {
   EuiTableRowCell,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Request, RequestStatistic } from '../../../../../common/adapters/request/types';
-import { RequestDetailsProps } from '../types';
+import PropTypes from 'prop-types';
+import React, { Component } from 'react';
+import type { Request, RequestStatistic } from '../../../../../common/adapters/request/types';
+import type { RequestDetailsProps } from '../types';
 
 // TODO: Replace by property once available
 interface RequestDetailsStatRow extends RequestStatistic {

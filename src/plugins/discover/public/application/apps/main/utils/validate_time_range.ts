@@ -8,7 +8,7 @@
 
 import dateMath from '@elastic/datemath';
 import { i18n } from '@kbn/i18n';
-import { ToastsStart } from 'kibana/public';
+import type { ToastsStart } from '../../../../../../../core/public/notifications/toasts/toasts_service';
 
 /**
  * Validates a given time filter range, provided by URL or UI

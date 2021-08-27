@@ -5,20 +5,22 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from 'src/core/server';
-import { ExpressionsServerSetup } from 'src/plugins/expressions/server';
-import { BfetchServerSetup } from 'src/plugins/bfetch/server';
-import { ConfigSchema } from '../config';
-import { IndexPatternsServiceProvider, IndexPatternsServiceStart } from './index_patterns';
-import { ISearchSetup, ISearchStart, SearchEnhancements } from './search';
-import { SearchService } from './search/search_service';
+import type { Logger } from '@kbn/logging';
+import type { CoreSetup, CoreStart } from '../../../core/server';
+import type { Plugin, PluginInitializerContext } from '../../../core/server/plugins/types';
+import type { BfetchServerSetup } from '../../bfetch/server/plugin';
+import type { ExpressionsServerSetup } from '../../expressions/server/plugin';
+import type { FieldFormatsSetup, FieldFormatsStart } from '../../field_formats/server/types';
+import type { UsageCollectionSetup } from '../../usage_collection/server/plugin';
+import type { ConfigSchema } from '../config';
+import { AutocompleteService } from './autocomplete/autocomplete_service';
+import type { IndexPatternsServiceStart } from './index_patterns/index_patterns_service';
+import { IndexPatternsServiceProvider } from './index_patterns/index_patterns_service';
+import { KqlTelemetryService } from './kql_telemetry/kql_telemetry_service';
 import { QueryService } from './query/query_service';
-import { ScriptsService } from './scripts';
-import { KqlTelemetryService } from './kql_telemetry';
-import { UsageCollectionSetup } from '../../usage_collection/server';
-import { AutocompleteService } from './autocomplete';
-import { FieldFormatsSetup, FieldFormatsStart } from '../../field_formats/server';
+import { ScriptsService } from './scripts/scripts_service';
+import { SearchService } from './search/search_service';
+import type { ISearchSetup, ISearchStart, SearchEnhancements } from './search/types';
 import { getUiSettings } from './ui_settings';
 
 export interface DataEnhancements {

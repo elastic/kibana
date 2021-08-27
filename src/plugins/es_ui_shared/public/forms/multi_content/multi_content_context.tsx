@@ -5,10 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import React, { useEffect, useCallback, createContext, useContext, useRef } from 'react';
-
-import { useMultiContent, HookProps, Content, MultiContent } from './use_multi_content';
+import React, { createContext, useCallback, useContext, useEffect, useRef } from 'react';
+import type { Content, HookProps, MultiContent } from './use_multi_content';
+import { useMultiContent } from './use_multi_content';
 
 const multiContentContext = createContext<MultiContent<any>>({} as MultiContent<any>);
 

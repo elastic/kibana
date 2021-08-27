@@ -5,10 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import React, { useState, useEffect } from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import {
   EuiButtonEmpty,
   EuiFieldNumber,
@@ -17,12 +13,15 @@ import {
   EuiFormRow,
   EuiSpacer,
 } from '@elastic/eui';
-import { ActionBarWarning } from './action_bar_warning';
-import { SurrDocType } from '../../api/context';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
+import React, { useEffect, useState } from 'react';
 import {
   MAX_CONTEXT_SIZE,
   MIN_CONTEXT_SIZE,
 } from '../../../../components/context_app/utils/constants';
+import { SurrDocType } from '../../api/context';
+import { ActionBarWarning } from './action_bar_warning';
 
 export interface ActionBarProps {
   /**

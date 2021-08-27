@@ -5,11 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import type { IndexPatternSavedObjectAttrs } from './index_patterns';
-import type { SavedObjectsClientCommon } from '../types';
-
 import { INDEX_PATTERN_SAVED_OBJECT_TYPE } from '../constants';
+import type { IndexPatternSavedObjectAttrs } from './index_patterns/index_patterns';
+import type { SavedObjectsClientCommon } from './types';
 
 /**
  * Returns an object matching a given title

@@ -5,9 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { i18n } from '@kbn/i18n';
-import { Trigger } from '../../../ui_actions/public';
+import type { Trigger } from '../../../ui_actions/public/triggers/trigger';
 
 export const APPLY_FILTER_TRIGGER = 'FILTER_TRIGGER';
 export const applyFilterTrigger: Trigger = {

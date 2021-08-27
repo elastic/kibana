@@ -7,13 +7,14 @@
  */
 import { i18n } from '@kbn/i18n';
 import { filter } from 'rxjs/operators';
-import { Adapters } from '../../../../../../inspector/common';
-import { isCompleteResponse, SearchSource } from '../../../../../../data/common';
-import { FetchStatus } from '../../../types';
-import { SavedSearchData } from '../services/use_saved_search';
-import { sendErrorMsg, sendLoadingMsg } from '../services/use_saved_search_messages';
+import { SearchSource } from '../../../../../../data/common/search/search_source/search_source';
+import { isCompleteResponse } from '../../../../../../data/common/search/utils';
+import type { Adapters } from '../../../../../../inspector/common/adapters/types';
 import { SAMPLE_SIZE_SETTING } from '../../../../../common';
-import { DiscoverServices } from '../../../../build_services';
+import type { DiscoverServices } from '../../../../build_services';
+import { FetchStatus } from '../../../types';
+import type { SavedSearchData } from '../services/use_saved_search';
+import { sendErrorMsg, sendLoadingMsg } from '../services/use_saved_search_messages';
 
 export const fetchDocuments = (
   data$: SavedSearchData,

@@ -7,12 +7,14 @@
  */
 
 import React from 'react';
-import { NotificationsStart, OverlayRef, OverlayStart } from 'src/core/public';
-import { EmbeddableStart } from '../../../../../plugin';
-import { toMountPoint } from '../../../../../../../kibana_react/public';
-import { IContainer } from '../../../../containers';
+import type { NotificationsStart } from '../../../../../../../../core/public/notifications/notifications_service';
+import type { OverlayStart } from '../../../../../../../../core/public/overlays/overlay_service';
+import type { OverlayRef } from '../../../../../../../../core/public/overlays/types';
+import { toMountPoint } from '../../../../../../../kibana_react/public/util/to_mount_point';
+import type { UsageCollectionStart } from '../../../../../../../usage_collection/public/plugin';
+import type { EmbeddableStart } from '../../../../../plugin';
+import type { IContainer } from '../../../../containers/i_container';
 import { AddPanelFlyout } from './add_panel_flyout';
-import { UsageCollectionStart } from '../../../../../../../usage_collection/public';
 
 export function openAddPanelFlyout(options: {
   embeddable: IContainer;

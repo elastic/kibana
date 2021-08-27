@@ -5,24 +5,24 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiCheckbox,
   EuiForm,
   EuiFormRow,
   EuiModalBody,
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
-  EuiCheckbox,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Component } from 'react';
-import { IIndexPattern } from '../..';
-import { Filter } from '../../../common';
+import type { Filter } from '../../../common/es_query';
+import type { IIndexPattern } from '../../../common/index_patterns/types';
+import { getDisplayValueFromFilter } from '../../query/filter_manager/lib/get_display_value';
+import { mapAndFlattenFilters } from '../../query/filter_manager/lib/map_and_flatten_filters';
 import { FilterLabel } from '../filter_bar';
-import { mapAndFlattenFilters, getDisplayValueFromFilter } from '../../query';
 
 interface Props {
   filters: Filter[];

@@ -6,9 +6,10 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { I18nProvider } from '@kbn/i18n/react';
-import { DocTableEmbeddable, DocTableEmbeddableProps } from './doc_table_embeddable';
+import React from 'react';
+import type { DocTableEmbeddableProps } from './doc_table_embeddable';
+import { DocTableEmbeddable } from './doc_table_embeddable';
 
 export function DiscoverDocTableEmbeddable(renderProps: DocTableEmbeddableProps) {
   return (

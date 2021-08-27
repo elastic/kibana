@@ -5,9 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { i18n } from '@kbn/i18n';
-import { IBucketAggConfig } from './bucket_agg_type';
+import type { IBucketAggConfig } from './bucket_agg_type';
 
 export const autoInterval = 'auto';
 export const isAutoInterval = (value: unknown) => value === autoInterval;

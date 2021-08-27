@@ -5,8 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { EsQuerySortValue, SortDirection } from '../../../../../kibana_services';
+import type { EsQuerySortValue } from '../../../../../../../data/common/search/search_source/types';
+import { SortDirection } from '../../../../../../../data/common/search/search_source/types';
 
 /**
  * Returns `EsQuerySort` which is used to sort records in the ES query

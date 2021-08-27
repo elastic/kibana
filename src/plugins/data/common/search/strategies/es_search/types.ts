@@ -5,9 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { estypes } from '@elastic/elasticsearch';
-
-import { IKibanaSearchRequest, IKibanaSearchResponse } from '../../types';
+import { estypes } from '@elastic/elasticsearch';
+import type { IKibanaSearchRequest, IKibanaSearchResponse } from '../../types';
 
 export const ES_SEARCH_STRATEGY = 'es';
 

@@ -5,33 +5,32 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useCallback, useState } from 'react';
-import { omit } from 'lodash';
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiFocusTrap,
   EuiFormRow,
   EuiModalBody,
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
+  EuiOutsideClickDetector,
   EuiPanel,
   EuiRadio,
   EuiSpacer,
   EuiText,
-  EuiFocusTrap,
-  EuiOutsideClickDetector,
 } from '@elastic/eui';
-import { DashboardCopyToCapabilities } from './copy_to_dashboard_action';
-import { LazyDashboardPicker, withSuspense } from '../../services/presentation_util';
+import { omit } from 'lodash';
+import React, { useCallback, useState } from 'react';
+import type { IEmbeddable } from '../../../../embeddable/public/lib/embeddables/i_embeddable';
+import { PanelNotFoundError } from '../../../../embeddable/public/lib/errors';
+import { EmbeddableStateTransfer } from '../../../../embeddable/public/lib/state_transfer/embeddable_state_transfer';
+import { LazyDashboardPicker, withSuspense } from '../../../../presentation_util/public/components';
+import type { DashboardPanelState } from '../../../common/types';
+import { createDashboardEditUrl, DashboardConstants } from '../../dashboard_constants';
 import { dashboardCopyToDashboardAction } from '../../dashboard_strings';
-import {
-  EmbeddableStateTransfer,
-  IEmbeddable,
-  PanelNotFoundError,
-} from '../../services/embeddable';
-import { createDashboardEditUrl, DashboardConstants, DashboardContainer } from '../..';
-import { DashboardPanelState } from '..';
+import { DashboardContainer } from '../embeddable/dashboard_container';
+import type { DashboardCopyToCapabilities } from './copy_to_dashboard_action';
 
 interface CopyToDashboardModalProps {
   capabilities: DashboardCopyToCapabilities;

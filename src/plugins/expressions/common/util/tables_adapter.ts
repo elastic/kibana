@@ -5,9 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { EventEmitter } from 'events';
-import { Datatable } from '../expression_types/specs';
+import type { Datatable } from '../expression_types/specs/datatable';
 
 export class TablesAdapter extends EventEmitter {
   private _tables: { [key: string]: Datatable } = {};

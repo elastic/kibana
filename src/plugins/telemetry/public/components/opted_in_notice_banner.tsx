@@ -8,12 +8,12 @@
 
 /* eslint @elastic/eui/href-or-on-click:0 */
 
-import * as React from 'react';
-import { EuiButton, EuiLink, EuiCallOut, EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiButton, EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+import * as React from 'react';
+import type { HttpSetup } from '../../../../core/public/http/types';
 import { PATH_TO_ADVANCED_SETTINGS, PRIVACY_STATEMENT_URL } from '../../common/constants';
-import { HttpSetup } from '../../../../core/public';
 
 interface Props {
   http: HttpSetup;

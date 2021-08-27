@@ -5,8 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { DateRange } from '../../../expressions';
+import type { DateRange } from '../../../expressions/date_range';
 
 export function convertDateRangeToString({ from, to }: DateRange, format: (val: any) => string) {
   if (!from) {

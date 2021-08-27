@@ -5,15 +5,17 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { EuiFormRow } from '@elastic/eui';
-import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import type { InjectedIntl } from '@kbn/i18n/react';
+import { injectI18n } from '@kbn/i18n/react';
 import { uniq } from 'lodash';
 import React from 'react';
-import { GenericComboBox, GenericComboBoxProps } from './generic_combo_box';
-import { PhraseSuggestorUI, PhraseSuggestorProps } from './phrase_suggestor';
+import { withKibana } from '../../../../../kibana_react/public/context/context';
+import type { GenericComboBoxProps } from './generic_combo_box';
+import { GenericComboBox } from './generic_combo_box';
+import type { PhraseSuggestorProps } from './phrase_suggestor';
+import { PhraseSuggestorUI } from './phrase_suggestor';
 import { ValueInputType } from './value_input_type';
-import { withKibana } from '../../../../../kibana_react/public';
 
 interface Props extends PhraseSuggestorProps {
   value?: string;

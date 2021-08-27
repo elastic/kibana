@@ -5,8 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { ObservableLike, UnwrapObservable, UnwrapPromiseOrReturn } from '@kbn/utility-types';
+import type { ObservableLike, UnwrapObservable, UnwrapPromiseOrReturn } from '@kbn/utility-types';
 
 /**
  * This can convert a type into a known Expression string representation of

@@ -5,16 +5,15 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { i18n } from '@kbn/i18n';
-import { KibanaRequest, StartServicesAccessor } from 'src/core/server';
-
-import {
-  getIndexPatternLoadMeta,
+import type { StartServicesAccessor } from '../../../../../core/server';
+import { KibanaRequest } from '../../../../../core/server/http/router/request';
+import type {
   IndexPatternLoadExpressionFunctionDefinition,
   IndexPatternLoadStartDependencies,
-} from '../../../common/index_patterns/expressions';
-import { DataPluginStartDependencies, DataPluginStart } from '../../plugin';
+} from '../../../common/index_patterns/expressions/load_index_pattern';
+import { getIndexPatternLoadMeta } from '../../../common/index_patterns/expressions/load_index_pattern';
+import type { DataPluginStart, DataPluginStartDependencies } from '../../plugin';
 
 /**
  * Returns the expression function definition. Any stateful dependencies are accessed

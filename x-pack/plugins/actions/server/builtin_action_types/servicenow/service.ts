@@ -4,20 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import axios, { AxiosResponse } from 'axios';
-
-import { ExternalServiceCredentials, ExternalService, ExternalServiceParams } from './types';
-
+import type { Logger } from '@kbn/logging';
+import type { AxiosResponse } from 'axios';
+import axios from 'axios';
+import type { ActionsConfigurationUtilities } from '../../actions_config';
+import { addTimeZoneToDate, getErrorMessage, patch, request } from '../lib/axios_utils';
 import * as i18n from './translations';
-import { Logger } from '../../../../../../src/core/server';
-import {
+import type {
+  ExternalService,
+  ExternalServiceCredentials,
+  ExternalServiceParams,
+  ResponseError,
   ServiceNowPublicConfigurationType,
   ServiceNowSecretConfigurationType,
-  ResponseError,
 } from './types';
-import { request, getErrorMessage, addTimeZoneToDate, patch } from '../lib/axios_utils';
-import { ActionsConfigurationUtilities } from '../../actions_config';
 
 const API_VERSION = 'v2';
 const SYS_DICTIONARY = `api/now/${API_VERSION}/table/sys_dictionary`;

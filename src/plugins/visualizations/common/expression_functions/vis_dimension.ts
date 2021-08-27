@@ -5,14 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { i18n } from '@kbn/i18n';
-import {
-  ExpressionFunctionDefinition,
-  ExpressionValueBoxed,
+import type { ExpressionFunctionDefinition } from '../../../expressions/common/expression_functions/types';
+import type {
   Datatable,
   DatatableColumn,
-} from '../../../expressions/common';
+} from '../../../expressions/common/expression_types/specs/datatable';
+import type { ExpressionValueBoxed } from '../../../expressions/common/expression_types/types';
 
 interface Arguments {
   accessor: string | number;

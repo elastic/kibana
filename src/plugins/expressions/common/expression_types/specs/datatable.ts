@@ -5,14 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import type { SerializableRecord } from '@kbn/utility-types';
 import { map, pick, zipObject } from 'lodash';
-
-import { ExpressionTypeDefinition } from '../types';
-import { PointSeries, PointSeriesColumn } from './pointseries';
-import { ExpressionValueRender } from './render';
-import { SerializedFieldFormat } from '../../types';
+import type { SerializedFieldFormat } from '../../types/common';
+import type { ExpressionTypeDefinition } from '../types';
+import type { PointSeries, PointSeriesColumn } from './pointseries';
+import type { ExpressionValueRender } from './render';
 
 const name = 'datatable';
 

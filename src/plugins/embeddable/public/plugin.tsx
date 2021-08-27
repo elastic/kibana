@@ -6,51 +6,44 @@
  * Side Public License, v 1.
  */
 
+import type { SerializableRecord } from '@kbn/utility-types';
+import { identity } from 'lodash';
 import React from 'react';
 import { Subscription } from 'rxjs';
-import { identity } from 'lodash';
-import type { SerializableRecord } from '@kbn/utility-types';
-import { getSavedObjectFinder, showSaveModal } from '../../saved_objects/public';
-import { UiActionsSetup, UiActionsStart } from '../../ui_actions/public';
-import { Start as InspectorStart } from '../../inspector/public';
-import {
-  PluginInitializerContext,
-  CoreSetup,
-  CoreStart,
-  Plugin,
-  PublicAppInfo,
-} from '../../../core/public';
-import {
-  EmbeddableFactoryRegistry,
+import type { CoreSetup, CoreStart } from '../../../core/public';
+import type { PublicAppInfo } from '../../../core/public/application/types';
+import type { Plugin } from '../../../core/public/plugins/plugin';
+import type { PluginInitializerContext } from '../../../core/public/plugins/plugin_context';
+import type { Start as InspectorStart } from '../../inspector/public/plugin';
+import { migrateToLatest } from '../../kibana_utils/common/persistable_state/migrate_to_latest';
+import type { PersistableStateService } from '../../kibana_utils/common/persistable_state/types';
+import { Storage } from '../../kibana_utils/public/storage/storage';
+import { getSavedObjectFinder } from '../../saved_objects/public/finder/saved_object_finder';
+import { showSaveModal } from '../../saved_objects/public/save_modal/show_saved_object_save_modal';
+import type { UiActionsSetup, UiActionsStart } from '../../ui_actions/public/plugin';
+import { getExtractFunction } from '../common/lib/extract';
+import { getAllMigrations } from '../common/lib/get_all_migrations';
+import { getInjectFunction } from '../common/lib/inject';
+import { getMigrateFunction } from '../common/lib/migrate';
+import type { SavedObjectEmbeddableInput } from '../common/lib/saved_object_embeddable';
+import { getTelemetryFunction } from '../common/lib/telemetry';
+import type { EmbeddableInput, EmbeddableStateWithType } from '../common/types';
+import { bootstrap } from './bootstrap';
+import type { AttributeServiceOptions } from './lib/attribute_service/attribute_service';
+import { AttributeService, ATTRIBUTE_SERVICE_KEY } from './lib/attribute_service/attribute_service';
+import { defaultEmbeddableFactoryProvider } from './lib/embeddables/default_embeddable_factory_provider';
+import type { EmbeddableFactory } from './lib/embeddables/embeddable_factory';
+import type { EmbeddableFactoryDefinition } from './lib/embeddables/embeddable_factory_definition';
+import type { EmbeddableOutput, IEmbeddable } from './lib/embeddables/i_embeddable';
+import { EmbeddablePanel } from './lib/panel/embeddable_panel';
+import { EmbeddableStateTransfer } from './lib/state_transfer/embeddable_state_transfer';
+import type {
   EmbeddableFactoryProvider,
-  EnhancementsRegistry,
+  EmbeddableFactoryRegistry,
   EnhancementRegistryDefinition,
   EnhancementRegistryItem,
+  EnhancementsRegistry,
 } from './types';
-import { bootstrap } from './bootstrap';
-import {
-  EmbeddableFactory,
-  EmbeddableInput,
-  EmbeddableOutput,
-  defaultEmbeddableFactoryProvider,
-  IEmbeddable,
-  EmbeddablePanel,
-  SavedObjectEmbeddableInput,
-} from './lib';
-import { EmbeddableFactoryDefinition } from './lib/embeddables/embeddable_factory_definition';
-import { EmbeddableStateTransfer } from './lib/state_transfer';
-import { Storage } from '../../kibana_utils/public';
-import { migrateToLatest, PersistableStateService } from '../../kibana_utils/common';
-import { ATTRIBUTE_SERVICE_KEY, AttributeService } from './lib/attribute_service';
-import { AttributeServiceOptions } from './lib/attribute_service/attribute_service';
-import { EmbeddableStateWithType } from '../common/types';
-import {
-  getExtractFunction,
-  getInjectFunction,
-  getMigrateFunction,
-  getTelemetryFunction,
-} from '../common/lib';
-import { getAllMigrations } from '../common/lib/get_all_migrations';
 
 export interface EmbeddableSetupDependencies {
   uiActions: UiActionsSetup;

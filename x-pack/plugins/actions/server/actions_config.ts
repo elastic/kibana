@@ -4,18 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { i18n } from '@kbn/i18n';
-import { tryCatch, map, mapNullable, getOrElse } from 'fp-ts/lib/Option';
-import url from 'url';
-import { curry } from 'lodash';
+import { getOrElse, map, mapNullable, tryCatch } from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
-
-import { ActionsConfig, AllowedHosts, EnabledActionTypes, CustomHostSettings } from './config';
-import { getCanonicalCustomHostUrl } from './lib/custom_host_settings';
-import { ActionTypeDisabledError } from './lib';
-import { ProxySettings, ResponseSettings, SSLSettings } from './types';
+import { curry } from 'lodash';
+import url from 'url';
 import { getSSLSettingsFromConfig } from './builtin_action_types/lib/get_node_ssl_options';
+import type { ActionsConfig, CustomHostSettings } from './config';
+import { AllowedHosts, EnabledActionTypes } from './config';
+import { getCanonicalCustomHostUrl } from './lib/custom_host_settings';
+import { ActionTypeDisabledError } from './lib/errors/action_type_disabled';
+import type { ProxySettings, ResponseSettings, SSLSettings } from './types';
 
 export { AllowedHosts, EnabledActionTypes } from './config';
 

@@ -6,31 +6,25 @@
  * Side Public License, v 1.
  */
 
+import type { Filter } from '@kbn/es-query';
+import { isFilterPinned, onlyDisabledFiltersChanged } from '@kbn/es-query';
 import _ from 'lodash';
 import { Subject } from 'rxjs';
-
-import { IUiSettingsClient } from 'src/core/public';
-
-import { isFilterPinned, onlyDisabledFiltersChanged, Filter } from '@kbn/es-query';
-import { sortFilters } from './lib/sort_filters';
-import { mapAndFlattenFilters } from './lib/map_and_flatten_filters';
-import { PartitionedFilters } from './types';
-
+import type { IUiSettingsClient } from '../../../../../core/public/ui_settings/types';
+import type { PersistableStateService } from '../../../../kibana_utils/common/persistable_state/types';
+import { FilterStateStore } from '../../../common';
+import { UI_SETTINGS } from '../../../common/constants';
+import { compareFilters, COMPARE_ALL_OPTIONS, uniqFilters } from '../../../common/es_query';
 import {
-  FilterStateStore,
-  uniqFilters,
-  compareFilters,
-  COMPARE_ALL_OPTIONS,
-  UI_SETTINGS,
-} from '../../../common';
-import { PersistableStateService } from '../../../../kibana_utils/common/persistable_state';
-import {
-  getAllMigrations,
-  migrateToLatest,
-  inject,
   extract,
+  getAllMigrations,
+  inject,
+  migrateToLatest,
   telemetry,
 } from '../../../common/query/persistable_state';
+import { mapAndFlattenFilters } from './lib/map_and_flatten_filters';
+import { sortFilters } from './lib/sort_filters';
+import type { PartitionedFilters } from './types';
 
 export class FilterManager implements PersistableStateService {
   private filters: Filter[] = [];

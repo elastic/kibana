@@ -8,7 +8,7 @@
 
 import classNames from 'classnames';
 import React, { Fragment, useState } from 'react';
-import { FieldRecord } from './table';
+import type { FieldRecord } from './table';
 import { trimAngularSpan } from './table_helper';
 import { DocViewTableRowBtnCollapse } from './table_row_btn_collapse';
 

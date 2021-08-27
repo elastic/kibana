@@ -5,18 +5,20 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { Capabilities, IUiSettingsClient } from 'kibana/public';
+import type { IUiSettingsClient } from '../../../../../../../../../core/public/ui_settings/types';
+import type { Capabilities } from '../../../../../../../../../core/types/capabilities';
+import { IndexPattern } from '../../../../../../../../data/common/index_patterns/index_patterns/index_pattern';
+import type { IndexPatternsContract } from '../../../../../../../../data/common/index_patterns/index_patterns/index_patterns';
 import { SORT_DEFAULT_ORDER_SETTING } from '../../../../../../../common';
-import { popularizeField } from '../../../../../../application/helpers/popularize_field';
-import {
-  AppState as DiscoverState,
-  GetStateReturn as DiscoverGetStateReturn,
-} from '../../../../../../application/apps/main/services/discover_state';
-import {
+import type {
   AppState as ContextState,
   GetStateReturn as ContextGetStateReturn,
-} from '../../../../../../application/angular/context_state';
-import { IndexPattern, IndexPatternsContract } from '../../../../../../../../data/public';
+} from '../../../../../angular/context_state';
+import { popularizeField } from '../../../../../helpers/popularize_field';
+import type {
+  AppState as DiscoverState,
+  GetStateReturn as DiscoverGetStateReturn,
+} from '../../../services/discover_state';
 
 /**
  * Helper function to provide a fallback to a single _source column if the given array of columns

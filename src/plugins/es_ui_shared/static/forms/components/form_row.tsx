@@ -6,10 +6,9 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-
 import { EuiDescribedFormGroup, EuiTitle } from '@elastic/eui';
-import { FieldHook } from '../hook_form_lib';
+import React from 'react';
+import type { FieldHook } from '../hook_form_lib/types';
 import { Field } from './field';
 
 interface Props {

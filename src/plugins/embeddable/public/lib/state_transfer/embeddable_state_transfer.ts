@@ -5,17 +5,15 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { cloneDeep } from 'lodash';
-import { Storage } from '../../../../kibana_utils/public';
-import { ApplicationStart, PublicAppInfo } from '../../../../../core/public';
+import type { ApplicationStart, PublicAppInfo } from '../../../../../core/public/application/types';
+import { Storage } from '../../../../kibana_utils/public/storage/storage';
+import type { EmbeddableEditorState, EmbeddablePackageState } from './types';
 import {
-  EmbeddableEditorState,
-  isEmbeddableEditorState,
-  EmbeddablePackageState,
-  isEmbeddablePackageState,
-  EMBEDDABLE_PACKAGE_STATE_KEY,
   EMBEDDABLE_EDITOR_STATE_KEY,
+  EMBEDDABLE_PACKAGE_STATE_KEY,
+  isEmbeddableEditorState,
+  isEmbeddablePackageState,
 } from './types';
 
 export const EMBEDDABLE_STATE_TRANSFER_STORAGE_KEY = 'EMBEDDABLE_STATE_TRANSFER';

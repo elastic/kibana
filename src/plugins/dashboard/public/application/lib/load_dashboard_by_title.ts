@@ -5,9 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { DashboardSavedObject } from '../..';
-import { SavedObjectsClientContract } from '../../../../../core/public';
+import type { SavedObjectsClientContract } from '../../../../../core/public/saved_objects/saved_objects_client';
+import type { DashboardSavedObject } from '../../saved_dashboards/saved_dashboard';
 
 export async function attemptLoadDashboardByTitle(
   title: string,

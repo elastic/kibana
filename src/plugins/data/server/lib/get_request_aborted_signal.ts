@@ -5,10 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { Observable } from 'rxjs';
-// @ts-ignore not typed
 import { AbortController } from 'abortcontroller-polyfill/dist/cjs-ponyfill';
+import { Observable } from 'rxjs';
+
+// @ts-ignore not typed
 
 /**
  * A simple utility function that returns an `AbortSignal` corresponding to an `AbortController`

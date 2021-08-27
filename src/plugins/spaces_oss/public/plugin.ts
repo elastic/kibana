@@ -5,9 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import type { Plugin } from 'src/core/public';
-
+import type { Plugin } from '../../../core/public/plugins/plugin';
 import type { SpacesApi } from './api';
 import type { SpacesOssPluginSetup, SpacesOssPluginStart } from './types';
 

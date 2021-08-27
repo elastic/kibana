@@ -5,10 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { SearchSource } from '../../../data/public';
-import { SavedObjectSaveOpts } from '../../../saved_objects/public';
-import { DiscoverGridSettings } from '../application/components/discover_grid/types';
+import { SearchSource } from '../../../data/common/search/search_source/search_source';
+import type { SavedObjectSaveOpts } from '../../../saved_objects/public/types';
+import type { DiscoverGridSettings } from '../application/components/discover_grid/types';
 
 export type SortOrder = [string, string];
 export interface SavedSearch {

@@ -5,12 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { i18n } from '@kbn/i18n';
-import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
-import { IndexPatternsContract } from '../index_patterns';
-import { IndexPatternSpec } from '..';
-import { SavedObjectReference } from '../../../../../core/types';
+import type { SavedObjectReference } from '../../../../../core/types/saved_objects';
+import type { ExpressionFunctionDefinition } from '../../../../expressions/common/expression_functions/types';
+import type { IndexPatternsContract } from '../index_patterns/index_patterns';
+import type { IndexPatternSpec } from '../types';
 
 const name = 'indexPatternLoad';
 const type = 'index_pattern';

@@ -5,9 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { kibanaJSON } from './constants';
 import { KBN_FIELD_TYPES } from '../../../../../data/common';
+import { kibanaJSON } from './constants';
 
 export function getSchemaByKbnType(kbnType: string | undefined) {
   // Default DataGrid schemas: boolean, numeric, datetime, json, currency, string

@@ -5,9 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { i18n } from '@kbn/i18n';
-import { Filter, IIndexPattern } from '../../../../common';
+import type { Filter } from '../../../../common/es_query';
+import type { IIndexPattern } from '../../../../common/index_patterns/types';
 import { getIndexPatternFromFilter } from './get_index_pattern_from_filter';
 
 function getValueFormatter(indexPattern?: IIndexPattern, key?: string) {

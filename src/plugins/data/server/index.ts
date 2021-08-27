@@ -5,91 +5,80 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import type {
+  PluginConfigDescriptor,
+  PluginInitializerContext,
+} from '../../../core/server/plugins/types';
+import { CSV_MIME_TYPE, datatableToCSV } from '../common/exports/export_csv';
+import { CidrMask } from '../common/search/aggs/buckets/lib/cidr_mask';
+import { calcAutoIntervalLessThan } from '../common/search/aggs/buckets/lib/time_buckets/calc_auto_interval';
+import { dateHistogramInterval } from '../common/search/aggs/utils/date_interval_utils/date_histogram_interval';
+import { parseInterval } from '../common/search/aggs/utils/date_interval_utils/parse_interval';
+import { IpAddress } from '../common/search/aggs/utils/ip_address';
+import type { ConfigSchema } from '../config';
+import { configSchema } from '../config';
+import { autocompleteConfigDeprecationProvider } from './config_deprecations';
+import type { DataPluginSetup, DataPluginStart } from './plugin';
+import { DataServerPlugin } from './plugin';
 
-import { PluginConfigDescriptor, PluginInitializerContext } from '../../../core/server';
-import { ConfigSchema, configSchema } from '../config';
-import { DataServerPlugin, DataPluginSetup, DataPluginStart } from './plugin';
-
+export {
+  castEsToKbnFieldTypeName,
+  ES_FIELD_TYPES,
+  ES_SEARCH_STRATEGY,
+  getEsQueryConfig,
+  getTime,
+  IEsSearchRequest,
+  IEsSearchResponse,
+  IFieldType,
+  IndexPattern,
+  IndexPatternAttributes,
+  IndexPatternField,
+  IndexPatternsService as IndexPatternsCommonService,
+  IndexPatternsService,
+  INDEX_PATTERN_SAVED_OBJECT_TYPE,
+  // search
+  ISearchOptions,
+  KBN_FIELD_TYPES,
+  // aggs
+  METRIC_TYPES,
+  ParsedInterval,
+  // utils
+  parseInterval,
+  // timefilter
+  TimeRange,
+  UI_SETTINGS,
+} from '../common';
 export * from './deprecated';
-export { getEsQueryConfig } from '../common';
-
-/**
- * Exporters (CSV)
+/*
+ * Index patterns:
  */
-
-import { datatableToCSV, CSV_MIME_TYPE } from '../common';
+export {
+  FieldDescriptor,
+  getCapabilitiesForRollupIndices,
+  IndexPatternsFetcher,
+  shouldReadFieldFromDocValues,
+} from './index_patterns';
+export {
+  AsyncSearchStatusResponse,
+  DataRequestHandlerContext,
+  IScopedSearchClient,
+  ISearchSessionService,
+  ISearchStrategy,
+  NoSearchIdInSessionError,
+  SearchRequestHandlerContext,
+  SearchSessionService,
+  SearchStrategyDependencies,
+  shimHitsTotal,
+} from './search';
+export {
+  DataServerPlugin as Plugin,
+  DataPluginSetup as PluginSetup,
+  DataPluginStart as PluginStart,
+};
 export const exporters = {
   datatableToCSV,
   CSV_MIME_TYPE,
 };
-
-/*
- * Field Formats:
- */
-
-export { INDEX_PATTERN_SAVED_OBJECT_TYPE } from '../common';
-
-/*
- * Index patterns:
- */
-
-export {
-  IndexPatternsFetcher,
-  shouldReadFieldFromDocValues, // used only in logstash_fields fixture
-  FieldDescriptor,
-  getCapabilitiesForRollupIndices,
-} from './index_patterns';
-
-export {
-  IndexPatternField,
-  IFieldType,
-  ES_FIELD_TYPES,
-  KBN_FIELD_TYPES,
-  IndexPatternAttributes,
-  UI_SETTINGS,
-  IndexPattern,
-  IndexPatternsService,
-  IndexPatternsService as IndexPatternsCommonService,
-} from '../common';
-
-/**
- * Search
- */
-
-import {
-  // aggs
-  CidrMask,
-  dateHistogramInterval,
-  IpAddress,
-  parseInterval,
-  // tabify
-  calcAutoIntervalLessThan,
-} from '../common';
-import { autocompleteConfigDeprecationProvider } from './config_deprecations';
-
-export {
-  // aggs
-  METRIC_TYPES,
-  ParsedInterval,
-  // search
-  ISearchOptions,
-  IEsSearchRequest,
-  IEsSearchResponse,
-  ES_SEARCH_STRATEGY,
-} from '../common';
-
-export {
-  IScopedSearchClient,
-  ISearchStrategy,
-  SearchStrategyDependencies,
-  shimHitsTotal,
-  SearchSessionService,
-  ISearchSessionService,
-  SearchRequestHandlerContext,
-  DataRequestHandlerContext,
-  AsyncSearchStatusResponse,
-  NoSearchIdInSessionError,
-} from './search';
 
 // Search namespace
 export const search = {
@@ -103,20 +92,6 @@ export const search = {
 };
 
 /**
- * Types to be shared externally
- * @public
- */
-
-export {
-  castEsToKbnFieldTypeName,
-  getTime,
-  // timefilter
-  TimeRange,
-  // utils
-  parseInterval,
-} from '../common';
-
-/**
  * Static code to be shared externally
  * @public
  */
@@ -124,12 +99,6 @@ export {
 export function plugin(initializerContext: PluginInitializerContext<ConfigSchema>) {
   return new DataServerPlugin(initializerContext);
 }
-
-export {
-  DataServerPlugin as Plugin,
-  DataPluginSetup as PluginSetup,
-  DataPluginStart as PluginStart,
-};
 
 export const config: PluginConfigDescriptor<ConfigSchema> = {
   deprecations: autocompleteConfigDeprecationProvider,

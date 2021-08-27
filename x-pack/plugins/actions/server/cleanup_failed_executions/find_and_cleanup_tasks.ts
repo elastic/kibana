@@ -4,14 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { Logger, CoreStart } from 'kibana/server';
-import { ActionsConfig } from '../config';
-import { ActionsPluginsStart } from '../plugin';
-import { ActionTypeRegistryContract } from '../types';
-import { cleanupTasks, CleanupTasksResult } from './cleanup_tasks';
-import { TaskInstance } from '../../../task_manager/server';
-import { nodeBuilder } from '../../../../../src/plugins/data/common';
+import type { Logger } from '@kbn/logging';
+import type { CoreStart } from '../../../../../src/core/server';
+import { nodeBuilder } from '../../../../../src/plugins/data/common/es_query';
+import type { TaskInstance } from '../../../task_manager/server/task';
+import type { ActionsConfig } from '../config';
+import type { ActionsPluginsStart } from '../plugin';
+import type { ActionTypeRegistryContract } from '../types';
+import type { CleanupTasksResult } from './cleanup_tasks';
+import { cleanupTasks } from './cleanup_tasks';
 
 export interface FindAndCleanupTasksOpts {
   logger: Logger;

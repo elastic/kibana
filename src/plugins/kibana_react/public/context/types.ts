@@ -7,9 +7,9 @@
  */
 
 import * as React from 'react';
-import { CoreStart } from '../../../../core/public';
-import { KibanaReactOverlays } from '../overlays';
-import { KibanaReactNotifications } from '../notifications';
+import type { CoreStart } from '../../../../core/public';
+import type { KibanaReactNotifications } from '../notifications/types';
+import type { KibanaReactOverlays } from '../overlays/types';
 
 export type KibanaServices = Partial<CoreStart>;
 

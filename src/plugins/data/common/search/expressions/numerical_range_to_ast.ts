@@ -5,9 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { buildExpression, buildExpressionFunction } from '../../../../expressions/common';
-import { ExpressionFunctionNumericalRange, NumericalRange } from './numerical_range';
+import { buildExpression } from '../../../../expressions/common/ast/build_expression';
+import { buildExpressionFunction } from '../../../../expressions/common/ast/build_function';
+import type { ExpressionFunctionNumericalRange, NumericalRange } from './numerical_range';
 
 export const numericalRangeToAst = (numericalRange: NumericalRange) => {
   return buildExpression([

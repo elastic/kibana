@@ -5,19 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-/**
- * @name SavedObject
- *
- * NOTE: SavedObject seems to track a reference to an object in ES,
- * and surface methods for CRUD functionality (save and delete). This seems
- * similar to how Backbone Models work.
- *
- * This class seems to interface with ES primarily through the es Angular
- * service and the saved object api.
- */
-import { SavedObject, SavedObjectConfig, SavedObjectKibanaServices } from '../types';
-import { ISavedObjectDecoratorRegistry } from './decorators';
+import type { SavedObject, SavedObjectConfig, SavedObjectKibanaServices } from '../types';
+import type { ISavedObjectDecoratorRegistry } from './decorators/registry';
 import { buildSavedObject } from './helpers/build_saved_object';
 
 export function createSavedObjectClass(

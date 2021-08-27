@@ -9,11 +9,15 @@
 import * as Rx from 'rxjs';
 import { Observable } from 'rxjs';
 import { filter } from 'rxjs/operators';
-import { ExpressionRenderError, RenderErrorHandlerFnType, IExpressionLoaderParams } from './types';
+import type { ExpressionAstExpression } from '../common/ast/types';
+import type { IInterpreterRenderHandlers, RenderMode } from '../common/expression_renderers/types';
 import { renderErrorHandler as defaultRenderErrorHandler } from './render_error_handler';
-import { IInterpreterRenderHandlers, ExpressionAstExpression, RenderMode } from '../common';
-
 import { getRenderersRegistry } from './services';
+import type {
+  ExpressionRenderError,
+  IExpressionLoaderParams,
+  RenderErrorHandlerFnType,
+} from './types';
 
 export type IExpressionRendererExtraHandlers = Record<string, any>;
 

@@ -5,25 +5,24 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { CoreSetup, PluginInitializerContext } from 'src/core/public';
 import moment from 'moment';
-import { TimefilterSetup } from '../query';
-import { QuerySuggestionGetFn } from './providers/query_suggestion_provider';
-import {
-  getEmptyValueSuggestions,
-  setupValueSuggestionProvider,
-  ValueSuggestionsGetFn,
-} from './providers/value_suggestion_provider';
-
-import { ConfigSchema } from '../../config';
-import { UsageCollectionSetup } from '../../../usage_collection/public';
-import { createUsageCollector } from './collectors';
+import type { CoreSetup } from '../../../../core/public';
+import type { PluginInitializerContext } from '../../../../core/public/plugins/plugin_context';
+import type { UsageCollectionSetup } from '../../../usage_collection/public/plugin';
+import type { ConfigSchema } from '../../config';
+import type { TimefilterSetup } from '../query/timefilter/timefilter_service';
+import type { DataPublicPluginStart, DataStartDependencies } from '../types';
+import { createUsageCollector } from './collectors/create_usage_collector';
 import {
   KUERY_LANGUAGE_NAME,
   setupKqlQuerySuggestionProvider,
 } from './providers/kql_query_suggestion';
-import { DataPublicPluginStart, DataStartDependencies } from '../types';
+import type { QuerySuggestionGetFn } from './providers/query_suggestion_provider';
+import type { ValueSuggestionsGetFn } from './providers/value_suggestion_provider';
+import {
+  getEmptyValueSuggestions,
+  setupValueSuggestionProvider,
+} from './providers/value_suggestion_provider';
 
 export class AutocompleteService {
   autocompleteConfig: ConfigSchema['autocomplete'];

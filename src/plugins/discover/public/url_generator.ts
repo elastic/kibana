@@ -5,11 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import type { UrlGeneratorsDefinition } from '../../share/public';
-import type { TimeRange, Filter, Query, QueryState, RefreshInterval } from '../../data/public';
-import { esFilters } from '../../data/public';
-import { setStateToKbnUrl } from '../../kibana_utils/public';
+import type { Filter } from '../../data/common/es_query';
+import type { RefreshInterval, TimeRange } from '../../data/common/query/timefilter/types';
+import type { Query } from '../../data/public';
+import { esFilters } from '../../data/public/deprecated';
+import type { QueryState } from '../../data/public/query/state_sync/types';
+import { setStateToKbnUrl } from '../../kibana_utils/public/state_management/url/kbn_url_storage';
+import type { UrlGeneratorsDefinition } from '../../share/public/url_generators/url_generator_definition';
 
 export const DISCOVER_APP_URL_GENERATOR = 'DISCOVER_APP_URL_GENERATOR';
 

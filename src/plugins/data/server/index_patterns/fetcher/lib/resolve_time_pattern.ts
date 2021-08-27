@@ -5,14 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { chain } from 'lodash';
 import moment from 'moment';
-
-import { ElasticsearchClient } from 'kibana/server';
-
-import { timePatternToWildcard } from './time_pattern_to_wildcard';
+import type { ElasticsearchClient } from '../../../../../../core/server/elasticsearch/client/types';
 import { callIndexAliasApi } from './es_api';
+import { timePatternToWildcard } from './time_pattern_to_wildcard';
 
 /**
  *  Convert a time pattern into a list of indexes it could

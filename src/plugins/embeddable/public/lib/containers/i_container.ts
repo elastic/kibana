@@ -5,15 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import {
-  Embeddable,
-  EmbeddableInput,
-  EmbeddableOutput,
-  ErrorEmbeddable,
-  IEmbeddable,
-} from '../embeddables';
-import { PanelState } from '../../../common/types';
+import type { EmbeddableInput, PanelState } from '../../../common/types';
+import { Embeddable } from '../embeddables/embeddable';
+import { ErrorEmbeddable } from '../embeddables/error_embeddable';
+import type { EmbeddableOutput, IEmbeddable } from '../embeddables/i_embeddable';
 
 export { PanelState };
 

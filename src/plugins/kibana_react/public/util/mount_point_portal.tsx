@@ -5,11 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { i18n } from '@kbn/i18n';
-import React, { useRef, useEffect, useState, Component } from 'react';
+import React, { Component, useEffect, useRef, useState } from 'react';
 import ReactDOM from 'react-dom';
-import { MountPoint } from 'kibana/public';
+import type { MountPoint } from '../../../../core/public/types';
 import { useIfMounted } from './utils';
 
 interface MountPointPortalProps {

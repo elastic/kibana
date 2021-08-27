@@ -5,13 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { of } from 'rxjs';
 import type { MockedKeys } from '@kbn/utility-types/jest';
-import { uiSettingsServiceMock } from '../../../../../core/public/mocks';
-
+import { of } from 'rxjs';
+import { uiSettingsServiceMock } from '../../../../../core/public/ui_settings/ui_settings_service.mock';
 import { SearchSource } from './search_source';
-import { ISearchStartSearchSource, ISearchSource, SearchSourceFields } from './types';
+import type { ISearchSource, ISearchStartSearchSource, SearchSourceFields } from './types';
 
 export const searchSourceInstanceMock: MockedKeys<ISearchSource> = {
   setPreferredSearchStrategyId: jest.fn(),

@@ -5,12 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { of, Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
-import { Execution, ExecutionResult } from './execution';
-import { ExpressionValueError } from '../expression_types/specs';
-import { ExpressionAstExpression } from '../ast';
+import type { ExpressionAstExpression } from '../ast/types';
+import type { ExpressionValueError } from '../expression_types/specs/error';
+import type { ExecutionResult } from './execution';
+import { Execution } from './execution';
 
 /**
  * `ExecutionContract` is a wrapper around `Execution` class. It provides the

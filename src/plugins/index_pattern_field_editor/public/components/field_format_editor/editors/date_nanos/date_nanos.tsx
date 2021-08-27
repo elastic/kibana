@@ -5,16 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import React, { Fragment } from 'react';
-
 import { EuiCode, EuiFieldText, EuiFormRow, EuiIcon, EuiLink } from '@elastic/eui';
-
 import { FormattedMessage } from '@kbn/i18n/react';
+import React, { Fragment } from 'react';
+import { FormatEditorSamples } from '../../samples/samples';
 import { DefaultFormatEditor, defaultState } from '../default/default';
 import { formatId } from './constants';
-
-import { FormatEditorSamples } from '../../samples';
 
 interface DateNanosFormatEditorFormatParams {
   pattern: string;

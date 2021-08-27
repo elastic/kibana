@@ -5,8 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { QueryStart, SavedQuery } from '../../../query';
+import type { QueryStart } from '../../../query/query_service';
+import type { SavedQuery } from '../../../query/saved_query/types';
 
 export const populateStateFromSavedQuery = (queryService: QueryStart, savedQuery: SavedQuery) => {
   const {

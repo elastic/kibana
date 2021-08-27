@@ -5,13 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { DataPlugin, IndexPatternsContract } from '.';
 import { fieldFormatsServiceMock } from '../../field_formats/public/mocks';
-import { searchServiceMock } from './search/mocks';
-import { queryServiceMock } from './query/mocks';
-import { AutocompleteStart, AutocompleteSetup } from './autocomplete';
+import type { IndexPatternsContract } from '../common/index_patterns/index_patterns/index_patterns';
+import type { AutocompleteSetup, AutocompleteStart } from './autocomplete/autocomplete_service';
 import { createNowProviderMock } from './now_provider/mocks';
+import { DataPublicPlugin as DataPlugin } from './plugin';
+import { queryServiceMock } from './query/mocks';
+import { searchServiceMock } from './search/mocks';
 
 export type Setup = jest.Mocked<ReturnType<DataPlugin['setup']>>;
 export type Start = jest.Mocked<ReturnType<DataPlugin['start']>>;
@@ -69,8 +69,8 @@ const createStartContract = (): Start => {
   };
 };
 
-export { createSearchSourceMock } from '../common/search/search_source/mocks';
 export { getCalculateAutoTimeExpression } from '../common/search/aggs';
+export { createSearchSourceMock } from '../common/search/search_source/mocks';
 
 export const dataPluginMock = {
   createSetupContract,

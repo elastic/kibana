@@ -5,12 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
-import { SharedGlobalConfig } from 'kibana/server';
-import { CollectorFetchContext } from 'src/plugins/usage_collection/server';
-import { CollectedUsage, ReportedUsage } from './register';
+import type { SharedGlobalConfig } from '../../../../../core/server/plugins/types';
+import type { CollectorFetchContext } from '../../../../usage_collection/server/collector/types';
+import type { CollectedUsage, ReportedUsage } from './register';
+
 interface SearchTelemetry {
   'search-telemetry': CollectedUsage;
 }

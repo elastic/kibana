@@ -6,11 +6,12 @@
  * Side Public License, v 1.
  */
 
+import type { Optional } from '@kbn/utility-types';
 import _ from 'lodash';
-import moment, { Moment } from 'moment';
-import { Optional } from '@kbn/utility-types';
-
-import { Filter, TimeRange } from '../../services/data';
+import type { Moment } from 'moment';
+import moment from 'moment';
+import type { Filter } from '../../../../data/common/es_query';
+import type { TimeRange } from '../../../../data/common/query/timefilter/types';
 
 type TimeRangeCompare = Optional<TimeRange>;
 

@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { injectI18n } from '@kbn/i18n/react';
-import { withKibana } from '../../../../kibana_react/public';
+import React from 'react';
+import { withKibana } from '../../../../kibana_react/public/context/context';
 import type { SearchBarProps } from './search_bar';
 
 const Fallback = () => <div />;
@@ -22,4 +22,4 @@ const WrappedSearchBar = (props: SearchBarProps) => (
 
 export const SearchBar = injectI18n(withKibana(WrappedSearchBar));
 export { StatefulSearchBarProps } from './create_search_bar';
-export type { SearchBarProps, SearchBarOwnProps } from './search_bar';
+export type { SearchBarOwnProps, SearchBarProps } from './search_bar';

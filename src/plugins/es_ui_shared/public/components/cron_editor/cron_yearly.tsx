@@ -5,12 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import React, { Fragment } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import type { EuiSelectOption } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-
-import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect, EuiSelectOption } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
+import React, { Fragment } from 'react';
 
 interface Props {
   minute?: string;

@@ -5,24 +5,22 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import React, {
-  createContext,
-  useState,
-  useContext,
-  useMemo,
-  useCallback,
-  useEffect,
-  useRef,
-  FunctionComponent,
-} from 'react';
-import useDebounce from 'react-use/lib/useDebounce';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
-
-import type { FieldPreviewContext, FieldFormatConfig } from '../../types';
+import type { FunctionComponent } from 'react';
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
+import useDebounce from 'react-use/lib/useDebounce';
+import type { RuntimeField, RuntimeType } from '../../../../data/common/index_patterns/types';
 import { parseEsError } from '../../lib/runtime_field_validation';
-import { RuntimeType, RuntimeField } from '../../shared_imports';
+import type { FieldFormatConfig, FieldPreviewContext } from '../../types';
 import { useFieldEditorContext } from '../field_editor_context';
 
 type From = 'cluster' | 'custom';

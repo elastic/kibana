@@ -5,9 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import type { EuiSwitchEvent } from '@elastic/eui';
 import {
-  htmlIdGenerator,
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
@@ -23,13 +22,13 @@ import {
   EuiModalHeaderTitle,
   EuiSpacer,
   EuiSwitch,
-  EuiSwitchEvent,
+  EuiText,
   EuiTextArea,
+  htmlIdGenerator,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
-import { EuiText } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 
 export interface OnSaveProps {
   newTitle: string;

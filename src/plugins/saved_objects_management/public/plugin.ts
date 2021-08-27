@@ -5,28 +5,31 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { i18n } from '@kbn/i18n';
-import { CoreSetup, CoreStart, Plugin } from 'src/core/public';
-import { ManagementSetup } from '../../management/public';
-import { DataPublicPluginStart } from '../../data/public';
-import { DashboardStart } from '../../dashboard/public';
-import { DiscoverStart } from '../../discover/public';
-import { HomePublicPluginSetup, FeatureCatalogueCategory } from '../../home/public';
-import { VisualizationsStart } from '../../visualizations/public';
-import { SavedObjectTaggingOssPluginStart } from '../../saved_objects_tagging_oss/public';
-import type { SpacesOssPluginStart } from '../../spaces_oss/public';
-import {
-  SavedObjectsManagementActionService,
+import type { CoreSetup, CoreStart } from '../../../core/public';
+import type { Plugin } from '../../../core/public/plugins/plugin';
+import type { DashboardStart } from '../../dashboard/public/plugin';
+import type { DataPublicPluginStart } from '../../data/public/types';
+import type { DiscoverStart } from '../../discover/public/plugin';
+import type { HomePublicPluginSetup } from '../../home/public/plugin';
+import { FeatureCatalogueCategory } from '../../home/public/services/feature_catalogue/feature_catalogue_registry';
+import type { ManagementSetup } from '../../management/public/types';
+import type { SavedObjectTaggingOssPluginStart } from '../../saved_objects_tagging_oss/public/types';
+import type { SpacesOssPluginStart } from '../../spaces_oss/public/types';
+import type { VisualizationsStart } from '../../visualizations/public/plugin';
+import { registerServices } from './register_services';
+import type {
   SavedObjectsManagementActionServiceSetup,
   SavedObjectsManagementActionServiceStart,
-  SavedObjectsManagementColumnService,
+} from './services/action_service';
+import { SavedObjectsManagementActionService } from './services/action_service';
+import type {
   SavedObjectsManagementColumnServiceSetup,
   SavedObjectsManagementColumnServiceStart,
-  SavedObjectsManagementServiceRegistry,
-  ISavedObjectsManagementServiceRegistry,
-} from './services';
-import { registerServices } from './register_services';
+} from './services/column_service';
+import { SavedObjectsManagementColumnService } from './services/column_service';
+import type { ISavedObjectsManagementServiceRegistry } from './services/service_registry';
+import { SavedObjectsManagementServiceRegistry } from './services/service_registry';
 
 export interface SavedObjectsManagementPluginSetup {
   actions: SavedObjectsManagementActionServiceSetup;

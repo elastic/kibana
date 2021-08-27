@@ -4,28 +4,24 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { URL } from 'url';
-import { curry } from 'lodash';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
+import { i18n } from '@kbn/i18n';
+import type { Logger } from '@kbn/logging';
+import type { IncomingWebhookResult } from '@slack/webhook';
+import { IncomingWebhook } from '@slack/webhook';
+import { getOrElse, map } from 'fp-ts/lib/Option';
+import { pipe } from 'fp-ts/lib/pipeable';
 import HttpProxyAgent from 'http-proxy-agent';
 import { HttpsProxyAgent } from 'https-proxy-agent';
-import { i18n } from '@kbn/i18n';
-import { schema, TypeOf } from '@kbn/config-schema';
-import { IncomingWebhook, IncomingWebhookResult } from '@slack/webhook';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { map, getOrElse } from 'fp-ts/lib/Option';
-import { Logger } from '../../../../../src/core/server';
-import { getRetryAfterIntervalFromHeaders } from './lib/http_rersponse_retry_header';
+import { curry } from 'lodash';
+import { URL } from 'url';
+import type { ActionTypeExecutorResult } from '../../common/types';
+import type { ActionsConfigurationUtilities } from '../actions_config';
 import { renderMustacheString } from '../lib/mustache_renderer';
-
-import {
-  ActionType,
-  ActionTypeExecutorOptions,
-  ActionTypeExecutorResult,
-  ExecutorType,
-} from '../types';
-import { ActionsConfigurationUtilities } from '../actions_config';
+import type { ActionType, ActionTypeExecutorOptions, ExecutorType } from '../types';
 import { getCustomAgents } from './lib/get_custom_agents';
+import { getRetryAfterIntervalFromHeaders } from './lib/http_rersponse_retry_header';
 
 export type SlackActionType = ActionType<{}, ActionTypeSecretsType, ActionParamsType, unknown>;
 export type SlackActionTypeExecutorOptions = ActionTypeExecutorOptions<

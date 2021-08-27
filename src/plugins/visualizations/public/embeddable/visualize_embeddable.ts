@@ -5,43 +5,39 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import { i18n } from '@kbn/i18n';
 import _, { get } from 'lodash';
 import { Subscription } from 'rxjs';
-import { i18n } from '@kbn/i18n';
-import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
-import {
-  IndexPattern,
-  TimeRange,
-  Query,
-  esFilters,
-  Filter,
-  TimefilterContract,
-} from '../../../../plugins/data/public';
-import {
-  EmbeddableInput,
-  EmbeddableOutput,
-  Embeddable,
-  IContainer,
-  Adapters,
-  SavedObjectEmbeddableInput,
-  ReferenceOrValueEmbeddable,
-  AttributeService,
-} from '../../../../plugins/embeddable/public';
-import {
-  IExpressionLoaderParams,
-  ExpressionsStart,
+import type { SavedObjectAttributes } from '../../../../core/types/saved_objects';
+import type { Query } from '../../../../plugins/data/public';
+import type { Filter } from '../../../data/common/es_query';
+import { IndexPattern } from '../../../data/common/index_patterns/index_patterns/index_pattern';
+import type { TimeRange } from '../../../data/common/query/timefilter/types';
+import { esFilters } from '../../../data/public/deprecated';
+import type { TimefilterContract } from '../../../data/public/query/timefilter/timefilter';
+import type { SavedObjectEmbeddableInput } from '../../../embeddable/common/lib/saved_object_embeddable';
+import type { EmbeddableInput } from '../../../embeddable/common/types';
+import { AttributeService } from '../../../embeddable/public/lib/attribute_service/attribute_service';
+import type { IContainer } from '../../../embeddable/public/lib/containers/i_container';
+import { Embeddable } from '../../../embeddable/public/lib/embeddables/embeddable';
+import type { EmbeddableOutput } from '../../../embeddable/public/lib/embeddables/i_embeddable';
+import type { ReferenceOrValueEmbeddable } from '../../../embeddable/public/lib/reference_or_value_embeddable/types';
+import type { ExpressionAstExpression } from '../../../expressions/common/ast/types';
+import type { ExpressionsStart } from '../../../expressions/public/plugin';
+import type {
   ExpressionRenderError,
-  ExpressionAstExpression,
-} from '../../../../plugins/expressions/public';
-import { Vis, SerializedVis } from '../vis';
+  IExpressionLoaderParams,
+} from '../../../expressions/public/types';
+import type { Adapters } from '../../../inspector/common/adapters/types';
+import type { SavedVisualizationsLoader } from '../saved_visualizations/saved_visualizations';
 import { getExpressions, getUiActions } from '../services';
+import type { VisSavedObject } from '../types';
+import type { SerializedVis } from '../vis';
+import { Vis } from '../vis';
+import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
 import { VIS_EVENT_TO_TRIGGER } from './events';
-import { VisualizeEmbeddableFactoryDeps } from './visualize_embeddable_factory';
-import { SavedObjectAttributes } from '../../../../core/types';
-import { SavedVisualizationsLoader } from '../saved_visualizations';
-import { VisSavedObject } from '../types';
 import { toExpressionAst } from './to_ast';
+import type { VisualizeEmbeddableFactoryDeps } from './visualize_embeddable_factory';
 
 const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<keyof T>;
 

@@ -5,13 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
-import { get } from 'lodash';
 import { set } from '@elastic/safer-lodash-set';
-
-import { FormHook, FieldHook, FormData, FieldConfig, FieldsMap, FormConfig } from '../types';
-import { mapFormFields, unflattenObject, Subject, Subscription } from '../lib';
+import { get } from 'lodash';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type { Subscription } from '../lib/subject';
+import { Subject } from '../lib/subject';
+import { mapFormFields, unflattenObject } from '../lib/utils';
+import type { FieldConfig, FieldHook, FieldsMap, FormConfig, FormData, FormHook } from '../types';
 
 const DEFAULT_OPTIONS = {
   valueChangeDebounceTime: 500,

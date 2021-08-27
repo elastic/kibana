@@ -5,34 +5,43 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { METRIC_TYPE } from '@kbn/analytics';
-import { Required } from '@kbn/utility-types';
 import { EuiHorizontalRule } from '@elastic/eui';
-import UseUnmount from 'react-use/lib/useUnmount';
+import { METRIC_TYPE } from '@kbn/analytics';
+import type { AugmentedRequired as Required } from '@kbn/utility-types';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-
-import { saveDashboard } from '../lib';
-import { TopNavIds } from './top_nav_ids';
-import { EditorMenu } from './editor_menu';
+import UseUnmount from 'react-use/lib/useUnmount';
+import type { OverlayRef } from '../../../../../core/public/overlays/types';
+import type { SavedQuery } from '../../../../data/public/query/saved_query/types';
+import { ViewMode } from '../../../../embeddable/common/types';
+import { isErrorEmbeddable } from '../../../../embeddable/public/lib/embeddables/error_embeddable';
+import { openAddPanelFlyout } from '../../../../embeddable/public/lib/panel/panel_header/panel_actions/add_panel/open_add_panel_flyout';
+import { useKibana } from '../../../../kibana_react/public/context/context';
+import type { TopNavMenuProps } from '../../../../navigation/public/top_nav_menu/top_nav_menu';
+import { LazyLabsFlyout, withSuspense } from '../../../../presentation_util/public/components';
+import { AddFromLibraryButton } from '../../../../presentation_util/public/components/solution_toolbar/items/add_from_library';
+import { PrimaryActionButton } from '../../../../presentation_util/public/components/solution_toolbar/items/primary_button';
+import type { QuickButtonProps } from '../../../../presentation_util/public/components/solution_toolbar/items/quick_group';
+import { QuickButtonGroup } from '../../../../presentation_util/public/components/solution_toolbar/items/quick_group';
+import { SolutionToolbar } from '../../../../presentation_util/public/components/solution_toolbar/solution_toolbar';
+import { getSavedObjectFinder } from '../../../../saved_objects/public/finder/saved_object_finder';
+import type { SaveResult } from '../../../../saved_objects/public/save_modal/show_saved_object_save_modal';
+import { showSaveModal } from '../../../../saved_objects/public/save_modal/show_saved_object_save_modal';
+import { BaseVisType } from '../../../../visualizations/public/vis_types/base_vis_type';
+import type { VisTypeAlias } from '../../../../visualizations/public/vis_types/vis_type_alias_registry';
 import { UI_SETTINGS } from '../../../common';
-import { SavedQuery } from '../../services/data';
-import { DashboardSaveModal } from './save_modal';
-import { showCloneModal } from './show_clone_modal';
-import { ShowShareModal } from './show_share_modal';
-import { getTopNavConfig } from './get_top_nav_config';
-import { OverlayRef } from '../../../../../core/public';
-import { useKibana } from '../../services/kibana_react';
-import { showOptionsPopover } from './show_options_popover';
 import { DashboardConstants } from '../../dashboard_constants';
-import { TopNavMenuProps } from '../../../../navigation/public';
-import { confirmDiscardUnsavedChanges } from '../listing/confirm_overlays';
-import { BaseVisType, VisTypeAlias } from '../../../../visualizations/public';
-import { DashboardAppState, DashboardSaveOptions, NavAction } from '../../types';
-import { isErrorEmbeddable, openAddPanelFlyout, ViewMode } from '../../services/embeddable';
-import { DashboardAppServices, DashboardEmbedSettings, DashboardRedirect } from '../../types';
-import { getSavedObjectFinder, SaveResult, showSaveModal } from '../../services/saved_objects';
 import { getCreateVisualizationButtonTitle, unsavedChangesBadge } from '../../dashboard_strings';
+import type {
+  DashboardAppServices,
+  DashboardAppState,
+  DashboardEmbedSettings,
+  DashboardRedirect,
+  DashboardSaveOptions,
+  NavAction,
+} from '../../types';
+import { saveDashboard } from '../lib/save_dashboard';
+import { confirmDiscardUnsavedChanges } from '../listing/confirm_overlays';
+import { useDashboardDispatch, useDashboardSelector } from '../state/dashboard_state_hooks';
 import {
   setFullScreenMode,
   setHidePanelTitles,
@@ -41,19 +50,14 @@ import {
   setSyncColors,
   setUseMargins,
   setViewMode,
-  useDashboardDispatch,
-  useDashboardSelector,
-} from '../state';
-
-import {
-  AddFromLibraryButton,
-  LazyLabsFlyout,
-  PrimaryActionButton,
-  QuickButtonGroup,
-  QuickButtonProps,
-  SolutionToolbar,
-  withSuspense,
-} from '../../../../presentation_util/public';
+} from '../state/dashboard_state_slice';
+import { EditorMenu } from './editor_menu';
+import { getTopNavConfig } from './get_top_nav_config';
+import { DashboardSaveModal } from './save_modal';
+import { showCloneModal } from './show_clone_modal';
+import { showOptionsPopover } from './show_options_popover';
+import { ShowShareModal } from './show_share_modal';
+import { TopNavIds } from './top_nav_ids';
 
 export interface DashboardTopNavState {
   chromeIsVisible: boolean;

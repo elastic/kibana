@@ -5,16 +5,16 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { CoreSetup, Plugin } from 'kibana/server';
-import { querySavedObjectType } from '../saved_objects';
+import type { CoreSetup } from '../../../../core/server';
+import type { Plugin } from '../../../../core/server/plugins/types';
 import {
   extract,
-  inject,
-  telemetry,
-  migrateToLatest,
   getAllMigrations,
+  inject,
+  migrateToLatest,
+  telemetry,
 } from '../../common/query/persistable_state';
+import { querySavedObjectType } from '../saved_objects/query';
 
 export class QueryService implements Plugin<void> {
   public setup(core: CoreSetup) {

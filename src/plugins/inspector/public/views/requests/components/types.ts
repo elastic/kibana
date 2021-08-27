@@ -5,8 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { Request } from '../../../../common/adapters/request/types';
+import type { Request } from '../../../../common/adapters/request/types';
 
 export interface RequestDetailsProps {
   request: Request;

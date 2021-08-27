@@ -5,10 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { ExpressionValueVisDimension } from './expression_functions/vis_dimension';
-import { ExpressionValueXYDimension } from './expression_functions/xy_dimension';
-import { Datatable } from '../../expressions/common/expression_types/specs';
+import type { Datatable } from '../../expressions/common/expression_types/specs/datatable';
+import type { ExpressionValueVisDimension } from './expression_functions/vis_dimension';
+import type { ExpressionValueXYDimension } from './expression_functions/xy_dimension';
 
 export type Dimension = [
   Array<ExpressionValueVisDimension | ExpressionValueXYDimension> | undefined,

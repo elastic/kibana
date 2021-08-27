@@ -4,35 +4,34 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { pick } from 'lodash';
 import type { Request } from '@hapi/hapi';
+import type { Logger } from '@kbn/logging';
+import { fromNullable, getOrElse, map } from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { map, fromNullable, getOrElse } from 'fp-ts/lib/Option';
-import { addSpaceIdToPath } from '../../../spaces/server';
-import {
-  Logger,
-  SavedObjectsClientContract,
-  KibanaRequest,
-  SavedObjectReference,
-  IBasePath,
+import { pick } from 'lodash';
+import type { IBasePath } from '../../../../../src/core/server/http/base_path_service';
+import { KibanaRequest } from '../../../../../src/core/server/http/router/request';
+import type { SavedObjectsClientContract } from '../../../../../src/core/server/saved_objects/types';
+import type {
   SavedObject,
-} from '../../../../../src/core/server';
-import { ActionExecutorContract } from './action_executor';
-import { ExecutorError } from './executor_error';
-import { RunContext } from '../../../task_manager/server';
-import { EncryptedSavedObjectsClient } from '../../../encrypted_saved_objects/server';
-import { ActionTypeDisabledError } from './errors';
-import {
+  SavedObjectReference,
+} from '../../../../../src/core/types/saved_objects';
+import type { EncryptedSavedObjectsClient } from '../../../encrypted_saved_objects/server/saved_objects';
+import { addSpaceIdToPath } from '../../../spaces/common/lib/spaces_url_parser';
+import type { RunContext } from '../../../task_manager/server/task';
+import type { ActionTypeExecutorResult } from '../../common/types';
+import { ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE } from '../constants/saved_objects';
+import type {
+  ActionTaskExecutorParams,
   ActionTaskParams,
   ActionTypeRegistryContract,
   SpaceIdToNamespaceFunction,
-  ActionTypeExecutorResult,
-  ActionTaskExecutorParams,
-  isPersistedActionTask,
 } from '../types';
-import { ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE } from '../constants/saved_objects';
+import { isPersistedActionTask } from '../types';
 import { asSavedObjectExecutionSource } from './action_execution_source';
+import type { ActionExecutorContract } from './action_executor';
+import { ActionTypeDisabledError } from './errors/action_type_disabled';
+import { ExecutorError } from './executor_error';
 import { validatedRelatedSavedObjects } from './related_saved_objects';
 
 export interface TaskRunnerContext {

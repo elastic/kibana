@@ -7,11 +7,11 @@
  */
 
 import moment from 'moment';
-import { UI_SETTINGS } from '../../../../common/constants';
-import { TimeRange } from '../../../../common/query';
-import { TimeBuckets } from '../buckets/lib/time_buckets';
-import { toAbsoluteDates } from './date_interval_utils';
+import { UI_SETTINGS } from '../../../constants';
+import type { TimeRange } from '../../../query/timefilter/types';
+import { TimeBuckets } from '../buckets/lib/time_buckets/time_buckets';
 import { autoInterval } from '../buckets/_interval_options';
+import { toAbsoluteDates } from './date_interval_utils/to_absolute_dates';
 
 export function getCalculateAutoTimeExpression(getConfig: (key: string) => any) {
   return function calculateAutoTimeExpression(range: TimeRange) {

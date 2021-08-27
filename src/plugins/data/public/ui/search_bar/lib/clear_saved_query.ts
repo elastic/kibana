@@ -5,8 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { QueryStart } from '../../../query';
+import type { QueryStart } from '../../../query/query_service';
 
 export const clearStateFromSavedQuery = (queryService: QueryStart) => {
   queryService.filterManager.removeAll();

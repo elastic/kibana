@@ -5,11 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import React, { Component } from 'react';
-import { i18n } from '@kbn/i18n';
-
 import { EuiForm, EuiFormRow, EuiSwitch } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import React, { Component } from 'react';
 
 interface Props {
   useMargins: boolean;

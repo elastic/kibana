@@ -5,12 +5,16 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { i18n } from '@kbn/i18n';
-import { CoreSetup, Plugin } from 'kibana/public';
-import { FeatureCatalogueCategory } from '../../home/public';
-import { ComponentRegistry } from './component_registry';
-import { AdvancedSettingsSetup, AdvancedSettingsStart, AdvancedSettingsPluginSetup } from './types';
+import type { CoreSetup } from '../../../core/public';
+import type { Plugin } from '../../../core/public/plugins/plugin';
+import { FeatureCatalogueCategory } from '../../home/public/services/feature_catalogue/feature_catalogue_registry';
+import { ComponentRegistry } from './component_registry/component_registry';
+import type {
+  AdvancedSettingsPluginSetup,
+  AdvancedSettingsSetup,
+  AdvancedSettingsStart,
+} from './types';
 
 const component = new ComponentRegistry();
 

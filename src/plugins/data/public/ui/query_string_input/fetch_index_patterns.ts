@@ -5,9 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { isEmpty } from 'lodash';
-import { IndexPatternsContract } from '../..';
+import type { IndexPatternsContract } from '../../../common/index_patterns/index_patterns/index_patterns';
 
 export async function fetchIndexPatterns(
   indexPatternsService: IndexPatternsContract,

@@ -6,27 +6,32 @@
  * Side Public License, v 1.
  */
 
+import type { CoreSetup, CoreStart } from '../../../core/public';
+import type { Plugin } from '../../../core/public/plugins/plugin';
+import type { PluginInitializerContext } from '../../../core/public/plugins/plugin_context';
+import { createStartServicesGetter } from '../../kibana_utils/public/core/create_start_service_getter';
+import { Storage } from '../../kibana_utils/public/storage/storage';
+import type { IStorageWrapper } from '../../kibana_utils/public/storage/types';
+import type { UsageCollectionSetup } from '../../usage_collection/public/plugin';
+import { IndexPatternsService } from '../common/index_patterns/index_patterns/index_patterns';
+import { getAggsFormats } from '../common/search/aggs/utils/get_aggs_formats';
+import type { ConfigSchema } from '../config';
+import { ACTION_GLOBAL_APPLY_FILTER, createFilterAction } from './actions/apply_filter_action';
+import { createFiltersFromRangeSelectAction } from './actions/filters/create_filters_from_range_select';
+import { createFiltersFromValueClickAction } from './actions/filters/create_filters_from_value_click';
+import { createSelectRangeAction } from './actions/select_range_action';
+import { createValueClickAction } from './actions/value_click_action';
+import { AutocompleteService } from './autocomplete/autocomplete_service';
 import './index.scss';
-
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
-import { ConfigSchema } from '../config';
-import { Storage, IStorageWrapper, createStartServicesGetter } from '../../kibana_utils/public';
-import {
-  DataPublicPluginSetup,
-  DataPublicPluginStart,
-  DataSetupDependencies,
-  DataStartDependencies,
-} from './types';
-import { AutocompleteService } from './autocomplete';
+import { getIndexPatternLoad } from './index_patterns/expressions/load_index_pattern';
+import { IndexPatternsApiClient } from './index_patterns/index_patterns/index_patterns_api_client';
+import { onRedirectNoIndexPattern } from './index_patterns/index_patterns/redirect_no_index_pattern';
+import { SavedObjectsClientPublicToCommon } from './index_patterns/saved_objects_client_wrapper';
+import { UiSettingsPublicToCommon } from './index_patterns/ui_settings_wrapper';
+import type { NowProviderInternalContract } from './now_provider/now_provider';
+import { NowProvider } from './now_provider/now_provider';
+import { QueryService } from './query/query_service';
 import { SearchService } from './search/search_service';
-import { QueryService } from './query';
-import { createIndexPatternSelect } from './ui/index_pattern_select';
-import {
-  IndexPatternsService,
-  onRedirectNoIndexPattern,
-  IndexPatternsApiClient,
-  UiSettingsPublicToCommon,
-} from './index_patterns';
 import {
   setIndexPatterns,
   setNotifications,
@@ -34,22 +39,16 @@ import {
   setSearchService,
   setUiSettings,
 } from './services';
+import { applyFilterTrigger, APPLY_FILTER_TRIGGER } from './triggers/apply_filter_trigger';
+import type {
+  DataPublicPluginSetup,
+  DataPublicPluginStart,
+  DataSetupDependencies,
+  DataStartDependencies,
+} from './types';
+import { createIndexPatternSelect } from './ui/index_pattern_select/create_index_pattern_select';
 import { createSearchBar } from './ui/search_bar/create_search_bar';
-import {
-  ACTION_GLOBAL_APPLY_FILTER,
-  createFilterAction,
-  createFiltersFromValueClickAction,
-  createFiltersFromRangeSelectAction,
-  createValueClickAction,
-  createSelectRangeAction,
-} from './actions';
-import { APPLY_FILTER_TRIGGER, applyFilterTrigger } from './triggers';
-import { SavedObjectsClientPublicToCommon } from './index_patterns';
-import { getIndexPatternLoad } from './index_patterns/expressions';
-import { UsageCollectionSetup } from '../../usage_collection/public';
 import { getTableViewDescription } from './utils/table_inspector_view';
-import { NowProvider, NowProviderInternalContract } from './now_provider';
-import { getAggsFormats } from '../common';
 
 export class DataPublicPlugin
   implements

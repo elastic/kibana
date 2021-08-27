@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-
-import { EuiContextMenu, EuiContextMenuPanelDescriptor, EuiPopover } from '@elastic/eui';
+import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
+import { EuiContextMenu, EuiPopover } from '@elastic/eui';
 import { EventEmitter } from 'events';
+import React from 'react';
 import ReactDOM from 'react-dom';
 
 let activeSession: ContextMenuSession | null = null;

@@ -5,13 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { schema } from '@kbn/config-schema';
 import _ from 'lodash';
-import { IRouter } from 'src/core/server';
-import { SampleDatasetSchema } from '../lib/sample_dataset_registry_types';
+import type { IRouter } from '../../../../../../core/server/http/router/router';
 import { createIndexName } from '../lib/create_index_name';
-import { SampleDataUsageTracker } from '../usage/usage';
+import type { SampleDatasetSchema } from '../lib/sample_dataset_schema';
+import type { SampleDataUsageTracker } from '../usage/usage';
 
 export function createUninstallRoute(
   router: IRouter,

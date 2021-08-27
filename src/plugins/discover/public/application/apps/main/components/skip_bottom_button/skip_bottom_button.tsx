@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import './skip_bottom_button.scss';
 import { EuiSkipLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import React from 'react';
+import './skip_bottom_button.scss';
 
 export interface SkipBottomButtonProps {
   /**

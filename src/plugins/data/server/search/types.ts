@@ -5,28 +5,27 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { Observable } from 'rxjs';
+import type { RequestHandlerContext } from '../../../../core/server';
+import type { IScopedClusterClient } from '../../../../core/server/elasticsearch/client/scoped_cluster_client';
+import { KibanaRequest } from '../../../../core/server/http/router/request';
+import type { IRouter } from '../../../../core/server/http/router/router';
+import type { SavedObjectsClientContract } from '../../../../core/server/saved_objects/types';
+import type { IUiSettingsClient } from '../../../../core/server/ui_settings/types';
+import type { ISearchStartSearchSource } from '../../common/search/search_source/types';
 import type {
-  IRouter,
-  IScopedClusterClient,
-  IUiSettingsClient,
-  SavedObjectsClientContract,
-  KibanaRequest,
-  RequestHandlerContext,
-} from 'src/core/server';
-import {
-  ISearchOptions,
-  ISearchStartSearchSource,
+  IEsSearchRequest,
+  IEsSearchResponse,
+} from '../../common/search/strategies/es_search/types';
+import type {
   IKibanaSearchRequest,
   IKibanaSearchResponse,
   ISearchClient,
-  IEsSearchResponse,
-  IEsSearchRequest,
-} from '../../common/search';
-import { AggsSetup, AggsStart } from './aggs';
-import { SearchUsage } from './collectors';
-import { IScopedSearchSessionsClient, ISearchSessionService } from './session';
+  ISearchOptions,
+} from '../../common/search/types';
+import type { AggsSetup, AggsStart } from './aggs/types';
+import type { SearchUsage } from './collectors/usage';
+import type { IScopedSearchSessionsClient, ISearchSessionService } from './session/types';
 
 export interface SearchEnhancements {
   sessionService: ISearchSessionService;

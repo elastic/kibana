@@ -5,9 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { Capabilities } from 'src/core/public';
-import { IconType } from '@elastic/eui';
+import type { IconType } from '@elastic/eui';
+import type { Capabilities } from '../../../../../core/types/capabilities';
 
 /** @public */
 export enum FeatureCatalogueCategory {

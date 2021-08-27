@@ -5,10 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import type { Unit } from '@elastic/datemath';
+import dateMath from '@elastic/datemath';
 import { find } from 'lodash';
 import moment from 'moment';
-import dateMath, { Unit } from '@elastic/datemath';
 
 // Assume interval is in the form (value)(unit), such as "1h"
 const INTERVAL_STRING_RE = new RegExp('^([0-9\\.]*)\\s*(' + dateMath.units.join('|') + ')$');

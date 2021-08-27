@@ -5,13 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { i18n } from '@kbn/i18n';
-
-import { ValidationFunc, FieldConfig } from '../../shared_imports';
-import { Field } from '../../types';
-import { schema } from './form_schema';
+import type {
+  FieldConfig,
+  ValidationFunc,
+} from '../../../../es_ui_shared/static/forms/hook_form_lib/types';
+import type { Field } from '../../types';
 import type { Props } from './field_editor';
+import { schema } from './form_schema';
 
 const createNameNotAllowedValidator = (
   namesNotAllowed: string[]

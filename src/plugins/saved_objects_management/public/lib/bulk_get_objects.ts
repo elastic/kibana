@@ -5,9 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { HttpStart } from 'src/core/public';
-import { SavedObjectWithMetadata } from '../types';
+import type { HttpStart } from '../../../../core/public/http/types';
+import type { SavedObjectWithMetadata } from '../../common/types';
 
 export async function bulkGetObjects(
   http: HttpStart,

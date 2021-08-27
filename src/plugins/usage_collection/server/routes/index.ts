@@ -5,18 +5,16 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import {
-  IRouter,
-  ISavedObjectsRepository,
-  MetricsServiceSetup,
-  ServiceStatus,
-} from 'src/core/server';
 import { Observable } from 'rxjs';
-import { CollectorSet } from '../collector';
+import type { IRouter } from '../../../../core/server/http/router/router';
+import type { MetricsServiceSetup } from '../../../../core/server/metrics/types';
+import type { ISavedObjectsRepository } from '../../../../core/server/saved_objects/service/lib/repository';
+import type { ServiceStatus } from '../../../../core/server/status/types';
+import { CollectorSet } from '../collector/collector_set';
+import type { IUsageCounter as UsageCounter } from '../usage_counters/usage_counter';
+import { registerStatsRoute } from './stats/stats';
 import { registerUiCountersRoute } from './ui_counters';
-import { registerStatsRoute } from './stats';
-import type { UsageCounter } from '../usage_counters';
+
 export function setupRoutes({
   router,
   uiCountersUsageCounter,

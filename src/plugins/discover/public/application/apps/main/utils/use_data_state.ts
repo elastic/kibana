@@ -5,9 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { BehaviorSubject } from 'rxjs';
-import { DataMsg } from '../services/use_saved_search';
+import type { DataMsg } from '../services/use_saved_search';
 
 export function useDataState(data$: BehaviorSubject<DataMsg>) {
   const [fetchState, setFetchState] = useState<DataMsg>(data$.getValue());

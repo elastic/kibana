@@ -4,20 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import {
-  Logger,
-  ElasticsearchClient,
-  SavedObjectsFindResult,
-  SavedObjectsSerializer,
-} from 'kibana/server';
-import { TaskInstance } from '../../../task_manager/server';
-import { SpacesPluginStart } from '../../../spaces/server';
-import {
-  bulkDelete,
-  extractBulkResponseDeleteFailures,
-  getRawActionTaskParamsIdFromTask,
-} from './lib';
+import type { Logger } from '@kbn/logging';
+import type { ElasticsearchClient } from '../../../../../src/core/server/elasticsearch/client/types';
+import { SavedObjectsSerializer } from '../../../../../src/core/server/saved_objects/serialization/serializer';
+import type { SavedObjectsFindResult } from '../../../../../src/core/server/saved_objects/service/saved_objects_client';
+import type { SpacesPluginStart } from '../../../spaces/server/plugin';
+import type { TaskInstance } from '../../../task_manager/server/task';
+import { bulkDelete } from './lib/bulk_delete';
+import { extractBulkResponseDeleteFailures } from './lib/extract_bulk_response_delete_failures';
+import { getRawActionTaskParamsIdFromTask } from './lib/get_raw_action_task_params_id_from_task';
 
 export interface CleanupTasksOpts {
   logger: Logger;

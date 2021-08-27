@@ -5,25 +5,24 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { ManagementSection, RegisterManagementSectionArgs } from './utils';
+import { createGetterSetter } from '../../kibana_utils/common/create_getter_setter';
 import {
-  IngestSection,
   DataSection,
+  IngestSection,
   InsightsAndAlertingSection,
-  SecuritySection,
   KibanaSection,
+  SecuritySection,
   StackSection,
 } from './components/management_sections';
-
-import {
-  ManagementSectionId,
-  SectionsServiceSetup,
-  SectionsServiceStartDeps,
+import type {
   DefinedSections,
   ManagementSectionsStartPrivate,
+  SectionsServiceSetup,
+  SectionsServiceStartDeps,
 } from './types';
-import { createGetterSetter } from '../../kibana_utils/public';
+import { ManagementSectionId } from './types';
+import type { RegisterManagementSectionArgs } from './utils/management_section';
+import { ManagementSection } from './utils/management_section';
 
 const [
   getSectionsServiceStartPrivate,

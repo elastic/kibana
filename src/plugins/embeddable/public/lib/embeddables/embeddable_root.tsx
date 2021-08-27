@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
+import { EuiLoadingSpinner, EuiText } from '@elastic/eui';
 import React from 'react';
-import { EuiLoadingSpinner } from '@elastic/eui';
-import { EuiText } from '@elastic/eui';
-import { EmbeddableInput, IEmbeddable } from './i_embeddable';
+import type { EmbeddableInput } from '../../../common/types';
+import type { IEmbeddable } from './i_embeddable';
 
 interface Props {
   embeddable?: IEmbeddable;

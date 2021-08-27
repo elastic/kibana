@@ -5,21 +5,21 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useCallback, useState, useContext, useMemo, useEffect } from 'react';
-import classNames from 'classnames';
+import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import {
   EuiButtonEmpty,
+  EuiCheckbox,
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiCopy,
   EuiPopover,
-  EuiCheckbox,
-  EuiDataGridCellValueElementProps,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
 import themeDark from '@elastic/eui/dist/eui_theme_dark.json';
 import themeLight from '@elastic/eui/dist/eui_theme_light.json';
-import { ElasticSearchHit } from '../../doc_views/doc_views_types';
+import { FormattedMessage } from '@kbn/i18n/react';
+import classNames from 'classnames';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import type { ElasticSearchHit } from '../../doc_views/doc_views_types';
 import { DiscoverGridContext } from './discover_grid_context';
 
 /**

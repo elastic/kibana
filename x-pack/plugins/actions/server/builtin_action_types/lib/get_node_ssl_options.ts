@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { PeerCertificate } from 'tls';
-import { SSLSettings } from '../../types';
-import { Logger } from '../../../../../../src/core/server';
+import type { Logger } from '@kbn/logging';
+import type { PeerCertificate } from 'tls';
+import type { SSLSettings } from '../../types';
 
 export function getNodeSSLOptions(
   logger: Logger,

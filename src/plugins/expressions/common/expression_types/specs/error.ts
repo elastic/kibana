@@ -5,12 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import type { SerializableRecord } from '@kbn/utility-types';
-import { ExpressionTypeDefinition, ExpressionValueBoxed } from '../types';
-import { ExpressionValueRender } from './render';
+import type { ErrorLike } from '../../util/create_error';
 import { getType } from '../get_type';
-import { ErrorLike } from '../../util';
+import type { ExpressionTypeDefinition, ExpressionValueBoxed } from '../types';
+import type { ExpressionValueRender } from './render';
 
 const name = 'error';
 

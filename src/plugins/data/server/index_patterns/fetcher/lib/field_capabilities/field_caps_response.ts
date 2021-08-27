@@ -5,12 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import { estypes } from '@elastic/elasticsearch';
 import { uniq } from 'lodash';
-import type { estypes } from '@elastic/elasticsearch';
-import { castEsToKbnFieldTypeName } from '../../../../../common';
+import { castEsToKbnFieldTypeName } from '../../../../../common/kbn_field_types';
+import type { FieldDescriptor } from '../../index_patterns_fetcher';
 import { shouldReadFieldFromDocValues } from './should_read_field_from_doc_values';
-import { FieldDescriptor } from '../../../fetcher';
 
 /**
  *  Read the response from the _field_caps API to determine the type and

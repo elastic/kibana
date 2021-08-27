@@ -5,9 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { RuntimeType } from '../../shared_imports';
+import type { RuntimeType } from '../../../../data/common/index_patterns/types';
 
 export const RUNTIME_FIELD_OPTIONS: Array<EuiComboBoxOptionOption<RuntimeType>> = [
   {

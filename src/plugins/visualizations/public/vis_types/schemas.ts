@@ -5,9 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import _, { defaults } from 'lodash';
-import { AggGroupNames, AggParam } from '../../../data/public';
+import { AggGroupNames } from '../../../data/common/search/aggs/agg_groups';
+import type { AggParam } from '../../../data/common/search/aggs/agg_params';
 import type { ISchemas, Schema } from './types';
 
 /** @private **/

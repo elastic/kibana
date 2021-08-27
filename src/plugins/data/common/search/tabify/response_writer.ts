@@ -5,13 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { isEmpty } from 'lodash';
-import { IAggConfigs } from '../aggs';
+import type {
+  Datatable,
+  DatatableColumn,
+} from '../../../../expressions/common/expression_types/specs/datatable';
+import type { IAggConfigs } from '../aggs/agg_configs';
 import { tabifyGetColumns } from './get_columns';
-
-import { TabbedResponseWriterOptions, TabbedAggColumn, TabbedAggRow } from './types';
-import { Datatable, DatatableColumn } from '../../../../expressions/common/expression_types/specs';
+import type { TabbedAggColumn, TabbedAggRow, TabbedResponseWriterOptions } from './types';
 
 interface BufferColumn {
   id: string;

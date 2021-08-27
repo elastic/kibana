@@ -5,14 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { FieldFormatsStartCommon } from '../../../../field_formats/common';
-
+import type { FieldFormatsStartCommon } from '../../../../field_formats/common/types';
 import * as buckets from './buckets';
+import { BUCKET_TYPES } from './buckets/bucket_agg_types';
+import type { CalculateBoundsFn } from './buckets/date_histogram';
 import * as metrics from './metrics';
-
-import { BUCKET_TYPES, CalculateBoundsFn } from './buckets';
-import { METRIC_TYPES } from './metrics';
+import { METRIC_TYPES } from './metrics/metric_agg_types';
 
 /** @internal */
 export interface AggTypesDependencies {

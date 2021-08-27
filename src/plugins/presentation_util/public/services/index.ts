@@ -5,12 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { PresentationUtilPluginStart } from '../types';
+import type { PresentationUtilPluginStart } from '../types';
+import type { PresentationCapabilitiesService } from './capabilities';
 import { PluginServices } from './create';
-import { PresentationCapabilitiesService } from './capabilities';
-import { PresentationDashboardsService } from './dashboards';
-import { PresentationLabsService } from './labs';
+import type { PresentationDashboardsService } from './dashboards';
+import type { PresentationLabsService } from './labs';
 import { registry as stubRegistry } from './stub';
 
 export { PresentationCapabilitiesService } from './capabilities';

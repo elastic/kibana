@@ -5,13 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import {
-  StateContainer,
-  createStateContainer,
-} from '../../../kibana_utils/common/state_containers';
-import { ExpressionFunction } from '../expression_functions';
-import { ExpressionType } from '../expression_types';
+import { createStateContainer } from '../../../kibana_utils/common/state_containers/create_state_container';
+import type { StateContainer } from '../../../kibana_utils/common/state_containers/types';
+import { ExpressionFunction } from '../expression_functions/expression_function';
+import { ExpressionType } from '../expression_types/expression_type';
 
 export interface ExecutorState<Context extends Record<string, unknown> = Record<string, unknown>> {
   functions: Record<string, ExpressionFunction>;

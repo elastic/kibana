@@ -5,8 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { IMetricAggConfig, MetricAggParam } from '../metric_agg_type';
+import type { IMetricAggConfig, MetricAggParam } from '../metric_agg_type';
 
 /**
  * Forwards modifyAggConfigOnSearchRequestStart calls to a nested AggConfig.

@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { EuiText, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { StringFieldProgressBar } from './string_progress_bar';
-import { Bucket } from './types';
-import { IndexPatternField } from '../../../../../../../data/public';
+import React from 'react';
+import { IndexPatternField } from '../../../../../../../data/common/index_patterns/fields/index_pattern_field';
 import './discover_field_bucket.scss';
+import { StringFieldProgressBar } from './string_progress_bar';
+import type { Bucket } from './types';
 
 interface Props {
   bucket: Bucket;

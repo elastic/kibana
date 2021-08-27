@@ -6,39 +6,40 @@
  * Side Public License, v 1.
  */
 
-import _ from 'lodash';
+import { I18nProvider } from '@kbn/i18n/react';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { I18nProvider } from '@kbn/i18n/react';
 import uuid from 'uuid';
-import { CoreStart, IUiSettingsClient, KibanaExecutionContext } from 'src/core/public';
-import { Start as InspectorStartContract } from 'src/plugins/inspector/public';
-
-import { UiActionsStart } from '../../services/ui_actions';
-import { RefreshInterval, TimeRange, Query, Filter } from '../../services/data';
-import {
-  ViewMode,
-  Container,
-  PanelState,
-  IEmbeddable,
-  EmbeddableInput,
-  EmbeddableStart,
+import type { CoreStart } from '../../../../../core/public';
+import type { IUiSettingsClient } from '../../../../../core/public/ui_settings/types';
+import type { KibanaExecutionContext } from '../../../../../core/types/execution_context';
+import type { Filter } from '../../../../data/common/es_query';
+import type { RefreshInterval, TimeRange } from '../../../../data/common/query/timefilter/types';
+import type { EmbeddableInput, PanelState } from '../../../../embeddable/common/types';
+import { ViewMode } from '../../../../embeddable/common/types';
+import { Container } from '../../../../embeddable/public/lib/containers/container';
+import type { EmbeddableFactory } from '../../../../embeddable/public/lib/embeddables/embeddable_factory';
+import type {
   EmbeddableOutput,
-  EmbeddableFactory,
-} from '../../services/embeddable';
-import { DASHBOARD_CONTAINER_TYPE } from './dashboard_constants';
-import { createPanelState } from './panel';
-import { DashboardPanelState } from './types';
-import { DashboardViewport } from './viewport/dashboard_viewport';
-import {
-  KibanaContextProvider,
+  IEmbeddable,
+} from '../../../../embeddable/public/lib/embeddables/i_embeddable';
+import type { EmbeddableStart } from '../../../../embeddable/public/plugin';
+import type { Start as InspectorStartContract } from '../../../../inspector/public/plugin';
+import { KibanaContextProvider } from '../../../../kibana_react/public/context/context';
+import type {
   KibanaReactContext,
   KibanaReactContextValue,
-} from '../../services/kibana_react';
-import { PLACEHOLDER_EMBEDDABLE } from './placeholder';
-import { DashboardAppCapabilities, DashboardContainerInput } from '../../types';
-import { PresentationUtilPluginStart } from '../../services/presentation_util';
-import { PanelPlacementMethod, IPanelPlacementArgs } from './panel/dashboard_panel_placement';
+} from '../../../../kibana_react/public/context/types';
+import type { PresentationUtilPluginStart } from '../../../../presentation_util/public/types';
+import type { UiActionsStart } from '../../../../ui_actions/public/plugin';
+import type { DashboardPanelState } from '../../../common/types';
+import type { Query } from '../../services/data';
+import type { DashboardAppCapabilities, DashboardContainerInput } from '../../types';
+import { DASHBOARD_CONTAINER_TYPE } from './dashboard_constants';
+import { createPanelState } from './panel/create_panel_state';
+import type { IPanelPlacementArgs, PanelPlacementMethod } from './panel/dashboard_panel_placement';
+import { PLACEHOLDER_EMBEDDABLE } from './placeholder/placeholder_embeddable';
+import { DashboardViewport } from './viewport/dashboard_viewport';
 
 export interface DashboardContainerServices {
   ExitFullScreenButton: React.ComponentType<any>;

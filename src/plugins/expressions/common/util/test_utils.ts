@@ -5,8 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { ExecutionContext } from '../execution';
+import type { ExecutionContext } from '../execution/types';
 
 export const createMockContext = () => {
   return {

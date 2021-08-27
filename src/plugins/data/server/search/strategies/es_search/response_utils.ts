@@ -5,9 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import type { estypes } from '@elastic/elasticsearch';
-import { ISearchOptions } from '../../../../common';
+import { estypes } from '@elastic/elasticsearch';
+import type { ISearchOptions } from '../../../../common/search/types';
 
 /**
  * Get the `total`/`loaded` for this response (see `IKibanaSearchResponse`). Note that `skipped` is

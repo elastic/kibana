@@ -5,9 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { has } from 'lodash';
-import { Query } from '../../services/data';
+import type { Query } from '../../services/data';
 
 /**
  * Creates a standardized query object from old queries that were either strings or pure ES query DSL

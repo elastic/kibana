@@ -5,8 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { Capabilities } from 'src/core/public';
+import type { Capabilities } from '../../../../core/types/capabilities';
 
 export function canViewInApp(uiCapabilities: Capabilities, type: string): boolean {
   switch (type) {

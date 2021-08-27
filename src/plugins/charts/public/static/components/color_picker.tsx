@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
-import classNames from 'classnames';
-import React, { BaseSyntheticEvent } from 'react';
-
 import {
   EuiButtonEmpty,
+  EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
   euiPaletteColorBlind,
   EuiScreenReaderOnly,
-  EuiFlexGroup,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import classNames from 'classnames';
+import type { BaseSyntheticEvent } from 'react';
+import React from 'react';
 import { lightenColor } from '../../services/palettes/lighten_color';
 import './color_picker.scss';
 

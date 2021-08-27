@@ -6,24 +6,24 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { i18n } from '@kbn/i18n';
+import { estypes } from '@elastic/elasticsearch';
 import {
-  EuiCodeBlock,
-  EuiTabbedContent,
-  EuiCopy,
   EuiButton,
-  EuiModalBody,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
-  EuiModalFooter,
   EuiButtonEmpty,
   EuiCallOut,
+  EuiCodeBlock,
+  EuiCopy,
+  EuiModalBody,
+  EuiModalFooter,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
+  EuiTabbedContent,
 } from '@elastic/eui';
-import type { estypes } from '@elastic/elasticsearch';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+import React from 'react';
 import { ShardFailureTable } from './shard_failure_table';
-import { ShardFailureRequest } from './shard_failure_types';
+import type { ShardFailureRequest } from './shard_failure_types';
 
 export interface Props {
   onClose: () => void;

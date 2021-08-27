@@ -5,11 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import React, { Fragment } from 'react';
+import { SkipBottomButton } from '../skip_bottom_button/skip_bottom_button';
+import type { DocTableProps, DocTableRenderProps } from './doc_table_wrapper';
+import { DocTableWrapper } from './doc_table_wrapper';
 import './index.scss';
-import { SkipBottomButton } from '../skip_bottom_button';
-import { DocTableProps, DocTableRenderProps, DocTableWrapper } from './doc_table_wrapper';
 
 const DocTableWrapperMemoized = React.memo(DocTableWrapper);
 

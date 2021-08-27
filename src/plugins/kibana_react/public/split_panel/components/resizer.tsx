@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React from 'react';
 
 export type ResizerMouseEvent = React.MouseEvent<HTMLButtonElement, MouseEvent>;
 export type ResizerKeyDownEvent = React.KeyboardEvent<HTMLButtonElement>;

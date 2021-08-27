@@ -5,18 +5,16 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { i18n } from '@kbn/i18n';
-
 import { KBN_FIELD_TYPES } from '../../../../common';
-import { AggTypesDependencies } from '../agg_types';
-import { BaseAggParams } from '../types';
-
+import type { AggTypesDependencies } from '../agg_types';
+import type { BaseAggParams } from '../types';
+import type { IResponseAggConfig } from './lib/get_response_agg_config_class';
+import { getResponseAggConfigClass } from './lib/get_response_agg_config_class';
 import { MetricAggType } from './metric_agg_type';
-import { getResponseAggConfigClass, IResponseAggConfig } from './lib/get_response_agg_config_class';
-import { aggPercentileRanksFnName } from './percentile_ranks_fn';
-import { getPercentileValue } from './percentiles_get_value';
 import { METRIC_TYPES } from './metric_agg_types';
+import { getPercentileValue } from './percentiles_get_value';
+import { aggPercentileRanksFnName } from './percentile_ranks_fn';
 
 export interface AggParamsPercentileRanks extends BaseAggParams {
   field: string;

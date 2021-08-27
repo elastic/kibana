@@ -5,7 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import {
   EuiButtonEmpty,
   EuiCallOut,
@@ -16,11 +15,11 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useState } from 'react';
-import { DashboardSavedObject } from '../..';
+import { useKibana } from '../../../../kibana_react/public/context/context';
 import { dashboardUnsavedListingStrings, getNewDashboardTitle } from '../../dashboard_strings';
-import { useKibana } from '../../services/kibana_react';
+import type { DashboardSavedObject } from '../../saved_dashboards/saved_dashboard';
+import type { DashboardAppServices, DashboardRedirect } from '../../types';
 import { DASHBOARD_PANELS_UNSAVED_ID } from '../lib/dashboard_session_storage';
-import { DashboardAppServices, DashboardRedirect } from '../../types';
 import { confirmDiscardUnsavedChanges } from './confirm_overlays';
 
 const DashboardUnsavedItem = ({

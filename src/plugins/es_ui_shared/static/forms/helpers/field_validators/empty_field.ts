@@ -5,11 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { ValidationFunc } from '../../hook_form_lib';
-import { isEmptyString } from '../../../validators/string';
-import { isEmptyArray } from '../../../validators/array';
-import { ERROR_CODE } from './types';
+import { isEmptyArray } from '../../../validators/array/is_empty';
+import { isEmptyString } from '../../../validators/string/is_empty';
+import type { ValidationFunc } from '../../hook_form_lib/types';
+import type { ERROR_CODE } from './types';
 
 export const emptyField = (message: string) => (
   ...args: Parameters<ValidationFunc>

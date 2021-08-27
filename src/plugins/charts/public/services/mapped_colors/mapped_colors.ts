@@ -6,13 +6,11 @@
  * Side Public License, v 1.
  */
 
-import _ from 'lodash';
 import Color from 'color';
-
-import { CoreSetup } from 'kibana/public';
-
+import _ from 'lodash';
+import type { CoreSetup } from '../../../../../core/public';
 import { COLOR_MAPPING_SETTING } from '../../../common';
-import { createColorPalette } from '../../static/colors';
+import { createColorPalette } from '../../static/colors/color_palette';
 
 const standardizeColor = (color: string) => new Color(color).hex().toLowerCase();
 

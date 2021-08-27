@@ -5,10 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { SavedObjectReference } from '../../../../../core/types';
-import { VisParams } from '../../../common';
-import { INDEX_PATTERN_SAVED_OBJECT_TYPE } from '../../../../data/public';
+import type { SavedObjectReference } from '../../../../../core/types/saved_objects';
+import { INDEX_PATTERN_SAVED_OBJECT_TYPE } from '../../../../data/common/constants';
+import type { VisParams } from '../../../common/types';
 
 const isControlsVis = (visType: string) => visType === 'input_control_vis';
 

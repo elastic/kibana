@@ -5,15 +5,15 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { Datatable } from 'src/plugins/expressions/public';
-import { CoreStart } from '../../../../../core/public';
-import { FormatFactory } from '../../../../field_formats/common';
-
-import { DataPublicPluginStart, exporters } from '../../services/data';
-import { downloadMultipleAs } from '../../services/share';
-import { Adapters, IEmbeddable } from '../../services/embeddable';
-import { Action } from '../../services/ui_actions';
+import type { CoreStart } from '../../../../../core/public';
+import { exporters } from '../../../../data/public';
+import type { DataPublicPluginStart } from '../../../../data/public/types';
+import type { IEmbeddable } from '../../../../embeddable/public/lib/embeddables/i_embeddable';
+import type { Datatable } from '../../../../expressions/common/expression_types/specs/datatable';
+import type { FormatFactory } from '../../../../field_formats/common/types';
+import type { Adapters } from '../../../../inspector/common/adapters/types';
+import { downloadMultipleAs } from '../../../../share/public/lib/download_as';
+import type { Action } from '../../../../ui_actions/public/actions/action';
 import { dashboardExportCsvAction } from '../../dashboard_strings';
 
 export const ACTION_EXPORT_CSV = 'ACTION_EXPORT_CSV';

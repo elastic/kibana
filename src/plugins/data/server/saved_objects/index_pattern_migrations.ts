@@ -5,9 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { flow, omit } from 'lodash';
-import { SavedObjectMigrationFn } from 'kibana/server';
+import type { SavedObjectMigrationFn } from '../../../../core/server/saved_objects/migrations/types';
 
 const migrateAttributeTypeAndAttributeTypeMeta: SavedObjectMigrationFn<any, any> = (doc) => ({
   ...doc,

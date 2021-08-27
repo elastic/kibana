@@ -5,13 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import React, { ReactNode } from 'react';
 import { EuiForm } from '@elastic/eui';
-
+import type { ReactNode } from 'react';
+import React from 'react';
 import { FormProvider } from '../form_context';
 import { FormDataContextProvider } from '../form_data_context';
-import { FormHook } from '../types';
+import type { FormHook } from '../types';
 
 interface Props {
   form: FormHook<any>;

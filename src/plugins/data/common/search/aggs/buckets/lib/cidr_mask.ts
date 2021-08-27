@@ -7,7 +7,7 @@
  */
 
 import ipaddr from 'ipaddr.js';
-import { IpAddress } from '../../utils';
+import { IpAddress } from '../../utils/ip_address';
 
 export class CidrMask {
   private address: number[];

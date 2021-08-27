@@ -5,13 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { first } from 'rxjs/operators';
-import { METRIC_TYPE } from '@kbn/analytics';
 import type { UiCounterMetricType } from '@kbn/analytics';
-import type { StartServicesAccessor } from 'src/core/public';
-import type { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
-import { SEARCH_EVENT_TYPE, SearchUsageCollector } from './types';
+import { METRIC_TYPE } from '@kbn/analytics';
+import { first } from 'rxjs/operators';
+import type { StartServicesAccessor } from '../../../../../core/public';
+import type { UsageCollectionSetup } from '../../../../usage_collection/public/plugin';
+import type { SearchUsageCollector } from './types';
+import { SEARCH_EVENT_TYPE } from './types';
 
 export const createUsageCollector = (
   getStartServices: StartServicesAccessor,

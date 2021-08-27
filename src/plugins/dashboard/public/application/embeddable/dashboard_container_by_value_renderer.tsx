@@ -7,9 +7,9 @@
  */
 
 import * as React from 'react';
-import { DashboardContainerInput } from '../..';
-import { DashboardContainerFactory } from './dashboard_container_factory';
-import { EmbeddableRenderer } from '../../services/embeddable';
+import { EmbeddableRenderer } from '../../../../embeddable/public/lib/embeddables/embeddable_renderer';
+import type { DashboardContainerInput } from '../../types';
+import type { DashboardContainerFactory } from './dashboard_container_factory';
 
 interface Props {
   input: DashboardContainerInput;

@@ -5,9 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { ReactNode, ChangeEvent, FormEvent, MouseEvent } from 'react';
-import { Subject, Subscription } from './lib';
+import type { ChangeEvent, FormEvent, MouseEvent, ReactNode } from 'react';
+import type { Subscription } from './lib/subject';
+import { Subject } from './lib/subject';
 
 // This type will convert all optional property to required ones
 // Comes from https://github.com/microsoft/TypeScript/issues/15012#issuecomment-365453623

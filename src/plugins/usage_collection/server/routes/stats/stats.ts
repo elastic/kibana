@@ -5,23 +5,19 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import defaultsDeep from 'lodash/defaultsDeep';
 import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
-
-import {
-  ElasticsearchClient,
-  IRouter,
-  KibanaRequest,
-  MetricsServiceSetup,
-  SavedObjectsClientContract,
-  ServiceStatus,
-  ServiceStatusLevels,
-} from '../../../../../core/server';
-import { CollectorSet } from '../../collector';
+import type { ElasticsearchClient } from '../../../../../core/server/elasticsearch/client/types';
+import { KibanaRequest } from '../../../../../core/server/http/router/request';
+import type { IRouter } from '../../../../../core/server/http/router/router';
+import type { MetricsServiceSetup } from '../../../../../core/server/metrics/types';
+import type { SavedObjectsClientContract } from '../../../../../core/server/saved_objects/types';
+import type { ServiceStatus } from '../../../../../core/server/status/types';
+import { ServiceStatusLevels } from '../../../../../core/server/status/types';
+import { CollectorSet } from '../../collector/collector_set';
 
 const STATS_NOT_READY_MESSAGE = i18n.translate('usageCollection.stats.notReadyMessage', {
   defaultMessage: 'Stats are not ready yet. Please try again later.',

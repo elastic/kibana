@@ -5,12 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { EmbeddableInput, SavedObjectEmbeddableInput } from '../index';
+import type { CoreStart } from '../../../../../core/public';
 import { coreMock } from '../../../../../core/public/mocks';
-import { AttributeServiceOptions } from './attribute_service';
-import { CoreStart } from 'src/core/public';
-import { AttributeService, ATTRIBUTE_SERVICE_KEY } from './index';
+import type { SavedObjectEmbeddableInput } from '../../../common/lib/saved_object_embeddable';
+import type { EmbeddableInput } from '../../../common/types';
+import type { AttributeServiceOptions } from './attribute_service';
+import { AttributeService, ATTRIBUTE_SERVICE_KEY } from './attribute_service';
 
 export const mockAttributeService = <
   A extends { title: string },

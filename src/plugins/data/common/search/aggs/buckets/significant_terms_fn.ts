@@ -5,10 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { i18n } from '@kbn/i18n';
-import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
-import { AggExpressionType, AggExpressionFunctionArgs, BUCKET_TYPES } from '../';
+import type { ExpressionFunctionDefinition } from '../../../../../expressions/common/expression_functions/types';
+import type { AggExpressionFunctionArgs, AggExpressionType } from '../types';
+import { BUCKET_TYPES } from './bucket_agg_types';
 
 export const aggSignificantTermsFnName = 'aggSignificantTerms';
 

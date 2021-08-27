@@ -4,19 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { SavedObjectsClientContract } from '../../../../src/core/server';
-import { RunNowResult, TaskManagerStartContract } from '../../task_manager/server';
-import {
-  RawAction,
+import type { SavedObjectsClientContract } from '../../../../src/core/server/saved_objects/types';
+import type { TaskManagerStartContract } from '../../task_manager/server/plugin';
+import type { RunNowResult } from '../../task_manager/server/task_scheduling';
+import { ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE } from './constants/saved_objects';
+import { isSavedObjectExecutionSource } from './lib/action_execution_source';
+import type { ExecuteOptions as ActionExecutorOptions } from './lib/action_executor';
+import type { RelatedSavedObjects } from './lib/related_saved_objects';
+import type {
+  ActionTaskExecutorParams,
   ActionTypeRegistryContract,
   PreConfiguredAction,
-  ActionTaskExecutorParams,
+  RawAction,
 } from './types';
-import { ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE } from './constants/saved_objects';
-import { ExecuteOptions as ActionExecutorOptions } from './lib/action_executor';
-import { isSavedObjectExecutionSource } from './lib';
-import { RelatedSavedObjects } from './lib/related_saved_objects';
 
 interface CreateExecuteFunctionOptions {
   taskManager: TaskManagerStartContract;

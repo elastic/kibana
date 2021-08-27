@@ -5,14 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import React, { useState, useRef, useEffect, FC } from 'react';
 import { EuiLoadingChart } from '@elastic/eui';
 import classNames from 'classnames';
-
-import { EmbeddableChildPanel } from '../../../services/embeddable';
-import { useLabs } from '../../../services/presentation_util';
-import { DashboardPanelState } from '../types';
+import type { FC } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { EmbeddableChildPanel } from '../../../../../embeddable/public/lib/containers/embeddable_child_panel';
+import { useLabs } from '../../../../../presentation_util/public';
+import type { DashboardPanelState } from '../../../../common/types';
 
 type PanelProps = Pick<EmbeddableChildPanel, 'container' | 'PanelComponent'>;
 type DivProps = Pick<React.HTMLAttributes<HTMLDivElement>, 'className' | 'style' | 'children'>;

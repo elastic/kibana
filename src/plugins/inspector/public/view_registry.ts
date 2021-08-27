@@ -5,10 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { EventEmitter } from 'events';
-import { InspectorViewDescription } from './types';
-import { Adapters } from '../common';
+import type { Adapters } from '../common/adapters/types';
+import type { InspectorViewDescription } from './types';
 
 /**
  * @callback viewShouldShowFunc

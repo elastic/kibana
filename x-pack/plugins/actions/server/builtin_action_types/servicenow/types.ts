@@ -6,22 +6,21 @@
  */
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-
-import { TypeOf } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
+import type { Logger } from '@kbn/logging';
+import type { ActionsConfigurationUtilities } from '../../actions_config';
 import {
   ExecutorParamsSchemaITSM,
+  ExecutorParamsSchemaSIR,
   ExecutorSubActionCommonFieldsParamsSchema,
+  ExecutorSubActionGetChoicesParamsSchema,
   ExecutorSubActionGetIncidentParamsSchema,
   ExecutorSubActionHandshakeParamsSchema,
   ExecutorSubActionPushParamsSchemaITSM,
+  ExecutorSubActionPushParamsSchemaSIR,
   ExternalIncidentServiceConfigurationSchema,
   ExternalIncidentServiceSecretConfigurationSchema,
-  ExecutorParamsSchemaSIR,
-  ExecutorSubActionPushParamsSchemaSIR,
-  ExecutorSubActionGetChoicesParamsSchema,
 } from './schema';
-import { ActionsConfigurationUtilities } from '../../actions_config';
-import { Logger } from '../../../../../../src/core/server';
 
 export type ServiceNowPublicConfigurationType = TypeOf<
   typeof ExternalIncidentServiceConfigurationSchema

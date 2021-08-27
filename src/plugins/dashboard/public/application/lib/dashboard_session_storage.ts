@@ -5,12 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { set } from '@elastic/safer-lodash-set';
-import { Storage } from '../../services/kibana_utils';
-import { NotificationsStart } from '../../services/core';
+import type { NotificationsStart } from '../../../../../core/public/notifications/notifications_service';
+import { Storage } from '../../../../kibana_utils/public/storage/storage';
 import { panelStorageErrorStrings } from '../../dashboard_strings';
-import { DashboardState } from '../../types';
+import type { DashboardState } from '../../types';
 
 export const DASHBOARD_PANELS_UNSAVED_ID = 'unsavedDashboard';
 const DASHBOARD_PANELS_SESSION_KEY = 'dashboardStateManagerPanels';

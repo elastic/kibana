@@ -6,7 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
-import { ActionType, ActionTypeConfig, ActionTypeSecrets, ActionTypeParams } from '../types';
+import type { ActionType, ActionTypeConfig, ActionTypeParams, ActionTypeSecrets } from '../types';
 
 export function validateParams<
   Config extends ActionTypeConfig = ActionTypeConfig,

@@ -5,9 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { HttpStart, SavedObjectsImportResponse } from 'src/core/public';
-import { ImportMode } from '../management_section/objects_table/components/import_mode_control';
+import type { HttpStart } from '../../../../core/public/http/types';
+import type { SavedObjectsImportResponse } from '../../../../core/server/saved_objects/import/types';
+import type { ImportMode } from '../management_section/objects_table/components/import_mode_control';
 
 export async function importFile(
   http: HttpStart,

@@ -5,16 +5,16 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { cloneDeep, isEqual } from 'lodash';
 import * as Rx from 'rxjs';
 import { merge } from 'rxjs';
 import { debounceTime, distinctUntilChanged, map, skip } from 'rxjs/operators';
-import { RenderCompleteDispatcher } from '../../../../kibana_utils/public';
-import { Adapters } from '../types';
-import { IContainer } from '../containers';
-import { EmbeddableOutput, IEmbeddable } from './i_embeddable';
-import { EmbeddableInput, ViewMode } from '../../../common/types';
+import type { Adapters } from '../../../../inspector/common/adapters/types';
+import { RenderCompleteDispatcher } from '../../../../kibana_utils/public/render_complete/render_complete_dispatcher';
+import type { EmbeddableInput } from '../../../common/types';
+import { ViewMode } from '../../../common/types';
+import type { IContainer } from '../containers/i_container';
+import type { EmbeddableOutput, IEmbeddable } from './i_embeddable';
 
 function getPanelTitle(input: EmbeddableInput, output: EmbeddableOutput) {
   return input.hidePanelTitles ? '' : input.title === undefined ? output.defaultTitle : input.title;

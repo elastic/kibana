@@ -6,11 +6,10 @@
  * Side Public License, v 1.
  */
 
-import './loading_spinner.scss';
-
-import React from 'react';
-import { EuiLoadingSpinner, EuiTitle, EuiSpacer } from '@elastic/eui';
+import { EuiLoadingSpinner, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import React from 'react';
+import './loading_spinner.scss';
 
 export function LoadingSpinner() {
   return (

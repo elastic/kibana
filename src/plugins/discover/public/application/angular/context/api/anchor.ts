@@ -5,16 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
-
-import {
-  ISearchSource,
-  IndexPatternsContract,
+import { get } from 'lodash';
+import type { IndexPatternsContract } from '../../../../../../data/common/index_patterns/index_patterns/index_patterns';
+import type {
   EsQuerySortValue,
-} from '../../../../../../data/public';
-import { EsHitRecord } from './context';
+  ISearchSource,
+} from '../../../../../../data/common/search/search_source/types';
+import type { EsHitRecord } from './context';
 
 export function fetchAnchorProvider(
   indexPatterns: IndexPatternsContract,

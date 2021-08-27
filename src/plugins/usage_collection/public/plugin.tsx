@@ -5,21 +5,18 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { Reporter, ApplicationUsageTracker } from '@kbn/analytics';
 import type { UiCounterMetricType } from '@kbn/analytics';
-import type { Subscription } from 'rxjs';
+import { ApplicationUsageTracker, Reporter } from '@kbn/analytics';
 import React from 'react';
-import type {
-  PluginInitializerContext,
-  Plugin,
-  CoreSetup,
-  CoreStart,
-  HttpSetup,
-} from 'src/core/public';
-import { Storage } from '../../kibana_utils/public';
-import { createReporter, trackApplicationUsageChange } from './services';
-import { ApplicationUsageContext } from './components/track_application_view';
+import { Subscription } from 'rxjs';
+import type { CoreSetup, CoreStart } from '../../../core/public';
+import type { HttpSetup } from '../../../core/public/http/types';
+import type { Plugin } from '../../../core/public/plugins/plugin';
+import type { PluginInitializerContext } from '../../../core/public/plugins/plugin_context';
+import { Storage } from '../../kibana_utils/public/storage/storage';
+import { ApplicationUsageContext } from './components/track_application_view/track_application_view';
+import { trackApplicationUsageChange } from './services/application_usage';
+import { createReporter } from './services/create_reporter';
 
 export interface PublicConfigType {
   uiCounters: {

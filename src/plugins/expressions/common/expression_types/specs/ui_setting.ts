@@ -5,10 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { Datatable, DatatableColumnType } from './datatable';
-import { ExpressionTypeDefinition, ExpressionValueBoxed } from '../types';
-import { ExpressionValueRender } from './render';
+import type { ExpressionTypeDefinition, ExpressionValueBoxed } from '../types';
+import type { Datatable, DatatableColumnType } from './datatable';
+import type { ExpressionValueRender } from './render';
 
 const name = 'ui_setting';
 

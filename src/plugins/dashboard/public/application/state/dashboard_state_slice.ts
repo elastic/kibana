@@ -5,12 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-
-import { Filter, Query } from '../../services/data';
-import { ViewMode } from '../../services/embeddable';
-import { DashboardOptions, DashboardPanelMap, DashboardState } from '../../types';
+import type { PayloadAction } from '@reduxjs/toolkit';
+import { createSlice } from '@reduxjs/toolkit';
+import type { Filter } from '../../../../data/common/es_query';
+import { ViewMode } from '../../../../embeddable/common/types';
+import type { Query } from '../../services/data';
+import type { DashboardOptions, DashboardPanelMap, DashboardState } from '../../types';
 
 export const dashboardStateSlice = createSlice({
   name: 'dashboardState',

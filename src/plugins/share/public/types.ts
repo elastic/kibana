@@ -5,11 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { ComponentType } from 'react';
-import { EuiContextMenuPanelDescriptor } from '@elastic/eui';
-import { EuiContextMenuPanelItemDescriptorEntry } from '@elastic/eui/src/components/context_menu/context_menu';
-import type { Capabilities } from 'src/core/public';
+import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
+import type { EuiContextMenuPanelItemDescriptorEntry } from '@elastic/eui/src/components/context_menu/context_menu';
+import type { ComponentType } from 'react';
+import type { Capabilities } from '../../../core/types/capabilities';
 
 /**
  * @public

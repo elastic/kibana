@@ -5,26 +5,26 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { useMemo, useEffect, useState, useCallback } from 'react';
+import type { History } from 'history';
 import { isEqual } from 'lodash';
-import { History } from 'history';
-import { getState } from './discover_state';
-import { getStateDefaults } from '../utils/get_state_defaults';
-import { IndexPattern } from '../../../../../../data/public';
-import { DiscoverServices } from '../../../../build_services';
-import { SavedSearch } from '../../../../saved_searches';
-import { loadIndexPattern } from '../utils/resolve_index_pattern';
-import { useSavedSearch as useSavedSearchData } from './use_saved_search';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { IndexPattern } from '../../../../../../data/common/index_patterns/index_patterns/index_pattern';
 import {
   MODIFY_COLUMNS_ON_SWITCH,
   SEARCH_FIELDS_FROM_SOURCE,
   SEARCH_ON_PAGE_LOAD_SETTING,
   SORT_DEFAULT_ORDER_SETTING,
 } from '../../../../../common';
-import { useSearchSession } from './use_search_session';
+import type { DiscoverServices } from '../../../../build_services';
+import type { SavedSearch } from '../../../../saved_searches/types';
 import { FetchStatus } from '../../../types';
+import type { SortPairArr } from '../components/doc_table/lib/get_sort';
+import { getStateDefaults } from '../utils/get_state_defaults';
 import { getSwitchIndexPatternAppState } from '../utils/get_switch_index_pattern_app_state';
-import { SortPairArr } from '../components/doc_table/lib/get_sort';
+import { loadIndexPattern } from '../utils/resolve_index_pattern';
+import { getState } from './discover_state';
+import { useSavedSearch as useSavedSearchData } from './use_saved_search';
+import { useSearchSession } from './use_search_session';
 
 export function useDiscoverState({
   services,

@@ -5,12 +5,15 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { PublicUiSettingsParams, UserProvidedValues, SavedObjectAttribute } from 'src/core/public';
-import { FieldSetting } from '../types';
-import { getValType } from './get_val_type';
-import { getAriaName } from './get_aria_name';
+import type { SavedObjectAttribute } from '../../../../../core/types/saved_objects';
+import type {
+  PublicUiSettingsParams,
+  UserProvidedValues,
+} from '../../../../../core/types/ui_settings';
+import type { FieldSetting } from '../types';
 import { DEFAULT_CATEGORY } from './default_category';
+import { getAriaName } from './get_aria_name';
+import { getValType } from './get_val_type';
 
 /**
  * @param {object} advanced setting definition object

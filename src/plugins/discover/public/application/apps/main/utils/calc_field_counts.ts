@@ -5,9 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { IndexPattern } from '../../../../kibana_services';
-import { ElasticSearchHit } from '../../../doc_views/doc_views_types';
+import { IndexPattern } from '../../../../../../data/common/index_patterns/index_patterns/index_pattern';
+import type { ElasticSearchHit } from '../../../doc_views/doc_views_types';
 
 /**
  * This function is recording stats of the available fields, for usage in sidebar and sharing

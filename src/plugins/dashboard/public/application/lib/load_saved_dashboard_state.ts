@@ -6,15 +6,14 @@
  * Side Public License, v 1.
  */
 
-import _ from 'lodash';
-
-import { savedObjectToDashboardState } from './convert_dashboard_state';
-import { DashboardState, DashboardBuildContext } from '../../types';
-import { DashboardConstants, DashboardSavedObject } from '../..';
+import { ViewMode } from '../../../../embeddable/common/types';
+import { DashboardConstants } from '../../dashboard_constants';
 import { getDashboard60Warning } from '../../dashboard_strings';
-import { migrateLegacyQuery } from './migrate_legacy_query';
+import type { DashboardSavedObject } from '../../saved_dashboards/saved_dashboard';
+import type { DashboardBuildContext, DashboardState } from '../../types';
+import { savedObjectToDashboardState } from './convert_dashboard_state';
 import { cleanFiltersForSerialize } from './filter_utils';
-import { ViewMode } from '../../services/embeddable';
+import { migrateLegacyQuery } from './migrate_legacy_query';
 
 interface LoadSavedDashboardStateReturn {
   savedDashboardState: DashboardState;

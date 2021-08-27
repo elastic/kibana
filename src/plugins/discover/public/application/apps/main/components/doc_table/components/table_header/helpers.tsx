@@ -5,9 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { i18n } from '@kbn/i18n';
-import { IndexPattern } from '../../../../../../../kibana_services';
+import { IndexPattern } from '../../../../../../../../../data/common/index_patterns/index_patterns/index_pattern';
 
 export type SortOrder = [string, string];
 export interface ColumnProps {

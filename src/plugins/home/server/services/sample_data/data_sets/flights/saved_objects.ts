@@ -7,9 +7,8 @@
  */
 
 /* eslint max-len: 0 */
-
 import { i18n } from '@kbn/i18n';
-import { SavedObject } from 'kibana/server';
+import type { SavedObject } from '../../../../../../../core/types/saved_objects';
 
 export const getSavedObjects = (): SavedObject[] => [
   {

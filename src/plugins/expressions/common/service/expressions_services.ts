@@ -5,38 +5,40 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { Observable } from 'rxjs';
 import type { SerializableRecord } from '@kbn/utility-types';
+import { Observable } from 'rxjs';
+import { KibanaRequest } from '../../../../core/server/http/router/request';
+import type { KibanaExecutionContext } from '../../../../core/types/execution_context';
+import type { SavedObjectReference } from '../../../../core/types/saved_objects';
+import type { Adapters } from '../../../inspector/common/adapters/types';
+import type {
+  PersistableStateService,
+  VersionedState,
+} from '../../../kibana_utils/common/persistable_state/types';
+import type { ExpressionAstExpression } from '../ast/types';
+import type { ExecutionResult } from '../execution/execution';
+import { ExecutionContract } from '../execution/execution_contract';
+import { Executor } from '../executor/executor';
+import { clog } from '../expression_functions/specs/clog';
+import { createTable } from '../expression_functions/specs/create_table';
+import { cumulativeSum } from '../expression_functions/specs/cumulative_sum';
+import { derivative } from '../expression_functions/specs/derivative';
+import { font } from '../expression_functions/specs/font';
+import { mapColumn } from '../expression_functions/specs/map_column';
+import { math } from '../expression_functions/specs/math';
+import { mathColumn } from '../expression_functions/specs/math_column';
+import { movingAverage } from '../expression_functions/specs/moving_average';
+import { overallMetric } from '../expression_functions/specs/overall_metric';
+import { theme } from '../expression_functions/specs/theme';
+import { variable } from '../expression_functions/specs/var';
+import { variableSet } from '../expression_functions/specs/var_set';
+import type { AnyExpressionFunctionDefinition } from '../expression_functions/types';
+import { ExpressionRendererRegistry } from '../expression_renderers/expression_renderer_registry';
+import type { AnyExpressionRenderDefinition } from '../expression_renderers/types';
+import type { ExpressionValueError } from '../expression_types/specs/error';
+import type { AnyExpressionTypeDefinition } from '../expression_types/types';
+
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import type { KibanaRequest } from 'src/core/server';
-import type { KibanaExecutionContext } from 'src/core/public';
-
-import { Executor } from '../executor';
-import { AnyExpressionRenderDefinition, ExpressionRendererRegistry } from '../expression_renderers';
-import { ExpressionAstExpression } from '../ast';
-import { ExecutionContract, ExecutionResult } from '../execution';
-import { AnyExpressionTypeDefinition, ExpressionValueError } from '../expression_types';
-import { AnyExpressionFunctionDefinition } from '../expression_functions';
-import { SavedObjectReference } from '../../../../core/types';
-import { PersistableStateService, VersionedState } from '../../../kibana_utils/common';
-import { Adapters } from '../../../inspector/common/adapters';
-import {
-  clog,
-  createTable,
-  font,
-  variableSet,
-  variable,
-  theme,
-  cumulativeSum,
-  derivative,
-  movingAverage,
-  mapColumn,
-  overallMetric,
-  math,
-  mathColumn,
-} from '../expression_functions';
-
 /**
  * The public contract that `ExpressionsService` provides to other plugins
  * in Kibana Platform in *setup* life-cycle.

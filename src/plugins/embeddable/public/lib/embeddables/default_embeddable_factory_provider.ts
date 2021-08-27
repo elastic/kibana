@@ -5,13 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { SavedObjectAttributes } from 'kibana/public';
-import { EmbeddableFactoryDefinition } from './embeddable_factory_definition';
-import { EmbeddableInput, EmbeddableOutput, IEmbeddable } from './i_embeddable';
-import { EmbeddableFactory } from './embeddable_factory';
-import { EmbeddableStateWithType } from '../../../common/types';
-import { IContainer } from '..';
+import type { SavedObjectAttributes } from '../../../../../core/types/saved_objects';
+import type { EmbeddableInput, EmbeddableStateWithType } from '../../../common/types';
+import type { IContainer } from '../containers/i_container';
+import type { EmbeddableFactory } from './embeddable_factory';
+import type { EmbeddableFactoryDefinition } from './embeddable_factory_definition';
+import type { EmbeddableOutput, IEmbeddable } from './i_embeddable';
 
 export const defaultEmbeddableFactoryProvider = <
   I extends EmbeddableInput = EmbeddableInput,

@@ -5,12 +5,16 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import type { IconType } from '@elastic/eui';
 import type { ReactNode } from 'react';
-import type { Adapters } from 'src/plugins/inspector';
-import type { IndexPattern, AggGroupNames, AggParam, AggGroupName } from '../../../data/public';
-import type { Vis, VisEditorOptionsProps, VisParams, VisToExpressionAst } from '../types';
+import { IndexPattern } from '../../../data/common/index_patterns/index_patterns/index_pattern';
+import type { AggGroupName } from '../../../data/common/search/aggs/agg_groups';
+import { AggGroupNames } from '../../../data/common/search/aggs/agg_groups';
+import type { AggParam } from '../../../data/common/search/aggs/agg_params';
+import type { Adapters } from '../../../inspector/common/adapters/types';
+import type { VisParams } from '../../common/types';
+import type { VisEditorOptionsProps, VisToExpressionAst } from '../types';
+import { Vis } from '../vis';
 import { VisGroups } from './vis_groups_enum';
 
 export interface VisTypeOptions {

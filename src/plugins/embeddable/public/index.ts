@@ -6,9 +6,8 @@
  * Side Public License, v 1.
  */
 
+import type { PluginInitializerContext } from '../../../core/public/plugins/plugin_context';
 import './index.scss';
-
-import { PluginInitializerContext } from 'src/core/public';
 import { EmbeddablePublicPlugin } from './plugin';
 
 export {
@@ -16,74 +15,71 @@ export {
   ACTION_EDIT_PANEL,
   Adapters,
   AddPanelAction,
-  ReferenceOrValueEmbeddable,
-  isReferenceOrValueEmbeddable,
   ChartActionContext,
   Container,
   ContainerInput,
   ContainerOutput,
-  CONTEXT_MENU_TRIGGER,
   contextMenuTrigger,
+  CONTEXT_MENU_TRIGGER,
   defaultEmbeddableFactoryProvider,
   EditPanelAction,
   Embeddable,
   EmbeddableChildPanel,
   EmbeddableChildPanelProps,
   EmbeddableContext,
+  EmbeddableEditorState,
   EmbeddableFactory,
   EmbeddableFactoryDefinition,
   EmbeddableFactoryNotFoundError,
   EmbeddableInput,
   EmbeddableInstanceConfiguration,
   EmbeddableOutput,
+  EmbeddablePackageState,
   EmbeddablePanel,
+  EmbeddableRenderer,
+  EmbeddableRendererProps,
   EmbeddableRoot,
-  ValueClickContext,
-  RangeSelectContext,
+  EmbeddableStateTransfer,
   ErrorEmbeddable,
   IContainer,
   IEmbeddable,
+  isContextMenuTriggerContext,
   isEmbeddable,
   isErrorEmbeddable,
+  isRangeSelectTriggerContext,
+  isReferenceOrValueEmbeddable,
+  isRowClickTriggerContext,
+  isSavedObjectEmbeddableInput,
+  isValueClickTriggerContext,
   openAddPanelFlyout,
   OutputSpec,
-  PANEL_BADGE_TRIGGER,
   panelBadgeTrigger,
-  PANEL_NOTIFICATION_TRIGGER,
-  panelNotificationTrigger,
   PanelNotFoundError,
+  panelNotificationTrigger,
   PanelState,
+  PANEL_BADGE_TRIGGER,
+  PANEL_NOTIFICATION_TRIGGER,
   PropertySpec,
+  RangeSelectContext,
+  ReferenceOrValueEmbeddable,
+  SavedObjectEmbeddableInput,
   SELECT_RANGE_TRIGGER,
+  useEmbeddableFactory,
+  ValueClickContext,
   VALUE_CLICK_TRIGGER,
   ViewMode,
   withEmbeddableSubscription,
-  SavedObjectEmbeddableInput,
-  isSavedObjectEmbeddableInput,
-  isRangeSelectTriggerContext,
-  isValueClickTriggerContext,
-  isRowClickTriggerContext,
-  isContextMenuTriggerContext,
-  EmbeddableStateTransfer,
-  EmbeddableEditorState,
-  EmbeddablePackageState,
-  EmbeddableRenderer,
-  EmbeddableRendererProps,
-  useEmbeddableFactory,
 } from './lib';
-
 export { AttributeService, ATTRIBUTE_SERVICE_KEY } from './lib/attribute_service';
-
+export {
+  EmbeddablePanelHOC,
+  EmbeddableSetup,
+  EmbeddableSetupDependencies,
+  EmbeddableStart,
+  EmbeddableStartDependencies,
+} from './plugin';
 export { EnhancementRegistryDefinition } from './types';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new EmbeddablePublicPlugin(initializerContext);
 }
-
-export {
-  EmbeddableSetup,
-  EmbeddableStart,
-  EmbeddableSetupDependencies,
-  EmbeddableStartDependencies,
-  EmbeddablePanelHOC,
-} from './plugin';

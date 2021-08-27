@@ -5,12 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import React, { useEffect, useState } from 'react';
-import { EmbeddableInput, IEmbeddable } from './i_embeddable';
+import type { EmbeddableInput } from '../../../common/types';
+import type { EmbeddableFactory } from './embeddable_factory';
 import { EmbeddableRoot } from './embeddable_root';
-import { EmbeddableFactory } from './embeddable_factory';
 import { ErrorEmbeddable, isErrorEmbeddable } from './error_embeddable';
+import type { IEmbeddable } from './i_embeddable';
 
 /**
  * This type is a publicly exposed props of {@link EmbeddableRenderer}

@@ -5,10 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import type { PluginInitializerContext } from 'kibana/server';
-import type { UsageCollectionSetup } from '../../../../../usage_collection/server';
-import { fetchProvider, TelemetryResponse } from './collector_fetch';
+import type { PluginInitializerContext } from '../../../../../../core/server/plugins/types';
+import type { UsageCollectionSetup } from '../../../../../usage_collection/server/plugin';
+import type { TelemetryResponse } from './collector_fetch';
+import { fetchProvider } from './collector_fetch';
 
 export function makeSampleDataUsageCollector(
   usageCollection: UsageCollectionSetup,

@@ -5,11 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import type { EmbeddableSetup, EmbeddableStart } from './plugin';
+import { EmbeddableServerPlugin } from './plugin';
 
-import { EmbeddableServerPlugin, EmbeddableSetup, EmbeddableStart } from './plugin';
-
+export { EmbeddableRegistryDefinition, EnhancementRegistryDefinition } from './types';
 export { EmbeddableSetup, EmbeddableStart };
-
-export { EnhancementRegistryDefinition, EmbeddableRegistryDefinition } from './types';
 
 export const plugin = () => new EmbeddableServerPlugin();

@@ -5,22 +5,21 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import React, { lazy, Suspense } from 'react';
-import ReactDOM from 'react-dom';
 import { EuiPortal, EuiProgress } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n/react';
+import React, { lazy, Suspense } from 'react';
+import ReactDOM from 'react-dom';
 import {
+  getApplication,
+  getDocLinks,
+  getEmbeddable,
   getHttp,
   getSavedObjects,
   getTypes,
   getUISettings,
   getUsageCollector,
-  getApplication,
-  getEmbeddable,
-  getDocLinks,
 } from '../services';
-import type { BaseVisType } from '../vis_types';
+import { BaseVisType } from '../vis_types/base_vis_type';
 
 const NewVisModal = lazy(() => import('./new_vis_modal'));
 

@@ -6,24 +6,24 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import ReactDOM from 'react-dom';
-import { I18nStart } from 'kibana/public';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 import {
-  EuiSpacer,
   EuiButton,
-  EuiText,
-  EuiWrappingPopover,
+  EuiButtonEmpty,
   EuiCode,
   EuiHorizontalRule,
-  EuiButtonEmpty,
+  EuiSpacer,
+  EuiText,
   EuiTextAlign,
+  EuiWrappingPopover,
 } from '@elastic/eui';
-import './open_options_popover.scss';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+import React from 'react';
+import ReactDOM from 'react-dom';
+import type { I18nStart } from '../../../../../../../../core/public/i18n/i18n_service';
 import { DOC_TABLE_LEGACY } from '../../../../../../common';
 import { getServices } from '../../../../../kibana_services';
+import './open_options_popover.scss';
 
 const container = document.createElement('div');
 let isOpen = false;

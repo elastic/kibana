@@ -5,8 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { IRouter } from 'src/core/server';
+import type { IRouter } from '../../../../core/server/http/router/router';
 import { registerHitsStatusRoute } from './fetch_es_hits_status';
 import { registerNewInstanceStatusRoute } from './fetch_new_instance_status';
 

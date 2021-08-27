@@ -6,9 +6,10 @@
  * Side Public License, v 1.
  */
 
-import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
+import _ from 'lodash';
 import { formatESMsg } from './format_es_msg';
+
 const has = _.has;
 
 /**

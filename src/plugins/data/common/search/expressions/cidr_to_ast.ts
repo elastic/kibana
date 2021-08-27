@@ -5,9 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { buildExpression, buildExpressionFunction } from '../../../../expressions/common';
-import { ExpressionFunctionCidr, Cidr } from './cidr';
+import { buildExpression } from '../../../../expressions/common/ast/build_expression';
+import { buildExpressionFunction } from '../../../../expressions/common/ast/build_function';
+import type { Cidr, ExpressionFunctionCidr } from './cidr';
 
 export const cidrToAst = (cidr: Cidr) => {
   return buildExpression([buildExpressionFunction<ExpressionFunctionCidr>('cidr', cidr)]).toAst();

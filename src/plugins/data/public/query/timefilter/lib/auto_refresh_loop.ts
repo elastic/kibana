@@ -5,10 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import { once } from 'lodash';
 import { defer, Subject } from 'rxjs';
 import { finalize, map } from 'rxjs/operators';
-import { once } from 'lodash';
 
 export type AutoRefreshDoneFn = () => void;
 

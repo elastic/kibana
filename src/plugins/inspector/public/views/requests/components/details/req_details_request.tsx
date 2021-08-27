@@ -5,11 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { Request } from '../../../../../common/adapters/request/types';
-import { RequestDetailsProps } from '../types';
+import React, { Component } from 'react';
+import type { Request } from '../../../../../common/adapters/request/types';
+import type { RequestDetailsProps } from '../types';
 import { RequestCodeViewer } from './req_code_viewer';
 
 export class RequestDetailsRequest extends Component<RequestDetailsProps> {

@@ -5,8 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { RedirectOptions } from '../redirect_manager';
+import type { RedirectOptions } from '../redirect_manager';
 
 export function formatSearchParams(opts: RedirectOptions): URLSearchParams {
   const searchParams = new URLSearchParams();

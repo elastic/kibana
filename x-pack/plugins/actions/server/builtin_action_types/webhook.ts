@@ -4,21 +4,24 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
-import { curry, isString } from 'lodash';
-import axios, { AxiosError, AxiosResponse } from 'axios';
-import { schema, TypeOf } from '@kbn/config-schema';
+import type { Logger } from '@kbn/logging';
+import type { AxiosError, AxiosResponse } from 'axios';
+import axios from 'axios';
+import { getOrElse, map } from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { map, getOrElse } from 'fp-ts/lib/Option';
+import { curry, isString } from 'lodash';
+import type { ActionTypeExecutorResult } from '../../common/types';
+import type { ActionsConfigurationUtilities } from '../actions_config';
+import { renderMustacheString } from '../lib/mustache_renderer';
+import type { ActionType, ActionTypeExecutorOptions } from '../types';
+import { request } from './lib/axios_utils';
 import { getRetryAfterIntervalFromHeaders } from './lib/http_rersponse_retry_header';
 import { nullableType } from './lib/nullable';
-import { isOk, promiseResult, Result } from './lib/result_type';
-import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../types';
-import { ActionsConfigurationUtilities } from '../actions_config';
-import { Logger } from '../../../../../src/core/server';
-import { request } from './lib/axios_utils';
-import { renderMustacheString } from '../lib/mustache_renderer';
+import type { Result } from './lib/result_type';
+import { isOk, promiseResult } from './lib/result_type';
 
 // config definition
 export enum WebhookMethods {

@@ -5,11 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import type { FieldDescriptor } from '../index_patterns_fetcher';
 
 // Merge rollup capabilities information with field information
-
-import { FieldDescriptor } from '../index_patterns_fetcher';
-
 export const mergeCapabilitiesWithFields = (
   rollupIndexCapabilities: { [key: string]: any },
   fieldsFromFieldCapsApi: Record<string, FieldDescriptor>,

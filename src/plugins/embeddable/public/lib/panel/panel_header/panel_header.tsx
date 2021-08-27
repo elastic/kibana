@@ -5,25 +5,25 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { i18n } from '@kbn/i18n';
+import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import {
-  EuiContextMenuPanelDescriptor,
   EuiBadge,
   EuiIcon,
-  EuiToolTip,
-  EuiScreenReaderOnly,
-  EuiNotificationBadge,
   EuiLink,
+  EuiNotificationBadge,
+  EuiScreenReaderOnly,
+  EuiToolTip,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
 import React from 'react';
-import { Action } from 'src/plugins/ui_actions/public';
+import { uiToReactComponent } from '../../../../../kibana_react/public/adapters/ui_to_react_component';
+import type { Action } from '../../../../../ui_actions/public/actions/action';
+import type { IEmbeddable } from '../../embeddables/i_embeddable';
+import type { EmbeddableContext } from '../../triggers/triggers';
+import { panelBadgeTrigger, panelNotificationTrigger } from '../../triggers/triggers';
+import { CustomizePanelTitleAction } from './panel_actions/customize_title/customize_panel_action';
 import { PanelOptionsMenu } from './panel_options_menu';
-import { IEmbeddable } from '../../embeddables';
-import { EmbeddableContext, panelBadgeTrigger, panelNotificationTrigger } from '../../triggers';
-import { uiToReactComponent } from '../../../../../kibana_react/public';
-import { CustomizePanelTitleAction } from '.';
 
 export interface PanelHeaderProps {
   title?: string;

@@ -5,7 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { QuerySuggestion } from '../../autocomplete';
+import type { QuerySuggestion } from '../../autocomplete/providers/query_suggestion_provider';
 
 export type SuggestionOnClick = (suggestion: QuerySuggestion, index: number) => void;

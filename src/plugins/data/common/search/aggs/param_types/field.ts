@@ -5,17 +5,17 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { i18n } from '@kbn/i18n';
-import { IAggConfig } from '../agg_config';
 import {
   SavedFieldNotFound,
   SavedFieldTypeInvalidForAgg,
-} from '../../../../../../plugins/kibana_utils/common';
-import { BaseParamType } from './base';
-import { propFilter } from '../utils';
+} from '../../../../../kibana_utils/common/errors/errors';
+import { IndexPatternField } from '../../../index_patterns/fields/index_pattern_field';
+import { isNestedField } from '../../../index_patterns/fields/utils';
 import { KBN_FIELD_TYPES } from '../../../kbn_field_types/types';
-import { isNestedField, IndexPatternField } from '../../../index_patterns/fields';
+import type { IAggConfig } from '../agg_config';
+import { propFilter } from '../utils/prop_filter';
+import { BaseParamType } from './base';
 
 const filterByType = propFilter('type');
 

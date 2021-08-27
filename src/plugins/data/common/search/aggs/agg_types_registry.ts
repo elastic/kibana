@@ -5,10 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import type { AggTypesDependencies } from './agg_types';
 import { BucketAggType } from './buckets/bucket_agg_type';
 import { MetricAggType } from './metrics/metric_agg_type';
-import { AggTypesDependencies } from './agg_types';
 
 export type AggTypesRegistrySetup = ReturnType<AggTypesRegistry['setup']>;
 /**

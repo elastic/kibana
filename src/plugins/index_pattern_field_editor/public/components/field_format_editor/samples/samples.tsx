@@ -6,15 +6,12 @@
  * Side Public License, v 1.
  */
 
-import './samples.scss';
-
-import React, { PureComponent } from 'react';
-
 import { EuiBasicTable, EuiFormRow } from '@elastic/eui';
-
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { Sample } from '../types';
+import React, { PureComponent } from 'react';
+import type { Sample } from '../types';
+import './samples.scss';
 
 interface FormatEditorSamplesProps {
   samples: Sample[];

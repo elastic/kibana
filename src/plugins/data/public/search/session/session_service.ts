@@ -5,30 +5,29 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { PublicContract } from '@kbn/utility-types';
-import { distinctUntilChanged, map, startWith } from 'rxjs/operators';
-import { Observable, Subscription } from 'rxjs';
-import {
-  PluginInitializerContext,
-  StartServicesAccessor,
-  ToastsStart as ToastService,
-} from 'kibana/public';
 import { i18n } from '@kbn/i18n';
-import { UrlGeneratorId, UrlGeneratorStateMapping } from '../../../../share/public/';
-import { ConfigSchema } from '../../../config';
-import {
-  createSessionStateContainer,
-  SearchSessionState,
-  SessionStateInternal,
-  SessionMeta,
-  SessionStateContainer,
-} from './search_session_state';
-import { ISessionsClient } from './sessions_client';
-import { ISearchOptions } from '../../../common';
-import { NowProviderInternalContract } from '../../now_provider';
+import type { PublicContract } from '@kbn/utility-types';
+import { Observable, Subscription } from 'rxjs';
+import { distinctUntilChanged, map, startWith } from 'rxjs/operators';
+import type { StartServicesAccessor } from '../../../../../core/public';
+import type { ToastsStart as ToastService } from '../../../../../core/public/notifications/toasts/toasts_service';
+import type { PluginInitializerContext } from '../../../../../core/public/plugins/plugin_context';
+import type {
+  UrlGeneratorId,
+  UrlGeneratorStateMapping,
+} from '../../../../share/public/url_generators/url_generator_definition';
+import type { ISearchOptions } from '../../../common/search/types';
+import type { ConfigSchema } from '../../../config';
+import type { NowProviderInternalContract } from '../../now_provider/now_provider';
 import { SEARCH_SESSIONS_MANAGEMENT_ID } from './constants';
 import { formatSessionName } from './lib/session_name_formatter';
+import type {
+  SessionMeta,
+  SessionStateContainer,
+  SessionStateInternal,
+} from './search_session_state';
+import { createSessionStateContainer, SearchSessionState } from './search_session_state';
+import type { ISessionsClient } from './sessions_client';
 
 export type ISessionService = PublicContract<SessionService>;
 

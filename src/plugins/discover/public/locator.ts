@@ -5,12 +5,17 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import type { SerializableRecord } from '@kbn/utility-types';
-import type { TimeRange, Filter, Query, QueryState, RefreshInterval } from '../../data/public';
-import type { LocatorDefinition, LocatorPublic } from '../../share/public';
-import { esFilters } from '../../data/public';
-import { setStateToKbnUrl } from '../../kibana_utils/public';
+import type { Filter } from '../../data/common/es_query';
+import type { RefreshInterval, TimeRange } from '../../data/common/query/timefilter/types';
+import type { Query } from '../../data/public';
+import { esFilters } from '../../data/public/deprecated';
+import type { QueryState } from '../../data/public/query/state_sync/types';
+import { setStateToKbnUrl } from '../../kibana_utils/public/state_management/url/kbn_url_storage';
+import type {
+  LocatorDefinition,
+  LocatorPublic,
+} from '../../share/common/url_service/locators/types';
 
 export const DISCOVER_APP_LOCATOR = 'DISCOVER_APP_LOCATOR';
 

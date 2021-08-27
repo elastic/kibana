@@ -6,18 +6,16 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { flatten } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { flatten } from 'lodash';
+import React from 'react';
+import { indexPatterns as indexPatternsUtils } from '../../..';
+import type { IFieldType } from '../../../../common/index_patterns/fields/types';
+import type { QuerySuggestionField } from '../query_suggestion_provider';
+import { QuerySuggestionTypes } from '../query_suggestion_provider';
 import { escapeKuery } from './lib/escape_kuery';
 import { sortPrefixFirst } from './sort_prefix_first';
-import {
-  IFieldType,
-  indexPatterns as indexPatternsUtils,
-  QuerySuggestionField,
-  QuerySuggestionTypes,
-} from '../../../../../../../src/plugins/data/public';
-import { KqlQuerySuggestionProvider } from './types';
+import type { KqlQuerySuggestionProvider } from './types';
 
 const getDescription = (field: IFieldType) => {
   return (

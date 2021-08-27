@@ -5,12 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import { EuiDualRange, EuiFormRow } from '@elastic/eui';
+import type { EuiFormRowDisplayKeys } from '@elastic/eui/src/components/form/form_row/form_row';
+import type { EuiDualRangeProps } from '@elastic/eui/src/components/form/range/dual_range';
 import { i18n } from '@kbn/i18n';
-import React, { Component, ReactNode } from 'react';
-import { EuiFormRow, EuiDualRange } from '@elastic/eui';
-import { EuiFormRowDisplayKeys } from '@elastic/eui/src/components/form/form_row/form_row';
-import { EuiDualRangeProps } from '@elastic/eui/src/components/form/range/dual_range';
+import type { ReactNode } from 'react';
+import React, { Component } from 'react';
 import { isRangeValid } from './is_range_valid';
 
 // Wrapper around EuiDualRange that ensures onChange callback is only called when range value

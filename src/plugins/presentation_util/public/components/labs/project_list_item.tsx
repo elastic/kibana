@@ -6,27 +6,25 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import {
+  EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiBadge,
-  EuiTitle,
-  EuiText,
   EuiFormFieldset,
+  EuiIconTip,
   EuiScreenReaderOnly,
   EuiSpacer,
-  EuiIconTip,
+  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 import classnames from 'classnames';
-
-import { ProjectID, EnvironmentName, Project, environmentNames } from '../../../common/labs';
+import React from 'react';
+import type { EnvironmentName, Project, ProjectID } from '../../../common/labs';
+import { environmentNames } from '../../../common/labs';
+import { LabsStrings } from '../../i18n/labs';
 import { EnvironmentSwitch } from './environment_switch';
-
-import { LabsStrings } from '../../i18n';
-const { ListItem: strings } = LabsStrings.Components;
-
 import './project_list_item.scss';
+const { ListItem: strings } = LabsStrings.Components;
 
 export interface Props {
   project: Project;

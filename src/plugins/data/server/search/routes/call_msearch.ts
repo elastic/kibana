@@ -5,15 +5,23 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import { estypes } from '@elastic/elasticsearch';
 import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
-import type { IUiSettingsClient, IScopedClusterClient, SharedGlobalConfig } from 'src/core/server';
-import type { estypes } from '@elastic/elasticsearch';
-
-import type { MsearchRequestBody, MsearchResponse } from '../../../common/search/search_source';
-import { getKbnServerError } from '../../../../kibana_utils/server';
-import { getShardTimeout, getDefaultSearchParams, shimAbortSignal, shimHitsTotal } from '..';
+import type { IScopedClusterClient } from '../../../../../core/server/elasticsearch/client/scoped_cluster_client';
+import type { SharedGlobalConfig } from '../../../../../core/server/plugins/types';
+import type { IUiSettingsClient } from '../../../../../core/server/ui_settings/types';
+import { getKbnServerError } from '../../../../kibana_utils/server/report_server_error';
+import type {
+  MsearchRequestBody,
+  MsearchResponse,
+} from '../../../common/search/search_source/legacy/types';
+import {
+  getDefaultSearchParams,
+  getShardTimeout,
+  shimAbortSignal,
+} from '../strategies/es_search/request_utils';
+import { shimHitsTotal } from '../strategies/es_search/response_utils';
 
 /** @internal */
 export function convertRequestBody(

@@ -5,7 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import {
   EuiButton,
   EuiCheckbox,
@@ -19,7 +18,8 @@ import { render, unmountComponentAtNode } from 'react-dom';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
-import type { MountPoint } from 'src/core/public';
+
+import type { MountPoint } from '../../../../../core/public/types';
 
 export const defaultAlertTitle = i18n.translate('security.checkup.insecureClusterTitle', {
   defaultMessage: 'Your data is not secure',

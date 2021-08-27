@@ -5,10 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Subscription } from 'rxjs';
-import { DataPublicPluginStart, TimeRange, RefreshInterval } from 'src/plugins/data/public';
+import type { RefreshInterval, TimeRange } from '../../../../common/query/timefilter/types';
+import type { DataPublicPluginStart } from '../../../types';
 
 interface UseTimefilterProps {
   dateRangeFrom?: string;

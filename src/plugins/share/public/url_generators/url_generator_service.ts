@@ -5,12 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { CoreSetup, CoreStart, Plugin } from 'src/core/public';
 import { i18n } from '@kbn/i18n';
-import { UrlGeneratorId, UrlGeneratorsDefinition } from './url_generator_definition';
+import type { CoreSetup, CoreStart } from '../../../../core/public';
+import type { Plugin } from '../../../../core/public/plugins/plugin';
+import type { UrlGeneratorContract } from './url_generator_contract';
+import type { UrlGeneratorId, UrlGeneratorsDefinition } from './url_generator_definition';
 import { UrlGeneratorInternal } from './url_generator_internal';
-import { UrlGeneratorContract } from './url_generator_contract';
 
 export interface UrlGeneratorsStart {
   /**

@@ -5,12 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { CoreSetup, CoreStart, Plugin } from '../../../core/public';
-
-import { ScreenshotModePluginSetup, ScreenshotModePluginStart } from './types';
-
-import { getScreenshotMode } from '../common';
+import type { CoreSetup, CoreStart } from '../../../core/public';
+import type { Plugin } from '../../../core/public/plugins/plugin';
+import { getScreenshotMode } from '../common/get_set_browser_screenshot_mode';
+import type { ScreenshotModePluginSetup, ScreenshotModePluginStart } from './types';
 
 export class ScreenshotModePlugin implements Plugin<ScreenshotModePluginSetup> {
   private publicContract = Object.freeze({

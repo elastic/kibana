@@ -5,31 +5,25 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import { schema } from '@kbn/config-schema';
+import type { Logger } from '@kbn/logging';
+import { Subject } from 'rxjs';
 import type {
-  CoreStart,
-  PluginInitializerContext,
   CoreSetup,
-  Plugin,
-  Logger,
-  KibanaRequest,
-  RouteMethod,
-  RequestHandler,
+  CoreStart,
   RequestHandlerContext,
   StartServicesAccessor,
-} from 'src/core/server';
-import { schema } from '@kbn/config-schema';
-import { Subject } from 'rxjs';
-import {
-  StreamingResponseHandler,
-  BatchRequestData,
-  BatchResponseItem,
-  ErrorLike,
-  removeLeadingSlash,
-  normalizeError,
-} from '../common';
-import { StreamingRequestHandler } from './types';
-import { createStream } from './streaming';
+} from '../../../core/server';
+import { KibanaRequest } from '../../../core/server/http/router/request';
+import type { RouteMethod } from '../../../core/server/http/router/route';
+import type { RequestHandler } from '../../../core/server/http/router/router';
+import type { Plugin, PluginInitializerContext } from '../../../core/server/plugins/types';
+import type { BatchRequestData, BatchResponseItem, ErrorLike } from '../common/batch';
+import type { StreamingResponseHandler } from '../common/streaming/types';
+import { normalizeError } from '../common/util/normalize_error';
+import { removeLeadingSlash } from '../common/util/remove_leading_slash';
+import { createStream } from './streaming/create_stream';
+import type { StreamingRequestHandler } from './types';
 import { getUiSettings } from './ui_settings';
 
 // eslint-disable-next-line

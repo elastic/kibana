@@ -5,10 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { Moment } from 'moment';
-import { RangeFilterParams } from '@kbn/es-query';
-import { IAggConfig } from '../aggs';
+import type { RangeFilterParams } from '@kbn/es-query';
+import type { Moment } from 'moment';
+import type { IAggConfig } from '../aggs/agg_config';
 
 /** @internal **/
 export interface TabbedRangeFilterParams extends RangeFilterParams {

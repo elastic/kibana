@@ -5,9 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { IUiSettingsClient } from 'src/core/public';
-import { UiSettingsCommon } from '../../common/index_patterns';
+import type { IUiSettingsClient } from '../../../../core/public/ui_settings/types';
+import type { UiSettingsCommon } from '../../common/index_patterns/types';
 
 export class UiSettingsPublicToCommon implements UiSettingsCommon {
   private uiSettings: IUiSettingsClient;

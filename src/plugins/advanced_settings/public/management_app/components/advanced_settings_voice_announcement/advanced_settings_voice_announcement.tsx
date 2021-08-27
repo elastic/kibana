@@ -25,12 +25,11 @@
 
     5: If there is another component call, the timer is dropped (cleared).
  */
-
-import React, { Component } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiScreenReaderOnly, EuiDelayRender } from '@elastic/eui';
+import { EuiDelayRender, EuiScreenReaderOnly } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FieldSetting } from '../../types';
+import { FormattedMessage } from '@kbn/i18n/react';
+import React, { Component } from 'react';
+import type { FieldSetting } from '../../types';
 
 interface Props {
   queryText: string;

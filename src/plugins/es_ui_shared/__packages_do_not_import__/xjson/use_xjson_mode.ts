@@ -5,9 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { useState, Dispatch } from 'react';
-
+import type { Dispatch } from 'react';
+import { useState } from 'react';
 import { collapseLiteralStrings, expandLiteralStrings } from './json_xjson_translation_tools';
 
 interface ReturnValue {

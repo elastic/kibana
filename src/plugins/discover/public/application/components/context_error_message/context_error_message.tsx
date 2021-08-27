@@ -6,14 +6,11 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { EuiCallOut, EuiText } from '@elastic/eui';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
-import {
-  FailureReason,
-  LoadingStatus,
-  LoadingStatusEntry,
-} from '../../angular/context_query_state';
+import React from 'react';
+import type { LoadingStatusEntry } from '../../angular/context_query_state';
+import { FailureReason, LoadingStatus } from '../../angular/context_query_state';
 
 export interface ContextErrorMessageProps {
   /**

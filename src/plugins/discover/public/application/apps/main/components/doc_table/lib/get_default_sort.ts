@@ -5,10 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { IndexPattern } from '../../../../../../kibana_services';
+import { IndexPattern } from '../../../../../../../../data/common/index_patterns/index_patterns/index_pattern';
+import type { SortOrder } from '../components/table_header/helpers';
 import { isSortable } from './get_sort';
-import { SortOrder } from '../components/table_header/helpers';
 
 /**
  * use in case the user didn't manually sort.

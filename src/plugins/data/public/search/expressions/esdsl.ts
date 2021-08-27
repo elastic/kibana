@@ -5,11 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { StartServicesAccessor } from 'src/core/public';
-import { DataPublicPluginStart, DataStartDependencies } from '../../types';
+import type { StartServicesAccessor } from '../../../../../core/public';
+import type { UiSettingsCommon } from '../../../common/index_patterns/types';
 import { getEsdslFn } from '../../../common/search/expressions/esdsl';
-import { UiSettingsCommon } from '../../../common/index_patterns';
+import type { DataPublicPluginStart, DataStartDependencies } from '../../types';
 
 /**
  * This is some glue code that takes in `core.getStartServices`, extracts the dependencies

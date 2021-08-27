@@ -5,10 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { REPORT_INTERVAL_MS, LOCALSTORAGE_KEY } from '../../common/constants';
+import { Storage } from '../../../kibana_utils/public/storage/storage';
+import { LOCALSTORAGE_KEY, REPORT_INTERVAL_MS } from '../../common/constants';
 import { TelemetryService } from './telemetry_service';
-import { Storage } from '../../../kibana_utils/public';
 
 export class TelemetrySender {
   private readonly telemetryService: TelemetryService;

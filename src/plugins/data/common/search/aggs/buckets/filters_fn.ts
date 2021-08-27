@@ -5,14 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { omit } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { Assign } from '@kbn/utility-types';
-import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
-
-import { QueryFilterOutput } from '../../expressions';
-import { AggExpressionType, AggExpressionFunctionArgs, BUCKET_TYPES } from '../';
+import type { Assign } from '@kbn/utility-types';
+import { omit } from 'lodash';
+import type { ExpressionFunctionDefinition } from '../../../../../expressions/common/expression_functions/types';
+import type { QueryFilterOutput } from '../../expressions/query_filter';
+import type { AggExpressionFunctionArgs, AggExpressionType } from '../types';
+import { BUCKET_TYPES } from './bucket_agg_types';
 
 export const aggFiltersFnName = 'aggFilters';
 

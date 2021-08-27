@@ -9,10 +9,13 @@
 import dateMath from '@elastic/datemath';
 import { buildQueryFromFilters } from '@kbn/es-query';
 import { memoize } from 'lodash';
-import { CoreSetup } from 'src/core/public';
-import { IIndexPattern, IFieldType, UI_SETTINGS, ValueSuggestionsMethod } from '../../../common';
-import { TimefilterSetup } from '../../query';
-import { AutocompleteUsageCollector } from '../collectors';
+import type { CoreSetup } from '../../../../../core/public';
+import type { ValueSuggestionsMethod } from '../../../common/constants';
+import { UI_SETTINGS } from '../../../common/constants';
+import type { IFieldType } from '../../../common/index_patterns/fields/types';
+import type { IIndexPattern } from '../../../common/index_patterns/types';
+import type { TimefilterSetup } from '../../query/timefilter/timefilter_service';
+import type { AutocompleteUsageCollector } from '../collectors/types';
 
 export type ValueSuggestionsGetFn = (args: ValueSuggestionsGetFnArgs) => Promise<any[]>;
 

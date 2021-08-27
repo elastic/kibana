@@ -5,11 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { Assign } from '@kbn/utility-types';
-import { CreateManagementItemArgs, ManagementSectionId } from '../types';
+import type { Assign } from '@kbn/utility-types';
+import type { CreateManagementItemArgs } from '../types';
+import { ManagementSectionId } from '../types';
+import type { RegisterManagementAppArgs } from './management_app';
+import { ManagementApp } from './management_app';
 import { ManagementItem } from './management_item';
-import { ManagementApp, RegisterManagementAppArgs } from './management_app';
 
 export type RegisterManagementSectionArgs = Assign<
   CreateManagementItemArgs,

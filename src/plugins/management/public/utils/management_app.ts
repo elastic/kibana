@@ -5,8 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { CreateManagementItemArgs, Mount } from '../types';
+import type { CreateManagementItemArgs, Mount } from '../types';
 import { ManagementItem } from './management_item';
 
 export interface RegisterManagementAppArgs extends CreateManagementItemArgs {

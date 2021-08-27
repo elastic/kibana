@@ -6,39 +6,43 @@
  * Side Public License, v 1.
  */
 
-import './index.scss';
-import React from 'react';
-import { History } from 'history';
-import { Provider } from 'react-redux';
-import { first } from 'rxjs/operators';
 import { I18nProvider } from '@kbn/i18n/react';
-import { parse, ParsedQuery } from 'query-string';
+import type { History } from 'history';
+import type { ParsedQuery } from 'query-string';
+import { parse } from 'query-string';
+import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { Switch, Route, RouteComponentProps, HashRouter, Redirect } from 'react-router-dom';
-
-import { DashboardListing } from './listing';
-import { dashboardStateStore } from './state';
-import { DashboardApp } from './dashboard_app';
-import { DashboardNoMatch } from './listing/dashboard_no_match';
-import { KibanaContextProvider } from '../services/kibana_react';
-import { addHelpMenuToAppChrome, DashboardSessionStorage } from './lib';
-import { createDashboardListingFilterUrl } from '../dashboard_constants';
-import { createDashboardEditUrl, DashboardConstants } from '../dashboard_constants';
-import { getDashboardPageTitle, dashboardReadonlyBadge } from '../dashboard_strings';
-import { createKbnUrlStateStorage, withNotifyOnErrors } from '../services/kibana_utils';
-import { DashboardAppServices, DashboardEmbedSettings, RedirectToProps } from '../types';
+import { Provider } from 'react-redux';
+import type { RouteComponentProps } from 'react-router-dom';
+import { HashRouter, Redirect, Route, Switch } from 'react-router-dom';
+import { first } from 'rxjs/operators';
+import type { CoreSetup } from '../../../../core/public';
+import { ScopedHistory } from '../../../../core/public/application/scoped_history';
+import type { AppMountParameters } from '../../../../core/public/application/types';
+import type { PluginInitializerContext } from '../../../../core/public/plugins/plugin_context';
+import { KibanaContextProvider } from '../../../kibana_react/public/context/context';
+import { withNotifyOnErrors } from '../../../kibana_utils/public/state_management/url/errors';
+import { createKbnUrlStateStorage } from '../../../kibana_utils/public/state_sync/state_sync_state_storage/create_kbn_url_state_storage';
 import {
+  createDashboardEditUrl,
+  createDashboardListingFilterUrl,
+  DashboardConstants,
+} from '../dashboard_constants';
+import { dashboardReadonlyBadge, getDashboardPageTitle } from '../dashboard_strings';
+import type {
   DashboardFeatureFlagConfig,
   DashboardSetupDependencies,
   DashboardStart,
   DashboardStartDependencies,
 } from '../plugin';
-import {
-  AppMountParameters,
-  CoreSetup,
-  PluginInitializerContext,
-  ScopedHistory,
-} from '../services/core';
+import type { DashboardAppServices, DashboardEmbedSettings, RedirectToProps } from '../types';
+import { DashboardApp } from './dashboard_app';
+import './index.scss';
+import { DashboardSessionStorage } from './lib/dashboard_session_storage';
+import { addHelpMenuToAppChrome } from './lib/help_menu_util';
+import { DashboardListing } from './listing/dashboard_listing';
+import { DashboardNoMatch } from './listing/dashboard_no_match';
+import { dashboardStateStore } from './state/dashboard_state_store';
 
 export const dashboardUrlParams = {
   showTopMenu: 'show-top-menu',

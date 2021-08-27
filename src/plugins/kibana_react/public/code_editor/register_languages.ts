@@ -6,7 +6,10 @@
  * Side Public License, v 1.
  */
 import { registerLanguage } from '@kbn/monaco';
-import { CssLang, HandlebarsLang, MarkdownLang, YamlLang } from './languages';
+import { CssLang } from './languages/css';
+import { HandlebarsLang } from './languages/handlebars';
+import { MarkdownLang } from './languages/markdown';
+import { YamlLang } from './languages/yaml';
 
 registerLanguage(CssLang);
 registerLanguage(HandlebarsLang);

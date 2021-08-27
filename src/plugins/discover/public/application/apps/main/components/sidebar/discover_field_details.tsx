@@ -6,12 +6,13 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { EuiText, EuiSpacer, EuiLink } from '@elastic/eui';
+import { EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import React from 'react';
+import { IndexPatternField } from '../../../../../../../data/common/index_patterns/fields/index_pattern_field';
+import { IndexPattern } from '../../../../../../../data/common/index_patterns/index_patterns/index_pattern';
 import { DiscoverFieldBucket } from './discover_field_bucket';
-import { Bucket, FieldDetails } from './types';
-import { IndexPatternField, IndexPattern } from '../../../../../../../data/public';
+import type { Bucket, FieldDetails } from './types';
 
 interface DiscoverFieldDetailsProps {
   field: IndexPatternField;

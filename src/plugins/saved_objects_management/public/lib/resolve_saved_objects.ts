@@ -5,19 +5,19 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { i18n } from '@kbn/i18n';
 import { cloneDeep } from 'lodash';
-import { OverlayStart, SavedObjectReference } from 'src/core/public';
-import { SavedObject, SavedObjectLoader } from '../../../saved_objects/public';
-import {
-  DataPublicPluginStart,
-  IndexPatternsContract,
-  injectSearchSourceReferences,
-  IndexPatternSpec,
-} from '../../../data/public';
-import { FailedImport } from './process_import_response';
-import { DuplicateIndexPatternError, IndexPattern } from '../../../data/public';
+import type { OverlayStart } from '../../../../core/public/overlays/overlay_service';
+import type { SavedObjectReference } from '../../../../core/types/saved_objects';
+import { DuplicateIndexPatternError } from '../../../data/common/index_patterns/errors/duplicate_index_pattern';
+import { IndexPattern } from '../../../data/common/index_patterns/index_patterns/index_pattern';
+import type { IndexPatternsContract } from '../../../data/common/index_patterns/index_patterns/index_patterns';
+import type { IndexPatternSpec } from '../../../data/common/index_patterns/types';
+import { injectSearchSourceReferences } from '../../../data/common/search/search_source/inject_references';
+import type { DataPublicPluginStart } from '../../../data/public/types';
+import { SavedObjectLoader } from '../../../saved_objects/public/saved_object/saved_object_loader';
+import type { SavedObject } from '../../../saved_objects/public/types';
+import type { FailedImport } from './process_import_response';
 
 type SavedObjectsRawDoc = Record<string, any>;
 

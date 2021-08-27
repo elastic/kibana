@@ -5,8 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { ExpressionValue, ExpressionValueError } from '../expression_types';
+import type { ExpressionValueError } from '../expression_types/specs/error';
+import type { ExpressionValue } from '../expression_types/types';
 
 export type ExpressionAstNode =
   | ExpressionAstExpression

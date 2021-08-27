@@ -5,19 +5,15 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { i18n } from '@kbn/i18n';
 import { Observable } from 'rxjs';
-
-import { Datatable, ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
-
-import { IndexPatternExpressionType } from '../../../index_patterns/expressions';
-import { IndexPatternsContract } from '../../../index_patterns/index_patterns';
-
-import { AggsStart, AggExpressionType } from '../../aggs';
-import { ISearchStartSearchSource } from '../../search_source';
-
-import { KibanaContext } from '../kibana_context_type';
+import type { ExpressionFunctionDefinition } from '../../../../../expressions/common/expression_functions/types';
+import type { Datatable } from '../../../../../expressions/common/expression_types/specs/datatable';
+import type { IndexPatternExpressionType } from '../../../index_patterns/expressions/load_index_pattern';
+import type { IndexPatternsContract } from '../../../index_patterns/index_patterns/index_patterns';
+import type { AggExpressionType, AggsStart } from '../../aggs/types';
+import type { ISearchStartSearchSource } from '../../search_source/types';
+import type { KibanaContext } from '../kibana_context_type';
 import { handleRequest } from './request_handler';
 
 const name = 'esaggs';

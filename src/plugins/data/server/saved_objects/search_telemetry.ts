@@ -5,8 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { SavedObjectsType } from 'kibana/server';
+import type { SavedObjectsType } from '../../../../core/server/saved_objects/types';
 import { migrate712 } from './migrations/to_v7_12_0';
 
 export const searchTelemetry: SavedObjectsType = {

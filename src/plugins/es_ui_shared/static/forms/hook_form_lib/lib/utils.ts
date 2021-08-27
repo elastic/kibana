@@ -5,9 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { set } from '@elastic/safer-lodash-set';
-import { FieldHook } from '../types';
+import type { FieldHook } from '../types';
 
 export const unflattenObject = <T extends object = { [key: string]: any }>(object: object): T =>
   Object.entries(object).reduce((acc, [key, value]) => {

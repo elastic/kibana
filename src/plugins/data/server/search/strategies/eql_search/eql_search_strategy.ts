@@ -5,21 +5,21 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import type { ApiResponse } from '@elastic/elasticsearch';
+import type { Logger } from '@kbn/logging';
 import { tap } from 'rxjs/operators';
-import type { IScopedClusterClient, Logger } from 'kibana/server';
-import {
+import type { IScopedClusterClient } from '../../../../../../core/server/elasticsearch/client/scoped_cluster_client';
+import { pollSearch } from '../../../../common/search/poll_search';
+import type {
   EqlSearchStrategyRequest,
   EqlSearchStrategyResponse,
-  IAsyncSearchOptions,
-  pollSearch,
-} from '../../../../common';
-import { toEqlKibanaSearchResponse } from './response_utils';
-import { EqlSearchResponse } from './types';
-import { ISearchStrategy } from '../../types';
-import { getDefaultSearchParams, shimAbortSignal } from '../es_search';
+} from '../../../../common/search/strategies/eql_search/types';
+import type { IAsyncSearchOptions } from '../../../../common/search/strategies/ese_search/types';
+import type { ISearchStrategy } from '../../types';
 import { getDefaultAsyncGetParams, getIgnoreThrottled } from '../ese_search/request_utils';
+import { getDefaultSearchParams, shimAbortSignal } from '../es_search/request_utils';
+import { toEqlKibanaSearchResponse } from './response_utils';
+import type { EqlSearchResponse } from './types';
 
 export const eqlSearchStrategyProvider = (
   logger: Logger

@@ -5,13 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import React, { Fragment } from 'react';
-
 import { EuiBasicTable, EuiButton, EuiFieldText, EuiFormRow, EuiSpacer } from '@elastic/eui';
-
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import React, { Fragment } from 'react';
 import { DefaultFormatEditor } from '../default/default';
 import { formatId } from './constants';
 

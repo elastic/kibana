@@ -5,9 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import dateMath, { Unit } from '@elastic/datemath';
-
+import type { Unit } from '@elastic/datemath';
+import dateMath from '@elastic/datemath';
 import { InvalidEsCalendarIntervalError } from './invalid_es_calendar_interval_error';
 import { InvalidEsIntervalFormatError } from './invalid_es_interval_format_error';
 

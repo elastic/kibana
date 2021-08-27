@@ -5,13 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { isNumber, keys, values, find, each, cloneDeep, flatten } from 'lodash';
 import { estypes } from '@elastic/elasticsearch';
 import { buildExistsFilter, buildPhrasesFilter, buildQueryFromFilters } from '@kbn/es-query';
+import { cloneDeep, each, find, flatten, isNumber, keys, values } from 'lodash';
+import type { IAggConfigs } from '../agg_configs';
 import { AggGroupNames } from '../agg_groups';
-import { IAggConfigs } from '../agg_configs';
-import { IBucketAggConfig } from './bucket_agg_type';
+import type { IBucketAggConfig } from './bucket_agg_type';
 
 export const OTHER_BUCKET_SEPARATOR = '╰┄►';
 

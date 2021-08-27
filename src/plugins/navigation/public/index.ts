@@ -6,17 +6,15 @@
  * Side Public License, v 1.
  */
 
+import type { PluginInitializerContext } from '../../../core/public/plugins/plugin_context';
 import './index.scss';
+import { NavigationPublicPlugin } from './plugin';
 
-import { PluginInitializerContext } from '../../../core/public';
 export function plugin(initializerContext: PluginInitializerContext) {
   return new NavigationPublicPlugin(initializerContext);
 }
 
-export { TopNavMenuData, TopNavMenu, TopNavMenuProps } from './top_nav_menu';
-
+export { TopNavMenu, TopNavMenuData, TopNavMenuProps } from './top_nav_menu';
 export { NavigationPublicPluginSetup, NavigationPublicPluginStart } from './types';
-
 // Export plugin after all other imports
-import { NavigationPublicPlugin } from './plugin';
 export { NavigationPublicPlugin as Plugin };

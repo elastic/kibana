@@ -5,16 +5,15 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import deepFreeze from 'deep-freeze-strict';
 import { BehaviorSubject } from 'rxjs';
 import { skip } from 'rxjs/operators';
-import deepFreeze from 'deep-freeze-strict';
-import {
-  PureTransitionsToTransitions,
-  PureTransition,
-  ReduxLikeStateContainer,
-  PureSelectorsToSelectors,
+import type {
   BaseState,
+  PureSelectorsToSelectors,
+  PureTransition,
+  PureTransitionsToTransitions,
+  ReduxLikeStateContainer,
 } from './types';
 
 const $$observable = (typeof Symbol === 'function' && (Symbol as any).observable) || '@@observable';

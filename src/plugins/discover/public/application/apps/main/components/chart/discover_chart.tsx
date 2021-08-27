@@ -5,18 +5,18 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useCallback, useEffect, useRef, memo } from 'react';
-import moment from 'moment';
-import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { HitsCounter } from '../hits_counter';
+import moment from 'moment';
+import React, { memo, useCallback, useEffect, useRef } from 'react';
 import { search } from '../../../../../../../data/public';
-import { TimechartHeader } from '../timechart_header';
-import { SavedSearch } from '../../../../../saved_searches';
-import { AppState, GetStateReturn } from '../../services/discover_state';
+import type { DiscoverServices } from '../../../../../build_services';
+import type { SavedSearch } from '../../../../../saved_searches/types';
+import type { AppState, GetStateReturn } from '../../services/discover_state';
+import type { DataCharts$, DataTotalHits$ } from '../../services/use_saved_search';
+import { HitsCounter } from '../hits_counter/hits_counter';
+import { TimechartHeader } from '../timechart_header/timechart_header';
 import { DiscoverHistogram } from './histogram';
-import { DataCharts$, DataTotalHits$ } from '../../services/use_saved_search';
-import { DiscoverServices } from '../../../../../build_services';
 
 const TimechartHeaderMemoized = memo(TimechartHeader);
 const DiscoverHistogramMemoized = memo(DiscoverHistogram);

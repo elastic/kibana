@@ -5,19 +5,17 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { useMemo, useState, useEffect, useRef, useCallback } from 'react';
-
-import {
-  FormHook,
-  FieldHook,
-  FieldConfig,
-  FieldValidateResponse,
-  ValidationError,
-  FormData,
-  ValidationConfig,
-} from '../types';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FIELD_TYPES, VALIDATION_TYPES } from '../constants';
+import type {
+  FieldConfig,
+  FieldHook,
+  FieldValidateResponse,
+  FormData,
+  FormHook,
+  ValidationConfig,
+  ValidationError,
+} from '../types';
 
 export interface InternalFieldConfig<T> {
   initialValue?: T;

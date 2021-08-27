@@ -5,7 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { partition } from 'lodash';
 
 export function sortPrefixFirst(array: any[], prefix?: string | number, property?: string): any[] {

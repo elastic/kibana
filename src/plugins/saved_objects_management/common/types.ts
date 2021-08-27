@@ -5,9 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { SavedObject } from 'src/core/types';
-import { SavedObjectsNamespaceType } from 'src/core/public';
+import type { SavedObjectsNamespaceType } from '../../../core/server/saved_objects/types';
+import type { SavedObject } from '../../../core/types/saved_objects';
 
 /**
  * The metadata injected into a {@link SavedObject | saved object} when returning

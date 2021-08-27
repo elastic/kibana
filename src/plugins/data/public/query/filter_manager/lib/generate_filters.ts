@@ -6,20 +6,20 @@
  * Side Public License, v 1.
  */
 
-import _ from 'lodash';
+import type { Filter } from '@kbn/es-query';
 import {
-  Filter,
+  buildFilter,
+  FILTERS,
+  FilterStateStore,
+  getPhraseFilterField,
+  getPhraseFilterValue,
   isExistsFilter,
   isPhraseFilter,
-  getPhraseFilterValue,
-  getPhraseFilterField,
   isScriptedPhraseFilter,
-  buildFilter,
-  FilterStateStore,
-  FILTERS,
 } from '@kbn/es-query';
-
-import { IFieldType, IIndexPattern } from '../../../../common';
+import _ from 'lodash';
+import type { IFieldType } from '../../../../common/index_patterns/fields/types';
+import type { IIndexPattern } from '../../../../common/index_patterns/types';
 import { FilterManager } from '../filter_manager';
 
 function getExistingFilter(

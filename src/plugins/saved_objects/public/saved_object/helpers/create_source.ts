@@ -5,12 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { SavedObjectAttributes } from 'kibana/public';
-import { SavedObject, SavedObjectKibanaServices } from '../../types';
+import { get } from 'lodash';
+import type { SavedObjectAttributes } from '../../../../../core/types/saved_objects';
 import { OVERWRITE_REJECTED } from '../../constants';
+import type { SavedObject, SavedObjectKibanaServices } from '../../types';
 import { confirmModalPromise } from './confirm_modal_promise';
 
 /**

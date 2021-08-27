@@ -5,14 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import {
-  CoreSetup,
+import type { CoreSetup } from '../../../../../core/server';
+import type {
   DeprecationsDetails,
   GetDeprecationsContext,
   RegisterDeprecationsConfig,
-} from 'kibana/server';
-import { IndexPatternAttributes } from '../../../common';
+} from '../../../../../core/server/deprecations/types';
+import type { IndexPatternAttributes } from '../../../common/index_patterns/types';
 
 type IndexPatternAttributesWithFields = Pick<IndexPatternAttributes, 'title' | 'fields'>;
 

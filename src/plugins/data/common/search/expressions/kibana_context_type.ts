@@ -5,10 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { ExpressionValueBoxed } from 'src/plugins/expressions/common';
-import { Filter } from '../../es_query';
-import { Query, TimeRange } from '../../query';
-import { IndexPatternField } from '../../index_patterns/fields';
+import type { ExpressionValueBoxed } from '../../../../expressions/common/expression_types/types';
+import type { Filter } from '../../es_query';
+import { IndexPatternField } from '../../index_patterns/fields/index_pattern_field';
+import type { Query } from '../../query';
+import type { TimeRange } from '../../query/timefilter/types';
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type ExecutionContextSearch = {

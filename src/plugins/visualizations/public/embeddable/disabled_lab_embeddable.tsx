@@ -8,11 +8,11 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Embeddable, EmbeddableOutput } from '../../../../plugins/embeddable/public';
-
-import { DisabledLabVisualization } from './disabled_lab_visualization';
-import { VisualizeInput } from './visualize_embeddable';
+import { Embeddable } from '../../../embeddable/public/lib/embeddables/embeddable';
+import type { EmbeddableOutput } from '../../../embeddable/public/lib/embeddables/i_embeddable';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
+import { DisabledLabVisualization } from './disabled_lab_visualization';
+import type { VisualizeInput } from './visualize_embeddable';
 
 export class DisabledLabEmbeddable extends Embeddable<VisualizeInput, EmbeddableOutput> {
   private domNode?: HTMLElement;

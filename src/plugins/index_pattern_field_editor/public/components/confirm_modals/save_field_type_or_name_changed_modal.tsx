@@ -5,9 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useState } from 'react';
-import { EuiCallOut, EuiSpacer, EuiConfirmModal, EuiFieldText, EuiFormRow } from '@elastic/eui';
+import { EuiCallOut, EuiConfirmModal, EuiFieldText, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React, { useState } from 'react';
 
 const geti18nTexts = (fieldName: string) => ({
   cancelButtonText: i18n.translate(

@@ -5,13 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { useEffect, useRef, useState } from 'react';
-import { Observable, BehaviorSubject } from 'rxjs';
-
-import { CoreSetup } from 'kibana/public';
-import { DARK_THEME, LIGHT_THEME, PartialTheme, Theme } from '@elastic/charts';
+import type { PartialTheme, Theme } from '@elastic/charts';
+import { DARK_THEME, LIGHT_THEME } from '@elastic/charts';
 import { EUI_CHARTS_THEME_DARK, EUI_CHARTS_THEME_LIGHT } from '@elastic/eui/dist/eui_charts_theme';
+import { useEffect, useRef, useState } from 'react';
+import { BehaviorSubject, Observable } from 'rxjs';
+import type { CoreSetup } from '../../../../../core/public';
 
 export class ThemeService {
   /** Returns default charts theme */

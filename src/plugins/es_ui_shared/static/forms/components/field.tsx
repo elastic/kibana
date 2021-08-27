@@ -5,30 +5,28 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import React, { ComponentType } from 'react';
-import { FieldHook, FIELD_TYPES } from '../hook_form_lib';
+import type { ComponentType } from 'react';
+import React from 'react';
+import { FIELD_TYPES } from '../hook_form_lib/constants';
+import type { FieldHook } from '../hook_form_lib/types';
+import { CheckBoxField } from './fields/checkbox_field';
+import { ComboBoxField } from './fields/combobox_field';
+import { JsonEditorField } from './fields/json_editor_field';
+import { MultiSelectField } from './fields/multi_select_field';
+import { NumericField } from './fields/numeric_field';
+import { RadioGroupField } from './fields/radio_group_field';
+import { RangeField } from './fields/range_field';
+import { SelectField } from './fields/select_field';
+import { SuperSelectField } from './fields/super_select_field';
+import { TextAreaField } from './fields/text_area_field';
+import { TextField } from './fields/text_field';
+import { ToggleField } from './fields/toggle_field';
 
 interface Props {
   field: FieldHook;
   euiFieldProps?: { [key: string]: any };
   [key: string]: any;
 }
-
-import {
-  TextField,
-  TextAreaField,
-  NumericField,
-  CheckBoxField,
-  ComboBoxField,
-  MultiSelectField,
-  RadioGroupField,
-  RangeField,
-  SelectField,
-  SuperSelectField,
-  ToggleField,
-  JsonEditorField,
-} from './fields';
 
 const mapTypeToFieldComponent: { [key: string]: ComponentType<any> } = {
   [FIELD_TYPES.TEXT]: TextField,

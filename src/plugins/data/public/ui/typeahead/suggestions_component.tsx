@@ -5,19 +5,18 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import classNames from 'classnames';
 import { isEmpty } from 'lodash';
 import React, { Component } from 'react';
-import classNames from 'classnames';
 import styled from 'styled-components';
-import { QuerySuggestion } from '../../autocomplete';
-import { SuggestionComponent } from './suggestion_component';
+import type { QuerySuggestion } from '../../autocomplete/providers/query_suggestion_provider';
 import {
   SUGGESTIONS_LIST_REQUIRED_BOTTOM_SPACE,
   SUGGESTIONS_LIST_REQUIRED_TOP_OFFSET,
   SUGGESTIONS_LIST_REQUIRED_WIDTH,
 } from './constants';
-import { SuggestionOnClick } from './types';
+import { SuggestionComponent } from './suggestion_component';
+import type { SuggestionOnClick } from './types';
 
 // @internal
 export interface SuggestionsComponentProps {

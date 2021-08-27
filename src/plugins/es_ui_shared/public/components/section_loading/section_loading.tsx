@@ -6,16 +6,15 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-
 import {
   EuiEmptyPrompt,
-  EuiLoadingSpinner,
-  EuiText,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLoadingSpinner,
+  EuiText,
   EuiTextColor,
 } from '@elastic/eui';
+import React from 'react';
 
 interface Props {
   inline?: boolean;

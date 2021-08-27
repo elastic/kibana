@@ -9,20 +9,16 @@
 import _ from 'lodash';
 import { merge } from 'rxjs';
 import { debounceTime, finalize, map, switchMap, tap } from 'rxjs/operators';
-
-import { setQuery } from '../state';
-import { DashboardBuildContext, DashboardState } from '../../types';
-import { DashboardSavedObject } from '../../saved_dashboards';
-import { setFiltersAndQuery } from '../state/dashboard_state_slice';
-import {
-  syncQueryStateWithUrl,
-  connectToQueryState,
-  Filter,
-  Query,
-  waitUntilNextSessionCompletes$,
-  QueryState,
-} from '../../services/data';
-import { cleanFiltersForSerialize } from '.';
+import type { Filter } from '../../../../data/common/es_query';
+import { connectToQueryState } from '../../../../data/public/query/state_sync/connect_to_query_state';
+import { syncQueryStateWithUrl } from '../../../../data/public/query/state_sync/sync_state_with_url';
+import type { QueryState } from '../../../../data/public/query/state_sync/types';
+import { waitUntilNextSessionCompletes$ } from '../../../../data/public/search/session/session_helpers';
+import type { DashboardSavedObject } from '../../saved_dashboards/saved_dashboard';
+import type { Query } from '../../services/data';
+import type { DashboardBuildContext, DashboardState } from '../../types';
+import { setFiltersAndQuery, setQuery } from '../state/dashboard_state_slice';
+import { cleanFiltersForSerialize } from './filter_utils';
 
 type SyncDashboardFilterStateProps = DashboardBuildContext & {
   initialDashboardState: DashboardState;

@@ -5,18 +5,15 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import React, { Component } from 'react';
-import PropTypes from 'prop-types';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiEmptyPrompt, EuiSpacer, EuiText, EuiTextColor } from '@elastic/eui';
-
-import { RequestStatus } from '../../../../common/adapters';
-import { Request } from '../../../../common/adapters/request/types';
-import { InspectorViewProps } from '../../../types';
-
-import { RequestSelector } from './request_selector';
+import { FormattedMessage } from '@kbn/i18n/react';
+import PropTypes from 'prop-types';
+import React, { Component } from 'react';
+import type { Request } from '../../../../common/adapters/request/types';
+import { RequestStatus } from '../../../../common/adapters/request/types';
+import type { InspectorViewProps } from '../../../types';
 import { RequestDetails } from './request_details';
+import { RequestSelector } from './request_selector';
 
 interface RequestSelectorState {
   requests: Request[];

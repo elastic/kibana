@@ -5,8 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { OnSaveProps, SaveModalState } from '../../../../plugins/saved_objects/public';
+import type {
+  OnSaveProps,
+  SaveModalState,
+} from '../../../saved_objects/public/save_modal/saved_object_save_modal';
 
 interface SaveModalDocumentInfo {
   id?: string;

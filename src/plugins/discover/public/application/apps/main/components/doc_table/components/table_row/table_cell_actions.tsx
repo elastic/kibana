@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { EuiIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React from 'react';
 
 interface TableCellActionsProps {
   handleFilterFor: () => void;

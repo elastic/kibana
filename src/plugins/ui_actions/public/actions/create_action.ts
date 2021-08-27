@@ -5,8 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { ActionDefinition, Action } from './action';
+import type { Action, ActionDefinition } from './action';
 
 export function createAction<Context extends object = object>(
   action: ActionDefinition<Context>

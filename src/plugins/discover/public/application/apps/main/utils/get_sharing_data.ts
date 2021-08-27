@@ -5,13 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import type { Capabilities, IUiSettingsClient } from 'kibana/public';
-import { ISearchSource } from '../../../../../../data/common';
+import type { IUiSettingsClient } from '../../../../../../../core/public/ui_settings/types';
+import type { Capabilities } from '../../../../../../../core/types/capabilities';
+import type { ISearchSource } from '../../../../../../data/common/search/search_source/types';
 import { DOC_HIDE_TIME_COLUMN_SETTING, SORT_DEFAULT_ORDER_SETTING } from '../../../../../common';
 import type { SavedSearch, SortOrder } from '../../../../saved_searches/types';
-import { getSortForSearchSource } from '../components/doc_table';
-import { AppState } from '../services/discover_state';
+import { getSortForSearchSource } from '../components/doc_table/lib/get_sort_for_search_source';
+import type { AppState } from '../services/discover_state';
 
 /**
  * Preparing data to share the current state as link or CSV/Report

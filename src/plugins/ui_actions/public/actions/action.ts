@@ -5,10 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { UiComponent } from 'src/plugins/kibana_utils/public';
-import { Presentable } from '../util/presentable';
-import { Trigger } from '../triggers';
+import type { UiComponent } from '../../../kibana_utils/common/ui/ui_component';
+import type { Trigger } from '../triggers/trigger';
+import type { Presentable } from '../util/presentable';
 
 /**
  * During action execution we can provide additional information,

@@ -8,8 +8,7 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-
-import { I18nStart } from '../../../../core/public';
+import type { I18nStart } from '../../../../core/public/i18n/i18n_service';
 
 /**
  * Represents the result of trying to persist the saved object.

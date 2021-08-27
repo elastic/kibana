@@ -5,8 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import type { Logger } from '@kbn/logging';
 
-import type { ElasticsearchClient, Logger } from 'src/core/server';
+import type { ElasticsearchClient } from '../../../core/server/elasticsearch/client/types';
 
 export const createClusterDataCheck = () => {
   let clusterHasUserData = false;

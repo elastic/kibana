@@ -5,12 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import React, { Children, ReactNode, useRef, useState, useCallback, useEffect } from 'react';
-
 import { keys } from '@elastic/eui';
+import type { ReactNode } from 'react';
+import React, { Children, useCallback, useEffect, useRef, useState } from 'react';
+import type { ResizerKeyDownEvent, ResizerMouseEvent } from '../components/resizer';
+import { Resizer } from '../components/resizer';
 import { PanelContextProvider } from '../context';
-import { Resizer, ResizerMouseEvent, ResizerKeyDownEvent } from '../components/resizer';
 import { PanelRegistry } from '../registry';
 
 export interface Props {

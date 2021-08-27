@@ -5,16 +5,15 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import {
+import { OVERWRITE_REJECTED, SAVE_DUPLICATE_REJECTED } from '../../constants';
+import type {
   SavedObject,
   SavedObjectConfig,
   SavedObjectKibanaServices,
   SavedObjectSaveOpts,
 } from '../../types';
-import { OVERWRITE_REJECTED, SAVE_DUPLICATE_REJECTED } from '../../constants';
-import { createSource } from './create_source';
 import { checkForDuplicateTitle } from './check_for_duplicate_title';
+import { createSource } from './create_source';
 
 /**
  * @param error {Error} the error

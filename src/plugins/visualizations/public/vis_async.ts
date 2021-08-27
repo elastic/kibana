@@ -5,9 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import type { VisParams } from '../common/types';
 import type { SerializedVis } from './vis';
-import type { VisParams } from '../common';
 
 export const createVisAsync = async <TVisParams = VisParams>(
   visType: string,

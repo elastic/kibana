@@ -5,12 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import React, { ReactElement, useState } from 'react';
-import { EuiButton } from '@elastic/eui';
-import { EuiContextMenuPanel } from '@elastic/eui';
-import { EuiPopover } from '@elastic/eui';
+import { EuiButton, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import type { ReactElement } from 'react';
+import React, { useState } from 'react';
 
 interface Props {
   menuItems: ReactElement[];

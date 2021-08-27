@@ -5,12 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { DashboardContainerInput } from '../..';
-import { IEmbeddable } from '../../services/embeddable';
+import type { IEmbeddable } from '../../../../embeddable/public/lib/embeddables/i_embeddable';
+import type { Action } from '../../../../ui_actions/public/actions/action';
+import { IncompatibleActionError } from '../../../../ui_actions/public/actions/incompatible_action_error';
 import { dashboardExpandPanelAction } from '../../dashboard_strings';
-import { Action, IncompatibleActionError } from '../../services/ui_actions';
-import { DASHBOARD_CONTAINER_TYPE, DashboardContainer } from '../embeddable';
+import type { DashboardContainerInput } from '../../types';
+import { DASHBOARD_CONTAINER_TYPE } from '../embeddable/dashboard_constants';
+import { DashboardContainer } from '../embeddable/dashboard_container';
 
 export const ACTION_EXPAND_PANEL = 'togglePanel';
 

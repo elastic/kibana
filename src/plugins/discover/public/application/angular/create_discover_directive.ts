@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { DiscoverMainApp } from '../apps/main';
+import { DiscoverMainApp } from '../apps/main/discover_main_app';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function createDiscoverDirective(reactDirective: any) {

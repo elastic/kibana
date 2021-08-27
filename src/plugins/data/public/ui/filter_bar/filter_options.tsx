@@ -5,11 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { EuiButtonIcon, EuiContextMenu, EuiPopover, EuiPopoverTitle } from '@elastic/eui';
-import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
-import { Component } from 'react';
-import React from 'react';
+import type { InjectedIntl } from '@kbn/i18n/react';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import React, { Component } from 'react';
 
 interface Props {
   onEnableAll: () => void;

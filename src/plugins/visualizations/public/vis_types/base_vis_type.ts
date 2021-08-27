@@ -5,13 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { defaultsDeep } from 'lodash';
-
-import type { VisParams } from '../types';
+import type { VisParams } from '../../common/types';
+import { Schemas } from './schemas';
 import type { VisTypeDefinition, VisTypeOptions } from './types';
 import { VisGroups } from './vis_groups_enum';
-import { Schemas } from './schemas';
 
 const defaultOptions: VisTypeOptions = {
   showTimePicker: true,

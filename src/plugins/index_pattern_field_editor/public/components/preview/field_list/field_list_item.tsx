@@ -5,12 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import React, { useState } from 'react';
-import classnames from 'classnames';
+import { EuiButtonEmpty, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiFlexItem, EuiToolTip, EuiButtonIcon, EuiButtonEmpty } from '@elastic/eui';
-
+import classnames from 'classnames';
+import React, { useState } from 'react';
 import { ImagePreviewModal } from '../image_preview_modal';
 import type { DocumentField } from './field_list';
 

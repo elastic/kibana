@@ -5,8 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { UrlGeneratorId, UrlGeneratorStateMapping } from './url_generator_definition';
+import type { UrlGeneratorId, UrlGeneratorStateMapping } from './url_generator_definition';
 
 export interface UrlGeneratorContract<Id extends UrlGeneratorId> {
   id: Id;

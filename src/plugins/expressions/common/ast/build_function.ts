@@ -5,19 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { ExpressionAstExpression, ExpressionAstFunction } from './types';
-import {
+import type {
   AnyExpressionFunctionDefinition,
   ExpressionFunctionDefinition,
 } from '../expression_functions/types';
-import {
-  buildExpression,
-  ExpressionAstExpressionBuilder,
-  isExpressionAstBuilder,
-  isExpressionAst,
-} from './build_expression';
+import type { ExpressionAstExpressionBuilder } from './build_expression';
+import { buildExpression, isExpressionAst, isExpressionAstBuilder } from './build_expression';
 import { format } from './format';
+import type { ExpressionAstExpression, ExpressionAstFunction } from './types';
 
 // Infers the types from an ExpressionFunctionDefinition.
 // @internal

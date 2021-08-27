@@ -5,9 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { merge } from 'lodash';
-import { FieldDescriptor } from '../../index_patterns_fetcher';
+import type { FieldDescriptor } from '../../index_patterns_fetcher';
 
 const OVERRIDES: Record<string, Partial<FieldDescriptor>> = {
   _source: { type: '_source' },

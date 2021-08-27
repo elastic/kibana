@@ -5,38 +5,38 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { sortBy } from 'lodash';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { UiCounterMetricType } from '@kbn/analytics';
 import {
-  EuiTitle,
-  EuiHideFor,
-  EuiShowFor,
-  EuiButton,
   EuiBadge,
-  EuiFlyoutHeader,
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiFlyout,
-  EuiSpacer,
+  EuiFlyoutHeader,
+  EuiHideFor,
   EuiIcon,
   EuiLink,
   EuiPortal,
-  EuiFlexGroup,
-  EuiFlexItem,
+  EuiShowFor,
+  EuiSpacer,
+  EuiTitle,
 } from '@elastic/eui';
-import { DiscoverIndexPattern } from './discover_index_pattern';
-import { IndexPatternAttributes } from '../../../../../../../data/common';
-import { SavedObject } from '../../../../../../../../core/types';
-import { IndexPatternField, IndexPattern } from '../../../../../../../data/public';
-import { getDefaultFieldFilter } from './lib/field_filter';
-import { DiscoverSidebar } from './discover_sidebar';
-import { DiscoverServices } from '../../../../../build_services';
-import { AppState } from '../../services/discover_state';
-import { DiscoverIndexPatternManagement } from './discover_index_pattern_management';
-import { DataDocuments$ } from '../../services/use_saved_search';
+import type { UiCounterMetricType } from '@kbn/analytics';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { sortBy } from 'lodash';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import type { SavedObject } from '../../../../../../../../core/types/saved_objects';
+import { IndexPatternField } from '../../../../../../../data/common/index_patterns/fields/index_pattern_field';
+import { IndexPattern } from '../../../../../../../data/common/index_patterns/index_patterns/index_pattern';
+import type { IndexPatternAttributes } from '../../../../../../../data/common/index_patterns/types';
+import type { DiscoverServices } from '../../../../../build_services';
+import type { AppState } from '../../services/discover_state';
+import type { DataDocuments$ } from '../../services/use_saved_search';
 import { calcFieldCounts } from '../../utils/calc_field_counts';
+import { DiscoverIndexPattern } from './discover_index_pattern';
+import { DiscoverIndexPatternManagement } from './discover_index_pattern_management';
+import { DiscoverSidebar } from './discover_sidebar';
+import { getDefaultFieldFilter } from './lib/field_filter';
 
 export interface DiscoverSidebarResponsiveProps {
   /**

@@ -5,12 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { ExpressionFunctionKibana, ExpressionFunctionKibanaContext } from '../../../data/public';
-import { buildExpression, buildExpressionFunction } from '../../../expressions/public';
-
-import { VisToExpressionAst } from '../types';
-import { queryToAst, filtersToAst } from '../../../data/common';
+import { filtersToAst } from '../../../data/common/search/expressions/filters_to_ast';
+import type { ExpressionFunctionKibana } from '../../../data/common/search/expressions/kibana';
+import type { ExpressionFunctionKibanaContext } from '../../../data/common/search/expressions/kibana_context';
+import { queryToAst } from '../../../data/common/search/expressions/query_to_ast';
+import { buildExpression } from '../../../expressions/common/ast/build_expression';
+import { buildExpressionFunction } from '../../../expressions/common/ast/build_function';
+import type { VisToExpressionAst } from '../types';
 
 /**
  * Creates an ast expression for a visualization based on kibana context (query, filters, timerange)

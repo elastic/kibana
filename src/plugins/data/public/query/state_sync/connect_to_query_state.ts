@@ -5,15 +5,15 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import _ from 'lodash';
 import { Subscription } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
-import _ from 'lodash';
-import { BaseStateContainer } from '../../../../kibana_utils/public';
-import { QuerySetup, QueryStart } from '../query_service';
-import { QueryState, QueryStateChange } from './types';
-import { FilterStateStore, COMPARE_ALL_OPTIONS, compareFilters } from '../../../common';
-import { validateTimeRange } from '../timefilter';
+import type { BaseStateContainer } from '../../../../kibana_utils/common/state_containers/types';
+import { FilterStateStore } from '../../../common';
+import { compareFilters, COMPARE_ALL_OPTIONS } from '../../../common/es_query';
+import type { QuerySetup, QueryStart } from '../query_service';
+import { validateTimeRange } from '../timefilter/lib/validate_timerange';
+import type { QueryState, QueryStateChange } from './types';
 
 /**
  * Helper to setup two-way syncing of global data and a state container

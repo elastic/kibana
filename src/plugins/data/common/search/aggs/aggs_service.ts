@@ -5,18 +5,16 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { ExpressionsServiceSetup } from 'src/plugins/expressions/common';
-import { CreateAggConfigParams, IndexPattern, UI_SETTINGS } from '../../../common';
-import { GetConfigFn } from '../../types';
-import {
-  AggConfigs,
-  AggTypesRegistry,
-  getAggTypes,
-  getAggTypesFunctions,
-  getCalculateAutoTimeExpression,
-} from './';
-import { AggsCommonSetup, AggsCommonStart } from './types';
+import type { ExpressionsServiceSetup } from '../../../../expressions/common/service/expressions_services';
+import { UI_SETTINGS } from '../../constants';
+import { IndexPattern } from '../../index_patterns/index_patterns/index_pattern';
+import type { GetConfigFn } from '../../types';
+import type { CreateAggConfigParams } from './agg_configs';
+import { AggConfigs } from './agg_configs';
+import { getAggTypes, getAggTypesFunctions } from './agg_types';
+import { AggTypesRegistry } from './agg_types_registry';
+import type { AggsCommonSetup, AggsCommonStart } from './types';
+import { getCalculateAutoTimeExpression } from './utils/calculate_auto_time_expression';
 import { getDatatableColumnUtilities } from './utils/datatable_column_meta';
 
 /** @internal */

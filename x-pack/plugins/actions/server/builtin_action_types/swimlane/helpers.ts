@@ -4,8 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { CreateRecordParams, Incident, SwimlaneRecordPayload, MappingConfigType } from './types';
+import type {
+  CreateRecordParams,
+  Incident,
+  MappingConfigType,
+  SwimlaneRecordPayload,
+} from './types';
 
 type ConfigMapping = Omit<MappingConfigType, 'commentsConfig'>;
 

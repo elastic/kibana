@@ -5,11 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import React, { PureComponent, ReactText } from 'react';
 import { i18n } from '@kbn/i18n';
-
-import type { FieldFormatsContentType } from 'src/plugins/field_formats/common';
+import type { ReactText } from 'react';
+import React, { PureComponent } from 'react';
+import type { FieldFormatsContentType } from '../../../../../../field_formats/common/types';
 import type { Sample, SampleInput } from '../../types';
 import type { FormatEditorProps } from '../types';
 import { formatId } from './constants';

@@ -5,8 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { IndexPatternFieldBase } from '@kbn/es-query';
-import { FieldSpec, IndexPattern } from '../..';
+import type { IndexPatternFieldBase } from '@kbn/es-query';
+import { IndexPattern } from '../index_patterns/index_pattern';
+import type { FieldSpec } from '../types';
 
 /**
  * @deprecated Use {@link IndexPatternField}

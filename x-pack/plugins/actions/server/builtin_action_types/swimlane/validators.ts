@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { ActionsConfigurationUtilities } from '../../actions_config';
-import { ExternalServiceValidation, SwimlanePublicConfigurationType } from './types';
+import type { ActionsConfigurationUtilities } from '../../actions_config';
 import * as i18n from './translations';
+import type { ExternalServiceValidation, SwimlanePublicConfigurationType } from './types';
 
 export const validateCommonConfig = (
   configurationUtilities: ActionsConfigurationUtilities,

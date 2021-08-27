@@ -5,10 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { Moment } from 'moment';
-
-import { TimeRange, RefreshInterval } from '../../../common';
+import type { Moment } from 'moment';
+import type { RefreshInterval, TimeRange } from '../../../common/query/timefilter/types';
 
 export interface TimefilterConfig {
   timeDefaults: TimeRange;

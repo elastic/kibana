@@ -5,8 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-// NOTE: trick to mark exports as deprecated (only for constants and types, but not for interfaces, classes or enums)
 import {
   castEsToKbnFieldTypeName as oldCastEsToKbnFieldTypeName,
   getFilterableKbnTypeNames as oldGetFilterableKbnTypeNames,
@@ -15,6 +13,7 @@ import {
   KbnFieldType,
 } from '@kbn/field-types';
 
+// NOTE: trick to mark exports as deprecated (only for constants and types, but not for interfaces, classes or enums)
 /**
  * @deprecated Import from the "@kbn/field-types" package directly instead.
  * @removeBy 8.1

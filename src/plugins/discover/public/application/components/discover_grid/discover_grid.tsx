@@ -5,41 +5,38 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import React, { useCallback, useMemo, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
-import './discover_grid.scss';
+import type { EuiDataGridProps, EuiDataGridSorting, EuiDataGridStyle } from '@elastic/eui';
 import {
-  EuiDataGridSorting,
-  EuiDataGridStyle,
-  EuiDataGridProps,
   EuiDataGrid,
+  EuiIcon,
+  EuiLoadingSpinner,
   EuiScreenReaderOnly,
   EuiSpacer,
   EuiText,
   htmlIdGenerator,
-  EuiLoadingSpinner,
-  EuiIcon,
 } from '@elastic/eui';
-import { IndexPattern } from '../../../kibana_services';
-import { DocViewFilterFn, ElasticSearchHit } from '../../doc_views/doc_views_types';
-import { getSchemaDetectors } from './discover_grid_schema';
-import { DiscoverGridFlyout } from './discover_grid_flyout';
-import { DiscoverGridContext } from './discover_grid_context';
-import { getRenderCellValueFn } from './get_render_cell_value';
-import { DiscoverGridSettings } from './types';
+import { FormattedMessage } from '@kbn/i18n/react';
+import React, { useCallback, useMemo, useState } from 'react';
+import { IndexPattern } from '../../../../../data/common/index_patterns/index_patterns/index_pattern';
+import { KibanaContextProvider } from '../../../../../kibana_react/public/context/context';
+import { MAX_DOC_FIELDS_DISPLAYED } from '../../../../common';
+import type { DiscoverServices } from '../../../build_services';
+import type { SortPairArr } from '../../apps/main/components/doc_table/lib/get_sort';
+import type { DocViewFilterFn, ElasticSearchHit } from '../../doc_views/doc_views_types';
+import { getDisplayedColumns } from '../../helpers/columns';
+import { defaultPageSize, gridStyle, pageSizeArr, toolbarVisibility } from './constants';
+import './discover_grid.scss';
 import {
   getEuiGridColumns,
   getLeadControlColumns,
   getVisibleColumns,
 } from './discover_grid_columns';
-import { defaultPageSize, gridStyle, pageSizeArr, toolbarVisibility } from './constants';
-import { DiscoverServices } from '../../../build_services';
-import { getDisplayedColumns } from '../../helpers/columns';
-import { KibanaContextProvider } from '../../../../../kibana_react/public';
-import { MAX_DOC_FIELDS_DISPLAYED } from '../../../../common';
+import { DiscoverGridContext } from './discover_grid_context';
 import { DiscoverGridDocumentToolbarBtn, getDocId } from './discover_grid_document_selection';
-import { SortPairArr } from '../../apps/main/components/doc_table/lib/get_sort';
+import { DiscoverGridFlyout } from './discover_grid_flyout';
+import { getSchemaDetectors } from './discover_grid_schema';
+import { getRenderCellValueFn } from './get_render_cell_value';
+import type { DiscoverGridSettings } from './types';
 
 interface SortObj {
   id: string;

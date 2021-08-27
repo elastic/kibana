@@ -5,25 +5,20 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import type {
-  PluginInitializerContext,
-  Logger,
-  CoreSetup,
-  CoreStart,
-  ISavedObjectsRepository,
-  Plugin,
-  ElasticsearchClient,
-  SavedObjectsClientContract,
-  KibanaRequest,
-} from 'src/core/server';
+import type { Logger } from '@kbn/logging';
+import type { CoreSetup, CoreStart } from '../../../core/server';
+import type { ElasticsearchClient } from '../../../core/server/elasticsearch/client/types';
+import { KibanaRequest } from '../../../core/server/http/router/request';
+import type { Plugin, PluginInitializerContext } from '../../../core/server/plugins/types';
+import type { ISavedObjectsRepository } from '../../../core/server/saved_objects/service/lib/repository';
+import type { SavedObjectsClientContract } from '../../../core/server/saved_objects/types';
+import { CollectorSet } from './collector/collector_set';
+import type { CollectorOptions, ICollector as Collector } from './collector/types';
+import type { UsageCollectorOptions } from './collector/usage_collector';
 import type { ConfigType } from './config';
-import { CollectorSet } from './collector';
-import type { Collector, CollectorOptions, UsageCollectorOptions } from './collector';
 import { setupRoutes } from './routes';
-
-import { UsageCountersService } from './usage_counters';
-import type { UsageCounter } from './usage_counters';
+import type { IUsageCounter as UsageCounter } from './usage_counters/usage_counter';
+import { UsageCountersService } from './usage_counters/usage_counters_service';
 
 /** Server's setup APIs exposed by the UsageCollection Service **/
 export interface UsageCollectionSetup {

@@ -7,26 +7,30 @@
  */
 
 import dateMath from '@elastic/datemath';
-import classNames from 'classnames';
-import React, { useState } from 'react';
-
+import type { EuiIconProps, OnRefreshProps } from '@elastic/eui';
 import {
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSuperDatePicker,
-  EuiFieldText,
+  EuiSuperUpdateButton,
   prettyDuration,
-  EuiIconProps,
 } from '@elastic/eui';
-// @ts-ignore
-import { EuiSuperUpdateButton, OnRefreshProps } from '@elastic/eui';
-import { IDataPluginServices, IIndexPattern, TimeRange, TimeHistoryContract, Query } from '../..';
-import { useKibana, withKibana } from '../../../../kibana_react/public';
-import QueryStringInputUI from './query_string_input';
-import { UI_SETTINGS } from '../../../common';
-import { PersistedLog, getQueryLog } from '../../query';
-import { NoDataPopover } from './no_data_popover';
+import classNames from 'classnames';
+import React, { useState } from 'react';
+import type { Query } from '../..';
+import { useKibana, withKibana } from '../../../../kibana_react/public/context/context';
+import { UI_SETTINGS } from '../../../common/constants';
+import type { IIndexPattern } from '../../../common/index_patterns/types';
+import type { TimeRange } from '../../../common/query/timefilter/types';
+import { getQueryLog } from '../../query/lib/get_query_log';
+import { PersistedLog } from '../../query/persisted_log/persisted_log';
+import type { TimeHistoryContract } from '../../query/timefilter/time_history';
+import type { IDataPluginServices } from '../../types';
 import { AutocompleteFtuePopover } from './autocomplete_ftue_popover';
+import { NoDataPopover } from './no_data_popover';
+// @ts-ignore
+import QueryStringInputUI from './query_string_input';
 
 const QueryStringInput = withKibana(QueryStringInputUI);
 

@@ -5,14 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { CoreStart } from 'kibana/public';
-import { SavedQuery } from '../../../query';
-import { DataPublicPluginStart } from '../../..';
-import { populateStateFromSavedQuery } from './populate_state_from_saved_query';
+import { useEffect, useState } from 'react';
+import type { CoreStart } from '../../../../../../core/public';
+import type { SavedQuery } from '../../../query/saved_query/types';
+import type { DataPublicPluginStart } from '../../../types';
 import { clearStateFromSavedQuery } from './clear_saved_query';
+import { populateStateFromSavedQuery } from './populate_state_from_saved_query';
 
 interface UseSavedQueriesProps {
   queryService: DataPublicPluginStart['query'];

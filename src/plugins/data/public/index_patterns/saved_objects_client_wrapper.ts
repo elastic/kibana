@@ -5,14 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { omit } from 'lodash';
-import { SavedObjectsClient, SimpleSavedObject } from 'src/core/public';
-import {
+import { SavedObjectsClient } from '../../../../core/public/saved_objects/saved_objects_client';
+import { SimpleSavedObject } from '../../../../core/public/saved_objects/simple_saved_object';
+import type { SavedObject } from '../../../../core/types/saved_objects';
+import type {
   SavedObjectsClientCommon,
   SavedObjectsClientCommonFindArgs,
-  SavedObject,
-} from '../../common/index_patterns';
+} from '../../common/index_patterns/types';
 
 type SOClient = Pick<SavedObjectsClient, 'find' | 'get' | 'update' | 'create' | 'delete'>;
 

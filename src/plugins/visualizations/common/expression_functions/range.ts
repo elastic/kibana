@@ -5,9 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { i18n } from '@kbn/i18n';
-import { ExpressionFunctionDefinition, Datatable, Range } from '../../../expressions/common';
+import type { ExpressionFunctionDefinition } from '../../../expressions/common/expression_functions/types';
+import type { Datatable } from '../../../expressions/common/expression_types/specs/datatable';
+import type { Range } from '../../../expressions/common/expression_types/specs/range';
 
 interface Arguments {
   from: number;

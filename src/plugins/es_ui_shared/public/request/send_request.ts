@@ -5,8 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { HttpSetup, HttpFetchQuery } from '../../../../../src/core/public';
+import type { HttpFetchQuery, HttpSetup } from '../../../../core/public/http/types';
 
 export interface SendRequestConfig {
   path: string;

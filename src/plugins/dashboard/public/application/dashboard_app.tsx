@@ -5,22 +5,22 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { History } from 'history';
+import type { History } from 'history';
 import React, { useEffect, useMemo } from 'react';
-
-import { useDashboardSelector } from './state';
-import { useDashboardAppState } from './hooks';
-import { useKibana } from '../../../kibana_react/public';
+import { EmbeddableRenderer } from '../../../embeddable/public/lib/embeddables/embeddable_renderer';
+import { useKibana } from '../../../kibana_react/public/context/context';
+import { withNotifyOnErrors } from '../../../kibana_utils/public/state_management/url/errors';
+import { createKbnUrlStateStorage } from '../../../kibana_utils/public/state_sync/state_sync_state_storage/create_kbn_url_state_storage';
 import {
   getDashboardBreadcrumb,
   getDashboardTitle,
   leaveConfirmStrings,
 } from '../dashboard_strings';
-import { EmbeddableRenderer } from '../services/embeddable';
+import type { DashboardAppServices, DashboardEmbedSettings, DashboardRedirect } from '../types';
+import { useDashboardAppState } from './hooks/use_dashboard_app_state';
+import { useDashboardSelector } from './state/dashboard_state_hooks';
 import { DashboardTopNav, isCompleteDashboardAppState } from './top_nav/dashboard_top_nav';
-import { DashboardAppServices, DashboardEmbedSettings, DashboardRedirect } from '../types';
-import { createKbnUrlStateStorage, withNotifyOnErrors } from '../services/kibana_utils';
+
 export interface DashboardAppProps {
   history: History;
   savedDashboardId?: string;

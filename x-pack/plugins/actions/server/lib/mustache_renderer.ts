@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { cloneDeepWith, isPlainObject, isString } from 'lodash';
 import Mustache from 'mustache';
-import { isString, isPlainObject, cloneDeepWith } from 'lodash';
 
 export type Escape = 'markdown' | 'slack' | 'json' | 'none';
 type Variables = Record<string, unknown>;

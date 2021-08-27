@@ -5,13 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { useEffect, useMemo, useState } from 'react';
-
 import { cloneDeep } from 'lodash';
+import { useEffect, useMemo, useState } from 'react';
+import { IndexPattern } from '../../../../../data/common/index_patterns/index_patterns/index_pattern';
 import { CONTEXT_DEFAULT_SIZE_SETTING } from '../../../../common';
-import { IndexPattern } from '../../../../../data/public';
-import { DiscoverServices } from '../../../build_services';
-import { AppState, getState } from '../../angular/context_state';
+import type { DiscoverServices } from '../../../build_services';
+import type { AppState } from '../../angular/context_state';
+import { getState } from '../../angular/context_state';
 
 export function useContextAppState({
   indexPattern,

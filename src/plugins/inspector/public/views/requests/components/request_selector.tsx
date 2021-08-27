@@ -5,17 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import React, { Component } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
-import PropTypes from 'prop-types';
-import { i18n } from '@kbn/i18n';
-
 import {
   EuiBadge,
   EuiButtonEmpty,
-  EuiContextMenuPanel,
   EuiContextMenuItem,
+  EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
@@ -23,9 +17,12 @@ import {
   EuiTextColor,
   EuiToolTip,
 } from '@elastic/eui';
-
-import { RequestStatus } from '../../../../common/adapters';
-import { Request } from '../../../../common/adapters/request/types';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+import PropTypes from 'prop-types';
+import React, { Component } from 'react';
+import type { Request } from '../../../../common/adapters/request/types';
+import { RequestStatus } from '../../../../common/adapters/request/types';
 
 interface RequestSelectorState {
   isPopoverOpen: boolean;

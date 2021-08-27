@@ -5,12 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-/**
- * This file is adapted from: https://github.com/microsoft/monaco-languages/blob/master/src/handlebars/handlebars.ts
- * License: https://github.com/microsoft/monaco-languages/blob/master/LICENSE.md
- */
-
 import { monaco } from '@kbn/monaco';
 
 export const languageConfiguration: monaco.languages.LanguageConfiguration = {

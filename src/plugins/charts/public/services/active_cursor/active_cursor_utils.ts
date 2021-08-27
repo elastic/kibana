@@ -6,10 +6,8 @@
  * Side Public License, v 1.
  */
 import { uniq } from 'lodash';
-
-import type { Datatable } from '../../../../expressions/public';
-import type { ActiveCursorSyncOption, DateHistogramSyncOption } from './types';
-import type { ActiveCursorPayload } from './types';
+import type { Datatable } from '../../../../expressions/common/expression_types/specs/datatable';
+import type { ActiveCursorPayload, ActiveCursorSyncOption, DateHistogramSyncOption } from './types';
 
 function isDateHistogramSyncOption(
   syncOption?: ActiveCursorSyncOption

@@ -5,8 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { FieldHook } from './types';
+import type { FieldHook } from './types';
 
 export const getFieldValidityAndErrorMessage = (field: {
   isChangingValue: FieldHook['isChangingValue'];

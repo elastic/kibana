@@ -5,57 +5,55 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import React, { Component, Fragment, ReactNode } from 'react';
-import { take, get as getField } from 'lodash';
 import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiCallOut,
+  EuiFilePicker,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
-  EuiButtonEmpty,
-  EuiButton,
-  EuiText,
-  EuiTitle,
   EuiForm,
   EuiFormRow,
-  EuiFilePicker,
   EuiInMemoryTable,
-  EuiSelect,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingElastic,
-  EuiCallOut,
-  EuiSpacer,
   EuiLink,
+  EuiLoadingElastic,
+  EuiSelect,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { OverlayStart, HttpStart, IBasePath } from 'src/core/public';
+import { get as getField, take } from 'lodash';
+import type { ReactNode } from 'react';
+import React, { Component, Fragment } from 'react';
+import type { HttpStart, IBasePath } from '../../../../../../core/public/http/types';
+import type { OverlayStart } from '../../../../../../core/public/overlays/overlay_service';
+import { IndexPattern } from '../../../../../data/common/index_patterns/index_patterns/index_pattern';
+import type { IndexPatternsContract } from '../../../../../data/common/index_patterns/index_patterns/index_patterns';
+import type { DataPublicPluginStart } from '../../../../../data/public/types';
+import { importFile } from '../../../lib/import_file';
+import { importLegacyFile } from '../../../lib/import_legacy_file';
+import { logLegacyImport } from '../../../lib/log_legacy_import';
+import type { ProcessedImportResponse } from '../../../lib/process_import_response';
+import { processImportResponse } from '../../../lib/process_import_response';
+import type { FailedImportConflict, RetryDecision } from '../../../lib/resolve_import_errors';
+import { resolveImportErrors } from '../../../lib/resolve_import_errors';
 import {
-  IndexPatternsContract,
-  IndexPattern,
-  DataPublicPluginStart,
-} from '../../../../../data/public';
-import {
-  importFile,
-  importLegacyFile,
-  resolveImportErrors,
-  logLegacyImport,
-  processImportResponse,
-  ProcessedImportResponse,
-} from '../../../lib';
-import {
+  resolveIndexPatternConflicts,
   resolveSavedObjects,
   resolveSavedSearches,
-  resolveIndexPatternConflicts,
   saveObjects,
 } from '../../../lib/resolve_saved_objects';
-import { ISavedObjectsManagementServiceRegistry } from '../../../services';
-import { FailedImportConflict, RetryDecision } from '../../../lib/resolve_import_errors';
-import { OverwriteModal } from './overwrite_modal';
-import { ImportModeControl, ImportMode } from './import_mode_control';
+import type { ISavedObjectsManagementServiceRegistry } from '../../../services/service_registry';
+import type { ImportMode } from './import_mode_control';
+import { ImportModeControl } from './import_mode_control';
 import { ImportSummary } from './import_summary';
+import { OverwriteModal } from './overwrite_modal';
 
 const CREATE_NEW_COPIES_DEFAULT = false;
 const OVERWRITE_ALL_DEFAULT = true;

@@ -5,8 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { KbnError } from '../../../../kibana_utils/common';
+import { KbnError } from '../../../../kibana_utils/common/errors/errors';
 
 export class NoSearchIdInSessionError extends KbnError {
   constructor() {

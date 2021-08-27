@@ -5,31 +5,25 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { Subscription } from 'rxjs';
-import React from 'react';
-import ReactDOM from 'react-dom';
 import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';
-import { Container, Embeddable } from '../../../../embeddable/public';
-import { ISearchEmbeddable, SearchInput, SearchOutput } from './types';
-import { SavedSearch } from '../../saved_searches';
-import { Adapters, RequestAdapter } from '../../../../inspector/common';
-import { SEARCH_EMBEDDABLE_TYPE } from './constants';
-import { APPLY_FILTER_TRIGGER, esFilters, FilterManager } from '../../../../data/public';
-import { DiscoverServices } from '../../build_services';
-import {
-  Query,
-  TimeRange,
-  Filter,
-  IndexPattern,
-  ISearchSource,
-  IndexPatternField,
-} from '../../../../data/common';
-import { ElasticSearchHit } from '../doc_views/doc_views_types';
-import { SavedSearchEmbeddableComponent } from './saved_search_embeddable_component';
-import { UiActionsStart } from '../../../../ui_actions/public';
-import { getServices } from '../../kibana_services';
+import React from 'react';
+import ReactDOM from 'react-dom';
+import { Subscription } from 'rxjs';
+import type { Query } from '../../../../data/common';
+import type { Filter } from '../../../../data/common/es_query';
+import { IndexPatternField } from '../../../../data/common/index_patterns/fields/index_pattern_field';
+import { IndexPattern } from '../../../../data/common/index_patterns/index_patterns/index_pattern';
+import type { TimeRange } from '../../../../data/common/query/timefilter/types';
+import type { ISearchSource } from '../../../../data/common/search/search_source/types';
+import { esFilters } from '../../../../data/public/deprecated';
+import { FilterManager } from '../../../../data/public/query/filter_manager/filter_manager';
+import { APPLY_FILTER_TRIGGER } from '../../../../data/public/triggers/apply_filter_trigger';
+import { Container } from '../../../../embeddable/public/lib/containers/container';
+import { Embeddable } from '../../../../embeddable/public/lib/embeddables/embeddable';
+import { RequestAdapter } from '../../../../inspector/common/adapters/request/request_adapter';
+import type { Adapters } from '../../../../inspector/common/adapters/types';
+import type { UiActionsStart } from '../../../../ui_actions/public/plugin';
 import {
   DOC_HIDE_TIME_COLUMN_SETTING,
   DOC_TABLE_LEGACY,
@@ -37,13 +31,21 @@ import {
   SEARCH_FIELDS_FROM_SOURCE,
   SORT_DEFAULT_ORDER_SETTING,
 } from '../../../common';
+import type { DiscoverServices } from '../../build_services';
+import { getServices } from '../../kibana_services';
+import type { SavedSearch } from '../../saved_searches/types';
+import { handleSourceColumnState } from '../angular/helpers/state_helpers';
 import * as columnActions from '../apps/main/components/doc_table/actions/columns';
-import { handleSourceColumnState } from '../angular/helpers';
-import { DiscoverGridProps } from '../components/discover_grid/discover_grid';
-import { DiscoverGridSettings } from '../components/discover_grid/types';
-import { DocTableProps } from '../apps/main/components/doc_table/doc_table_wrapper';
-import { getDefaultSort, getSortForSearchSource } from '../apps/main/components/doc_table';
-import { SortOrder } from '../apps/main/components/doc_table/components/table_header/helpers';
+import type { SortOrder } from '../apps/main/components/doc_table/components/table_header/helpers';
+import type { DocTableProps } from '../apps/main/components/doc_table/doc_table_wrapper';
+import { getDefaultSort } from '../apps/main/components/doc_table/lib/get_default_sort';
+import { getSortForSearchSource } from '../apps/main/components/doc_table/lib/get_sort_for_search_source';
+import type { DiscoverGridProps } from '../components/discover_grid/discover_grid';
+import type { DiscoverGridSettings } from '../components/discover_grid/types';
+import type { ElasticSearchHit } from '../doc_views/doc_views_types';
+import { SEARCH_EMBEDDABLE_TYPE } from './constants';
+import { SavedSearchEmbeddableComponent } from './saved_search_embeddable_component';
+import type { ISearchEmbeddable, SearchInput, SearchOutput } from './types';
 
 export type SearchProps = Partial<DiscoverGridProps> &
   Partial<DocTableProps> & {

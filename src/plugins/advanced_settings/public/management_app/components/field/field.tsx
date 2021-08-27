@@ -5,19 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import React, { PureComponent, Fragment } from 'react';
-import classNames from 'classnames';
-import 'brace/theme/textmate';
-import 'brace/mode/markdown';
-import 'brace/mode/json';
-
+import type { EuiSwitchEvent } from '@elastic/eui';
 import {
   EuiBadge,
   EuiCode,
   EuiCodeBlock,
   EuiColorPicker,
-  EuiScreenReaderOnly,
   EuiDescribedFormGroup,
   EuiFieldNumber,
   EuiFieldText,
@@ -26,19 +19,26 @@ import {
   EuiIconTip,
   EuiImage,
   EuiLink,
-  EuiSpacer,
-  EuiText,
+  EuiScreenReaderOnly,
   EuiSelect,
+  EuiSpacer,
   EuiSwitch,
-  EuiSwitchEvent,
+  EuiText,
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { FieldSetting, FieldState } from '../../types';
-import { isDefaultValue } from '../../lib';
-import { UiSettingsType, DocLinksStart, ToastsStart } from '../../../../../../core/public';
-import { EuiCodeEditor } from '../../../../../es_ui_shared/public';
+import 'brace/mode/json';
+import 'brace/mode/markdown';
+import 'brace/theme/textmate';
+import classNames from 'classnames';
+import React, { Fragment, PureComponent } from 'react';
+import type { DocLinksStart } from '../../../../../../core/public/doc_links/doc_links_service';
+import type { ToastsStart } from '../../../../../../core/public/notifications/toasts/toasts_service';
+import type { UiSettingsType } from '../../../../../../core/types/ui_settings';
+import { EuiCodeEditor } from '../../../../../es_ui_shared/public/components/code_editor';
+import { isDefaultValue } from '../../lib/is_default_value';
+import type { FieldSetting, FieldState } from '../../types';
 
 interface FieldProps {
   setting: FieldSetting;

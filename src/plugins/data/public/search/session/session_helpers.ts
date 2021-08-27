@@ -5,10 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { debounceTime, first, skipUntil } from 'rxjs/operators';
-import { ISessionService } from './session_service';
 import { SearchSessionState } from './search_session_state';
+import type { ISessionService } from './session_service';
 
 /**
  * Options for {@link waitUntilNextSessionCompletes$}

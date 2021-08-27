@@ -5,15 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { UiActionsSetup } from '../../ui_actions/public';
+import type { UiActionsSetup } from '../../ui_actions/public/plugin';
 import {
   contextMenuTrigger,
   panelBadgeTrigger,
   panelNotificationTrigger,
   selectRangeTrigger,
   valueClickTrigger,
-} from './lib';
+} from './lib/triggers/triggers';
 
 /**
  * This method initializes Embeddable plugin with initial set of

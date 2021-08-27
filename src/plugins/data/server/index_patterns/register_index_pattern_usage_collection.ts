@@ -5,12 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { StartServicesAccessor } from 'src/core/server';
-import { IndexPatternsCommonService } from '..';
-import { SavedObjectsClient } from '../../../../core/server';
-import { DataPluginStartDependencies, DataPluginStart } from '../plugin';
+import type { StartServicesAccessor } from '../../../../core/server';
+import { SavedObjectsClient } from '../../../../core/server/saved_objects/service/saved_objects_client';
+import type { UsageCollectionSetup } from '../../../usage_collection/server/plugin';
+import { IndexPatternsService as IndexPatternsCommonService } from '../../common/index_patterns/index_patterns/index_patterns';
+import type { DataPluginStart, DataPluginStartDependencies } from '../plugin';
 
 interface CountSummary {
   min?: number;

@@ -5,10 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { ReactNode } from 'react';
-import { Capabilities } from 'src/core/public';
-import { SavedObjectsManagementRecord } from '.';
+import type { ReactNode } from 'react';
+import type { Capabilities } from '../../../../../core/types/capabilities';
+import type { SavedObjectsManagementRecord } from './record';
 
 interface ActionContext {
   capabilities: Capabilities;

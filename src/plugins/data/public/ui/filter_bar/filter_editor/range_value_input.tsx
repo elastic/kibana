@@ -6,13 +6,14 @@
  * Side Public License, v 1.
  */
 
-import moment from 'moment';
 import { EuiFormControlLayoutDelimited } from '@elastic/eui';
-import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import type { InjectedIntl } from '@kbn/i18n/react';
+import { injectI18n } from '@kbn/i18n/react';
 import { get } from 'lodash';
+import moment from 'moment';
 import React from 'react';
-import { useKibana } from '../../../../../kibana_react/public';
-import { IFieldType } from '../../..';
+import { useKibana } from '../../../../../kibana_react/public/context/context';
+import type { IFieldType } from '../../../../common/index_patterns/fields/types';
 import { ValueInputType } from './value_input_type';
 
 interface RangeParams {

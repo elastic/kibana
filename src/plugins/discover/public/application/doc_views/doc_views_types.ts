@@ -5,11 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { ComponentType } from 'react';
-import { IScope } from 'angular';
-import type { estypes } from '@elastic/elasticsearch';
-import { IndexPattern } from '../../../../data/public';
+import { estypes } from '@elastic/elasticsearch';
+import type { IScope } from 'angular';
+import type { ComponentType } from 'react';
+import { IndexPattern } from '../../../../data/common/index_patterns/index_patterns/index_pattern';
 
 export interface AngularDirective {
   controller: (...injectedServices: unknown[]) => void;

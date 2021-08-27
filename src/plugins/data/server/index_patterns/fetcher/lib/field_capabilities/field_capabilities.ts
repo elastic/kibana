@@ -5,14 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { defaults, keyBy, sortBy } from 'lodash';
-
-import { ElasticsearchClient } from 'kibana/server';
+import type { ElasticsearchClient } from '../../../../../../../core/server/elasticsearch/client/types';
+import type { FieldDescriptor } from '../../index_patterns_fetcher';
 import { callFieldCapsApi } from '../es_api';
 import { readFieldCapsResponse } from './field_caps_response';
 import { mergeOverrides } from './overrides';
-import { FieldDescriptor } from '../../index_patterns_fetcher';
 
 /**
  *  Get the field capabilities for field in `indices`, excluding

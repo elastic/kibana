@@ -8,6 +8,7 @@
 
 import React from 'react';
 import type { FilterLabelProps } from './filter_editor/lib/filter_label';
+import type { FilterItemProps } from './filter_item';
 
 const Fallback = () => <div />;
 
@@ -17,9 +18,6 @@ export const FilterLabel = (props: FilterLabelProps) => (
     <LazyFilterLabel {...props} />
   </React.Suspense>
 );
-
-import type { FilterItemProps } from './filter_item';
-
 const LazyFilterItem = React.lazy(() => import('./filter_item'));
 export const FilterItem = (props: FilterItemProps) => (
   <React.Suspense fallback={<Fallback />}>

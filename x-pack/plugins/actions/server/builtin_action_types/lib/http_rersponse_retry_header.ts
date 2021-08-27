@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { fromNullable, Option, map, filter } from 'fp-ts/lib/Option';
+import type { Option } from 'fp-ts/lib/Option';
+import { filter, fromNullable, map } from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
 
 export function getRetryAfterIntervalFromHeaders(headers: Record<string, string>): Option<number> {

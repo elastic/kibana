@@ -5,9 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import {
+import type {
   EuiBasicTableColumn,
+  EuiTableActionsColumnType,
+  SearchFilterConfig,
+} from '@elastic/eui';
+import {
   EuiButton,
   EuiCallOut,
   EuiConfirmModal,
@@ -15,16 +18,15 @@ import {
   EuiInMemoryTable,
   EuiLink,
   EuiSpacer,
-  EuiTableActionsColumnType,
-  SearchFilterConfig,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { HttpFetchError, ToastsStart } from 'kibana/public';
 import { debounce, keyBy, sortBy, uniq } from 'lodash';
 import React from 'react';
-import { KibanaPageTemplate } from '../page_template';
-import { toMountPoint } from '../util';
+import { HttpFetchError } from '../../../../core/public/http/http_fetch_error';
+import type { ToastsStart } from '../../../../core/public/notifications/toasts/toasts_service';
+import { KibanaPageTemplate } from '../page_template/page_template';
+import { toMountPoint } from '../util/to_mount_point';
 
 interface Item {
   id?: string;

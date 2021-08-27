@@ -5,23 +5,22 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import React, { useCallback } from 'react';
-import {
-  EuiContextMenu,
-  EuiContextMenuPanelItemDescriptor,
-  EuiContextMenuItemIcon,
-} from '@elastic/eui';
+import type { EuiContextMenuItemIcon, EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
+import { EuiContextMenu } from '@elastic/eui';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
-import { BaseVisType, VisGroups, VisTypeAlias } from '../../../../visualizations/public';
-import { SolutionToolbarPopover } from '../../../../presentation_util/public';
-import { EmbeddableFactoryDefinition, EmbeddableInput } from '../../services/embeddable';
-import { useKibana } from '../../services/kibana_react';
-import { DashboardAppServices } from '../../types';
-import { DashboardContainer } from '..';
+import React, { useCallback } from 'react';
+import type { EmbeddableInput } from '../../../../embeddable/common/types';
+import type { EmbeddableFactoryDefinition } from '../../../../embeddable/public/lib/embeddables/embeddable_factory_definition';
+import { useKibana } from '../../../../kibana_react/public/context/context';
+import { SolutionToolbarPopover } from '../../../../presentation_util/public/components/solution_toolbar/items/popover';
+import { BaseVisType } from '../../../../visualizations/public/vis_types/base_vis_type';
+import { VisGroups } from '../../../../visualizations/public/vis_types/vis_groups_enum';
+import type { VisTypeAlias } from '../../../../visualizations/public/vis_types/vis_type_alias_registry';
 import { DashboardConstants } from '../../dashboard_constants';
 import { dashboardReplacePanelAction } from '../../dashboard_strings';
+import type { DashboardAppServices } from '../../types';
+import { DashboardContainer } from '../embeddable/dashboard_container';
 
 interface Props {
   /** Dashboard container */

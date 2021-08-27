@@ -6,14 +6,21 @@
  * Side Public License, v 1.
  */
 import Semver from 'semver';
-import { SavedObjectAttributes, SavedObjectReference } from '../../../core/types';
-import { DashboardContainerStateWithType, DashboardPanelState } from './types';
-import { EmbeddablePersistableStateService } from '../../embeddable/common/types';
+import type {
+  SavedObjectAttributes,
+  SavedObjectReference,
+} from '../../../core/types/saved_objects';
+import type { EmbeddablePersistableStateService } from '../../embeddable/common/types';
 import {
   convertPanelStateToSavedDashboardPanel,
   convertSavedDashboardPanelToPanelState,
 } from './embeddable/embeddable_saved_object_converters';
-import { SavedDashboardPanel } from './types';
+import type {
+  DashboardContainerStateWithType,
+  DashboardPanelState,
+  SavedDashboardPanel,
+} from './types';
+
 export interface ExtractDeps {
   embeddablePersistableStateService: EmbeddablePersistableStateService;
 }

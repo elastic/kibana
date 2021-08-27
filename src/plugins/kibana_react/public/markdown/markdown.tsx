@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import classNames from 'classnames';
-import React, { PureComponent } from 'react';
-import MarkdownIt from 'markdown-it';
-import { memoize } from 'lodash';
 import { getSecureRelForTarget } from '@elastic/eui';
-
+import classNames from 'classnames';
+import { memoize } from 'lodash';
+import MarkdownIt from 'markdown-it';
+import React, { PureComponent } from 'react';
 import './index.scss';
+
 /**
  * Return a memoized markdown rendering function that use the specified
  * whiteListedRules and openLinksInNewTab configurations.

@@ -5,13 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useState } from 'react';
-import { I18nProvider } from '@kbn/i18n/react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { DiscoverGrid, DiscoverGridProps } from '../components/discover_grid/discover_grid';
+import { I18nProvider } from '@kbn/i18n/react';
+import React, { useState } from 'react';
 import { getServices } from '../../kibana_services';
-import { ElasticSearchHit } from '../doc_views/doc_views_types';
 import { TotalDocuments } from '../apps/main/components/total_documents/total_documents';
+import type { DiscoverGridProps } from '../components/discover_grid/discover_grid';
+import { DiscoverGrid } from '../components/discover_grid/discover_grid';
+import type { ElasticSearchHit } from '../doc_views/doc_views_types';
 
 export interface DiscoverGridEmbeddableProps extends DiscoverGridProps {
   totalHitCount: number;

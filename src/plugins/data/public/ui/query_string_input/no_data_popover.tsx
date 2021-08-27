@@ -5,12 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { ReactElement, useEffect, useState } from 'react';
-import React from 'react';
 import { EuiButtonEmpty, EuiText, EuiTourStep } from '@elastic/eui';
-import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { i18n } from '@kbn/i18n';
+import type { ReactElement } from 'react';
+import React, { useEffect, useState } from 'react';
+import type { IStorageWrapper } from '../../../../kibana_utils/public/storage/types';
 
 const NO_DATA_POPOVER_STORAGE_KEY = 'data.noDataPopover';
 

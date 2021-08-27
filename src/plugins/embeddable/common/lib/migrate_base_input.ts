@@ -5,10 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { SavedObjectReference } from '../../../../core/types';
-import { EmbeddableStateWithType } from '../types';
-import { MigrateFunctionsObject } from '../../../kibana_utils/common';
+import type { SavedObjectReference } from '../../../../core/types/saved_objects';
+import type { MigrateFunctionsObject } from '../../../kibana_utils/common/persistable_state/types';
+import type { EmbeddableStateWithType } from '../types';
 
 export const telemetryBaseEmbeddableInput = (
   state: EmbeddableStateWithType,

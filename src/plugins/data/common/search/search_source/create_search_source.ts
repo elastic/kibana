@@ -5,11 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import type { IndexPatternsContract } from '../../index_patterns/index_patterns/index_patterns';
 import { migrateLegacyQuery } from './migrate_legacy_query';
-import { SearchSource, SearchSourceDependencies } from './search_source';
-import { IndexPatternsContract } from '../../index_patterns/index_patterns';
-import { SearchSourceFields } from './types';
+import type { SearchSourceDependencies } from './search_source';
+import { SearchSource } from './search_source';
+import type { SearchSourceFields } from './types';
 
 /**
  * Deserializes a json string and a set of referenced objects to a `SearchSource` instance.

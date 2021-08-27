@@ -5,12 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { TriggerRegistry, ActionRegistry, TriggerToActionsRegistry } from '../types';
-import { ActionInternal, Action, ActionDefinition, ActionContext } from '../actions';
-import { Trigger } from '../triggers/trigger';
-import { TriggerInternal } from '../triggers/trigger_internal';
+import type { Action, ActionContext, ActionDefinition } from '../actions/action';
+import { ActionInternal } from '../actions/action_internal';
+import type { Trigger } from '../triggers/trigger';
 import { TriggerContract } from '../triggers/trigger_contract';
+import { TriggerInternal } from '../triggers/trigger_internal';
+import type { ActionRegistry, TriggerRegistry, TriggerToActionsRegistry } from '../types';
 import { UiActionsExecutionService } from './ui_actions_execution_service';
 
 export interface UiActionsServiceParams {

@@ -5,12 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { EuiBasicTableColumn, EuiText } from '@elastic/eui';
-import React from 'react';
+import type { EuiBasicTableColumn } from '@elastic/eui';
+import { EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import React from 'react';
 import { FieldName } from '../field_name/field_name';
-import { FieldRecord } from './table';
+import type { FieldRecord } from './table';
 import { TableActions } from './table_cell_actions';
 import { TableFieldValue } from './table_cell_value';
 

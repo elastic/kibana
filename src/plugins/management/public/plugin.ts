@@ -5,32 +5,29 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { i18n } from '@kbn/i18n';
 import { BehaviorSubject } from 'rxjs';
-import type { SharePluginSetup, SharePluginStart } from 'src/plugins/share/public';
-import { ManagementSetup, ManagementStart } from './types';
-import { FeatureCatalogueCategory, HomePublicPluginSetup } from '../../home/public';
-import {
-  CoreSetup,
-  CoreStart,
-  Plugin,
-  DEFAULT_APP_CATEGORIES,
-  PluginInitializerContext,
+import type { CoreSetup, CoreStart } from '../../../core/public';
+import type {
+  AppDeepLink,
   AppMountParameters,
   AppUpdater,
-  AppStatus,
-  AppNavLinkStatus,
-  AppDeepLink,
-} from '../../../core/public';
-
+} from '../../../core/public/application/types';
+import { AppNavLinkStatus, AppStatus } from '../../../core/public/application/types';
+import type { Plugin } from '../../../core/public/plugins/plugin';
+import type { PluginInitializerContext } from '../../../core/public/plugins/plugin_context';
+import { DEFAULT_APP_CATEGORIES } from '../../../core/utils/default_app_categories';
+import type { HomePublicPluginSetup } from '../../home/public/plugin';
+import { FeatureCatalogueCategory } from '../../home/public/services/feature_catalogue/feature_catalogue_registry';
+import type { SharePluginSetup, SharePluginStart } from '../../share/public/plugin';
 import { MANAGEMENT_APP_ID } from '../common/contants';
 import { ManagementAppLocatorDefinition } from '../common/locator';
 import {
-  ManagementSectionsService,
   getSectionsServiceStartPrivate,
+  ManagementSectionsService,
 } from './management_sections_service';
-import { ManagementSection } from './utils';
+import type { ManagementSetup, ManagementStart } from './types';
+import { ManagementSection } from './utils/management_section';
 
 interface ManagementSetupDependencies {
   home?: HomePublicPluginSetup;

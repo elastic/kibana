@@ -5,68 +5,62 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import {
-  setUISettings,
-  setTypes,
-  setApplication,
-  setCapabilities,
-  setHttp,
-  setSearch,
-  setSavedObjects,
-  setUsageCollector,
-  setExpressions,
-  setUiActions,
-  setSavedVisualizationsLoader,
-  setTimeFilter,
-  setAggs,
-  setChrome,
-  setOverlays,
-  setSavedSearchLoader,
-  setEmbeddable,
-  setDocLinks,
-} from './services';
-import {
-  VISUALIZE_EMBEDDABLE_TYPE,
-  VisualizeEmbeddableFactory,
-  createVisEmbeddableFromObject,
-} from './embeddable';
-import { TypesService } from './vis_types/types_service';
+import type { CoreSetup, CoreStart } from '../../../core/public';
+import type { ApplicationStart } from '../../../core/public/application/types';
+import type { Plugin } from '../../../core/public/plugins/plugin';
+import type { PluginInitializerContext } from '../../../core/public/plugins/plugin_context';
+import type { SavedObjectsClientContract } from '../../../core/public/saved_objects/saved_objects_client';
+import type { DataPublicPluginSetup, DataPublicPluginStart } from '../../data/public/types';
+import { createSavedSearchesLoader } from '../../discover/public/saved_searches/saved_searches';
+import type { EmbeddableSetup, EmbeddableStart } from '../../embeddable/public/plugin';
+import type { ExpressionsSetup, ExpressionsStart } from '../../expressions/public/plugin';
+import type {
+  Setup as InspectorSetup,
+  Start as InspectorStart,
+} from '../../inspector/public/plugin';
+import type { StartServicesGetter } from '../../kibana_utils/public/core/create_start_service_getter';
+import { createStartServicesGetter } from '../../kibana_utils/public/core/create_start_service_getter';
+import type { SavedObjectsStart } from '../../saved_objects/public/plugin';
+import type { UiActionsStart } from '../../ui_actions/public/plugin';
+import type { UsageCollectionSetup } from '../../usage_collection/public/plugin';
 import { range as rangeExpressionFunction } from '../common/expression_functions/range';
 import { visDimension as visDimensionExpressionFunction } from '../common/expression_functions/vis_dimension';
 import { xyDimension as xyDimensionExpressionFunction } from '../common/expression_functions/xy_dimension';
-
-import { createStartServicesGetter, StartServicesGetter } from '../../kibana_utils/public';
-import { createSavedVisLoader, SavedVisualizationsLoader } from './saved_visualizations';
-import type { SerializedVis, Vis } from './vis';
-import { showNewVisModal } from './wizard';
-
+import { VISUALIZE_EMBEDDABLE_TYPE } from './embeddable/constants';
+import { createVisEmbeddableFromObject } from './embeddable/create_vis_embeddable_from_object';
+import { VisualizeEmbeddableFactory } from './embeddable/visualize_embeddable_factory';
+import type { SavedVisualizationsLoader } from './saved_visualizations/saved_visualizations';
+import { createSavedVisLoader } from './saved_visualizations/saved_visualizations';
 import {
   convertFromSerializedVis,
   convertToSerializedVis,
 } from './saved_visualizations/_saved_vis';
-
-import { createSavedSearchesLoader } from '../../discover/public';
-
-import type {
-  PluginInitializerContext,
-  CoreSetup,
-  CoreStart,
-  Plugin,
-  ApplicationStart,
-  SavedObjectsClientContract,
-} from '../../../core/public';
-import type { UsageCollectionSetup } from '../../usage_collection/public';
-import type { UiActionsStart } from '../../ui_actions/public';
-import type { SavedObjectsStart } from '../../saved_objects/public';
-import type { TypesSetup, TypesStart } from './vis_types';
-import type {
-  Setup as InspectorSetup,
-  Start as InspectorStart,
-} from '../../../plugins/inspector/public';
-import type { DataPublicPluginSetup, DataPublicPluginStart } from '../../../plugins/data/public';
-import type { ExpressionsSetup, ExpressionsStart } from '../../expressions/public';
-import type { EmbeddableSetup, EmbeddableStart } from '../../embeddable/public';
+import {
+  setAggs,
+  setApplication,
+  setCapabilities,
+  setChrome,
+  setDocLinks,
+  setEmbeddable,
+  setExpressions,
+  setHttp,
+  setOverlays,
+  setSavedObjects,
+  setSavedSearchLoader,
+  setSavedVisualizationsLoader,
+  setSearch,
+  setTimeFilter,
+  setTypes,
+  setUiActions,
+  setUISettings,
+  setUsageCollector,
+} from './services';
+import type { SerializedVis } from './vis';
+import { Vis } from './vis';
 import { createVisAsync } from './vis_async';
+import type { TypesSetup, TypesStart } from './vis_types/types_service';
+import { TypesService } from './vis_types/types_service';
+import { showNewVisModal } from './wizard/show_new_vis';
 
 /**
  * Interface for this plugin's returned setup/start contracts.

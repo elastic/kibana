@@ -5,10 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { Logger } from 'kibana/server';
-import { Stream } from 'stream';
+import type { Logger } from '@kbn/logging';
 import { Observable } from 'rxjs';
+import { Stream } from 'stream';
 import { createCompressedStream } from './create_compressed_stream';
 import { createNDJSONStream } from './create_ndjson_stream';
 

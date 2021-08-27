@@ -5,10 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import './discover_layout.scss';
-import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import {
-  EuiSpacer,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
@@ -17,33 +14,34 @@ import {
   EuiPage,
   EuiPageBody,
   EuiPageContent,
+  EuiSpacer,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
+import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n/react';
 import classNames from 'classnames';
-import { DiscoverNoResults } from '../no_results';
-import { LoadingSpinner } from '../loading_spinner/loading_spinner';
-import {
-  esFilters,
-  IndexPatternField,
-  indexPatterns as indexPatternsUtils,
-} from '../../../../../../../data/public';
-import { DiscoverSidebarResponsive } from '../sidebar';
-import { DiscoverLayoutProps } from './types';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { IndexPatternField } from '../../../../../../../data/common/index_patterns/fields/index_pattern_field';
+import { indexPatterns as indexPatternsUtils } from '../../../../../../../data/public';
+import { esFilters } from '../../../../../../../data/public/deprecated';
+import type { InspectorSession } from '../../../../../../../inspector/public/types';
 import { SEARCH_FIELDS_FROM_SOURCE } from '../../../../../../common';
+import type { DocViewFilterFn, ElasticSearchHit } from '../../../../doc_views/doc_views_types';
 import { popularizeField } from '../../../../helpers/popularize_field';
-import { DiscoverTopNav } from '../top_nav/discover_topnav';
-import { DocViewFilterFn, ElasticSearchHit } from '../../../../doc_views/doc_views_types';
-import { DiscoverChart } from '../chart';
-import { getResultState } from '../../utils/get_result_state';
-import { InspectorSession } from '../../../../../../../inspector/public';
-import { DiscoverUninitialized } from '../uninitialized/uninitialized';
-import { DataMainMsg } from '../../services/use_saved_search';
 import { useDataGridColumns } from '../../../../helpers/use_data_grid_columns';
-import { DiscoverDocuments } from './discover_documents';
 import { FetchStatus } from '../../../../types';
+import type { DataMainMsg } from '../../services/use_saved_search';
+import { getResultState } from '../../utils/get_result_state';
 import { useDataState } from '../../utils/use_data_state';
+import { DiscoverChart } from '../chart/discover_chart';
+import { LoadingSpinner } from '../loading_spinner/loading_spinner';
+import { DiscoverNoResults } from '../no_results/no_results';
+import { DiscoverSidebarResponsive } from '../sidebar/discover_sidebar_responsive';
+import { DiscoverTopNav } from '../top_nav/discover_topnav';
+import { DiscoverUninitialized } from '../uninitialized/uninitialized';
+import { DiscoverDocuments } from './discover_documents';
+import './discover_layout.scss';
+import type { DiscoverLayoutProps } from './types';
 
 const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
 const TopNavMemoized = React.memo(DiscoverTopNav);

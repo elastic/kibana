@@ -5,8 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { Filter, FilterStateStore } from '../../../../common';
+import { FilterStateStore } from '../../../../common';
+import type { Filter } from '../../../../common/es_query';
 
 /**
  * Sort filters according to their store - global filters go first

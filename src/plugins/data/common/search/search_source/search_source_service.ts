@@ -5,9 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { createSearchSource, SearchSource, SearchSourceDependencies } from './';
-import { IndexPatternsContract } from '../../index_patterns/index_patterns';
+import type { IndexPatternsContract } from '../../index_patterns/index_patterns/index_patterns';
+import { createSearchSource } from './create_search_source';
+import type { SearchSourceDependencies } from './search_source';
+import { SearchSource } from './search_source';
 
 export class SearchSourceService {
   public setup() {}

@@ -6,13 +6,12 @@
  * Side Public License, v 1.
  */
 
+import type { EuiButtonGroupOptionProps } from '@elastic/eui';
+import { EuiButtonGroup, htmlIdGenerator } from '@elastic/eui';
 import React from 'react';
-import { EuiButtonGroup, htmlIdGenerator, EuiButtonGroupOptionProps } from '@elastic/eui';
 import { ComponentStrings } from '../../../i18n/components';
-
-const { QuickButtonGroup: strings } = ComponentStrings;
-
 import './quick_group.scss';
+const { QuickButtonGroup: strings } = ComponentStrings;
 
 export interface QuickButtonProps extends Pick<EuiButtonGroupOptionProps, 'iconType'> {
   createType: string;

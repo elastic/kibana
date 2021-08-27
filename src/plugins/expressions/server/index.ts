@@ -5,18 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { PluginInitializerContext } from 'src/core/server';
+import type { PluginInitializerContext } from '../../../core/server/plugins/types';
 import { ExpressionsServerPlugin } from './plugin';
-
-export { ExpressionsServerSetup, ExpressionsServerStart } from './plugin';
-
-// Kibana Platform.
-export { ExpressionsServerPlugin as Plugin };
-export * from './plugin';
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new ExpressionsServerPlugin(initializerContext);
-}
 
 // Static exports.
 export {
@@ -58,10 +48,11 @@ export {
   ExpressionValueBoxed,
   ExpressionValueConverter,
   ExpressionValueError,
+  ExpressionValueFilter,
   ExpressionValueNum,
   ExpressionValueRender,
+  ExpressionValueRender as Render,
   ExpressionValueUnboxed,
-  ExpressionValueFilter,
   Font,
   FontLabel,
   FontStyle,
@@ -93,5 +84,12 @@ export {
   TypeString,
   TypeToString,
   UnmappedTypeStrings,
-  ExpressionValueRender as Render,
 } from '../common';
+export * from './plugin';
+export { ExpressionsServerSetup, ExpressionsServerStart } from './plugin';
+// Kibana Platform.
+export { ExpressionsServerPlugin as Plugin };
+
+export function plugin(initializerContext: PluginInitializerContext) {
+  return new ExpressionsServerPlugin(initializerContext);
+}

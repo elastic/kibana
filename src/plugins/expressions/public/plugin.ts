@@ -5,19 +5,20 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { pick } from 'lodash';
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
-import { ExpressionsServiceSetup, ExpressionsServiceStart } from '../common';
-import {
-  ExpressionsService,
-  setRenderersRegistry,
-  setNotifications,
-  setExpressionsService,
-} from './services';
+import type { CoreSetup, CoreStart } from '../../../core/public';
+import type { Plugin } from '../../../core/public/plugins/plugin';
+import type { PluginInitializerContext } from '../../../core/public/plugins/plugin_context';
+import type {
+  ExpressionsServiceSetup,
+  ExpressionsServiceStart,
+} from '../common/service/expressions_services';
+import type { IExpressionLoader } from './loader';
+import { ExpressionLoader, loader } from './loader';
 import { ReactExpressionRenderer } from './react_expression_renderer';
-import { ExpressionLoader, IExpressionLoader, loader } from './loader';
-import { render, ExpressionRenderHandler } from './render';
+import { ExpressionRenderHandler, render } from './render';
+import { setExpressionsService, setNotifications, setRenderersRegistry } from './services';
+import { ExpressionsService } from './services/expressions_services';
 
 /**
  * Expressions public setup contract, extends {@link ExpressionsServiceSetup}

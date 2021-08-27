@@ -5,16 +5,18 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { schema } from '@kbn/config-schema';
-import { IRouter } from 'kibana/server';
 import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
-import { getRequestAbortedSignal } from '../lib';
-import { getKbnServerError, reportServerError } from '../../../kibana_utils/server';
+import type { IRouter } from '../../../../core/server/http/router/router';
+import {
+  getKbnServerError,
+  reportServerError,
+} from '../../../kibana_utils/server/report_server_error';
 import type { ConfigSchema } from '../../config';
-import { termsEnumSuggestions } from './terms_enum';
+import { getRequestAbortedSignal } from '../lib/get_request_aborted_signal';
 import { termsAggSuggestions } from './terms_agg';
+import { termsEnumSuggestions } from './terms_enum';
 
 export function registerValueSuggestionsRoute(router: IRouter, config$: Observable<ConfigSchema>) {
   router.post(

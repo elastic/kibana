@@ -5,9 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import type { SerializableRecord } from '@kbn/utility-types';
-import { CommonEmbeddableStartContract, EmbeddableStateWithType } from '../types';
+import type { CommonEmbeddableStartContract, EmbeddableStateWithType } from '../types';
 import { extractBaseEmbeddableInput } from './migrate_base_input';
 
 export const getExtractFunction = (embeddables: CommonEmbeddableStartContract) => {

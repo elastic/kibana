@@ -7,7 +7,7 @@
  */
 
 import * as React from 'react';
-import { CoreStart } from '../../../../core/public';
+import type { CoreStart } from '../../../../core/public';
 
 export interface KibanaReactOverlays {
   openFlyout: (

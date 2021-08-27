@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiComboBox, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-
-import { EuiFormRow, EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
-
-import { UseField, RuntimeType } from '../../../shared_imports';
+import React from 'react';
+import type { RuntimeType } from '../../../../../data/common/index_patterns/types';
+import { UseField } from '../../../../../es_ui_shared/static/forms/hook_form_lib/components/use_field';
 import { RUNTIME_FIELD_OPTIONS } from '../constants';
 
 interface Props {

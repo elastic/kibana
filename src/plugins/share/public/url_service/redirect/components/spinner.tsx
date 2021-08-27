@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import * as React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingElastic, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import * as React from 'react';
 
 const text = i18n.translate('share.urlService.redirect.components.Spinner.label', {
   defaultMessage: 'Redirecting…',

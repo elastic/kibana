@@ -5,15 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import {
-  SavedObjectAttributes,
-  SavedObjectsCreateOptions,
-  OverlayStart,
+import { get } from 'lodash';
+import type { OverlayStart } from '../../../../../core/public/overlays/overlay_service';
+import type {
   SavedObjectsClientContract,
-} from 'kibana/public';
+  SavedObjectsCreateOptions,
+} from '../../../../../core/public/saved_objects/saved_objects_client';
+import type { SavedObjectAttributes } from '../../../../../core/types/saved_objects';
 import { OVERWRITE_REJECTED } from '../../constants';
 import { confirmModalPromise } from './confirm_modal_promise';
 

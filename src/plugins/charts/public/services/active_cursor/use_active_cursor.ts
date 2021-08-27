@@ -5,17 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import { Chart } from '@elastic/charts';
 import { intersection } from 'lodash';
+import type { RefObject } from 'react';
+import { useCallback, useEffect } from 'react';
 import { animationFrameScheduler } from 'rxjs';
-import { useCallback, useEffect, RefObject } from 'react';
-import { filter, debounceTime } from 'rxjs/operators';
-
-import type { Chart } from '@elastic/charts';
-
+import { debounceTime, filter } from 'rxjs/operators';
+import { ActiveCursor } from './active_cursor';
 import { parseSyncOptions } from './active_cursor_utils';
-
-import type { ActiveCursor } from './active_cursor';
 import type { ActiveCursorSyncOption } from './types';
 
 const DEFAULT_DEBOUNCE_TIME = 40;

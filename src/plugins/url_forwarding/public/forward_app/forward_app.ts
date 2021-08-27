@@ -5,11 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { App, AppMountParameters, CoreSetup } from 'kibana/public';
-import { AppNavLinkStatus } from '../../../../core/public';
+import type { CoreSetup } from '../../../../core/public';
+import type { App, AppMountParameters } from '../../../../core/public/application/types';
+import { AppNavLinkStatus } from '../../../../core/public/application/types';
+import type { ForwardDefinition, UrlForwardingStart } from '../plugin';
 import { navigateToLegacyKibanaUrl } from './navigate_to_legacy_kibana_url';
-import { ForwardDefinition, UrlForwardingStart } from '../plugin';
 
 export const createLegacyUrlForwardApp = (
   core: CoreSetup<{}, UrlForwardingStart>,

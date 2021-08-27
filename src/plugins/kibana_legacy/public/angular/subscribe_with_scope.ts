@@ -5,10 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { IScope } from 'angular';
+import type { IScope } from 'angular';
 import * as Rx from 'rxjs';
-import { AngularHttpError } from '../notify/lib';
+import type { AngularHttpError } from '../notify/lib/format_angular_http_error';
 
 type FatalErrorFn = (error: AngularHttpError | Error | string, location?: string) => void;
 

@@ -5,18 +5,15 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { i18n } from '@kbn/i18n';
-import { TutorialsCategory } from '../../services/tutorials';
+import type { TutorialContext } from '../../services/tutorials/lib/tutorials_registry_types';
+import { TutorialsCategory } from '../../services/tutorials/lib/tutorials_registry_types';
+import type { TutorialSchema } from '../../services/tutorials/lib/tutorial_schema';
 import {
-  onPremInstructions,
   cloudInstructions,
   onPremCloudInstructions,
+  onPremInstructions,
 } from '../instructions/metricbeat_instructions';
-import {
-  TutorialContext,
-  TutorialSchema,
-} from '../../services/tutorials/lib/tutorials_registry_types';
 
 export function stanMetricsSpecProvider(context: TutorialContext): TutorialSchema {
   const moduleName = 'stan';

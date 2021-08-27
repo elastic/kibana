@@ -7,8 +7,8 @@
  */
 
 import _ from 'lodash';
-
-import { vislibColorMaps, RawColorSchema } from './color_maps';
+import type { RawColorSchema } from './color_maps';
+import { vislibColorMaps } from './color_maps';
 
 function enforceBounds(x: number) {
   if (x < 0) {

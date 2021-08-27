@@ -5,9 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { buildExpression, buildExpressionFunction } from '../../../../expressions/common';
-import { ExpressionFunctionGeoPoint, GeoPoint } from './geo_point';
+import { buildExpression } from '../../../../expressions/common/ast/build_expression';
+import { buildExpressionFunction } from '../../../../expressions/common/ast/build_function';
+import type { ExpressionFunctionGeoPoint, GeoPoint } from './geo_point';
 
 export const geoPointToAst = (point: GeoPoint) => {
   return buildExpression([

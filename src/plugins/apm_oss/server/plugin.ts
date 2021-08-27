@@ -5,10 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { Observable } from 'rxjs';
-import { Plugin, PluginInitializerContext } from 'src/core/server';
-import { APMOSSConfig } from './';
+import type { APMOSSConfig } from '.';
+import type { Plugin, PluginInitializerContext } from '../../../core/server/plugins/types';
 
 export class APMOSSPlugin implements Plugin<APMOSSPluginSetup> {
   constructor(private readonly initContext: PluginInitializerContext) {

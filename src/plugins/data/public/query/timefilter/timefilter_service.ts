@@ -5,12 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { IUiSettingsClient } from 'src/core/public';
-import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
-import { TimeHistory, Timefilter, TimeHistoryContract, TimefilterContract } from './index';
-import { UI_SETTINGS } from '../../../common';
-import { NowProviderInternalContract } from '../../now_provider';
+import type { IUiSettingsClient } from '../../../../../core/public/ui_settings/types';
+import type { IStorageWrapper } from '../../../../kibana_utils/public/storage/types';
+import { UI_SETTINGS } from '../../../common/constants';
+import type { NowProviderInternalContract } from '../../now_provider/now_provider';
+import type { TimefilterContract } from './timefilter';
+import { Timefilter } from './timefilter';
+import type { TimeHistoryContract } from './time_history';
+import { TimeHistory } from './time_history';
 
 /**
  * Filter Service

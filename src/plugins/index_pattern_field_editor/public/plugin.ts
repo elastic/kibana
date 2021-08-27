@@ -5,15 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { Plugin, CoreSetup, CoreStart } from 'src/core/public';
-
-import type { PluginSetup, PluginStart, SetupPlugins, StartPlugins } from './types';
+import type { CoreSetup, CoreStart } from '../../../core/public';
+import type { Plugin } from '../../../core/public/plugins/plugin';
+import { getDeleteFieldProvider } from './components/delete_field_provider';
+import { initApi } from './lib/api';
+import { getFieldDeleteModalOpener } from './open_delete_modal';
 import { getFieldEditorOpener } from './open_editor';
 import { FormatEditorService } from './service/format_editor_service';
-import { getDeleteFieldProvider } from './components/delete_field_provider';
-import { getFieldDeleteModalOpener } from './open_delete_modal';
-import { initApi } from './lib/api';
+import type { PluginSetup, PluginStart, SetupPlugins, StartPlugins } from './types';
 
 export class IndexPatternFieldEditorPlugin
   implements Plugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {

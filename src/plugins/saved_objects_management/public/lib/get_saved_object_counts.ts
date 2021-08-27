@@ -5,8 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { HttpStart, SavedObjectsFindOptionsReference } from 'src/core/public';
+import type { HttpStart } from '../../../../core/public/http/types';
+import type { SavedObjectsFindOptionsReference } from '../../../../core/server/saved_objects/types';
 
 export async function getSavedObjectCounts({
   http,

@@ -5,10 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { KbnError } from '../../../../../kibana_utils/common';
-import { IKibanaSearchResponse } from '../../types';
-import { SearchError } from './types';
+import { KbnError } from '../../../../../kibana_utils/common/errors/errors';
+import type { IKibanaSearchResponse } from '../../types';
+import type { SearchError } from './types';
 
 /**
  * Request Failure - When an entire multi request fails

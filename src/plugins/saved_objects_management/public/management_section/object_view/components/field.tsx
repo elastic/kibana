@@ -5,11 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import React, { PureComponent } from 'react';
-import { EuiFieldNumber, EuiFieldText, EuiFormRow, EuiSwitch, EuiCodeEditor } from '@elastic/eui';
+import { EuiCodeEditor, EuiFieldNumber, EuiFieldText, EuiFormRow, EuiSwitch } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { FieldState, FieldType } from '../../types';
+import React, { PureComponent } from 'react';
+import type { FieldState, FieldType } from '../../types';
 
 interface FieldProps {
   type: FieldType;

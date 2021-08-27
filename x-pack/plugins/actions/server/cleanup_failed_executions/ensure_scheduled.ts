@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { Logger } from 'kibana/server';
+import type { Logger } from '@kbn/logging';
+import { asInterval } from '../../../task_manager/server/lib/intervals';
+import type { TaskManagerStartContract } from '../../../task_manager/server/plugin';
+import type { ActionsConfig } from '../config';
 import { TASK_ID, TASK_TYPE } from './constants';
-import { ActionsConfig } from '../config';
-import { TaskManagerStartContract, asInterval } from '../../../task_manager/server';
 
 export async function ensureScheduled(
   taskManager: TaskManagerStartContract,

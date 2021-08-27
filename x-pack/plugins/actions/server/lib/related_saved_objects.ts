@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { schema, TypeOf } from '@kbn/config-schema';
-import { Logger } from '../../../../../src/core/server';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
+import type { Logger } from '@kbn/logging';
 
 export type RelatedSavedObjects = TypeOf<typeof RelatedSavedObjectsSchema>;
 

@@ -5,18 +5,18 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
-import { showOpenSearchPanel } from './show_open_search_panel';
+import { IndexPattern } from '../../../../../../../data/common/index_patterns/index_patterns/index_pattern';
+import type { ISearchSource } from '../../../../../../../data/common/search/search_source/types';
+import { unhashUrl } from '../../../../../../../kibana_utils/public/state_management/url/hash_unhash_url';
+import type { DiscoverServices } from '../../../../../build_services';
+import type { SavedSearch } from '../../../../../saved_searches/types';
+import type { GetStateReturn } from '../../services/discover_state';
 import { getSharingData, showPublicUrlSwitch } from '../../utils/get_sharing_data';
-import { unhashUrl } from '../../../../../../../kibana_utils/public';
-import { DiscoverServices } from '../../../../../build_services';
-import { SavedSearch } from '../../../../../saved_searches';
 import { onSaveSearch } from './on_save_search';
-import { GetStateReturn } from '../../services/discover_state';
-import { IndexPattern, ISearchSource } from '../../../../../kibana_services';
 import { openOptionsPopover } from './open_options_popover';
+import { showOpenSearchPanel } from './show_open_search_panel';
 
 /**
  * Helper function to build the top nav links

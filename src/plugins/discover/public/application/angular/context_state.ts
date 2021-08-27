@@ -5,19 +5,20 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import type { History } from 'history';
 import { isEqual } from 'lodash';
-import { History } from 'history';
-import { NotificationsStart, IUiSettingsClient } from 'kibana/public';
-import {
-  createStateContainer,
-  createKbnUrlStateStorage,
-  syncStates,
-  withNotifyOnErrors,
-  ReduxLikeStateContainer,
-} from '../../../../kibana_utils/public';
-import { esFilters, FilterManager, Filter, SortDirection } from '../../../../data/public';
-import { handleSourceColumnState } from './helpers';
+import type { NotificationsStart } from '../../../../../core/public/notifications/notifications_service';
+import type { IUiSettingsClient } from '../../../../../core/public/ui_settings/types';
+import type { Filter } from '../../../../data/common/es_query';
+import { SortDirection } from '../../../../data/common/search/search_source/types';
+import { esFilters } from '../../../../data/public/deprecated';
+import { FilterManager } from '../../../../data/public/query/filter_manager/filter_manager';
+import { createStateContainer } from '../../../../kibana_utils/common/state_containers/create_state_container';
+import type { ReduxLikeStateContainer } from '../../../../kibana_utils/common/state_containers/types';
+import { withNotifyOnErrors } from '../../../../kibana_utils/public/state_management/url/errors';
+import { syncStates } from '../../../../kibana_utils/public/state_sync/state_sync';
+import { createKbnUrlStateStorage } from '../../../../kibana_utils/public/state_sync/state_sync_state_storage/create_kbn_url_state_storage';
+import { handleSourceColumnState } from './helpers/state_helpers';
 
 export interface AppState {
   /**

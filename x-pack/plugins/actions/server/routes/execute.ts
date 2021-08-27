@@ -4,14 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { schema } from '@kbn/config-schema';
-import { IRouter } from 'kibana/server';
-import { ILicenseState } from '../lib';
-
-import { ActionTypeExecutorResult, ActionsRequestHandlerContext } from '../types';
-import { BASE_ACTION_API_PATH, RewriteResponseCase } from '../../common';
+import type { IRouter } from '../../../../../src/core/server/http/router/router';
+import { BASE_ACTION_API_PATH } from '../../common';
+import type { RewriteResponseCase } from '../../common/rewrite_request_case';
+import type { ActionTypeExecutorResult } from '../../common/types';
 import { asHttpRequestExecutionSource } from '../lib/action_execution_source';
+import type { ILicenseState } from '../lib/license_state';
+import type { ActionsRequestHandlerContext } from '../types';
 import { verifyAccessAndContext } from './verify_access_and_context';
 
 const paramSchema = schema.object({

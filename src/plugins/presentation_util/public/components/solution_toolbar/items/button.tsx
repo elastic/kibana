@@ -6,10 +6,9 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { EuiButton } from '@elastic/eui';
-import { EuiButtonPropsForButton } from '@elastic/eui/src/components/button/button';
-
+import type { EuiButtonPropsForButton } from '@elastic/eui/src/components/button/button';
+import React from 'react';
 import './button.scss';
 
 export interface Props

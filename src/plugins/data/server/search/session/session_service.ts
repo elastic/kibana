@@ -5,8 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { ISearchSessionService } from './types';
+import type { ISearchSessionService } from './types';
 
 /**
  * The OSS session service, which leaves most search session-related logic unimplemented.

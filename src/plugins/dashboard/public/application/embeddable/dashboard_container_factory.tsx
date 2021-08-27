@@ -5,24 +5,21 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { i18n } from '@kbn/i18n';
-import { EmbeddablePersistableStateService } from 'src/plugins/embeddable/common';
-
-import { DashboardContainerInput } from '../..';
-import { DASHBOARD_CONTAINER_TYPE } from './dashboard_constants';
-import { DashboardContainer, DashboardContainerServices } from './dashboard_container';
-import {
-  Container,
-  ErrorEmbeddable,
-  ContainerOutput,
-  EmbeddableFactory,
-  EmbeddableFactoryDefinition,
-} from '../../services/embeddable';
+import type { EmbeddablePersistableStateService } from '../../../../embeddable/common/types';
+import { Container } from '../../../../embeddable/public/lib/containers/container';
+import type { ContainerOutput } from '../../../../embeddable/public/lib/containers/i_container';
+import type { EmbeddableFactory } from '../../../../embeddable/public/lib/embeddables/embeddable_factory';
+import type { EmbeddableFactoryDefinition } from '../../../../embeddable/public/lib/embeddables/embeddable_factory_definition';
+import { ErrorEmbeddable } from '../../../../embeddable/public/lib/embeddables/error_embeddable';
 import {
   createExtract,
   createInject,
 } from '../../../common/embeddable/dashboard_container_persistable_state';
+import type { DashboardContainerInput } from '../../types';
+import { DASHBOARD_CONTAINER_TYPE } from './dashboard_constants';
+import type { DashboardContainerServices } from './dashboard_container';
+import { DashboardContainer } from './dashboard_container';
 
 export type DashboardContainerFactory = EmbeddableFactory<
   DashboardContainerInput,

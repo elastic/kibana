@@ -5,11 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { useMemo } from 'react';
 import { get } from 'lodash';
-
-import { FieldHook, FormHook } from '../types';
+import { useMemo } from 'react';
 import { useFormContext } from '../form_context';
+import type { FieldHook, FormHook } from '../types';
 import { useFormData } from './use_form_data';
 
 interface Options {

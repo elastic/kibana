@@ -5,18 +5,19 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import {
-  XYChartSeriesIdentifier,
-  GeometryValue,
-  XYBrushArea,
+import type {
   Accessor,
   AccessorFn,
   Datum,
+  GeometryValue,
+  XYBrushArea,
+  XYChartSeriesIdentifier,
 } from '@elastic/charts';
-
-import { RangeSelectContext, ValueClickContext } from '../../../../embeddable/public';
-import { Datatable } from '../../../../expressions/public';
+import type {
+  RangeSelectContext,
+  ValueClickContext,
+} from '../../../../embeddable/public/lib/triggers/triggers';
+import type { Datatable } from '../../../../expressions/common/expression_types/specs/datatable';
 
 export interface ClickTriggerEvent {
   name: 'filterBucket';

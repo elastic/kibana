@@ -5,13 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import React, { FunctionComponent } from 'react';
-import { i18n } from '@kbn/i18n';
-import { CoreStart } from 'kibana/public';
 import { EuiButton, EuiCard } from '@elastic/eui';
-import { useKibana } from '../../../context';
-import { NoDataPageActions, NO_DATA_RECOMMENDED } from '../no_data_page';
+import { i18n } from '@kbn/i18n';
+import type { FunctionComponent } from 'react';
+import React from 'react';
+import type { CoreStart } from '../../../../../../core/public';
+import { useKibana } from '../../../context/context';
+import type { NoDataPageActions } from '../no_data_page';
+import { NO_DATA_RECOMMENDED } from '../no_data_page';
 
 export type ElasticAgentCardProps = NoDataPageActions & {
   solution: string;

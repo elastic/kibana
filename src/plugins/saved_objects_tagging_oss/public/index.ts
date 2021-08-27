@@ -5,27 +5,24 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { PluginInitializerContext } from '../../../../src/core/public';
+import type { PluginInitializerContext } from '../../../core/public/plugins/plugin_context';
 import { SavedObjectTaggingOssPlugin } from './plugin';
 
-export { SavedObjectTaggingOssPluginSetup, SavedObjectTaggingOssPluginStart } from './types';
-
 export {
-  SavedObjectsTaggingApi,
-  SavedObjectsTaggingApiUi,
-  SavedObjectsTaggingApiUiComponent,
-  ITagsCache,
-  TagListComponentProps,
-  TagSelectorComponentProps,
   GetSearchBarFilterOptions,
+  ITagsCache,
   ParsedSearchQuery,
   ParseSearchQueryOptions,
   SavedObjectSaveModalTagSelectorComponentProps,
+  SavedObjectsTaggingApi,
+  SavedObjectsTaggingApiUi,
+  SavedObjectsTaggingApiUiComponent,
   SavedObjectTagDecoratorTypeGuard,
+  TagListComponentProps,
+  TagSelectorComponentProps,
 } from './api';
-
 export { TagDecoratedSavedObject } from './decorator';
+export { SavedObjectTaggingOssPluginSetup, SavedObjectTaggingOssPluginStart } from './types';
 
 export const plugin = (initializerContext: PluginInitializerContext) =>
   new SavedObjectTaggingOssPlugin(initializerContext);

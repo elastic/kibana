@@ -5,7 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { INDEX_ILLEGAL_CHARACTERS_VISIBLE } from '../constants';
 
 // Names beginning with periods are reserved for hidden indices.

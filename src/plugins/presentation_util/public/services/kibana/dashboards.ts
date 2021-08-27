@@ -5,10 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { PresentationUtilPluginStartDeps } from '../../types';
-import { KibanaPluginServiceFactory } from '../create';
-import { PresentationDashboardsService } from '../dashboards';
+import type { PresentationUtilPluginStartDeps } from '../../types';
+import type { KibanaPluginServiceFactory } from '../create/factory';
+import type { PresentationDashboardsService } from '../dashboards';
 
 export type DashboardsServiceFactory = KibanaPluginServiceFactory<
   PresentationDashboardsService,

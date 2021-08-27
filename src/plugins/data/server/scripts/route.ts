@@ -5,8 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { IRouter } from 'kibana/server';
+import type { IRouter } from '../../../../core/server/http/router/router';
 
 export function registerScriptsRoute(router: IRouter) {
   router.get(

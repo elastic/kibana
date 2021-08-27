@@ -5,13 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import type { RuntimeField } from '../types';
-import { KbnFieldType, getKbnFieldType, castEsToKbnFieldTypeName } from '../../kbn_field_types';
+import { castEsToKbnFieldTypeName, getKbnFieldType, KbnFieldType } from '../../kbn_field_types';
 import { KBN_FIELD_TYPES } from '../../kbn_field_types/types';
+import { shortenDottedString } from '../../utils/shorten_dotted_string';
+import { IndexPattern } from '../index_patterns/index_pattern';
+import type { FieldSpec, RuntimeField } from '../types';
 import type { IFieldType } from './types';
-import { FieldSpec, IndexPattern } from '../..';
-import { shortenDottedString } from '../../utils';
 
 /** @public */
 export class IndexPatternField implements IFieldType {

@@ -6,23 +6,27 @@
  * Side Public License, v 1.
  */
 
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import _ from 'lodash';
-import { Subject, BehaviorSubject } from 'rxjs';
 import moment from 'moment';
-import { PublicMethodsOf } from '@kbn/utility-types';
-import { areRefreshIntervalsDifferent, areTimeRangesDifferent } from './lib/diff_time_picker_vals';
-import { TimefilterConfig, InputTimeRange, TimeRangeBounds } from './types';
-import { NowProviderInternalContract } from '../../now_provider';
+import { BehaviorSubject, Subject } from 'rxjs';
+import type { IIndexPattern } from '../../../common/index_patterns/types';
 import {
   calculateBounds,
   getAbsoluteTimeRange,
   getTime,
-  IIndexPattern,
+} from '../../../common/query/timefilter/get_time';
+import type {
   RefreshInterval,
   TimeRange,
-} from '../../../common';
-import { TimeHistoryContract } from './time_history';
-import { createAutoRefreshLoop, AutoRefreshDoneFn } from './lib/auto_refresh_loop';
+  TimeRangeBounds,
+} from '../../../common/query/timefilter/types';
+import type { NowProviderInternalContract } from '../../now_provider/now_provider';
+import type { AutoRefreshDoneFn } from './lib/auto_refresh_loop';
+import { createAutoRefreshLoop } from './lib/auto_refresh_loop';
+import { areRefreshIntervalsDifferent, areTimeRangesDifferent } from './lib/diff_time_picker_vals';
+import type { TimeHistoryContract } from './time_history';
+import type { InputTimeRange, TimefilterConfig } from './types';
 
 export { AutoRefreshDoneFn };
 

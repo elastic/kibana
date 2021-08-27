@@ -5,9 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import type { SerializableRecord } from '@kbn/utility-types';
-import { LocatorDefinition, LocatorPublic } from 'src/plugins/share/common';
+import type {
+  LocatorDefinition,
+  LocatorPublic,
+} from '../../share/common/url_service/locators/types';
 import { MANAGEMENT_APP_ID } from './contants';
 
 export const MANAGEMENT_APP_LOCATOR = 'MANAGEMENT_APP_LOCATOR';

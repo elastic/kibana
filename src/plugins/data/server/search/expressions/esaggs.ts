@@ -5,19 +5,19 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import { defer } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
-import { i18n } from '@kbn/i18n';
-import { KibanaRequest, StartServicesAccessor } from 'src/core/server';
-import {
+import type { StartServicesAccessor } from '../../../../../core/server';
+import { KibanaRequest } from '../../../../../core/server/http/router/request';
+import type {
   EsaggsExpressionFunctionDefinition,
   EsaggsStartDependencies,
-  getEsaggsMeta,
-  handleEsaggsRequest,
-} from '../../../common/search/expressions';
-import { DataPluginStartDependencies, DataPluginStart } from '../../plugin';
+} from '../../../common/search/expressions/esaggs/esaggs_fn';
+import { getEsaggsMeta } from '../../../common/search/expressions/esaggs/esaggs_fn';
+import { handleEsaggsRequest } from '../../../common/search/expressions/esaggs/request_handler';
+import type { DataPluginStart, DataPluginStartDependencies } from '../../plugin';
 
 /**
  * Returns the expression function definition. Any stateful dependencies are accessed

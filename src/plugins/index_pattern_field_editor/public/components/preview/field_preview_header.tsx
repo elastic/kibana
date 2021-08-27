@@ -6,17 +6,16 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import {
-  EuiTitle,
-  EuiText,
-  EuiTextColor,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
+  EuiText,
+  EuiTextColor,
+  EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-
+import React from 'react';
 import { useFieldEditorContext } from '../field_editor_context';
 import { useFieldPreviewContext } from './field_preview_context';
 

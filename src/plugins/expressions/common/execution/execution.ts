@@ -5,7 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { i18n } from '@kbn/i18n';
 import { isPromise } from '@kbn/std';
 import { keys, last, mapValues, reduce, zipObject } from 'lodash';
@@ -14,36 +13,41 @@ import {
   defer,
   from,
   isObservable,
+  Observable,
   of,
   race,
-  throwError,
-  Observable,
   ReplaySubject,
+  throwError,
 } from 'rxjs';
 import { catchError, finalize, map, pluck, shareReplay, switchMap, tap } from 'rxjs/operators';
-import { Executor } from '../executor';
-import { createExecutionContainer, ExecutionContainer } from './container';
-import { createError } from '../util';
-import { abortSignalToPromise, now } from '../../../kibana_utils/common';
-import { RequestAdapter, Adapters } from '../../../inspector/common';
-import { isExpressionValueError, ExpressionValueError } from '../expression_types/specs/error';
-import {
+import { RequestAdapter } from '../../../inspector/common/adapters/request/request_adapter';
+import type { Adapters } from '../../../inspector/common/adapters/types';
+import { abortSignalToPromise } from '../../../kibana_utils/common/abort_utils';
+import { now } from '../../../kibana_utils/common/now';
+import { formatExpression } from '../ast/format_expression';
+import { parse } from '../ast/parse';
+import { parseExpression } from '../ast/parse_expression';
+import type {
   ExpressionAstArgument,
   ExpressionAstExpression,
   ExpressionAstFunction,
-  parse,
-  formatExpression,
-  parseExpression,
   ExpressionAstNode,
-} from '../ast';
-import { ExecutionContext, DefaultInspectorAdapters } from './types';
-import { getType, Datatable } from '../expression_types';
-import { ExpressionFunction } from '../expression_functions';
-import { getByAlias } from '../util/get_by_alias';
-import { ExecutionContract } from './execution_contract';
-import { ExpressionExecutionParams } from '../service';
-import { TablesAdapter } from '../util/tables_adapter';
+} from '../ast/types';
+import { Executor } from '../executor/executor';
+import { ExpressionFunction } from '../expression_functions/expression_function';
+import { getType } from '../expression_types/get_type';
+import type { Datatable } from '../expression_types/specs/datatable';
+import type { ExpressionValueError } from '../expression_types/specs/error';
+import { isExpressionValueError } from '../expression_types/specs/error';
+import type { ExpressionExecutionParams } from '../service/expressions_services';
+import { createError } from '../util/create_error';
 import { ExpressionsInspectorAdapter } from '../util/expressions_inspector_adapter';
+import { getByAlias } from '../util/get_by_alias';
+import { TablesAdapter } from '../util/tables_adapter';
+import type { ExecutionContainer } from './container';
+import { createExecutionContainer } from './container';
+import { ExecutionContract } from './execution_contract';
+import type { DefaultInspectorAdapters, ExecutionContext } from './types';
 
 /**
  * The result returned after an expression function execution.

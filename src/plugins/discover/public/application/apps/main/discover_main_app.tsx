@@ -5,16 +5,18 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import type { History } from 'history';
 import React, { useCallback, useEffect } from 'react';
-import { History } from 'history';
-import { DiscoverLayout } from './components/layout';
-import { setBreadcrumbsTitle } from '../../helpers/breadcrumbs';
+import type { SavedObject } from '../../../../../../core/types/saved_objects';
+import { IndexPattern } from '../../../../../data/common/index_patterns/index_patterns/index_pattern';
+import type { IndexPatternAttributes } from '../../../../../data/common/index_patterns/types';
+import type { DiscoverServices } from '../../../build_services';
+import type { SavedSearch } from '../../../saved_searches/types';
 import { addHelpMenuToAppChrome } from '../../components/help_menu/help_menu_util';
+import { setBreadcrumbsTitle } from '../../helpers/breadcrumbs';
+import { DiscoverLayout } from './components/layout/discover_layout';
 import { useDiscoverState } from './services/use_discover_state';
 import { useUrl } from './services/use_url';
-import { IndexPattern, IndexPatternAttributes, SavedObject } from '../../../../../data/common';
-import { DiscoverServices } from '../../../build_services';
-import { SavedSearch } from '../../../saved_searches';
 
 const DiscoverLayoutMemoized = React.memo(DiscoverLayout);
 

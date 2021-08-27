@@ -5,11 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { Setup as PluginSetup, Start as PluginStart } from '.';
-import { InspectorViewRegistry } from './view_registry';
 import { plugin as pluginInitializer } from '.';
 import { coreMock } from '../../../core/public/mocks';
+import type { Setup as PluginSetup, Start as PluginStart } from './plugin';
+import { InspectorViewRegistry } from './view_registry';
 
 export type Setup = jest.Mocked<PluginSetup>;
 export type Start = jest.Mocked<PluginStart>;

@@ -5,7 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { indexPatterns } from '../../../../data/public';
 
 export const INDEX_ILLEGAL_CHARACTERS_VISIBLE = [...indexPatterns.ILLEGAL_CHARACTERS_VISIBLE, '*'];

@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ApplicationStart } from 'kibana/public';
-import { RedirectAppLinks } from '../../app_links';
+import React from 'react';
+import type { ApplicationStart } from '../../../../../core/public/application/types';
+import { RedirectAppLinks } from '../../app_links/redirect_app_link';
 
 interface Props {
   addBasePath: (path: string) => string;

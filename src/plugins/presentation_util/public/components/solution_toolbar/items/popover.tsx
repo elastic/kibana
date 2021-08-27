@@ -5,12 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import React, { useState } from 'react';
 import { EuiPopover } from '@elastic/eui';
-import { Props as EuiPopoverProps } from '@elastic/eui/src/components/popover/popover';
-
-import { SolutionToolbarButton, Props as ButtonProps } from './button';
+import type { Props as EuiPopoverProps } from '@elastic/eui/src/components/popover/popover';
+import React, { useState } from 'react';
+import type { Props as ButtonProps } from './button';
+import { SolutionToolbarButton } from './button';
 
 type AllowedButtonProps = Omit<ButtonProps, 'onClick' | 'fill'>;
 type AllowedPopoverProps = Omit<

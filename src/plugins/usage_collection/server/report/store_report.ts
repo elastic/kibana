@@ -5,14 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { ISavedObjectsRepository } from 'src/core/server';
-import moment from 'moment';
 import { chain, sumBy } from 'lodash';
-import { ReportSchemaType } from './schema';
-import { storeApplicationUsage } from './store_application_usage';
-import { UsageCounter } from '../usage_counters';
+import moment from 'moment';
+import type { ISavedObjectsRepository } from '../../../../core/server/saved_objects/service/lib/repository';
 import { serializeUiCounterName } from '../../common/ui_counters';
+import type { IUsageCounter as UsageCounter } from '../usage_counters/usage_counter';
+import type { ReportSchemaType } from './schema';
+import { storeApplicationUsage } from './store_application_usage';
 
 export async function storeReport(
   internalRepository: ISavedObjectsRepository,

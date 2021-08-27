@@ -5,11 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { first } from 'rxjs/operators';
 import { schema } from '@kbn/config-schema';
-import { getRequestAbortedSignal } from '../../lib';
-import { reportServerError } from '../../../../kibana_utils/server';
+import { first } from 'rxjs/operators';
+import { reportServerError } from '../../../../kibana_utils/server/report_server_error';
+import { getRequestAbortedSignal } from '../../lib/get_request_aborted_signal';
 import type { DataPluginRouter } from '../types';
 
 export function registerSearchRoute(router: DataPluginRouter): void {

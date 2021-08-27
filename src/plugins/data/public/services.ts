@@ -5,11 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { NotificationsStart, CoreStart } from 'src/core/public';
-import { createGetterSetter } from '../../kibana_utils/public';
-import { IndexPatternsContract } from './index_patterns';
-import { DataPublicPluginStart } from './types';
+import type { CoreStart } from '../../../core/public';
+import type { NotificationsStart } from '../../../core/public/notifications/notifications_service';
+import { createGetterSetter } from '../../kibana_utils/common/create_getter_setter';
+import type { IndexPatternsContract } from '../common/index_patterns/index_patterns/index_patterns';
+import type { DataPublicPluginStart } from './types';
 
 export const [getNotifications, setNotifications] = createGetterSetter<NotificationsStart>(
   'Notifications'

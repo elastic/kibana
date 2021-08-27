@@ -5,28 +5,28 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { schema } from '@kbn/config-schema';
-import { HttpServiceSetup, RequestHandlerContext, StartServicesAccessor } from 'kibana/server';
-import { IndexPatternsFetcher } from './fetcher';
-import { registerCreateIndexPatternRoute } from './routes/create_index_pattern';
-import { registerGetIndexPatternRoute } from './routes/get_index_pattern';
-import { registerDeleteIndexPatternRoute } from './routes/delete_index_pattern';
-import { registerUpdateIndexPatternRoute } from './routes/update_index_pattern';
-import { registerUpdateFieldsRoute } from './routes/fields/update_fields';
-import { registerCreateScriptedFieldRoute } from './routes/scripted_fields/create_scripted_field';
-import { registerPutScriptedFieldRoute } from './routes/scripted_fields/put_scripted_field';
-import { registerGetScriptedFieldRoute } from './routes/scripted_fields/get_scripted_field';
-import { registerDeleteScriptedFieldRoute } from './routes/scripted_fields/delete_scripted_field';
-import { registerUpdateScriptedFieldRoute } from './routes/scripted_fields/update_scripted_field';
+import type { RequestHandlerContext, StartServicesAccessor } from '../../../../core/server';
+import type { HttpServiceSetup } from '../../../../core/server/http/types';
 import type { DataPluginStart, DataPluginStartDependencies } from '../plugin';
+import { IndexPatternsFetcher } from './fetcher/index_patterns_fetcher';
+import { registerCreateIndexPatternRoute } from './routes/create_index_pattern';
 import { registerManageDefaultIndexPatternRoutes } from './routes/default_index_pattern';
+import { registerDeleteIndexPatternRoute } from './routes/delete_index_pattern';
+import { registerUpdateFieldsRoute } from './routes/fields/update_fields';
+import { registerGetIndexPatternRoute } from './routes/get_index_pattern';
+import { registerHasUserIndexPatternRoute } from './routes/has_user_index_pattern';
 import { registerCreateRuntimeFieldRoute } from './routes/runtime_fields/create_runtime_field';
-import { registerGetRuntimeFieldRoute } from './routes/runtime_fields/get_runtime_field';
 import { registerDeleteRuntimeFieldRoute } from './routes/runtime_fields/delete_runtime_field';
+import { registerGetRuntimeFieldRoute } from './routes/runtime_fields/get_runtime_field';
 import { registerPutRuntimeFieldRoute } from './routes/runtime_fields/put_runtime_field';
 import { registerUpdateRuntimeFieldRoute } from './routes/runtime_fields/update_runtime_field';
-import { registerHasUserIndexPatternRoute } from './routes/has_user_index_pattern';
+import { registerCreateScriptedFieldRoute } from './routes/scripted_fields/create_scripted_field';
+import { registerDeleteScriptedFieldRoute } from './routes/scripted_fields/delete_scripted_field';
+import { registerGetScriptedFieldRoute } from './routes/scripted_fields/get_scripted_field';
+import { registerPutScriptedFieldRoute } from './routes/scripted_fields/put_scripted_field';
+import { registerUpdateScriptedFieldRoute } from './routes/scripted_fields/update_scripted_field';
+import { registerUpdateIndexPatternRoute } from './routes/update_index_pattern';
 
 export function registerRoutes(
   http: HttpServiceSetup,

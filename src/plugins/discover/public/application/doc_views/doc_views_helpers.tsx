@@ -5,13 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { auto, IController } from 'angular';
+import type { ICompileService, IController } from 'angular';
+import angular, { auto } from 'angular';
 import React from 'react';
 import { render } from 'react-dom';
-import angular, { ICompileService } from 'angular';
-import { DocViewRenderProps, AngularScope, AngularDirective } from './doc_views_types';
 import { DocViewerError } from '../components/doc_viewer/doc_viewer_render_error';
+import type { AngularDirective, AngularScope, DocViewRenderProps } from './doc_views_types';
 
 /**
  * Compiles and injects the give angular template into the given dom node

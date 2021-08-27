@@ -5,11 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
-import { CoreStart } from 'kibana/public';
-import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
+import React from 'react';
+import type { CoreStart } from '../../../../../core/public';
 
 export const SearchSessionIncompleteWarning = (docLinks: CoreStart['docLinks']) => (
   <>

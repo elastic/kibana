@@ -5,10 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { get } from 'lodash';
-import { CollectorFetchContext } from 'src/plugins/usage_collection/server';
-import { DEFAULT_QUERY_LANGUAGE, UI_SETTINGS } from '../../../common';
+import type { CollectorFetchContext } from '../../../../usage_collection/server/collector/types';
+import { DEFAULT_QUERY_LANGUAGE, UI_SETTINGS } from '../../../common/constants';
 
 const defaultSearchQueryLanguageSetting = DEFAULT_QUERY_LANGUAGE;
 

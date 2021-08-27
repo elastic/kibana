@@ -5,9 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { ValueSuggestionsMethod } from '../../../common';
-import { IFieldType, IIndexPattern } from '../../../common/index_patterns';
+import type { ValueSuggestionsMethod } from '../../../common/constants';
+import type { IFieldType } from '../../../common/index_patterns/fields/types';
+import type { IIndexPattern } from '../../../common/index_patterns/types';
 
 export enum QuerySuggestionTypes {
   Field = 'field',

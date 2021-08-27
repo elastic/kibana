@@ -5,17 +5,16 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useCallback } from 'react';
-import { i18n } from '@kbn/i18n';
 import {
+  EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiFieldText,
-  EuiButtonIcon,
-  EuiButtonEmpty,
 } from '@elastic/eui';
-
+import { i18n } from '@kbn/i18n';
+import React, { useCallback } from 'react';
 import { useFieldPreviewContext } from './field_preview_context';
 
 export const DocumentsNavPreview = () => {

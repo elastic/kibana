@@ -5,12 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { once, debounce } from 'lodash';
-import type { CoreSetup, Logger } from 'kibana/server';
-import type { IEsSearchResponse, ISearchOptions } from '../../../common';
-import { isCompleteResponse } from '../../../common';
-import { CollectedUsage } from './register';
+import type { Logger } from '@kbn/logging';
+import { debounce, once } from 'lodash';
+import type { CoreSetup } from '../../../../../core/server';
+import type { IEsSearchResponse } from '../../../common/search/strategies/es_search/types';
+import type { ISearchOptions } from '../../../common/search/types';
+import { isCompleteResponse } from '../../../common/search/utils';
+import type { CollectedUsage } from './register';
 
 const SAVED_OBJECT_ID = 'search-telemetry';
 

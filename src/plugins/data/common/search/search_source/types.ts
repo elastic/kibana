@@ -5,11 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { estypes } from '@elastic/elasticsearch';
-import { IAggConfigs } from 'src/plugins/data/public';
-import { Query } from '../..';
-import { Filter } from '../../es_query';
-import { IndexPattern } from '../../index_patterns';
+import { estypes } from '@elastic/elasticsearch';
+import type { Query } from '../..';
+import type { Filter } from '../../es_query';
+import { IndexPattern } from '../../index_patterns/index_patterns/index_pattern';
+import type { IAggConfigs } from '../aggs/agg_configs';
 import { SearchSource } from './search_source';
 
 /**

@@ -5,17 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { i18n } from '@kbn/i18n';
 import { filter } from 'rxjs/operators';
-import {
-  DataPublicPluginStart,
-  isCompleteResponse,
-  SearchSource,
-} from '../../../../../../data/public';
-import { Adapters } from '../../../../../../inspector/common';
+import { SearchSource } from '../../../../../../data/common/search/search_source/search_source';
+import { isCompleteResponse } from '../../../../../../data/common/search/utils';
+import type { DataPublicPluginStart } from '../../../../../../data/public/types';
+import type { Adapters } from '../../../../../../inspector/common/adapters/types';
 import { FetchStatus } from '../../../types';
-import { SavedSearchData } from '../services/use_saved_search';
+import type { SavedSearchData } from '../services/use_saved_search';
 import { sendErrorMsg, sendLoadingMsg } from '../services/use_saved_search_messages';
 
 export function fetchTotalHits(

@@ -5,16 +5,15 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { catchError, first } from 'rxjs/operators';
-import { BfetchServerSetup } from 'src/plugins/bfetch/server';
-import type { ExecutionContextSetup } from 'src/core/server';
-import {
+import type { ExecutionContextSetup } from '../../../../../core/server/execution_context/execution_context_service';
+import type { BfetchServerSetup } from '../../../../bfetch/server/plugin';
+import type {
   IKibanaSearchRequest,
   IKibanaSearchResponse,
   ISearchOptionsSerializable,
-} from '../../../common/search';
-import { ISearchStart } from '../types';
+} from '../../../common/search/types';
+import type { ISearchStart } from '../types';
 
 export function registerBsearchRoute(
   bfetch: BfetchServerSetup,

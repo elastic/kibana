@@ -7,9 +7,8 @@
  */
 
 import React from 'react';
-
-import { SolutionToolbarButton, Props as SolutionToolbarButtonProps } from './button';
-
+import type { Props as SolutionToolbarButtonProps } from './button';
+import { SolutionToolbarButton } from './button';
 import './primary_button.scss';
 
 export interface Props extends Omit<SolutionToolbarButtonProps, 'primary'> {

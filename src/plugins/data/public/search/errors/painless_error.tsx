@@ -6,15 +6,16 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import { EuiButton, EuiCodeBlock, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EuiButton, EuiSpacer, EuiText, EuiCodeBlock } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { ApplicationStart } from 'kibana/public';
-import { IEsError, isEsError } from './types';
+import React from 'react';
+import type { ApplicationStart } from '../../../../../core/public/application/types';
+import { IndexPattern } from '../../../common/index_patterns/index_patterns/index_pattern';
 import { EsError } from './es_error';
+import type { IEsError } from './types';
+import { isEsError } from './types';
 import { getRootCause } from './utils';
-import { IndexPattern } from '../..';
 
 export class PainlessError extends EsError {
   painlessStack?: string;

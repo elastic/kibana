@@ -5,15 +5,15 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import type { SerializableRecord } from '@kbn/utility-types';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import type { KibanaRequest } from 'src/core/server';
-import type { KibanaExecutionContext } from 'src/core/public';
-
-import { ExpressionType } from '../expression_types';
-import { Adapters, RequestAdapter } from '../../../inspector/common';
+import { KibanaRequest } from '../../../../core/server/http/router/request';
+import type { KibanaExecutionContext } from '../../../../core/types/execution_context';
+import { RequestAdapter } from '../../../inspector/common/adapters/request/request_adapter';
+import type { Adapters } from '../../../inspector/common/adapters/types';
+import { ExpressionType } from '../expression_types/expression_type';
 import { TablesAdapter } from '../util/tables_adapter';
+
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 
 /**
  * `ExecutionContext` is an object available to all functions during a single execution;

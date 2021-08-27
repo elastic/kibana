@@ -6,24 +6,18 @@
  * Side Public License, v 1.
  */
 
-import './no_data_page.scss';
-
-import React, { ReactNode, useMemo, FunctionComponent, MouseEventHandler } from 'react';
-import {
-  EuiFlexItem,
-  EuiCardProps,
-  EuiFlexGrid,
-  EuiSpacer,
-  EuiText,
-  EuiTextColor,
-  EuiLink,
-} from '@elastic/eui';
+import type { EuiCardProps } from '@elastic/eui';
+import { EuiFlexGrid, EuiFlexItem, EuiLink, EuiSpacer, EuiText, EuiTextColor } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { KibanaPageTemplateProps } from '../page_template';
-
-import { ElasticAgentCard, ElasticBeatsCard, NoDataCard } from './no_data_card';
-import { KibanaPageTemplateSolutionNavAvatar } from '../solution_nav';
+import type { FunctionComponent, MouseEventHandler, ReactNode } from 'react';
+import React, { useMemo } from 'react';
+import type { KibanaPageTemplateProps } from '../page_template';
+import { KibanaPageTemplateSolutionNavAvatar } from '../solution_nav/solution_nav_avatar';
+import { ElasticAgentCard } from './no_data_card/elastic_agent_card';
+import { ElasticBeatsCard } from './no_data_card/elastic_beats_card';
+import { NoDataCard } from './no_data_card/no_data_card';
+import './no_data_page.scss';
 
 export const NO_DATA_PAGE_MAX_WIDTH = 950;
 export const NO_DATA_PAGE_TEMPLATE_PROPS: KibanaPageTemplateProps = {

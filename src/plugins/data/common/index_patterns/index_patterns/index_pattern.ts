@@ -5,20 +5,30 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import _, { each, reject } from 'lodash';
-import { FieldAttrs, FieldAttrSet, IndexPatternAttributes } from '../..';
-import type { RuntimeField } from '../types';
-import { DuplicateField } from '../../../../kibana_utils/common';
-
-import { ES_FIELD_TYPES, KBN_FIELD_TYPES, IIndexPattern, IFieldType } from '../../../common';
-import { IndexPatternField, IIndexPatternFieldList, fieldList } from '../fields';
-import { formatHitProvider } from './format_hit';
-import { flattenHitWrapper } from './flatten_hit';
-import { FieldFormatsStartCommon, FieldFormat } from '../../../../field_formats/common';
-import { IndexPatternSpec, TypeMeta, SourceFilter, IndexPatternFieldMap } from '../types';
-import { SerializedFieldFormat } from '../../../../expressions/common';
+import type { SerializedFieldFormat } from '../../../../expressions/common/types/common';
+import { FieldFormat } from '../../../../field_formats/common/field_format';
+import type { FieldFormatsStartCommon } from '../../../../field_formats/common/types';
+import { DuplicateField } from '../../../../kibana_utils/common/errors/errors';
+import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '../../../common';
 import { castEsToKbnFieldTypeName } from '../../kbn_field_types';
+import type { IIndexPatternFieldList } from '../fields/field_list';
+import { fieldList } from '../fields/field_list';
+import { IndexPatternField } from '../fields/index_pattern_field';
+import type { IFieldType } from '../fields/types';
+import type {
+  FieldAttrs,
+  FieldAttrSet,
+  IIndexPattern,
+  IndexPatternAttributes,
+  IndexPatternFieldMap,
+  IndexPatternSpec,
+  RuntimeField,
+  SourceFilter,
+  TypeMeta,
+} from '../types';
+import { flattenHitWrapper } from './flatten_hit';
+import { formatHitProvider } from './format_hit';
 
 interface IndexPatternDeps {
   spec?: IndexPatternSpec;

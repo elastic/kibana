@@ -5,15 +5,15 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import React, { Fragment } from 'react';
-import './field_name.scss';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { FieldIcon, FieldIconProps } from '../../../../../kibana_react/public';
+import { FormattedMessage } from '@kbn/i18n/react';
+import React, { Fragment } from 'react';
+import { IndexPatternField } from '../../../../../data/common/index_patterns/fields/index_pattern_field';
+import type { FieldIconProps } from '../../../../../kibana_react/public/field_icon/field_icon';
+import { FieldIcon } from '../../../../../kibana_react/public/field_icon/field_icon';
+import './field_name.scss';
 import { getFieldTypeName } from './field_type_name';
-import { IndexPatternField } from '../../../../../data/public';
 
 // properties fieldType and fieldName are provided in kbn_doc_view
 // this should be changed when both components are deangularized

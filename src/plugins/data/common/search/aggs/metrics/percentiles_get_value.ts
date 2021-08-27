@@ -5,9 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { find } from 'lodash';
-import { IResponseAggConfig } from './lib/get_response_agg_config_class';
+import type { IResponseAggConfig } from './lib/get_response_agg_config_class';
 
 export const getPercentileValue = <TAggConfig extends IResponseAggConfig>(
   agg: TAggConfig,

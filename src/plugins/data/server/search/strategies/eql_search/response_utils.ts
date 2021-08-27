@@ -5,10 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { ApiResponse } from '@elastic/elasticsearch';
-import { EqlSearchResponse } from './types';
-import { EqlSearchStrategyResponse } from '../../../../common';
+import type { ApiResponse } from '@elastic/elasticsearch';
+import type { EqlSearchStrategyResponse } from '../../../../common/search/strategies/eql_search/types';
+import type { EqlSearchResponse } from './types';
 
 /**
  * Get the Kibana representation of an EQL search response (see `IKibanaSearchResponse`).

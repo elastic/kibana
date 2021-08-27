@@ -5,13 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import React, { Component } from 'react';
-import { memoize } from 'lodash';
-import PropTypes from 'prop-types';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { i18n } from '@kbn/i18n';
-
 import {
   EuiButton,
   EuiContextMenuItem,
@@ -19,11 +12,17 @@ import {
   EuiPopover,
   EuiToolTip,
 } from '@elastic/eui';
-import { CSV_MIME_TYPE, datatableToCSV, tableHasFormulas } from '../../../../common';
-import { Datatable } from '../../../../../expressions';
-import { downloadMultipleAs } from '../../../../../share/public';
-import { FieldFormatsStart } from '../../../../../field_formats/public';
-import { IUiSettingsClient } from '../../../../../../core/public';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { memoize } from 'lodash';
+import PropTypes from 'prop-types';
+import React, { Component } from 'react';
+import type { IUiSettingsClient } from '../../../../../../core/public/ui_settings/types';
+import type { Datatable } from '../../../../../expressions/common/expression_types/specs/datatable';
+import type { FieldFormatsStart } from '../../../../../field_formats/public/plugin';
+import { downloadMultipleAs } from '../../../../../share/public/lib/download_as';
+import { CSV_MIME_TYPE, datatableToCSV } from '../../../../common/exports/export_csv';
+import { tableHasFormulas } from '../../../../common/exports/formula_checks';
 
 interface DataDownloadOptionsState {
   isPopoverOpen: boolean;

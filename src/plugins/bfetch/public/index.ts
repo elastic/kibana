@@ -5,14 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { PluginInitializerContext } from '../../../core/public';
+import type { PluginInitializerContext } from '../../../core/public/plugins/plugin_context';
 import { BfetchPublicPlugin } from './plugin';
 
-export { BfetchPublicSetup, BfetchPublicStart, BfetchPublicContract } from './plugin';
-export { split } from './streaming';
-
 export { BatchedFunc } from './batching/types';
+export { BfetchPublicContract, BfetchPublicSetup, BfetchPublicStart } from './plugin';
+export { split } from './streaming';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new BfetchPublicPlugin(initializerContext);

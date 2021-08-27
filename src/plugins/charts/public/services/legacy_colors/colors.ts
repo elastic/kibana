@@ -7,11 +7,9 @@
  */
 
 import _ from 'lodash';
-
-import { CoreSetup } from 'kibana/public';
-
-import { MappedColors } from '../mapped_colors';
-import { seedColors } from '../../static/colors';
+import type { CoreSetup } from '../../../../../core/public';
+import { seedColors } from '../../static/colors/seed_colors';
+import { MappedColors } from '../mapped_colors/mapped_colors';
 
 /**
  * Accepts an array of strings or numbers that are used to create a

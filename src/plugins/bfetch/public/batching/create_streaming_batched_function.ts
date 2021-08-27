@@ -5,18 +5,16 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { Observable, of } from 'rxjs';
-import { AbortError, abortSignalToPromise, defer } from '../../../kibana_utils/public';
-import {
-  ItemBufferParams,
-  TimedItemBufferParams,
-  createBatchedFunction,
-  ErrorLike,
-  normalizeError,
-} from '../../common';
-import { fetchStreaming } from '../streaming';
-import { BatchedFunc, BatchItem } from './types';
+import { AbortError, abortSignalToPromise } from '../../../kibana_utils/common/abort_utils';
+import { defer } from '../../../kibana_utils/common/defer';
+import type { ErrorLike } from '../../common/batch';
+import { createBatchedFunction } from '../../common/buffer/create_batched_function';
+import type { ItemBufferParams } from '../../common/buffer/item_buffer';
+import type { TimedItemBufferParams } from '../../common/buffer/timed_item_buffer';
+import { normalizeError } from '../../common/util/normalize_error';
+import { fetchStreaming } from '../streaming/fetch_streaming';
+import type { BatchedFunc, BatchItem } from './types';
 
 export interface BatchedFunctionProtocolError extends ErrorLike {
   code: string;

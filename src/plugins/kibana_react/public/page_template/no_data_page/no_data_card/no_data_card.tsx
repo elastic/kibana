@@ -5,10 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import React, { FunctionComponent } from 'react';
-import { EuiButton, EuiCard, EuiCardProps } from '@elastic/eui';
-import { NoDataPageActions, NO_DATA_RECOMMENDED } from '../no_data_page';
+import type { EuiCardProps } from '@elastic/eui';
+import { EuiButton, EuiCard } from '@elastic/eui';
+import type { FunctionComponent } from 'react';
+import React from 'react';
+import type { NoDataPageActions } from '../no_data_page';
+import { NO_DATA_RECOMMENDED } from '../no_data_page';
 
 // Custom cards require all the props the EuiCard does
 type NoDataCard = EuiCardProps & NoDataPageActions;

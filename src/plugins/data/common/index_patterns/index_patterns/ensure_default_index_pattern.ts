@@ -5,10 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { includes } from 'lodash';
-import { IndexPatternsContract } from './index_patterns';
-import { UiSettingsCommon } from '../types';
+import type { UiSettingsCommon } from '../types';
+import type { IndexPatternsContract } from './index_patterns';
 
 export type EnsureDefaultIndexPattern = () => Promise<unknown> | undefined;
 

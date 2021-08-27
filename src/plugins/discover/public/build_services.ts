@@ -5,37 +5,31 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { History } from 'history';
-
-import type { auto } from 'angular';
-import {
-  Capabilities,
-  ChromeStart,
-  CoreStart,
-  DocLinksStart,
-  ToastsStart,
-  IUiSettingsClient,
-  PluginInitializerContext,
-} from 'kibana/public';
-import {
-  FilterManager,
-  TimefilterContract,
-  IndexPatternsContract,
-  DataPublicPluginStart,
-} from 'src/plugins/data/public';
-import { Start as InspectorPublicPluginStart } from 'src/plugins/inspector/public';
-import { SharePluginStart } from 'src/plugins/share/public';
-import { ChartsPluginStart } from 'src/plugins/charts/public';
-
-import { UiCounterMetricType } from '@kbn/analytics';
-import { DiscoverStartPlugins } from './plugin';
-import { createSavedSearchesLoader, SavedSearch } from './saved_searches';
+import type { UiCounterMetricType } from '@kbn/analytics';
+import { auto } from 'angular';
+import type { History } from 'history';
+import type { CoreStart } from '../../../core/public';
+import type { ChromeStart } from '../../../core/public/chrome/types';
+import type { DocLinksStart } from '../../../core/public/doc_links/doc_links_service';
+import type { ToastsStart } from '../../../core/public/notifications/toasts/toasts_service';
+import type { PluginInitializerContext } from '../../../core/public/plugins/plugin_context';
+import type { IUiSettingsClient } from '../../../core/public/ui_settings/types';
+import type { Capabilities } from '../../../core/types/capabilities';
+import type { ChartsPluginStart } from '../../charts/public/plugin';
+import type { IndexPatternsContract } from '../../data/common/index_patterns/index_patterns/index_patterns';
+import { FilterManager } from '../../data/public/query/filter_manager/filter_manager';
+import type { TimefilterContract } from '../../data/public/query/timefilter/timefilter';
+import type { DataPublicPluginStart } from '../../data/public/types';
+import type { PluginStart as IndexPatternFieldEditorStart } from '../../index_pattern_field_editor/public/types';
+import type { Start as InspectorPublicPluginStart } from '../../inspector/public/plugin';
+import type { KibanaLegacyStart } from '../../kibana_legacy/public/plugin';
+import type { NavigationPublicPluginStart } from '../../navigation/public/types';
+import type { SharePluginStart } from '../../share/public/plugin';
+import type { UrlForwardingStart } from '../../url_forwarding/public/plugin';
 import { getHistory } from './kibana_services';
-import { KibanaLegacyStart } from '../../kibana_legacy/public';
-import { UrlForwardingStart } from '../../url_forwarding/public';
-import { NavigationPublicPluginStart } from '../../navigation/public';
-import { IndexPatternFieldEditorStart } from '../../index_pattern_field_editor/public';
+import type { DiscoverStartPlugins } from './plugin';
+import { createSavedSearchesLoader } from './saved_searches/saved_searches';
+import type { SavedSearch } from './saved_searches/types';
 
 export interface DiscoverServices {
   addBasePath: (path: string) => string;

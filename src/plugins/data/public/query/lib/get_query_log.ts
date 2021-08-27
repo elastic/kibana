@@ -5,11 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { IUiSettingsClient } from 'src/core/public';
-import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
-import { PersistedLog } from '../persisted_log';
-import { UI_SETTINGS } from '../../../common';
+import type { IUiSettingsClient } from '../../../../../core/public/ui_settings/types';
+import type { IStorageWrapper } from '../../../../kibana_utils/public/storage/types';
+import { UI_SETTINGS } from '../../../common/constants';
+import { PersistedLog } from '../persisted_log/persisted_log';
 
 /** @internal */
 export function getQueryLog(

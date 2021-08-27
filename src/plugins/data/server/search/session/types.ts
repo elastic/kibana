@@ -5,17 +5,16 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import {
-  CoreStart,
-  KibanaRequest,
-  SavedObject,
-  SavedObjectsFindOptions,
+import type { CoreStart } from '../../../../../core/server';
+import { KibanaRequest } from '../../../../../core/server/http/router/request';
+import type {
   SavedObjectsFindResponse,
   SavedObjectsUpdateResponse,
-} from 'kibana/server';
-import { IKibanaSearchRequest, ISearchOptions } from '../../../common/search';
-import { SearchSessionsConfigSchema } from '../../../config';
+} from '../../../../../core/server/saved_objects/service/saved_objects_client';
+import type { SavedObjectsFindOptions } from '../../../../../core/server/saved_objects/types';
+import type { SavedObject } from '../../../../../core/types/saved_objects';
+import type { IKibanaSearchRequest, ISearchOptions } from '../../../common/search/types';
+import type { SearchSessionsConfigSchema } from '../../../config';
 
 export interface IScopedSearchSessionsClient<T = unknown> {
   getId: (request: IKibanaSearchRequest, options: ISearchOptions) => Promise<string>;

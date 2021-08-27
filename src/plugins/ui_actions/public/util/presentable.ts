@@ -5,8 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { UiComponent } from 'src/plugins/kibana_utils/public';
+import type { UiComponent } from '../../../kibana_utils/common/ui/ui_component';
 
 /**
  * Represents something that can be displayed to user in UI.

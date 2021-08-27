@@ -6,14 +6,15 @@
  * Side Public License, v 1.
  */
 
-import _ from 'lodash';
 import { createHashHistory } from 'history';
-import { ScopedHistory, AppMountParameters } from 'kibana/public';
-import { UiActionsStart } from 'src/plugins/ui_actions/public';
-import { DiscoverServices } from './build_services';
-import { createGetterSetter } from '../../kibana_utils/public';
+import _ from 'lodash';
+import { ScopedHistory } from '../../../core/public/application/scoped_history';
+import type { AppMountParameters } from '../../../core/public/application/types';
 import { search } from '../../data/public';
+import { createGetterSetter } from '../../kibana_utils/common/create_getter_setter';
+import type { UiActionsStart } from '../../ui_actions/public/plugin';
 import { DocViewsRegistry } from './application/doc_views/doc_views_registry';
+import type { DiscoverServices } from './build_services';
 
 let angularModule: ng.IModule | null = null;
 let services: DiscoverServices | null = null;
@@ -92,16 +93,15 @@ export const [getScopedHistory, setScopedHistory] = createGetterSetter<ScopedHis
 );
 
 export const { tabifyAggResponse } = search;
-export { unhashUrl, redirectWhenMissing } from '../../kibana_utils/public';
-export { formatMsg, formatStack, subscribeWithScope } from '../../kibana_legacy/public';
-
 // EXPORT types
 export {
-  IndexPatternsContract,
-  IndexPattern,
-  indexPatterns,
-  IndexPatternField,
-  ISearchSource,
   EsQuerySortValue,
+  IndexPattern,
+  IndexPatternField,
+  indexPatterns,
+  IndexPatternsContract,
+  ISearchSource,
   SortDirection,
 } from '../../data/public';
+export { formatMsg, formatStack, subscribeWithScope } from '../../kibana_legacy/public';
+export { redirectWhenMissing, unhashUrl } from '../../kibana_utils/public';

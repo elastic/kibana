@@ -5,23 +5,21 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import React, { Fragment, useContext, useEffect } from 'react';
-import themeLight from '@elastic/eui/dist/eui_theme_light.json';
-import themeDark from '@elastic/eui/dist/eui_theme_dark.json';
-
+import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import {
-  EuiDataGridCellValueElementProps,
   EuiDescriptionList,
-  EuiDescriptionListTitle,
   EuiDescriptionListDescription,
+  EuiDescriptionListTitle,
 } from '@elastic/eui';
-import { IndexPattern } from '../../../kibana_services';
-import { ElasticSearchHit } from '../../doc_views/doc_views_types';
-import { DiscoverGridContext } from './discover_grid_context';
+import themeDark from '@elastic/eui/dist/eui_theme_dark.json';
+import themeLight from '@elastic/eui/dist/eui_theme_light.json';
+import React, { Fragment, useContext, useEffect } from 'react';
+import { IndexPattern } from '../../../../../data/common/index_patterns/index_patterns/index_pattern';
+import type { EsHitRecord } from '../../angular/context/api/context';
+import type { ElasticSearchHit } from '../../doc_views/doc_views_types';
 import { JsonCodeEditor } from '../json_code_editor/json_code_editor';
 import { defaultMonacoEditorWidth } from './constants';
-import { EsHitRecord } from '../../angular/context/api/context';
+import { DiscoverGridContext } from './discover_grid_context';
 
 export const getRenderCellValueFn = (
   indexPattern: IndexPattern,

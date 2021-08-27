@@ -5,19 +5,15 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import React, { ReactElement } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-
-import {
-  AddFromLibraryButton,
-  QuickButtonGroup,
-  PrimaryActionButton,
-  SolutionToolbarButton,
-  PrimaryActionPopover,
-  SolutionToolbarPopover,
-} from './items';
-
+import type { ReactElement } from 'react';
+import React from 'react';
+import { AddFromLibraryButton } from './items/add_from_library';
+import { SolutionToolbarButton } from './items/button';
+import { SolutionToolbarPopover } from './items/popover';
+import { PrimaryActionButton } from './items/primary_button';
+import { PrimaryActionPopover } from './items/primary_popover';
+import { QuickButtonGroup } from './items/quick_group';
 import './solution_toolbar.scss';
 
 interface NamedSlots {

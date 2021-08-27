@@ -4,34 +4,34 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
+import type { Logger } from '@kbn/logging';
 import { curry } from 'lodash';
-import { schema, TypeOf } from '@kbn/config-schema';
-
-import { validate } from './validators';
-import {
-  ExternalIncidentServiceConfiguration,
-  ExternalIncidentServiceSecretConfiguration,
-  ExecutorParamsSchema,
-} from './schema';
-import { ActionsConfigurationUtilities } from '../../actions_config';
-import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../../types';
-import { createExternalService } from './service';
+import type { ActionTypeExecutorResult } from '../../../common/types';
+import type { ActionsConfigurationUtilities } from '../../actions_config';
+import type { ActionType, ActionTypeExecutorOptions } from '../../types';
 import { api } from './api';
 import {
+  ExecutorParamsSchema,
+  ExternalIncidentServiceConfiguration,
+  ExternalIncidentServiceSecretConfiguration,
+} from './schema';
+import { createExternalService } from './service';
+import * as i18n from './translations';
+import type {
   ExecutorParams,
+  ExecutorSubActionCommonFieldsParams,
+  ExecutorSubActionGetFieldsByIssueTypeParams,
+  ExecutorSubActionGetIncidentParams,
+  ExecutorSubActionGetIssueParams,
+  ExecutorSubActionGetIssuesParams,
   ExecutorSubActionPushParams,
+  JiraExecutorResultData,
   JiraPublicConfigurationType,
   JiraSecretConfigurationType,
-  JiraExecutorResultData,
-  ExecutorSubActionGetFieldsByIssueTypeParams,
-  ExecutorSubActionCommonFieldsParams,
-  ExecutorSubActionGetIssuesParams,
-  ExecutorSubActionGetIssueParams,
-  ExecutorSubActionGetIncidentParams,
 } from './types';
-import * as i18n from './translations';
-import { Logger } from '../../../../../../src/core/server';
+import { validate } from './validators';
 
 export type ActionParamsType = TypeOf<typeof ExecutorParamsSchema>;
 interface GetActionTypeParams {

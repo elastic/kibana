@@ -5,30 +5,30 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import React, { FC, useMemo } from 'react';
 import {
-  EuiInMemoryTable,
-  EuiLoadingElastic,
-  EuiToolTip,
-  EuiIcon,
-  EuiOverlayMask,
-  EuiModal,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
-  EuiModalBody,
-  EuiModalFooter,
+  EuiButton,
+  EuiButtonEmpty,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButtonEmpty,
-  EuiButton,
+  EuiIcon,
+  EuiInMemoryTable,
+  EuiLoadingElastic,
+  EuiModal,
+  EuiModalBody,
+  EuiModalFooter,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
+  EuiOverlayMask,
   EuiSpacer,
-  EuiCallOut,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { SavedObjectWithMetadata } from '../../../../common';
-import { getSavedObjectLabel } from '../../../lib';
+import type { FC } from 'react';
+import React, { useMemo } from 'react';
+import type { SavedObjectWithMetadata } from '../../../../common/types';
+import { getSavedObjectLabel } from '../../../lib/get_saved_object_label';
 
 export interface DeleteConfirmModalProps {
   isDeleting: boolean;

@@ -5,10 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { cloneDeep, assign } from 'lodash';
-import { SavedObjectsClientContract } from 'kibana/public';
-import { SavedObject, SavedObjectConfig } from '../../types';
+import { assign, cloneDeep } from 'lodash';
+import type { SavedObjectsClientContract } from '../../../../../core/public/saved_objects/saved_objects_client';
+import type { SavedObject, SavedObjectConfig } from '../../types';
 
 /**
  * Initialize saved object

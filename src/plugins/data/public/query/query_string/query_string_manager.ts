@@ -5,13 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { BehaviorSubject } from 'rxjs';
 import { skip } from 'rxjs/operators';
-import { PublicMethodsOf } from '@kbn/utility-types';
-import { CoreStart } from 'kibana/public';
-import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
-import { KIBANA_USER_QUERY_LANGUAGE_KEY, Query, UI_SETTINGS } from '../../../common';
+import type { CoreStart } from '../../../../../core/public';
+import type { IStorageWrapper } from '../../../../kibana_utils/public/storage/types';
+import type { Query } from '../../../common';
+import { KIBANA_USER_QUERY_LANGUAGE_KEY, UI_SETTINGS } from '../../../common/constants';
 
 export class QueryStringManager {
   private query$: BehaviorSubject<Query>;

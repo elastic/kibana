@@ -5,13 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { i18n } from '@kbn/i18n';
+import { KBN_FIELD_TYPES } from '../../../../common';
+import type { BaseAggParams } from '../types';
 import { aggGeoCentroidFnName } from './geo_centroid_fn';
 import { MetricAggType } from './metric_agg_type';
 import { METRIC_TYPES } from './metric_agg_types';
-import { KBN_FIELD_TYPES } from '../../../../common';
-import { BaseAggParams } from '../types';
 
 export interface AggParamsGeoCentroid extends BaseAggParams {
   field: string;

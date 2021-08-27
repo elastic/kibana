@@ -5,17 +5,16 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import type { EuiFlexGroupProps } from '@elastic/eui';
+import { EuiFlexGroup } from '@elastic/eui';
 import React, {
-  useState,
   createContext,
-  useContext,
   useCallback,
-  useMemo,
+  useContext,
   useLayoutEffect,
+  useMemo,
+  useState,
 } from 'react';
-import { EuiFlexGroup, EuiFlexGroupProps } from '@elastic/eui';
-
 import './flyout_panels.scss';
 
 interface Panel {

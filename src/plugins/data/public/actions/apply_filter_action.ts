@@ -5,13 +5,17 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { i18n } from '@kbn/i18n';
-import { toMountPoint } from '../../../kibana_react/public';
-import { Action, createAction, IncompatibleActionError } from '../../../ui_actions/public';
-import { getOverlays, getIndexPatterns } from '../services';
-import { applyFiltersPopover } from '../ui/apply_filters';
-import { Filter, FilterManager, TimefilterContract, esFilters } from '..';
+import { toMountPoint } from '../../../kibana_react/public/util/to_mount_point';
+import type { Action } from '../../../ui_actions/public/actions/action';
+import { createAction } from '../../../ui_actions/public/actions/create_action';
+import { IncompatibleActionError } from '../../../ui_actions/public/actions/incompatible_action_error';
+import type { Filter } from '../../common/es_query';
+import { esFilters } from '../deprecated';
+import { FilterManager } from '../query/filter_manager/filter_manager';
+import type { TimefilterContract } from '../query/timefilter/timefilter';
+import { getIndexPatterns, getOverlays } from '../services';
+import { applyFiltersPopover } from '../ui/apply_filters/apply_filters_popover';
 
 export const ACTION_GLOBAL_APPLY_FILTER = 'ACTION_GLOBAL_APPLY_FILTER';
 

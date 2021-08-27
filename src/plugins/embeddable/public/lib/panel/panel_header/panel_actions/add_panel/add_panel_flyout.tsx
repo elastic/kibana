@@ -5,21 +5,22 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import { EuiContextMenuItem, EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
+import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { ReactElement } from 'react';
-import { METRIC_TYPE } from '@kbn/analytics';
-import { CoreSetup, SavedObjectAttributes, SimpleSavedObject } from 'src/core/public';
-
-import { EuiContextMenuItem, EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
-
-import { EmbeddableFactory, EmbeddableStart } from 'src/plugins/embeddable/public';
-import { IContainer } from '../../../../containers';
+import type { ReactElement } from 'react';
+import React from 'react';
+import type { CoreSetup } from '../../../../../../../../core/public';
+import { SimpleSavedObject } from '../../../../../../../../core/public/saved_objects/simple_saved_object';
+import type { SavedObjectAttributes } from '../../../../../../../../core/types/saved_objects';
+import type { UsageCollectionStart } from '../../../../../../../usage_collection/public/plugin';
+import type { SavedObjectEmbeddableInput } from '../../../../../../common/lib/saved_object_embeddable';
+import type { EmbeddableStart } from '../../../../../plugin';
+import type { IContainer } from '../../../../containers/i_container';
+import type { EmbeddableFactory } from '../../../../embeddables/embeddable_factory';
 import { EmbeddableFactoryNotFoundError } from '../../../../errors';
 import { SavedObjectFinderCreateNew } from './saved_object_finder_create_new';
-import { SavedObjectEmbeddableInput } from '../../../../embeddables';
-import { UsageCollectionStart } from '../../../../../../../usage_collection/public';
 
 interface Props {
   onClose: () => void;

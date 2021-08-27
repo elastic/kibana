@@ -7,19 +7,16 @@
  */
 
 import React from 'react';
-
-import { Action, IncompatibleActionError } from '../../services/ui_actions';
-import { reactToUiComponent } from '../../services/kibana_react';
-import {
-  IEmbeddable,
-  ViewMode,
-  isReferenceOrValueEmbeddable,
-  isErrorEmbeddable,
-} from '../../services/embeddable';
-
-import { UnlinkFromLibraryAction } from '.';
-import { LibraryNotificationPopover } from './library_notification_popover';
+import { ViewMode } from '../../../../embeddable/common/types';
+import { isErrorEmbeddable } from '../../../../embeddable/public/lib/embeddables/error_embeddable';
+import type { IEmbeddable } from '../../../../embeddable/public/lib/embeddables/i_embeddable';
+import { isReferenceOrValueEmbeddable } from '../../../../embeddable/public/lib/reference_or_value_embeddable/types';
+import { reactToUiComponent } from '../../../../kibana_react/public/adapters/react_to_ui_component';
+import type { Action } from '../../../../ui_actions/public/actions/action';
+import { IncompatibleActionError } from '../../../../ui_actions/public/actions/incompatible_action_error';
 import { dashboardLibraryNotification } from '../../dashboard_strings';
+import { LibraryNotificationPopover } from './library_notification_popover';
+import { UnlinkFromLibraryAction } from './unlink_from_library_action';
 
 export const ACTION_LIBRARY_NOTIFICATION = 'ACTION_LIBRARY_NOTIFICATION';
 

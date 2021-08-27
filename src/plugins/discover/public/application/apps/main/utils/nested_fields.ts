@@ -5,9 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { escapeRegExp } from 'lodash/fp';
-import type { IndexPattern } from 'src/plugins/data/public';
+import { IndexPattern } from '../../../../../../data/common/index_patterns/index_patterns/index_pattern';
 
 /**
  * This function checks if the given field in a given index pattern is a nested field's parent.

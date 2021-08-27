@@ -5,10 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { ElasticsearchClient, SavedObjectsClientContract } from '../../../../core/server';
-import { IndexPatternSavedObjectAttrs } from '../../common/index_patterns/index_patterns';
+import type { ElasticsearchClient } from '../../../../core/server/elasticsearch/client/types';
+import type { SavedObjectsClientContract } from '../../../../core/server/saved_objects/types';
 import { FLEET_ASSETS_TO_IGNORE } from '../../common/index_patterns/constants';
+import type { IndexPatternSavedObjectAttrs } from '../../common/index_patterns/index_patterns/index_patterns';
 
 interface Deps {
   esClient: ElasticsearchClient;

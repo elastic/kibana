@@ -5,11 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import type { estypes } from '@elastic/elasticsearch';
+import { estypes } from '@elastic/elasticsearch';
 import { isPlainObject } from 'lodash';
-import { IndexPattern } from '../../index_patterns/index_patterns';
-import { Datatable, DatatableColumn, DatatableColumnType } from '../../../../expressions/common';
+import type {
+  Datatable,
+  DatatableColumn,
+  DatatableColumnType,
+} from '../../../../expressions/common/expression_types/specs/datatable';
+import { IndexPattern } from '../../index_patterns/index_patterns/index_pattern';
 
 export interface TabifyDocsOptions {
   shallow?: boolean;

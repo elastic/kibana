@@ -4,13 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { Logger } from '@kbn/logging';
 import { Agent as HttpAgent } from 'http';
-import { Agent as HttpsAgent, AgentOptions } from 'https';
 import HttpProxyAgent from 'http-proxy-agent';
+import type { AgentOptions } from 'https';
+import { Agent as HttpsAgent } from 'https';
 import { HttpsProxyAgent } from 'https-proxy-agent';
-import { Logger } from '../../../../../../src/core/server';
-import { ActionsConfigurationUtilities } from '../../actions_config';
+import type { ActionsConfigurationUtilities } from '../../actions_config';
 import { getNodeSSLOptions, getSSLSettingsFromConfig } from './get_node_ssl_options';
 
 interface GetCustomAgentsResponse {

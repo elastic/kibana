@@ -5,9 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { i18n } from '@kbn/i18n';
 import { FILTERS } from '@kbn/es-query';
+import { i18n } from '@kbn/i18n';
 
 export interface Operator {
   message: string;

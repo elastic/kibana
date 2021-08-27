@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { withKibana } from '../../../../kibana_react/public';
+import { withKibana } from '../../../../kibana_react/public/context/context';
 import type { QueryBarTopRowProps } from './query_bar_top_row';
 import type { QueryStringInputProps } from './query_string_input';
 

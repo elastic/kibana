@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import {
-  ExternalServiceIncidentResponse,
+import type {
   ExternalServiceApi,
+  ExternalServiceIncidentResponse,
   Incident,
   PushToServiceApiHandlerArgs,
   PushToServiceResponse,

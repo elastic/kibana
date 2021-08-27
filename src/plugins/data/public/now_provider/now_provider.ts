@@ -5,9 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { PublicMethodsOf } from '@kbn/utility-types';
-import { getForceNowFromUrl } from './lib';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import { getForceNowFromUrl } from './lib/get_force_now_from_url';
 
 export type NowProviderInternalContract = PublicMethodsOf<NowProvider>;
 export type NowProviderPublicContract = Pick<NowProviderInternalContract, 'get'>;

@@ -7,18 +7,17 @@
  */
 
 import _ from 'lodash';
-
-import { migrateAppState } from '.';
-import { replaceUrlHashQuery } from '../../../../kibana_utils/public';
-import { DASHBOARD_STATE_STORAGE_KEY } from '../../dashboard_constants';
+import { replaceUrlHashQuery } from '../../../../kibana_utils/public/state_management/url/format';
 import { convertSavedDashboardPanelToPanelState } from '../../../common/embeddable/embeddable_saved_object_converters';
-import {
+import type { SavedDashboardPanel } from '../../../common/types';
+import { DASHBOARD_STATE_STORAGE_KEY } from '../../dashboard_constants';
+import type {
   DashboardBuildContext,
   DashboardPanelMap,
   DashboardState,
   RawDashboardState,
-  SavedDashboardPanel,
 } from '../../types';
+import { migrateAppState } from './migrate_app_state';
 import { migrateLegacyQuery } from './migrate_legacy_query';
 
 /**

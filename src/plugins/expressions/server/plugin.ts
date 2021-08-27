@@ -5,10 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { pick } from 'lodash';
-import { CoreStart, CoreSetup, Plugin, PluginInitializerContext } from 'src/core/server';
-import { ExpressionsService, ExpressionsServiceSetup, ExpressionsServiceStart } from '../common';
+import type { CoreSetup, CoreStart } from '../../../core/server';
+import type { Plugin, PluginInitializerContext } from '../../../core/server/plugins/types';
+import type {
+  ExpressionsServiceSetup,
+  ExpressionsServiceStart,
+} from '../common/service/expressions_services';
+import { ExpressionsService } from '../common/service/expressions_services';
 
 export type ExpressionsServerSetup = ExpressionsServiceSetup;
 

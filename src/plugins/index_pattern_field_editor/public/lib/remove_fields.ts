@@ -5,13 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { NotificationsStart } from 'src/core/public';
-import { IndexPattern, UsageCollectionStart } from '../shared_imports';
+import { i18n } from '@kbn/i18n';
+import type { NotificationsStart } from '../../../../core/public/notifications/notifications_service';
+import { IndexPattern } from '../../../data/common/index_patterns/index_patterns/index_pattern';
+import type { DataPublicPluginStart } from '../../../data/public/types';
+import type { UsageCollectionStart } from '../../../usage_collection/public/plugin';
 import { pluginName } from '../constants';
-import { DataPublicPluginStart } from '../../../data/public';
 
 export async function removeFields(
   fieldNames: string[],

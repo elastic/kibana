@@ -5,10 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { KibanaExecutionContext } from 'src/core/public';
 import { Observable } from 'rxjs';
-import { IEsSearchRequest, IEsSearchResponse, IndexPattern } from '..';
-import type { RequestAdapter } from '../../../inspector/common';
+import type { KibanaExecutionContext } from '../../../../core/types/execution_context';
+import { RequestAdapter } from '../../../inspector/common/adapters/request/request_adapter';
+import { IndexPattern } from '../index_patterns/index_patterns/index_pattern';
+import type { IEsSearchRequest, IEsSearchResponse } from './strategies/es_search/types';
 
 export type ISearchGeneric = <
   SearchStrategyRequest extends IKibanaSearchRequest = IEsSearchRequest,

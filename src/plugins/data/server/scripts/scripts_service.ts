@@ -5,8 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { CoreSetup, Plugin } from 'kibana/server';
+import type { CoreSetup } from '../../../../core/server';
+import type { Plugin } from '../../../../core/server/plugins/types';
 import { registerScriptsRoute } from './route';
 
 export class ScriptsService implements Plugin<void> {

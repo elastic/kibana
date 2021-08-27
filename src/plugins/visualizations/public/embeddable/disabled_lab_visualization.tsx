@@ -5,9 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import { EuiEmptyPrompt, EuiLink } from '@elastic/eui';
+import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import React from 'react';
 import { getDocLinks } from '../services';
 

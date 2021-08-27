@@ -5,22 +5,22 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import React, { useState, Fragment, useMemo, useCallback } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiHorizontalRule, EuiText } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
+import React, { Fragment, useCallback, useMemo, useState } from 'react';
+import { IndexPattern } from '../../../../../data/common/index_patterns/index_patterns/index_pattern';
+import { SortDirection } from '../../../../../data/common/search/search_source/types';
 import { CONTEXT_STEP_SETTING, DOC_HIDE_TIME_COLUMN_SETTING } from '../../../../common';
-import { IndexPattern } from '../../../../../data/common';
-import { SortDirection } from '../../../../../data/public';
-import { LoadingStatus } from '../../angular/context_query_state';
+import type { DiscoverServices } from '../../../build_services';
+import type { EsHitRecordList } from '../../angular/context/api/context';
+import { SurrDocType } from '../../angular/context/api/context';
 import { ActionBar } from '../../angular/context/components/action_bar/action_bar';
-import { DiscoverGrid } from '../discover_grid/discover_grid';
-import { DocViewFilterFn, ElasticSearchHit } from '../../doc_views/doc_views_types';
-import { AppState } from '../../angular/context_state';
-import { EsHitRecordList, SurrDocType } from '../../angular/context/api/context';
-import { DiscoverServices } from '../../../build_services';
-import { MAX_CONTEXT_SIZE, MIN_CONTEXT_SIZE } from './utils/constants';
+import { LoadingStatus } from '../../angular/context_query_state';
+import type { AppState } from '../../angular/context_state';
 import { DocTableContext } from '../../apps/main/components/doc_table/doc_table_context';
+import type { DocViewFilterFn, ElasticSearchHit } from '../../doc_views/doc_views_types';
+import { DiscoverGrid } from '../discover_grid/discover_grid';
+import { MAX_CONTEXT_SIZE, MIN_CONTEXT_SIZE } from './utils/constants';
 
 export interface ContextAppContentProps {
   columns: string[];

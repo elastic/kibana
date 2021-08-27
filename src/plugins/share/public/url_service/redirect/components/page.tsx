@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
+import { EuiPageTemplate } from '@elastic/eui';
 import * as React from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { EuiPageTemplate } from '@elastic/eui';
-import { Error } from './error';
 import { RedirectManager } from '../redirect_manager';
+import { Error } from './error';
 import { Spinner } from './spinner';
 
 export interface PageProps {

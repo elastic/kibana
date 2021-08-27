@@ -5,15 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import defaultComparator from 'fast-deep-equal';
 import { EMPTY, Subscription } from 'rxjs';
 import { tap } from 'rxjs/operators';
-import defaultComparator from 'fast-deep-equal';
-import { IStateSyncConfig } from './types';
-import { IStateStorage } from './state_sync_state_storage';
-import { distinctUntilChangedWithInitialValue } from '../../common';
-import { BaseState } from '../../common/state_containers';
+import { distinctUntilChangedWithInitialValue } from '../../common/distinct_until_changed_with_initial_value';
+import type { BaseState } from '../../common/state_containers/types';
 import { applyDiff } from '../state_management/utils/diff_object';
+import type { IStateStorage } from './state_sync_state_storage/types';
+import type { IStateSyncConfig } from './types';
 
 /**
  * @public

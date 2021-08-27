@@ -5,19 +5,16 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import React, { Component } from 'react';
-
-import { I18nProvider } from '@kbn/i18n/react';
+import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
+import { EuiContextMenu } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EuiContextMenu, EuiContextMenuPanelDescriptor } from '@elastic/eui';
-
-import { HttpStart } from 'kibana/public';
-import type { Capabilities } from 'src/core/public';
-
+import { I18nProvider } from '@kbn/i18n/react';
+import React, { Component } from 'react';
+import type { HttpStart } from '../../../../core/public/http/types';
+import type { Capabilities } from '../../../../core/types/capabilities';
+import type { SecurityOssPluginStart } from '../../../security_oss/public/plugin';
+import type { ShareContextMenuPanelItem, ShareMenuItem, UrlParamExtension } from '../types';
 import { UrlPanelContent } from './url_panel_content';
-import { ShareMenuItem, ShareContextMenuPanelItem, UrlParamExtension } from '../types';
-import type { SecurityOssPluginStart } from '../../../security_oss/public';
 
 interface Props {
   allowEmbed: boolean;

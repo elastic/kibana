@@ -4,11 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { SavedObject } from 'kibana/server';
+import type { SavedObject } from '../../../../../src/core/types/saved_objects';
 import { ActionTypeRegistry } from '../action_type_registry';
-import { validateSecrets } from '../lib';
-import { RawAction, ActionType } from '../types';
+import { validateSecrets } from '../lib/validate_with_schema';
+import type { ActionType, RawAction } from '../types';
 
 export function transformConnectorsForExport(
   connectors: SavedObject[],

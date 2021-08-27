@@ -5,8 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { ShareContext, ShareMenuProvider } from '../types';
+import type { ShareContext, ShareMenuProvider } from '../types';
 
 export class ShareMenuRegistry {
   private readonly shareMenuProviders = new Map<string, ShareMenuProvider>();

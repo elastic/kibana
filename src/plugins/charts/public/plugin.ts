@@ -5,14 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { Plugin, CoreSetup } from 'kibana/public';
-import { ExpressionsSetup } from '../../expressions/public';
-import { palette, systemPalette } from '../common';
-
-import { ThemeService, LegacyColorsService } from './services';
+import type { CoreSetup } from '../../../core/public';
+import type { Plugin } from '../../../core/public/plugins/plugin';
+import type { ExpressionsSetup } from '../../expressions/public/plugin';
+import { palette, systemPalette } from '../common/palette';
+import { ActiveCursor } from './services/active_cursor/active_cursor';
+import { LegacyColorsService } from './services/legacy_colors/colors';
 import { PaletteService } from './services/palettes/service';
-import { ActiveCursor } from './services/active_cursor';
+import { ThemeService } from './services/theme/theme';
 
 export type Theme = Omit<ThemeService, 'init'>;
 export type Color = Omit<LegacyColorsService, 'init'>;

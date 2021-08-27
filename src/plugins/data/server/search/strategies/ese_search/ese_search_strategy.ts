@@ -5,35 +5,38 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import type { Observable } from 'rxjs';
-import type { IScopedClusterClient, Logger, SharedGlobalConfig } from 'kibana/server';
+import { estypes } from '@elastic/elasticsearch';
+import type { Logger } from '@kbn/logging';
+import { from, Observable } from 'rxjs';
 import { catchError, first, tap } from 'rxjs/operators';
-import type { estypes } from '@elastic/elasticsearch';
-import { from } from 'rxjs';
-import type { ISearchStrategy, SearchStrategyDependencies } from '../../types';
+import type { IScopedClusterClient } from '../../../../../../core/server/elasticsearch/client/scoped_cluster_client';
+import type { SharedGlobalConfig } from '../../../../../../core/server/plugins/types';
+import {
+  getKbnServerError,
+  KbnServerError,
+} from '../../../../../kibana_utils/server/report_server_error';
+import { pollSearch } from '../../../../common/search/poll_search';
+import type { IAsyncSearchOptions } from '../../../../common/search/strategies/ese_search/types';
 import type {
-  IAsyncSearchOptions,
   IEsSearchRequest,
   IEsSearchResponse,
-  ISearchOptions,
-} from '../../../../common';
-import { pollSearch } from '../../../../common';
+} from '../../../../common/search/strategies/es_search/types';
+import type { ISearchOptions } from '../../../../common/search/types';
+import type { SearchUsage } from '../../collectors/usage';
+import { searchUsageObserver } from '../../collectors/usage';
+import type { ISearchStrategy, SearchStrategyDependencies } from '../../types';
+import {
+  getDefaultSearchParams,
+  getShardTimeout,
+  shimAbortSignal,
+} from '../es_search/request_utils';
+import { getTotalLoaded, shimHitsTotal } from '../es_search/response_utils';
 import {
   getDefaultAsyncGetParams,
   getDefaultAsyncSubmitParams,
   getIgnoreThrottled,
 } from './request_utils';
 import { toAsyncKibanaSearchResponse } from './response_utils';
-import { getKbnServerError, KbnServerError } from '../../../../../kibana_utils/server';
-import { SearchUsage, searchUsageObserver } from '../../collectors';
-import {
-  getDefaultSearchParams,
-  getShardTimeout,
-  getTotalLoaded,
-  shimAbortSignal,
-  shimHitsTotal,
-} from '../es_search';
 
 export const enhancedEsSearchStrategyProvider = (
   legacyConfig$: Observable<SharedGlobalConfig>,

@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { MakeSchemaFrom, UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { get } from 'lodash';
-import { TaskManagerStartContract } from '../../../task_manager/server';
-import { ActionsUsage } from './types';
-import { ActionsConfig } from '../config';
+import type { MakeSchemaFrom } from '../../../../../src/plugins/usage_collection/server/collector/types';
+import type { UsageCollectionSetup } from '../../../../../src/plugins/usage_collection/server/plugin';
+import type { TaskManagerStartContract } from '../../../task_manager/server/plugin';
+import type { ActionsConfig } from '../config';
+import type { ActionsUsage } from './types';
 
 const byTypeSchema: MakeSchemaFrom<ActionsUsage>['count_by_type'] = {
   // TODO: Find out an automated way to populate the keys or reformat these into an array (and change the Remote Telemetry indexer accordingly)

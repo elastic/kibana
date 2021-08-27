@@ -5,11 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { DependencyList, useEffect, useState } from 'react';
-import useMountedState from 'react-use/lib/useMountedState';
 import type { SerializableRecord } from '@kbn/utility-types';
-import { LocatorGetUrlParams, LocatorPublic } from '../../../common/url_service';
+import type { DependencyList } from 'react';
+import { useEffect, useState } from 'react';
+import useMountedState from 'react-use/lib/useMountedState';
+import type { LocatorGetUrlParams, LocatorPublic } from './types';
 
 export const useLocatorUrl = <P extends SerializableRecord>(
   locator: LocatorPublic<P> | null | undefined,

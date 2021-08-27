@@ -5,9 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { Comparators } from '@elastic/eui';
-import { FieldSetting } from '../types';
+import type { FieldSetting } from '../types';
 
 const cmp = Comparators.default('asc');
 

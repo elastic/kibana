@@ -5,12 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import type { SavedObjectReference, SavedObjectsFindOptionsReference } from 'kibana/public';
-import { SavedObjectLoader } from '../../../../plugins/saved_objects/public';
+import type { SavedObjectsFindOptionsReference } from '../../../../core/server/saved_objects/types';
+import type { SavedObjectReference } from '../../../../core/types/saved_objects';
+import { SavedObjectLoader } from '../../../saved_objects/public/saved_object/saved_object_loader';
+import type { TypesStart } from '../vis_types/types_service';
 import { findListItems } from './find_list_items';
-import { createSavedVisClass, SavedVisServices } from './_saved_vis';
-import type { TypesStart } from '../vis_types';
+import type { SavedVisServices } from './_saved_vis';
+import { createSavedVisClass } from './_saved_vis';
 
 export interface SavedVisServicesWithVisualizations extends SavedVisServices {
   visualizationTypes: TypesStart;

@@ -5,8 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { ExpressionAstExpression } from '../../../../expressions/common/ast';
+import type { ExpressionAstExpression } from '../../../../expressions/common/ast/types';
 
 /**
  * Information about a series in a chart used to determine its color.

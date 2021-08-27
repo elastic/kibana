@@ -7,30 +7,28 @@
  */
 
 // @ts-ignore
-import chroma from 'chroma-js';
-import { i18n } from '@kbn/i18n';
 import {
   euiPaletteColorBlind,
+  euiPaletteColorBlindBehindText,
+  euiPaletteComplimentary,
   euiPaletteCool,
+  euiPaletteForStatus,
+  euiPaletteForTemperature,
   euiPaletteGray,
   euiPaletteNegative,
   euiPalettePositive,
   euiPaletteWarm,
-  euiPaletteForStatus,
-  euiPaletteForTemperature,
-  euiPaletteComplimentary,
-  euiPaletteColorBlindBehindText,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import chroma from 'chroma-js';
 import { flatten, zip } from 'lodash';
-import {
-  ChartsPluginSetup,
-  createColorPalette as createLegacyColorPalette,
-} from '../../../../../../src/plugins/charts/public';
-import { lightenColor } from './lighten_color';
-import { ChartColorConfiguration, PaletteDefinition, SeriesLayer } from './types';
-import { LegacyColorsService } from '../legacy_colors';
-import { MappedColors } from '../mapped_colors';
+import type { ChartsPluginSetup } from '../../plugin';
+import { createColorPalette as createLegacyColorPalette } from '../../static/colors/color_palette';
+import { LegacyColorsService } from '../legacy_colors/colors';
+import { MappedColors } from '../mapped_colors/mapped_colors';
 import { workoutColorForValue } from './helpers';
+import { lightenColor } from './lighten_color';
+import type { ChartColorConfiguration, PaletteDefinition, SeriesLayer } from './types';
 
 function buildRoundRobinCategoricalWithMappedColors(): Omit<PaletteDefinition, 'title'> {
   const colors = euiPaletteColorBlind({ rotations: 2 });

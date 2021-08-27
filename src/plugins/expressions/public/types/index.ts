@@ -5,17 +5,16 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import type { SerializableRecord } from '@kbn/utility-types';
-import type { KibanaExecutionContext } from 'src/core/public';
-import { Adapters } from '../../../inspector/public';
-import {
+import type { KibanaExecutionContext } from '../../../../core/types/execution_context';
+import type { Adapters } from '../../../inspector/common/adapters/types';
+import type {
   IInterpreterRenderHandlers,
-  ExpressionValue,
-  ExpressionsService,
   RenderMode,
-} from '../../common';
-import { ExpressionRenderHandlerParams } from '../render';
+} from '../../common/expression_renderers/types';
+import type { ExpressionValue } from '../../common/expression_types/types';
+import { ExpressionsService } from '../../common/service/expressions_services';
+import type { ExpressionRenderHandlerParams } from '../render';
 
 /**
  * @deprecated

@@ -5,9 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { CoreSetup } from 'src/core/public';
-import { getUiSettingFn as getCommonUiSettingFn } from '../../common';
+import type { CoreSetup } from '../../../../core/public';
+import { getUiSettingFn as getCommonUiSettingFn } from '../../common/expression_functions/specs/ui_setting';
 
 export function getUiSettingFn({ getStartServices }: Pick<CoreSetup, 'getStartServices'>) {
   return getCommonUiSettingFn({

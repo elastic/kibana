@@ -5,23 +5,20 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { ArgumentType } from './arguments';
-import { TypeToString, TypeString, UnmappedTypeStrings } from '../types/common';
-import { ExecutionContext } from '../execution/types';
-import {
-  ExpressionFunctionClog,
-  ExpressionFunctionFont,
-  ExpressionFunctionVarSet,
-  ExpressionFunctionVar,
-  ExpressionFunctionTheme,
-  ExpressionFunctionCumulativeSum,
-  ExpressionFunctionDerivative,
-  ExpressionFunctionMovingAverage,
-  ExpressionFunctionOverallMetric,
-} from './specs';
-import { ExpressionAstFunction } from '../ast';
-import { PersistableStateDefinition } from '../../../kibana_utils/common';
+import type { PersistableStateDefinition } from '../../../kibana_utils/common/persistable_state/types';
+import type { ExpressionAstFunction } from '../ast/types';
+import type { ExecutionContext } from '../execution/types';
+import type { TypeString, TypeToString, UnmappedTypeStrings } from '../types/common';
+import type { ArgumentType } from './arguments';
+import type { ExpressionFunctionClog } from './specs/clog';
+import type { ExpressionFunctionCumulativeSum } from './specs/cumulative_sum';
+import type { ExpressionFunctionDerivative } from './specs/derivative';
+import type { ExpressionFunctionFont } from './specs/font';
+import type { ExpressionFunctionMovingAverage } from './specs/moving_average';
+import type { ExpressionFunctionOverallMetric } from './specs/overall_metric';
+import type { ExpressionFunctionTheme } from './specs/theme';
+import type { ExpressionFunctionVar } from './specs/var';
+import type { ExpressionFunctionVarSet } from './specs/var_set';
 
 /**
  * `ExpressionFunctionDefinition` is the interface plugins have to implement to

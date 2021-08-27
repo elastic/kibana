@@ -5,22 +5,17 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import type {
-  Capabilities,
-  CoreSetup,
-  CoreStart,
-  Plugin,
-  PluginInitializerContext,
-} from 'src/core/public';
-
-import { AppStateService } from './app_state';
+import type { CoreSetup, CoreStart } from '../../../core/public';
+import type { Plugin } from '../../../core/public/plugins/plugin';
+import type { PluginInitializerContext } from '../../../core/public/plugins/plugin_context';
+import type { Capabilities } from '../../../core/types/capabilities';
+import { AppStateService } from './app_state/app_state_service';
 import type { ConfigType } from './config';
 import type {
   InsecureClusterServiceSetup,
   InsecureClusterServiceStart,
-} from './insecure_cluster_service';
-import { InsecureClusterService } from './insecure_cluster_service';
+} from './insecure_cluster_service/insecure_cluster_service';
+import { InsecureClusterService } from './insecure_cluster_service/insecure_cluster_service';
 
 export interface SecurityOssPluginSetup {
   insecureCluster: InsecureClusterServiceSetup;

@@ -5,11 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { i18n } from '@kbn/i18n';
-import { UiSettingsParams } from 'src/core/server';
 import { schema } from '@kbn/config-schema';
-import { DISABLE_BFETCH_COMPRESSION } from '../common';
+import { i18n } from '@kbn/i18n';
+import type { UiSettingsParams } from '../../../core/types/ui_settings';
+import { DISABLE_BFETCH_COMPRESSION } from '../common/constants';
 
 export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
   return {

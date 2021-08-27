@@ -4,8 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { LegacyAuditLogger } from '../../../security/server';
+import type { LegacyAuditLogger } from '../../../security/server/audit/audit_service';
 
 export enum AuthorizationResult {
   Unauthorized = 'Unauthorized',

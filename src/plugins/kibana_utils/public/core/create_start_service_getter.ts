@@ -5,8 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { CoreStart, StartServicesAccessor } from '../../../../core/public';
+import type { CoreStart, StartServicesAccessor } from '../../../../core/public';
 
 export interface StartServices<Plugins = unknown, OwnContract = unknown, Core = CoreStart> {
   plugins: Plugins;

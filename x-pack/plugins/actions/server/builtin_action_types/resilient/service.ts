@@ -5,27 +5,25 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/logging';
 import axios from 'axios';
-import { omitBy, isNil } from 'lodash/fp';
-
-import { Logger } from '../../../../../../src/core/server';
-import {
-  ExternalServiceCredentials,
-  ExternalService,
-  ExternalServiceParams,
+import { isNil, omitBy } from 'lodash/fp';
+import type { ActionsConfigurationUtilities } from '../../actions_config';
+import { getErrorMessage, request } from '../lib/axios_utils';
+import * as i18n from './translations';
+import type {
   CreateCommentParams,
-  UpdateIncidentParams,
-  CreateIncidentParams,
   CreateIncidentData,
+  CreateIncidentParams,
+  ExternalService,
+  ExternalServiceCredentials,
+  ExternalServiceParams,
+  GetValueTextContentResponse,
   ResilientPublicConfigurationType,
   ResilientSecretConfigurationType,
+  UpdateIncidentParams,
   UpdateIncidentRequest,
-  GetValueTextContentResponse,
 } from './types';
-
-import * as i18n from './translations';
-import { getErrorMessage, request } from '../lib/axios_utils';
-import { ActionsConfigurationUtilities } from '../../actions_config';
 
 const VIEW_INCIDENT_URL = `#incidents`;
 

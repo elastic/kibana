@@ -5,18 +5,17 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import {
-  SavedObjectsImportResponse,
-  SavedObjectsImportConflictError,
+import type {
   SavedObjectsImportAmbiguousConflictError,
-  SavedObjectsImportUnsupportedTypeError,
-  SavedObjectsImportMissingReferencesError,
-  SavedObjectsImportUnknownError,
+  SavedObjectsImportConflictError,
   SavedObjectsImportFailure,
+  SavedObjectsImportMissingReferencesError,
+  SavedObjectsImportResponse,
   SavedObjectsImportSuccess,
+  SavedObjectsImportUnknownError,
+  SavedObjectsImportUnsupportedTypeError,
   SavedObjectsImportWarning,
-} from 'src/core/public';
+} from '../../../../core/server/saved_objects/import/types';
 
 export interface FailedImport {
   obj: Omit<SavedObjectsImportFailure, 'error'>;

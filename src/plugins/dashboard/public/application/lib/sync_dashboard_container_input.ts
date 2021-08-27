@@ -9,19 +9,26 @@
 import _ from 'lodash';
 import { Subscription } from 'rxjs';
 import { debounceTime, tap } from 'rxjs/operators';
-
-import { DashboardContainer } from '../embeddable';
-import { esFilters, Filter, Query } from '../../services/data';
-import { DashboardConstants, DashboardSavedObject } from '../..';
-import { setExpandedPanelId, setFullScreenMode, setPanels, setQuery } from '../state';
-import { diffDashboardContainerInput } from './diff_dashboard_state';
-import { replaceUrlHashQuery } from '../../../../kibana_utils/public';
-import { DashboardBuildContext, DashboardContainerInput } from '../../types';
+import type { Filter } from '../../../../data/common/es_query';
+import { esFilters } from '../../../../data/public/deprecated';
+import { replaceUrlHashQuery } from '../../../../kibana_utils/public/state_management/url/format';
+import { DashboardConstants } from '../../dashboard_constants';
+import type { DashboardSavedObject } from '../../saved_dashboards/saved_dashboard';
+import type { Query } from '../../services/data';
+import type { DashboardBuildContext, DashboardContainerInput } from '../../types';
+import { DashboardContainer } from '../embeddable/dashboard_container';
+import {
+  setExpandedPanelId,
+  setFullScreenMode,
+  setPanels,
+  setQuery,
+} from '../state/dashboard_state_slice';
+import { stateToDashboardContainerInput } from './convert_dashboard_state';
 import {
   getSearchSessionIdFromURL,
   getSessionURLObservable,
-  stateToDashboardContainerInput,
-} from '.';
+} from './dashboard_session_restoration';
+import { diffDashboardContainerInput } from './diff_dashboard_state';
 
 type SyncDashboardContainerCommon = DashboardBuildContext & {
   dashboardContainer: DashboardContainer;

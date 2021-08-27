@@ -5,11 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { schema } from '@kbn/config-schema';
-import { IRouter, ISavedObjectsRepository } from 'src/core/server';
-import { storeReport, reportSchema } from '../report';
-import { UsageCounter } from '../usage_counters';
+import type { IRouter } from '../../../../core/server/http/router/router';
+import type { ISavedObjectsRepository } from '../../../../core/server/saved_objects/service/lib/repository';
+import { reportSchema } from '../report/schema';
+import { storeReport } from '../report/store_report';
+import type { IUsageCounter as UsageCounter } from '../usage_counters/usage_counter';
 
 export function registerUiCountersRoute(
   router: IRouter,

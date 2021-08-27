@@ -5,8 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { EmbeddableInput, SavedObjectEmbeddableInput } from '..';
+import type { SavedObjectEmbeddableInput } from '../../../common/lib/saved_object_embeddable';
+import type { EmbeddableInput } from '../../../common/types';
 
 /**
  * Any embeddable that implements this interface will be able to use input that is

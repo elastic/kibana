@@ -5,12 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { FieldFormatEditorFactory } from '../types';
+import type { FieldFormatEditorFactory } from '../types';
 import { formatId } from './constants';
 
-export { defaultState, FormatEditorState } from './default';
 export type { FormatEditorProps } from '../types';
+export { defaultState, FormatEditorState } from './default';
 export type { DefaultFormatEditor } from './default';
 
 export const defaultFormatEditorFactory: FieldFormatEditorFactory = () =>

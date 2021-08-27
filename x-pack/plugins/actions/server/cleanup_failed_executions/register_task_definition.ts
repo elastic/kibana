@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { TaskManagerSetupContract } from '../../../task_manager/server/plugin';
 import { TASK_TYPE } from './constants';
-import { taskRunner, TaskRunnerOpts } from './task_runner';
-import { TaskManagerSetupContract } from '../../../task_manager/server';
+import type { TaskRunnerOpts } from './task_runner';
+import { taskRunner } from './task_runner';
 
 export function registerTaskDefinition(
   taskManager: TaskManagerSetupContract,

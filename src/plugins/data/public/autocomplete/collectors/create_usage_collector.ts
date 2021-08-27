@@ -5,12 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { first } from 'rxjs/operators';
 import { METRIC_TYPE } from '@kbn/analytics';
-import type { StartServicesAccessor } from 'src/core/public';
-import type { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
-import { AUTOCOMPLETE_EVENT_TYPE, AutocompleteUsageCollector } from './types';
+import { first } from 'rxjs/operators';
+import type { StartServicesAccessor } from '../../../../../core/public';
+import type { UsageCollectionSetup } from '../../../../usage_collection/public/plugin';
+import type { AutocompleteUsageCollector } from './types';
+import { AUTOCOMPLETE_EVENT_TYPE } from './types';
 
 export const createUsageCollector = (
   getStartServices: StartServicesAccessor,

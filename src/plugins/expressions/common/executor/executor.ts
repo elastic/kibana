@@ -7,28 +7,30 @@
  */
 
 /* eslint-disable max-classes-per-file */
-
+import type { SerializableRecord } from '@kbn/utility-types';
 import { cloneDeep, mapValues } from 'lodash';
 import { Observable } from 'rxjs';
-import type { SerializableRecord } from '@kbn/utility-types';
-import { ExecutorState, ExecutorContainer } from './container';
-import { createExecutorContainer } from './container';
-import { AnyExpressionFunctionDefinition, ExpressionFunction } from '../expression_functions';
-import { Execution, ExecutionParams, ExecutionResult } from '../execution/execution';
-import { IRegistry } from '../types';
-import { ExpressionType } from '../expression_types/expression_type';
-import { AnyExpressionTypeDefinition } from '../expression_types/types';
-import { ExpressionAstExpression, ExpressionAstFunction } from '../ast';
-import { ExpressionValueError, typeSpecs } from '../expression_types/specs';
-import { getByAlias } from '../util';
-import { SavedObjectReference } from '../../../../core/types';
-import {
+import type { SavedObjectReference } from '../../../../core/types/saved_objects';
+import { migrateToLatest } from '../../../kibana_utils/common/persistable_state/migrate_to_latest';
+import type {
   MigrateFunctionsObject,
-  migrateToLatest,
   PersistableStateService,
   VersionedState,
-} from '../../../kibana_utils/common';
-import { ExpressionExecutionParams } from '../service';
+} from '../../../kibana_utils/common/persistable_state/types';
+import type { ExpressionAstExpression, ExpressionAstFunction } from '../ast/types';
+import type { ExecutionParams, ExecutionResult } from '../execution/execution';
+import { Execution } from '../execution/execution';
+import { ExpressionFunction } from '../expression_functions/expression_function';
+import type { AnyExpressionFunctionDefinition } from '../expression_functions/types';
+import { ExpressionType } from '../expression_types/expression_type';
+import { typeSpecs } from '../expression_types/specs';
+import type { ExpressionValueError } from '../expression_types/specs/error';
+import type { AnyExpressionTypeDefinition } from '../expression_types/types';
+import type { ExpressionExecutionParams } from '../service/expressions_services';
+import type { IRegistry } from '../types/registry';
+import { getByAlias } from '../util/get_by_alias';
+import type { ExecutorContainer, ExecutorState } from './container';
+import { createExecutorContainer } from './container';
 
 export interface ExpressionExecOptions {
   /**

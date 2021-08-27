@@ -5,20 +5,18 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { constant, noop, identity } from 'lodash';
-import { i18n } from '@kbn/i18n';
-
-import { ISearchSource } from 'src/plugins/data/public';
-import { DatatableColumnType, SerializedFieldFormat } from 'src/plugins/expressions/common';
-import type { RequestAdapter } from 'src/plugins/inspector/common';
-
 import { estypes } from '@elastic/elasticsearch';
-import { initParams } from './agg_params';
+import { i18n } from '@kbn/i18n';
+import { constant, identity, noop } from 'lodash';
+import type { DatatableColumnType } from '../../../../expressions/common/expression_types/specs/datatable';
+import type { SerializedFieldFormat } from '../../../../expressions/common/types/common';
+import { RequestAdapter } from '../../../../inspector/common/adapters/request/request_adapter';
+import type { ISearchSource } from '../search_source/types';
 import { AggConfig } from './agg_config';
-import { IAggConfigs } from './agg_configs';
-import { BaseParamType } from './param_types/base';
+import type { IAggConfigs } from './agg_configs';
+import { initParams } from './agg_params';
 import { AggParamType } from './param_types/agg';
+import { BaseParamType } from './param_types/base';
 
 type PostFlightRequestFn<TAggConfig> = (
   resp: estypes.SearchResponse<any>,

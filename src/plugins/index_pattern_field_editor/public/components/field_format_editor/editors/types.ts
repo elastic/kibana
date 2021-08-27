@@ -5,9 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import type { ComponentType } from 'react';
-import type { FieldFormat } from '../../../../../field_formats/common';
+import { FieldFormat } from '../../../../../field_formats/common/field_format';
 import type { FormatSelectEditorProps } from '../field_format_editor';
 
 /**

@@ -5,8 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { IndexPattern } from '../../../../data/common';
+import { IndexPattern } from '../../../../data/common/index_patterns/index_patterns/index_pattern';
 
 // We store this outside the function as a constant, so we're not creating a new array every time
 // the function is returning this. A changing array might cause the data grid to think it got

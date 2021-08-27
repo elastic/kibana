@@ -5,11 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import type { EuiSwitchEvent } from '@elastic/eui';
 import {
   EuiButton,
   EuiButtonEmpty,
-  // @ts-ignore
   EuiCodeEditor,
   EuiFieldText,
   EuiFlexGroup,
@@ -19,21 +18,19 @@ import {
   EuiPopoverTitle,
   EuiSpacer,
   EuiSwitch,
-  EuiSwitchEvent,
 } from '@elastic/eui';
+import type { FieldFilter, Filter } from '@kbn/es-query';
+import { buildCustomFilter, buildFilter, cleanFilter, getFilterParams } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
-import {
-  Filter,
-  FieldFilter,
-  buildFilter,
-  buildCustomFilter,
-  cleanFilter,
-  getFilterParams,
-} from '@kbn/es-query';
+import type { InjectedIntl } from '@kbn/i18n/react';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import { get } from 'lodash';
 import React, { Component } from 'react';
-import { GenericComboBox, GenericComboBoxProps } from './generic_combo_box';
+import type { IFieldType } from '../../../../common/index_patterns/fields/types';
+import type { IIndexPattern } from '../../../../common/index_patterns/types';
+import { getIndexPatternFromFilter } from '../../../query/filter_manager/lib/get_index_pattern_from_filter';
+import type { GenericComboBoxProps } from './generic_combo_box';
+import { GenericComboBox } from './generic_combo_box';
 import {
   getFieldFromFilter,
   getFilterableFields,
@@ -41,12 +38,10 @@ import {
   getOperatorOptions,
   isFilterValid,
 } from './lib/filter_editor_utils';
-import { Operator } from './lib/filter_operators';
-import { PhraseValueInput } from './phrase_value_input';
+import type { Operator } from './lib/filter_operators';
 import { PhrasesValuesInput } from './phrases_values_input';
+import { PhraseValueInput } from './phrase_value_input';
 import { RangeValueInput } from './range_value_input';
-import { getIndexPatternFromFilter } from '../../../query';
-import { IIndexPattern, IFieldType } from '../../..';
 
 export interface Props {
   filter: Filter;

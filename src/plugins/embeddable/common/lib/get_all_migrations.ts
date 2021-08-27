@@ -5,13 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { baseEmbeddableMigrations } from './migrate_base_input';
-import {
+import type {
   MigrateFunctionsObject,
   PersistableState,
   PersistableStateMigrateFn,
-} from '../../../kibana_utils/common/persistable_state';
+} from '../../../kibana_utils/common/persistable_state/types';
+import { baseEmbeddableMigrations } from './migrate_base_input';
 
 export const getAllMigrations = (
   factories: unknown[],

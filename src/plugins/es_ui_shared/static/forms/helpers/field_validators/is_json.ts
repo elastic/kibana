@@ -5,10 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { ValidationFunc } from '../../hook_form_lib';
-import { isJSON } from '../../../validators/string';
-import { ERROR_CODE } from './types';
+import { isJSON } from '../../../validators/string/is_json';
+import type { ValidationFunc } from '../../hook_form_lib/types';
+import type { ERROR_CODE } from './types';
 
 export const isJsonField = (
   message: string,

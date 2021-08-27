@@ -5,23 +5,26 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { fromPairs } from 'lodash';
+import React, { useCallback, useMemo, useState } from 'react';
+import { IndexPattern } from '../../../../../data/common/index_patterns/index_patterns/index_pattern';
+import { SortDirection } from '../../../../../data/common/search/search_source/types';
+import { MarkdownSimple } from '../../../../../kibana_react/public/markdown';
+import { toMountPoint } from '../../../../../kibana_react/public/util/to_mount_point';
 import { CONTEXT_TIE_BREAKER_FIELDS_SETTING } from '../../../../common';
-import { DiscoverServices } from '../../../build_services';
+import type { DiscoverServices } from '../../../build_services';
 import { fetchAnchorProvider } from '../../angular/context/api/anchor';
-import { EsHitRecord, fetchContextProvider, SurrDocType } from '../../angular/context/api/context';
-import { MarkdownSimple, toMountPoint } from '../../../../../kibana_react/public';
-import { IndexPattern, SortDirection } from '../../../../../data/public';
+import type { EsHitRecord } from '../../angular/context/api/context';
+import { fetchContextProvider, SurrDocType } from '../../angular/context/api/context';
+import { getFirstSortableField } from '../../angular/context/api/utils/sorting';
+import type { ContextFetchState } from '../../angular/context_query_state';
 import {
-  ContextFetchState,
   FailureReason,
   getInitialContextQueryState,
   LoadingStatus,
 } from '../../angular/context_query_state';
-import { AppState } from '../../angular/context_state';
-import { getFirstSortableField } from '../../angular/context/api/utils/sorting';
+import type { AppState } from '../../angular/context_state';
 
 const createError = (statusKey: string, reason: FailureReason, error?: Error) => ({
   [statusKey]: { value: LoadingStatus.FAILED, error, reason },

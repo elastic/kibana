@@ -5,10 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { Trigger } from './trigger';
+import { UiActionsService } from '../service/ui_actions_service';
+import type { Trigger } from './trigger';
 import { TriggerContract } from './trigger_contract';
-import { UiActionsService } from '../service';
 
 /**
  * Internal representation of a trigger kept for consumption only internally

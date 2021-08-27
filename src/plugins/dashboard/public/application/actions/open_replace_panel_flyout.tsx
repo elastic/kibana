@@ -7,16 +7,16 @@
  */
 
 import React from 'react';
-import { CoreStart } from 'src/core/public';
-import { toMountPoint } from '../../services/kibana_react';
-import { ReplacePanelFlyout } from './replace_panel_flyout';
-import {
-  IContainer,
-  IEmbeddable,
-  EmbeddableStart,
-  EmbeddableInput,
+import type { CoreStart } from '../../../../../core/public';
+import type { EmbeddableInput } from '../../../../embeddable/common/types';
+import type { IContainer } from '../../../../embeddable/public/lib/containers/i_container';
+import type {
   EmbeddableOutput,
-} from '../../services/embeddable';
+  IEmbeddable,
+} from '../../../../embeddable/public/lib/embeddables/i_embeddable';
+import type { EmbeddableStart } from '../../../../embeddable/public/plugin';
+import { toMountPoint } from '../../../../kibana_react/public/util/to_mount_point';
+import { ReplacePanelFlyout } from './replace_panel_flyout';
 
 export async function openReplacePanelFlyout(options: {
   embeddable: IContainer;

@@ -5,19 +5,17 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { FunctionComponent } from 'react';
-
-import {
-  DataPublicPluginStart,
-  RuntimeField,
-  RuntimeType,
-  UsageCollectionStart,
-} from './shared_imports';
-import { OpenFieldEditorOptions } from './open_editor';
-import { OpenFieldDeleteModalOptions } from './open_delete_modal';
-import { FormatEditorServiceSetup, FormatEditorServiceStart } from './service';
-import { DeleteFieldProviderProps } from './components';
+import type { FunctionComponent } from 'react';
+import type { RuntimeField, RuntimeType } from '../../data/common/index_patterns/types';
+import type { DataPublicPluginStart } from '../../data/public/types';
+import type { UsageCollectionStart } from '../../usage_collection/public/plugin';
+import type { Props as DeleteFieldProviderProps } from './components/delete_field_provider';
+import type { OpenFieldDeleteModalOptions } from './open_delete_modal';
+import type { OpenFieldEditorOptions } from './open_editor';
+import type {
+  FormatEditorServiceSetup,
+  FormatEditorServiceStart,
+} from './service/format_editor_service';
 
 export interface PluginSetup {
   fieldFormatEditors: FormatEditorServiceSetup['fieldFormatEditors'];

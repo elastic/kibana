@@ -5,17 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { ElasticsearchClient } from 'kibana/server';
 import { keyBy } from 'lodash';
-
-import {
-  getFieldCapabilities,
-  resolveTimePattern,
-  createNoMatchingIndicesError,
-  getCapabilitiesForRollupIndices,
-  mergeCapabilitiesWithFields,
-} from './lib';
+import type { ElasticsearchClient } from '../../../../../core/server/elasticsearch/client/types';
+import { createNoMatchingIndicesError } from './lib/errors';
+import { getFieldCapabilities } from './lib/field_capabilities/field_capabilities';
+import { getCapabilitiesForRollupIndices } from './lib/map_capabilities';
+import { mergeCapabilitiesWithFields } from './lib/merge_capabilities_with_fields';
+import { resolveTimePattern } from './lib/resolve_time_pattern';
 
 export interface FieldDescriptor {
   aggregatable: boolean;

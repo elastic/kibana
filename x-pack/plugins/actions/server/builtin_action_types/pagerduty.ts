@@ -4,14 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { curry, isUndefined, pick, omitBy } from 'lodash';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
-import { schema, TypeOf } from '@kbn/config-schema';
+import type { Logger } from '@kbn/logging';
+import { curry, isUndefined, omitBy, pick } from 'lodash';
+import type { ActionTypeExecutorResult } from '../../common/types';
+import type { ActionsConfigurationUtilities } from '../actions_config';
+import type { ActionType, ActionTypeExecutorOptions } from '../types';
 import { postPagerduty } from './lib/post_pagerduty';
-import { Logger } from '../../../../../src/core/server';
-import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../types';
-import { ActionsConfigurationUtilities } from '../actions_config';
 
 // uses the PagerDuty Events API v2
 // https://v2.developer.pagerduty.com/docs/events-api-v2

@@ -7,13 +7,16 @@
  */
 
 import React from 'react';
-import { OverlayStart } from '../../../../../core/public';
+import type { OverlayStart } from '../../../../../core/public/overlays/overlay_service';
+import type { IEmbeddable } from '../../../../embeddable/public/lib/embeddables/i_embeddable';
+import { EmbeddableStateTransfer } from '../../../../embeddable/public/lib/state_transfer/embeddable_state_transfer';
+import { toMountPoint } from '../../../../kibana_react/public/util/to_mount_point';
+import type { PresentationUtilPluginStart } from '../../../../presentation_util/public/types';
+import type { Action } from '../../../../ui_actions/public/actions/action';
+import { IncompatibleActionError } from '../../../../ui_actions/public/actions/incompatible_action_error';
 import { dashboardCopyToDashboardAction } from '../../dashboard_strings';
-import { EmbeddableStateTransfer, IEmbeddable } from '../../services/embeddable';
-import { toMountPoint } from '../../services/kibana_react';
-import { PresentationUtilPluginStart } from '../../services/presentation_util';
-import { Action, IncompatibleActionError } from '../../services/ui_actions';
-import { DASHBOARD_CONTAINER_TYPE, DashboardContainer } from '../embeddable';
+import { DASHBOARD_CONTAINER_TYPE } from '../embeddable/dashboard_constants';
+import { DashboardContainer } from '../embeddable/dashboard_container';
 import { CopyToDashboardModal } from './copy_to_dashboard_modal';
 
 export const ACTION_COPY_TO_DASHBOARD = 'copyToDashboard';

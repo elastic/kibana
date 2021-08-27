@@ -5,8 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { vislibColorMaps, ColorMap, ColorSchema } from './color_maps';
+import type { ColorMap, ColorSchema } from './color_maps';
+import { vislibColorMaps } from './color_maps';
 
 export const truncatedColorMaps: ColorMap = {};
 

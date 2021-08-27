@@ -7,9 +7,11 @@
  */
 
 import moment from 'moment';
-import { IAggConfig } from '../agg_config';
-import { GenericBucket, IAggConfigs, KBN_FIELD_TYPES } from '../../../../common';
-import { AggType, AggTypeConfig } from '../agg_type';
+import { KBN_FIELD_TYPES } from '../../../../common';
+import type { IAggConfig } from '../agg_config';
+import type { GenericBucket, IAggConfigs } from '../agg_configs';
+import type { AggTypeConfig } from '../agg_type';
+import { AggType } from '../agg_type';
 import { AggParamType } from '../param_types/agg';
 
 export interface IBucketAggConfig extends IAggConfig {

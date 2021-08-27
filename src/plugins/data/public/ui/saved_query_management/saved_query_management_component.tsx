@@ -5,26 +5,24 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import {
-  EuiPopover,
-  EuiPopoverTitle,
-  EuiPopoverFooter,
-  EuiButtonEmpty,
   EuiButton,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiListGroup,
   EuiPagination,
-  EuiText,
+  EuiPopover,
+  EuiPopoverFooter,
+  EuiPopoverTitle,
   EuiSpacer,
-  EuiIcon,
+  EuiText,
 } from '@elastic/eui';
-
 import { i18n } from '@kbn/i18n';
-import React, { useCallback, useEffect, useState, Fragment, useRef } from 'react';
 import { sortBy } from 'lodash';
-import { SavedQuery, SavedQueryService } from '../..';
+import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react';
+import type { SavedQuery, SavedQueryService } from '../../query/saved_query/types';
 import { SavedQueryListItem } from './saved_query_list_item';
 
 const perPage = 50;

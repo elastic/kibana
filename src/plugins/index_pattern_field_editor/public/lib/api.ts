@@ -5,10 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { HttpSetup } from 'src/core/public';
+import type { HttpSetup } from '../../../../core/public/http/types';
+import { sendRequest } from '../../../es_ui_shared/public/request/send_request';
 import { API_BASE_PATH } from '../../common/constants';
-import { sendRequest } from '../shared_imports';
-import { FieldPreviewContext, FieldPreviewResponse } from '../types';
+import type { FieldPreviewContext, FieldPreviewResponse } from '../types';
 
 export const initApi = (httpClient: HttpSetup) => {
   const getFieldPreview = ({

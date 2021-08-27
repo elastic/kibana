@@ -5,14 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import React, { useState, useEffect } from 'react';
 import { I18nProvider } from '@kbn/i18n/react';
-import { SavedObject } from 'kibana/public';
-import { IndexPattern, IndexPatternAttributes } from 'src/plugins/data/public';
-
-import { IndexPatternRef } from './types';
+import React, { useEffect, useState } from 'react';
+import type { SavedObject } from '../../../../../../../../core/types/saved_objects';
+import { IndexPattern } from '../../../../../../../data/common/index_patterns/index_patterns/index_pattern';
+import type { IndexPatternAttributes } from '../../../../../../../data/common/index_patterns/types';
 import { ChangeIndexPattern } from './change_indexpattern';
+import type { IndexPatternRef } from './types';
+
 export interface DiscoverIndexPatternProps {
   /**
    * list of available index patterns, if length > 1, component offers a "change" link

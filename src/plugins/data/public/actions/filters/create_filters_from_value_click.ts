@@ -7,10 +7,11 @@
  */
 
 import _ from 'lodash';
-import { Datatable } from '../../../../../plugins/expressions/public';
-import { esFilters, Filter } from '../../../public';
-import { getIndexPatterns, getSearchService } from '../../../public/services';
-import { AggConfigSerialized } from '../../../common/search/aggs';
+import type { Datatable } from '../../../../expressions/common/expression_types/specs/datatable';
+import type { Filter } from '../../../common/es_query';
+import type { AggConfigSerialized } from '../../../common/search/aggs/agg_config';
+import { esFilters } from '../../deprecated';
+import { getIndexPatterns, getSearchService } from '../../services';
 
 /** @internal */
 export interface ValueClickDataContext {

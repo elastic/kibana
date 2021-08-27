@@ -5,19 +5,16 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { IUiSettingsClient } from 'kibana/public';
-import {
+import type { IUiSettingsClient } from '../../../../core/public/ui_settings/types';
+import type {
   EnvironmentName,
-  projectIDs,
+  EnvironmentStatus,
   Project,
   ProjectConfig,
   ProjectID,
-  EnvironmentStatus,
-  environmentNames,
-  isProjectEnabledByStatus,
   SolutionName,
-} from '../../common';
+} from '../../common/labs';
+import { environmentNames, isProjectEnabledByStatus, projectIDs } from '../../common/labs';
 
 export interface PresentationLabsService {
   isProjectEnabled: (id: ProjectID) => boolean;

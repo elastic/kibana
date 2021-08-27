@@ -5,11 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { ISearchOptions, ISearchSource } from 'src/plugins/data/public';
-import { ExpressionAstExpression } from 'src/plugins/expressions/common';
-import { IAggConfigs } from '../agg_configs';
-import { IAggConfig } from '../agg_config';
+import type { ExpressionAstExpression } from '../../../../../expressions/common/ast/types';
+import type { ISearchSource } from '../../search_source/types';
+import type { ISearchOptions } from '../../types';
+import type { IAggConfig } from '../agg_config';
+import type { IAggConfigs } from '../agg_configs';
 
 export class BaseParamType<TAggConfig extends IAggConfig = IAggConfig> {
   name: string;

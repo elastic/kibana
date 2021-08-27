@@ -5,16 +5,15 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { i18n } from '@kbn/i18n';
-import React, { useEffect } from 'react';
 import { EuiCallOut } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { RouteComponentProps } from 'react-router-dom';
-
-import { useKibana, toMountPoint } from '../../services/kibana_react';
-import { DashboardAppServices } from '../../types';
-import { DashboardConstants } from '../..';
+import React, { useEffect } from 'react';
+import type { RouteComponentProps } from 'react-router-dom';
+import { useKibana } from '../../../../kibana_react/public/context/context';
+import { toMountPoint } from '../../../../kibana_react/public/util/to_mount_point';
+import { DashboardConstants } from '../../dashboard_constants';
+import type { DashboardAppServices } from '../../types';
 
 let bannerId: string | undefined;
 

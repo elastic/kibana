@@ -8,25 +8,22 @@
 
 import _ from 'lodash';
 import uuid from 'uuid';
-
-import { CoreStart } from 'src/core/public';
-import { Action, IncompatibleActionError } from '../../services/ui_actions';
-import { SavedObject } from '../../services/saved_objects';
-import {
-  ViewMode,
-  PanelState,
-  IEmbeddable,
-  PanelNotFoundError,
-  EmbeddableInput,
-  SavedObjectEmbeddableInput,
-  isErrorEmbeddable,
-} from '../../services/embeddable';
-import {
-  placePanelBeside,
-  IPanelPlacementBesideArgs,
-} from '../embeddable/panel/dashboard_panel_placement';
+import type { CoreStart } from '../../../../../core/public';
+import type { SavedObjectEmbeddableInput } from '../../../../embeddable/common/lib/saved_object_embeddable';
+import type { EmbeddableInput, PanelState } from '../../../../embeddable/common/types';
+import { ViewMode } from '../../../../embeddable/common/types';
+import { isErrorEmbeddable } from '../../../../embeddable/public/lib/embeddables/error_embeddable';
+import type { IEmbeddable } from '../../../../embeddable/public/lib/embeddables/i_embeddable';
+import { PanelNotFoundError } from '../../../../embeddable/public/lib/errors';
+import type { SavedObject } from '../../../../saved_objects/public/types';
+import type { Action } from '../../../../ui_actions/public/actions/action';
+import { IncompatibleActionError } from '../../../../ui_actions/public/actions/incompatible_action_error';
+import type { DashboardPanelState } from '../../../common/types';
 import { dashboardClonePanelAction } from '../../dashboard_strings';
-import { DashboardPanelState, DASHBOARD_CONTAINER_TYPE, DashboardContainer } from '..';
+import { DASHBOARD_CONTAINER_TYPE } from '../embeddable/dashboard_constants';
+import { DashboardContainer } from '../embeddable/dashboard_container';
+import type { IPanelPlacementBesideArgs } from '../embeddable/panel/dashboard_panel_placement';
+import { placePanelBeside } from '../embeddable/panel/dashboard_panel_placement';
 
 export const ACTION_CLONE_PANEL = 'clonePanel';
 

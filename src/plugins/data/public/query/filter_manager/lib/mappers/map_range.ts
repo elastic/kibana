@@ -5,11 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import type { Filter, RangeFilter } from '@kbn/es-query';
+import { FILTERS, isRangeFilter, isScriptedRangeFilter } from '@kbn/es-query';
 import { get, hasIn } from 'lodash';
-import { RangeFilter, isScriptedRangeFilter, isRangeFilter, Filter, FILTERS } from '@kbn/es-query';
-
-import { FilterValueFormatter } from '../../../../../common';
+import type { FilterValueFormatter } from '../../../../../common/types';
 
 const getFormattedValueFn = (left: any, right: any) => {
   return (formatter?: FilterValueFormatter) => {

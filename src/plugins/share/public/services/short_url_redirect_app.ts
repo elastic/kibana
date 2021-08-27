@@ -5,8 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { CoreSetup } from 'kibana/public';
+import type { CoreSetup } from '../../../../core/public';
 import { getUrlIdFromGotoRoute, getUrlPath, GOTO_PREFIX } from '../../common/short_url_routes';
 
 export const createShortUrlRedirectApp = (core: CoreSetup, location: Location) => ({

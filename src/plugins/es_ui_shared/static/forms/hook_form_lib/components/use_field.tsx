@@ -5,12 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import React, { FunctionComponent } from 'react';
-
-import { FieldHook, FieldConfig, FormData } from '../types';
-import { useField } from '../hooks';
+import type { FunctionComponent } from 'react';
+import React from 'react';
 import { useFormContext } from '../form_context';
+import { useField } from '../hooks/use_field';
+import type { FieldConfig, FieldHook, FormData } from '../types';
 
 export interface Props<T, FormType = FormData, I = T> {
   path: string;

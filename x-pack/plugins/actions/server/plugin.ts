@@ -4,88 +4,79 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { Logger } from '@kbn/logging';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import {
-  PluginInitializerContext,
-  Plugin,
-  CoreSetup,
-  CoreStart,
-  KibanaRequest,
-  Logger,
-  IContextProvider,
-  ElasticsearchServiceStart,
-  SavedObjectsClientContract,
-  SavedObjectsBulkGetObject,
-} from '../../../../src/core/server';
-
-import {
+import type { CoreSetup, CoreStart } from '../../../../src/core/server';
+import type { IContextProvider } from '../../../../src/core/server/context/container/context';
+import type { ElasticsearchServiceStart } from '../../../../src/core/server/elasticsearch/types';
+import { KibanaRequest } from '../../../../src/core/server/http/router/request';
+import type { Plugin, PluginInitializerContext } from '../../../../src/core/server/plugins/types';
+import type { SavedObjectsBulkGetObject } from '../../../../src/core/server/saved_objects/service/saved_objects_client';
+import type { SavedObjectsClientContract } from '../../../../src/core/server/saved_objects/types';
+import type { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server/plugin';
+import type {
   EncryptedSavedObjectsPluginSetup,
   EncryptedSavedObjectsPluginStart,
-} from '../../encrypted_saved_objects/server';
-import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
-import { LicensingPluginSetup, LicensingPluginStart } from '../../licensing/server';
-import { SpacesPluginStart, SpacesPluginSetup } from '../../spaces/server';
-import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
-import { SecurityPluginSetup } from '../../security/server';
-import {
-  ensureCleanupFailedExecutionsTaskScheduled,
-  registerCleanupFailedExecutionsTaskDefinition,
-} from './cleanup_failed_executions';
-
-import { ActionsConfig, getValidatedConfig } from './config';
-import { resolveCustomHosts } from './lib/custom_host_settings';
+} from '../../encrypted_saved_objects/server/plugin';
+import type { IEventLogger, IEventLogService } from '../../event_log/server/types';
+import type { PluginSetupContract as FeaturesPluginSetup } from '../../features/server/plugin';
+import type { LicensingPluginSetup, LicensingPluginStart } from '../../licensing/server/types';
+import type { SecurityPluginSetup } from '../../security/server/plugin';
+import type { SpacesPluginSetup, SpacesPluginStart } from '../../spaces/server/plugin';
+import type {
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from '../../task_manager/server/plugin';
+import { AlertHistoryEsIndexConnectorId } from '../common/alert_history_schema';
 import { ActionsClient } from './actions_client';
-import { ActionTypeRegistry } from './action_type_registry';
-import {
-  createExecutionEnqueuerFunction,
-  createEphemeralExecutionEnqueuerFunction,
-} from './create_execute_function';
-import { registerBuiltInActionTypes } from './builtin_action_types';
-import { registerActionsUsageCollector } from './usage';
-import {
-  ActionExecutor,
-  TaskRunnerFactory,
-  LicenseState,
-  ILicenseState,
-  spaceIdToNamespace,
-} from './lib';
-import {
-  Services,
-  ActionType,
-  PreConfiguredAction,
-  ActionTypeConfig,
-  ActionTypeSecrets,
-  ActionTypeParams,
-  ActionsRequestHandlerContext,
-} from './types';
-
 import { getActionsConfigurationUtilities } from './actions_config';
-
-import { defineRoutes } from './routes';
-import { IEventLogger, IEventLogService } from '../../event_log/server';
-import { initializeActionsTelemetry, scheduleActionsTelemetry } from './usage/task';
+import { ActionTypeRegistry } from './action_type_registry';
+import { ActionsAuthorization } from './authorization/actions_authorization';
+import { ActionsAuthorizationAuditLogger } from './authorization/audit_logger';
+import {
+  AuthorizationMode,
+  getAuthorizationModeBySource,
+} from './authorization/get_authorization_mode_by_source';
+import { registerBuiltInActionTypes } from './builtin_action_types';
+import { ensureCleanupFailedExecutionsTaskScheduled } from './cleanup_failed_executions/ensure_scheduled';
+import { registerCleanupFailedExecutionsTaskDefinition } from './cleanup_failed_executions/register_task_definition';
+import type { ActionsConfig } from './config';
+import { getValidatedConfig } from './config';
+import { EVENT_LOG_ACTIONS, EVENT_LOG_PROVIDER } from './constants/event_log';
 import {
   ACTION_SAVED_OBJECT_TYPE,
   ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
   ALERT_SAVED_OBJECT_TYPE,
 } from './constants/saved_objects';
-import { setupSavedObjects } from './saved_objects';
-import { ACTIONS_FEATURE } from './feature';
-import { ActionsAuthorization } from './authorization/actions_authorization';
-import { ActionsAuthorizationAuditLogger } from './authorization/audit_logger';
-import { ActionExecutionSource } from './lib/action_execution_source';
 import {
-  getAuthorizationModeBySource,
-  AuthorizationMode,
-} from './authorization/get_authorization_mode_by_source';
+  createEphemeralExecutionEnqueuerFunction,
+  createExecutionEnqueuerFunction,
+} from './create_execute_function';
+import { ACTIONS_FEATURE } from './feature';
+import type { ActionExecutionSource } from './lib/action_execution_source';
+import { ActionExecutor } from './lib/action_executor';
+import { resolveCustomHosts } from './lib/custom_host_settings';
 import { ensureSufficientLicense } from './lib/ensure_sufficient_license';
+import type { ILicenseState } from './lib/license_state';
+import { LicenseState } from './lib/license_state';
 import { renderMustacheObject } from './lib/mustache_renderer';
+import { spaceIdToNamespace } from './lib/space_id_to_namespace';
+import { TaskRunnerFactory } from './lib/task_runner_factory';
 import { getAlertHistoryEsIndex } from './preconfigured_connectors/alert_history_es_index/alert_history_es_index';
 import { createAlertHistoryIndexTemplate } from './preconfigured_connectors/alert_history_es_index/create_alert_history_index_template';
-import { AlertHistoryEsIndexConnectorId } from '../common';
-import { EVENT_LOG_ACTIONS, EVENT_LOG_PROVIDER } from './constants/event_log';
+import { defineRoutes } from './routes';
+import { setupSavedObjects } from './saved_objects';
+import type {
+  ActionsRequestHandlerContext,
+  ActionType,
+  ActionTypeConfig,
+  ActionTypeParams,
+  ActionTypeSecrets,
+  PreConfiguredAction,
+  Services,
+} from './types';
+import { registerActionsUsageCollector } from './usage/actions_usage_collector';
+import { initializeActionsTelemetry, scheduleActionsTelemetry } from './usage/task';
 
 export interface PluginSetupContract {
   registerType<

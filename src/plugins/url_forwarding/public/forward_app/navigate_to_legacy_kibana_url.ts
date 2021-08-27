@@ -5,9 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { ApplicationStart, IBasePath } from 'kibana/public';
-import { ForwardDefinition } from '../index';
+import type { ApplicationStart } from '../../../../core/public/application/types';
+import type { IBasePath } from '../../../../core/public/http/types';
+import type { ForwardDefinition } from '../plugin';
 import { normalizePath } from './normalize_path';
 
 export const navigateToLegacyKibanaUrl = (

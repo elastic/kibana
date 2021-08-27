@@ -5,9 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { i18n } from '@kbn/i18n';
-import { ChromeStart, DocLinksStart } from 'kibana/public';
+import type { ChromeStart } from '../../../../../../core/public/chrome/types';
+import type { DocLinksStart } from '../../../../../../core/public/doc_links/doc_links_service';
 
 export function addHelpMenuToAppChrome(chrome: ChromeStart, docLinks: DocLinksStart) {
   chrome.setHelpExtension({

@@ -6,14 +6,15 @@
  * Side Public License, v 1.
  */
 
-import _ from 'lodash';
-import MarkdownIt from 'markdown-it';
 import { EMSClient, FileLayer as EMSFileLayer, TMSService } from '@elastic/ems-client';
 import { i18n } from '@kbn/i18n';
-import { getKibanaVersion } from '../kibana_services';
-import { FileLayer, IServiceSettings, TmsLayer } from './service_settings_types';
-import { ORIGIN, TMS_IN_YML_ID } from '../../common';
+import _ from 'lodash';
+import MarkdownIt from 'markdown-it';
+import { TMS_IN_YML_ID } from '../../common';
+import { ORIGIN } from '../../common/origin';
 import type { MapsEmsConfig, TileMapConfig } from '../../config';
+import { getKibanaVersion } from '../kibana_services';
+import type { FileLayer, IServiceSettings, TmsLayer } from './service_settings_types';
 
 /**
  * This class provides access to the EMS-layers and the kibana.yml configured layers through a single interface.

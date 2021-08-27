@@ -8,18 +8,22 @@
 
 import _ from 'lodash';
 import React, { useEffect, useRef } from 'react';
-import { CoreStart } from 'src/core/public';
-import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
-import { KibanaContextProvider } from '../../../../kibana_react/public';
-import { QueryStart, SavedQuery } from '../../query';
-import { SearchBar, SearchBarOwnProps } from './';
+import { SearchBar } from '.';
+import type { CoreStart } from '../../../../../core/public';
+import { KibanaContextProvider } from '../../../../kibana_react/public/context/context';
+import type { IStorageWrapper } from '../../../../kibana_utils/public/storage/types';
+import type { UsageCollectionSetup } from '../../../../usage_collection/public/plugin';
+import type { Query } from '../../../common';
+import type { Filter } from '../../../common/es_query';
+import type { TimeRange } from '../../../common/query/timefilter/types';
+import type { QueryStart } from '../../query/query_service';
+import type { SavedQuery } from '../../query/saved_query/types';
+import type { DataPublicPluginStart } from '../../types';
 import { useFilterManager } from './lib/use_filter_manager';
-import { useTimefilter } from './lib/use_timefilter';
-import { useSavedQuery } from './lib/use_saved_query';
-import { DataPublicPluginStart } from '../../types';
-import { Filter, Query, TimeRange } from '../../../common';
 import { useQueryStringManager } from './lib/use_query_string_manager';
-import { UsageCollectionSetup } from '../../../../usage_collection/public';
+import { useSavedQuery } from './lib/use_saved_query';
+import { useTimefilter } from './lib/use_timefilter';
+import type { SearchBarOwnProps } from './search_bar';
 
 interface StatefulSearchBarDeps {
   core: CoreStart;

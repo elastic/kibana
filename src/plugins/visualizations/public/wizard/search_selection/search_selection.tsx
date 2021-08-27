@@ -5,15 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { EuiModalBody, EuiModalHeader, EuiModalHeaderTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
-import { IUiSettingsClient, SavedObjectsStart } from '../../../../../core/public';
-
-import { SavedObjectFinderUi } from '../../../../../plugins/saved_objects/public';
-import type { BaseVisType } from '../../vis_types';
+import type { SavedObjectsStart } from '../../../../../core/public/saved_objects/saved_objects_service';
+import type { IUiSettingsClient } from '../../../../../core/public/ui_settings/types';
+import { SavedObjectFinderUi } from '../../../../saved_objects/public/finder/saved_object_finder';
+import { BaseVisType } from '../../vis_types/base_vis_type';
 import { DialogNavigation } from '../dialog_navigation';
 
 interface SearchSelectionProps {

@@ -5,10 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { IRouter } from 'src/core/server';
-import { SampleDatasetSchema } from '../lib/sample_dataset_registry_types';
+import type { IRouter } from '../../../../../../core/server/http/router/router';
 import { createIndexName } from '../lib/create_index_name';
+import type { SampleDatasetSchema } from '../lib/sample_dataset_schema';
 
 const NOT_INSTALLED = 'not_installed';
 const INSTALLED = 'installed';

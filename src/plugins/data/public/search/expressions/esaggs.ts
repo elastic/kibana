@@ -5,18 +5,17 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { get } from 'lodash';
 import { defer } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
-import { StartServicesAccessor } from 'src/core/public';
-import {
+import type { StartServicesAccessor } from '../../../../../core/public';
+import type {
   EsaggsExpressionFunctionDefinition,
   EsaggsStartDependencies,
-  getEsaggsMeta,
-  handleEsaggsRequest,
-} from '../../../common/search/expressions';
-import { DataPublicPluginStart, DataStartDependencies } from '../../types';
+} from '../../../common/search/expressions/esaggs/esaggs_fn';
+import { getEsaggsMeta } from '../../../common/search/expressions/esaggs/esaggs_fn';
+import { handleEsaggsRequest } from '../../../common/search/expressions/esaggs/request_handler';
+import type { DataPublicPluginStart, DataStartDependencies } from '../../types';
 
 /**
  * Returns the expression function definition. Any stateful dependencies are accessed

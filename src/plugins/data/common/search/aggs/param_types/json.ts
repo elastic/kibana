@@ -7,8 +7,7 @@
  */
 
 import _ from 'lodash';
-
-import { IAggConfig } from '../agg_config';
+import type { IAggConfig } from '../agg_config';
 import { BaseParamType } from './base';
 
 export class JsonParamType extends BaseParamType {

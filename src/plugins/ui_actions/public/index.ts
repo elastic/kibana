@@ -5,41 +5,41 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { PluginInitializerContext } from '../../../core/public';
+import type { PluginInitializerContext } from '../../../core/public/plugins/plugin_context';
 import { UiActionsPlugin } from './plugin';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new UiActionsPlugin(initializerContext);
 }
 
-export { UiActionsSetup, UiActionsStart } from './plugin';
-export { UiActionsServiceParams, UiActionsService } from './service';
 export {
   Action,
   ActionDefinition as UiActionsActionDefinition,
+  ActionExecutionContext,
+  ActionExecutionMeta,
   createAction,
   IncompatibleActionError,
 } from './actions';
 export { buildContextMenuForActions } from './context_menu';
+export { UiActionsSetup, UiActionsStart } from './plugin';
+export { UiActionsService, UiActionsServiceParams } from './service';
+export {
+  RowClickContext,
+  rowClickTrigger,
+  ROW_CLICK_TRIGGER,
+  Trigger,
+  visualizeFieldTrigger,
+  visualizeGeoFieldTrigger,
+  VISUALIZE_FIELD_TRIGGER,
+  VISUALIZE_GEO_FIELD_TRIGGER,
+} from './triggers';
+export {
+  ACTION_VISUALIZE_FIELD,
+  ACTION_VISUALIZE_GEO_FIELD,
+  ACTION_VISUALIZE_LENS_FIELD,
+  VisualizeFieldContext,
+} from './types';
 export {
   Presentable as UiActionsPresentable,
   PresentableGrouping as UiActionsPresentableGrouping,
 } from './util';
-export {
-  Trigger,
-  VISUALIZE_FIELD_TRIGGER,
-  visualizeFieldTrigger,
-  VISUALIZE_GEO_FIELD_TRIGGER,
-  visualizeGeoFieldTrigger,
-  ROW_CLICK_TRIGGER,
-  rowClickTrigger,
-  RowClickContext,
-} from './triggers';
-export {
-  VisualizeFieldContext,
-  ACTION_VISUALIZE_FIELD,
-  ACTION_VISUALIZE_GEO_FIELD,
-  ACTION_VISUALIZE_LENS_FIELD,
-} from './types';
-export { ActionExecutionContext, ActionExecutionMeta } from './actions';

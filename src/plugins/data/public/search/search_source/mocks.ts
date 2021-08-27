@@ -5,9 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { searchSourceCommonMock } from '../../../common/search/search_source/mocks';
-import { ISearchStart } from '../types';
+import type { ISearchStart } from '../types';
 
 function createStartContract(): jest.Mocked<ISearchStart['searchSource']> {
   return searchSourceCommonMock;

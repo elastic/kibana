@@ -5,12 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { SavedObjectsClientContract, SavedObject } from 'src/core/server';
-import {
+import type { SavedObjectsClientContract } from '../../../../core/server/saved_objects/types';
+import type { SavedObject } from '../../../../core/types/saved_objects';
+import type {
   SavedObjectsClientCommon,
   SavedObjectsClientCommonFindArgs,
-} from '../../common/index_patterns';
+} from '../../common/index_patterns/types';
 
 export class SavedObjectsClientServerToCommon implements SavedObjectsClientCommon {
   private savedObjectClient: SavedObjectsClientContract;

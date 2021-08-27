@@ -7,8 +7,8 @@
  */
 
 import React from 'react';
-
-import { SolutionToolbarPopover, Props as SolutionToolbarPopoverProps } from './popover';
+import type { Props as SolutionToolbarPopoverProps } from './popover';
+import { SolutionToolbarPopover } from './popover';
 
 export type Props = Omit<SolutionToolbarPopoverProps, 'primary'>;
 

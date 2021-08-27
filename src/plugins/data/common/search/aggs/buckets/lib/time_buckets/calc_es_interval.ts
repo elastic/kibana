@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
+import type { Unit } from '@elastic/datemath';
+import dateMath from '@elastic/datemath';
 import moment from 'moment';
-import dateMath, { Unit } from '@elastic/datemath';
-
-import { parseEsInterval } from '../../../utils';
+import { parseEsInterval } from '../../../utils/date_interval_utils/parse_es_interval';
 
 const unitsDesc = dateMath.unitsDesc;
 const largeMax = unitsDesc.indexOf('w');

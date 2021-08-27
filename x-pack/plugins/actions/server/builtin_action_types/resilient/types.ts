@@ -6,8 +6,9 @@
  */
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-
-import { TypeOf } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
+import type { Logger } from '@kbn/logging';
+import type { ActionsConfigurationUtilities } from '../../actions_config';
 import {
   ExecutorParamsSchema,
   ExecutorSubActionCommonFieldsParamsSchema,
@@ -19,9 +20,6 @@ import {
   ExternalIncidentServiceConfigurationSchema,
   ExternalIncidentServiceSecretConfigurationSchema,
 } from './schema';
-
-import { ActionsConfigurationUtilities } from '../../actions_config';
-import { Logger } from '../../../../../../src/core/server';
 
 export type ResilientPublicConfigurationType = TypeOf<
   typeof ExternalIncidentServiceConfigurationSchema

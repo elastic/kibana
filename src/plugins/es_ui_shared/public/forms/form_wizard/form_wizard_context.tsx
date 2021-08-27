@@ -5,10 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import React, { useState, createContext, useContext, useCallback } from 'react';
-
-import { WithMultiContent, useMultiContentContext, HookProps } from '../multi_content';
+import React, { createContext, useCallback, useContext, useState } from 'react';
+import { useMultiContentContext } from '../multi_content/multi_content_context';
+import type { HookProps } from '../multi_content/use_multi_content';
+import { WithMultiContent } from '../multi_content/with_multi_content';
 
 export interface Props<T extends object> {
   onSave: (data: T) => void | Promise<void>;

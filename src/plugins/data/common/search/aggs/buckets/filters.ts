@@ -5,19 +5,20 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import type { Query } from '@kbn/es-query';
+import { buildEsQuery } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import { size, transform, cloneDeep } from 'lodash';
-import { buildEsQuery, Query } from '@kbn/es-query';
-
-import { QueryFilter, queryFilterToAst } from '../../expressions';
-import { createFilterFilters } from './create_filter/filters';
-import { toAngularJSON } from '../utils';
+import { cloneDeep, size, transform } from 'lodash';
+import { UI_SETTINGS } from '../../../constants';
+import { getEsQueryConfig } from '../../../es_query/get_es_query_config';
+import type { QueryFilter } from '../../expressions/query_filter';
+import { queryFilterToAst } from '../../expressions/query_filter_to_ast';
+import type { BaseAggParams } from '../types';
+import { toAngularJSON } from '../utils/to_angular_json';
 import { BucketAggType } from './bucket_agg_type';
 import { BUCKET_TYPES } from './bucket_agg_types';
+import { createFilterFilters } from './create_filter/filters';
 import { aggFiltersFnName } from './filters_fn';
-import { getEsQueryConfig, UI_SETTINGS } from '../../../../common';
-import { BaseAggParams } from '../types';
 
 const filtersTitle = i18n.translate('data.search.aggs.buckets.filtersTitle', {
   defaultMessage: 'Filters',

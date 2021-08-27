@@ -5,14 +5,24 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-export type { HomeServerPluginSetup, HomeServerPluginStart } from './plugin';
-export type { TutorialProvider } from './services';
-export type { SampleDatasetProvider, SampleDataRegistrySetup } from './services';
-import { PluginInitializerContext, PluginConfigDescriptor } from 'kibana/server';
+import type {
+  PluginConfigDescriptor,
+  PluginInitializerContext,
+} from '../../../core/server/plugins/types';
+import type { ConfigSchema } from '../config';
+import { configSchema } from '../config';
 import { HomeServerPlugin } from './plugin';
-import { configSchema, ConfigSchema } from '../config';
 
+export { INSTRUCTION_VARIANT } from '../common/instruction_variant';
+export type { HomeServerPluginSetup, HomeServerPluginStart } from './plugin';
+export type { SampleDataRegistrySetup, SampleDatasetProvider, TutorialProvider } from './services';
+export { TutorialsCategory } from './services/tutorials';
+export type {
+  ArtifactsSchema,
+  InstructionSetSchema,
+  InstructionsSchema,
+  TutorialSchema,
+} from './services/tutorials';
 export const config: PluginConfigDescriptor<ConfigSchema> = {
   exposeToBrowser: {
     disableWelcomeScreen: true,
@@ -24,12 +34,3 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
 };
 
 export const plugin = (initContext: PluginInitializerContext) => new HomeServerPlugin(initContext);
-
-export { INSTRUCTION_VARIANT } from '../common/instruction_variant';
-export { TutorialsCategory } from './services/tutorials';
-export type {
-  ArtifactsSchema,
-  TutorialSchema,
-  InstructionSetSchema,
-  InstructionsSchema,
-} from './services/tutorials';

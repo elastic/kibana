@@ -5,30 +5,29 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiPopover } from '@elastic/eui';
-import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import { METRIC_TYPE } from '@kbn/analytics';
+import type { Filter } from '@kbn/es-query';
 import {
   buildEmptyFilter,
-  Filter,
-  enableFilter,
   disableFilter,
+  enableFilter,
   pinFilter,
   toggleFilterDisabled,
   toggleFilterNegated,
   unpinFilter,
 } from '@kbn/es-query';
+import type { InjectedIntl } from '@kbn/i18n/react';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import classNames from 'classnames';
-import React, { useState, useRef } from 'react';
-
-import { METRIC_TYPE } from '@kbn/analytics';
+import React, { useRef, useState } from 'react';
+import { useKibana } from '../../../../kibana_react/public/context/context';
+import { UI_SETTINGS } from '../../../common/constants';
+import type { IIndexPattern } from '../../../common/index_patterns/types';
+import type { IDataPluginServices } from '../../types';
 import { FilterEditor } from './filter_editor';
-import { FILTER_EDITOR_WIDTH, FilterItem } from './filter_item';
+import { FilterItem, FILTER_EDITOR_WIDTH } from './filter_item';
 import { FilterOptions } from './filter_options';
-import { useKibana } from '../../../../kibana_react/public';
-import { IDataPluginServices, IIndexPattern } from '../..';
-
-import { UI_SETTINGS } from '../../../common';
 
 interface Props {
   filters: Filter[];

@@ -5,11 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { get } from 'lodash';
 import moment from 'moment';
-import { SearchResponse } from 'src/core/server';
-import { CollectorFetchContext } from '../../../../../usage_collection/server';
+import type { SearchResponse } from '../../../../../../core/server/elasticsearch/client/types';
+import type { CollectorFetchContext } from '../../../../../usage_collection/server/collector/types';
 
 interface SearchHit {
   _id: string;

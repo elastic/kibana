@@ -5,9 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { SavedObjectAttributes } from 'kibana/server';
-import { AggConfigOptions } from 'src/plugins/data/common';
+import type { SavedObjectAttributes } from '../../../core/types/saved_objects';
+import type { AggConfigOptions } from '../../data/common/search/aggs/agg_config';
 
 export interface VisParams {
   [key: string]: any;

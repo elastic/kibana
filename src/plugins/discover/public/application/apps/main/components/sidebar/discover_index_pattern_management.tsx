@@ -5,12 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import React, { useState } from 'react';
 import { EuiButtonIcon, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { DiscoverServices } from '../../../../../build_services';
-import { IndexPattern } from '../../../../../../../data/common/index_patterns/index_patterns';
+import React, { useState } from 'react';
+import { IndexPattern } from '../../../../../../../data/common/index_patterns/index_patterns/index_pattern';
+import type { DiscoverServices } from '../../../../../build_services';
 
 export interface DiscoverIndexPatternManagementProps {
   /**

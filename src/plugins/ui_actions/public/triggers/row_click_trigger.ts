@@ -5,10 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { i18n } from '@kbn/i18n';
-import { Trigger } from '.';
-import type { Datatable } from '../../../expressions';
+import type { Datatable } from '../../../expressions/common/expression_types/specs/datatable';
+import type { Trigger } from './trigger';
 
 export const ROW_CLICK_TRIGGER = 'ROW_CLICK_TRIGGER';
 

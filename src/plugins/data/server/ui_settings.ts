@@ -5,11 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
-import { UiSettingsParams } from 'kibana/server';
-import { DEFAULT_QUERY_LANGUAGE, UI_SETTINGS } from '../common';
+import { i18n } from '@kbn/i18n';
+import type { UiSettingsParams } from '../../../core/types/ui_settings';
+import { DEFAULT_QUERY_LANGUAGE, UI_SETTINGS } from '../common/constants';
 
 const luceneQueryLanguageLabel = i18n.translate('data.advancedSettings.searchQueryLanguageLucene', {
   defaultMessage: 'Lucene',

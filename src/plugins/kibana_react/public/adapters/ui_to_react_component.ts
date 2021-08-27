@@ -5,9 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { FC, createElement as h, useRef, useLayoutEffect, useMemo } from 'react';
-import { UiComponent, UiComponentInstance } from '../../../kibana_utils/public';
+import type { FC } from 'react';
+import { createElement as h, useLayoutEffect, useMemo, useRef } from 'react';
+import type {
+  UiComponent,
+  UiComponentInstance,
+} from '../../../kibana_utils/common/ui/ui_component';
 
 /**
  * Transforms `UiComponent` into a React component.

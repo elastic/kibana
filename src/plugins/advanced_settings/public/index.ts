@@ -7,10 +7,12 @@
  */
 
 import React from 'react';
-import { PluginInitializerContext } from 'kibana/public';
+import type { PluginInitializerContext } from '../../../core/public/plugins/plugin_context';
 import { AdvancedSettingsPlugin } from './plugin';
-export { AdvancedSettingsSetup, AdvancedSettingsStart } from './types';
+
 export { ComponentRegistry } from './component_registry';
+export { AdvancedSettingsSetup, AdvancedSettingsStart } from './types';
+export { LazyField };
 
 /**
  * Exports the field component as a React.lazy component. We're explicitly naming it lazy here
@@ -18,7 +20,6 @@ export { ComponentRegistry } from './component_registry';
  * inside a suspense context.
  */
 const LazyField = React.lazy(() => import('./management_app/components/field'));
-export { LazyField };
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new AdvancedSettingsPlugin();

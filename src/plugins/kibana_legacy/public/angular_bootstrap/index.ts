@@ -1,16 +1,14 @@
 /* eslint-disable */
-
-import { once } from 'lodash';
 import angular from 'angular';
-
+import { once } from "lodash";
+import { initBindHtml } from "./bind_html/bind_html";
+import { initBootstrapTooltip } from "./tooltip/tooltip";
+import tooltipUnsafePopup from './tooltip/tooltip_html_unsafe_popup.html';
 // @ts-ignore
-import { initBindHtml } from './bind_html/bind_html';
 // @ts-ignore
-import { initBootstrapTooltip } from './tooltip/tooltip';
-
 import tooltipPopup from './tooltip/tooltip_popup.html';
 
-import tooltipUnsafePopup from './tooltip/tooltip_html_unsafe_popup.html';
+
 
 export const initAngularBootstrap = once(() => {
   /*

@@ -7,24 +7,16 @@
  */
 
 /* eslint-disable @typescript-eslint/naming-convention */
-import './page_template.scss';
-
-import React, { FunctionComponent, useState } from 'react';
+import type { EuiPageTemplateProps } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiPageTemplate, useIsWithinBreakpoints } from '@elastic/eui';
 import classNames from 'classnames';
-
-import {
-  EuiEmptyPrompt,
-  EuiPageTemplate,
-  EuiPageTemplateProps,
-  useIsWithinBreakpoints,
-} from '@elastic/eui';
-
-import {
-  KibanaPageTemplateSolutionNav,
-  KibanaPageTemplateSolutionNavProps,
-} from './solution_nav/solution_nav';
-
-import { NoDataPage, NoDataPageProps, NO_DATA_PAGE_TEMPLATE_PROPS } from './no_data_page';
+import type { FunctionComponent } from 'react';
+import React, { useState } from 'react';
+import type { NoDataPageProps } from './no_data_page/no_data_page';
+import { NoDataPage, NO_DATA_PAGE_TEMPLATE_PROPS } from './no_data_page/no_data_page';
+import './page_template.scss';
+import type { KibanaPageTemplateSolutionNavProps } from './solution_nav/solution_nav';
+import { KibanaPageTemplateSolutionNav } from './solution_nav/solution_nav';
 
 /**
  * A thin wrapper around EuiPageTemplate with a few Kibana specific additions

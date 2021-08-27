@@ -5,10 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { i18n } from '@kbn/i18n';
-import { ExpressionFunctionDefinition, ExpressionValueBoxed } from 'src/plugins/expressions/common';
-import { TimeRange } from '../../query';
+import type { ExpressionFunctionDefinition } from '../../../../expressions/common/expression_functions/types';
+import type { ExpressionValueBoxed } from '../../../../expressions/common/expression_types/types';
+import type { TimeRange } from '../../query/timefilter/types';
 
 export type KibanaTimerangeOutput = ExpressionValueBoxed<'timerange', TimeRange>;
 

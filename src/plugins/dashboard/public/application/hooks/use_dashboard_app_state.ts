@@ -6,37 +6,36 @@
  * Side Public License, v 1.
  */
 
-import _ from 'lodash';
-import { History } from 'history';
-import { debounceTime } from 'rxjs/operators';
+import type { History } from 'history';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { BehaviorSubject, combineLatest, Subject } from 'rxjs';
-
-import { DashboardConstants } from '../..';
-import { ViewMode } from '../../services/embeddable';
-import { useKibana } from '../../services/kibana_react';
+import { debounceTime } from 'rxjs/operators';
+import { ViewMode } from '../../../../embeddable/common/types';
+import { useKibana } from '../../../../kibana_react/public/context/context';
+import type { IKbnUrlStateStorage } from '../../../../kibana_utils/public/state_sync/state_sync_state_storage/create_kbn_url_state_storage';
+import { DashboardConstants } from '../../dashboard_constants';
 import { getNewDashboardTitle } from '../../dashboard_strings';
-import { IKbnUrlStateStorage } from '../../services/kibana_utils';
-import { setDashboardState, useDashboardDispatch, useDashboardSelector } from '../state';
-import {
-  DashboardBuildContext,
+import type {
   DashboardAppServices,
   DashboardAppState,
+  DashboardBuildContext,
   DashboardRedirect,
   DashboardState,
 } from '../../types';
 import {
-  tryDestroyDashboardContainer,
-  syncDashboardContainerInput,
-  savedObjectToDashboardState,
-  syncDashboardIndexPatterns,
-  syncDashboardFilterState,
-  loadSavedDashboardState,
   buildDashboardContainer,
-  loadDashboardUrlState,
-  diffDashboardState,
-  areTimeRangesEqual,
-} from '../lib';
+  tryDestroyDashboardContainer,
+} from '../lib/build_dashboard_container';
+import { savedObjectToDashboardState } from '../lib/convert_dashboard_state';
+import { diffDashboardState } from '../lib/diff_dashboard_state';
+import { areTimeRangesEqual } from '../lib/filter_utils';
+import { loadDashboardUrlState } from '../lib/load_dashboard_url_state';
+import { loadSavedDashboardState } from '../lib/load_saved_dashboard_state';
+import { syncDashboardContainerInput } from '../lib/sync_dashboard_container_input';
+import { syncDashboardFilterState } from '../lib/sync_dashboard_filter_state';
+import { syncDashboardIndexPatterns } from '../lib/sync_dashboard_index_patterns';
+import { useDashboardDispatch, useDashboardSelector } from '../state/dashboard_state_hooks';
+import { setDashboardState } from '../state/dashboard_state_slice';
 
 export interface UseDashboardStateProps {
   history: History;

@@ -5,10 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { mergeWith } from 'lodash';
 import type { SerializableRecord } from '@kbn/utility-types';
-import { MigrateFunctionsObject, MigrateFunction } from './types';
+import { mergeWith } from 'lodash';
+import type { MigrateFunction, MigrateFunctionsObject } from './types';
 
 export const mergeMigrationFunctionMaps = (
   obj1: MigrateFunctionsObject,

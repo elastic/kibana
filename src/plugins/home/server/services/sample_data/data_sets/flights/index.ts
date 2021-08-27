@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import path from 'path';
 import { i18n } from '@kbn/i18n';
-import { getSavedObjects } from './saved_objects';
+import path from 'path';
+import type { AppLinkSchema, SampleDatasetSchema } from '../../lib/sample_dataset_schema';
 import { fieldMappings } from './field_mappings';
-import { SampleDatasetSchema, AppLinkSchema } from '../../lib/sample_dataset_registry_types';
+import { getSavedObjects } from './saved_objects';
 
 const flightsName = i18n.translate('home.sampleData.flightsSpecTitle', {
   defaultMessage: 'Sample flight data',

@@ -7,8 +7,7 @@
  */
 
 /* eslint-disable */
-
-import { KbnError } from '../../../../kibana_utils/common/';
+import { KbnError } from "../../../../kibana_utils/common/errors/errors";
 
 /**
  * Tried to call a method that relies on SearchSource having an indexPattern assigned

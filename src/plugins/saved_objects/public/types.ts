@@ -5,21 +5,20 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import {
-  ChromeStart,
-  OverlayStart,
-  SavedObjectsClientContract,
+import type { ChromeStart } from '../../../core/public/chrome/types';
+import type { OverlayStart } from '../../../core/public/overlays/overlay_service';
+import type { SavedObjectsClientContract } from '../../../core/public/saved_objects/saved_objects_client';
+import type {
   SavedObjectAttributes,
   SavedObjectReference,
-} from 'kibana/public';
-import {
-  DataPublicPluginStart,
-  IndexPattern,
-  IndexPatternsContract,
+} from '../../../core/types/saved_objects';
+import { IndexPattern } from '../../data/common/index_patterns/index_patterns/index_pattern';
+import type { IndexPatternsContract } from '../../data/common/index_patterns/index_patterns/index_patterns';
+import type {
   ISearchSource,
   SearchSourceFields,
-} from '../../data/public';
+} from '../../data/common/search/search_source/types';
+import type { DataPublicPluginStart } from '../../data/public/types';
 
 /** @deprecated */
 export interface SavedObject {

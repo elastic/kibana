@@ -5,9 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { FailedShard } from './types';
-import { KibanaServerError } from '../../../../kibana_utils/common';
+import type { KibanaServerError } from '../../../../kibana_utils/common/errors/types';
+import type { FailedShard } from './types';
 
 export function getFailedShards(err: KibanaServerError<any>): FailedShard | undefined {
   const errorInfo = err.attributes;

@@ -5,26 +5,25 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import React, { Component } from 'react';
 import {
-  EuiForm,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiButton,
   EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiForm,
   EuiSpacer,
 } from '@elastic/eui';
 import { set } from '@elastic/safer-lodash-set';
-import { cloneDeep } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { SavedObjectsClientContract } from '../../../../../../core/public';
-import { SavedObjectLoader } from '../../../../../saved_objects/public';
+import { cloneDeep } from 'lodash';
+import React, { Component } from 'react';
+import type { SavedObjectsClientContract } from '../../../../../../core/public/saved_objects/saved_objects_client';
+import { SavedObjectLoader } from '../../../../../saved_objects/public/saved_object/saved_object_loader';
+import type { SavedObjectWithMetadata } from '../../../../common/types';
+import { createFieldList } from '../../../lib/create_field_list';
+import type { FieldState, ObjectField, SubmittedFormData } from '../../types';
 import { Field } from './field';
-import { ObjectField, FieldState, SubmittedFormData } from '../../types';
-import { createFieldList } from '../../../lib';
-import { SavedObjectWithMetadata } from '../../../types';
 
 interface FormProps {
   object: SavedObjectWithMetadata;

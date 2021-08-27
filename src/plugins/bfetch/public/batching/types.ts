@@ -5,8 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { Defer } from '../../../kibana_utils/public';
+import { Defer } from '../../../kibana_utils/common/defer';
 
 export interface BatchItem<Payload, Result> {
   payload: Payload;

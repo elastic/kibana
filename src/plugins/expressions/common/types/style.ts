@@ -5,8 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { FontLabel } from '../fonts';
+import type { FontLabel } from '../fonts';
 
 /**
  * Enum of supported CSS `background-repeat` properties.

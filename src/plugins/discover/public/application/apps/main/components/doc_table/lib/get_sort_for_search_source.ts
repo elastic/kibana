@@ -5,9 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { EsQuerySortValue, IndexPattern } from '../../../../../../kibana_services';
-import { SortOrder } from '../components/table_header/helpers';
+import { IndexPattern } from '../../../../../../../../data/common/index_patterns/index_patterns/index_pattern';
+import type { EsQuerySortValue } from '../../../../../../../../data/common/search/search_source/types';
+import type { SortOrder } from '../components/table_header/helpers';
 import { getSort } from './get_sort';
 
 /**

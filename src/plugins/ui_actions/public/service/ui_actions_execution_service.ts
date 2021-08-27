@@ -5,12 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { uniqBy } from 'lodash';
-import { Action } from '../actions';
-import { defer as createDefer, Defer } from '../../../kibana_utils/public';
-import { buildContextMenuForActions, openContextMenu } from '../context_menu';
-import { Trigger } from '../triggers';
+import { defer as createDefer, Defer } from '../../../kibana_utils/common/defer';
+import type { Action } from '../actions/action';
+import { buildContextMenuForActions } from '../context_menu/build_eui_context_menu_panels';
+import { openContextMenu } from '../context_menu/open_context_menu';
+import type { Trigger } from '../triggers/trigger';
 
 interface ExecuteActionTask {
   action: Action;

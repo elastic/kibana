@@ -6,20 +6,19 @@
  * Side Public License, v 1.
  */
 
-import _ from 'lodash';
-import { Action, IncompatibleActionError } from '../../services/ui_actions';
-import {
-  ViewMode,
-  PanelState,
-  IEmbeddable,
-  PanelNotFoundError,
-  EmbeddableInput,
-  isReferenceOrValueEmbeddable,
-  isErrorEmbeddable,
-} from '../../services/embeddable';
-import { NotificationsStart } from '../../../../../core/public';
+import type { NotificationsStart } from '../../../../../core/public/notifications/notifications_service';
+import type { EmbeddableInput, PanelState } from '../../../../embeddable/common/types';
+import { ViewMode } from '../../../../embeddable/common/types';
+import { isErrorEmbeddable } from '../../../../embeddable/public/lib/embeddables/error_embeddable';
+import type { IEmbeddable } from '../../../../embeddable/public/lib/embeddables/i_embeddable';
+import { PanelNotFoundError } from '../../../../embeddable/public/lib/errors';
+import { isReferenceOrValueEmbeddable } from '../../../../embeddable/public/lib/reference_or_value_embeddable/types';
+import type { Action } from '../../../../ui_actions/public/actions/action';
+import { IncompatibleActionError } from '../../../../ui_actions/public/actions/incompatible_action_error';
+import type { DashboardPanelState } from '../../../common/types';
 import { dashboardUnlinkFromLibraryAction } from '../../dashboard_strings';
-import { DashboardPanelState, DASHBOARD_CONTAINER_TYPE, DashboardContainer } from '..';
+import { DASHBOARD_CONTAINER_TYPE } from '../embeddable/dashboard_constants';
+import { DashboardContainer } from '../embeddable/dashboard_container';
 
 export const ACTION_UNLINK_FROM_LIBRARY = 'unlinkFromLibrary';
 

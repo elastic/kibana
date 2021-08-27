@@ -5,18 +5,18 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import React, { useRef, useEffect, useState, useLayoutEffect } from 'react';
-import classNames from 'classnames';
-import { Observable, Subscription } from 'rxjs';
-import { filter } from 'rxjs/operators';
-import useShallowCompareEffect from 'react-use/lib/useShallowCompareEffect';
 import { EuiLoadingChart, EuiProgress } from '@elastic/eui';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
-import { IExpressionLoaderParams, ExpressionRenderError } from './types';
-import { ExpressionAstExpression, IInterpreterRenderHandlers } from '../common';
+import classNames from 'classnames';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import useShallowCompareEffect from 'react-use/lib/useShallowCompareEffect';
+import { Observable, Subscription } from 'rxjs';
+import { filter } from 'rxjs/operators';
+import type { ExpressionAstExpression } from '../common/ast/types';
+import type { IInterpreterRenderHandlers } from '../common/expression_renderers/types';
 import { ExpressionLoader } from './loader';
-import { ExpressionRendererEvent } from './render';
+import type { ExpressionRendererEvent } from './render';
+import type { ExpressionRenderError, IExpressionLoaderParams } from './types';
 
 // Accept all options of the runner as props except for the
 // dom element which is provided by the component itself

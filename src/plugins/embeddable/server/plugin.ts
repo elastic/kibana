@@ -5,30 +5,28 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import type { SerializableRecord } from '@kbn/utility-types';
-import { CoreSetup, CoreStart, Plugin } from 'kibana/server';
 import { identity } from 'lodash';
-import {
+import type { CoreSetup, CoreStart } from '../../../core/server';
+import type { Plugin } from '../../../core/server/plugins/types';
+import type {
+  MigrateFunctionsObject,
+  PersistableStateMigrateFn,
+  PersistableStateService,
+} from '../../kibana_utils/common/persistable_state/types';
+import { getExtractFunction } from '../common/lib/extract';
+import { getAllMigrations } from '../common/lib/get_all_migrations';
+import { getInjectFunction } from '../common/lib/inject';
+import { getMigrateFunction } from '../common/lib/migrate';
+import { getTelemetryFunction } from '../common/lib/telemetry';
+import type { EmbeddableStateWithType } from '../common/types';
+import type {
   EmbeddableFactoryRegistry,
-  EnhancementsRegistry,
+  EmbeddableRegistryDefinition,
   EnhancementRegistryDefinition,
   EnhancementRegistryItem,
-  EmbeddableRegistryDefinition,
+  EnhancementsRegistry,
 } from './types';
-import {
-  getExtractFunction,
-  getInjectFunction,
-  getMigrateFunction,
-  getTelemetryFunction,
-} from '../common/lib';
-import {
-  PersistableStateService,
-  PersistableStateMigrateFn,
-  MigrateFunctionsObject,
-} from '../../kibana_utils/common';
-import { EmbeddableStateWithType } from '../common/types';
-import { getAllMigrations } from '../common/lib/get_all_migrations';
 
 export interface EmbeddableSetup extends PersistableStateService<EmbeddableStateWithType> {
   registerEmbeddableFactory: (factory: EmbeddableRegistryDefinition) => void;

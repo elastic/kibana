@@ -6,29 +6,30 @@
  * Side Public License, v 1.
  */
 
-import './discover_field.scss';
-
-import React, { useState, useCallback, memo, useMemo } from 'react';
 import {
-  EuiPopover,
-  EuiPopoverTitle,
   EuiButtonIcon,
-  EuiToolTip,
-  EuiTitle,
-  EuiIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
+  EuiPopover,
+  EuiPopoverTitle,
   EuiSpacer,
+  EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
+import type { UiCounterMetricType } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
-import { UiCounterMetricType } from '@kbn/analytics';
 import classNames from 'classnames';
+import React, { memo, useCallback, useMemo, useState } from 'react';
+import { IndexPatternField } from '../../../../../../../data/common/index_patterns/fields/index_pattern_field';
+import { IndexPattern } from '../../../../../../../data/common/index_patterns/index_patterns/index_pattern';
+import { FieldButton } from '../../../../../../../kibana_react/public/field_button/field_button';
+import { FieldIcon } from '../../../../../../../kibana_react/public/field_icon/field_icon';
+import './discover_field.scss';
 import { DiscoverFieldDetails } from './discover_field_details';
-import { FieldIcon, FieldButton } from '../../../../../../../kibana_react/public';
-import { FieldDetails } from './types';
-import { IndexPatternField, IndexPattern } from '../../../../../../../data/public';
-import { getFieldTypeName } from './lib/get_field_type_name';
 import { DiscoverFieldVisualize } from './discover_field_visualize';
+import { getFieldTypeName } from './lib/get_field_type_name';
+import type { FieldDetails } from './types';
 
 function wrapOnDot(str?: string) {
   // u200B is a non-width white-space character, which allows

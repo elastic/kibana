@@ -5,8 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import React, { useState } from 'react';
 import {
   EuiButton,
   EuiButtonIcon,
@@ -17,8 +15,10 @@ import {
   EuiPopoverTitle,
   EuiText,
 } from '@elastic/eui';
-import { LibraryNotificationActionContext, UnlinkFromLibraryAction } from '.';
+import React, { useState } from 'react';
 import { dashboardLibraryNotification } from '../../dashboard_strings';
+import type { LibraryNotificationActionContext } from './library_notification_action';
+import { UnlinkFromLibraryAction } from './unlink_from_library_action';
 
 export interface LibraryNotificationProps {
   context: LibraryNotificationActionContext;

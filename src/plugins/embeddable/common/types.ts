@@ -5,10 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import type { SerializableRecord } from '@kbn/utility-types';
-import type { KibanaExecutionContext } from 'src/core/public';
-import { PersistableStateService } from '../../kibana_utils/common';
+import type { KibanaExecutionContext } from '../../../core/types/execution_context';
+import type { PersistableStateService } from '../../kibana_utils/common/persistable_state/types';
 
 export enum ViewMode {
   EDIT = 'edit',

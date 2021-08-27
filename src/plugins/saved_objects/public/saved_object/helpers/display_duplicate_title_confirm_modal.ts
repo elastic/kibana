@@ -5,12 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { i18n } from '@kbn/i18n';
-import { OverlayStart } from 'kibana/public';
+import type { OverlayStart } from '../../../../../core/public/overlays/overlay_service';
 import { SAVE_DUPLICATE_REJECTED } from '../../constants';
+import type { SavedObject } from '../../types';
 import { confirmModalPromise } from './confirm_modal_promise';
-import { SavedObject } from '../../types';
 
 export function displayDuplicateTitleConfirmModal(
   savedObject: Pick<SavedObject, 'title' | 'getDisplayName'>,

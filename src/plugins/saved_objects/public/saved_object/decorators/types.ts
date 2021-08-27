@@ -5,8 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { SavedObject, SavedObjectKibanaServices, SavedObjectConfig } from '../../types';
+import type { SavedObject, SavedObjectConfig, SavedObjectKibanaServices } from '../../types';
 
 export interface SavedObjectDecorator<T extends SavedObject = SavedObject> {
   /**

@@ -5,10 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { ChromeStart } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
-import { SavedSearch } from '../../saved_searches';
+import type { ChromeStart } from '../../../../../core/public/chrome/types';
+import type { SavedSearch } from '../../saved_searches/types';
 
 export function getRootBreadcrumbs() {
   return [

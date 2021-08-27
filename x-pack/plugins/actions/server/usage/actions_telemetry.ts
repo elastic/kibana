@@ -4,15 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import {
-  ElasticsearchClient,
-  SavedObjectsBaseOptions,
+import type { ElasticsearchClient } from '../../../../../src/core/server/elasticsearch/client/types';
+import type {
   SavedObjectsBulkGetObject,
   SavedObjectsBulkResponse,
-} from 'kibana/server';
-import { AlertHistoryEsIndexConnectorId } from '../../common';
-import { ActionResult } from '../types';
+} from '../../../../../src/core/server/saved_objects/service/saved_objects_client';
+import type { SavedObjectsBaseOptions } from '../../../../../src/core/server/saved_objects/types';
+import { AlertHistoryEsIndexConnectorId } from '../../common/alert_history_schema';
+import type { ActionResult } from '../types';
 
 export async function getTotalCount(esClient: ElasticsearchClient, kibanaIndex: string) {
   const scriptedMetric = {

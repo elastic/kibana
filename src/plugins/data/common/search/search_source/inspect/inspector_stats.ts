@@ -5,18 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-/**
- * This function collects statistics from a SearchSource and a response
- * for the usage in the inspector stats panel. Pass in a searchSource and a response
- * and the returned object can be passed to the `stats` method of the request
- * logger.
- */
-
+import { estypes } from '@elastic/elasticsearch';
 import { i18n } from '@kbn/i18n';
-import type { estypes } from '@elastic/elasticsearch';
-import type { ISearchSource } from 'src/plugins/data/public';
-import type { RequestStatistics } from 'src/plugins/inspector/common';
+import type { RequestStatistics } from '../../../../../inspector/common/adapters/request/types';
+import type { ISearchSource } from '../types';
 
 /** @public */
 export function getRequestInspectorStats(searchSource: ISearchSource) {

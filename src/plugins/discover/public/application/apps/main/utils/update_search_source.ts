@@ -5,13 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { SORT_DEFAULT_ORDER_SETTING } from '../../../../../common';
-import { IndexPattern, ISearchSource } from '../../../../../../data/common';
-import { SortOrder } from '../../../../saved_searches/types';
-import { DiscoverServices } from '../../../../build_services';
+import { IndexPattern } from '../../../../../../data/common/index_patterns/index_patterns/index_pattern';
+import type { ISearchSource } from '../../../../../../data/common/search/search_source/types';
 import { indexPatterns as indexPatternsUtils } from '../../../../../../data/public';
-import { getSortForSearchSource } from '../components/doc_table';
+import { SORT_DEFAULT_ORDER_SETTING } from '../../../../../common';
+import type { DiscoverServices } from '../../../../build_services';
+import type { SortOrder } from '../../../../saved_searches/types';
+import { getSortForSearchSource } from '../components/doc_table/lib/get_sort_for_search_source';
 
 /**
  * Helper function to update the given searchSource before fetching/sharing/persisting

@@ -5,14 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { i18n } from '@kbn/i18n';
-import { MetricAggType } from './metric_agg_type';
-import { aggMovingAvgFnName } from './moving_avg_fn';
-import { parentPipelineAggHelper } from './lib/parent_pipeline_agg_helper';
+import type { AggConfigSerialized } from '../agg_config';
+import type { BaseAggParams } from '../types';
 import { makeNestedLabel } from './lib/make_nested_label';
+import { parentPipelineAggHelper } from './lib/parent_pipeline_agg_helper';
+import { MetricAggType } from './metric_agg_type';
 import { METRIC_TYPES } from './metric_agg_types';
-import { AggConfigSerialized, BaseAggParams } from '../types';
+import { aggMovingAvgFnName } from './moving_avg_fn';
 
 export interface AggParamsMovingAvg extends BaseAggParams {
   buckets_path?: string;

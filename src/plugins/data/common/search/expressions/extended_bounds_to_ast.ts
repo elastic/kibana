@@ -5,9 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { buildExpression, buildExpressionFunction } from '../../../../expressions/common';
-import { ExpressionFunctionExtendedBounds, ExtendedBounds } from './extended_bounds';
+import { buildExpression } from '../../../../expressions/common/ast/build_expression';
+import { buildExpressionFunction } from '../../../../expressions/common/ast/build_function';
+import type { ExpressionFunctionExtendedBounds, ExtendedBounds } from './extended_bounds';
 
 export const extendedBoundsToAst = (extendedBounds: ExtendedBounds) => {
   return buildExpression([

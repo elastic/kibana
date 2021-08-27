@@ -5,9 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { schema, TypeOf } from '@kbn/config-schema';
-import { ConfigDeprecationProvider, PluginInitializerContext } from '../../../core/server';
+import type { ConfigDeprecationProvider } from '@kbn/config';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
+import type { PluginInitializerContext } from '../../../core/server/plugins/types';
 import { APMOSSPlugin } from './plugin';
 
 const deprecations: ConfigDeprecationProvider = ({ unused }) => [unused('fleetMode')];

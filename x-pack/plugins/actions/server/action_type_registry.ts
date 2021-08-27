@@ -7,22 +7,21 @@
 
 import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
-import { RunContext, TaskManagerSetupContract } from '../../task_manager/server';
-import { ActionType as CommonActionType } from '../common';
-import { ActionsConfigurationUtilities } from './actions_config';
-import { LicensingPluginSetup } from '../../licensing/server';
-import {
-  ExecutorError,
-  getActionTypeFeatureUsageName,
-  TaskRunnerFactory,
-  ILicenseState,
-} from './lib';
-import {
+import type { LicensingPluginSetup } from '../../licensing/server/types';
+import type { TaskManagerSetupContract } from '../../task_manager/server/plugin';
+import type { RunContext } from '../../task_manager/server/task';
+import type { ActionType as CommonActionType } from '../common/types';
+import type { ActionsConfigurationUtilities } from './actions_config';
+import { ExecutorError } from './lib/executor_error';
+import { getActionTypeFeatureUsageName } from './lib/get_action_type_feature_usage_name';
+import type { ILicenseState } from './lib/license_state';
+import { TaskRunnerFactory } from './lib/task_runner_factory';
+import type {
   ActionType,
-  PreConfiguredAction,
   ActionTypeConfig,
-  ActionTypeSecrets,
   ActionTypeParams,
+  ActionTypeSecrets,
+  PreConfiguredAction,
 } from './types';
 
 export interface ActionTypeRegistryOpts {

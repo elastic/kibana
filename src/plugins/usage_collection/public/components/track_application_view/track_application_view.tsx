@@ -5,11 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import React, { createContext, FC } from 'react';
+import type { FC } from 'react';
+import React, { createContext } from 'react';
+import type { IApplicationUsageTracker } from '../../plugin';
 import { TrackApplicationViewComponent } from './track_application_view_component';
-import { IApplicationUsageTracker } from '../../plugin';
-import { TrackApplicationViewProps } from './types';
+import type { TrackApplicationViewProps } from './types';
 
 export const ApplicationUsageContext = createContext<IApplicationUsageTracker | undefined>(
   undefined

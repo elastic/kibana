@@ -5,21 +5,18 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { PluginInitializerContext } from 'kibana/public';
+import type { PluginInitializerContext } from '../../../core/public/plugins/plugin_context';
 import { ManagementPlugin } from './plugin';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new ManagementPlugin(initializerContext);
 }
 
-export { RegisterManagementAppArgs, ManagementSection, ManagementApp } from './utils';
-
+export { MANAGEMENT_APP_ID } from '../common/contants';
 export {
+  DefinedSections,
   ManagementAppMountParams,
   ManagementSetup,
   ManagementStart,
-  DefinedSections,
 } from './types';
-
-export { MANAGEMENT_APP_ID } from '../common/contants';
+export { ManagementApp, ManagementSection, RegisterManagementAppArgs } from './utils';

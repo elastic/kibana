@@ -5,8 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { AggsCommonSetup } from '../../../common';
+import type { AggsCommonSetup } from '../../../common/search/aggs/types';
 
 export type AggsSetup = AggsCommonSetup;
 export { AggsStart } from '../../../common';

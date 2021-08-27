@@ -5,11 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { i18n } from '@kbn/i18n';
-import { ExecutionContext, ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
-import { Adapters } from 'src/plugins/inspector/common';
-import { ExpressionValueSearchContext, ExecutionContextSearch } from './kibana_context_type';
+import type { ExecutionContext } from '../../../../expressions/common/execution/types';
+import type { ExpressionFunctionDefinition } from '../../../../expressions/common/expression_functions/types';
+import type { Adapters } from '../../../../inspector/common/adapters/types';
+import type { ExecutionContextSearch, ExpressionValueSearchContext } from './kibana_context_type';
 
 const toArray = <T>(query: undefined | T | T[]): T[] =>
   !query ? [] : Array.isArray(query) ? query : [query];

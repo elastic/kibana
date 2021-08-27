@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { EuiCode, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ShardFailure } from './shard_failure_types';
+import React from 'react';
+import type { ShardFailure } from './shard_failure_types';
 
 export function getFailurePropsForSummary(
   failure: ShardFailure

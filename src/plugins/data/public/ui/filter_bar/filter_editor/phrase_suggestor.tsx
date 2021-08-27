@@ -6,12 +6,14 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { debounce } from 'lodash';
-
-import { withKibana, KibanaReactContextValue } from '../../../../../kibana_react/public';
-import { IDataPluginServices, IIndexPattern, IFieldType } from '../../..';
-import { UI_SETTINGS } from '../../../../common';
+import React from 'react';
+import { withKibana } from '../../../../../kibana_react/public/context/context';
+import type { KibanaReactContextValue } from '../../../../../kibana_react/public/context/types';
+import { UI_SETTINGS } from '../../../../common/constants';
+import type { IFieldType } from '../../../../common/index_patterns/fields/types';
+import type { IIndexPattern } from '../../../../common/index_patterns/types';
+import type { IDataPluginServices } from '../../../types';
 
 export interface PhraseSuggestorProps {
   kibana: KibanaReactContextValue<IDataPluginServices>;

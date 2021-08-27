@@ -5,11 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { SerializedFieldFormat } from '../../expressions/public';
-import { IAggConfig, search } from '../../data/public';
-
-import { Vis, VisToExpressionAstParams } from './types';
+import type { IAggConfig } from '../../data/common/search/aggs/agg_config';
+import { search } from '../../data/public';
+import type { SerializedFieldFormat } from '../../expressions/common/types/common';
+import type { VisToExpressionAstParams } from './types';
+import { Vis } from './vis';
 
 const { isDateHistogramBucketAggConfig } = search.aggs;
 

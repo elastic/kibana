@@ -5,8 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { SearchSource } from '../../../../../../data/common';
-import { DataPublicPluginStart } from '../../../../../../data/public';
+import { SearchSource } from '../../../../../../data/common/search/search_source/search_source';
+import type { DataPublicPluginStart } from '../../../../../../data/public/types';
 
 /**
  * Helper function to apply or remove aggregations to a given search source used for gaining data

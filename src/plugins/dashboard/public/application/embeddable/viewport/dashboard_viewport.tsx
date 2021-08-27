@@ -8,11 +8,13 @@
 
 import React from 'react';
 import { Subscription } from 'rxjs';
-import { PanelState, ViewMode } from '../../../services/embeddable';
-import { DashboardContainer, DashboardReactContextValue } from '../dashboard_container';
-import { DashboardGrid } from '../grid';
-import { context } from '../../../services/kibana_react';
+import type { PanelState } from '../../../../../embeddable/common/types';
+import { ViewMode } from '../../../../../embeddable/common/types';
+import { context } from '../../../../../kibana_react/public/context/context';
+import type { DashboardReactContextValue } from '../dashboard_container';
+import { DashboardContainer } from '../dashboard_container';
 import { DashboardEmptyScreen } from '../empty_screen/dashboard_empty_screen';
+import { DashboardGrid } from '../grid/dashboard_grid';
 
 export interface DashboardViewportProps {
   container: DashboardContainer;

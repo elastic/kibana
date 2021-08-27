@@ -5,10 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { isString, isObject } from 'lodash';
-import { IBucketAggConfig, BucketAggType, BucketAggParam } from './bucket_agg_type';
-import { IAggConfig } from '../agg_config';
+import { isObject, isString } from 'lodash';
+import type { IAggConfig } from '../agg_config';
+import type { BucketAggParam, IBucketAggConfig } from './bucket_agg_type';
+import { BucketAggType } from './bucket_agg_type';
 
 export const isType = (...types: string[]) => {
   return (agg: IAggConfig): boolean => {

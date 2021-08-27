@@ -5,22 +5,19 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { ChartsPlugin } from './plugin';
 
 export const plugin = () => new ChartsPlugin();
 
-export { ChartsPluginSetup, ChartsPluginStart } from './plugin';
-
-export * from './static';
-export * from './services/palettes/types';
-export { lightenColor } from './services/palettes/lighten_color';
-export { useActiveCursor } from './services/active_cursor';
-
 export {
-  PaletteOutput,
   CustomPaletteArguments,
   CustomPaletteState,
-  SystemPaletteArguments,
   paletteIds,
+  PaletteOutput,
+  SystemPaletteArguments,
 } from '../common';
+export { ChartsPluginSetup, ChartsPluginStart } from './plugin';
+export { useActiveCursor } from './services/active_cursor';
+export { lightenColor } from './services/palettes/lighten_color';
+export * from './services/palettes/types';
+export * from './static';

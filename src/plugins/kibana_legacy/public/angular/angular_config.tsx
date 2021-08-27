@@ -5,25 +5,27 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import {
+import { set } from '@elastic/safer-lodash-set';
+import type { EnvironmentMode, PackageInfo } from '@kbn/config';
+import type {
   ICompileProvider,
   IHttpProvider,
   IHttpService,
   ILocationProvider,
   IModule,
-  IRootScopeService,
   IRequestConfig,
+  IRootScopeService,
 } from 'angular';
+import type { History } from 'history';
 import $ from 'jquery';
-import { set } from '@elastic/safer-lodash-set';
 import { get } from 'lodash';
 import * as Rx from 'rxjs';
-import { ChromeBreadcrumb, EnvironmentMode, PackageInfo } from 'kibana/public';
-import { History } from 'history';
-
-import { CoreStart } from 'kibana/public';
-import { formatAngularHttpError, isAngularHttpError } from '../notify/lib';
+import type { CoreStart } from '../../../../core/public';
+import type { ChromeBreadcrumb } from '../../../../core/public/chrome/types';
+import {
+  formatAngularHttpError,
+  isAngularHttpError,
+} from '../notify/lib/format_angular_http_error';
 
 export interface RouteConfiguration {
   controller?: string | ((...args: any[]) => void);

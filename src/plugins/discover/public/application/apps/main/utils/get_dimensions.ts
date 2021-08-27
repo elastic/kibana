@@ -5,11 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import moment from 'moment';
 import dateMath from '@elastic/datemath';
-import { IAggConfigs } from '../../../../../../data/common';
-import { DataPublicPluginStart, search } from '../../../../../../data/public';
-import { Dimensions, HistogramParamsBounds } from '../components/chart/point_series';
+import moment from 'moment';
+import type { IAggConfigs } from '../../../../../../data/common/search/aggs/agg_configs';
+import { search } from '../../../../../../data/public';
+import type { DataPublicPluginStart } from '../../../../../../data/public/types';
+import type { Dimensions, HistogramParamsBounds } from '../components/chart/point_series';
 
 export function getDimensions(
   aggs: IAggConfigs,

@@ -5,13 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { first } from 'rxjs/operators';
-import { CoreSetup, Plugin, PluginInitializerContext } from 'kibana/server';
+import type { CoreSetup } from '../../../../core/server';
+import type { Plugin, PluginInitializerContext } from '../../../../core/server/plugins/types';
+import type { UsageCollectionSetup } from '../../../usage_collection/server/plugin';
+import { kqlTelemetry } from '../saved_objects/kql_telemetry';
 import { registerKqlTelemetryRoute } from './route';
-import { UsageCollectionSetup } from '../../../usage_collection/server';
-import { makeKQLUsageCollector } from './usage_collector';
-import { kqlTelemetry } from '../saved_objects';
+import { makeKQLUsageCollector } from './usage_collector/make_kql_usage_collector';
 
 export class KqlTelemetryService implements Plugin<void> {
   constructor(private initializerContext: PluginInitializerContext) {}

@@ -5,10 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import type { SerializableRecord } from '@kbn/utility-types';
-import { PersistableState, PersistableStateDefinition } from '../../kibana_utils/common';
-import { EmbeddableStateWithType } from '../common/types';
+import type {
+  PersistableState,
+  PersistableStateDefinition,
+} from '../../kibana_utils/common/persistable_state/types';
+import type { EmbeddableStateWithType } from '../common/types';
 
 export type EmbeddableFactoryRegistry = Map<string, EmbeddableRegistryItem>;
 export type EnhancementsRegistry = Map<string, EnhancementRegistryItem>;

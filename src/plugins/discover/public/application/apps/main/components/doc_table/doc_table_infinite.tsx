@@ -5,14 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import React, { Fragment, memo, useCallback, useEffect, useState } from 'react';
-import './index.scss';
+import { EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { debounce } from 'lodash';
-import { EuiButtonEmpty } from '@elastic/eui';
-import { DocTableProps, DocTableRenderProps, DocTableWrapper } from './doc_table_wrapper';
-import { SkipBottomButton } from '../skip_bottom_button';
+import React, { Fragment, memo, useCallback, useEffect, useState } from 'react';
+import { SkipBottomButton } from '../skip_bottom_button/skip_bottom_button';
+import type { DocTableProps, DocTableRenderProps } from './doc_table_wrapper';
+import { DocTableWrapper } from './doc_table_wrapper';
+import './index.scss';
 
 const DocTableInfiniteContent = (props: DocTableRenderProps) => {
   const [limit, setLimit] = useState(props.minimumVisibleRows);

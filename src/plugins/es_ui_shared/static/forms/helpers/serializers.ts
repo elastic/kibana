@@ -5,28 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-/**
- * Output transforms are functions that will be called
- * with the form field value whenever we access the form data object. (with `form.getFormData()`)
- *
- * This allows us to have a different object/array as field `value`
- * from the desired outputed form data.
- *
- * Example:
- * ```ts
- * myField.value = [{ label: 'index_1', isSelected: true }, { label: 'index_2', isSelected: false }]
- * const serializer = (value) => (
- *   value.filter(v => v.selected).map(v => v.label)
- * );
- *
- * // When serializing the form data, the following array will be returned
- * form.getFormData() -> { myField: ['index_1'] }
- * ````
- */
-
-import { EuiSelectableOption } from '@elastic/eui';
-import { SerializerFunc } from '../hook_form_lib';
+import type { EuiSelectableOption } from '@elastic/eui';
+import type { SerializerFunc } from '../hook_form_lib/types';
 
 export const multiSelectComponent: Record<string, SerializerFunc<string[]>> = {
   /**

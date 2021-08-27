@@ -5,13 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { CoreStart, CoreSetup } from 'kibana/public';
-import { KibanaLegacyStart } from 'src/plugins/kibana_legacy/public';
 import { Subscription } from 'rxjs';
-import { navigateToDefaultApp } from './navigate_to_default_app';
-import { createLegacyUrlForwardApp } from './forward_app';
+import type { CoreSetup, CoreStart } from '../../../core/public';
+import type { KibanaLegacyStart } from '../../kibana_legacy/public/plugin';
+import { createLegacyUrlForwardApp } from './forward_app/forward_app';
 import { navigateToLegacyKibanaUrl } from './forward_app/navigate_to_legacy_kibana_url';
+import { navigateToDefaultApp } from './navigate_to_default_app';
 
 export interface ForwardDefinition {
   legacyAppId: string;

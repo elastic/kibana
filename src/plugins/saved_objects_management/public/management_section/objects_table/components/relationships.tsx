@@ -5,34 +5,34 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import React, { Component } from 'react';
+import type { SearchFilterConfig } from '@elastic/eui';
 import {
-  EuiTitle,
+  EuiCallOut,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
-  EuiLink,
   EuiIcon,
-  EuiCallOut,
-  EuiLoadingElastic,
   EuiInMemoryTable,
-  EuiToolTip,
-  EuiText,
+  EuiLink,
+  EuiLoadingElastic,
   EuiSpacer,
+  EuiText,
+  EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
-import { SearchFilterConfig } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { IBasePath } from 'src/core/public';
-import { getDefaultTitle, getSavedObjectLabel } from '../../../lib';
-import {
-  SavedObjectWithMetadata,
-  SavedObjectRelationKind,
-  SavedObjectRelation,
-  SavedObjectInvalidRelation,
+import React, { Component } from 'react';
+import type { IBasePath } from '../../../../../../core/public/http/types';
+import type {
   SavedObjectGetRelationshipsResponse,
-} from '../../../types';
+  SavedObjectInvalidRelation,
+  SavedObjectRelation,
+  SavedObjectRelationKind,
+  SavedObjectWithMetadata,
+} from '../../../../common/types';
+import { getDefaultTitle } from '../../../lib/get_default_title';
+import { getSavedObjectLabel } from '../../../lib/get_saved_object_label';
 
 export interface RelationshipsProps {
   basePath: IBasePath;

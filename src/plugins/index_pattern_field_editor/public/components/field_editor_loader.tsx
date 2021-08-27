@@ -5,10 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import React, { useState, useCallback, useEffect } from 'react';
-import { EuiFlyoutHeader, EuiFlyoutBody, EuiFlyoutFooter } from '@elastic/eui';
-
+import { EuiFlyoutBody, EuiFlyoutFooter, EuiFlyoutHeader } from '@elastic/eui';
+import React, { useCallback, useEffect, useState } from 'react';
 import type { Props } from './field_editor_flyout_content_container';
 
 export const FieldEditorLoader: React.FC<Props> = (props) => {

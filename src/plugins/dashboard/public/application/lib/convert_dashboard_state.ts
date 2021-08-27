@@ -7,23 +7,25 @@
  */
 
 import _ from 'lodash';
-import type { KibanaExecutionContext } from 'src/core/public';
-import { DashboardSavedObject } from '../../saved_dashboards';
-import { getTagsFromSavedDashboard, migrateAppState } from '.';
-import { EmbeddablePackageState, ViewMode } from '../../services/embeddable';
+import type { KibanaExecutionContext } from '../../../../../core/types/execution_context';
+import { ViewMode } from '../../../../embeddable/common/types';
+import type { EmbeddablePackageState } from '../../../../embeddable/public/lib/state_transfer/types';
 import {
   convertPanelStateToSavedDashboardPanel,
   convertSavedDashboardPanelToPanelState,
 } from '../../../common/embeddable/embeddable_saved_object_converters';
-import {
+import type { SavedDashboardPanel } from '../../../common/types';
+import type { DashboardSavedObject } from '../../saved_dashboards/saved_dashboard';
+import type {
+  DashboardAppServices,
+  DashboardBuildContext,
+  DashboardContainerInput,
+  DashboardPanelMap,
   DashboardState,
   RawDashboardState,
-  DashboardPanelMap,
-  SavedDashboardPanel,
-  DashboardAppServices,
-  DashboardContainerInput,
-  DashboardBuildContext,
 } from '../../types';
+import { getTagsFromSavedDashboard } from './dashboard_tagging';
+import { migrateAppState } from './migrate_app_state';
 
 interface SavedObjectToDashboardStateProps {
   version: string;

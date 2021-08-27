@@ -5,8 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { PluginInitializerContext } from '../../../core/public';
+import type { PluginInitializerContext } from '../../../core/public/plugins/plugin_context';
 import { DashboardPlugin } from './plugin';
 
 export {
@@ -14,24 +13,21 @@ export {
   DashboardContainerFactoryDefinition,
   DASHBOARD_CONTAINER_TYPE,
 } from './application';
-export { DashboardConstants, createDashboardEditUrl } from './dashboard_constants';
-
+export { createDashboardEditUrl, DashboardConstants } from './dashboard_constants';
+export { DashboardAppLocator, DashboardAppLocatorParams } from './locator';
 export {
+  DashboardFeatureFlagConfig,
   DashboardSetup,
   DashboardStart,
   DashboardUrlGenerator,
-  DashboardFeatureFlagConfig,
 } from './plugin';
-
+export { DashboardSavedObject } from './saved_dashboards';
+export { DashboardContainerInput, SavedDashboardPanel } from './types';
 export {
-  DASHBOARD_APP_URL_GENERATOR,
   createDashboardUrlGenerator,
   DashboardUrlGeneratorState,
+  DASHBOARD_APP_URL_GENERATOR,
 } from './url_generator';
-export { DashboardAppLocator, DashboardAppLocatorParams } from './locator';
-
-export { DashboardSavedObject } from './saved_dashboards';
-export { SavedDashboardPanel, DashboardContainerInput } from './types';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new DashboardPlugin(initializerContext);

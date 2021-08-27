@@ -5,65 +5,63 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { i18n } from '@kbn/i18n';
-import React from 'react';
 import angular, { auto } from 'angular';
+import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
-
-import {
-  AppMountParameters,
-  AppUpdater,
-  CoreSetup,
-  CoreStart,
-  Plugin,
-  PluginInitializerContext,
-} from 'kibana/public';
-import { UiActionsStart, UiActionsSetup } from 'src/plugins/ui_actions/public';
-import { EmbeddableStart, EmbeddableSetup } from 'src/plugins/embeddable/public';
-import { ChartsPluginStart } from 'src/plugins/charts/public';
-import { NavigationPublicPluginStart as NavigationStart } from 'src/plugins/navigation/public';
-import { SharePluginStart, SharePluginSetup, UrlGeneratorContract } from 'src/plugins/share/public';
-import { KibanaLegacySetup, KibanaLegacyStart } from 'src/plugins/kibana_legacy/public';
-import { UrlForwardingSetup, UrlForwardingStart } from 'src/plugins/url_forwarding/public';
-import { HomePublicPluginSetup } from 'src/plugins/home/public';
-import { Start as InspectorPublicPluginStart } from 'src/plugins/inspector/public';
-import { DataPublicPluginStart, DataPublicPluginSetup, esFilters } from '../../data/public';
-import { SavedObjectLoader, SavedObjectsStart } from '../../saved_objects/public';
-import { createKbnUrlTracker } from '../../kibana_utils/public';
-import { DEFAULT_APP_CATEGORIES } from '../../../core/public';
-import { UrlGeneratorState } from '../../share/public';
-import { DocViewInput, DocViewInputFn } from './application/doc_views/doc_views_types';
-import { DocViewsRegistry } from './application/doc_views/doc_views_registry';
+import type { CoreSetup, CoreStart } from '../../../core/public';
+import type { AppMountParameters, AppUpdater } from '../../../core/public/application/types';
+import type { Plugin } from '../../../core/public/plugins/plugin';
+import type { PluginInitializerContext } from '../../../core/public/plugins/plugin_context';
+import { DEFAULT_APP_CATEGORIES } from '../../../core/utils/default_app_categories';
+import type { ChartsPluginStart } from '../../charts/public/plugin';
+import { esFilters } from '../../data/public/deprecated';
+import type { DataPublicPluginSetup, DataPublicPluginStart } from '../../data/public/types';
+import type { EmbeddableSetup, EmbeddableStart } from '../../embeddable/public/plugin';
+import type { HomePublicPluginSetup } from '../../home/public/plugin';
+import type { PluginStart as IndexPatternFieldEditorStart } from '../../index_pattern_field_editor/public/types';
+import type { Start as InspectorPublicPluginStart } from '../../inspector/public/plugin';
+import type { KibanaLegacySetup, KibanaLegacyStart } from '../../kibana_legacy/public/plugin';
+import { replaceUrlHashQuery } from '../../kibana_utils/public/state_management/url/format';
+import { createKbnUrlTracker } from '../../kibana_utils/public/state_management/url/kbn_url_tracker';
+import type { NavigationPublicPluginStart as NavigationStart } from '../../navigation/public/types';
+import type { SavedObjectsStart } from '../../saved_objects/public/plugin';
+import { SavedObjectLoader } from '../../saved_objects/public/saved_object/saved_object_loader';
+import type { SharePluginSetup, SharePluginStart } from '../../share/public/plugin';
+import type { UrlGeneratorContract } from '../../share/public/url_generators/url_generator_contract';
+import type { UrlGeneratorState } from '../../share/public/url_generators/url_generator_definition';
+import type { UiActionsSetup, UiActionsStart } from '../../ui_actions/public/plugin';
+import type { UrlForwardingSetup, UrlForwardingStart } from '../../url_forwarding/public/plugin';
+import type { UsageCollectionSetup } from '../../usage_collection/public/plugin';
+import { SourceViewer } from './application/components/source_viewer/source_viewer';
 import { DocViewerTable } from './application/components/table/table';
-import {
-  setDocViewsRegistry,
-  setUrlTracker,
-  setAngularModule,
-  setServices,
-  setHeaderActionMenuMounter,
-  setUiActions,
-  setScopedHistory,
-  getScopedHistory,
-  syncHistoryLocations,
-  getServices,
-} from './kibana_services';
-import { createSavedSearchesLoader } from './saved_searches';
-import { registerFeature } from './register_feature';
+import { DocViewsRegistry } from './application/doc_views/doc_views_registry';
+import type { DocViewInput, DocViewInputFn } from './application/doc_views/doc_views_types';
+import { SearchEmbeddableFactory } from './application/embeddable/search_embeddable_factory';
 import { buildServices } from './build_services';
 import {
-  DiscoverUrlGeneratorState,
-  DISCOVER_APP_URL_GENERATOR,
+  getScopedHistory,
+  getServices,
+  setAngularModule,
+  setDocViewsRegistry,
+  setHeaderActionMenuMounter,
+  setScopedHistory,
+  setServices,
+  setUiActions,
+  setUrlTracker,
+  syncHistoryLocations,
+} from './kibana_services';
+import type { DiscoverAppLocator } from './locator';
+import { DiscoverAppLocatorDefinition } from './locator';
+import { registerFeature } from './register_feature';
+import { createSavedSearchesLoader } from './saved_searches/saved_searches';
+import type { DiscoverUrlGeneratorState } from './url_generator';
+import {
   DiscoverUrlGenerator,
+  DISCOVER_APP_URL_GENERATOR,
   SEARCH_SESSION_ID_QUERY_PARAM,
 } from './url_generator';
-import { DiscoverAppLocatorDefinition, DiscoverAppLocator } from './locator';
-import { SearchEmbeddableFactory } from './application/embeddable';
-import { UsageCollectionSetup } from '../../usage_collection/public';
-import { replaceUrlHashQuery } from '../../kibana_utils/public/';
-import { IndexPatternFieldEditorStart } from '../../../plugins/index_pattern_field_editor/public';
-import { SourceViewer } from './application/components/source_viewer/source_viewer';
 
 declare module '../../share/public' {
   export interface UrlGeneratorStateMapping {

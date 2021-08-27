@@ -5,9 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import React, { Fragment } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiButton,
   EuiCallOut,
@@ -16,10 +13,12 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import { DataPublicPluginStart } from '../../../../../../../data/public';
+import { FormattedMessage } from '@kbn/i18n/react';
+import React, { Fragment } from 'react';
+import type { DataPublicPluginStart } from '../../../../../../../data/public/types';
+import { NoResultsIllustration } from './assets/no_results_illustration';
 import { AdjustSearch, getTimeFieldMessage } from './no_results_helper';
 import './_no_results.scss';
-import { NoResultsIllustration } from './assets/no_results_illustration';
 
 export interface DiscoverNoResultsProps {
   timeFieldName?: string;

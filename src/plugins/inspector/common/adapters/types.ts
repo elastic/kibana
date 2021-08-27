@@ -5,8 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import type { RequestAdapter } from './request';
+import { RequestAdapter } from './request/request_adapter';
 
 /**
  * The interface that the adapters used to open an inspector have to fullfill.

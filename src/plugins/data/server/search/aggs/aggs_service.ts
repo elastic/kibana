@@ -5,26 +5,22 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { pick } from 'lodash';
-
-import {
-  UiSettingsServiceStart,
-  SavedObjectsClientContract,
-  ElasticsearchClient,
-} from 'src/core/server';
-import { ExpressionsServiceSetup } from 'src/plugins/expressions/common';
+import type { ElasticsearchClient } from '../../../../../core/server/elasticsearch/client/types';
+import type { SavedObjectsClientContract } from '../../../../../core/server/saved_objects/types';
+import type { UiSettingsServiceStart } from '../../../../../core/server/ui_settings/types';
+import type { ExpressionsServiceSetup } from '../../../../expressions/common/service/expressions_services';
+import type { FieldFormatsStart } from '../../../../field_formats/server/types';
+import { calculateBounds } from '../../../common/query/timefilter/get_time';
+import type { TimeRange } from '../../../common/query/timefilter/types';
 import {
   AggsCommonService,
-  AggConfigs,
-  AggTypesDependencies,
   aggsRequiredUiSettings,
-  calculateBounds,
-  TimeRange,
-} from '../../../common';
-import { FieldFormatsStart } from '../../../../field_formats/server';
-import { IndexPatternsServiceStart } from '../../index_patterns';
-import { AggsSetup, AggsStart } from './types';
+} from '../../../common/search/aggs/aggs_service';
+import { AggConfigs } from '../../../common/search/aggs/agg_configs';
+import type { AggTypesDependencies } from '../../../common/search/aggs/agg_types';
+import type { IndexPatternsServiceStart } from '../../index_patterns/index_patterns_service';
+import type { AggsSetup, AggsStart } from './types';
 
 /** @internal */
 export interface AggsSetupDependencies {

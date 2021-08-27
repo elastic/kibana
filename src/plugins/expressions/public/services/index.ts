@@ -5,10 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { NotificationsStart } from 'kibana/public';
-import { createGetterSetter } from '../../../kibana_utils/public';
-import { ExpressionsService, ExpressionRendererRegistry } from '../../common';
+import type { NotificationsStart } from '../../../../core/public/notifications/notifications_service';
+import { createGetterSetter } from '../../../kibana_utils/common/create_getter_setter';
+import { ExpressionRendererRegistry } from '../../common/expression_renderers/expression_renderer_registry';
+import { ExpressionsService } from '../../common/service/expressions_services';
 
 export const [getNotifications, setNotifications] = createGetterSetter<NotificationsStart>(
   'Notifications'

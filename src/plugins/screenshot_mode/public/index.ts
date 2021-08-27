@@ -5,7 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { ScreenshotModePlugin } from './plugin';
 
 export function plugin() {
@@ -13,9 +12,8 @@ export function plugin() {
 }
 
 export {
+  KBN_SCREENSHOT_MODE_ENABLED_KEY,
   KBN_SCREENSHOT_MODE_HEADER,
   setScreenshotModeEnabled,
-  KBN_SCREENSHOT_MODE_ENABLED_KEY,
 } from '../common';
-
 export { ScreenshotModePluginSetup, ScreenshotModePluginStart } from './types';

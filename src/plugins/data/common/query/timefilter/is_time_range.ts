@@ -5,8 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { TimeRange } from './types';
+import type { TimeRange } from './types';
 
 export const isTimeRange = (x: unknown): x is TimeRange =>
   !!x &&

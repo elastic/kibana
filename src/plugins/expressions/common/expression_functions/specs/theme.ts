@@ -5,10 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
-import { ExpressionFunctionDefinition } from '../types';
+import type { ExpressionFunctionDefinition } from '../types';
 
 interface Arguments {
   variable: string;

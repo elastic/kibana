@@ -5,10 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Subscription } from 'rxjs';
-import { DataPublicPluginStart, Filter } from '../../..';
+import type { Filter } from '../../../../common/es_query';
+import type { DataPublicPluginStart } from '../../../types';
 
 interface UseFilterManagerProps {
   filters?: Filter[];

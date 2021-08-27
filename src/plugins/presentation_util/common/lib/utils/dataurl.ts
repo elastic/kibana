@@ -5,10 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { fromByteArray } from 'base64-js';
-
 // @ts-expect-error @types/mime doesn't resolve mime/lite for some reason.
+import { fromByteArray } from 'base64-js';
 import mime from 'mime/lite';
 
 const dataurlRegex = /^data:([a-z]+\/[a-z0-9-+.]+)(;[a-z-]+=[a-z0-9-]+)?(;([a-z0-9]+))?,/;

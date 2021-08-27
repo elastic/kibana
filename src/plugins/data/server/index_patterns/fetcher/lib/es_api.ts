@@ -5,8 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { ElasticsearchClient } from 'kibana/server';
+import type { ElasticsearchClient } from '../../../../../../core/server/elasticsearch/client/types';
 import { convertEsError } from './errors';
 
 /**

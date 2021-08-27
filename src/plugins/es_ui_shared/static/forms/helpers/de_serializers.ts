@@ -5,9 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { EuiSelectableOption } from '@elastic/eui';
-import { SerializerFunc } from '../hook_form_lib';
+import type { EuiSelectableOption } from '@elastic/eui';
+import type { SerializerFunc } from '../hook_form_lib/types';
 
 type FuncType = (selectOptions: EuiSelectableOption[]) => SerializerFunc;
 

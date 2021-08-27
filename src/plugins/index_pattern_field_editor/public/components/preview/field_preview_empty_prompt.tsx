@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiText, EuiTextColor } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EuiEmptyPrompt, EuiText, EuiTextColor, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import React from 'react';
 
 export const FieldPreviewEmptyPrompt = () => {
   return (

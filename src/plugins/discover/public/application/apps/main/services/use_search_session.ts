@@ -5,13 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { useMemo, useEffect } from 'react';
-import { History } from 'history';
+import type { History } from 'history';
+import { useEffect, useMemo } from 'react';
+import { noSearchSessionStorageCapabilityMessage } from '../../../../../../data/public/search/session/i18n';
+import type { DiscoverServices } from '../../../../build_services';
+import type { SavedSearch } from '../../../../saved_searches/types';
 import { DiscoverSearchSessionManager } from './discover_search_session';
-import { createSearchSessionRestorationDataProvider, GetStateReturn } from './discover_state';
-import { noSearchSessionStorageCapabilityMessage } from '../../../../../../data/public';
-import { DiscoverServices } from '../../../../build_services';
-import { SavedSearch } from '../../../../saved_searches';
+import type { GetStateReturn } from './discover_state';
+import { createSearchSessionRestorationDataProvider } from './discover_state';
 
 export function useSearchSession({
   services,

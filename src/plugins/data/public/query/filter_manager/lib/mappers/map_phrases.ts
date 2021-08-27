@@ -5,10 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { Filter, isPhrasesFilter } from '@kbn/es-query';
-
-import { FilterValueFormatter } from '../../../../../common';
+import type { Filter } from '@kbn/es-query';
+import { isPhrasesFilter } from '@kbn/es-query';
+import type { FilterValueFormatter } from '../../../../../common/types';
 
 const getFormattedValueFn = (params: any) => {
   return (formatter?: FilterValueFormatter) => {

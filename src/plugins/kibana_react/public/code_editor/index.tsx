@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import {
   EuiDelayRender,
   EuiErrorBoundary,
-  EuiLoadingContent,
   EuiFormControlLayout,
+  EuiLoadingContent,
 } from '@elastic/eui';
 import darkTheme from '@elastic/eui/dist/eui_theme_dark.json';
 import lightTheme from '@elastic/eui/dist/eui_theme_light.json';
-import { useUiSetting } from '../ui_settings';
-import { Props } from './code_editor';
+import React from 'react';
+import { useUiSetting } from '../ui_settings/use_ui_setting';
+import type { Props } from './code_editor';
 import './register_languages';
 
 export * from './languages';

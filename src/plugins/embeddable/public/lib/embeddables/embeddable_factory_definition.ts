@@ -5,11 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { SavedObjectAttributes } from 'kibana/server';
-import { IEmbeddable } from './i_embeddable';
-import { EmbeddableFactory } from './embeddable_factory';
-import { EmbeddableInput, EmbeddableOutput } from '..';
+import type { SavedObjectAttributes } from '../../../../../core/types/saved_objects';
+import type { EmbeddableInput } from '../../../common/types';
+import type { EmbeddableFactory } from './embeddable_factory';
+import type { EmbeddableOutput, IEmbeddable } from './i_embeddable';
 
 export type EmbeddableFactoryDefinition<
   I extends EmbeddableInput = EmbeddableInput,

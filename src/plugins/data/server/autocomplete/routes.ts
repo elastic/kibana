@@ -5,11 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { Observable } from 'rxjs';
-import { CoreSetup } from 'kibana/server';
+import type { CoreSetup } from '../../../../core/server';
+import type { ConfigSchema } from '../../config';
 import { registerValueSuggestionsRoute } from './value_suggestions_route';
-import { ConfigSchema } from '../../config';
 
 export function registerRoutes({ http }: CoreSetup, config$: Observable<ConfigSchema>): void {
   const router = http.createRouter();

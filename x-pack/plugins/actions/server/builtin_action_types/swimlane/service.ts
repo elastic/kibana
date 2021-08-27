@@ -4,14 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { Logger } from '@kbn/logging';
+import type { Logger } from '@kbn/logging';
 import axios from 'axios';
-
-import { ActionsConfigurationUtilities } from '../../actions_config';
+import type { ActionsConfigurationUtilities } from '../../actions_config';
 import { getErrorMessage, request } from '../lib/axios_utils';
 import { getBodyForEventAction } from './helpers';
-import {
+import * as i18n from './translations';
+import type {
   CreateCommentParams,
   CreateRecordParams,
   ExternalService,
@@ -24,7 +23,6 @@ import {
   SwimlaneSecretConfigurationType,
   UpdateRecordParams,
 } from './types';
-import * as i18n from './translations';
 
 const createErrorMessage = (errorResponse: ResponseError | null | undefined): string => {
   if (errorResponse == null) {

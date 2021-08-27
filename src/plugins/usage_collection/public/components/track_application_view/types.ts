@@ -5,8 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { ReactNode } from 'react';
+import type { ReactNode } from 'react';
 
 /**
  * Props to provide to the {@link TrackApplicationView} component.

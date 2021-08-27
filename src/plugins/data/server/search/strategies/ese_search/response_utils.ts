@@ -5,9 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { AsyncSearchResponse } from './types';
-import { getTotalLoaded } from '../es_search';
+import { getTotalLoaded } from '../es_search/response_utils';
+import type { AsyncSearchResponse } from './types';
 
 /**
  * Get the Kibana representation of an async search response (see `IKibanaSearchResponse`).
