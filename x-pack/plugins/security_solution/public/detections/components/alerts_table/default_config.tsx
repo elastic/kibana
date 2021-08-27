@@ -235,7 +235,7 @@ export const buildAlertStatusesFilterRuleRegistry = (statuses: Status[]): Filter
     bool: {
       should: statuses.map((status) => ({
         term: {
-          [ALERT_STATUS]: status,
+          [ALERT_WORKFLOW_STATUS]: status,
         },
       })),
     },
