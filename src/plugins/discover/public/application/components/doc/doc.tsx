@@ -53,8 +53,8 @@ export function Doc(props: DocProps) {
               iconType="alert"
               title={
                 <FormattedMessage
-                  id="discover.doc.failedToLocateIndexPattern"
-                  defaultMessage="No index pattern matches ID {indexPatternId}."
+                  id="discover.doc.failedToLocateDataView"
+                  defaultMessage="No data view matches ID {indexPatternId}."
                   values={{ indexPatternId: props.indexPatternId }}
                 />
               }
@@ -99,7 +99,7 @@ export function Doc(props: DocProps) {
               <EuiLink href={indexExistsLink} target="_blank">
                 <FormattedMessage
                   id="discover.doc.somethingWentWrongDescriptionAddon"
-                  defaultMessage="Please ensure the index exists."
+                  defaultMessage="Please ensure the data view exists."
                 />
               </EuiLink>
             </EuiCallOut>

@@ -328,7 +328,7 @@ function DiscoverFieldComponent({
               iconType="pencil"
               data-test-subj={`discoverFieldListPanelEdit-${field.name}`}
               aria-label={i18n.translate('discover.fieldChooser.discoverField.editFieldLabel', {
-                defaultMessage: 'Edit index pattern field',
+                defaultMessage: 'Edit data view field',
               })}
             />
           </EuiFlexItem>
@@ -337,7 +337,7 @@ function DiscoverFieldComponent({
           <EuiFlexItem grow={false} data-test-subj="discoverFieldListPanelDeleteItem">
             <EuiToolTip
               content={i18n.translate('discover.fieldChooser.discoverField.deleteFieldLabel', {
-                defaultMessage: 'Delete index pattern field',
+                defaultMessage: 'Delete data view field',
               })}
             >
               <EuiButtonIcon
@@ -348,7 +348,7 @@ function DiscoverFieldComponent({
                 data-test-subj={`discoverFieldListPanelDelete-${field.name}`}
                 color="danger"
                 aria-label={i18n.translate('discover.fieldChooser.discoverField.deleteFieldLabel', {
-                  defaultMessage: 'Delete index pattern field',
+                  defaultMessage: 'Delete data view field',
                 })}
               />
             </EuiToolTip>

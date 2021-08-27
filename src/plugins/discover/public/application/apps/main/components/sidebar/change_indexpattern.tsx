@@ -67,8 +67,8 @@ export function ChangeIndexPattern({
     >
       <div style={{ width: 320 }}>
         <EuiPopoverTitle>
-          {i18n.translate('discover.fieldChooser.indexPattern.changeIndexPatternTitle', {
-            defaultMessage: 'Change index pattern',
+          {i18n.translate('discover.fieldChooser.indexPattern.changeDataViewTitle', {
+            defaultMessage: 'Change data view',
           })}
         </EuiPopoverTitle>
         <EuiSelectable<{ value: string }>
