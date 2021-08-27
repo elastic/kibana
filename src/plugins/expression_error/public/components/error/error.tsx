@@ -7,15 +7,15 @@
  */
 
 import React, { FC } from 'react';
-import { EuiCallOut } from '@elastic/eui';
+import { EuiButtonIcon, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { get } from 'lodash';
 import { ShowDebugging } from './show_debugging';
 
 export interface Props {
   payload: {
     error: Error;
   };
+  onClose?: () => void;
 }
 
 const strings = {
@@ -29,14 +29,18 @@ const strings = {
     }),
 };
 
-export const Error: FC<Props> = ({ payload }) => {
-  const message = get(payload, 'error.message');
+export const Error: FC<Props> = ({ payload, onClose }) => {
+  const message = payload.error?.message;
+
+  const CloseIconButton = () => (
+    <EuiButtonIcon color="danger" iconType="cross" onClick={onClose} aria-hidden />
+  );
 
   return (
     <EuiCallOut
       style={{ maxWidth: 500 }}
       color="danger"
-      iconType="cross"
+      iconType={CloseIconButton}
       title={strings.getTitle()}
     >
       <p>{message ? strings.getDescription() : ''}</p>
