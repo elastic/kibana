@@ -7,9 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-import 'brace';
-import 'brace/mode/json';
-
 import {
   ChromeStart,
   CoreStart,
