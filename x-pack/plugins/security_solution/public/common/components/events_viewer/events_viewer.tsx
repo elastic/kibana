@@ -321,7 +321,9 @@ const EventsViewerComponent: React.FC<Props> = ({
                 refetch={refetch}
               />
 
-              {graphEventId && <GraphOverlay isEventViewer={true} timelineId={id} />}
+              {graphEventId && (
+                <GraphOverlay isEventViewer={true} timelineId={id} isDataGridExpanded={false} />
+              )}
               <FullWidthFlexGroup $visible={!graphEventId} gutterSize="none">
                 <ScrollableFlexItem grow={1}>
                   <StatefulBody

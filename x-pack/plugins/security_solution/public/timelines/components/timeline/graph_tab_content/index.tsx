@@ -26,7 +26,7 @@ const GraphTabContentComponent: React.FC<GraphTabContentProps> = ({ timelineId }
     return null;
   }
 
-  return <GraphOverlay isEventViewer={false} timelineId={timelineId} />;
+  return <GraphOverlay isEventViewer={false} timelineId={timelineId} isDataGridExpanded={false} />;
 };
 
 GraphTabContentComponent.displayName = 'GraphTabContentComponent';

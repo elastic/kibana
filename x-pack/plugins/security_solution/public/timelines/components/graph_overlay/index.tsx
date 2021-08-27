@@ -24,6 +24,7 @@ import { FULL_SCREEN_TOGGLED_CLASS_NAME } from '../../../../common/constants';
 import {
   useGlobalFullScreen,
   useTimelineFullScreen,
+  closeDataGrid,
 } from '../../../common/containers/use_full_screen';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { TimelineId } from '../../../../common/types/timeline';
@@ -50,6 +51,15 @@ const OverlayContainer = styled.div`
     `}
 `;
 
+const FullScreenOverlayContainer = styled.div`
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 10;
+`;
+
 const StyledResolver = styled(Resolver)`
   height: 100%;
 `;
@@ -61,6 +71,7 @@ const FullScreenButtonIcon = styled(EuiButtonIcon)`
 interface OwnProps {
   isEventViewer: boolean;
   timelineId: TimelineId;
+  isDataGridExpanded: boolean;
 }
 
 interface NavigationProps {
@@ -111,18 +122,19 @@ NavigationComponent.displayName = 'NavigationComponent';
 
 const Navigation = React.memo(NavigationComponent);
 
-const GraphOverlayComponent: React.FC<OwnProps> = ({ isEventViewer, timelineId }) => {
+const GraphOverlayComponent: React.FC<OwnProps> = ({
+  isEventViewer,
+  timelineId,
+  isDataGridExpanded,
+}) => {
   const dispatch = useDispatch();
-  const onCloseOverlay = useCallback(() => {
-    dispatch(updateTimelineGraphEventId({ id: timelineId, graphEventId: '' }));
-  }, [dispatch, timelineId]);
+  const { globalFullScreen, setGlobalFullScreen } = useGlobalFullScreen();
+  const { timelineFullScreen, setTimelineFullScreen } = useTimelineFullScreen();
+
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const graphEventId = useDeepEqualSelector(
     (state) => (getTimeline(state, timelineId) ?? timelineDefaults).graphEventId
   );
-
-  const { globalFullScreen, setGlobalFullScreen } = useGlobalFullScreen();
-  const { timelineFullScreen, setTimelineFullScreen } = useTimelineFullScreen();
   const getStartSelector = useMemo(() => startSelector(), []);
   const getEndSelector = useMemo(() => endSelector(), []);
   const getIsLoadingSelector = useMemo(() => isLoadingSelector(), []);
@@ -149,10 +161,26 @@ const GraphOverlayComponent: React.FC<OwnProps> = ({ isEventViewer, timelineId }
     }
   });
 
-  const fullScreen = useMemo(
+  const isResolverExpanded = useMemo(
     () => isFullScreen({ globalFullScreen, timelineId, timelineFullScreen }),
     [globalFullScreen, timelineId, timelineFullScreen]
   );
+
+  const fullScreen = useMemo(() => {
+    return isResolverExpanded && isDataGridExpanded;
+  }, [isResolverExpanded, isDataGridExpanded]);
+
+  const onCloseOverlay = useCallback(() => {
+    if (isResolverExpanded === false) {
+      closeDataGrid();
+    }
+    if (timelineId === TimelineId.active) {
+      setTimelineFullScreen(false);
+    } else {
+      setGlobalFullScreen(false);
+    }
+    dispatch(updateTimelineGraphEventId({ id: timelineId, graphEventId: '' }));
+  }, [dispatch, timelineId, setTimelineFullScreen, setGlobalFullScreen, isResolverExpanded]);
 
   const toggleFullScreen = useCallback(() => {
     if (timelineId === TimelineId.active) {
@@ -173,41 +201,74 @@ const GraphOverlayComponent: React.FC<OwnProps> = ({ isEventViewer, timelineId }
     []
   );
   const existingIndexNames = useDeepEqualSelector<string[]>(existingIndexNamesSelector);
-
-  return (
-    <OverlayContainer
-      data-test-subj="overlayContainer"
-      $restrictWidth={isEventViewer && fullScreen}
-    >
-      <EuiHorizontalRule margin="none" />
-      <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween">
-        <EuiFlexItem grow={false}>
-          <Navigation
-            fullScreen={fullScreen}
-            globalFullScreen={globalFullScreen}
-            onCloseOverlay={onCloseOverlay}
-            timelineId={timelineId}
-            timelineFullScreen={timelineFullScreen}
-            toggleFullScreen={toggleFullScreen}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiHorizontalRule margin="none" />
-      {graphEventId !== undefined ? (
-        <StyledResolver
-          databaseDocumentID={graphEventId}
-          resolverComponentInstanceID={timelineId}
-          indices={existingIndexNames}
-          shouldUpdate={shouldUpdate}
-          filters={{ from, to }}
-        />
-      ) : (
-        <EuiFlexGroup alignItems="center" justifyContent="center" style={{ height: '100%' }}>
-          <EuiLoadingSpinner size="xl" />
+  if (fullScreen) {
+    return (
+      <FullScreenOverlayContainer data-test-subj="overlayContainer">
+        <EuiHorizontalRule margin="none" />
+        <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <Navigation
+              fullScreen={isResolverExpanded}
+              globalFullScreen={globalFullScreen}
+              onCloseOverlay={onCloseOverlay}
+              timelineId={timelineId}
+              timelineFullScreen={timelineFullScreen}
+              toggleFullScreen={toggleFullScreen}
+            />
+          </EuiFlexItem>
         </EuiFlexGroup>
-      )}
-    </OverlayContainer>
-  );
+        <EuiHorizontalRule margin="none" />
+        {graphEventId !== undefined ? (
+          <StyledResolver
+            databaseDocumentID={graphEventId}
+            resolverComponentInstanceID={timelineId}
+            indices={existingIndexNames}
+            shouldUpdate={shouldUpdate}
+            filters={{ from, to }}
+          />
+        ) : (
+          <EuiFlexGroup alignItems="center" justifyContent="center" style={{ height: '100%' }}>
+            <EuiLoadingSpinner size="xl" />
+          </EuiFlexGroup>
+        )}
+      </FullScreenOverlayContainer>
+    );
+  } else {
+    return (
+      <OverlayContainer
+        data-test-subj="overlayContainer"
+        $restrictWidth={isEventViewer && fullScreen}
+      >
+        <EuiHorizontalRule margin="none" />
+        <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <Navigation
+              fullScreen={isResolverExpanded}
+              globalFullScreen={globalFullScreen}
+              onCloseOverlay={onCloseOverlay}
+              timelineId={timelineId}
+              timelineFullScreen={timelineFullScreen}
+              toggleFullScreen={toggleFullScreen}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiHorizontalRule margin="none" />
+        {graphEventId !== undefined ? (
+          <StyledResolver
+            databaseDocumentID={graphEventId}
+            resolverComponentInstanceID={timelineId}
+            indices={existingIndexNames}
+            shouldUpdate={shouldUpdate}
+            filters={{ from, to }}
+          />
+        ) : (
+          <EuiFlexGroup alignItems="center" justifyContent="center" style={{ height: '100%' }}>
+            <EuiLoadingSpinner size="xl" />
+          </EuiFlexGroup>
+        )}
+      </OverlayContainer>
+    );
+  }
 };
 
 export const GraphOverlay = React.memo(GraphOverlayComponent);

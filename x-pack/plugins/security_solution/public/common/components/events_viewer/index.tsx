@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React, { useMemo, useEffect } from 'react';
+import React, { useMemo, useEffect, useCallback, useState } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
+import { EuiMutationObserver } from '@elastic/eui';
 import deepEqual from 'fast-deep-equal';
 import styled from 'styled-components';
 
@@ -142,92 +143,109 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
 
   const globalFilters = useMemo(() => [...filters, ...(pageFilters ?? [])], [filters, pageFilters]);
   const trailingControlColumns: ControlColumnProps[] = EMPTY_CONTROL_COLUMNS;
+  const [isDataGridExpanded, setDataGridExpanded] = useState(false);
+  const onMutation = useCallback(() => {
+    const isExpanded = document.querySelector('.euiDataGrid--fullScreen') !== null;
+    setDataGridExpanded(isExpanded);
+  }, [setDataGridExpanded]);
   const graphOverlay = useMemo(
     () =>
       graphEventId != null && graphEventId.length > 0 ? (
-        <GraphOverlay isEventViewer={true} timelineId={id} />
+        <GraphOverlay
+          isEventViewer={true}
+          timelineId={id}
+          isDataGridExpanded={isDataGridExpanded}
+        />
       ) : null,
-    [graphEventId, id]
+    [graphEventId, id, isDataGridExpanded]
   );
+
   return (
-    <>
-      <FullScreenContainer $isFullScreen={globalFullScreen}>
-        <InspectButtonContainer>
-          {tGridEnabled ? (
-            timelinesUi.getTGrid<'embedded'>({
-              id,
-              type: 'embedded',
-              browserFields,
-              columns,
-              dataProviders: dataProviders!,
-              defaultCellActions,
-              deletedEventIds,
-              docValueFields,
-              end,
-              entityType,
-              filters: globalFilters,
-              globalFullScreen,
-              graphOverlay,
-              hasAlertsCrud,
-              indexNames: selectedPatterns,
-              indexPattern,
-              isLive,
-              isLoadingIndexPattern,
-              itemsPerPage,
-              itemsPerPageOptions: itemsPerPageOptions!,
-              kqlMode,
-              query,
-              onRuleChange,
-              renderCellValue,
-              rowRenderers,
-              start,
-              sort,
-              additionalFilters,
-              graphEventId,
-              filterStatus: currentFilter,
-              leadingControlColumns,
-              trailingControlColumns,
-              tGridEventRenderedViewEnabled,
-              unit,
-            })
-          ) : (
-            <EventsViewer
-              browserFields={browserFields}
-              columns={columns}
-              docValueFields={docValueFields}
-              id={id}
-              dataProviders={dataProviders!}
-              deletedEventIds={deletedEventIds}
-              end={end}
-              isLoadingIndexPattern={isLoadingIndexPattern}
-              filters={globalFilters}
-              indexNames={selectedPatterns}
-              indexPattern={indexPattern}
-              isLive={isLive}
-              itemsPerPage={itemsPerPage!}
-              itemsPerPageOptions={itemsPerPageOptions!}
-              kqlMode={kqlMode}
-              query={query}
-              onRuleChange={onRuleChange}
-              renderCellValue={renderCellValue}
-              rowRenderers={rowRenderers}
-              start={start}
-              sort={sort}
-              showTotalCount={isEmpty(graphEventId) ? true : false}
-              utilityBar={utilityBar}
-              graphEventId={graphEventId}
-            />
-          )}
-        </InspectButtonContainer>
-      </FullScreenContainer>
-      <DetailsPanel
-        browserFields={browserFields}
-        entityType={entityType}
-        docValueFields={docValueFields}
-        isFlyoutView
-        timelineId={id}
-      />
-    </>
+    <EuiMutationObserver
+      observerOptions={{ subtree: true, attributes: true, childList: true }}
+      onMutation={onMutation}
+    >
+      {(mutationRef) => (
+        <>
+          <FullScreenContainer $isFullScreen={globalFullScreen} ref={mutationRef}>
+            <InspectButtonContainer>
+              {tGridEnabled ? (
+                timelinesUi.getTGrid<'embedded'>({
+                  id,
+                  type: 'embedded',
+                  browserFields,
+                  columns,
+                  dataProviders: dataProviders!,
+                  defaultCellActions,
+                  deletedEventIds,
+                  docValueFields,
+                  end,
+                  entityType,
+                  filters: globalFilters,
+                  globalFullScreen,
+                  graphOverlay,
+                  hasAlertsCrud,
+                  indexNames: selectedPatterns,
+                  indexPattern,
+                  isLive,
+                  isLoadingIndexPattern,
+                  itemsPerPage,
+                  itemsPerPageOptions: itemsPerPageOptions!,
+                  kqlMode,
+                  query,
+                  onRuleChange,
+                  renderCellValue,
+                  rowRenderers,
+                  start,
+                  sort,
+                  additionalFilters,
+                  graphEventId,
+                  filterStatus: currentFilter,
+                  leadingControlColumns,
+                  trailingControlColumns,
+                  tGridEventRenderedViewEnabled,
+                  unit,
+                })
+              ) : (
+                <EventsViewer
+                  browserFields={browserFields}
+                  columns={columns}
+                  docValueFields={docValueFields}
+                  id={id}
+                  dataProviders={dataProviders!}
+                  deletedEventIds={deletedEventIds}
+                  end={end}
+                  isLoadingIndexPattern={isLoadingIndexPattern}
+                  filters={globalFilters}
+                  indexNames={selectedPatterns}
+                  indexPattern={indexPattern}
+                  isLive={isLive}
+                  itemsPerPage={itemsPerPage!}
+                  itemsPerPageOptions={itemsPerPageOptions!}
+                  kqlMode={kqlMode}
+                  query={query}
+                  onRuleChange={onRuleChange}
+                  renderCellValue={renderCellValue}
+                  rowRenderers={rowRenderers}
+                  start={start}
+                  sort={sort}
+                  showTotalCount={isEmpty(graphEventId) ? true : false}
+                  utilityBar={utilityBar}
+                  graphEventId={graphEventId}
+                />
+              )}
+            </InspectButtonContainer>
+          </FullScreenContainer>
+          <DetailsPanel
+            browserFields={browserFields}
+            entityType={entityType}
+            docValueFields={docValueFields}
+            isFlyoutView
+            timelineId={id}
+          />
+        </>
+      )}
+    </EuiMutationObserver>
   );
 };
 

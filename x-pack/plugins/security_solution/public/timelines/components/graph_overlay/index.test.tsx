@@ -49,7 +49,11 @@ describe('GraphOverlay', () => {
     test('it has 100% width when isEventViewer is true and NOT in full screen mode', async () => {
       const wrapper = mount(
         <TestProviders>
-          <GraphOverlay timelineId={TimelineId.test} isEventViewer={isEventViewer} />
+          <GraphOverlay
+            timelineId={TimelineId.test}
+            isEventViewer={isEventViewer}
+            isDataGridExpanded={false}
+          />
         </TestProviders>
       );
 
@@ -71,7 +75,11 @@ describe('GraphOverlay', () => {
 
       const wrapper = mount(
         <TestProviders>
-          <GraphOverlay timelineId={TimelineId.test} isEventViewer={isEventViewer} />
+          <GraphOverlay
+            timelineId={TimelineId.test}
+            isEventViewer={isEventViewer}
+            isDataGridExpanded={false}
+          />
         </TestProviders>
       );
 
@@ -89,7 +97,11 @@ describe('GraphOverlay', () => {
     test('it has 100% width when isEventViewer is false and NOT in full screen mode', async () => {
       const wrapper = mount(
         <TestProviders>
-          <GraphOverlay timelineId={timelineId} isEventViewer={isEventViewer} />
+          <GraphOverlay
+            timelineId={timelineId}
+            isEventViewer={isEventViewer}
+            isDataGridExpanded={false}
+          />
         </TestProviders>
       );
 
@@ -111,7 +123,11 @@ describe('GraphOverlay', () => {
 
       const wrapper = mount(
         <TestProviders>
-          <GraphOverlay timelineId={timelineId} isEventViewer={isEventViewer} />
+          <GraphOverlay
+            timelineId={timelineId}
+            isEventViewer={isEventViewer}
+            isDataGridExpanded={false}
+          />
         </TestProviders>
       );
 
