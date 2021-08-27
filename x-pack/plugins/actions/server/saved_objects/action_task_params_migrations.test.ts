@@ -356,6 +356,14 @@ describe('successful migrations', () => {
       });
     });
   });
+
+  describe('8.0.0', () => {
+    test('no op migration for rules SO', () => {
+      const migration800 = getActionTaskParamsMigrations(encryptedSavedObjectsSetup, [])['8.0.0'];
+      const actionTaskParam = getMockData();
+      expect(migration800(actionTaskParam, context)).toEqual(actionTaskParam);
+    });
+  });
 });
 
 describe('handles errors during migrations', () => {
@@ -402,7 +410,8 @@ describe('isPreconfiguredAction()', () => {
 
 function getMockData(
   overwrites: Record<string, unknown> = {},
-  referencesOverwrites: SavedObjectReference[] = []
+  referencesOverwrites: SavedObjectReference[] = [],
+  namespaces: string[] = ['default']
 ): SavedObjectUnsanitizedDoc<ActionTaskParams> {
   return {
     attributes: {
@@ -412,6 +421,7 @@ function getMockData(
     },
     references: [...referencesOverwrites],
     id: uuid.v4(),
+    namespaces,
     type: 'action_task_param',
   };
 }
