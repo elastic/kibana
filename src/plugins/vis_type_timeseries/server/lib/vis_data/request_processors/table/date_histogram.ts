@@ -9,7 +9,7 @@
 import { overwrite, getBucketSize, isLastValueTimerangeMode, getTimerange } from '../../helpers';
 import { calculateAggRoot } from './calculate_agg_root';
 import { search, UI_SETTINGS } from '../../../../../../../plugins/data/server';
-import { METRIC_AGGREGATIONS } from '../../../../../common/enums';
+import { AGG_TYPE, getAggsByType } from '../../../../../common/agg_utils';
 
 import type { TableRequestProcessorsFunction, TableSearchRequestMeta } from './types';
 
@@ -59,7 +59,7 @@ export const dateHistogram: TableRequestProcessorsFunction = ({
   };
 
   const overwriteDateHistogramForEntireTimerangeMode = () => {
-    const metricAggs = Object.values<string>(METRIC_AGGREGATIONS);
+    const metricAggs = getAggsByType<string>((agg) => agg.id)[AGG_TYPE.METRIC];
     let bucketInterval;
 
     panel.series.forEach((column) => {

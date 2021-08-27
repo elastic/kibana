@@ -17,7 +17,7 @@ import type { Agg } from '../../../../common/agg_utils';
 import type { Metric } from '../../../../common/types';
 import { TimeseriesUIRestrictions } from '../../../../common/ui_restrictions';
 import { PanelModelContext } from '../../contexts/panel_model_context';
-import { PANEL_TYPES, TIME_RANGE_DATA_MODES, SPECIAL_AGGREGATIONS } from '../../../../common/enums';
+import { PANEL_TYPES, TIME_RANGE_DATA_MODES } from '../../../../common/enums';
 
 type AggSelectOption = EuiComboBoxOptionOption;
 
@@ -43,7 +43,7 @@ export function isMetricAviableForPanel(aggId: string, panelType: string, timeRa
     timeRangeMode === TIME_RANGE_DATA_MODES.ENTIRE_TIME_RANGE
   ) {
     return (
-      !pipelineAggs.some((agg) => agg.value === aggId) || aggId !== SPECIAL_AGGREGATIONS.SERIES_AGG
+      !pipelineAggs.some((agg) => agg.value === aggId) || aggId !== TSVB_METRIC_TYPES.SERIES_AGG
     );
   }
 

@@ -11,7 +11,7 @@ import { getBucketSize } from '../../helpers/get_bucket_size';
 import { offsetTime } from '../../offset_time';
 import { isLastValueTimerangeMode } from '../../helpers/get_timerange_mode';
 import { search, UI_SETTINGS } from '../../../../../../../plugins/data/server';
-import { METRIC_AGGREGATIONS } from '../../../../../common/enums';
+import { AGG_TYPE, getAggsByType } from '../../../../../common/agg_utils';
 
 const { dateHistogramInterval } = search.aggs;
 
@@ -57,7 +57,7 @@ export function dateHistogram(
     };
 
     const overwriteDateHistogramForEntireTimerangeMode = () => {
-      const metricAggs = Object.values(METRIC_AGGREGATIONS);
+      const metricAggs = getAggsByType((agg) => agg.id)[AGG_TYPE.METRIC];
 
       // we should use auto_date_histogram only for metric aggregations
       if (series.metrics.every((metric) => metricAggs.includes(metric.type))) {

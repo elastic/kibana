@@ -16,11 +16,10 @@ import { RESTRICTIONS_KEYS } from '../../../../common/ui_restrictions';
 import {
   TIME_RANGE_DATA_MODES,
   PANEL_TYPES,
-  METRIC_AGGREGATIONS,
-  SIBLING_PIPELINE_AGGREGATIONS,
-  SPECIAL_AGGREGATIONS,
   BUCKET_TYPES,
+  TSVB_METRIC_TYPES,
 } from '../../../../common/enums';
+import { getAggsByType, AGG_TYPE } from '../../../../common/agg_utils';
 import type { Panel } from '../../../../common/types';
 
 export interface SearchCapabilitiesOptions {
@@ -50,12 +49,11 @@ export class DefaultSearchCapabilities {
       this.panel.type !== PANEL_TYPES.TIMESERIES &&
       this.panel.time_range_mode === TIME_RANGE_DATA_MODES.ENTIRE_TIME_RANGE
     ) {
-      const metricAggs = Object.values<string>(METRIC_AGGREGATIONS);
-      const siblingPipelineAggs = Object.values<string>(SIBLING_PIPELINE_AGGREGATIONS);
+      const aggs = getAggsByType<string>((agg) => agg.id);
       const allAvailableAggs = [
-        ...metricAggs,
-        ...siblingPipelineAggs,
-        SPECIAL_AGGREGATIONS.MATH,
+        ...aggs[AGG_TYPE.METRIC],
+        ...aggs[AGG_TYPE.SIBLING_PIPELINE],
+        TSVB_METRIC_TYPES.MATH,
         BUCKET_TYPES.TERMS,
       ].reduce(
         (availableAggs, aggType) => ({

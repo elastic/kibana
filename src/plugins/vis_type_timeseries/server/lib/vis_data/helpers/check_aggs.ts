@@ -7,18 +7,18 @@
  */
 
 import { AggNotSupportedInMode } from '../../../../common/errors';
+import { getAggsByType, AGG_TYPE } from '../../../../common/agg_utils';
 import {
-  PARENT_PIPELINE_AGGREGATIONS,
-  SPECIAL_AGGREGATIONS,
+  TSVB_METRIC_TYPES,
   TIME_RANGE_DATA_MODES,
 } from '../../../../common/enums';
 import { Metric } from '../../../../common/types';
 
 export function isAggSupported(metrics: Metric[]) {
-  const parentPipelineAggs = Object.values<string>(PARENT_PIPELINE_AGGREGATIONS);
+  const parentPipelineAggs = getAggsByType<string>((agg) => agg.id)[AGG_TYPE.PARENT_PIPELINE];
   const metricTypes = metrics.filter(
     (metric) =>
-      parentPipelineAggs.includes(metric.type) || metric.type === SPECIAL_AGGREGATIONS.SERIES_AGG
+      parentPipelineAggs.includes(metric.type) || metric.type === TSVB_METRIC_TYPES.SERIES_AGG
   );
 
   if (metricTypes.length) {
