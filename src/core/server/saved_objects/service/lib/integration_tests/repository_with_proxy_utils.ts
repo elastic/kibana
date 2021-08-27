@@ -10,7 +10,7 @@ import { IncomingMessage } from 'http';
 import { kibanaPackageJson as pkg } from '@kbn/utils';
 
 // proxy setup
-const defaultProxyOptions = (hostname: string, port: number | string) => ({
+const defaultProxyOptions = (hostname: string, port: string) => ({
   host: hostname,
   port,
   protocol: 'http' as 'http',
@@ -22,11 +22,11 @@ let proxyInterrupt: string | null | undefined = null;
 export const setProxyInterrupt = (testArg: string | null) => (proxyInterrupt = testArg);
 
 // passes the req/response directly as is
-const relayHandler = (h: Hapi.ResponseToolkit, hostname: string, port: number | string) => {
-  return h.proxy({ ...defaultProxyOptions(hostname, port) });
+const relayHandler = (h: Hapi.ResponseToolkit, hostname: string, port: string) => {
+  return h.proxy(defaultProxyOptions(hostname, port));
 };
 
-const proxyResponseHandler = (h: Hapi.ResponseToolkit, hostname: string, port: number | string) => {
+const proxyResponseHandler = (h: Hapi.ResponseToolkit, hostname: string, port: string) => {
   return h.proxy({
     ...defaultProxyOptions(hostname, port),
     // eslint-disable-next-line @typescript-eslint/no-shadow
@@ -45,7 +45,7 @@ const proxyOnResponseHandler = async (res: IncomingMessage, h: Hapi.ResponseTool
 const kbnIndex = `.kibana_${pkg.version}`;
 
 // GET /.kibana_8.0.0/_doc/{type*} route (repository.get calls)
-export const declareGetRoute = (hapiServer: Hapi.Server, hostname: string, port: string | number) =>
+export const declareGetRoute = (hapiServer: Hapi.Server, hostname: string, port: string) =>
   hapiServer.route({
     method: 'GET',
     path: `/${kbnIndex}/_doc/{type*}`,
@@ -60,11 +60,7 @@ export const declareGetRoute = (hapiServer: Hapi.Server, hostname: string, port:
     },
   });
 // DELETE /.kibana_8.0.0/_doc/{type*} route (repository.delete calls)
-export const declareDeleteRoute = (
-  hapiServer: Hapi.Server,
-  hostname: string,
-  port: string | number
-) =>
+export const declareDeleteRoute = (hapiServer: Hapi.Server, hostname: string, port: string) =>
   hapiServer.route({
     method: 'DELETE',
     path: `/${kbnIndex}/_doc/{_id*}`,
@@ -84,11 +80,7 @@ export const declareDeleteRoute = (
   });
 
 // POST _bulk route
-export const declarePostBulkRoute = (
-  hapiServer: Hapi.Server,
-  hostname: string,
-  port: string | number
-) =>
+export const declarePostBulkRoute = (hapiServer: Hapi.Server, hostname: string, port: string) =>
   hapiServer.route({
     method: 'POST',
     path: '/_bulk',
@@ -107,11 +99,7 @@ export const declarePostBulkRoute = (
     },
   });
 // POST _mget route (repository.bulkGet calls)
-export const declarePostMgetRoute = (
-  hapiServer: Hapi.Server,
-  hostname: string,
-  port: string | number
-) =>
+export const declarePostMgetRoute = (hapiServer: Hapi.Server, hostname: string, port: string) =>
   hapiServer.route({
     method: 'POST',
     path: '/_mget',
@@ -130,11 +118,7 @@ export const declarePostMgetRoute = (
     },
   });
 // GET _search route
-export const declareGetSearchRoute = (
-  hapiServer: Hapi.Server,
-  hostname: string,
-  port: string | number
-) =>
+export const declareGetSearchRoute = (hapiServer: Hapi.Server, hostname: string, port: string) =>
   hapiServer.route({
     method: 'GET',
     path: `/${kbnIndex}/_search`,
@@ -150,11 +134,7 @@ export const declareGetSearchRoute = (
     },
   });
 // POST _search route (`find` calls)
-export const declarePostSearchRoute = (
-  hapiServer: Hapi.Server,
-  hostname: string,
-  port: string | number
-) =>
+export const declarePostSearchRoute = (hapiServer: Hapi.Server, hostname: string, port: string) =>
   hapiServer.route({
     method: 'POST',
     path: `/${kbnIndex}/_search`,
@@ -173,11 +153,7 @@ export const declarePostSearchRoute = (
     },
   });
 // POST _update
-export const declarePostUpdateRoute = (
-  hapiServer: Hapi.Server,
-  hostname: string,
-  port: string | number
-) =>
+export const declarePostUpdateRoute = (hapiServer: Hapi.Server, hostname: string, port: string) =>
   hapiServer.route({
     method: 'POST',
     path: `/${kbnIndex}/_update/{_id*}`,
@@ -196,11 +172,7 @@ export const declarePostUpdateRoute = (
     },
   });
 // POST _pit
-export const declarePostPitRoute = (
-  hapiServer: Hapi.Server,
-  hostname: string,
-  port: string | number
-) =>
+export const declarePostPitRoute = (hapiServer: Hapi.Server, hostname: string, port: string) =>
   hapiServer.route({
     method: 'POST',
     path: `/${kbnIndex}/_pit`,
@@ -222,7 +194,7 @@ export const declarePostPitRoute = (
 export const declarePostUpdateByQueryRoute = (
   hapiServer: Hapi.Server,
   hostname: string,
-  port: string | number
+  port: string
 ) =>
   hapiServer.route({
     method: 'POST',
@@ -243,11 +215,7 @@ export const declarePostUpdateByQueryRoute = (
   });
 
 // catch-all passthrough route
-export const declarePassthroughRoute = (
-  hapiServer: Hapi.Server,
-  hostname: string,
-  port: string | number
-) =>
+export const declarePassthroughRoute = (hapiServer: Hapi.Server, hostname: string, port: string) =>
   hapiServer.route({
     method: '*',
     path: '/{any*}',
