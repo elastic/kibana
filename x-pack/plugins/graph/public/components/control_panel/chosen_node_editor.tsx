@@ -11,12 +11,12 @@ import { EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Workspace, WorkspaceNode } from '../../types';
 
-interface LatestSelectionEditorProps {
+interface ChosenNodeEditorProps {
   workspace: Workspace;
   chosenNode: WorkspaceNode;
 }
 
-export const LatestSelectionEditor = ({ workspace, chosenNode }: LatestSelectionEditorProps) => {
+export const ChosenNodeEditor = ({ workspace, chosenNode }: ChosenNodeEditorProps) => {
   const groupButtonMsg = i18n.translate('xpack.graph.sidebar.groupButtonTooltip', {
     defaultMessage: 'group the currently selected items into {latestSelectionLabel}',
     values: { latestSelectionLabel: chosenNode.label },
@@ -40,7 +40,7 @@ export const LatestSelectionEditor = ({ workspace, chosenNode }: LatestSelection
   return (
     <div className="gphSidebar__panel">
       <div className="gphSidebar__header">
-        {chosenNode.icon && <span className="kuiIcon {{latestNodeSelection.icon.class}}" />}
+        {chosenNode.icon && <span className={`kuiIcon ${chosenNode.icon.class}`} />}
         {chosenNode.data.field} {chosenNode.data.term}
       </div>
 

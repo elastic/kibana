@@ -24,6 +24,10 @@
   padding: $euiSizeXS;
   border-radius: $euiBorderRadius;
   margin-bottom: $euiSizeXS;
+
+  & > span {
+    padding-right: $euiSizeXS;
+  }
 }
 
 .gphSidebar__panel {
@@ -73,10 +77,10 @@
  */
 
 .gphLinkSummary__term--1 {
-  color:$euiColorDanger;
+  color: $euiColorDanger;
 }
 .gphLinkSummary__term--2 {
-  color:$euiColorPrimary;
+  color: $euiColorPrimary;
 }
 .gphLinkSummary__term--1-2 {
   color: mix($euiColorDanger, $euiColorPrimary);

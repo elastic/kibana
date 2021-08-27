@@ -137,9 +137,14 @@ export const WorkspaceTopNavMenu = (props: WorkspaceTopNavMenuProps) => {
       defaultMessage: 'Settings',
     }),
     run: () => {
+      // At this point workspace should be initialized,
+      // since settings button will be disabled only if workspace was set
+      const workspace = props.workspace as Workspace;
+
       const settingsObservable = (asSyncedObservable(() => ({
-        blocklistedNodes: props.workspace?.blocklistedNodes,
-        unblocklistNode: props.workspace?.unblocklist,
+        blocklistedNodes: workspace.blocklistedNodes,
+        unblockNode: workspace.unblockNode,
+        unblockAll: workspace.unblockAll,
         canEditDrillDownUrls: props.canEditDrillDownUrls,
       })) as unknown) as AsObservable<SettingsWorkspaceProps>['observable'];
 

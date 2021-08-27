@@ -20,10 +20,10 @@ import { urlTemplateRegex } from '../../helpers/url_template';
 import { SelectionToolBar } from './selection_tool_bar';
 import { ControlPanelToolBar } from './control_panel_tool_bar';
 import { SelectStyle } from './select_style';
-import { LatestSelectionEditor } from './latest_selection_editor';
+import { ChosenNodeEditor } from './chosen_node_editor';
 import { MergeCandidates } from './merge_candidates';
 import { DrillDowns } from './drill_downs';
-import { UrlTemplateButtons } from './url_template_buttons';
+import { DrillDownIconLinks } from './drill_down_icon_links';
 import { GraphState, liveResponseFieldsSelector, templatesSelector } from '../../state_management';
 import { SelectedNodeItem } from './selected_node_item';
 
@@ -114,7 +114,7 @@ const ControlPanelComponent = ({
           ))}
         </div>
       </div>
-      <UrlTemplateButtons
+      <DrillDownIconLinks
         urlTemplates={urlTemplates}
         hasNodes={hasNodes}
         openUrlTemplate={openUrlTemplate}
@@ -126,7 +126,7 @@ const ControlPanelComponent = ({
         <SelectStyle workspace={workspace} colors={colors} />
       )}
       {control === 'editLabel' && chosenNode && (
-        <LatestSelectionEditor workspace={workspace} chosenNode={chosenNode} />
+        <ChosenNodeEditor workspace={workspace} chosenNode={chosenNode} />
       )}
       {control === 'mergeTerms' && mergeCandidates.length > 0 && (
         <MergeCandidates

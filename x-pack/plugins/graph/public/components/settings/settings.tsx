@@ -14,7 +14,7 @@ import { bindActionCreators } from 'redux';
 import { AdvancedSettingsForm } from './advanced_settings_form';
 import { BlocklistForm } from './blocklist_form';
 import { UrlTemplateList } from './url_template_list';
-import { WorkspaceNode, AdvancedSettings, UrlTemplate, WorkspaceField } from '../../types';
+import { AdvancedSettings, UrlTemplate, WorkspaceField, BlockListedNode } from '../../types';
 import {
   GraphState,
   settingsSelector,
@@ -60,8 +60,9 @@ export interface DispatchProps {
 }
 
 export interface SettingsWorkspaceProps {
-  blocklistedNodes?: WorkspaceNode[];
-  unblocklistNode?: (node: WorkspaceNode) => void;
+  blocklistedNodes: BlockListedNode[];
+  unblockNode: (node: BlockListedNode) => void;
+  unblockAll: () => void;
   canEditDrillDownUrls: boolean;
 }
 
@@ -80,7 +81,7 @@ export function SettingsComponent({
   updateSettings: updateSettingsAction,
   removeTemplate: removeTemplateAction,
 }: AsObservable<SettingsWorkspaceProps> & SettingsStateProps) {
-  const [SettingsWorkspaceProps, setWorkspaceProps] = useState<SettingsWorkspaceProps | undefined>(
+  const [workspaceProps, setWorkspaceProps] = useState<SettingsWorkspaceProps | undefined>(
     undefined
   );
   const [activeTab, setActiveTab] = useState(0);
@@ -89,7 +90,7 @@ export function SettingsComponent({
     observable.subscribe(setWorkspaceProps);
   }, [observable]);
 
-  if (!SettingsWorkspaceProps) {
+  if (!workspaceProps) {
     return null;
   }
 
@@ -103,7 +104,7 @@ export function SettingsComponent({
         </EuiTitle>
         <EuiTabs style={{ margin: '0 -16px -25px' }}>
           {tabs
-            .filter(({ id }) => id !== 'drillDowns' || SettingsWorkspaceProps.canEditDrillDownUrls)
+            .filter(({ id }) => id !== 'drillDowns' || workspaceProps.canEditDrillDownUrls)
             .map(({ title }, index) => (
               <EuiTab
                 key={title}
@@ -119,8 +120,9 @@ export function SettingsComponent({
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <ActiveTabContent
-          blocklistedNodes={SettingsWorkspaceProps.blocklistedNodes}
-          unblocklistNode={SettingsWorkspaceProps.unblocklistNode}
+          blocklistedNodes={workspaceProps.blocklistedNodes}
+          unblockNode={workspaceProps.unblockNode}
+          unblockAll={workspaceProps.unblockAll}
           advancedSettings={advancedSettings}
           urlTemplates={urlTemplates}
           allFields={allFields}

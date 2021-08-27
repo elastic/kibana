@@ -23,8 +23,9 @@ import { useListKeys } from './use_list_keys';
 
 export function BlocklistForm({
   blocklistedNodes,
-  unblocklistNode,
-}: Pick<SettingsWorkspaceProps, 'blocklistedNodes' | 'unblocklistNode'>) {
+  unblockNode,
+  unblockAll,
+}: Pick<SettingsWorkspaceProps, 'blocklistedNodes' | 'unblockNode' | 'unblockAll'>) {
   const getListKey = useListKeys(blocklistedNodes || []);
   return (
     <>
@@ -46,7 +47,7 @@ export function BlocklistForm({
         />
       )}
       <EuiSpacer />
-      {blocklistedNodes && unblocklistNode && blocklistedNodes.length > 0 && (
+      {blocklistedNodes && blocklistedNodes.length > 0 && (
         <>
           <EuiListGroup bordered maxWidth={false}>
             {blocklistedNodes.map((node) => (
@@ -63,9 +64,7 @@ export function BlocklistForm({
                     defaultMessage: 'Delete',
                   }),
                   color: 'danger',
-                  onClick: () => {
-                    unblocklistNode(node);
-                  },
+                  onClick: () => unblockNode(node),
                 }}
               />
             ))}
@@ -77,11 +76,7 @@ export function BlocklistForm({
             iconType="trash"
             size="s"
             fill
-            onClick={() => {
-              blocklistedNodes.forEach((node) => {
-                unblocklistNode(node);
-              });
-            }}
+            onClick={() => unblockAll()}
           >
             {i18n.translate('xpack.graph.settings.blocklist.clearButtonLabel', {
               defaultMessage: 'Delete all',
