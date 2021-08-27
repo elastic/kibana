@@ -22,7 +22,7 @@ import { CancellationToken } from '../../../common';
 import { durationToNumber, numberToDuration } from '../../../common/schema_utils';
 import { ReportOutput } from '../../../common/types';
 import { ReportingConfigType } from '../../config';
-import { BasePayload, RunTaskFn } from '../../types';
+import { BasePayload, ImmediateExecuteFn, RunTaskFn } from '../../types';
 import { Report, ReportDocument, ReportingStore, SavedReport } from '../store';
 import { ReportFailedFields, ReportProcessingFields } from '../store/store';
 import {
@@ -56,7 +56,7 @@ export class ExecuteReportTask implements ReportingTask {
 
   private logger: LevelLogger;
   private taskManagerStart?: TaskManagerStartContract;
-  private taskExecutors?: Map<string, RunTaskFn<BasePayload>>;
+  private taskExecutors?: Map<string, RunTaskFn | ImmediateExecuteFn>;
   private kibanaId?: string;
   private kibanaName?: string;
   private store?: ReportingStore;
@@ -78,7 +78,7 @@ export class ExecuteReportTask implements ReportingTask {
     const { reporting } = this;
 
     const exportTypesRegistry = reporting.getExportTypesRegistry();
-    const executors = new Map<string, RunTaskFn<BasePayload>>();
+    const executors = new Map<string, RunTaskFn | ImmediateExecuteFn>();
     for (const exportType of exportTypesRegistry.getAll()) {
       const exportTypeLogger = this.logger.clone([exportType.id]);
       const jobExecutor = exportType.runTaskFnFactory(reporting, exportTypeLogger);
@@ -233,7 +233,7 @@ export class ExecuteReportTask implements ReportingTask {
     }
 
     // get the run_task function
-    const runner = this.taskExecutors.get(task.jobtype);
+    const runner = this.taskExecutors.get(task.jobtype) as RunTaskFn<BasePayload>;
     if (!runner) {
       throw new Error(`No defined task runner function for ${task.jobtype}!`);
     }

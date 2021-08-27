@@ -16,7 +16,7 @@ export { ExecuteReportTask } from './execute_report';
 export { MonitorReportsTask } from './monitor_reports';
 export { TaskRunResult };
 
-export interface ReportTaskParams<JobPayloadType = BasePayload> {
+export interface ReportTaskParams<JobPayloadType extends BasePayload = BasePayload> {
   id: string;
   index: string;
   payload: JobPayloadType;

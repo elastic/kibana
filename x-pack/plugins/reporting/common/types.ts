@@ -59,6 +59,8 @@ export interface BaseParams {
   version: string; // to handle any state migrations
 }
 
+export type BaseParamsImmediate = Omit<BaseParams, 'objectType' | 'version'>;
+
 // base params decorated with encrypted headers that come into runJob functions
 export interface BasePayload extends BaseParams {
   headers: string;

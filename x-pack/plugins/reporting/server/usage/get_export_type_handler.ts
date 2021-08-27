@@ -33,6 +33,7 @@ export function getExportTypesHandler(exportTypesRegistry: ExportTypesRegistry) 
         throw new Error('No license type returned from XPackMainPlugin#info!');
       }
       for (const exportType of exportTypesRegistry.getAll()) {
+        // FIXME: more restrictions on ExportTypeDefinition type
         exportTypesAvailability[exportType.jobType] = xpackInfoAvailable
           ? exportType.validLicenses.includes(licenseType)
           : false;

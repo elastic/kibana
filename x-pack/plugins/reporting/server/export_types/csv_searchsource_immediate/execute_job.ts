@@ -5,32 +5,16 @@
  * 2.0.
  */
 
-import { Writable } from 'stream';
-import { KibanaRequest } from 'src/core/server';
 import { CancellationToken } from '../../../common';
 import { CSV_SEARCHSOURCE_IMMEDIATE_TYPE } from '../../../common/constants';
-import { TaskRunResult } from '../../lib/tasks';
 import { getFieldFormats } from '../../services';
-import { ReportingRequestHandlerContext, RunTaskFnFactory } from '../../types';
+import { ImmediateExecuteFn, RunTaskFnFactory } from '../../types';
 import { CsvGenerator } from '../csv_searchsource/generate_csv/generate_csv';
 import { JobParamsDownloadCSV } from './types';
 
-/*
- * ImmediateExecuteFn receives the job doc payload because the payload was
- * generated in the ScheduleFn
- */
-export type ImmediateExecuteFn = (
-  jobId: null,
-  job: JobParamsDownloadCSV,
-  context: ReportingRequestHandlerContext,
-  stream: Writable,
-  req: KibanaRequest
-) => Promise<TaskRunResult>;
-
-export const runTaskFnFactory: RunTaskFnFactory<ImmediateExecuteFn> = function executeJobFactoryFn(
-  reporting,
-  parentLogger
-) {
+export const runTaskFnFactory: RunTaskFnFactory<
+  ImmediateExecuteFn<JobParamsDownloadCSV>
+> = function executeJobFactoryFn(reporting, parentLogger) {
   const config = reporting.getConfig();
   const logger = parentLogger.clone([CSV_SEARCHSOURCE_IMMEDIATE_TYPE, 'execute-job']);
 

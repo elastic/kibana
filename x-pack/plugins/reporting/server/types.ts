@@ -17,7 +17,13 @@ import { AuthenticatedUser, SecurityPluginSetup } from '../../security/server';
 import { SpacesPluginSetup } from '../../spaces/server';
 import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
 import { CancellationToken } from '../common';
-import { BaseParams, BasePayload, TaskRunResult } from '../common/types';
+import {
+  BaseParams,
+  BaseParamsImmediate,
+  BasePayload,
+  JobType,
+  TaskRunResult,
+} from '../common/types';
 import { ReportingConfigType } from './config';
 import { ReportingCore } from './core';
 import { LevelLogger } from './lib';
@@ -57,21 +63,31 @@ export type ReportingUser = { username: AuthenticatedUser['username'] } | false;
 export type CaptureConfig = ReportingConfigType['capture'];
 export type ScrollConfig = ReportingConfigType['csv']['scroll'];
 
-export { BaseParams, BasePayload };
+export { BaseParams, BasePayload, BaseParamsImmediate };
 
 // default fn type for CreateJobFnFactory
-export type CreateJobFn<JobParamsType = BaseParams, JobPayloadType = BasePayload> = (
+export type CreateJobFn<
+  JobParamsType extends BaseParams = BaseParams,
+  JobPayloadType extends BasePayload = BasePayload
+> = (
   jobParams: JobParamsType,
   context: ReportingRequestHandlerContext,
   request: KibanaRequest<any, any, any, any>
 ) => Promise<JobPayloadType>;
 
-// default fn type for RunTaskFnFactory
-export type RunTaskFn<TaskPayloadType = BasePayload> = (
+export type RunTaskFn<TaskPayloadType extends BasePayload = BasePayload> = (
   jobId: string,
   payload: ReportTaskParams<TaskPayloadType>['payload'],
   cancellationToken: CancellationToken,
   stream: Writable
+) => Promise<TaskRunResult>;
+
+export type ImmediateExecuteFn<JobParamsType extends BaseParamsImmediate = BaseParamsImmediate> = (
+  jobId: null,
+  job: JobParamsType,
+  context: ReportingRequestHandlerContext,
+  stream: Writable,
+  req: KibanaRequest
 ) => Promise<TaskRunResult>;
 
 export type CreateJobFnFactory<CreateJobFnType> = (
@@ -84,19 +100,34 @@ export type RunTaskFnFactory<RunTaskFnType> = (
   logger: LevelLogger
 ) => RunTaskFnType;
 
-export interface ExportTypeDefinition<
-  CreateJobFnType = CreateJobFn | null,
-  RunTaskFnType = RunTaskFn
-> {
+interface BaseExportTypeInstance<RunTaskFnType> {
   id: string;
   name: string;
-  jobType: string;
+  jobType: JobType;
   jobContentEncoding?: string;
   jobContentExtension: string;
-  createJobFnFactory: CreateJobFnFactory<CreateJobFnType> | null; // immediate job does not have a "create" phase
   runTaskFnFactory: RunTaskFnFactory<RunTaskFnType>;
   validLicenses: string[];
 }
+
+export type QueuedJobExportTypeInstance<
+  CreateJobFnType = CreateJobFn,
+  RunTaskFnType = RunTaskFn
+> = BaseExportTypeInstance<RunTaskFnType> & {
+  createJobFnFactory: RunTaskFnFactory<CreateJobFnType>;
+};
+
+export type ImmediateExportTypeInstance<
+  RunTaskFnType = ImmediateExecuteFn
+> = BaseExportTypeInstance<RunTaskFnType>;
+
+export type ExportTypeDefinition<
+  CreateJobFnType = CreateJobFn | null,
+  RunTaskFnType = RunTaskFn | ImmediateExecuteFn,
+  ExportTypeInstance =
+    | QueuedJobExportTypeInstance<CreateJobFnType, RunTaskFnType>
+    | ImmediateExportTypeInstance<RunTaskFnType>
+> = ExportTypeInstance;
 
 /**
  * @internal

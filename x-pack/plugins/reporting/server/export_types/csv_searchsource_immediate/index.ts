@@ -14,9 +14,10 @@ import {
   LICENSE_TYPE_STANDARD,
   LICENSE_TYPE_TRIAL,
 } from '../../../common/constants';
-import { ExportTypeDefinition } from '../../types';
-import { ImmediateExecuteFn, runTaskFnFactory } from './execute_job';
+import { ExportTypeDefinition, ImmediateExecuteFn } from '../../types';
+import { runTaskFnFactory } from './execute_job';
 import { metadata } from './metadata';
+import { JobParamsDownloadCSV } from './types';
 
 /*
  * These functions are exported to share with the API route handler that
@@ -24,10 +25,13 @@ import { metadata } from './metadata';
  */
 export { runTaskFnFactory } from './execute_job';
 
-export const getExportType = (): ExportTypeDefinition<null, ImmediateExecuteFn> => ({
+export const getExportType = (): ExportTypeDefinition<
+  null,
+  ImmediateExecuteFn<JobParamsDownloadCSV>
+> => ({
   ...metadata,
-  immediateType: CSV_SEARCHSOURCE_IMMEDIATE_TYPE,
   jobContentExtension: 'csv',
+  jobType: CSV_SEARCHSOURCE_IMMEDIATE_TYPE,
   runTaskFnFactory,
   validLicenses: [
     LICENSE_TYPE_TRIAL,
