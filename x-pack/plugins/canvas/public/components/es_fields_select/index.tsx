@@ -10,7 +10,7 @@ import usePrevious from 'react-use/lib/usePrevious';
 import { getFields } from '../../lib/es_service';
 import { ESFieldsSelect as Component, ESFieldsSelectProps as Props } from './es_fields_select';
 
-type ESFieldsSelectProps = Omit<Props, 'fields'>;
+type ESFieldsSelectProps = Omit<Props, 'fields'> & { index: string };
 
 export const ESFieldsSelect: React.FunctionComponent<ESFieldsSelectProps> = (props) => {
   const { index, selected, onChange } = props;

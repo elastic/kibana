@@ -9,7 +9,6 @@ import React, { FocusEventHandler } from 'react';
 import { EuiComboBox } from '@elastic/eui';
 
 export interface ESFieldsSelectProps {
-  index: string;
   value: string;
   onChange: (fields: string[]) => void;
   onBlur: FocusEventHandler<HTMLDivElement> | undefined;
