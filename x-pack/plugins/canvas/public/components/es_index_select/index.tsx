@@ -6,6 +6,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import usePrevious from 'react-use/lib/usePrevious';
 import { getIndices } from '../../lib/es_service';
 import { ESIndexSelect as Component, ESIndexSelectProps as Props } from './es_index_select';
 
@@ -13,22 +14,25 @@ type ESIndexSelectProps = Omit<Props, 'indices' | 'loading'>;
 
 export const ESIndexSelect: React.FunctionComponent<ESIndexSelectProps> = (props) => {
   const { value, onChange } = props;
+  const prevValue = usePrevious(value);
 
   const [indices, setIndices] = useState<string[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    getIndices().then((newIndices) => {
-      if (!newIndices) {
-        newIndices = [];
-      }
-      setLoading(false);
-      setIndices(newIndices.sort());
-      if (!value && newIndices.length) {
-        onChange(newIndices[0]);
-      }
-    });
-  }, [indices, onChange, value]);
+    if (prevValue !== value) {
+      getIndices().then((newIndices) => {
+        if (!newIndices) {
+          newIndices = [];
+        }
+        setLoading(false);
+        setIndices(newIndices.sort());
+        if (!value && newIndices.length) {
+          onChange(newIndices[0]);
+        }
+      });
+    }
+  }, [indices, onChange, prevValue, value]);
 
   return <Component {...props} indices={indices} loading={loading} />;
 };
