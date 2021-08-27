@@ -6,7 +6,33 @@
     "interfaces": [],
     "enums": [],
     "misc": [],
-    "objects": []
+    "objects": [],
+    "setup": {
+      "parentPluginId": "apmOss",
+      "id": "def-public.ApmOssPluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "ApmOssPluginSetup",
+      "description": [],
+      "path": "src/plugins/apm_oss/public/types.ts",
+      "deprecated": false,
+      "children": [],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "apmOss",
+      "id": "def-public.ApmOssPluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "ApmOssPluginStart",
+      "description": [],
+      "path": "src/plugins/apm_oss/public/types.ts",
+      "deprecated": false,
+      "children": [],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
   },
   "server": {
     "classes": [],

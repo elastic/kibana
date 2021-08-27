@@ -74,15 +74,15 @@ export function runBuildApiDocsCli() {
       }
       const collectReferences = flags.references as boolean;
 
-      const { pluginApiMap, missingApiItems, referencedDeprecations } = getPluginApiMap(
-        project,
-        plugins,
-        log,
-        {
-          collectReferences,
-          pluginFilter: pluginFilter as string[],
-        }
-      );
+      const {
+        pluginApiMap,
+        missingApiItems,
+        unReferencedDeprecations,
+        referencedDeprecations,
+      } = getPluginApiMap(project, plugins, log, {
+        collectReferences,
+        pluginFilter: pluginFilter as string[],
+      });
 
       const reporter = CiStatsReporter.fromEnv(log);
       plugins.forEach((plugin) => {
@@ -153,8 +153,6 @@ export function runBuildApiDocsCli() {
           } else {
             log.info(`No unused APIs for plugin ${plugin.manifest.id}`);
           }
-        } else {
-          log.info(`Not tracking refs for plugin ${plugin.manifest.id}`);
         }
 
         if (stats) {
@@ -208,10 +206,18 @@ export function runBuildApiDocsCli() {
         }
 
         if (pluginStats.apiCount > 0) {
+          log.info(`Writing public API doc for plugin ${pluginApi.id}.`);
           writePluginDocs(outputFolder, { doc: pluginApi, plugin, pluginStats, log });
+        } else {
+          log.info(`Plugin ${pluginApi.id} has no public API.`);
         }
         writeDeprecationDocByPlugin(outputFolder, referencedDeprecations, log);
-        writeDeprecationDocByApi(outputFolder, referencedDeprecations, log);
+        writeDeprecationDocByApi(
+          outputFolder,
+          referencedDeprecations,
+          unReferencedDeprecations,
+          log
+        );
       });
       if (Object.values(pathsOutsideScopes).length > 0) {
         log.warning(`Found paths outside of normal scope folders:`);
@@ -241,6 +247,7 @@ function getTsProject(repoPath: string) {
     tsConfigFilePath: xpackTsConfig,
   });
   project.addSourceFilesAtPaths(`${repoPath}/x-pack/plugins/**/*{.d.ts,.ts}`);
+  project.addSourceFilesAtPaths(`${repoPath}/src/plugins/**/*{.d.ts,.ts}`);
   project.resolveSourceFileDependencies();
   return project;
 }
