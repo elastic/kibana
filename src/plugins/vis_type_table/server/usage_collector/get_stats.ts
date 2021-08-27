@@ -49,6 +49,7 @@ export async function getStats(
   const finder = await soClient.createPointInTimeFinder({
     type: 'visualization',
     perPage: 1000,
+    namespaces: ['*'],
   });
 
   const stats: VisTypeTableUsage = {
