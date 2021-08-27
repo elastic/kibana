@@ -791,6 +791,253 @@ describe('create()', () => {
     `);
   });
 
+  test('creates a rule with some actions using preconfigured connectors', async () => {
+    const data = getMockData({
+      actions: [
+        {
+          group: 'default',
+          id: '1',
+          params: {
+            foo: true,
+          },
+        },
+        {
+          group: 'default',
+          id: 'preconfigured',
+          params: {
+            foo: true,
+          },
+        },
+        {
+          group: 'default',
+          id: '2',
+          params: {
+            foo: true,
+          },
+        },
+      ],
+    });
+    actionsClient.getBulk.mockReset();
+    actionsClient.getBulk.mockResolvedValue([
+      {
+        id: '1',
+        actionTypeId: 'test',
+        config: {
+          from: 'me@me.com',
+          hasAuth: false,
+          host: 'hello',
+          port: 22,
+          secure: null,
+          service: null,
+        },
+        isMissingSecrets: false,
+        name: 'email connector',
+        isPreconfigured: false,
+      },
+      {
+        id: '2',
+        actionTypeId: 'test2',
+        config: {
+          from: 'me@me.com',
+          hasAuth: false,
+          host: 'hello',
+          port: 22,
+          secure: null,
+          service: null,
+        },
+        isMissingSecrets: false,
+        name: 'another email connector',
+        isPreconfigured: false,
+      },
+      {
+        id: 'preconfigured',
+        actionTypeId: 'test',
+        config: {
+          from: 'me@me.com',
+          hasAuth: false,
+          host: 'hello',
+          port: 22,
+          secure: null,
+          service: null,
+        },
+        isMissingSecrets: false,
+        name: 'preconfigured email connector',
+        isPreconfigured: true,
+      },
+    ]);
+    actionsClient.isPreconfigured.mockReset();
+    actionsClient.isPreconfigured.mockReturnValueOnce(false);
+    actionsClient.isPreconfigured.mockReturnValueOnce(true);
+    actionsClient.isPreconfigured.mockReturnValueOnce(false);
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        alertTypeId: '123',
+        schedule: { interval: '10s' },
+        params: {
+          bar: true,
+        },
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        notifyWhen: 'onActiveAlert',
+        actions: [
+          {
+            group: 'default',
+            actionRef: 'action_0',
+            actionTypeId: 'test',
+            params: {
+              foo: true,
+            },
+          },
+          {
+            group: 'default',
+            actionRef: 'preconfigured:preconfigured',
+            actionTypeId: 'test',
+            params: {
+              foo: true,
+            },
+          },
+          {
+            group: 'default',
+            actionRef: 'action_2',
+            actionTypeId: 'test2',
+            params: {
+              foo: true,
+            },
+          },
+        ],
+      },
+      references: [
+        {
+          name: 'action_0',
+          type: 'action',
+          id: '1',
+        },
+        {
+          name: 'action_2',
+          type: 'action',
+          id: '2',
+        },
+      ],
+    });
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        actions: [],
+        scheduledTaskId: 'task-123',
+      },
+      references: [],
+    });
+    const result = await rulesClient.create({ data });
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "actions": Array [
+          Object {
+            "actionTypeId": "test",
+            "group": "default",
+            "id": "1",
+            "params": Object {
+              "foo": true,
+            },
+          },
+          Object {
+            "actionTypeId": "test",
+            "group": "default",
+            "id": "preconfigured",
+            "params": Object {
+              "foo": true,
+            },
+          },
+          Object {
+            "actionTypeId": "test2",
+            "group": "default",
+            "id": "2",
+            "params": Object {
+              "foo": true,
+            },
+          },
+        ],
+        "alertTypeId": "123",
+        "createdAt": 2019-02-12T21:01:22.479Z,
+        "id": "1",
+        "notifyWhen": "onActiveAlert",
+        "params": Object {
+          "bar": true,
+        },
+        "schedule": Object {
+          "interval": "10s",
+        },
+        "scheduledTaskId": "task-123",
+        "updatedAt": 2019-02-12T21:01:22.479Z,
+      }
+    `);
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+      'alert',
+      {
+        actions: [
+          {
+            group: 'default',
+            actionRef: 'action_0',
+            actionTypeId: 'test',
+            params: {
+              foo: true,
+            },
+          },
+          {
+            group: 'default',
+            actionRef: 'preconfigured:preconfigured',
+            actionTypeId: 'test',
+            params: {
+              foo: true,
+            },
+          },
+          {
+            group: 'default',
+            actionRef: 'action_2',
+            actionTypeId: 'test2',
+            params: {
+              foo: true,
+            },
+          },
+        ],
+        alertTypeId: '123',
+        apiKey: null,
+        apiKeyOwner: null,
+        consumer: 'bar',
+        createdAt: '2019-02-12T21:01:22.479Z',
+        createdBy: 'elastic',
+        enabled: true,
+        legacyId: null,
+        executionStatus: {
+          error: null,
+          lastExecutionDate: '2019-02-12T21:01:22.479Z',
+          status: 'pending',
+        },
+        meta: { versionApiKeyLastmodified: kibanaVersion },
+        muteAll: false,
+        mutedInstanceIds: [],
+        name: 'abc',
+        notifyWhen: 'onActiveAlert',
+        params: { bar: true },
+        schedule: { interval: '10s' },
+        tags: ['foo'],
+        throttle: null,
+        updatedAt: '2019-02-12T21:01:22.479Z',
+        updatedBy: 'elastic',
+      },
+      {
+        id: 'mock-saved-object-id',
+        references: [
+          { id: '1', name: 'action_0', type: 'action' },
+          { id: '2', name: 'action_2', type: 'action' },
+        ],
+      }
+    );
+    expect(actionsClient.isPreconfigured).toHaveBeenCalledTimes(3);
+  });
+
   test('creates a disabled alert', async () => {
     const data = getMockData({ enabled: false });
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
