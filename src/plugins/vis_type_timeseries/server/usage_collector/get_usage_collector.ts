@@ -27,6 +27,7 @@ const doTelemetryFoVisualizations = async (
   const finder = await soClient.createPointInTimeFinder({
     type: 'visualization',
     perPage: 1000,
+    namespaces: ['*'],
   });
 
   for await (const response of finder.find()) {
@@ -52,7 +53,7 @@ const doTelemetryForByValueVisualizations = async (
   const byValueVisualizations = await findByValueEmbeddables(soClient, 'visualization');
 
   for (const item of byValueVisualizations) {
-    telemetryUseLastValueMode(item.savedVis as SavedVisState);
+    telemetryUseLastValueMode((item.savedVis as unknown) as SavedVisState);
   }
 };
 
