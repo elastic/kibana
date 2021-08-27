@@ -63,18 +63,7 @@ export function GraphVisualization({
   };
 
   const handleMergeCandidatesCallback = (termIntersects: TermIntersect[]) => {
-    const mergeCandidates: TermIntersect[] = [];
-    termIntersects.forEach((ti) => {
-      mergeCandidates.push({
-        id1: ti.id1,
-        id2: ti.id2,
-        term1: ti.term1,
-        term2: ti.term2,
-        v1: ti.v1,
-        v2: ti.v2,
-        overlap: ti.overlap,
-      });
-    });
+    const mergeCandidates: TermIntersect[] = [...termIntersects];
     onSetMergeCandidates(mergeCandidates);
     onSetControl('mergeTerms');
   };
