@@ -1,0 +1,7 @@
+.canvasLayout__sidebarHeader {
+  padding: calc(#{$euiSizeM} + 2px) $euiSizeS;
+}
+
+.canvasLayout__sidebarHeaderWorkpad {
+  padding: calc(#{$euiSizeS} * .75) 0;
+}
