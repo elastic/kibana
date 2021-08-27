@@ -22,32 +22,38 @@ const enlargedMockSavedObjects = [
   // default space
   {
     id: 'visualization:coolviz-123',
+    namespaces: ['default'],
     attributes: { visState: '{"type": "cave_painting"}' },
     updated_at: moment().subtract(7, 'days').startOf('day').toString(),
   },
   {
     id: 'visualization:coolviz-456',
+    namespaces: ['default'],
     attributes: { visState: '{"type": "printing_press"}' },
     updated_at: moment().subtract(20, 'days').startOf('day').toString(),
   },
   {
     id: 'meat:visualization:coolviz-789',
+    namespaces: ['default'],
     attributes: { visState: '{"type": "floppy_disk"}' },
     updated_at: moment().subtract(2, 'months').startOf('day').toString(),
   },
   // meat space
   {
     id: 'meat:visualization:coolviz-789',
+    namespaces: ['meat'],
     attributes: { visState: '{"type": "cave_painting"}' },
     updated_at: moment().subtract(89, 'days').startOf('day').toString(),
   },
   {
     id: 'meat:visualization:coolviz-789',
+    namespaces: ['meat'],
     attributes: { visState: '{"type": "cuneiform"}' },
     updated_at: moment().subtract(5, 'months').startOf('day').toString(),
   },
   {
     id: 'meat:visualization:coolviz-789',
+    namespaces: ['meat'],
     attributes: { visState: '{"type": "cuneiform"}' },
     updated_at: moment().subtract(2, 'days').startOf('day').toString(),
   },
@@ -59,16 +65,19 @@ const enlargedMockSavedObjects = [
   // cyber space
   {
     id: 'cyber:visualization:coolviz-789',
+    namespaces: ['cyber'],
     attributes: { visState: '{"type": "floppy_disk"}' },
     updated_at: moment().subtract(7, 'months').startOf('day').toString(),
   },
   {
     id: 'cyber:visualization:coolviz-789',
+    namespaces: ['cyber'],
     attributes: { visState: '{"type": "floppy_disk"}' },
     updated_at: moment().subtract(3, 'days').startOf('day').toString(),
   },
   {
     id: 'cyber:visualization:coolviz-123',
+    namespaces: ['cyber'],
     attributes: { visState: '{"type": "cave_painting"}' },
     updated_at: moment().subtract(15, 'days').startOf('day').toString(),
   },
