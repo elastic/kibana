@@ -6,8 +6,13 @@
  */
 
 import { HttpSetup } from 'src/core/public';
-import { ESUpgradeStatus } from '../../../common/types';
-import { API_BASE_PATH, DEPRECATION_LOGS_COUNT_POLL_INTERVAL_MS } from '../../../common/constants';
+
+import { ESUpgradeStatus, CloudBackupStatus } from '../../../common/types';
+import {
+  API_BASE_PATH,
+  DEPRECATION_LOGS_COUNT_POLL_INTERVAL_MS,
+  CLOUD_BACKUP_STATUS_POLL_INTERVAL_MS,
+} from '../../../common/constants';
 import {
   UseRequestConfig,
   SendRequestConfig,
@@ -43,6 +48,14 @@ export class ApiService {
 
   public setup(httpClient: HttpSetup): void {
     this.client = httpClient;
+  }
+
+  public useLoadCloudBackupStatus() {
+    return this.useRequest<CloudBackupStatus>({
+      path: `${API_BASE_PATH}/cloud_backup_status`,
+      method: 'get',
+      pollIntervalMs: CLOUD_BACKUP_STATUS_POLL_INTERVAL_MS,
+    });
   }
 
   public useLoadEsDeprecations() {

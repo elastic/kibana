@@ -5,72 +5,40 @@
  * 2.0.
  */
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiText, EuiButton, EuiSpacer } from '@elastic/eui';
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 
-import { useAppContext } from '../../../app_context';
+import type { CloudSetup } from '../../../../../../cloud/public';
+import { OnPremBackup } from './on_prem_backup';
+import { CloudBackup, CloudBackupStatusResponse } from './cloud_backup';
 
-const i18nTexts = {
-  backupStepTitle: i18n.translate('xpack.upgradeAssistant.overview.backupStepTitle', {
-    defaultMessage: 'Back up your data',
-  }),
+const title = i18n.translate('xpack.upgradeAssistant.overview.backupStepTitle', {
+  defaultMessage: 'Back up your data',
+});
 
-  backupStepDescription: i18n.translate('xpack.upgradeAssistant.overview.backupStepDescription', {
-    defaultMessage: 'Back up your data before addressing any deprecation warnings.',
-  }),
-};
+interface Props {
+  cloud?: CloudSetup;
+  cloudBackupStatusResponse?: CloudBackupStatusResponse;
+}
 
-const SnapshotRestoreAppLink: React.FunctionComponent = () => {
-  const { share } = useAppContext();
-
-  const [snapshotRestoreUrl, setSnapshotRestoreUrl] = useState<string | undefined>();
-
-  useEffect(() => {
-    const getSnapshotRestoreUrl = async () => {
-      const locator = share.url.locators.get('SNAPSHOT_RESTORE_LOCATOR');
-
-      if (!locator) {
-        return;
-      }
-
-      const url = await locator.getUrl({
-        page: 'snapshots',
-      });
-      setSnapshotRestoreUrl(url);
+export const getBackupStep = ({ cloud, cloudBackupStatusResponse }: Props): EuiStepProps => {
+  if (cloud?.isCloudEnabled) {
+    return {
+      title,
+      status: cloudBackupStatusResponse!.data?.isBackedUp ? 'complete' : 'incomplete',
+      children: (
+        <CloudBackup
+          cloudBackupStatusResponse={cloudBackupStatusResponse!}
+          cloudSnapshotsUrl={`${cloud!.deploymentUrl}/elasticsearch/snapshots`}
+        />
+      ),
     };
+  }
 
-    getSnapshotRestoreUrl();
-  }, [share]);
-
-  return (
-    <EuiButton href={snapshotRestoreUrl} data-test-subj="snapshotRestoreLink">
-      {i18n.translate('xpack.upgradeAssistant.overview.snapshotRestoreLink', {
-        defaultMessage: 'Create snapshot',
-      })}
-    </EuiButton>
-  );
-};
-
-const BackupStep: React.FunctionComponent = () => {
-  return (
-    <>
-      <EuiText>
-        <p>{i18nTexts.backupStepDescription}</p>
-      </EuiText>
-
-      <EuiSpacer size="s" />
-
-      <SnapshotRestoreAppLink />
-    </>
-  );
-};
-
-export const getBackupStep = (): EuiStepProps => {
   return {
-    title: i18nTexts.backupStepTitle,
+    title,
     status: 'incomplete',
-    children: <BackupStep />,
+    children: <OnPremBackup />,
   };
 };

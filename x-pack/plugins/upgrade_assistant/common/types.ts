@@ -215,6 +215,11 @@ export interface EnrichedDeprecationInfo
   resolveDuringUpgrade: boolean;
 }
 
+export interface CloudBackupStatus {
+  isBackedUp: boolean;
+  lastBackupTime?: string;
+}
+
 export interface ESUpgradeStatus {
   totalCriticalDeprecations: number;
   deprecations: EnrichedDeprecationInfo[];
