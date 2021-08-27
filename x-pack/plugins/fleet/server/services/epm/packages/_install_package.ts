@@ -23,6 +23,7 @@ import { installILMPolicy } from '../elasticsearch/ilm/install';
 import { installKibanaAssets, getKibanaAssets } from '../kibana/assets/install';
 import { updateCurrentWriteIndices } from '../elasticsearch/template/template';
 import { installTransform } from '../elasticsearch/transform/install';
+import { installMlModel } from '../elasticsearch/ml_model/';
 import { installIlmForDataStream } from '../elasticsearch/datastream_ilm/install';
 import { saveArchiveEntries } from '../archive/storage';
 import { ConcurrentInstallOperationError } from '../../../errors';
@@ -134,6 +135,9 @@ export async function _installPackage({
       savedObjectsClient
     );
 
+    // installs ml models
+    const installedMlModel = await installMlModel(packageInfo, paths, esClient, savedObjectsClient);
+
     // installs versionized pipelines without removing currently installed ones
     const installedPipelines = await installPipelines(
       packageInfo,
@@ -227,6 +231,7 @@ export async function _installPackage({
       ...installedDataStreamIlm,
       ...installedTemplateRefs,
       ...installedTransforms,
+      ...installedMlModel,
     ];
   } catch (err) {
     if (savedObjectsClient.errors.isConflictError(err)) {

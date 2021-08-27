@@ -20,6 +20,7 @@ import type {
 import { deletePipeline } from '../elasticsearch/ingest_pipeline/';
 import { installIndexPatterns } from '../kibana/index_pattern/install';
 import { deleteTransforms } from '../elasticsearch/transform/remove';
+import { deleteMlModel } from '../elasticsearch/ml_model';
 import { packagePolicyService, appContextService } from '../..';
 import { splitPkgKey } from '../registry';
 import { deletePackageCache } from '../archive';
@@ -105,6 +106,8 @@ function deleteESAssets(
       return deleteTransforms(esClient, [id]);
     } else if (assetType === ElasticsearchAssetType.dataStreamIlmPolicy) {
       return deleteIlms(esClient, [id]);
+    } else if (assetType === ElasticsearchAssetType.mlModel) {
+      return deleteMlModel(esClient, [id]);
     }
   });
 }

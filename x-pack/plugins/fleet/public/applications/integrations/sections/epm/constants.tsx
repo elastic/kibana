@@ -36,6 +36,7 @@ export const AssetTitleMap: Record<DisplayedAssetType, string> = {
   lens: 'Lens',
   security_rule: 'Security rules',
   ml_module: 'ML modules',
+  ml_model: 'ML models',
   view: 'Views',
 };
 
