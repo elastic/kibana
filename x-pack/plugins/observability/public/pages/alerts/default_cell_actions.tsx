@@ -13,7 +13,7 @@ import FilterForValueButton from './filter_for_value';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { TimelineNonEcsData } from '../../../../timelines/common/search_strategy';
 import { TGridCellAction } from '../../../../timelines/common/types/timeline';
-import { TimelinesUIStart } from '../../../../timelines/public';
+import { getPageRowIndex, TimelinesUIStart } from '../../../../timelines/public';
 
 export const FILTER_FOR_VALUE = i18n.translate('xpack.observability.hoverActions.filterForValue', {
   defaultMessage: 'Filter for value',
@@ -35,11 +35,15 @@ const useKibanaServices = () => {
 
 /** actions common to all cells (e.g. copy to clipboard) */
 const commonCellActions: TGridCellAction[] = [
-  ({ data }: { data: TimelineNonEcsData[][] }) => ({ rowIndex, columnId, Component }) => {
+  ({ data, pageSize }: { data: TimelineNonEcsData[][]; pageSize: number }) => ({
+    rowIndex,
+    columnId,
+    Component,
+  }) => {
     const { timelines } = useKibanaServices();
 
     const value = getMappedNonEcsValue({
-      data: data[rowIndex],
+      data: data[getPageRowIndex(rowIndex, pageSize)],
       fieldName: columnId,
     });
 
@@ -60,9 +64,13 @@ const commonCellActions: TGridCellAction[] = [
 
 /** actions for adding filters to the search bar */
 const buildFilterCellActions = (addToQuery: (value: string) => void): TGridCellAction[] => [
-  ({ data }: { data: TimelineNonEcsData[][] }) => ({ rowIndex, columnId, Component }) => {
+  ({ data, pageSize }: { data: TimelineNonEcsData[][]; pageSize: number }) => ({
+    rowIndex,
+    columnId,
+    Component,
+  }) => {
     const value = getMappedNonEcsValue({
-      data: data[rowIndex],
+      data: data[getPageRowIndex(rowIndex, pageSize)],
       fieldName: columnId,
     });
 

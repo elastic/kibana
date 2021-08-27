@@ -10,7 +10,7 @@ import { Location } from 'history';
 import React from 'react';
 import { useLocation } from 'react-router-dom';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
-import { IUrlParams } from '../../../context/url_params_context/types';
+import type { ApmUrlParams } from '../../../context/url_params_context/types';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useFallbackToTransactionsFetcher } from '../../../hooks/use_fallback_to_transactions_fetcher';
@@ -29,7 +29,7 @@ function getRedirectLocation({
 }: {
   location: Location;
   transactionType?: string;
-  urlParams: IUrlParams;
+  urlParams: ApmUrlParams;
 }): Location | undefined {
   const transactionTypeFromUrlParams = urlParams.transactionType;
 

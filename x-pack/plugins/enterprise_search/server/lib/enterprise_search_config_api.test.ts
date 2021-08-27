@@ -184,8 +184,6 @@ describe('callEnterpriseSearchConfigAPI', () => {
           groups: [],
           isAdmin: false,
           canCreatePersonalSources: false,
-          canCreateInvitations: false,
-          isCurated: false,
           viewedOnboardingPage: false,
         },
       },
