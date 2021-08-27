@@ -43,10 +43,6 @@ export interface DataStartDependencies {
 export interface DataPublicPluginSetup {
   autocomplete: AutocompleteSetup;
   search: ISearchSetup;
-  /**
-   * @deprecated Use fieldFormats plugin instead
-   */
-  fieldFormats: FieldFormatsSetup;
   query: QuerySetup;
 }
 

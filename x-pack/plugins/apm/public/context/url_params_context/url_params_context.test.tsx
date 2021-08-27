@@ -11,7 +11,7 @@ import { History, Location } from 'history';
 import moment from 'moment-timezone';
 import * as React from 'react';
 import { MemoryRouter, Router } from 'react-router-dom';
-import { IUrlParams } from './types';
+import type { UrlParams } from './types';
 import { UrlParamsContext, UrlParamsProvider } from './url_params_context';
 
 function mountParams(location: Location) {
@@ -19,7 +19,7 @@ function mountParams(location: Location) {
     <MemoryRouter initialEntries={[location]}>
       <UrlParamsProvider>
         <UrlParamsContext.Consumer>
-          {({ urlParams }: { urlParams: IUrlParams }) => (
+          {({ urlParams }: { urlParams: UrlParams }) => (
             <span id="data">{JSON.stringify(urlParams, null, 2)}</span>
           )}
         </UrlParamsContext.Consumer>
