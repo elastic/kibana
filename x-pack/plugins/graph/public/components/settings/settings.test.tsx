@@ -89,7 +89,8 @@ describe('settings', () => {
         ky: 0,
       },
     ],
-    unblocklistNode: jest.fn(),
+    unblockNode: jest.fn(),
+    unblockAll: jest.fn(),
     canEditDrillDownUrls: true,
   };
 
@@ -259,14 +260,13 @@ describe('settings', () => {
     it('should delete node', () => {
       instance.find(EuiListGroupItem).at(0).prop('extraAction')!.onClick!({} as any);
 
-      expect(angularProps.unblocklistNode).toHaveBeenCalledWith(angularProps.blocklistedNodes![0]);
+      expect(angularProps.unblockNode).toHaveBeenCalledWith(angularProps.blocklistedNodes![0]);
     });
 
     it('should delete all nodes', () => {
       instance.find('[data-test-subj="graphUnblocklistAll"]').find(EuiButton).simulate('click');
 
-      expect(angularProps.unblocklistNode).toHaveBeenCalledWith(angularProps.blocklistedNodes![0]);
-      expect(angularProps.unblocklistNode).toHaveBeenCalledWith(angularProps.blocklistedNodes![1]);
+      expect(angularProps.unblockAll).toHaveBeenCalled();
     });
   });
 

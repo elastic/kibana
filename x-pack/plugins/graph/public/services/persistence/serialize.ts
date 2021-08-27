@@ -6,7 +6,6 @@
  */
 
 import {
-  SerializedNode,
   WorkspaceNode,
   WorkspaceEdge,
   SerializedEdge,
@@ -17,14 +16,14 @@ import {
   SerializedWorkspaceState,
   Workspace,
   AdvancedSettings,
-  BlockListedNode,
+  SerializedNode,
 } from '../../types';
 import { IndexpatternDatasource } from '../../state_management';
 
 function serializeNode(
-  { data, scaledSize, parent, x, y, label, color }: BlockListedNode,
+  { data, scaledSize, parent, x, y, label, color }: WorkspaceNode,
   allNodes: WorkspaceNode[] = []
-): SerializedNode {
+) {
   return {
     x,
     y,

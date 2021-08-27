@@ -53,11 +53,7 @@ export interface SerializedField extends Omit<WorkspaceField, 'icon' | 'type' | 
   iconClass: string;
 }
 
-export interface SerializedNode
-  extends Omit<
-    WorkspaceNode,
-    'icon' | 'data' | 'parent' | 'scaledSize' | 'kx' | 'ky' | 'numChildren'
-  > {
+export interface SerializedNode extends Pick<WorkspaceNode, 'x' | 'y' | 'label' | 'color'> {
   field: string;
   term: string;
   parent: number | null;

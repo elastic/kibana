@@ -20,7 +20,7 @@ import { urlTemplateRegex } from '../../helpers/url_template';
 import { SelectionToolBar } from './selection_tool_bar';
 import { ControlPanelToolBar } from './control_panel_tool_bar';
 import { SelectStyle } from './select_style';
-import { ChosenNodeEditor } from './chosen_node_editor';
+import { SelectedNodeEditor } from './selected_node_editor';
 import { MergeCandidates } from './merge_candidates';
 import { DrillDowns } from './drill_downs';
 import { DrillDownIconLinks } from './drill_down_icon_links';
@@ -35,12 +35,11 @@ interface ControlPanelProps {
   renderCounter: number;
   workspace: Workspace;
   control: ControlType;
-  chosenNode?: WorkspaceNode;
+  selectedNode?: WorkspaceNode;
   colors: string[];
   mergeCandidates: TermIntersect[];
   onSetControl: (control: ControlType) => void;
   selectSelected: (node: WorkspaceNode) => void;
-  isSelectedSelected: (node: WorkspaceNode) => boolean;
 }
 
 interface ControlPanelStateProps {
@@ -53,11 +52,10 @@ const ControlPanelComponent = ({
   liveResponseFields,
   urlTemplates,
   control,
-  chosenNode,
+  selectedNode,
   colors,
   mergeCandidates,
   onSetControl,
-  isSelectedSelected,
   selectSelected,
 }: ControlPanelProps & ControlPanelStateProps) => {
   const hasNodes = workspace.nodes.length === 0;
@@ -107,8 +105,8 @@ const ControlPanelComponent = ({
             <SelectedNodeItem
               key={`${node.label}-${node.x}-${node.y}`}
               node={node}
+              isHighlighted={selectedNode === node}
               onSelectedFieldClick={onSelectedFieldClick}
-              isSelectedSelected={isSelectedSelected}
               onDeselectNode={onDeselectNode}
             />
           ))}
@@ -125,8 +123,8 @@ const ControlPanelComponent = ({
       {control === 'style' && workspace.selectedNodes.length > 0 && (
         <SelectStyle workspace={workspace} colors={colors} />
       )}
-      {control === 'editLabel' && chosenNode && (
-        <ChosenNodeEditor workspace={workspace} chosenNode={chosenNode} />
+      {control === 'editLabel' && selectedNode && (
+        <SelectedNodeEditor workspace={workspace} selectedNode={selectedNode} />
       )}
       {control === 'mergeTerms' && mergeCandidates.length > 0 && (
         <MergeCandidates

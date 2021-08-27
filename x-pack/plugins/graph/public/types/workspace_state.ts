@@ -29,8 +29,6 @@ export interface WorkspaceNode {
   ky: number;
 }
 
-export type BlockListedNode = Omit<WorkspaceNode, 'kx' | 'ky' | 'numChildren' | 'isSelected'>;
-
 export interface WorkspaceEdge {
   weight: number;
   width: number;
@@ -83,7 +81,7 @@ export interface Workspace {
   nodes: WorkspaceNode[];
   selectedNodes: WorkspaceNode[];
   edges: WorkspaceEdge[];
-  blocklistedNodes: BlockListedNode[];
+  blocklistedNodes: WorkspaceNode[];
   undoLog: string;
   redoLog: string;
   force: ReturnType<typeof d3.layout.force>;
@@ -117,7 +115,7 @@ export interface Workspace {
   toggleNodeSelection: (node: WorkspaceNode) => boolean;
   mergeIds: (term1: string, term2: string) => void;
   changeHandler: () => void;
-  unblockNode: (node: BlockListedNode) => void;
+  unblockNode: (node: WorkspaceNode) => void;
   unblockAll: () => void;
   clearGraph: () => void;
 

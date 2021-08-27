@@ -14,19 +14,19 @@ const isHexColorDark = (color: string) => isColorDark(...hexToRgb(color));
 
 interface SelectedNodeItemProps {
   node: WorkspaceNode;
-  isSelectedSelected: (node: WorkspaceNode) => boolean;
+  isHighlighted: boolean;
   onDeselectNode: (node: WorkspaceNode) => void;
   onSelectedFieldClick: (node: WorkspaceNode) => void;
 }
 
 export const SelectedNodeItem = ({
   node,
-  isSelectedSelected,
+  isHighlighted,
   onSelectedFieldClick,
   onDeselectNode,
 }: SelectedNodeItemProps) => {
   const fieldClasses = classNames('gphSelectionList__field', {
-    ['gphSelectionList__field--selected']: isSelectedSelected(node),
+    ['gphSelectionList__field--selected']: isHighlighted,
   });
   const fieldIconClasses = classNames('fa', 'gphNode__text', 'gphSelectionList__icon', {
     ['gphNode__text--inverse']: isHexColorDark(node.color),

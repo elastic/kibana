@@ -100,20 +100,18 @@ const WorkspaceLayoutComponent = ({
   const [pickerOpen, setPickerOpen] = useState(false);
   const [mergeCandidates, setMergeCandidates] = useState<TermIntersect[]>([]);
   const [control, setControl] = useState<ControlType>('none');
-  const chosenNode = useRef<WorkspaceNode | undefined>(undefined);
+  const selectedNode = useRef<WorkspaceNode | undefined>(undefined);
   const isInitialized = Boolean(workspaceInitialized || savedWorkspace.id);
 
   const selectSelected = useCallback((node: WorkspaceNode) => {
-    chosenNode.current = node;
+    selectedNode.current = node;
     setControl('editLabel');
   }, []);
 
   const onSetControl = useCallback((newControl: ControlType) => {
-    chosenNode.current = undefined;
+    selectedNode.current = undefined;
     setControl(newControl);
   }, []);
-
-  const isSelectedSelected = useCallback((node: WorkspaceNode) => chosenNode.current === node, []);
 
   // Deal with situation of request to open saved workspace
   useEffect(() => {
@@ -247,10 +245,9 @@ const WorkspaceLayoutComponent = ({
             renderCounter={renderCounter}
             workspace={workspace}
             control={control}
-            chosenNode={chosenNode.current}
+            selectedNode={selectedNode.current}
             colors={colorChoices}
             mergeCandidates={mergeCandidates}
-            isSelectedSelected={isSelectedSelected}
             selectSelected={selectSelected}
             onSetControl={onSetControl}
           />

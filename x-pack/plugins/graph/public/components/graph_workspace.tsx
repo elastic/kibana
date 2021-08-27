@@ -147,7 +147,7 @@ export const GraphWorkspace = (props: GraphWorkspaceProps) => {
           nodeLabeller() {
             // console.log(newNodes);
           },
-          changeHandler: () => setRenderCounter((cur) => ++cur),
+          changeHandler: () => setRenderCounter((cur) => cur + 1),
           graphExploreProxy: callNodeProxy,
           searchProxy: callSearchNodeProxy,
           exploreControls,
@@ -165,7 +165,7 @@ export const GraphWorkspace = (props: GraphWorkspaceProps) => {
       showSaveModal,
       savePolicy: props.deps.graphSavePolicy,
       changeUrl: (newUrl) => history.push(newUrl),
-      notifyReact: () => setRenderCounter((cur) => ++cur),
+      notifyReact: () => setRenderCounter((cur) => cur + 1),
       chrome: props.deps.chrome,
       I18nContext: props.deps.coreStart.i18n.Context,
       handleSearchQueryError,
