@@ -11,6 +11,7 @@ import { EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import { ShowDebugging } from './show_debugging';
+import { Markdown } from '../../../../kibana_react/public';
 
 export interface Props {
   payload: {
@@ -40,8 +41,11 @@ export const Error: FC<Props> = ({ payload }) => {
       title={strings.getTitle()}
     >
       <p>{message ? strings.getDescription() : ''}</p>
-      {message && <p style={{ padding: '0 16px' }}>{message}</p>}
-
+      {message && (
+        <p style={{ padding: '0 16px' }}>
+          <Markdown markdown={message} openLinksInNewTab={true} />
+        </p>
+      )}
       <ShowDebugging payload={payload} />
     </EuiCallOut>
   );
