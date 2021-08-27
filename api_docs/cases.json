@@ -530,6 +530,21 @@
             "description": [],
             "path": "x-pack/plugins/cases/public/components/all_cases/selector_modal/index.tsx",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "cases",
+            "id": "def-public.AllCasesSelectorModalProps.onClose",
+            "type": "Function",
+            "tags": [],
+            "label": "onClose",
+            "description": [],
+            "signature": [
+              "(() => void) | undefined"
+            ],
+            "path": "x-pack/plugins/cases/public/components/all_cases/selector_modal/index.tsx",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -2733,6 +2748,32 @@
       },
       {
         "parentPluginId": "cases",
+        "id": "def-common.CasesUiConfigType",
+        "type": "Interface",
+        "tags": [],
+        "label": "CasesUiConfigType",
+        "description": [],
+        "path": "x-pack/plugins/cases/common/ui/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "cases",
+            "id": "def-common.CasesUiConfigType.markdownPlugins",
+            "type": "Object",
+            "tags": [],
+            "label": "markdownPlugins",
+            "description": [],
+            "signature": [
+              "{ lens: boolean; }"
+            ],
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cases",
         "id": "def-common.CaseUserActions",
         "type": "Interface",
         "tags": [],
@@ -3014,78 +3055,6 @@
               "string | null | undefined"
             ],
             "path": "x-pack/plugins/cases/common/ui/types.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "cases",
-        "id": "def-common.ESCaseConnector",
-        "type": "Interface",
-        "tags": [],
-        "label": "ESCaseConnector",
-        "description": [],
-        "path": "x-pack/plugins/cases/common/api/connectors/index.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "cases",
-            "id": "def-common.ESCaseConnector.id",
-            "type": "string",
-            "tags": [],
-            "label": "id",
-            "description": [],
-            "path": "x-pack/plugins/cases/common/api/connectors/index.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "cases",
-            "id": "def-common.ESCaseConnector.name",
-            "type": "string",
-            "tags": [],
-            "label": "name",
-            "description": [],
-            "path": "x-pack/plugins/cases/common/api/connectors/index.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "cases",
-            "id": "def-common.ESCaseConnector.type",
-            "type": "Enum",
-            "tags": [],
-            "label": "type",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "cases",
-                "scope": "common",
-                "docId": "kibCasesPluginApi",
-                "section": "def-common.ConnectorTypes",
-                "text": "ConnectorTypes"
-              }
-            ],
-            "path": "x-pack/plugins/cases/common/api/connectors/index.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "cases",
-            "id": "def-common.ESCaseConnector.fields",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "fields",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "cases",
-                "scope": "common",
-                "docId": "kibCasesPluginApi",
-                "section": "def-common.ESConnectorFields",
-                "text": "ESConnectorFields"
-              },
-              " | null"
-            ],
-            "path": "x-pack/plugins/cases/common/api/connectors/index.ts",
             "deprecated": false
           }
         ],
@@ -4848,7 +4817,7 @@
             "section": "def-common.ConnectorTypes",
             "text": "ConnectorTypes"
           },
-          ".swimlane; fields: { caseId: string | null; } | null; }); settings: { syncAlerts: boolean; }; owner: string; } & { closed_at: string | null; closed_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } | null; created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; }; external_service: ({ connector_id: string; connector_name: string; external_id: string; external_title: string; external_url: string; } & { pushed_at: string; pushed_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; }; }) | null; updated_at: string | null; updated_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } | null; }"
+          ".swimlane; fields: { caseId: string | null; } | null; }); settings: { syncAlerts: boolean; }; owner: string; } & { closed_at: string | null; closed_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } | null; created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; }; external_service: { connector_id: string | null; connector_name: string; external_id: string; external_title: string; external_url: string; pushed_at: string; pushed_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; }; } | null; updated_at: string | null; updated_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } | null; }"
         ],
         "path": "x-pack/plugins/cases/common/api/cases/case.ts",
         "deprecated": false,
@@ -4938,7 +4907,7 @@
         "label": "CaseFullExternalService",
         "description": [],
         "signature": [
-          "({ connector_id: string; connector_name: string; external_id: string; external_title: string; external_url: string; } & { pushed_at: string; pushed_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; }; }) | null"
+          "{ connector_id: string | null; connector_name: string; external_id: string; external_title: string; external_url: string; pushed_at: string; pushed_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; }; } | null"
         ],
         "path": "x-pack/plugins/cases/common/api/cases/case.ts",
         "deprecated": false,
@@ -5164,7 +5133,7 @@
             "section": "def-common.ConnectorTypes",
             "text": "ConnectorTypes"
           },
-          ".swimlane; fields: { caseId: string | null; } | null; }); settings: { syncAlerts: boolean; }; owner: string; } & { closed_at: string | null; closed_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } | null; created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; }; external_service: ({ connector_id: string; connector_name: string; external_id: string; external_title: string; external_url: string; } & { pushed_at: string; pushed_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; }; }) | null; updated_at: string | null; updated_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } | null; } & { id: string; totalComment: number; totalAlerts: number; version: string; } & { subCaseIds?: string[] | undefined; subCases?: ({ status: ",
+          ".swimlane; fields: { caseId: string | null; } | null; }); settings: { syncAlerts: boolean; }; owner: string; } & { closed_at: string | null; closed_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } | null; created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; }; external_service: { connector_id: string | null; connector_name: string; external_id: string; external_title: string; external_url: string; pushed_at: string; pushed_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; }; } | null; updated_at: string | null; updated_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } | null; } & { id: string; totalComment: number; totalAlerts: number; version: string; } & { subCaseIds?: string[] | undefined; subCases?: ({ status: ",
           {
             "pluginId": "cases",
             "scope": "common",
@@ -5894,7 +5863,7 @@
             "section": "def-common.ConnectorTypes",
             "text": "ConnectorTypes"
           },
-          ".swimlane; fields: { caseId: string | null; } | null; }); settings: { syncAlerts: boolean; }; owner: string; } & { closed_at: string | null; closed_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } | null; created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; }; external_service: ({ connector_id: string; connector_name: string; external_id: string; external_title: string; external_url: string; } & { pushed_at: string; pushed_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; }; }) | null; updated_at: string | null; updated_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } | null; } & { id: string; totalComment: number; totalAlerts: number; version: string; } & { subCaseIds?: string[] | undefined; subCases?: ({ status: ",
+          ".swimlane; fields: { caseId: string | null; } | null; }); settings: { syncAlerts: boolean; }; owner: string; } & { closed_at: string | null; closed_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } | null; created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; }; external_service: { connector_id: string | null; connector_name: string; external_id: string; external_title: string; external_url: string; pushed_at: string; pushed_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; }; } | null; updated_at: string | null; updated_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } | null; } & { id: string; totalComment: number; totalAlerts: number; version: string; } & { subCaseIds?: string[] | undefined; subCases?: ({ status: ",
           {
             "pluginId": "cases",
             "scope": "common",
@@ -6170,7 +6139,7 @@
             "section": "def-common.ConnectorTypes",
             "text": "ConnectorTypes"
           },
-          ".swimlane; fields: { caseId: string | null; } | null; }); settings: { syncAlerts: boolean; }; owner: string; } & { closed_at: string | null; closed_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } | null; created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; }; external_service: ({ connector_id: string; connector_name: string; external_id: string; external_title: string; external_url: string; } & { pushed_at: string; pushed_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; }; }) | null; updated_at: string | null; updated_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } | null; } & { id: string; totalComment: number; totalAlerts: number; version: string; } & { subCaseIds?: string[] | undefined; subCases?: ({ status: ",
+          ".swimlane; fields: { caseId: string | null; } | null; }); settings: { syncAlerts: boolean; }; owner: string; } & { closed_at: string | null; closed_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } | null; created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; }; external_service: { connector_id: string | null; connector_name: string; external_id: string; external_title: string; external_url: string; pushed_at: string; pushed_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; }; } | null; updated_at: string | null; updated_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } | null; } & { id: string; totalComment: number; totalAlerts: number; version: string; } & { subCaseIds?: string[] | undefined; subCases?: ({ status: ",
           {
             "pluginId": "cases",
             "scope": "common",
@@ -7368,282 +7337,6 @@
       },
       {
         "parentPluginId": "cases",
-        "id": "def-common.ESCaseAttributes",
-        "type": "Type",
-        "tags": [],
-        "label": "ESCaseAttributes",
-        "description": [],
-        "signature": [
-          "Pick<{ description: string; status: ",
-          {
-            "pluginId": "cases",
-            "scope": "common",
-            "docId": "kibCasesPluginApi",
-            "section": "def-common.CaseStatuses",
-            "text": "CaseStatuses"
-          },
-          "; tags: string[]; title: string; type: ",
-          {
-            "pluginId": "cases",
-            "scope": "common",
-            "docId": "kibCasesPluginApi",
-            "section": "def-common.CaseType",
-            "text": "CaseType"
-          },
-          "; connector: ({ id: string; name: string; } & { type: ",
-          {
-            "pluginId": "cases",
-            "scope": "common",
-            "docId": "kibCasesPluginApi",
-            "section": "def-common.ConnectorTypes",
-            "text": "ConnectorTypes"
-          },
-          ".jira; fields: { issueType: string | null; priority: string | null; parent: string | null; } | null; }) | ({ id: string; name: string; } & { type: ",
-          {
-            "pluginId": "cases",
-            "scope": "common",
-            "docId": "kibCasesPluginApi",
-            "section": "def-common.ConnectorTypes",
-            "text": "ConnectorTypes"
-          },
-          ".none; fields: null; }) | ({ id: string; name: string; } & { type: ",
-          {
-            "pluginId": "cases",
-            "scope": "common",
-            "docId": "kibCasesPluginApi",
-            "section": "def-common.ConnectorTypes",
-            "text": "ConnectorTypes"
-          },
-          ".resilient; fields: { incidentTypes: string[] | null; severityCode: string | null; } | null; }) | ({ id: string; name: string; } & { type: ",
-          {
-            "pluginId": "cases",
-            "scope": "common",
-            "docId": "kibCasesPluginApi",
-            "section": "def-common.ConnectorTypes",
-            "text": "ConnectorTypes"
-          },
-          ".serviceNowITSM; fields: { impact: string | null; severity: string | null; urgency: string | null; category: string | null; subcategory: string | null; } | null; }) | ({ id: string; name: string; } & { type: ",
-          {
-            "pluginId": "cases",
-            "scope": "common",
-            "docId": "kibCasesPluginApi",
-            "section": "def-common.ConnectorTypes",
-            "text": "ConnectorTypes"
-          },
-          ".serviceNowSIR; fields: { category: string | null; destIp: boolean | null; malwareHash: boolean | null; malwareUrl: boolean | null; priority: string | null; sourceIp: boolean | null; subcategory: string | null; } | null; }) | ({ id: string; name: string; } & { type: ",
-          {
-            "pluginId": "cases",
-            "scope": "common",
-            "docId": "kibCasesPluginApi",
-            "section": "def-common.ConnectorTypes",
-            "text": "ConnectorTypes"
-          },
-          ".swimlane; fields: { caseId: string | null; } | null; }); settings: { syncAlerts: boolean; }; owner: string; } & { closed_at: string | null; closed_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } | null; created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; }; external_service: ({ connector_id: string; connector_name: string; external_id: string; external_title: string; external_url: string; } & { pushed_at: string; pushed_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; }; }) | null; updated_at: string | null; updated_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } | null; }, \"type\" | \"status\" | \"description\" | \"title\" | \"updated_at\" | \"tags\" | \"settings\" | \"owner\" | \"created_at\" | \"created_by\" | \"updated_by\" | \"closed_at\" | \"closed_by\" | \"external_service\"> & { connector: ",
-          {
-            "pluginId": "cases",
-            "scope": "common",
-            "docId": "kibCasesPluginApi",
-            "section": "def-common.ESCaseConnector",
-            "text": "ESCaseConnector"
-          },
-          "; }"
-        ],
-        "path": "x-pack/plugins/cases/common/api/cases/case.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "cases",
-        "id": "def-common.ESCaseConnectorTypes",
-        "type": "Type",
-        "tags": [],
-        "label": "ESCaseConnectorTypes",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "cases",
-            "scope": "common",
-            "docId": "kibCasesPluginApi",
-            "section": "def-common.ConnectorTypes",
-            "text": "ConnectorTypes"
-          }
-        ],
-        "path": "x-pack/plugins/cases/common/api/connectors/index.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "cases",
-        "id": "def-common.ESCasePatchRequest",
-        "type": "Type",
-        "tags": [],
-        "label": "ESCasePatchRequest",
-        "description": [],
-        "signature": [
-          "Pick<{ description?: string | undefined; status?: ",
-          {
-            "pluginId": "cases",
-            "scope": "common",
-            "docId": "kibCasesPluginApi",
-            "section": "def-common.CaseStatuses",
-            "text": "CaseStatuses"
-          },
-          " | undefined; tags?: string[] | undefined; title?: string | undefined; type?: ",
-          {
-            "pluginId": "cases",
-            "scope": "common",
-            "docId": "kibCasesPluginApi",
-            "section": "def-common.CaseType",
-            "text": "CaseType"
-          },
-          " | undefined; connector?: ({ id: string; name: string; } & { type: ",
-          {
-            "pluginId": "cases",
-            "scope": "common",
-            "docId": "kibCasesPluginApi",
-            "section": "def-common.ConnectorTypes",
-            "text": "ConnectorTypes"
-          },
-          ".jira; fields: { issueType: string | null; priority: string | null; parent: string | null; } | null; }) | ({ id: string; name: string; } & { type: ",
-          {
-            "pluginId": "cases",
-            "scope": "common",
-            "docId": "kibCasesPluginApi",
-            "section": "def-common.ConnectorTypes",
-            "text": "ConnectorTypes"
-          },
-          ".none; fields: null; }) | ({ id: string; name: string; } & { type: ",
-          {
-            "pluginId": "cases",
-            "scope": "common",
-            "docId": "kibCasesPluginApi",
-            "section": "def-common.ConnectorTypes",
-            "text": "ConnectorTypes"
-          },
-          ".resilient; fields: { incidentTypes: string[] | null; severityCode: string | null; } | null; }) | ({ id: string; name: string; } & { type: ",
-          {
-            "pluginId": "cases",
-            "scope": "common",
-            "docId": "kibCasesPluginApi",
-            "section": "def-common.ConnectorTypes",
-            "text": "ConnectorTypes"
-          },
-          ".serviceNowITSM; fields: { impact: string | null; severity: string | null; urgency: string | null; category: string | null; subcategory: string | null; } | null; }) | ({ id: string; name: string; } & { type: ",
-          {
-            "pluginId": "cases",
-            "scope": "common",
-            "docId": "kibCasesPluginApi",
-            "section": "def-common.ConnectorTypes",
-            "text": "ConnectorTypes"
-          },
-          ".serviceNowSIR; fields: { category: string | null; destIp: boolean | null; malwareHash: boolean | null; malwareUrl: boolean | null; priority: string | null; sourceIp: boolean | null; subcategory: string | null; } | null; }) | ({ id: string; name: string; } & { type: ",
-          {
-            "pluginId": "cases",
-            "scope": "common",
-            "docId": "kibCasesPluginApi",
-            "section": "def-common.ConnectorTypes",
-            "text": "ConnectorTypes"
-          },
-          ".swimlane; fields: { caseId: string | null; } | null; }) | undefined; settings?: { syncAlerts: boolean; } | undefined; owner?: string | undefined; } & { id: string; version: string; }, \"type\" | \"status\" | \"description\" | \"title\" | \"id\" | \"version\" | \"tags\" | \"settings\" | \"owner\"> & { connector?: ",
-          {
-            "pluginId": "cases",
-            "scope": "common",
-            "docId": "kibCasesPluginApi",
-            "section": "def-common.ESCaseConnector",
-            "text": "ESCaseConnector"
-          },
-          " | undefined; }"
-        ],
-        "path": "x-pack/plugins/cases/common/api/cases/case.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "cases",
-        "id": "def-common.ESCasesConfigureAttributes",
-        "type": "Type",
-        "tags": [],
-        "label": "ESCasesConfigureAttributes",
-        "description": [],
-        "signature": [
-          "Pick<{ connector: ({ id: string; name: string; } & { type: ",
-          {
-            "pluginId": "cases",
-            "scope": "common",
-            "docId": "kibCasesPluginApi",
-            "section": "def-common.ConnectorTypes",
-            "text": "ConnectorTypes"
-          },
-          ".jira; fields: { issueType: string | null; priority: string | null; parent: string | null; } | null; }) | ({ id: string; name: string; } & { type: ",
-          {
-            "pluginId": "cases",
-            "scope": "common",
-            "docId": "kibCasesPluginApi",
-            "section": "def-common.ConnectorTypes",
-            "text": "ConnectorTypes"
-          },
-          ".none; fields: null; }) | ({ id: string; name: string; } & { type: ",
-          {
-            "pluginId": "cases",
-            "scope": "common",
-            "docId": "kibCasesPluginApi",
-            "section": "def-common.ConnectorTypes",
-            "text": "ConnectorTypes"
-          },
-          ".resilient; fields: { incidentTypes: string[] | null; severityCode: string | null; } | null; }) | ({ id: string; name: string; } & { type: ",
-          {
-            "pluginId": "cases",
-            "scope": "common",
-            "docId": "kibCasesPluginApi",
-            "section": "def-common.ConnectorTypes",
-            "text": "ConnectorTypes"
-          },
-          ".serviceNowITSM; fields: { impact: string | null; severity: string | null; urgency: string | null; category: string | null; subcategory: string | null; } | null; }) | ({ id: string; name: string; } & { type: ",
-          {
-            "pluginId": "cases",
-            "scope": "common",
-            "docId": "kibCasesPluginApi",
-            "section": "def-common.ConnectorTypes",
-            "text": "ConnectorTypes"
-          },
-          ".serviceNowSIR; fields: { category: string | null; destIp: boolean | null; malwareHash: boolean | null; malwareUrl: boolean | null; priority: string | null; sourceIp: boolean | null; subcategory: string | null; } | null; }) | ({ id: string; name: string; } & { type: ",
-          {
-            "pluginId": "cases",
-            "scope": "common",
-            "docId": "kibCasesPluginApi",
-            "section": "def-common.ConnectorTypes",
-            "text": "ConnectorTypes"
-          },
-          ".swimlane; fields: { caseId: string | null; } | null; }); closure_type: \"close-by-user\" | \"close-by-pushing\"; } & { owner: string; } & { created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; }; updated_at: string | null; updated_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } | null; }, \"updated_at\" | \"owner\" | \"created_at\" | \"created_by\" | \"updated_by\" | \"closure_type\"> & { connector: ",
-          {
-            "pluginId": "cases",
-            "scope": "common",
-            "docId": "kibCasesPluginApi",
-            "section": "def-common.ESCaseConnector",
-            "text": "ESCaseConnector"
-          },
-          "; }"
-        ],
-        "path": "x-pack/plugins/cases/common/api/cases/configure.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "cases",
-        "id": "def-common.ESConnectorFields",
-        "type": "Type",
-        "tags": [],
-        "label": "ESConnectorFields",
-        "description": [],
-        "signature": [
-          "{ key: string; value: unknown; }[]"
-        ],
-        "path": "x-pack/plugins/cases/common/api/connectors/index.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "cases",
         "id": "def-common.ExternalServiceResponse",
         "type": "Type",
         "tags": [],
@@ -7797,6 +7490,17 @@
           "64"
         ],
         "path": "x-pack/plugins/cases/common/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cases",
+        "id": "def-common.noneConnectorId",
+        "type": "string",
+        "tags": [],
+        "label": "noneConnectorId",
+        "description": [],
+        "path": "x-pack/plugins/cases/common/api/connectors/index.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -9997,12 +9701,14 @@
           "]>; }>; external_service: ",
           "UnionC",
           "<[",
-          "IntersectionC",
-          "<[",
           "TypeC",
           "<{ connector_id: ",
+          "UnionC",
+          "<[",
           "StringC",
-          "; connector_name: ",
+          ", ",
+          "NullC",
+          "]>; connector_name: ",
           "StringC",
           "; external_id: ",
           "StringC",
@@ -10010,9 +9716,7 @@
           "StringC",
           "; external_url: ",
           "StringC",
-          "; }>, ",
-          "TypeC",
-          "<{ pushed_at: ",
+          "; pushed_at: ",
           "StringC",
           "; pushed_by: ",
           "TypeC",
@@ -10040,7 +9744,7 @@
           "NullC",
           ", ",
           "StringC",
-          "]>; }>; }>]>, ",
+          "]>; }>; }>, ",
           "NullC",
           "]>; updated_at: ",
           "UnionC",
@@ -11391,6 +11095,63 @@
       },
       {
         "parentPluginId": "cases",
+        "id": "def-common.CaseExternalServiceBasicRt",
+        "type": "Object",
+        "tags": [],
+        "label": "CaseExternalServiceBasicRt",
+        "description": [],
+        "signature": [
+          "TypeC",
+          "<{ connector_id: ",
+          "UnionC",
+          "<[",
+          "StringC",
+          ", ",
+          "NullC",
+          "]>; connector_name: ",
+          "StringC",
+          "; external_id: ",
+          "StringC",
+          "; external_title: ",
+          "StringC",
+          "; external_url: ",
+          "StringC",
+          "; pushed_at: ",
+          "StringC",
+          "; pushed_by: ",
+          "TypeC",
+          "<{ email: ",
+          "UnionC",
+          "<[",
+          "UndefinedC",
+          ", ",
+          "NullC",
+          ", ",
+          "StringC",
+          "]>; full_name: ",
+          "UnionC",
+          "<[",
+          "UndefinedC",
+          ", ",
+          "NullC",
+          ", ",
+          "StringC",
+          "]>; username: ",
+          "UnionC",
+          "<[",
+          "UndefinedC",
+          ", ",
+          "NullC",
+          ", ",
+          "StringC",
+          "]>; }>; }>"
+        ],
+        "path": "x-pack/plugins/cases/common/api/cases/case.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cases",
         "id": "def-common.CasePatchRequestRt",
         "type": "Object",
         "tags": [],
@@ -12378,12 +12139,14 @@
           "]>; }>; external_service: ",
           "UnionC",
           "<[",
-          "IntersectionC",
-          "<[",
           "TypeC",
           "<{ connector_id: ",
+          "UnionC",
+          "<[",
           "StringC",
-          "; connector_name: ",
+          ", ",
+          "NullC",
+          "]>; connector_name: ",
           "StringC",
           "; external_id: ",
           "StringC",
@@ -12391,9 +12154,7 @@
           "StringC",
           "; external_url: ",
           "StringC",
-          "; }>, ",
-          "TypeC",
-          "<{ pushed_at: ",
+          "; pushed_at: ",
           "StringC",
           "; pushed_by: ",
           "TypeC",
@@ -12421,7 +12182,7 @@
           "NullC",
           ", ",
           "StringC",
-          "]>; }>; }>]>, ",
+          "]>; }>; }>, ",
           "NullC",
           "]>; updated_at: ",
           "UnionC",
@@ -14961,12 +14722,14 @@
           "]>; }>; external_service: ",
           "UnionC",
           "<[",
-          "IntersectionC",
-          "<[",
           "TypeC",
           "<{ connector_id: ",
+          "UnionC",
+          "<[",
           "StringC",
-          "; connector_name: ",
+          ", ",
+          "NullC",
+          "]>; connector_name: ",
           "StringC",
           "; external_id: ",
           "StringC",
@@ -14974,9 +14737,7 @@
           "StringC",
           "; external_url: ",
           "StringC",
-          "; }>, ",
-          "TypeC",
-          "<{ pushed_at: ",
+          "; pushed_at: ",
           "StringC",
           "; pushed_by: ",
           "TypeC",
@@ -15004,7 +14765,7 @@
           "NullC",
           ", ",
           "StringC",
-          "]>; }>; }>]>, ",
+          "]>; }>; }>, ",
           "NullC",
           "]>; updated_at: ",
           "UnionC",
@@ -16925,12 +16686,14 @@
           "]>; }>; external_service: ",
           "UnionC",
           "<[",
-          "IntersectionC",
-          "<[",
           "TypeC",
           "<{ connector_id: ",
+          "UnionC",
+          "<[",
           "StringC",
-          "; connector_name: ",
+          ", ",
+          "NullC",
+          "]>; connector_name: ",
           "StringC",
           "; external_id: ",
           "StringC",
@@ -16938,9 +16701,7 @@
           "StringC",
           "; external_url: ",
           "StringC",
-          "; }>, ",
-          "TypeC",
-          "<{ pushed_at: ",
+          "; pushed_at: ",
           "StringC",
           "; pushed_by: ",
           "TypeC",
@@ -16968,7 +16729,7 @@
           "NullC",
           ", ",
           "StringC",
-          "]>; }>; }>]>, ",
+          "]>; }>; }>, ",
           "NullC",
           "]>; updated_at: ",
           "UnionC",

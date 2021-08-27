@@ -32,6 +32,7 @@ export interface UseHoverActionItemsProps {
   field: string;
   handleHoverActionClicked: () => void;
   hideTopN: boolean;
+  isCaseView: boolean;
   isObjectArray: boolean;
   isOverflowPopoverOpen?: boolean;
   itemsToShow?: number;
@@ -60,6 +61,7 @@ export const useHoverActionItems = ({
   field,
   handleHoverActionClicked,
   hideTopN,
+  isCaseView,
   isObjectArray,
   isOverflowPopoverOpen,
   itemsToShow = 2,
@@ -119,9 +121,8 @@ export const useHoverActionItems = ({
    * in the case of `EnableOverflowButton`, we only need to hide all the items in the overflow popover as the chart's panel opens in the overflow popover, so non-overflowed actions are not affected.
    */
   const showFilters =
-    values != null && (enableOverflowButton || (!showTopN && !enableOverflowButton));
-
-  const shouldDisableColumnToggle = isObjectArray && field !== 'geo_point';
+    values != null && (enableOverflowButton || (!showTopN && !enableOverflowButton)) && !isCaseView;
+  const shouldDisableColumnToggle = (isObjectArray && field !== 'geo_point') || isCaseView;
 
   const allItems = useMemo(
     () =>
@@ -275,7 +276,7 @@ export const useHoverActionItems = ({
     () =>
       [
         ...allItems.slice(0, itemsToShow),
-        ...(enableOverflowButton && itemsToShow > 0
+        ...(enableOverflowButton && itemsToShow > 0 && itemsToShow < allItems.length
           ? [
               getOverflowButton({
                 closePopOver: handleHoverActionClicked,

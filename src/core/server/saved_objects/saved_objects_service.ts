@@ -399,20 +399,20 @@ export class SavedObjectsService
         'Waiting until all Elasticsearch nodes are compatible with Kibana before starting saved objects migrations...'
       );
 
-      // TODO: Move to Status Service https://github.com/elastic/kibana/issues/41983
-      this.setupDeps!.elasticsearch.esNodesCompatibility$.subscribe(({ isCompatible, message }) => {
-        if (!isCompatible && message) {
-          this.logger.error(message);
-        }
-      });
-
-      await this.setupDeps!.elasticsearch.esNodesCompatibility$.pipe(
+      // The Elasticsearch service should already ensure that, but let's double check just in case.
+      // Should it be replaced with elasticsearch.status$ API instead?
+      const compatibleNodes = await this.setupDeps!.elasticsearch.esNodesCompatibility$.pipe(
         filter((nodes) => nodes.isCompatible),
         take(1)
       ).toPromise();
 
-      this.logger.info('Starting saved objects migrations');
-      await migrator.runMigrations();
+      // Running migrations only if we got compatible nodes.
+      // It may happen that the observable completes due to Kibana shutting down
+      // and the promise above fulfils as undefined. We shouldn't trigger migrations at that point.
+      if (compatibleNodes) {
+        this.logger.info('Starting saved objects migrations');
+        await migrator.runMigrations();
+      }
     }
 
     const createRepository = (

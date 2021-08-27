@@ -92,7 +92,7 @@ export async function deleteJobResponseHandler(
 
   try {
     /** @note Overwriting existing content with an empty buffer to remove all the chunks. */
-    await promisify(stream.end.bind(stream))();
+    await promisify(stream.end.bind(stream, '', 'utf8'))();
     await jobsQuery.delete(docIndex, docId);
     return res.ok({
       body: { deleted: true },
