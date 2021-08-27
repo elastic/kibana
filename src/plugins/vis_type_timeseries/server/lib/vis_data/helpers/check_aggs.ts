@@ -8,10 +8,7 @@
 
 import { AggNotSupportedInMode } from '../../../../common/errors';
 import { getAggsByType, AGG_TYPE } from '../../../../common/agg_utils';
-import {
-  TSVB_METRIC_TYPES,
-  TIME_RANGE_DATA_MODES,
-} from '../../../../common/enums';
+import { TSVB_METRIC_TYPES, TIME_RANGE_DATA_MODES } from '../../../../common/enums';
 import { Metric } from '../../../../common/types';
 
 export function isAggSupported(metrics: Metric[]) {
