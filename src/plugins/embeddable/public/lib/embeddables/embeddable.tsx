@@ -47,7 +47,7 @@ export abstract class Embeddable<
   // to update input when the parent changes.
   private parentSubscription?: Rx.Subscription;
 
-  private destroyed: boolean = false;
+  protected destroyed: boolean = false;
 
   constructor(input: TEmbeddableInput, output: TEmbeddableOutput, parent?: IContainer) {
     this.id = input.id;

@@ -80,7 +80,7 @@ export function DependenciesTable(props: Props) {
       name: i18n.translate('xpack.apm.dependenciesTable.columnLatency', {
         defaultMessage: 'Latency (avg.)',
       }),
-      width: `${unit * 10}px`,
+      width: `${unit * 11}px`,
       render: (_, { currentStats, previousStats }) => {
         return (
           <SparkPlot
@@ -99,7 +99,7 @@ export function DependenciesTable(props: Props) {
       name: i18n.translate('xpack.apm.dependenciesTable.columnThroughput', {
         defaultMessage: 'Throughput',
       }),
-      width: `${unit * 10}px`,
+      width: `${unit * 11}px`,
       render: (_, { currentStats, previousStats }) => {
         return (
           <SparkPlot
