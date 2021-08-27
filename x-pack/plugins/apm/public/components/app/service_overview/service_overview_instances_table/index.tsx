@@ -26,6 +26,7 @@ import {
 import { OverviewTableContainer } from '../../../shared/overview_table_container';
 import { getColumns } from './get_columns';
 import { InstanceDetails } from './intance_details';
+import { useApmParams } from '../../../../hooks/use_apm_params';
 
 type ServiceInstanceMainStatistics = APIReturnType<'GET /api/apm/services/{serviceName}/service_overview_instances/main_statistics'>;
 type MainStatsServiceInstanceItem = ServiceInstanceMainStatistics['currentPeriod'][0];
@@ -63,6 +64,11 @@ export function ServiceOverviewInstancesTable({
   isLoading,
 }: Props) {
   const { agentName } = useApmServiceContext();
+
+  const {
+    query: { kuery },
+  } = useApmParams('/services/:serviceName');
+
   const {
     urlParams: { latencyAggregationType, comparisonEnabled },
   } = useUrlParams();
@@ -103,6 +109,7 @@ export function ServiceOverviewInstancesTable({
         <InstanceDetails
           serviceNodeName={selectedServiceNodeName}
           serviceName={serviceName}
+          kuery={kuery}
         />
       );
     }
@@ -112,6 +119,7 @@ export function ServiceOverviewInstancesTable({
   const columns = getColumns({
     agentName,
     serviceName,
+    kuery,
     latencyAggregationType,
     detailedStatsData,
     comparisonEnabled,

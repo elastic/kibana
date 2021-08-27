@@ -143,7 +143,6 @@ export function MockApmPluginContextWrapper({
   const usedHistory = useMemo(() => {
     return history || contextHistory || createMemoryHistory();
   }, [history, contextHistory]);
-
   return (
     <RouterProvider router={apmRouter as any} history={usedHistory}>
       <ApmPluginContext.Provider
