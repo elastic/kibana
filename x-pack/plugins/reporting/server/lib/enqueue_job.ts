@@ -7,7 +7,7 @@
 
 import { KibanaRequest } from 'src/core/server';
 import { ReportingCore } from '../';
-import type { ReportingRequestHandlerContext } from '../types';
+import type { QueuedJobExportTypeInstance, ReportingRequestHandlerContext } from '../types';
 import { BaseParams, ReportingUser } from '../types';
 import { checkParamsVersion, LevelLogger } from './';
 import { Report } from './store';
@@ -22,7 +22,9 @@ export async function enqueueJob(
   parentLogger: LevelLogger
 ): Promise<Report> {
   const logger = parentLogger.clone(['createJob']);
-  const exportType = reporting.getExportTypesRegistry().getById(exportTypeId);
+  const exportType = reporting
+    .getExportTypesRegistry()
+    .getById(exportTypeId) as QueuedJobExportTypeInstance;
 
   if (exportType == null) {
     throw new Error(`Export type ${exportTypeId} does not exist in the registry!`);

@@ -14,7 +14,7 @@ import {
   LICENSE_TYPE_STANDARD,
   LICENSE_TYPE_TRIAL,
 } from '../../../common/constants';
-import { ExportTypeDefinition, ImmediateExecuteFn } from '../../types';
+import { ImmediateExportTypeInstance } from '../../types';
 import { runTaskFnFactory } from './execute_job';
 import { metadata } from './metadata';
 import { JobParamsDownloadCSV } from './types';
@@ -25,10 +25,7 @@ import { JobParamsDownloadCSV } from './types';
  */
 export { runTaskFnFactory } from './execute_job';
 
-export const getExportType = (): ExportTypeDefinition<
-  null,
-  ImmediateExecuteFn<JobParamsDownloadCSV>
-> => ({
+export const getExportType = (): ImmediateExportTypeInstance<JobParamsDownloadCSV> => ({
   ...metadata,
   jobContentExtension: 'csv',
   jobType: CSV_SEARCHSOURCE_IMMEDIATE_TYPE,

@@ -14,15 +14,15 @@ import {
   LICENSE_TYPE_STANDARD,
   LICENSE_TYPE_TRIAL,
 } from '../../../common/constants';
-import { CreateJobFn, ExportTypeDefinition, RunTaskFn } from '../../types';
+import { QueuedJobExportTypeInstance } from '../../types';
 import { createJobFnFactory } from './create_job';
 import { runTaskFnFactory } from './execute_job';
 import { metadata } from './metadata';
 import { JobParamsDeprecatedCSV, TaskPayloadDeprecatedCSV } from './types';
 
-export const getExportType = (): ExportTypeDefinition<
-  CreateJobFn<JobParamsDeprecatedCSV>,
-  RunTaskFn<TaskPayloadDeprecatedCSV>
+export const getExportType = (): QueuedJobExportTypeInstance<
+  JobParamsDeprecatedCSV,
+  TaskPayloadDeprecatedCSV
 > => ({
   ...metadata,
   jobType,

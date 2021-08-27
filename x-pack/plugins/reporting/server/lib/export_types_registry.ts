@@ -74,13 +74,19 @@ export class ExportTypesRegistry {
 }
 
 export function getExportTypesRegistry(): ExportTypesRegistry {
+  const getTypeFns = [
+    getTypeCsv,
+    getTypeCsvDeprecated,
+    getTypeCsvFromSavedObject,
+    getTypePng,
+    getTypePngV2,
+    getTypePrintablePdf,
+    getTypePrintablePdfV2,
+  ] as Array<() => ExportTypeDefinition>;
+
   const registry = new ExportTypesRegistry();
-  registry.register(getTypeCsv());
-  registry.register(getTypeCsvDeprecated());
-  registry.register(getTypeCsvFromSavedObject());
-  registry.register(getTypePng());
-  registry.register(getTypePngV2());
-  registry.register(getTypePrintablePdf());
-  registry.register(getTypePrintablePdfV2());
+  getTypeFns.forEach((getType) => {
+    registry.register(getType());
+  });
   return registry;
 }

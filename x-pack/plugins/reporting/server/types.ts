@@ -100,33 +100,31 @@ export type RunTaskFnFactory<RunTaskFnType> = (
   logger: LevelLogger
 ) => RunTaskFnType;
 
-interface BaseExportTypeInstance<RunTaskFnType> {
+interface BaseExportTypeInstance {
   id: string;
   name: string;
   jobType: JobType;
   jobContentEncoding?: string;
   jobContentExtension: string;
-  runTaskFnFactory: RunTaskFnFactory<RunTaskFnType>;
   validLicenses: string[];
 }
 
 export type QueuedJobExportTypeInstance<
-  CreateJobFnType = CreateJobFn,
-  RunTaskFnType = RunTaskFn
-> = BaseExportTypeInstance<RunTaskFnType> & {
-  createJobFnFactory: RunTaskFnFactory<CreateJobFnType>;
+  JobParamsType extends BaseParams = BaseParams,
+  JobPayloadType extends BasePayload = BasePayload
+> = BaseExportTypeInstance & {
+  createJobFnFactory: RunTaskFnFactory<CreateJobFn<JobParamsType>>;
+  runTaskFnFactory: RunTaskFnFactory<RunTaskFn<JobPayloadType>>;
 };
 
 export type ImmediateExportTypeInstance<
-  RunTaskFnType = ImmediateExecuteFn
-> = BaseExportTypeInstance<RunTaskFnType>;
+  JobParamsType extends BaseParamsImmediate = BaseParamsImmediate
+> = BaseExportTypeInstance & {
+  runTaskFnFactory: RunTaskFnFactory<ImmediateExecuteFn<JobParamsType>>;
+};
 
 export type ExportTypeDefinition<
-  CreateJobFnType = CreateJobFn | null,
-  RunTaskFnType = RunTaskFn | ImmediateExecuteFn,
-  ExportTypeInstance =
-    | QueuedJobExportTypeInstance<CreateJobFnType, RunTaskFnType>
-    | ImmediateExportTypeInstance<RunTaskFnType>
+  ExportTypeInstance = QueuedJobExportTypeInstance | ImmediateExportTypeInstance
 > = ExportTypeInstance;
 
 /**
