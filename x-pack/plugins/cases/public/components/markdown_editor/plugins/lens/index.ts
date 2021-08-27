@@ -8,6 +8,6 @@
 import { plugin } from './plugin';
 import { LensParser } from './parser';
 import { LensMarkDownRenderer } from './processor';
-import { INSERT_LENS } from './translations';
+import { VISUALIZATION } from './translations';
 
-export { plugin, LensParser as parser, LensMarkDownRenderer as renderer, INSERT_LENS };
+export { plugin, LensParser as parser, LensMarkDownRenderer as renderer, VISUALIZATION };
