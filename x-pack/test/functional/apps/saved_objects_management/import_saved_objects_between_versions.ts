@@ -55,7 +55,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await retry.tryForTime(10000, async () => {
         const existingSavedObjects = await testSubjects.getVisibleText('exportAllObjects');
         // Kibana always has 1 advanced setting as a saved object
-        await expect(existingSavedObjects).to.be('Export 88 objects');
+        await expect(existingSavedObjects).to.be('Export 87 objects');
       });
       await PageObjects.savedObjects.importFile(
         path.join(__dirname, 'exports', '_7.14_import_alerts_actions.ndjson')

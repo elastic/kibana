@@ -226,7 +226,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             await common.sleep(300);
             const suggestions = await timelion.getSuggestionItemsText();
             expect(suggestions.length).not.to.eql(0);
-            expect(suggestions[0].includes('logstash*')).to.eql(true);
+            expect(suggestions[0].includes('log')).to.eql(true);
           });
 
           it('should show field suggestions for timefield argument when index pattern set', async () => {
