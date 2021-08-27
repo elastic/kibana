@@ -34,6 +34,8 @@ import { uiActionsPluginMock } from '../../../../../../../src/plugins/ui_actions
 import { TriggerContract } from '../../../../../../../src/plugins/ui_actions/public/triggers';
 import { VIS_EVENT_TO_TRIGGER } from '../../../../../../../src/plugins/visualizations/public/embeddable';
 import { LensRootStore, setState } from '../../../state_management';
+import { getLensInspectorService } from '../../../lens_inspector_service';
+import { inspectorPluginMock } from '../../../../../../../src/plugins/inspector/public/mocks';
 
 const defaultPermissions: Record<string, Record<string, boolean | Record<string, boolean>>> = {
   navLinks: { management: true },
@@ -59,6 +61,7 @@ const defaultProps = {
     data: mockDataPlugin(),
   },
   getSuggestionForField: () => undefined,
+  lensInspector: getLensInspectorService(inspectorPluginMock.createStartContract()),
   toggleFullscreen: jest.fn(),
 };
 

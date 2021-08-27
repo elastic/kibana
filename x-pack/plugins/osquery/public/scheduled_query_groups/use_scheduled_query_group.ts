@@ -33,6 +33,10 @@ export const useScheduledQueryGroup = ({
       keepPreviousData: true,
       enabled: !skip || !scheduledQueryGroupId,
       select: (response) => response.item,
+      refetchOnMount: false,
+      refetchOnReconnect: false,
+      refetchOnWindowFocus: false,
+      staleTime: Infinity,
     }
   );
 };
