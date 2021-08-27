@@ -2,7 +2,7 @@
   "author": [
     "Elastic"
   ],
-  "description": "Generates a detection alert each time an Elastic Endpoint Security alert is received. Enabling this rule allows you to immediately begin investigating your Endpoint alerts.",
+  "description": "Generates a detection alert each time an Elastic Endpoint Security alert is received for Behavior Protection alerts. Enabling this rule allows you to immediately begin investigating your Endpoint alerts for Behavior Protection.",
   "enabled": true,
   "exceptions_list": [
     {
@@ -19,8 +19,8 @@
   "language": "kuery",
   "license": "Elastic License v2",
   "max_signals": 10000,
-  "name": "Endpoint Security",
-  "query": "event.kind:alert and event.module:(endpoint and not endgame) and not event.code: behavior\n",
+  "name": "Endpoint Security Behavior Protection",
+  "query": "event.kind:alert and event.module:(endpoint and not endgame) and event.code: behavior\n",
   "risk_score": 47,
   "risk_score_mapping": [
     {
@@ -29,8 +29,8 @@
       "value": ""
     }
   ],
-  "rule_id": "9a1a2dae-0b5f-4c3d-8305-a268d404c306",
-  "rule_name_override": "message",
+  "rule_id": "d516af98-19f3-45bb-b590-dd623535b746",
+  "rule_name_override": "rule.name",
   "severity": "medium",
   "severity_mapping": [
     {
@@ -64,5 +64,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 4
+  "version": 1
 }
