@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { RetryProvider } from './retry';
+export { RetryService } from './retry';

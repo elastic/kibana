@@ -9,12 +9,6 @@ import React from 'react';
 
 import { EuiBadge } from '@elastic/eui';
 
-import './license_badge.scss';
+import { PLATINUM_FEATURE } from '../../../constants';
 
-const licenseColor = '#00A7B1';
-
-export const LicenseBadge: React.FC = () => (
-  <EuiBadge className="wsLicenseBadge" color={licenseColor}>
-    <span className="wsLicenseBadge__text">Platinum Feature</span>
-  </EuiBadge>
-);
+export const LicenseBadge: React.FC = () => <EuiBadge color="accent">{PLATINUM_FEATURE}</EuiBadge>;

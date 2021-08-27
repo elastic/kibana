@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   EuiInMemoryTable,
   EuiSpacer,
@@ -19,15 +19,12 @@ import {
   EuiButtonIcon,
   EuiEmptyPrompt,
   Criteria,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { omit } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { loadAllActions, loadActionTypes, deleteActions } from '../../../lib/action_connector_api';
-import ConnectorAddFlyout from '../../action_connector_form/connector_add_flyout';
-import ConnectorEditFlyout, {
-  EditConectorTabs,
-} from '../../action_connector_form/connector_edit_flyout';
 import {
   hasDeleteActionsCapability,
   hasSaveActionsCapability,
@@ -36,13 +33,20 @@ import {
 import { DeleteModalConfirmation } from '../../../components/delete_modal_confirmation';
 import { checkActionTypeEnabled } from '../../../lib/check_action_type_enabled';
 import './actions_connectors_list.scss';
-import { ActionConnector, ActionConnectorTableItem, ActionTypeIndex } from '../../../../types';
+import {
+  ActionConnector,
+  ActionConnectorTableItem,
+  ActionTypeIndex,
+  EditConectorTabs,
+} from '../../../../types';
 import { EmptyConnectorsPrompt } from '../../../components/prompts/empty_connectors_prompt';
 import { useKibana } from '../../../../common/lib/kibana';
 import { DEFAULT_HIDDEN_ACTION_TYPES } from '../../../../';
 import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
+import ConnectorEditFlyout from '../../action_connector_form/connector_edit_flyout';
+import ConnectorAddFlyout from '../../action_connector_form/connector_add_flyout';
 
-export const ActionsConnectorsList: React.FunctionComponent = () => {
+const ActionsConnectorsList: React.FunctionComponent = () => {
   const {
     http,
     notifications: { toasts },
@@ -63,9 +67,9 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
   const [editConnectorProps, setEditConnectorProps] = useState<{
     initialConnector?: ActionConnector;
     tab?: EditConectorTabs;
+    isFix?: boolean;
   }>({});
   const [connectorsToDelete, setConnectorsToDelete] = useState<string[]>([]);
-
   useEffect(() => {
     loadActions();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -139,8 +143,12 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
     }
   }
 
-  async function editItem(actionConnector: ActionConnector, tab: EditConectorTabs) {
-    setEditConnectorProps({ initialConnector: actionConnector, tab });
+  async function editItem(
+    actionConnector: ActionConnector,
+    tab: EditConectorTabs,
+    isFix?: boolean
+  ) {
+    setEditConnectorProps({ initialConnector: actionConnector, tab, isFix: isFix ?? false });
   }
 
   const actionsTableColumns = [
@@ -161,27 +169,41 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
         );
 
         const link = (
-          <EuiLink
-            data-test-subj={`edit${item.id}`}
-            onClick={() => editItem(item, EditConectorTabs.Configuration)}
-            key={item.id}
-            disabled={actionTypesIndex ? !actionTypesIndex[item.actionTypeId]?.enabled : true}
-          >
-            {value}
-          </EuiLink>
+          <>
+            <EuiLink
+              data-test-subj={`edit${item.id}`}
+              onClick={() => editItem(item, EditConectorTabs.Configuration)}
+              key={item.id}
+              disabled={actionTypesIndex ? !actionTypesIndex[item.actionTypeId]?.enabled : true}
+            >
+              {value}
+            </EuiLink>
+            {item.isMissingSecrets ? (
+              <EuiIconTip
+                iconProps={{ 'data-test-subj': `missingSecrets_${item.id}` }}
+                type="alert"
+                color="warning"
+                content={i18n.translate(
+                  'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.missingSecretsDescription',
+                  { defaultMessage: 'Sensitive information was not imported' }
+                )}
+                position="right"
+              />
+            ) : null}
+          </>
         );
 
         return checkEnabledResult.isEnabled ? (
           link
         ) : (
-          <Fragment>
+          <>
             {link}
             <EuiIconTip
               type="questionInCircle"
               content={checkEnabledResult.message}
               position="right"
             />
-          </Fragment>
+          </>
         );
       },
     },
@@ -207,11 +229,39 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
               item={item}
               onDelete={() => setConnectorsToDelete([item.id])}
             />
-            <RunOperation
-              canExecute={canExecute && actionTypesIndex && actionTypesIndex[item.actionTypeId]}
-              item={item}
-              onRun={() => editItem(item, EditConectorTabs.Test)}
-            />
+            {item.isMissingSecrets ? (
+              <>
+                {actionTypesIndex && actionTypesIndex[item.actionTypeId]?.enabled ? (
+                  <EuiFlexItem grow={false} style={{ marginLeft: 4 }}>
+                    <EuiToolTip
+                      content={i18n.translate(
+                        'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.fixActionDescription',
+                        { defaultMessage: 'Fix connector configuration' }
+                      )}
+                    >
+                      <EuiButtonEmpty
+                        size="xs"
+                        data-test-subj="fixConnectorButton"
+                        onClick={() => editItem(item, EditConectorTabs.Configuration, true)}
+                      >
+                        {i18n.translate(
+                          'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.fixButtonLabel',
+                          {
+                            defaultMessage: 'Fix',
+                          }
+                        )}
+                      </EuiButtonEmpty>
+                    </EuiToolTip>
+                  </EuiFlexItem>
+                ) : null}
+              </>
+            ) : (
+              <RunOperation
+                canExecute={canExecute && actionTypesIndex && actionTypesIndex[item.actionTypeId]}
+                item={item}
+                onRun={() => editItem(item, EditConectorTabs.Test)}
+              />
+            )}
           </EuiFlexGroup>
         );
       },
@@ -393,6 +443,9 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
   );
 };
 
+// eslint-disable-next-line import/no-default-export
+export { ActionsConnectorsList as default };
+
 function getActionsCountByActionType(actions: ActionConnector[], actionTypeId: string) {
   return actions.filter((action) => action.actionTypeId === actionTypeId).length;
 }
@@ -408,7 +461,7 @@ const DeleteOperation: React.FunctionComponent<{
         <EuiBetaBadge
           data-test-subj="preConfiguredTitleMessage"
           label={i18n.translate(
-            'xpack.triggersActionsUI.sections.alertForm.preconfiguredTitleMessage',
+            'xpack.triggersActionsUI.sections.actionsConnectorsList.preconfiguredTitleMessage',
             {
               defaultMessage: 'Preconfigured',
             }

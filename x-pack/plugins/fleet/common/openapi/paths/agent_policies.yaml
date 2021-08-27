@@ -1,5 +1,5 @@
 get:
-  summary: Agent policy - List
+  summary: Agent policies - List
   tags: []
   responses:
     '200':
@@ -43,7 +43,7 @@ post:
             properties:
               item:
                 $ref: ../components/schemas/agent_policy.yaml
-  operationId: post-agent-policy
+  operationId: create-agent-policy
   requestBody:
     content:
       application/json:

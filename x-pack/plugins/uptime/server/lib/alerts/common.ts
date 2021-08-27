@@ -6,6 +6,7 @@
  */
 
 import { isRight } from 'fp-ts/lib/Either';
+import Mustache from 'mustache';
 import { UptimeCommonState, UptimeCommonStateType } from '../../../common/runtime_types';
 
 export type UpdateUptimeAlertState = (
@@ -54,4 +55,8 @@ export const updateState: UpdateUptimeAlertState = (state, isTriggeredNow) => {
     lastResolvedAt: !isTriggeredNow && wasTriggered ? now : lastResolvedAt,
     isTriggered: isTriggeredNow,
   };
+};
+
+export const generateAlertMessage = (messageTemplate: string, fields: Record<string, any>) => {
+  return Mustache.render(messageTemplate, { state: { ...fields } });
 };

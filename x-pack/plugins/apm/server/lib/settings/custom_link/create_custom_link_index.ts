@@ -6,7 +6,7 @@
  */
 
 import { ElasticsearchClient, Logger } from 'src/core/server';
-import { PropertyBase } from '@elastic/elasticsearch/api/types';
+import { estypes } from '@elastic/elasticsearch';
 import {
   createOrUpdateIndex,
   Mappings,
@@ -47,7 +47,7 @@ const mappings: Mappings = {
         },
       },
       // FIXME: PropertyBase type is missing .fields
-    } as PropertyBase,
+    } as estypes.MappingPropertyBase,
     url: {
       type: 'keyword',
     },

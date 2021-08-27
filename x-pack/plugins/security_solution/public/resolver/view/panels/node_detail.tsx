@@ -48,15 +48,15 @@ export const NodeDetail = memo(function ({ nodeID }: { nodeID: string }) {
   const nodeStatus = useSelector((state: ResolverState) => selectors.nodeDataStatus(state)(nodeID));
 
   return nodeStatus === 'loading' ? (
-    <StyledPanel>
+    <StyledPanel hasBorder>
       <PanelLoading />
     </StyledPanel>
   ) : processEvent ? (
-    <StyledPanel data-test-subj="resolver:panel:node-detail">
+    <StyledPanel hasBorder data-test-subj="resolver:panel:node-detail">
       <NodeDetailView nodeID={nodeID} processEvent={processEvent} />
     </StyledPanel>
   ) : (
-    <StyledPanel>
+    <StyledPanel hasBorder>
       <PanelContentError translatedErrorMessage={nodeDetailError} />
     </StyledPanel>
   );

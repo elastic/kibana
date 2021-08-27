@@ -20,7 +20,7 @@ import {
 import { get } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { PhasesExceptDelete } from '../../../../../../../common/types';
+import { PhaseExceptDelete } from '../../../../../../../common/types';
 import { ToggleField, useFormData } from '../../../../../../shared_imports';
 import { i18nTexts } from '../../../i18n_texts';
 import { FormInternal } from '../../../types';
@@ -33,7 +33,7 @@ import { PhaseErrorIndicator } from './phase_error_indicator';
 import './phase.scss';
 
 interface Props {
-  phase: PhasesExceptDelete;
+  phase: PhaseExceptDelete;
   /**
    * Settings that should always be visible on the phase when it is enabled.
    */

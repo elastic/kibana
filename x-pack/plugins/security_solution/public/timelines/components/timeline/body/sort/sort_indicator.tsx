@@ -11,8 +11,8 @@ import React from 'react';
 import * as i18n from '../translations';
 import { SortNumber } from './sort_number';
 
-import { SortDirection } from '.';
 import { Direction } from '../../../../../../common/search_strategy';
+import { SortDirection } from '../../../../../../common/types/timeline';
 
 enum SortDirectionIndicatorEnum {
   SORT_UP = 'sortUp',

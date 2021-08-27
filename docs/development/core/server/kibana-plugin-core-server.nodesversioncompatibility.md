@@ -18,5 +18,6 @@ export interface NodesVersionCompatibility
 |  [isCompatible](./kibana-plugin-core-server.nodesversioncompatibility.iscompatible.md) | <code>boolean</code> |  |
 |  [kibanaVersion](./kibana-plugin-core-server.nodesversioncompatibility.kibanaversion.md) | <code>string</code> |  |
 |  [message](./kibana-plugin-core-server.nodesversioncompatibility.message.md) | <code>string</code> |  |
+|  [nodesInfoRequestError](./kibana-plugin-core-server.nodesversioncompatibility.nodesinforequesterror.md) | <code>Error</code> |  |
 |  [warningNodes](./kibana-plugin-core-server.nodesversioncompatibility.warningnodes.md) | <code>NodeInfo[]</code> |  |
 

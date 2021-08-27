@@ -11,6 +11,10 @@ export const closesModal = () => {
   cy.get('[data-test-subj="modal-inspect-close"]').click();
 };
 
+export const clickInspectButton = (container: string) => {
+  cy.get(`${container} ${INSPECT_BUTTON_ICON}`).trigger('click', { force: true });
+};
+
 export const openStatsAndTables = (table: InspectButtonMetadata) => {
   if (table.tabId) {
     cy.get(table.tabId).click({ force: true });
@@ -21,6 +25,6 @@ export const openStatsAndTables = (table: InspectButtonMetadata) => {
       force: true,
     });
   } else {
-    cy.get(`${table.id} ${INSPECT_BUTTON_ICON}`).trigger('click', { force: true });
+    clickInspectButton(table.id);
   }
 };

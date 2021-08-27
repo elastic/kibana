@@ -8,7 +8,7 @@
 
 /* eslint-disable max-classes-per-file */
 
-import { ImAType } from './types';
+import { FnTypeWithGeneric, ImAType } from './types';
 
 /**
  * @internal
@@ -31,6 +31,11 @@ export interface WithGen<T = number> {
   t: T;
 }
 
+/**
+ *
+ * @deprecated
+ * @removeBy 8.0
+ */
 export interface AnotherInterface<T> {
   t: T;
 }
@@ -77,13 +82,31 @@ export interface ExampleInterface extends AnotherInterface<string> {
   /**
    * This function takes a generic. It was sometimes being tripped on
    * and returned as an unknown type with no signature.
+   * @param t This a parameter.
+   * @returns nothing!
    */
   aFnWithGen: <T>(t: T) => void;
+
+  /**
+   * Add coverage for this bug report: https://github.com/elastic/kibana/issues/107145
+   */
+  anOptionalFn?: (foo: string) => string;
 
   /**
    * These are not coming back properly.
    */
   aFn(): void;
+
+  /**
+   * This one is slightly different than the above `aFnWithGen`. The generic is part of the type, not the function (it's before the = sign).
+   * Ideally, we can still capture the children.
+   */
+  fnTypeWithGeneric: FnTypeWithGeneric<string>;
+
+  /**
+   * Optional code path is different than others.
+   */
+  fnTypeWithGenericThatIsOptional?: FnTypeWithGeneric<string>;
 }
 
 /**

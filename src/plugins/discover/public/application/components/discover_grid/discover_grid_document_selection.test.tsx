@@ -51,7 +51,14 @@ describe('document selection', () => {
 
       const component = mountWithIntl(
         <DiscoverGridContext.Provider value={contextMock}>
-          <SelectButton rowIndex={0} />
+          <SelectButton
+            rowIndex={0}
+            setCellProps={jest.fn()}
+            columnId="test"
+            isExpanded={false}
+            isDetails={false}
+            isExpandable={false}
+          />
         </DiscoverGridContext.Provider>
       );
 
@@ -73,7 +80,14 @@ describe('document selection', () => {
 
       const component = mountWithIntl(
         <DiscoverGridContext.Provider value={contextMock}>
-          <SelectButton rowIndex={0} />
+          <SelectButton
+            rowIndex={0}
+            setCellProps={jest.fn()}
+            columnId="test"
+            isExpanded={false}
+            isDetails={false}
+            isExpandable={false}
+          />
         </DiscoverGridContext.Provider>
       );
 
@@ -95,7 +109,14 @@ describe('document selection', () => {
 
       const component = mountWithIntl(
         <DiscoverGridContext.Provider value={contextMock}>
-          <SelectButton rowIndex={0} />
+          <SelectButton
+            rowIndex={0}
+            setCellProps={jest.fn()}
+            columnId="test"
+            isExpanded={false}
+            isDetails={false}
+            isExpandable={false}
+          />
         </DiscoverGridContext.Provider>
       );
 
@@ -117,7 +138,14 @@ describe('document selection', () => {
 
       const component = mountWithIntl(
         <DiscoverGridContext.Provider value={contextMock}>
-          <SelectButton rowIndex={0} />
+          <SelectButton
+            rowIndex={0}
+            setCellProps={jest.fn()}
+            columnId="test"
+            isExpanded={false}
+            isDetails={false}
+            isExpandable={false}
+          />
         </DiscoverGridContext.Provider>
       );
 

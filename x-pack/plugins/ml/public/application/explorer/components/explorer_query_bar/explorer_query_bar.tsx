@@ -8,12 +8,8 @@
 import React, { FC, useState, useEffect } from 'react';
 import { EuiCode, EuiInputPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import {
-  Query,
-  esKuery,
-  esQuery,
-  QueryStringInput,
-} from '../../../../../../../../src/plugins/data/public';
+import { fromKueryExpression, luceneStringToDsl, toElasticsearchQuery } from '@kbn/es-query';
+import { Query, QueryStringInput } from '../../../../../../../../src/plugins/data/public';
 import { IIndexPattern } from '../../../../../../../../src/plugins/data/common/index_patterns';
 import { SEARCH_QUERY_LANGUAGE, ErrorMessage } from '../../../../../common/constants/search';
 import { explorerService } from '../../explorer_dashboard_service';
@@ -32,7 +28,7 @@ export function getKqlQueryValues({
 }): { clearSettings: boolean; settings: any } {
   let influencersFilterQuery: InfluencersFilterQuery = {};
   const filteredFields: string[] = [];
-  const ast = esKuery.fromKueryExpression(inputString);
+  const ast = fromKueryExpression(inputString);
   const isAndOperator = ast && ast.function === 'and';
   // if ast.type == 'function' then layout of ast.arguments:
   // [{ arguments: [ { type: 'literal', value: 'AAL' } ] },{ arguments: [ { type: 'literal', value: 'AAL' } ] }]
@@ -50,17 +46,14 @@ export function getKqlQueryValues({
     });
   }
   if (queryLanguage === SEARCH_QUERY_LANGUAGE.KUERY) {
-    influencersFilterQuery = esKuery.toElasticsearchQuery(
-      esKuery.fromKueryExpression(inputString),
-      indexPattern
-    );
+    influencersFilterQuery = toElasticsearchQuery(fromKueryExpression(inputString), indexPattern);
   } else if (queryLanguage === SEARCH_QUERY_LANGUAGE.LUCENE) {
-    influencersFilterQuery = esQuery.luceneStringToDsl(inputString);
+    influencersFilterQuery = luceneStringToDsl(inputString);
   }
 
-  const clearSettings =
-    influencersFilterQuery?.match_all && Object.keys(influencersFilterQuery.match_all).length === 0;
-
+  const clearSettings = Boolean(
+    influencersFilterQuery?.match_all && Object.keys(influencersFilterQuery.match_all).length === 0
+  );
   return {
     clearSettings,
     settings: {
@@ -95,7 +88,6 @@ function getInitSearchInputState({
 
 interface ExplorerQueryBarProps {
   filterActive: boolean;
-  filterIconTriggeredQuery: string;
   filterPlaceHolder: string;
   indexPattern: IIndexPattern;
   queryString?: string;
@@ -104,7 +96,6 @@ interface ExplorerQueryBarProps {
 
 export const ExplorerQueryBar: FC<ExplorerQueryBarProps> = ({
   filterActive,
-  filterIconTriggeredQuery,
   filterPlaceHolder,
   indexPattern,
   queryString,
@@ -116,14 +107,12 @@ export const ExplorerQueryBar: FC<ExplorerQueryBarProps> = ({
   );
   const [errorMessage, setErrorMessage] = useState<ErrorMessage | undefined>(undefined);
 
-  useEffect(() => {
-    if (filterIconTriggeredQuery !== undefined) {
-      setSearchInput({
-        language: searchInput.language,
-        query: filterIconTriggeredQuery,
-      });
-    }
-  }, [filterIconTriggeredQuery]);
+  useEffect(
+    function updateSearchInputFromFilter() {
+      setSearchInput(getInitSearchInputState({ filterActive, queryString }));
+    },
+    [filterActive, queryString]
+  );
 
   const searchChangeHandler = (query: Query) => {
     if (searchInput.language !== query.language) {
@@ -131,6 +120,7 @@ export const ExplorerQueryBar: FC<ExplorerQueryBarProps> = ({
     }
     setSearchInput(query);
   };
+
   const applyInfluencersFilterQuery = (query: Query) => {
     try {
       const { clearSettings, settings } = getKqlQueryValues({

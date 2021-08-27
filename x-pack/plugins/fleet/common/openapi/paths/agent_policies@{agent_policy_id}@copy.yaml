@@ -7,6 +7,8 @@ parameters:
 post:
   summary: Agent policy - copy one policy
   operationId: agent-policy-copy
+  parameters:
+    - $ref: ../components/headers/kbn_xsrf.yaml
   responses:
     '200':
       description: OK
@@ -32,4 +34,4 @@ post:
           required:
             - name
     description: ''
-  description: Copies one agent policy
+

@@ -10,6 +10,7 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
+import { TSVB_DEFAULT_COLOR } from '../../../../common/constants';
 import { collectionActions } from '../lib/collection_actions';
 import { AddDeleteButtons } from '../add_delete_buttons';
 import uuid from 'uuid';
@@ -23,10 +24,11 @@ import {
   EuiFlexGrid,
   EuiPanel,
 } from '@elastic/eui';
+import { ColorPicker } from '../color_picker';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 export const newPercentile = (opts) => {
-  return _.assign({ id: uuid.v1(), mode: 'line', shade: 0.2 }, opts);
+  return _.assign({ id: uuid.v1(), mode: 'line', shade: 0.2, color: TSVB_DEFAULT_COLOR }, opts);
 };
 
 export class Percentiles extends Component {
@@ -39,11 +41,20 @@ export class Percentiles extends Component {
     };
   }
 
+  handleColorChange(item) {
+    return (val) => {
+      const handleChange = collectionActions.handleChange.bind(null, this.props);
+      handleChange(_.assign({}, item, val));
+    };
+  }
+
   renderRow = (row, i, items) => {
-    const defaults = { value: '', percentile: '', shade: '' };
+    const defaults = { value: '', percentile: '', shade: '', color: TSVB_DEFAULT_COLOR };
     const model = { ...defaults, ...row };
-    const { panel } = this.props;
+    const { panel, seriesId } = this.props;
     const flexItemStyle = { minWidth: 100 };
+    const percentileSeries = panel.series.find((s) => s.id === seriesId) || panel.series[0];
+    const isGroupedBy = panel.series.length > 0 && percentileSeries.split_mode !== 'everything';
 
     const percentileFieldNumber = (
       <EuiFlexItem style={flexItemStyle}>
@@ -106,7 +117,19 @@ export class Percentiles extends Component {
         <EuiPanel>
           <EuiFlexGroup key={model.id} alignItems="center">
             <EuiFlexItem>
-              <EuiFlexGrid columns={2}>
+              <EuiFlexGrid columns={3}>
+                {/* If the series is grouped by, then these colors are not respected,
+                 no need to display the color picker */}
+                {!isGroupedBy && !['table', 'metric', 'markdown'].includes(panel.type) && (
+                  <EuiFlexItem grow={false} style={{ justifyContent: 'center' }}>
+                    <ColorPicker
+                      disableTrash={true}
+                      onChange={this.handleColorChange(model)}
+                      value={model.color}
+                      name="color"
+                    />
+                  </EuiFlexItem>
+                )}
                 {percentileFieldNumber}
                 <EuiFlexItem style={flexItemStyle}>
                   <EuiFormRow
@@ -206,4 +229,5 @@ Percentiles.propTypes = {
   model: PropTypes.object,
   panel: PropTypes.object,
   onChange: PropTypes.func,
+  seriesId: PropTypes.string,
 };

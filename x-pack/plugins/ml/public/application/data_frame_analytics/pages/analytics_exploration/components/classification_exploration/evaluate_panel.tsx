@@ -17,7 +17,6 @@ import {
   EuiDataGridPopoverContents,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIconTip,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -35,6 +34,7 @@ import { ResultsSearchQuery } from '../../../../common/analytics';
 
 import { ExpandableSection, HEADER_ITEMS_LOADING } from '../expandable_section';
 import { EvaluateStat } from './evaluate_stat';
+import { EvaluationQualityMetricsTable } from './evaluation_quality_metrics_table';
 
 import { getRocCurveChartVegaLiteSpec } from './get_roc_curve_chart_vega_lite_spec';
 
@@ -50,6 +50,8 @@ import {
 import { isTrainingFilter } from './is_training_filter';
 import { useRocCurve } from './use_roc_curve';
 import { useConfusionMatrix } from './use_confusion_matrix';
+import { MulticlassConfusionMatrixHelpPopover } from './confusion_matrix_help_popover';
+import { RocCurveHelpPopover } from './roc_curve_help_popover';
 
 export interface EvaluatePanelProps {
   jobConfig: DataFrameAnalyticsConfig;
@@ -81,6 +83,13 @@ const trainingDatasetHelpText = i18n.translate(
   'xpack.ml.dataframe.analytics.classificationExploration.confusionMatrixTrainingHelpText',
   {
     defaultMessage: 'Normalized confusion matrix for training dataset',
+  }
+);
+
+const evaluationQualityMetricsHelpText = i18n.translate(
+  'xpack.ml.dataframe.analytics.classificationExploration.evaluationQualityMetricsHelpText',
+  {
+    defaultMessage: 'Evaluation quality metrics',
   }
 );
 
@@ -119,6 +128,7 @@ export const EvaluatePanel: FC<EvaluatePanelProps> = ({ jobConfig, jobStatus, se
     error: errorConfusionMatrix,
     isLoading: isLoadingConfusionMatrix,
     overallAccuracy,
+    evaluationMetricsItems,
   } = useConfusionMatrix(jobConfig, searchQuery);
 
   useEffect(() => {
@@ -288,21 +298,12 @@ export const EvaluatePanel: FC<EvaluatePanelProps> = ({ jobConfig, jobStatus, se
                 {errorConfusionMatrix !== null && <ErrorCallout error={errorConfusionMatrix} />}
                 {errorConfusionMatrix === null && (
                   <>
-                    <EuiFlexGroup gutterSize="none">
+                    <EuiFlexGroup gutterSize="none" alignItems="center">
                       <EuiTitle size="xxs">
                         <span>{getHelpText(dataSubsetTitle)}</span>
                       </EuiTitle>
                       <EuiFlexItem grow={false}>
-                        <EuiIconTip
-                          anchorClassName="mlDataFrameAnalyticsClassificationInfoTooltip"
-                          content={i18n.translate(
-                            'xpack.ml.dataframe.analytics.classificationExploration.confusionMatrixTooltip',
-                            {
-                              defaultMessage:
-                                'The multi-class confusion matrix contains the number of occurrences where the analysis classified data points correctly with their actual class as well as the number of occurrences where it misclassified them with another class',
-                            }
-                          )}
-                        />
+                        <MulticlassConfusionMatrixHelpPopover />
                       </EuiFlexItem>
                     </EuiFlexGroup>
                     {/* BEGIN TABLE ELEMENTS */}
@@ -373,51 +374,66 @@ export const EvaluatePanel: FC<EvaluatePanelProps> = ({ jobConfig, jobStatus, se
             ) : null}
             {/* Accuracy and Recall */}
             <EuiSpacer size="xl" />
-            <EuiFlexGroup gutterSize="l">
+            <EuiTitle size="xxs">
+              <span>{evaluationQualityMetricsHelpText}</span>
+            </EuiTitle>
+            <EuiSpacer size="s" />
+            <EuiFlexGroup
+              direction="column"
+              justifyContent="center"
+              className="mlDataFrameAnalyticsClassification__evaluationMetrics"
+            >
               <EuiFlexItem grow={false}>
-                <EvaluateStat
-                  dataTestSubj={'mlDFAEvaluateSectionOverallAccuracyStat'}
-                  title={overallAccuracy}
-                  isLoading={isLoadingConfusionMatrix}
-                  description={i18n.translate(
-                    'xpack.ml.dataframe.analytics.classificationExploration.evaluateSectionOverallAccuracyStat',
-                    {
-                      defaultMessage: 'Overall accuracy',
-                    }
-                  )}
-                  tooltipContent={i18n.translate(
-                    'xpack.ml.dataframe.analytics.classificationExploration.evaluateSectionOverallAccuracyTooltip',
-                    {
-                      defaultMessage:
-                        'The ratio of the number of correct class predictions to the total number of predictions.',
-                    }
-                  )}
-                />
+                <EuiFlexGroup gutterSize="l">
+                  <EuiFlexItem grow={false}>
+                    <EvaluateStat
+                      dataTestSubj={'mlDFAEvaluateSectionOverallAccuracyStat'}
+                      title={overallAccuracy}
+                      isLoading={isLoadingConfusionMatrix}
+                      description={i18n.translate(
+                        'xpack.ml.dataframe.analytics.classificationExploration.evaluateSectionOverallAccuracyStat',
+                        {
+                          defaultMessage: 'Overall accuracy',
+                        }
+                      )}
+                      tooltipContent={i18n.translate(
+                        'xpack.ml.dataframe.analytics.classificationExploration.evaluateSectionOverallAccuracyTooltip',
+                        {
+                          defaultMessage:
+                            'The ratio of the number of correct class predictions to the total number of predictions.',
+                        }
+                      )}
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EvaluateStat
+                      dataTestSubj={'mlDFAEvaluateSectionAvgRecallStat'}
+                      title={avgRecall}
+                      isLoading={isLoadingConfusionMatrix}
+                      description={i18n.translate(
+                        'xpack.ml.dataframe.analytics.classificationExploration.evaluateSectionMeanRecallStat',
+                        {
+                          defaultMessage: 'Mean recall',
+                        }
+                      )}
+                      tooltipContent={i18n.translate(
+                        'xpack.ml.dataframe.analytics.classificationExploration.evaluateSectionAvgRecallTooltip',
+                        {
+                          defaultMessage:
+                            'Mean recall shows how many of the data points that are actual class members were identified correctly as class members.',
+                        }
+                      )}
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EvaluateStat
-                  dataTestSubj={'mlDFAEvaluateSectionAvgRecallStat'}
-                  title={avgRecall}
-                  isLoading={isLoadingConfusionMatrix}
-                  description={i18n.translate(
-                    'xpack.ml.dataframe.analytics.classificationExploration.evaluateSectionMeanRecallStat',
-                    {
-                      defaultMessage: 'Mean recall',
-                    }
-                  )}
-                  tooltipContent={i18n.translate(
-                    'xpack.ml.dataframe.analytics.classificationExploration.evaluateSectionAvgRecallTooltip',
-                    {
-                      defaultMessage:
-                        'Mean recall shows how many of the data points that are actual class members were identified correctly as class members.',
-                    }
-                  )}
-                />
+                <EvaluationQualityMetricsTable evaluationMetricsItems={evaluationMetricsItems} />
               </EuiFlexItem>
             </EuiFlexGroup>
             {/* AUC ROC Chart */}
             <EuiSpacer size="l" />
-            <EuiFlexGroup gutterSize="none">
+            <EuiFlexGroup gutterSize="none" alignItems="center">
               <EuiTitle size="xxs">
                 <span>
                   <FormattedMessage
@@ -427,16 +443,7 @@ export const EvaluatePanel: FC<EvaluatePanelProps> = ({ jobConfig, jobStatus, se
                 </span>
               </EuiTitle>
               <EuiFlexItem grow={false}>
-                <EuiIconTip
-                  anchorClassName="mlDataFrameAnalyticsClassificationInfoTooltip"
-                  content={i18n.translate(
-                    'xpack.ml.dataframe.analytics.classificationExploration.evaluateSectionRocInfoTooltip',
-                    {
-                      defaultMessage:
-                        'The receiver operating characteristic (ROC) curve is a plot that represents the performance of the classification process at different predicted probability thresholds.',
-                    }
-                  )}
-                />
+                <RocCurveHelpPopover />
               </EuiFlexItem>
             </EuiFlexGroup>
             {Array.isArray(errorRocCurve) && (

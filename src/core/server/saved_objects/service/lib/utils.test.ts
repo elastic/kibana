@@ -6,13 +6,10 @@
  * Side Public License, v 1.
  */
 
-import uuid from 'uuid';
+import { mockUuidv1, mockUuidv5 } from './utils.test.mock';
+
 import { SavedObjectsFindOptions } from '../../types';
 import { SavedObjectsUtils } from './utils';
-
-jest.mock('uuid', () => ({
-  v1: jest.fn().mockReturnValue('mock-uuid'),
-}));
 
 describe('SavedObjectsUtils', () => {
   const {
@@ -21,6 +18,7 @@ describe('SavedObjectsUtils', () => {
     createEmptyFindResponse,
     generateId,
     isRandomId,
+    getConvertedObjectId,
   } = SavedObjectsUtils;
 
   describe('#namespaceIdToString', () => {
@@ -80,8 +78,8 @@ describe('SavedObjectsUtils', () => {
 
   describe('#generateId', () => {
     it('returns a valid uuid', () => {
-      expect(generateId()).toBe('mock-uuid');
-      expect(uuid.v1).toHaveBeenCalled();
+      expect(generateId()).toBe('uuidv1'); // default return value for mockUuidv1
+      expect(mockUuidv1).toHaveBeenCalled();
     });
   });
 
@@ -91,6 +89,22 @@ describe('SavedObjectsUtils', () => {
       expect(isRandomId('invalid')).toBe(false);
       expect(isRandomId('')).toBe(false);
       expect(isRandomId(undefined)).toBe(false);
+    });
+  });
+
+  describe('#getConvertedObjectId', () => {
+    it('does not change the object ID if namespace is undefined or "default"', () => {
+      for (const namespace of [undefined, 'default']) {
+        const result = getConvertedObjectId(namespace, 'type', 'oldId');
+        expect(result).toBe('oldId');
+        expect(mockUuidv5).not.toHaveBeenCalled();
+      }
+    });
+
+    it('changes the object ID if namespace is defined and not "default"', () => {
+      const result = getConvertedObjectId('namespace', 'type', 'oldId');
+      expect(result).toBe('uuidv5'); // default return value for mockUuidv5
+      expect(mockUuidv5).toHaveBeenCalledWith('namespace:type:oldId', 'DNSUUID');
     });
   });
 });

@@ -36,11 +36,9 @@ describe('Columns', () => {
         timelineId="test"
         columnValues={'abc def'}
         showCheckboxes={false}
-        onPinEvent={jest.fn()}
         selectedEventIds={{}}
         loadingEventIds={[]}
         onEventDetailsPanelOpened={jest.fn()}
-        onUnPinEvent={jest.fn()}
         onRowSelected={jest.fn()}
         showNotes={false}
         isEventPinned={false}
@@ -49,6 +47,8 @@ describe('Columns', () => {
         eventIdToNoteIds={{}}
         leadingControlColumns={[defaultControlColumn]}
         trailingControlColumns={[]}
+        setEventsLoading={jest.fn()}
+        setEventsDeleted={jest.fn()}
       />
     );
 

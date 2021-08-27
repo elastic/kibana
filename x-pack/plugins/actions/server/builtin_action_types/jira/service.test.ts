@@ -155,12 +155,12 @@ describe('Jira service', () => {
       ).toThrow();
     });
 
-    test('throws without username', () => {
+    test('throws without email/username', () => {
       expect(() =>
         createExternalService(
           {
-            config: { apiUrl: 'test.com' },
-            secrets: { apiToken: '', email: 'elastic@elastic.com' },
+            config: { apiUrl: 'test.com', projectKey: 'CK' },
+            secrets: { apiToken: 'token' },
           },
           logger,
           configurationUtilities
@@ -168,12 +168,12 @@ describe('Jira service', () => {
       ).toThrow();
     });
 
-    test('throws without password', () => {
+    test('throws without apiToken/password', () => {
       expect(() =>
         createExternalService(
           {
-            config: { apiUrl: 'test.com' },
-            secrets: { apiToken: '', email: undefined },
+            config: { apiUrl: 'test.com', projectKey: 'CK' },
+            secrets: { email: 'elastic@elastic.com' },
           },
           logger,
           configurationUtilities

@@ -19,7 +19,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('ValidateCardinality', function () {
     before(async () => {
-      await esArchiver.loadIfNeeded('ml/ecommerce');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ecommerce');
       await ml.testResources.setKibanaTimeZoneToUTC();
     });
 
@@ -152,7 +152,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       expect(body.error).to.eql('Bad Request');
       expect(body.message).to.eql(
-        '[request body.analysis_config.detectors]: expected value of type [array] but got [undefined]'
+        '[request body.analysis_config.bucket_span]: expected value of type [string] but got [undefined]'
       );
     });
 

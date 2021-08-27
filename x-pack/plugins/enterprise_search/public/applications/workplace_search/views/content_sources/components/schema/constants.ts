@@ -77,13 +77,6 @@ export const SCHEMA_FILTER_PLACEHOLDER = i18n.translate(
   }
 );
 
-export const SCHEMA_UPDATING = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.contentSource.schema.updating',
-  {
-    defaultMessage: 'Updating schema...',
-  }
-);
-
 export const SCHEMA_SAVE_BUTTON = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.contentSource.schema.save.button',
   {

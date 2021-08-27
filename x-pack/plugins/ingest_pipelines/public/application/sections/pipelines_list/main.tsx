@@ -12,16 +12,12 @@ import { Location } from 'history';
 import { parse } from 'query-string';
 
 import {
-  EuiPageBody,
-  EuiPageContent,
-  EuiTitle,
-  EuiFlexGroup,
-  EuiFlexItem,
+  EuiPageHeader,
   EuiButtonEmpty,
-  EuiCallOut,
-  EuiLink,
+  EuiPageContent,
+  EuiEmptyPrompt,
+  EuiButton,
   EuiSpacer,
-  EuiText,
 } from '@elastic/eui';
 
 import { Pipeline } from '../../../../common/types';
@@ -81,31 +77,48 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
     history.push(getListPath());
   };
 
-  if (data && data.length === 0) {
-    return <EmptyList />;
+  if (error) {
+    return (
+      <EuiPageContent verticalPosition="center" horizontalPosition="center" color="danger">
+        <EuiEmptyPrompt
+          iconType="alert"
+          title={
+            <h2 data-test-subj="pipelineLoadError">
+              <FormattedMessage
+                id="xpack.ingestPipelines.list.loadErrorTitle"
+                defaultMessage="Unable to load pipelines"
+              />
+            </h2>
+          }
+          body={<p>{error.message}</p>}
+          actions={
+            <EuiButton onClick={resendRequest} iconType="refresh" color="danger">
+              <FormattedMessage
+                id="xpack.ingestPipelines.list.loadPipelineReloadButton"
+                defaultMessage="Try again"
+              />
+            </EuiButton>
+          }
+        />
+      </EuiPageContent>
+    );
   }
 
-  let content: React.ReactNode;
-
   if (isLoading) {
-    content = (
-      <SectionLoading data-test-subj="sectionLoading">
-        <FormattedMessage
-          id="xpack.ingestPipelines.list.loadingMessage"
-          defaultMessage="Loading pipelines..."
-        />
-      </SectionLoading>
+    return (
+      <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
+        <SectionLoading data-test-subj="sectionLoading">
+          <FormattedMessage
+            id="xpack.ingestPipelines.list.loadingMessage"
+            defaultMessage="Loading pipelines..."
+          />
+        </SectionLoading>
+      </EuiPageContent>
     );
-  } else if (data?.length) {
-    content = (
-      <PipelineTable
-        onReloadClick={resendRequest}
-        onEditPipelineClick={goToEditPipeline}
-        onDeletePipelineClick={setPipelinesToDelete}
-        onClonePipelineClick={goToClonePipeline}
-        pipelines={data}
-      />
-    );
+  }
+
+  if (data && data.length === 0) {
+    return <EmptyList />;
   }
 
   const renderFlyout = (): React.ReactNode => {
@@ -134,71 +147,47 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
 
   return (
     <>
-      <EuiPageBody>
-        <EuiPageContent>
-          <EuiTitle size="l">
-            <EuiFlexGroup alignItems="center">
-              <EuiFlexItem>
-                <h1 data-test-subj="appTitle">
-                  <FormattedMessage
-                    id="xpack.ingestPipelines.list.listTitle"
-                    defaultMessage="Ingest Node Pipelines"
-                  />
-                </h1>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  href={services.documentation.getIngestNodeUrl()}
-                  target="_blank"
-                  iconType="help"
-                  data-test-subj="documentationLink"
-                >
-                  <FormattedMessage
-                    id="xpack.ingestPipelines.list.pipelinesDocsLinkText"
-                    defaultMessage="Ingest Node Pipelines docs"
-                  />
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiTitle>
-          <EuiSpacer size="s" />
-          <EuiTitle size="s">
-            <EuiText color="subdued">
-              <FormattedMessage
-                id="xpack.ingestPipelines.list.pipelinesDescription"
-                defaultMessage="Define a pipeline for preprocessing documents before indexing."
-              />
-            </EuiText>
-          </EuiTitle>
-          <EuiSpacer size="m" />
-          {/* Error call out for pipeline table */}
-          {error ? (
-            <EuiCallOut
-              iconType="faceSad"
-              color="danger"
-              data-test-subj="pipelineLoadError"
-              title={
-                <FormattedMessage
-                  id="xpack.ingestPipelines.list.loadErrorTitle"
-                  defaultMessage="Unable to load pipelines. {reloadLink}"
-                  values={{
-                    reloadLink: (
-                      <EuiLink onClick={resendRequest}>
-                        <FormattedMessage
-                          id="xpack.ingestPipelines.list.loadErrorReloadLinkLabel"
-                          defaultMessage="Try again."
-                        />
-                      </EuiLink>
-                    ),
-                  }}
-                />
-              }
+      <EuiPageHeader
+        bottomBorder
+        pageTitle={
+          <span data-test-subj="appTitle">
+            <FormattedMessage
+              id="xpack.ingestPipelines.list.listTitle"
+              defaultMessage="Ingest Node Pipelines"
             />
-          ) : (
-            content
-          )}
-        </EuiPageContent>
-      </EuiPageBody>
+          </span>
+        }
+        description={
+          <FormattedMessage
+            id="xpack.ingestPipelines.list.pipelinesDescription"
+            defaultMessage="Define a pipeline for preprocessing documents before indexing."
+          />
+        }
+        rightSideItems={[
+          <EuiButtonEmpty
+            href={services.documentation.getIngestNodeUrl()}
+            target="_blank"
+            iconType="help"
+            data-test-subj="documentationLink"
+          >
+            <FormattedMessage
+              id="xpack.ingestPipelines.list.pipelinesDocsLinkText"
+              defaultMessage="Ingest Node Pipelines docs"
+            />
+          </EuiButtonEmpty>,
+        ]}
+      />
+
+      <EuiSpacer size="l" />
+
+      <PipelineTable
+        onReloadClick={resendRequest}
+        onEditPipelineClick={goToEditPipeline}
+        onDeletePipelineClick={setPipelinesToDelete}
+        onClonePipelineClick={goToClonePipeline}
+        pipelines={data as Pipeline[]}
+      />
+
       {renderFlyout()}
       {pipelinesToDelete?.length > 0 ? (
         <PipelineDeleteModal

@@ -22,7 +22,7 @@ export const listAlertTypesRoute = (router: AlertingRouter, licenseState: ILicen
         return res.badRequest({ body: 'RouteHandlerContext is not registered for alerting' });
       }
       return res.ok({
-        body: Array.from(await context.alerting.getAlertsClient().listAlertTypes()),
+        body: Array.from(await context.alerting.getRulesClient().listAlertTypes()),
       });
     })
   );

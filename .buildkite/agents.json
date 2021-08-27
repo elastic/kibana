@@ -1,0 +1,79 @@
+{
+  "gcp": {
+    "project": "elastic-kibana-ci",
+    "zones": ["us-central1-a", "us-central1-b", "us-central1-c", "us-central1-f"],
+    "serviceAccount": "elastic-buildkite-agent@elastic-kibana-ci.iam.gserviceaccount.com",
+    "imageFamily": "kb-ubuntu",
+    "subnetwork": "buildkite",
+    "disableExternalIp": true,
+    "diskType": "pd-ssd",
+    "diskSizeGb": 75,
+    "overprovision": 0,
+    "minimumAgents": 0,
+    "maximumAgents": 50,
+    "gracefulStopAfterMins": 360,
+    "hardStopAfterMins": 540,
+    "idleTimeoutMins": 10,
+    "exitAfterOneJob": false,
+
+    "agents": [
+      {
+        "queue": "default",
+        "name": "kb-default",
+        "minimumAgents": 1,
+        "maximumAgents": 100,
+        "idleTimeoutMins": 60,
+        "machineType": "e2-small"
+      },
+      {
+        "queue": "c2-8",
+        "name": "kb-c2-8",
+        "machineType": "c2-standard-8",
+        "localSsds": 1
+      },
+      {
+        "queue": "c2-4",
+        "name": "kb-c2-4",
+        "machineType": "c2-standard-4",
+        "localSsds": 1
+      },
+      {
+        "queue": "jest",
+        "name": "kb-jest",
+        "machineType": "n2-standard-2",
+        "diskSizeGb": 128
+      },
+      {
+        "queue": "ci-group",
+        "name": "kb-cigroup",
+        "machineType": "n2-standard-8",
+        "diskSizeGb": 256
+      },
+      {
+        "queue": "ci-group-4",
+        "name": "kb-cigroup-4",
+        "machineType": "n2-standard-4",
+        "diskSizeGb": 128
+      },
+      {
+        "queue": "ci-group-4d",
+        "name": "kb-cigroup-4d",
+        "machineType": "n2d-standard-4",
+        "diskSizeGb": 128
+      },
+      {
+        "queue": "ci-group-6",
+        "name": "kb-cigroup-6",
+        "machineType": "n2-custom-6-16384",
+        "diskSizeGb": 128
+      },
+      {
+        "queue": "packer",
+        "name": "kb-packer",
+        "serviceAccount": "buildkite-packer-agent@elastic-kibana-ci.iam.gserviceaccount.com",
+        "maximumAgents": 10,
+        "machineType": "e2-small"
+      }
+    ]
+  }
+}

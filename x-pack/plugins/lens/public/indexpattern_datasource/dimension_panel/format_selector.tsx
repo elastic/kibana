@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiComboBox, EuiSpacer, EuiRange } from '@elastic/eui';
 import { IndexPatternColumn } from '../indexpattern';
@@ -28,6 +28,13 @@ const supportedFormats: Record<string, { title: string }> = {
   },
 };
 
+const defaultOption = {
+  value: '',
+  label: i18n.translate('xpack.lens.indexPattern.defaultFormatLabel', {
+    defaultMessage: 'Default',
+  }),
+};
+
 interface FormatSelectorProps {
   selectedColumn: IndexPatternColumn;
   onChange: (newFormat?: { id: string; params?: Record<string, unknown> }) => void;
@@ -36,6 +43,8 @@ interface FormatSelectorProps {
 interface State {
   decimalPlaces: number;
 }
+
+const singleSelectionOption = { asPlainText: true };
 
 export function FormatSelector(props: FormatSelectorProps) {
   const { selectedColumn, onChange } = props;
@@ -51,13 +60,6 @@ export function FormatSelector(props: FormatSelectorProps) {
 
   const selectedFormat = currentFormat?.id ? supportedFormats[currentFormat.id] : undefined;
 
-  const defaultOption = {
-    value: '',
-    label: i18n.translate('xpack.lens.indexPattern.defaultFormatLabel', {
-      defaultMessage: 'Default',
-    }),
-  };
-
   const label = i18n.translate('xpack.lens.indexPattern.columnFormatLabel', {
     defaultMessage: 'Value format',
   });
@@ -65,6 +67,48 @@ export function FormatSelector(props: FormatSelectorProps) {
   const decimalsLabel = i18n.translate('xpack.lens.indexPattern.decimalPlacesLabel', {
     defaultMessage: 'Decimals',
   });
+
+  const stableOptions = useMemo(
+    () => [
+      defaultOption,
+      ...Object.entries(supportedFormats).map(([id, format]) => ({
+        value: id,
+        label: format.title ?? id,
+      })),
+    ],
+    []
+  );
+
+  const onChangeWrapped = useCallback(
+    (choices) => {
+      if (choices.length === 0) {
+        return;
+      }
+
+      if (!choices[0].value) {
+        onChange();
+        return;
+      }
+      onChange({
+        id: choices[0].value,
+        params: { decimals: state.decimalPlaces },
+      });
+    },
+    [onChange, state.decimalPlaces]
+  );
+
+  const currentOption = useMemo(
+    () =>
+      currentFormat
+        ? [
+            {
+              value: currentFormat.id,
+              label: selectedFormat?.title ?? currentFormat.id,
+            },
+          ]
+        : [defaultOption],
+    [currentFormat, selectedFormat?.title]
+  );
 
   return (
     <>
@@ -76,38 +120,10 @@ export function FormatSelector(props: FormatSelectorProps) {
             isClearable={false}
             data-test-subj="indexPattern-dimension-format"
             aria-label={label}
-            singleSelection={{ asPlainText: true }}
-            options={[
-              defaultOption,
-              ...Object.entries(supportedFormats).map(([id, format]) => ({
-                value: id,
-                label: format.title ?? id,
-              })),
-            ]}
-            selectedOptions={
-              currentFormat
-                ? [
-                    {
-                      value: currentFormat.id,
-                      label: selectedFormat?.title ?? currentFormat.id,
-                    },
-                  ]
-                : [defaultOption]
-            }
-            onChange={(choices) => {
-              if (choices.length === 0) {
-                return;
-              }
-
-              if (!choices[0].value) {
-                onChange();
-                return;
-              }
-              onChange({
-                id: choices[0].value,
-                params: { decimals: state.decimalPlaces },
-              });
-            }}
+            singleSelection={singleSelectionOption}
+            options={stableOptions}
+            selectedOptions={currentOption}
+            onChange={onChangeWrapped}
           />
           {currentFormat ? (
             <>

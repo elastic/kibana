@@ -4,7 +4,7 @@ exports[`ImpactBar component should render with default values 1`] = `
 <EuiProgress
   color="primary"
   max={100}
-  size="l"
+  size="m"
   value={25}
 />
 `;

@@ -7,6 +7,13 @@
 
 import { ELASTIC_NAME } from '../../../common/constants';
 
+/**
+ * Given a set of input indices and a prefix this will return the elastic name
+ * concatenated with the prefix.
+ * @param transformIndices The indices to add the prefix to
+ * @param prefix The prefix to add along with the elastic name
+ * @returns The indices with the prefix string
+ */
 export const createIndicesFromPrefix = ({
   transformIndices,
   prefix,

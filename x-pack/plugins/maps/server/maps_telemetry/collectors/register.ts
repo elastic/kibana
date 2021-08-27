@@ -7,12 +7,8 @@
 
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { getMapsTelemetry, MapsUsage } from '../maps_telemetry';
-import { MapsConfigType } from '../../../config';
 
-export function registerMapsUsageCollector(
-  usageCollection: UsageCollectionSetup,
-  config: MapsConfigType
-): void {
+export function registerMapsUsageCollector(usageCollection: UsageCollectionSetup): void {
   if (!usageCollection) {
     return;
   }
@@ -20,11 +16,8 @@ export function registerMapsUsageCollector(
   const mapsUsageCollector = usageCollection.makeUsageCollector<MapsUsage>({
     type: 'maps',
     isReady: () => true,
-    fetch: async () => await getMapsTelemetry(config),
+    fetch: async () => await getMapsTelemetry(),
     schema: {
-      settings: {
-        showMapVisualizationTypes: { type: 'boolean' },
-      },
       indexPatternsWithGeoFieldCount: { type: 'long' },
       indexPatternsWithGeoPointFieldCount: { type: 'long' },
       indexPatternsWithGeoShapeFieldCount: { type: 'long' },
@@ -271,6 +264,88 @@ export function registerMapsUsageCollector(
             type: 'long',
             _meta: {
               description: 'total number of es doc layers with mvt scaling option in cluster',
+            },
+          },
+        },
+      },
+      resolutions: {
+        coarse: {
+          min: {
+            type: 'long',
+            _meta: { description: 'min number of grid-agg layers with coarse resolution' },
+          },
+          max: {
+            type: 'long',
+            _meta: { description: 'max number of grid-agg layers with coarse resolution' },
+          },
+          avg: {
+            type: 'float',
+            _meta: { description: 'avg number of grid-agg layers with coarse resolution' },
+          },
+          total: {
+            type: 'long',
+            _meta: {
+              description: 'total number of grid-agg layers with coarse resolution',
+            },
+          },
+        },
+        fine: {
+          min: {
+            type: 'long',
+            _meta: { description: 'min number of grid-agg layers with fine resolution' },
+          },
+          max: {
+            type: 'long',
+            _meta: { description: 'max number of grid-agg layers with fine resolution' },
+          },
+          avg: {
+            type: 'float',
+            _meta: { description: 'avg number of grid-agg layers with fine resolution' },
+          },
+          total: {
+            type: 'long',
+            _meta: {
+              description: 'total number of grid-agg layers with fine resolution',
+            },
+          },
+        },
+        most_fine: {
+          min: {
+            type: 'long',
+            _meta: { description: 'min number of grid-agg layers with most_fine resolution' },
+          },
+          max: {
+            type: 'long',
+            _meta: { description: 'max number of grid-agg layers with most_fine resolution' },
+          },
+          avg: {
+            type: 'float',
+            _meta: { description: 'avg number of grid-agg layers with most_fine resolution' },
+          },
+          total: {
+            type: 'long',
+            _meta: {
+              description: 'total number of grid-agg layers with most_fine resolution',
+            },
+          },
+        },
+        super_fine: {
+          min: {
+            type: 'long',
+            _meta: { description: 'min number of grid-agg layers with super_fine resolution' },
+          },
+          max: {
+            type: 'long',
+            _meta: { description: 'max number of grid-agg layers with super_fine resolution' },
+          },
+          avg: {
+            type: 'float',
+            _meta: { description: 'avg number of grid-agg layers with super_fine resolution' },
+          },
+          total: {
+            type: 'long',
+            _meta: {
+              description: 'total number of grid-agg layers with super_fine resolution',
             },
           },
         },

@@ -21,12 +21,14 @@ import { ElasticSearchHit } from '../../doc_views/doc_views_types';
 import { DiscoverGridContext } from './discover_grid_context';
 import { JsonCodeEditor } from '../json_code_editor/json_code_editor';
 import { defaultMonacoEditorWidth } from './constants';
+import { EsHitRecord } from '../../angular/context/api/context';
 
 export const getRenderCellValueFn = (
   indexPattern: IndexPattern,
   rows: ElasticSearchHit[] | undefined,
   rowsFlattened: Array<Record<string, unknown>>,
   useNewFieldsApi: boolean,
+  fieldsToShow: string[],
   maxDocFieldsDisplayed: number
 ) => ({ rowIndex, columnId, isDetails, setCellProps }: EuiDataGridCellValueElementProps) => {
   const row = rows ? rows[rowIndex] : undefined;
@@ -38,7 +40,11 @@ export const getRenderCellValueFn = (
   const ctx = useContext(DiscoverGridContext);
 
   useEffect(() => {
-    if (ctx.expanded && row && ctx.expanded._id === row._id) {
+    if ((row as EsHitRecord).isAnchor) {
+      setCellProps({
+        className: 'dscDocsGrid__cell--highlight',
+      });
+    } else if (ctx.expanded && row && ctx.expanded._id === row._id) {
       setCellProps({
         style: {
           backgroundColor: ctx.isDarkMode
@@ -94,7 +100,13 @@ export const getRenderCellValueFn = (
         )
         .join(', ');
       const pairs = highlights[key] ? highlightPairs : sourcePairs;
-      pairs.push([displayKey ? displayKey : key, formatted]);
+      if (displayKey) {
+        if (fieldsToShow.includes(displayKey)) {
+          pairs.push([displayKey, formatted]);
+        }
+      } else {
+        pairs.push([key, formatted]);
+      }
     });
 
     return (
@@ -115,7 +127,7 @@ export const getRenderCellValueFn = (
   if (typeof rowFlattened[columnId] === 'object' && isDetails) {
     return (
       <JsonCodeEditor
-        json={rowFlattened[columnId] as Record<string, any>}
+        json={rowFlattened[columnId] as Record<string, unknown>}
         width={defaultMonacoEditorWidth}
       />
     );
@@ -123,7 +135,8 @@ export const getRenderCellValueFn = (
 
   if (field && field.type === '_source') {
     if (isDetails) {
-      return <JsonCodeEditor json={row} width={defaultMonacoEditorWidth} />;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      return <JsonCodeEditor json={row as any} width={defaultMonacoEditorWidth} />;
     }
     const formatted = indexPattern.formatHit(row);
 
@@ -131,13 +144,18 @@ export const getRenderCellValueFn = (
     const highlights: Record<string, unknown> = (row.highlight as Record<string, unknown>) ?? {};
     const highlightPairs: Array<[string, string]> = [];
     const sourcePairs: Array<[string, string]> = [];
-
     Object.entries(formatted).forEach(([key, val]) => {
       const pairs = highlights[key] ? highlightPairs : sourcePairs;
       const displayKey = indexPattern.fields.getByName
         ? indexPattern.fields.getByName(key)?.displayName
         : undefined;
-      pairs.push([displayKey ? displayKey : key, val as string]);
+      if (displayKey) {
+        if (fieldsToShow.includes(displayKey)) {
+          pairs.push([displayKey, val as string]);
+        }
+      } else {
+        pairs.push([key, val as string]);
+      }
     });
 
     return (

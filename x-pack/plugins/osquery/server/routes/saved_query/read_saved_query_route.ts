@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-
+import { PLUGIN_ID } from '../../../common';
 import { IRouter } from '../../../../../../src/core/server';
 import { savedQuerySavedObjectType } from '../../../common/types';
 
@@ -17,22 +17,19 @@ export const readSavedQueryRoute = (router: IRouter) => {
       validate: {
         params: schema.object({}, { unknowns: 'allow' }),
       },
+      options: { tags: [`access:${PLUGIN_ID}-readSavedQueries`] },
     },
     async (context, request, response) => {
       const savedObjectsClient = context.core.savedObjects.client;
 
-      const { attributes, ...savedQuery } = await savedObjectsClient.get(
+      const savedQuery = await savedObjectsClient.get(
         savedQuerySavedObjectType,
         // @ts-expect-error update types
         request.params.id
       );
 
       return response.ok({
-        body: {
-          ...savedQuery,
-          // @ts-expect-error update types
-          ...attributes,
-        },
+        body: savedQuery,
       });
     }
   );

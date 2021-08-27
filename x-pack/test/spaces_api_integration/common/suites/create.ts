@@ -68,8 +68,16 @@ export function createTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
     { user = {}, spaceId, tests }: CreateTestDefinition
   ) => {
     describeFn(description, () => {
-      beforeEach(() => esArchiver.load('saved_objects/spaces'));
-      afterEach(() => esArchiver.unload('saved_objects/spaces'));
+      beforeEach(() =>
+        esArchiver.load(
+          'x-pack/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
+        )
+      );
+      afterEach(() =>
+        esArchiver.unload(
+          'x-pack/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
+        )
+      );
 
       getTestScenariosForSpace(spaceId).forEach(({ urlPrefix, scenario }) => {
         it(`should return ${tests.newSpace.statusCode} ${scenario}`, async () => {

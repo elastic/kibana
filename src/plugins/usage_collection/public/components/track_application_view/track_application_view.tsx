@@ -17,7 +17,7 @@ export const ApplicationUsageContext = createContext<IApplicationUsageTracker | 
 
 /**
  * React component to track the number of clicks and minutes on screen of the children components.
- * @param props {@Link TrackApplicationViewProps}
+ * @param props {@link TrackApplicationViewProps}
  * @constructor
  */
 export const TrackApplicationView: FC<TrackApplicationViewProps> = (props) => {

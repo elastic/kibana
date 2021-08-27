@@ -11,7 +11,7 @@ Import hooks are executed during the savedObjects import process and allow to in
 <b>Signature:</b>
 
 ```typescript
-onImport?: SavedObjectsImportHook;
+onImport?: SavedObjectsImportHook<Attributes>;
 ```
 
 ## Remarks

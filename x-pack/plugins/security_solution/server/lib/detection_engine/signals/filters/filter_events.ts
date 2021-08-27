@@ -16,7 +16,7 @@ import { FilterEventsOptions } from './types';
 export const filterEvents = <T>({
   events,
   fieldAndSetTuples,
-}: FilterEventsOptions<T>): Array<estypes.Hit<T>> => {
+}: FilterEventsOptions<T>): Array<estypes.SearchHit<T>> => {
   return events.filter((item) => {
     return fieldAndSetTuples
       .map((tuple) => {

@@ -108,6 +108,7 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
         setGlobalState('time', {
           from: start,
           to: end,
+          ...(start === 'now' || end === 'now' ? { ts: Date.now() } : {}),
         });
       }
     }
@@ -127,7 +128,7 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
         to: globalState.time.to,
       });
     }
-  }, [globalState?.time?.from, globalState?.time?.to]);
+  }, [globalState?.time?.from, globalState?.time?.to, globalState?.time?.ts]);
 
   const getJobsWithStoppedPartitions = useCallback(async (selectedJobIds: string[]) => {
     try {
@@ -177,7 +178,7 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
       explorerService.setFilterData(filterData);
     }
 
-    const { viewByFieldName, viewByFromPage, viewByPerPage } =
+    const { viewByFieldName, viewByFromPage, viewByPerPage, severity } =
       explorerUrlState?.mlExplorerSwimlane ?? {};
 
     if (viewByFieldName !== undefined) {
@@ -190,6 +191,10 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
 
     if (viewByFromPage !== undefined) {
       explorerService.setViewByFromPage(viewByFromPage);
+    }
+
+    if (severity !== undefined) {
+      explorerService.setSwimLaneSeverity(severity);
     }
   }, []);
 
@@ -238,6 +243,7 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
           swimlaneContainerWidth: explorerState.swimlaneContainerWidth,
           viewByPerPage: explorerState.viewByPerPage,
           viewByFromPage: explorerState.viewByFromPage,
+          swimLaneSeverity: explorerState.swimLaneSeverity,
         }
       : undefined;
 

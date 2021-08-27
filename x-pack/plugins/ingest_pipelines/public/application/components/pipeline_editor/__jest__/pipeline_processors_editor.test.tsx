@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { act } from 'react-dom/test-utils';
 import { setup, SetupResult } from './pipeline_processors_editor.helpers';
 import { Pipeline } from '../../../../../common/types';
 
@@ -117,6 +118,37 @@ describe('Pipeline Editor', () => {
         // This unknown_field is not supported in the form
         unknown_field_foo: 'unknown_value',
         value: 'test44',
+      });
+    });
+
+    it('allows to edit an existing processor and change its type', async () => {
+      const { actions, exists, component, find } = testBed;
+
+      // Open one of the existing processors
+      actions.openProcessorEditor('processors>2');
+      expect(exists('editProcessorForm')).toBeTruthy();
+
+      // Change its type to `append` and set the missing required fields
+      await actions.setProcessorType('append');
+      await act(async () => {
+        find('appendValueField.input').simulate('change', [{ label: 'some_value' }]);
+      });
+      component.update();
+
+      await actions.submitProcessorForm();
+
+      const [onUpdateResult] = onUpdate.mock.calls[onUpdate.mock.calls.length - 1];
+      const {
+        processors: { 2: editedProcessor },
+      } = onUpdateResult.getData();
+
+      expect(editedProcessor.append).toEqual({
+        if: undefined,
+        tag: undefined,
+        description: undefined,
+        ignore_failure: undefined,
+        field: 'test',
+        value: ['some_value'],
       });
     });
 

@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { EventFiltersListPageState } from '../state';
 import { MANAGEMENT_DEFAULT_PAGE, MANAGEMENT_DEFAULT_PAGE_SIZE } from '../../../common/constants';
+import { EventFiltersListPageState } from '../types';
+import { createUninitialisedResourceState } from '../../../state';
 
 export const initialEventFiltersPageState = (): EventFiltersListPageState => ({
   entries: [],
@@ -15,11 +16,22 @@ export const initialEventFiltersPageState = (): EventFiltersListPageState => ({
     hasNameError: false,
     hasItemsError: false,
     hasOSError: false,
-    submissionResourceState: { type: 'UninitialisedResourceState' },
+    newComment: '',
+    submissionResourceState: createUninitialisedResourceState(),
   },
   location: {
     page_index: MANAGEMENT_DEFAULT_PAGE,
     page_size: MANAGEMENT_DEFAULT_PAGE_SIZE,
     filter: '',
+  },
+  listPage: {
+    active: false,
+    forceRefresh: false,
+    data: createUninitialisedResourceState(),
+    dataExist: createUninitialisedResourceState(),
+    deletion: {
+      item: undefined,
+      status: createUninitialisedResourceState(),
+    },
   },
 });

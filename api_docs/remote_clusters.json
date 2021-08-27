@@ -8,28 +8,26 @@
     "misc": [],
     "objects": [],
     "setup": {
+      "parentPluginId": "remoteClusters",
       "id": "def-public.RemoteClustersPluginSetup",
       "type": "Interface",
+      "tags": [],
       "label": "RemoteClustersPluginSetup",
       "description": [],
-      "tags": [],
+      "path": "x-pack/plugins/remote_clusters/public/plugin.ts",
+      "deprecated": false,
       "children": [
         {
-          "tags": [],
+          "parentPluginId": "remoteClusters",
           "id": "def-public.RemoteClustersPluginSetup.isUiEnabled",
           "type": "boolean",
+          "tags": [],
           "label": "isUiEnabled",
           "description": [],
-          "source": {
-            "path": "x-pack/plugins/remote_clusters/public/plugin.ts",
-            "lineNumber": 21
-          }
+          "path": "x-pack/plugins/remote_clusters/public/plugin.ts",
+          "deprecated": false
         }
       ],
-      "source": {
-        "path": "x-pack/plugins/remote_clusters/public/plugin.ts",
-        "lineNumber": 20
-      },
       "lifecycle": "setup",
       "initialIsOpen": true
     }
@@ -42,28 +40,26 @@
     "misc": [],
     "objects": [],
     "setup": {
+      "parentPluginId": "remoteClusters",
       "id": "def-server.RemoteClustersPluginSetup",
       "type": "Interface",
+      "tags": [],
       "label": "RemoteClustersPluginSetup",
       "description": [],
-      "tags": [],
+      "path": "x-pack/plugins/remote_clusters/server/plugin.ts",
+      "deprecated": false,
       "children": [
         {
-          "tags": [],
+          "parentPluginId": "remoteClusters",
           "id": "def-server.RemoteClustersPluginSetup.isUiEnabled",
           "type": "boolean",
+          "tags": [],
           "label": "isUiEnabled",
           "description": [],
-          "source": {
-            "path": "x-pack/plugins/remote_clusters/server/plugin.ts",
-            "lineNumber": 23
-          }
+          "path": "x-pack/plugins/remote_clusters/server/plugin.ts",
+          "deprecated": false
         }
       ],
-      "source": {
-        "path": "x-pack/plugins/remote_clusters/server/plugin.ts",
-        "lineNumber": 22
-      },
       "lifecycle": "setup",
       "initialIsOpen": true
     }

@@ -12,12 +12,13 @@ import styled from 'styled-components';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 
 import { ActionParamsProps } from '../../../../../triggers_actions_ui/public/types';
-import { CommentType } from '../../../../common';
+import { CommentType, SECURITY_SOLUTION_OWNER } from '../../../../common';
 
 import { CaseActionParams } from './types';
 import { ExistingCase } from './existing_case';
 
 import * as i18n from './translations';
+import { OwnerProvider } from '../../owner_context';
 
 const Container = styled.div`
   ${({ theme }) => `
@@ -89,9 +90,15 @@ const CaseParamsFields: React.FunctionComponent<ActionParamsProps<CaseActionPara
     actionParams.subAction,
   ]);
 
+  /**
+   * TODO: When the case connector is enabled we need to figure out
+   * how we can pass the owner to this component
+   */
   return (
     <Container>
-      <ExistingCase onCaseChanged={onCaseChanged} selectedCase={selectedCase} />
+      <OwnerProvider owner={[SECURITY_SOLUTION_OWNER]}>
+        <ExistingCase onCaseChanged={onCaseChanged} selectedCase={selectedCase} />
+      </OwnerProvider>
       <EuiSpacer size="m" />
       <EuiCallOut size="s" title={i18n.CASE_CONNECTOR_CALL_OUT_TITLE} iconType="iInCircle">
         <p>{i18n.CASE_CONNECTOR_CALL_OUT_MSG}</p>

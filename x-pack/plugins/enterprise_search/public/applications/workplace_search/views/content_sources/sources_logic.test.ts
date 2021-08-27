@@ -9,9 +9,10 @@ import {
   LogicMounter,
   mockFlashMessageHelpers,
   mockHttpValues,
-  expectedAsyncError,
-} from '../../../__mocks__';
+} from '../../../__mocks__/kea_logic';
 import { configuredSources, contentSources } from '../../__mocks__/content_sources.mock';
+
+import { expectedAsyncError } from '../../../test_helpers';
 
 jest.mock('../../app_logic', () => ({
   AppLogic: { values: { isOrganization: true } },
@@ -22,7 +23,7 @@ import { SourcesLogic, fetchSourceStatuses, POLLING_INTERVAL } from './sources_l
 
 describe('SourcesLogic', () => {
   const { http } = mockHttpValues;
-  const { flashAPIErrors, setQueuedSuccessMessage } = mockFlashMessageHelpers;
+  const { flashAPIErrors, flashSuccessToast } = mockFlashMessageHelpers;
   const { mount, unmount } = new LogicMounter(SourcesLogic);
 
   const contentSource = contentSources[0];
@@ -125,7 +126,7 @@ describe('SourcesLogic', () => {
           additionalConfiguration: false,
           serviceType: 'custom',
         });
-        expect(setQueuedSuccessMessage).toHaveBeenCalledWith('Successfully connected source. ');
+        expect(flashSuccessToast).toHaveBeenCalledWith('Successfully connected source. ');
       });
 
       it('unconfigured', () => {
@@ -137,7 +138,7 @@ describe('SourcesLogic', () => {
           additionalConfiguration: true,
           serviceType: 'custom',
         });
-        expect(setQueuedSuccessMessage).toHaveBeenCalledWith(
+        expect(flashSuccessToast).toHaveBeenCalledWith(
           'Successfully connected source. This source requires additional configuration.'
         );
       });

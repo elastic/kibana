@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import { PromiseReturnType } from '../../../../observability/typings/common';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { getTraceItems } from './get_trace_items';
 
-export type TraceAPIResponse = PromiseReturnType<typeof getTrace>;
 export async function getTrace(traceId: string, setup: Setup & SetupTimeRange) {
   const { errorsPerTransaction, ...trace } = await getTraceItems(
     traceId,

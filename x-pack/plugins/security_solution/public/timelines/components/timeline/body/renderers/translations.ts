@@ -44,3 +44,16 @@ export const LINK_ELASTIC_ENDPOINT_SECURITY = i18n.translate(
     defaultMessage: 'Open in Endpoint Security',
   }
 );
+
+export const EMPTY_STATUS = i18n.translate(
+  'xpack.securitySolution.hostIsolation.agentStatuses.empty',
+  {
+    defaultMessage: '-',
+  }
+);
+
+export const EVENT_RENDERER_POPOVER_TITLE = (eventRendererName: string) =>
+  i18n.translate('xpack.securitySolution.event.reason.eventRenderPopoverTitle', {
+    values: { eventRendererName },
+    defaultMessage: 'Event renderer: {eventRendererName} ',
+  });

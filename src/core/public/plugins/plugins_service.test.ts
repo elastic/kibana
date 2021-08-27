@@ -13,7 +13,7 @@ import {
   mockPluginInitializerProvider,
 } from './plugins_service.test.mocks';
 
-import { PluginName } from 'src/core/server';
+import { PluginName, PluginType } from 'src/core/server';
 import { coreMock } from '../mocks';
 import {
   PluginsService,
@@ -59,10 +59,15 @@ function createManifest(
   return {
     id,
     version: 'some-version',
+    type: PluginType.standard,
     configPath: ['path'],
     requiredPlugins: required,
     optionalPlugins: optional,
     requiredBundles: [],
+    owner: {
+      name: 'Core',
+      githubTeam: 'kibana-core',
+    },
   };
 }
 

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
+import { FtrConfigProviderContext } from '@kbn/test';
 import { cypressOpenTests } from './cypress_start';
 
 async function openE2ETests({ readConfigFile }: FtrConfigProviderContext) {
-  const cypressConfig = await readConfigFile(require.resolve('./config.ts'));
+  const kibanaConfig = await readConfigFile(require.resolve('./config.ts'));
   return {
-    ...cypressConfig.getAll(),
+    ...kibanaConfig.getAll(),
     testRunner: cypressOpenTests,
   };
 }

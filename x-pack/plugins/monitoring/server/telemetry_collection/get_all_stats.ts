@@ -9,7 +9,7 @@ import { set } from '@elastic/safer-lodash-set';
 import { get, merge } from 'lodash';
 
 import moment from 'moment';
-import { LegacyAPICaller } from 'kibana/server';
+import { ElasticsearchClient } from 'kibana/server';
 import {
   LOGSTASH_SYSTEM_ID,
   KIBANA_SYSTEM_ID,
@@ -28,7 +28,7 @@ import { getLogstashStats, LogstashStatsByClusterUuid } from './get_logstash_sta
  */
 export async function getAllStats(
   clusterUuids: string[],
-  callCluster: LegacyAPICaller, // TODO: To be changed to the new ES client when the plugin migrates
+  callCluster: ElasticsearchClient,
   timestamp: number,
   maxBucketSize: number
 ) {

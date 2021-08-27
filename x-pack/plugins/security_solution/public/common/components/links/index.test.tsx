@@ -7,7 +7,7 @@
 
 import { mount, shallow, ReactWrapper, ShallowWrapper } from 'enzyme';
 import React from 'react';
-import { removeExternalLinkText } from '../../../../common/test_utils';
+import { removeExternalLinkText } from '@kbn/securitysolution-io-ts-utils';
 import { mountWithIntl } from '@kbn/test/jest';
 
 import { encodeIpv6 } from '../../lib/helpers';

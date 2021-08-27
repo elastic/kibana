@@ -9,6 +9,8 @@ import React from 'react';
 import { addons, types } from '@storybook/addons';
 import { AddonPanel } from '@storybook/components';
 import { STORY_CHANGED } from '@storybook/core-events';
+import { create } from '@storybook/theming';
+import { PANEL_ID } from '@storybook/addon-actions';
 
 import { ADDON_ID, EVENTS, ACTIONS_PANEL_ID } from './constants';
 import { Panel } from './panel';
@@ -31,4 +33,17 @@ addons.register(ADDON_ID, (api) => {
       );
     },
   });
+});
+
+addons.setConfig({
+  theme: create({
+    base: 'light',
+    brandTitle: 'Canvas Storybook',
+    brandUrl: 'https://github.com/elastic/kibana/tree/master/x-pack/plugins/canvas',
+  }),
+  showPanel: true,
+  isFullscreen: false,
+  panelPosition: 'bottom',
+  isToolshown: true,
+  selectedPanel: PANEL_ID,
 });

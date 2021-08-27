@@ -5,10 +5,14 @@
  * 2.0.
  */
 
-import { QueryContainer } from '@elastic/elasticsearch/api/types';
-import { esKuery } from '../../../../../src/plugins/data/server';
+import type { estypes } from '@elastic/elasticsearch';
+import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 
-export function rangeQuery(start: number, end: number, field = '@timestamp'): QueryContainer[] {
+export function rangeQuery(
+  start?: number,
+  end?: number,
+  field = '@timestamp'
+): estypes.QueryDslQueryContainer[] {
   return [
     {
       range: {
@@ -22,11 +26,11 @@ export function rangeQuery(start: number, end: number, field = '@timestamp'): Qu
   ];
 }
 
-export function kqlQuery(kql?: string): QueryContainer[] {
+export function kqlQuery(kql: string): estypes.QueryDslQueryContainer[] {
   if (!kql) {
     return [];
   }
 
-  const ast = esKuery.fromKueryExpression(kql);
-  return [esKuery.toElasticsearchQuery(ast)];
+  const ast = fromKueryExpression(kql);
+  return [toElasticsearchQuery(ast)];
 }

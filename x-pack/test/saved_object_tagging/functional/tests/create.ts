@@ -20,11 +20,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     before(async () => {
       tagModal = tagManagementPage.tagModal;
-      await esArchiver.load('functional_base');
+      await esArchiver.load(
+        'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/functional_base'
+      );
       await tagManagementPage.navigateTo();
     });
     after(async () => {
-      await esArchiver.unload('functional_base');
+      await esArchiver.unload(
+        'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/functional_base'
+      );
     });
 
     afterEach(async () => {

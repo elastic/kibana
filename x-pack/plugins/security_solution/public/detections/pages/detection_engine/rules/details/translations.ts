@@ -15,9 +15,9 @@ export const PAGE_TITLE = i18n.translate(
 );
 
 export const BACK_TO_RULES = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDetails.backToRulesDescription',
+  'xpack.securitySolution.detectionEngine.ruleDetails.backToRulesButton',
   {
-    defaultMessage: 'Back to detection rules',
+    defaultMessage: 'Rules',
   }
 );
 
@@ -102,5 +102,12 @@ export const EXCEPTIONS_TAB = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.exceptionsTab',
   {
     defaultMessage: 'Exceptions',
+  }
+);
+
+export const DELETED_RULE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.deletedRule',
+  {
+    defaultMessage: 'Deleted rule',
   }
 );

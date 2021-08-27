@@ -13,11 +13,11 @@ import expect from '@kbn/expect';
 
 import { getFieldFormatsRegistry } from '../../../../data/public/test_utils';
 import { coreMock } from '../../../../../core/public/mocks';
-import { initAngularBootstrap } from '../../../../kibana_legacy/public';
 import { setUiSettings } from '../../../../data/public/services';
 import { setFormatService } from '../../services';
 import { getInnerAngular } from '../get_inner_angular';
 import { initTableVisLegacyModule } from '../table_vis_legacy_module';
+import { initAngularBootstrap } from '../../../../kibana_legacy/public/angular_bootstrap';
 import { tabifiedData } from './tabified_data';
 
 const uiSettings = new Map();
@@ -40,10 +40,12 @@ describe('Table Vis - AggTableGroup Directive', function () {
     initTableVisLegacyModule(tableVisModule);
   };
 
+  beforeAll(async () => {
+    await initAngularBootstrap();
+  });
   beforeEach(() => {
     setUiSettings(core.uiSettings);
     setFormatService(getFieldFormatsRegistry(core));
-    initAngularBootstrap();
     initLocalAngular();
     angular.mock.module('kibana/table_vis');
     angular.mock.inject(($injector) => {

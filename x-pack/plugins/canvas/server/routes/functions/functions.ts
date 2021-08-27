@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { LegacyAPICaller } from 'src/core/server';
 import { serializeProvider } from '../../../../../../src/plugins/expressions/common';
 import { RouteInitializerDeps } from '../';
 import { API_ROUTE_FUNCTIONS } from '../../../common/lib/constants';
@@ -34,12 +33,9 @@ export function initializeGetFunctionsRoute(deps: RouteInitializerDeps) {
 }
 
 export function initializeBatchFunctionsRoute(deps: RouteInitializerDeps) {
-  const { bfetch, elasticsearch, expressions } = deps;
+  const { bfetch, expressions } = deps;
 
-  async function runFunction(
-    handlers: { environment: string; elasticsearchClient: LegacyAPICaller },
-    fnCall: FunctionCall
-  ) {
+  async function runFunction(handlers: { environment: string }, fnCall: FunctionCall) {
     const { functionName, args, context } = fnCall;
     const { deserialize } = serializeProvider(expressions.getTypes());
 
@@ -61,7 +57,6 @@ export function initializeBatchFunctionsRoute(deps: RouteInitializerDeps) {
       onBatchItem: async (fnCall: FunctionCall) => {
         const handlers = {
           environment: 'server',
-          elasticsearchClient: elasticsearch.legacy.client.asScoped(request).callAsCurrentUser,
         };
         const result = await runFunction(handlers, fnCall);
         if (typeof result === 'undefined') {

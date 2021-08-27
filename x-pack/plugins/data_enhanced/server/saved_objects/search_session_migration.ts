@@ -17,14 +17,26 @@ import {
  * It is a timestamp representing the session was transitioned into "completed" status.
  */
 export type SearchSessionSavedObjectAttributesPre$7$13$0 = Omit<
-  SearchSessionSavedObjectAttributesLatest,
+  SearchSessionSavedObjectAttributesPre$7$14$0,
   'completed'
+>;
+
+/**
+ * In 7.14.0 a `version` field was added. When search session is created it is populated with current kibana version.
+ * It is used to display warnings when trying to restore a session from a different version
+ * For saved object created before 7.14.0 we populate "7.13.0" inside the migration.
+ * It is less then ideal because the saved object could have actually been created in "7.12.x" or "7.13.x",
+ * but what is important for 7.14.0 is that the version is less then "7.14.0"
+ */
+export type SearchSessionSavedObjectAttributesPre$7$14$0 = Omit<
+  SearchSessionSavedObjectAttributesLatest,
+  'version'
 >;
 
 export const searchSessionSavedObjectMigrations: SavedObjectMigrationMap = {
   '7.13.0': (
     doc: SavedObjectUnsanitizedDoc<SearchSessionSavedObjectAttributesPre$7$13$0>
-  ): SavedObjectUnsanitizedDoc<SearchSessionSavedObjectAttributesLatest> => {
+  ): SavedObjectUnsanitizedDoc<SearchSessionSavedObjectAttributesPre$7$14$0> => {
     if (doc.attributes.status === SearchSessionStatus.COMPLETE) {
       return {
         ...doc,
@@ -36,5 +48,16 @@ export const searchSessionSavedObjectMigrations: SavedObjectMigrationMap = {
     }
 
     return doc;
+  },
+  '7.14.0': (
+    doc: SavedObjectUnsanitizedDoc<SearchSessionSavedObjectAttributesPre$7$14$0>
+  ): SavedObjectUnsanitizedDoc<SearchSessionSavedObjectAttributesLatest> => {
+    return {
+      ...doc,
+      attributes: {
+        ...doc.attributes,
+        version: '7.13.0',
+      },
+    };
   },
 };

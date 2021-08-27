@@ -8,15 +8,16 @@
 import { ByteSizeValue } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import { IUiSettingsClient } from 'kibana/server';
+import { createEscapeValue } from '../../../../../../../src/plugins/data/common';
 import { ReportingConfig } from '../../../';
 import {
   CSV_BOM_CHARS,
-  UI_SETTINGS_DATEFORMAT_TZ,
   UI_SETTINGS_CSV_QUOTE_VALUES,
   UI_SETTINGS_CSV_SEPARATOR,
+  UI_SETTINGS_DATEFORMAT_TZ,
+  UI_SETTINGS_SEARCH_INCLUDE_FROZEN,
 } from '../../../../common/constants';
 import { LevelLogger } from '../../../lib';
-import { createEscapeValue } from './escape_value';
 
 export interface CsvExportSettings {
   timezone: string;
@@ -30,6 +31,7 @@ export interface CsvExportSettings {
   checkForFormulas: boolean;
   escapeFormulaValues: boolean;
   escapeValue: (value: string) => string;
+  includeFrozen: boolean;
 }
 
 export const getExportSettings = async (
@@ -38,9 +40,7 @@ export const getExportSettings = async (
   timezone: string | undefined,
   logger: LevelLogger
 ): Promise<CsvExportSettings> => {
-  // Timezone
   let setTimezone: string;
-  // timezone in job params?
   if (timezone) {
     setTimezone = timezone;
   } else {
@@ -59,8 +59,9 @@ export const getExportSettings = async (
     }
   }
 
-  // Separator, QuoteValues
-  const [separator, quoteValues] = await Promise.all([
+  // Advanced Settings that affect search export + CSV
+  const [includeFrozen, separator, quoteValues] = await Promise.all([
+    client.get(UI_SETTINGS_SEARCH_INCLUDE_FROZEN),
     client.get(UI_SETTINGS_CSV_SEPARATOR),
     client.get(UI_SETTINGS_CSV_QUOTE_VALUES),
   ]);
@@ -76,6 +77,7 @@ export const getExportSettings = async (
       duration: config.get('csv', 'scroll', 'duration'),
     },
     bom,
+    includeFrozen,
     separator,
     maxSizeBytes: config.get('csv', 'maxSizeBytes'),
     checkForFormulas: config.get('csv', 'checkForFormulas'),

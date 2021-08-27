@@ -17,14 +17,6 @@ export default function ({ getPageObjects }) {
       await PageObjects.timePicker.setDefaultAbsoluteRange();
     });
 
-    it('should display function suggestions filtered by function name', async () => {
-      await PageObjects.timelion.setExpression('.e');
-      const suggestions = await PageObjects.timelion.getSuggestionItemsText();
-      expect(suggestions.length).to.eql(2);
-      expect(suggestions[0].includes('.elasticsearch()')).to.eql(true);
-      expect(suggestions[1].includes('.es()')).to.eql(true);
-    });
-
     it('should show argument suggestions when function suggestion is selected', async () => {
       await PageObjects.timelion.setExpression('.es');
       await PageObjects.timelion.clickSuggestion();
@@ -46,6 +38,14 @@ export default function ({ getPageObjects }) {
       expect(valueSuggestions[1].includes('place legend in north east corner')).to.eql(true);
     });
 
+    it('should display function suggestions filtered by function name', async () => {
+      await PageObjects.timelion.setExpression('.e');
+      const suggestions = await PageObjects.timelion.getSuggestionItemsText();
+      expect(suggestions.length).to.eql(2);
+      expect(suggestions[0].includes('.elasticsearch()')).to.eql(true);
+      expect(suggestions[1].includes('.es()')).to.eql(true);
+    });
+
     describe('dynamic suggestions for argument values', () => {
       describe('.es()', () => {
         before(async () => {
@@ -54,8 +54,7 @@ export default function ({ getPageObjects }) {
         });
 
         it('should show index pattern suggestions for index argument', async () => {
-          await PageObjects.timelion.updateExpression('index');
-          await PageObjects.timelion.clickSuggestion();
+          await PageObjects.timelion.updateExpression('index=');
           const suggestions = await PageObjects.timelion.getSuggestionItemsText();
           expect(suggestions.length).to.eql(1);
           expect(suggestions[0].includes('logstash-*')).to.eql(true);
@@ -63,8 +62,7 @@ export default function ({ getPageObjects }) {
         });
 
         it('should show field suggestions for timefield argument when index pattern set', async () => {
-          await PageObjects.timelion.updateExpression(',timefield');
-          await PageObjects.timelion.clickSuggestion();
+          await PageObjects.timelion.updateExpression(',timefield=');
           const suggestions = await PageObjects.timelion.getSuggestionItemsText();
           expect(suggestions.length).to.eql(4);
           expect(suggestions[0].includes('@timestamp')).to.eql(true);
@@ -72,8 +70,7 @@ export default function ({ getPageObjects }) {
         });
 
         it('should show field suggestions for split argument when index pattern set', async () => {
-          await PageObjects.timelion.updateExpression(',split');
-          await PageObjects.timelion.clickSuggestion();
+          await PageObjects.timelion.updateExpression(',split=');
           const suggestions = await PageObjects.timelion.getSuggestionItemsText();
           expect(suggestions.length).not.to.eql(0);
           expect(suggestions[0].includes('@message.raw')).to.eql(true);
@@ -81,8 +78,7 @@ export default function ({ getPageObjects }) {
         });
 
         it('should show field suggestions for metric argument when index pattern set', async () => {
-          await PageObjects.timelion.updateExpression(',metric');
-          await PageObjects.timelion.clickSuggestion();
+          await PageObjects.timelion.updateExpression(',metric=');
           await PageObjects.timelion.updateExpression('avg:');
           await PageObjects.timelion.clickSuggestion(0);
           const suggestions = await PageObjects.timelion.getSuggestionItemsText();

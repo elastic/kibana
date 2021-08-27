@@ -10,7 +10,8 @@ import PropTypes from 'prop-types';
 // @ts-expect-error no @types definition
 import { Shortcuts } from 'react-shortcuts';
 import { EuiFlexItem, EuiFlexGroup, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
-import { ComponentStrings } from '../../../i18n';
+import { i18n } from '@kbn/i18n';
+
 import { ToolTipShortcut } from '../tool_tip_shortcut/';
 import { RefreshControl } from './refresh_control';
 // @ts-expect-error untyped local
@@ -22,7 +23,28 @@ import { ViewMenu } from './view_menu';
 import { LabsControl } from './labs_control';
 import { CommitFn } from '../../../types';
 
-const { WorkpadHeader: strings } = ComponentStrings;
+const strings = {
+  getFullScreenButtonAriaLabel: () =>
+    i18n.translate('xpack.canvas.workpadHeader.fullscreenButtonAriaLabel', {
+      defaultMessage: 'View fullscreen',
+    }),
+  getFullScreenTooltip: () =>
+    i18n.translate('xpack.canvas.workpadHeader.fullscreenTooltip', {
+      defaultMessage: 'Enter fullscreen mode',
+    }),
+  getHideEditControlTooltip: () =>
+    i18n.translate('xpack.canvas.workpadHeader.hideEditControlTooltip', {
+      defaultMessage: 'Hide editing controls',
+    }),
+  getNoWritePermissionTooltipText: () =>
+    i18n.translate('xpack.canvas.workpadHeader.noWritePermissionTooltip', {
+      defaultMessage: "You don't have permission to edit this workpad",
+    }),
+  getShowEditControlTooltip: () =>
+    i18n.translate('xpack.canvas.workpadHeader.showEditControlTooltip', {
+      defaultMessage: 'Show editing controls',
+    }),
+};
 
 export interface Props {
   isWriteable: boolean;

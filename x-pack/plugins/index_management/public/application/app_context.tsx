@@ -35,7 +35,7 @@ export interface AppDependencies {
   history: ScopedHistory;
   setBreadcrumbs: ManagementAppMountParams['setBreadcrumbs'];
   uiSettings: CoreSetup['uiSettings'];
-  urlGenerators: SharePluginStart['urlGenerators'];
+  url: SharePluginStart['url'];
   docLinks: CoreStart['docLinks'];
 }
 

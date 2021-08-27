@@ -18,6 +18,8 @@ import { MODIFIED_REGISTRY_KEY } from '../system/translations';
 
 import { RegistryEventDetails } from './registry_event_details';
 
+jest.mock('../../../../../../common/lib/kibana');
+
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
   return {

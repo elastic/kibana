@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-export * from './events';
 export * from './unenroll';
 export * from './upgrade';
 export * from './status';

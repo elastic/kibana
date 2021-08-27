@@ -36,8 +36,8 @@ To keep the code terse, Canvas uses i18n "dictionaries": abstracted, static sing
 
 ```js
 
-// i18n/components.ts
-export const ComponentStrings = {
+// asset_manager.tsx
+const strings = {
   // ...
   AssetManager: {
     getCopyAssetMessage: (id: string) =>
@@ -51,10 +51,6 @@ export const ComponentStrings = {
   },
   // ...
 };
-
-// asset_manager.tsx
-import { ComponentStrings } from '../../../i18n';
-const { AssetManager: strings } = ComponentStrings;
 
 const text = (
   <EuiText>
@@ -113,27 +109,4 @@ Canvas uses [Storybook](https://storybook.js.org) to test and develop components
 
 ### Using Storybook
 
-The Canvas Storybook instance can be started by running `node scripts/storybook` from the Canvas root directory.  It has a number of options:
-
-```
-node scripts/storybook
-
-  Storybook runner for Canvas.
-
-  Options:
-    --clean            Forces a clean of the Storybook DLL and exits.
-    --dll              Cleans and builds the Storybook dependency DLL and exits.
-    --stats            Produces a Webpack stats file.
-    --site             Produces a site deployment of this Storybook.
-    --verbose, -v      Log verbosely
-    --debug            Log debug messages (less than verbose)
-    --quiet            Only log errors
-    --silent           Don't log anything
-    --help             Show this message
-```
-
-### What about `kbn-storybook`?
-
-Canvas wants to move to the Kibana Storybook instance as soon as feasible.  There are few tweaks Canvas makes to Storybook, so we're actively working with the maintainers to make that migration successful.
-
-In the meantime, people can test our progress by running `node scripts/storybook_new` from the Canvas root.
+The Canvas Storybook instance can be started by running `yarn storybook canvas` from the Kibana root directory.

@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import { functionWrapper } from '../../../test_helpers/function_wrapper';
+import {
+  functionWrapper,
+  fontStyle,
+} from '../../../../../../src/plugins/presentation_util/common/lib';
 import { testTable } from '../common/__fixtures__/test_tables';
-import { fontStyle } from '../common/__fixtures__/test_styles';
 import { markdown } from './markdown';
 
 describe('markdown', () => {

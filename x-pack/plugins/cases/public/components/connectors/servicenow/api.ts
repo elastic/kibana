@@ -7,6 +7,7 @@
 
 import { HttpSetup } from 'kibana/public';
 import { ActionTypeExecutorResult } from '../../../../../actions/common';
+import { getExecuteConnectorUrl } from '../../../../common/utils/connectors_api';
 import { Choice } from './types';
 
 export const BASE_ACTION_API_PATH = '/api/actions';
@@ -19,13 +20,10 @@ export interface GetChoicesProps {
 }
 
 export async function getChoices({ http, signal, connectorId, fields }: GetChoicesProps) {
-  return http.post<ActionTypeExecutorResult<Choice[]>>(
-    `${BASE_ACTION_API_PATH}/action/${connectorId}/_execute`,
-    {
-      body: JSON.stringify({
-        params: { subAction: 'getChoices', subActionParams: { fields } },
-      }),
-      signal,
-    }
-  );
+  return http.post<ActionTypeExecutorResult<Choice[]>>(getExecuteConnectorUrl(connectorId), {
+    body: JSON.stringify({
+      params: { subAction: 'getChoices', subActionParams: { fields } },
+    }),
+    signal,
+  });
 }

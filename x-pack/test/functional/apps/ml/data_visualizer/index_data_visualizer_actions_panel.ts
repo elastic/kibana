@@ -15,18 +15,24 @@ export default function ({ getService }: FtrProviderContext) {
     this.tags(['mlqa']);
 
     const indexPatternName = 'ft_farequote';
-    const advancedJobWizardDatafeedQuery = `{
-  "bool": {
-    "must": [
+
+    const advancedJobWizardDatafeedQuery = JSON.stringify(
       {
-        "match_all": {}
-      }
-    ]
-  }
-}`; // Note query is not currently passed to the wizard
+        bool: {
+          must: [
+            {
+              match_all: {},
+            },
+          ],
+        },
+      },
+      null,
+      2
+    );
+    // Note query is not currently passed to the wizard
 
     before(async () => {
-      await esArchiver.loadIfNeeded('ml/farequote');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
       await ml.testResources.createIndexPatternIfNeeded(indexPatternName, '@timestamp');
       await ml.testResources.createSavedSearchFarequoteKueryIfNeeded();
       await ml.testResources.setKibanaTimeZoneToUTC();

@@ -9,18 +9,18 @@ import { KibanaRequest, KibanaResponseFactory } from 'kibana/server';
 import { identity } from 'lodash';
 import type { MethodKeysOf } from '@kbn/utility-types';
 import { httpServerMock } from '../../../../../src/core/server/mocks';
-import { alertsClientMock, AlertsClientMock } from '../alerts_client.mock';
+import { rulesClientMock, RulesClientMock } from '../rules_client.mock';
 import { AlertsHealth, AlertType } from '../../common';
 import type { AlertingRequestHandlerContext } from '../types';
 
 export function mockHandlerArguments(
   {
-    alertsClient = alertsClientMock.create(),
+    rulesClient = rulesClientMock.create(),
     listTypes: listTypesRes = [],
     getFrameworkHealth,
     areApiKeysEnabled,
   }: {
-    alertsClient?: AlertsClientMock;
+    rulesClient?: RulesClientMock;
     listTypes?: AlertType[];
     getFrameworkHealth?: jest.MockInstance<Promise<AlertsHealth>, []> &
       (() => Promise<AlertsHealth>);
@@ -38,8 +38,8 @@ export function mockHandlerArguments(
     ({
       alerting: {
         listTypes,
-        getAlertsClient() {
-          return alertsClient || alertsClientMock.create();
+        getRulesClient() {
+          return rulesClient || rulesClientMock.create();
         },
         getFrameworkHealth,
         areApiKeysEnabled: areApiKeysEnabled ? areApiKeysEnabled : () => Promise.resolve(true),

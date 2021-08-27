@@ -27,11 +27,28 @@ export function registerDashboardUsageCollector(
       lensByValue: {
         DYNAMIC_KEY: {
           type: 'long',
+          _meta: {
+            description:
+              'Collection of telemetry metrics for Lens visualizations, which are added to dashboard by "value".',
+          },
         },
       },
       visualizationByValue: {
         DYNAMIC_KEY: {
           type: 'long',
+          _meta: {
+            description:
+              'Collection of telemetry metrics for visualizations, which are added to dashboard by "value".',
+          },
+        },
+      },
+      embeddable: {
+        DYNAMIC_KEY: {
+          type: 'long',
+          _meta: {
+            description:
+              'Collection of telemetry metrics that embeddable service reports. Embeddable service internally calls each embeddable, which in turn calls its dynamic actions, which calls each drill down attached to that embeddable.',
+          },
         },
       },
     },

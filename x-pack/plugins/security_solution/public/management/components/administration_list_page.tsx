@@ -5,37 +5,19 @@
  * 2.0.
  */
 
-import React, { FC, memo } from 'react';
-import { EuiPanel, EuiSpacer, CommonProps } from '@elastic/eui';
-import styled from 'styled-components';
+import React, { FC, memo, useMemo } from 'react';
+import {
+  CommonProps,
+  EuiPageHeader,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiTitle,
+  EuiSpacer,
+} from '@elastic/eui';
 import { SecurityPageName } from '../../../common/constants';
-import { WrapperPage } from '../../common/components/wrapper_page';
-import { HeaderPage } from '../../common/components/header_page';
-import { SiemNavigation } from '../../common/components/navigation';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
-import { AdministrationSubTab } from '../types';
-import {
-  ENDPOINTS_TAB,
-  TRUSTED_APPS_TAB,
-  BETA_BADGE_LABEL,
-  EVENT_FILTERS_TAB,
-} from '../common/translations';
-import {
-  getEndpointListPath,
-  getEventFiltersListPath,
-  getTrustedAppsListPath,
-} from '../common/routing';
-import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
-
-/** Ensure that all flyouts z-index in Administation area show the flyout header */
-const EuiPanelStyled = styled(EuiPanel)`
-  .euiFlyout {
-    z-index: ${({ theme }) => theme.eui.euiZNavigation + 1};
-  }
-`;
 
 interface AdministrationListPageProps {
-  beta: boolean;
   title: React.ReactNode;
   subtitle: React.ReactNode;
   actions?: React.ReactNode;
@@ -43,61 +25,41 @@ interface AdministrationListPageProps {
 }
 
 export const AdministrationListPage: FC<AdministrationListPageProps & CommonProps> = memo(
-  ({ beta, title, subtitle, actions, children, headerBackComponent, ...otherProps }) => {
-    const isEventFilteringEnabled = useIsExperimentalFeatureEnabled('eventFilteringEnabled');
-    const badgeOptions = !beta ? undefined : { beta: true, text: BETA_BADGE_LABEL };
+  ({ title, subtitle, actions, children, headerBackComponent, ...otherProps }) => {
+    const header = useMemo(() => {
+      return (
+        <EuiFlexGroup direction="column" gutterSize="none" alignItems="flexStart">
+          <EuiFlexItem grow={false}>
+            {headerBackComponent && <>{headerBackComponent}</>}
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="l">
+              <span data-test-subj="header-page-title">{title}</span>
+            </EuiTitle>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      );
+    }, [headerBackComponent, title]);
+
+    const description = useMemo(() => {
+      return <span data-test-subj="header-panel-subtitle">{subtitle}</span>;
+    }, [subtitle]);
 
     return (
-      <WrapperPage noTimeline {...otherProps}>
-        <HeaderPage
-          hideSourcerer={true}
-          title={title}
-          subtitle={subtitle}
-          backComponent={headerBackComponent}
-          badgeOptions={badgeOptions}
-        >
-          {actions}
-        </HeaderPage>
-
-        <SiemNavigation
-          navTabs={{
-            [AdministrationSubTab.endpoints]: {
-              name: ENDPOINTS_TAB,
-              id: AdministrationSubTab.endpoints,
-              href: getEndpointListPath({ name: 'endpointList' }),
-              urlKey: 'administration',
-              pageId: SecurityPageName.administration,
-              disabled: false,
-            },
-            [AdministrationSubTab.trustedApps]: {
-              name: TRUSTED_APPS_TAB,
-              id: AdministrationSubTab.trustedApps,
-              href: getTrustedAppsListPath(),
-              urlKey: 'administration',
-              pageId: SecurityPageName.administration,
-              disabled: false,
-            },
-            ...(isEventFilteringEnabled
-              ? {
-                  [AdministrationSubTab.eventFilters]: {
-                    name: EVENT_FILTERS_TAB,
-                    id: AdministrationSubTab.eventFilters,
-                    href: getEventFiltersListPath(),
-                    urlKey: 'administration',
-                    pageId: SecurityPageName.administration,
-                    disabled: false,
-                  },
-                }
-              : {}),
-          }}
+      <>
+        <EuiPageHeader
+          pageTitle={header}
+          description={description}
+          bottomBorder={true}
+          rightSideItems={[actions]}
+          restrictWidth={false}
+          {...otherProps}
         />
-
-        <EuiSpacer />
-
-        <EuiPanelStyled>{children}</EuiPanelStyled>
+        <EuiSpacer size="l" />
+        {children}
 
         <SpyRoute pageName={SecurityPageName.administration} />
-      </WrapperPage>
+      </>
     );
   }
 );

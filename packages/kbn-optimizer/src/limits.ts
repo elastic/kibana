@@ -86,7 +86,7 @@ export function updateBundleLimits({
   limitsPath,
 }: UpdateBundleLimitsOptions) {
   const limits = readLimits(limitsPath);
-  const metrics: CiStatsMetric[] = config.bundles
+  const metrics: CiStatsMetric[] = config.filteredBundles
     .map((bundle) =>
       JSON.parse(Fs.readFileSync(Path.resolve(bundle.outputDir, 'metrics.json'), 'utf-8'))
     )

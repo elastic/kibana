@@ -8,6 +8,7 @@
 import React, { useCallback } from 'react';
 import { isEmpty } from 'lodash/fp';
 import { EuiFormRow } from '@elastic/eui';
+import styled from 'styled-components';
 
 import { FieldHook, getFieldValidityAndErrorMessage } from '../../common/shared_imports';
 import { ConnectorsDropdown } from '../configure_cases/connectors_dropdown';
@@ -24,6 +25,13 @@ interface ConnectorSelectorProps {
   handleChange?: (newValue: string) => void;
   hideConnectorServiceNowSir?: boolean;
 }
+
+const EuiFormRowWrapper = styled(EuiFormRow)`
+  .euiFormErrorText {
+    display: none;
+  }
+`;
+
 export const ConnectorSelector = ({
   connectors,
   dataTestSubj,
@@ -47,7 +55,7 @@ export const ConnectorSelector = ({
   );
 
   return isEdit ? (
-    <EuiFormRow
+    <EuiFormRowWrapper
       data-test-subj={dataTestSubj}
       describedByIds={idAria ? [idAria] : undefined}
       error={errorMessage}
@@ -65,6 +73,6 @@ export const ConnectorSelector = ({
         onChange={onChange}
         selectedConnector={isEmpty(field.value) ? 'none' : field.value}
       />
-    </EuiFormRow>
+    </EuiFormRowWrapper>
   ) : null;
 };

@@ -1,13 +1,16 @@
 {
   "openapi": "3.0.0",
+  "tags": [],
   "info": {
-    "title": "Ingest Manager",
+    "title": "Fleet",
+    "description": "OpenAPI schema for Fleet API endpoints",
     "version": "0.2",
     "contact": {
-      "name": "Ingest Team"
+      "name": "Fleet Team"
     },
     "license": {
-      "name": "Elastic"
+      "name": "Elastic License 2.0",
+      "url": "https://www.elastic.co/licensing/elastic-license"
     }
   },
   "servers": [
@@ -17,79 +20,9 @@
     }
   ],
   "paths": {
-    "/agent_policies": {
-      "get": {
-        "summary": "Agent policy - List",
-        "tags": [],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "items": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "#/paths/~1agent_policies/post/responses/200/content/application~1json/schema/properties/item"
-                      }
-                    },
-                    "total": {
-                      "type": "number"
-                    },
-                    "page": {
-                      "type": "number"
-                    },
-                    "perPage": {
-                      "type": "number"
-                    }
-                  },
-                  "required": [
-                    "items",
-                    "total",
-                    "page",
-                    "perPage"
-                  ]
-                }
-              }
-            }
-          }
-        },
-        "operationId": "agent-policy-list",
-        "parameters": [
-          {
-            "name": "perPage",
-            "in": "query",
-            "description": "The number of items to return",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "default": 50
-            }
-          },
-          {
-            "name": "page",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "default": 1
-            }
-          },
-          {
-            "name": "kuery",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "description": ""
-      },
+    "/setup": {
       "post": {
-        "summary": "Agent policy - Create",
+        "summary": "Setup",
         "tags": [],
         "responses": {
           "200": {
@@ -97,61 +30,20 @@
             "content": {
               "application/json": {
                 "schema": {
+                  "$ref": "#/components/schemas/fleet_setup_response"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
                   "type": "object",
                   "properties": {
-                    "item": {
-                      "allOf": [
-                        {
-                          "$ref": "#/paths/~1agent_policies/post/requestBody/content/application~1json/schema"
-                        },
-                        {
-                          "type": "object",
-                          "properties": {
-                            "id": {
-                              "type": "string"
-                            },
-                            "status": {
-                              "type": "string",
-                              "enum": [
-                                "active",
-                                "inactive"
-                              ]
-                            },
-                            "packagePolicies": {
-                              "oneOf": [
-                                {
-                                  "items": {
-                                    "type": "string"
-                                  }
-                                },
-                                {
-                                  "items": {
-                                    "$ref": "#/paths/~1package_policies~1%7BpackagePolicyId%7D/get/responses/200/content/application~1json/schema/properties/item"
-                                  }
-                                }
-                              ],
-                              "type": "array"
-                            },
-                            "updated_on": {
-                              "type": "string",
-                              "format": "date-time"
-                            },
-                            "updated_by": {
-                              "type": "string"
-                            },
-                            "revision": {
-                              "type": "number"
-                            },
-                            "agents": {
-                              "type": "number"
-                            }
-                          },
-                          "required": [
-                            "id",
-                            "status"
-                          ]
-                        }
-                      ]
+                    "message": {
+                      "type": "string"
                     }
                   }
                 }
@@ -159,49 +51,17 @@
             }
           }
         },
-        "operationId": "post-agent-policy",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "title": "NewAgentPolicy",
-                "type": "object",
-                "properties": {
-                  "name": {
-                    "type": "string"
-                  },
-                  "namespace": {
-                    "type": "string"
-                  },
-                  "description": {
-                    "type": "string"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "security": [],
+        "operationId": "setup",
         "parameters": [
           {
-            "$ref": "#/paths/~1setup/post/parameters/0"
+            "$ref": "#/components/parameters/kbn_xsrf"
           }
         ]
       }
     },
-    "/agent_policies/{agentPolicyId}": {
-      "parameters": [
-        {
-          "schema": {
-            "type": "string"
-          },
-          "name": "agentPolicyId",
-          "in": "path",
-          "required": true
-        }
-      ],
+    "/settings": {
       "get": {
-        "summary": "Agent policy - Info",
+        "summary": "Settings",
         "tags": [],
         "responses": {
           "200": {
@@ -209,26 +69,16 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "item": {
-                      "$ref": "#/paths/~1agent_policies/post/responses/200/content/application~1json/schema/properties/item"
-                    }
-                  },
-                  "required": [
-                    "item"
-                  ]
+                  "$ref": "#/components/schemas/fleet_settings_response"
                 }
               }
             }
           }
         },
-        "operationId": "agent-policy-info",
-        "description": "Get one agent policy",
-        "parameters": []
+        "operationId": "get-settings"
       },
-      "put": {
-        "summary": "Agent policy - Update",
+      "post": {
+        "summary": "Settings - Update",
         "tags": [],
         "responses": {
           "200": {
@@ -236,99 +86,19 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "item": {
-                      "$ref": "#/paths/~1agent_policies/post/responses/200/content/application~1json/schema/properties/item"
-                    }
-                  },
-                  "required": [
-                    "item"
-                  ]
+                  "$ref": "#/components/schemas/fleet_settings_response"
                 }
               }
             }
           }
         },
-        "operationId": "put-agent-policy-agentPolicyId",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/paths/~1agent_policies/post/requestBody/content/application~1json/schema"
-              }
-            }
-          }
-        },
-        "parameters": [
-          {
-            "$ref": "#/paths/~1setup/post/parameters/0"
-          }
-        ]
+        "operationId": "update-settings"
       }
     },
-    "/agent_policies/{agentPolicyId}/copy": {
-      "parameters": [
-        {
-          "schema": {
-            "type": "string"
-          },
-          "name": "agentPolicyId",
-          "in": "path",
-          "required": true
-        }
-      ],
-      "post": {
-        "summary": "Agent policy - copy one policy",
-        "operationId": "agent-policy-copy",
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "item": {
-                      "$ref": "#/paths/~1agent_policies/post/responses/200/content/application~1json/schema/properties/item"
-                    }
-                  },
-                  "required": [
-                    "item"
-                  ]
-                }
-              }
-            }
-          }
-        },
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "name": {
-                    "type": "string"
-                  },
-                  "description": {
-                    "type": "string"
-                  }
-                },
-                "required": [
-                  "name"
-                ]
-              }
-            }
-          },
-          "description": ""
-        },
-        "description": "Copies one agent policy"
-      }
-    },
-    "/agent_policies/delete": {
-      "post": {
-        "summary": "Agent policy - Delete",
-        "operationId": "post-agent-policy-delete",
+    "/epm/categories": {
+      "get": {
+        "summary": "Package categories",
+        "tags": [],
         "responses": {
           "200": {
             "description": "OK",
@@ -342,15 +112,277 @@
                       "id": {
                         "type": "string"
                       },
-                      "success": {
-                        "type": "boolean"
+                      "title": {
+                        "type": "string"
+                      },
+                      "count": {
+                        "type": "number"
                       }
                     },
                     "required": [
                       "id",
-                      "success"
+                      "title",
+                      "count"
                     ]
                   }
+                }
+              }
+            }
+          }
+        },
+        "operationId": "get-package-categories"
+      }
+    },
+    "/epm/packages": {
+      "get": {
+        "summary": "Packages - List",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/search_result"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "operationId": "list-all-packages"
+      },
+      "parameters": []
+    },
+    "/epm/packages/{pkgkey}": {
+      "get": {
+        "summary": "Packages - Info",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "allOf": [
+                    {
+                      "properties": {
+                        "response": {
+                          "$ref": "#/components/schemas/package_info"
+                        }
+                      }
+                    },
+                    {
+                      "properties": {
+                        "status": {
+                          "type": "string",
+                          "enum": [
+                            "installed",
+                            "not_installed"
+                          ]
+                        },
+                        "savedObject": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "status",
+                        "savedObject"
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "operationId": "get-package",
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ]
+      },
+      "parameters": [
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "pkgkey",
+          "in": "path",
+          "required": true
+        }
+      ],
+      "post": {
+        "summary": "Packages - Install",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "response": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "type": {
+                            "oneOf": [
+                              {
+                                "$ref": "#/components/schemas/kibana_saved_object_type"
+                              },
+                              {
+                                "$ref": "#/components/schemas/elasticsearch_asset_type"
+                              }
+                            ]
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "type"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "response"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "operationId": "install-package",
+        "description": "",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "force": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Packages - Delete",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "response": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "type": {
+                            "oneOf": [
+                              {
+                                "$ref": "#/components/schemas/kibana_saved_object_type"
+                              },
+                              {
+                                "$ref": "#/components/schemas/elasticsearch_asset_type"
+                              }
+                            ]
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "type"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "response"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "operationId": "delete-package",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "force": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/agents/setup": {
+      "get": {
+        "summary": "Agents setup - Info",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/fleet_status_response"
+                }
+              }
+            }
+          }
+        },
+        "operationId": "get-agents-setup-status",
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ]
+      },
+      "post": {
+        "summary": "Agents setup - Create",
+        "operationId": "setup-agents",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/fleet_setup_response"
                 }
               }
             }
@@ -362,31 +394,81 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "agentPolicyIds": {
-                    "type": "array",
-                    "items": {
-                      "type": "string"
-                    }
+                  "admin_username": {
+                    "type": "string"
+                  },
+                  "admin_password": {
+                    "type": "string"
                   }
-                }
+                },
+                "required": [
+                  "admin_username",
+                  "admin_password"
+                ]
               }
             }
           }
         },
         "parameters": [
           {
-            "$ref": "#/paths/~1setup/post/parameters/0"
+            "$ref": "#/components/parameters/kbn_xsrf"
           }
         ]
-      },
-      "parameters": []
+      }
     },
     "/agent-status": {
       "get": {
-        "summary": "Fleet - Agent - Status for policy",
+        "summary": "Agents - Summary stats",
         "tags": [],
-        "responses": {},
-        "operationId": "get-fleet-agent-status",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "integer"
+                    },
+                    "events": {
+                      "type": "integer"
+                    },
+                    "inactive": {
+                      "type": "integer"
+                    },
+                    "offline": {
+                      "type": "integer"
+                    },
+                    "online": {
+                      "type": "integer"
+                    },
+                    "other": {
+                      "type": "integer"
+                    },
+                    "total": {
+                      "type": "integer"
+                    },
+                    "updating": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "events",
+                    "inactive",
+                    "offline",
+                    "online",
+                    "other",
+                    "total",
+                    "updating"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "operationId": "get-agent-status",
         "parameters": [
           {
             "schema": {
@@ -401,7 +483,7 @@
     },
     "/agents": {
       "get": {
-        "summary": "Fleet - Agent - List",
+        "summary": "Agents - List",
         "tags": [],
         "responses": {
           "200": {
@@ -414,7 +496,7 @@
                     "list": {
                       "type": "array",
                       "items": {
-                        "type": "object"
+                        "$ref": "#/components/schemas/agent"
                       }
                     },
                     "total": {
@@ -438,12 +520,222 @@
             }
           }
         },
-        "operationId": "get-fleet-agents",
+        "operationId": "get-agents",
         "security": [
           {
             "basicAuth": []
           }
         ]
+      }
+    },
+    "/agents/bulk_upgrade": {
+      "post": {
+        "summary": "Agents - Bulk Upgrade",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "object",
+                    "properties": {
+                      "success": {
+                        "type": "boolean"
+                      },
+                      "error": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "success"
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "BAD REQUEST",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/upgrade_agent"
+                }
+              }
+            }
+          }
+        },
+        "operationId": "bulk-upgrade-agents",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/bulk_upgrade_agents"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/agents/{agentId}": {
+      "parameters": [
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "agentId",
+          "in": "path",
+          "required": true
+        }
+      ],
+      "get": {
+        "summary": "Agent - Info",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "item": {
+                      "$ref": "#/components/schemas/agent"
+                    }
+                  },
+                  "required": [
+                    "item"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "operationId": "get-agent"
+      },
+      "put": {
+        "summary": "Agent - Update",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "item": {
+                      "$ref": "#/components/schemas/agent"
+                    }
+                  },
+                  "required": [
+                    "item"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "operationId": "update-agent",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          }
+        ]
+      },
+      "delete": {
+        "summary": "Agent - Delete",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "action": {
+                      "type": "string",
+                      "enum": [
+                        "deleted"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "action"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "operationId": "delete-agent",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          }
+        ]
+      }
+    },
+    "/agents/{agentId}/reassign": {
+      "parameters": [
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "agentId",
+          "in": "path",
+          "required": true
+        }
+      ],
+      "put": {
+        "summary": "Agent - Reassign",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "operationId": "reassign-agent",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "policy_id": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "policy_id"
+                ]
+              }
+            }
+          }
+        }
       }
     },
     "/agents/{agentId}/unenroll": {
@@ -458,13 +750,48 @@
         }
       ],
       "post": {
-        "summary": "Fleet - Agent - Unenroll",
+        "summary": "Agent - Unenroll",
         "tags": [],
-        "responses": {},
-        "operationId": "post-fleet-agents-unenroll",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "BAD REQUEST",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "statusCode": {
+                      "type": "number",
+                      "enum": [
+                        400
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "operationId": "unenroll-agent",
         "parameters": [
           {
-            "$ref": "#/paths/~1setup/post/parameters/0"
+            "$ref": "#/components/parameters/kbn_xsrf"
           }
         ],
         "requestBody": {
@@ -498,7 +825,7 @@
         }
       ],
       "post": {
-        "summary": "Fleet - Agent - Upgrade",
+        "summary": "Agent - Upgrade",
         "tags": [],
         "responses": {
           "200": {
@@ -506,7 +833,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/paths/~1agents~1%7BagentId%7D~1upgrade/post/requestBody/content/application~1json/schema"
+                  "$ref": "#/components/schemas/upgrade_agent"
                 }
               }
             }
@@ -516,16 +843,16 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/paths/~1agents~1%7BagentId%7D~1upgrade/post/requestBody/content/application~1json/schema"
+                  "$ref": "#/components/schemas/upgrade_agent"
                 }
               }
             }
           }
         },
-        "operationId": "post-fleet-agents-upgrade",
+        "operationId": "upgrade-agent",
         "parameters": [
           {
-            "$ref": "#/paths/~1setup/post/parameters/0"
+            "$ref": "#/components/parameters/kbn_xsrf"
           }
         ],
         "requestBody": {
@@ -533,43 +860,16 @@
           "content": {
             "application/json": {
               "schema": {
-                "title": "UpgradeAgent",
-                "oneOf": [
-                  {
-                    "type": "object",
-                    "properties": {
-                      "version": {
-                        "type": "string"
-                      }
-                    },
-                    "required": [
-                      "version"
-                    ]
-                  },
-                  {
-                    "type": "object",
-                    "properties": {
-                      "version": {
-                        "type": "string"
-                      },
-                      "source_uri": {
-                        "type": "string"
-                      }
-                    },
-                    "required": [
-                      "version"
-                    ]
-                  }
-                ]
+                "$ref": "#/components/schemas/upgrade_agent"
               }
             }
           }
         }
       }
     },
-    "/agents/bulk_upgrade": {
+    "/agents/bulk_reassign": {
       "post": {
-        "summary": "Fleet - Agent - Bulk Upgrade",
+        "summary": "Agents - Bulk reassign",
         "tags": [],
         "responses": {
           "200": {
@@ -577,92 +877,58 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/paths/~1agents~1bulk_upgrade/post/requestBody/content/application~1json/schema"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "BAD REQUEST",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/paths/~1agents~1%7BagentId%7D~1upgrade/post/requestBody/content/application~1json/schema"
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "object",
+                    "properties": {
+                      "success": {
+                        "type": "boolean"
+                      },
+                      "error": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "success"
+                    ]
+                  }
                 }
               }
             }
           }
         },
-        "operationId": "post-fleet-agents-bulk-upgrade",
+        "operationId": "bulk-reassign-agents",
         "parameters": [
           {
-            "$ref": "#/paths/~1setup/post/parameters/0"
+            "$ref": "#/components/parameters/kbn_xsrf"
           }
         ],
         "requestBody": {
-          "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "title": "BulkUpgradeAgents",
-                "oneOf": [
-                  {
-                    "type": "object",
-                    "properties": {
-                      "version": {
+                "type": "object",
+                "properties": {
+                  "policy_id": {
+                    "type": "string"
+                  },
+                  "agents": {
+                    "oneOf": [
+                      {
                         "type": "string"
                       },
-                      "agents": {
+                      {
                         "type": "array",
                         "items": {
                           "type": "string"
                         }
                       }
-                    },
-                    "required": [
-                      "version",
-                      "agents"
-                    ]
-                  },
-                  {
-                    "type": "object",
-                    "properties": {
-                      "version": {
-                        "type": "string"
-                      },
-                      "source_uri": {
-                        "type": "string"
-                      },
-                      "agents": {
-                        "type": "array",
-                        "items": {
-                          "type": "string"
-                        }
-                      }
-                    },
-                    "required": [
-                      "version",
-                      "agents"
-                    ]
-                  },
-                  {
-                    "type": "object",
-                    "properties": {
-                      "version": {
-                        "type": "string"
-                      },
-                      "source_uri": {
-                        "type": "string"
-                      },
-                      "agents": {
-                        "type": "string"
-                      }
-                    },
-                    "required": [
-                      "version",
-                      "agents"
                     ]
                   }
+                },
+                "required": [
+                  "policy_id",
+                  "agents"
                 ]
               }
             }
@@ -670,9 +936,80 @@
         }
       }
     },
-    "/agents/setup": {
+    "/agents/bulk_unenroll": {
+      "post": {
+        "summary": "Agents - Bulk unenroll",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "object",
+                    "properties": {
+                      "success": {
+                        "type": "boolean"
+                      },
+                      "error": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "success"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "operationId": "bulk-unenroll-agents",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "revoke": {
+                    "type": "boolean"
+                  },
+                  "force": {
+                    "type": "boolean"
+                  },
+                  "agents": {
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "agents"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/agent_policies": {
       "get": {
-        "summary": "Agents setup - Info",
+        "summary": "Agent policies - List",
         "tags": [],
         "responses": {
           "200": {
@@ -682,28 +1019,50 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "isInitialized": {
-                      "type": "boolean"
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/agent_policy"
+                      }
+                    },
+                    "total": {
+                      "type": "number"
+                    },
+                    "page": {
+                      "type": "number"
+                    },
+                    "perPage": {
+                      "type": "number"
                     }
                   },
                   "required": [
-                    "isInitialized"
+                    "items",
+                    "total",
+                    "page",
+                    "perPage"
                   ]
                 }
               }
             }
           }
         },
-        "operationId": "get-agents-setup",
-        "security": [
+        "operationId": "agent-policy-list",
+        "parameters": [
           {
-            "basicAuth": []
+            "$ref": "#/components/parameters/page_size"
+          },
+          {
+            "$ref": "#/components/parameters/page_index"
+          },
+          {
+            "$ref": "#/components/parameters/kuery"
           }
-        ]
+        ],
+        "description": ""
       },
       "post": {
-        "summary": "Agents setup - Create",
-        "operationId": "post-agents-setup",
+        "summary": "Agent policy - Create",
+        "tags": [],
         "responses": {
           "200": {
             "description": "OK",
@@ -712,12 +1071,144 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "isInitialized": {
-                      "type": "boolean"
+                    "item": {
+                      "$ref": "#/components/schemas/agent_policy"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "operationId": "create-agent-policy",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/new_agent_policy"
+              }
+            }
+          }
+        },
+        "security": [],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          }
+        ]
+      }
+    },
+    "/agent_policies/{agentPolicyId}": {
+      "parameters": [
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "agentPolicyId",
+          "in": "path",
+          "required": true
+        }
+      ],
+      "get": {
+        "summary": "Agent policy - Info",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "item": {
+                      "$ref": "#/components/schemas/agent_policy"
                     }
                   },
                   "required": [
-                    "isInitialized"
+                    "item"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "operationId": "agent-policy-info",
+        "description": "Get one agent policy",
+        "parameters": []
+      },
+      "put": {
+        "summary": "Agent policy - Update",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "item": {
+                      "$ref": "#/components/schemas/agent_policy"
+                    }
+                  },
+                  "required": [
+                    "item"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "operationId": "update-agent-policy",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/new_agent_policy"
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          }
+        ]
+      }
+    },
+    "/agent_policies/{agentPolicyId}/copy": {
+      "parameters": [
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "agentPolicyId",
+          "in": "path",
+          "required": true
+        }
+      ],
+      "post": {
+        "summary": "Agent policy - copy one policy",
+        "operationId": "agent-policy-copy",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "item": {
+                      "$ref": "#/components/schemas/agent_policy"
+                    }
+                  },
+                  "required": [
+                    "item"
                   ]
                 }
               }
@@ -730,16 +1221,63 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "admin_username": {
+                  "name": {
                     "type": "string"
                   },
-                  "admin_password": {
+                  "description": {
                     "type": "string"
                   }
                 },
                 "required": [
-                  "admin_username",
-                  "admin_password"
+                  "name"
+                ]
+              }
+            }
+          },
+          "description": ""
+        }
+      }
+    },
+    "/agent_policies/delete": {
+      "post": {
+        "summary": "Agent policy - Delete",
+        "operationId": "delete-agent-policy",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "success": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "success"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "agentPolicyId": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "agentPolicyId"
                 ]
               }
             }
@@ -747,27 +1285,84 @@
         },
         "parameters": [
           {
-            "$ref": "#/paths/~1setup/post/parameters/0"
+            "$ref": "#/components/parameters/kbn_xsrf"
           }
         ]
-      }
+      },
+      "parameters": []
     },
     "/enrollment-api-keys": {
       "get": {
-        "summary": "Enrollment - List",
+        "summary": "Enrollment API Keys - List",
         "tags": [],
-        "responses": {},
-        "operationId": "get-fleet-enrollment-api-keys",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "list": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/enrollment_api_key"
+                      }
+                    },
+                    "page": {
+                      "type": "number"
+                    },
+                    "perPage": {
+                      "type": "number"
+                    },
+                    "total": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "list",
+                    "page",
+                    "perPage",
+                    "total"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "operationId": "get-enrollment-api-keys",
         "parameters": []
       },
       "post": {
-        "summary": "Enrollment - Create",
+        "summary": "Enrollment API Key - Create",
         "tags": [],
-        "responses": {},
-        "operationId": "post-fleet-enrollment-api-keys",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "item": {
+                      "$ref": "#/components/schemas/enrollment_api_key"
+                    },
+                    "action": {
+                      "type": "string",
+                      "enum": [
+                        "created"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "operationId": "create-enrollment-api-keys",
         "parameters": [
           {
-            "$ref": "#/paths/~1setup/post/parameters/0"
+            "$ref": "#/components/parameters/kbn_xsrf"
           }
         ]
       }
@@ -784,482 +1379,7 @@
         }
       ],
       "get": {
-        "summary": "Enrollment - Info",
-        "tags": [],
-        "responses": {},
-        "operationId": "get-fleet-enrollment-api-keys-keyId"
-      },
-      "delete": {
-        "summary": "Enrollment - Delete",
-        "tags": [],
-        "responses": {},
-        "operationId": "delete-fleet-enrollment-api-keys-keyId",
-        "parameters": [
-          {
-            "$ref": "#/paths/~1setup/post/parameters/0"
-          }
-        ]
-      }
-    },
-    "/epm/categories": {
-      "get": {
-        "summary": "EPM - Categories",
-        "tags": [],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "id": {
-                        "type": "string"
-                      },
-                      "title": {
-                        "type": "string"
-                      },
-                      "count": {
-                        "type": "number"
-                      }
-                    },
-                    "required": [
-                      "id",
-                      "title",
-                      "count"
-                    ]
-                  }
-                }
-              }
-            }
-          }
-        },
-        "operationId": "get-epm-categories"
-      }
-    },
-    "/epm/packages": {
-      "get": {
-        "summary": "EPM - Packages - List",
-        "tags": [],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "title": "SearchResult",
-                    "type": "object",
-                    "properties": {
-                      "description": {
-                        "type": "string"
-                      },
-                      "download": {
-                        "type": "string"
-                      },
-                      "icons": {
-                        "type": "string"
-                      },
-                      "name": {
-                        "type": "string"
-                      },
-                      "path": {
-                        "type": "string"
-                      },
-                      "title": {
-                        "type": "string"
-                      },
-                      "type": {
-                        "type": "string"
-                      },
-                      "version": {
-                        "type": "string"
-                      },
-                      "status": {
-                        "type": "string"
-                      },
-                      "savedObject": {
-                        "type": "object"
-                      }
-                    },
-                    "required": [
-                      "description",
-                      "download",
-                      "icons",
-                      "name",
-                      "path",
-                      "title",
-                      "type",
-                      "version",
-                      "status"
-                    ]
-                  }
-                }
-              }
-            }
-          }
-        },
-        "operationId": "get-epm-list"
-      },
-      "parameters": []
-    },
-    "/epm/packages/{pkgkey}": {
-      "get": {
-        "summary": "EPM - Packages - Info",
-        "tags": [],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "allOf": [
-                    {
-                      "properties": {
-                        "response": {
-                          "title": "PackageInfo",
-                          "type": "object",
-                          "properties": {
-                            "name": {
-                              "type": "string"
-                            },
-                            "title": {
-                              "type": "string"
-                            },
-                            "version": {
-                              "type": "string"
-                            },
-                            "readme": {
-                              "type": "string"
-                            },
-                            "description": {
-                              "type": "string"
-                            },
-                            "type": {
-                              "type": "string"
-                            },
-                            "categories": {
-                              "type": "array",
-                              "items": {
-                                "type": "string"
-                              }
-                            },
-                            "requirement": {
-                              "oneOf": [
-                                {
-                                  "properties": {
-                                    "kibana": {
-                                      "type": "object",
-                                      "properties": {
-                                        "versions": {
-                                          "type": "string"
-                                        }
-                                      }
-                                    }
-                                  }
-                                },
-                                {
-                                  "properties": {
-                                    "elasticsearch": {
-                                      "type": "object",
-                                      "properties": {
-                                        "versions": {
-                                          "type": "string"
-                                        }
-                                      }
-                                    }
-                                  }
-                                }
-                              ],
-                              "type": "object"
-                            },
-                            "screenshots": {
-                              "type": "array",
-                              "items": {
-                                "type": "object",
-                                "properties": {
-                                  "src": {
-                                    "type": "string"
-                                  },
-                                  "path": {
-                                    "type": "string"
-                                  },
-                                  "title": {
-                                    "type": "string"
-                                  },
-                                  "size": {
-                                    "type": "string"
-                                  },
-                                  "type": {
-                                    "type": "string"
-                                  }
-                                },
-                                "required": [
-                                  "src",
-                                  "path"
-                                ]
-                              }
-                            },
-                            "icons": {
-                              "type": "array",
-                              "items": {
-                                "type": "string"
-                              }
-                            },
-                            "assets": {
-                              "type": "array",
-                              "items": {
-                                "type": "string"
-                              }
-                            },
-                            "internal": {
-                              "type": "boolean"
-                            },
-                            "format_version": {
-                              "type": "string"
-                            },
-                            "data_streams": {
-                              "type": "array",
-                              "items": {
-                                "type": "object",
-                                "properties": {
-                                  "title": {
-                                    "type": "string"
-                                  },
-                                  "name": {
-                                    "type": "string"
-                                  },
-                                  "release": {
-                                    "type": "string"
-                                  },
-                                  "ingeset_pipeline": {
-                                    "type": "string"
-                                  },
-                                  "vars": {
-                                    "type": "array",
-                                    "items": {
-                                      "type": "object",
-                                      "properties": {
-                                        "name": {
-                                          "type": "string"
-                                        },
-                                        "default": {
-                                          "type": "string"
-                                        }
-                                      },
-                                      "required": [
-                                        "name",
-                                        "default"
-                                      ]
-                                    }
-                                  },
-                                  "type": {
-                                    "type": "string"
-                                  },
-                                  "package": {
-                                    "type": "string"
-                                  }
-                                },
-                                "required": [
-                                  "title",
-                                  "name",
-                                  "release",
-                                  "ingeset_pipeline",
-                                  "type",
-                                  "package"
-                                ]
-                              }
-                            },
-                            "download": {
-                              "type": "string"
-                            },
-                            "path": {
-                              "type": "string"
-                            },
-                            "removable": {
-                              "type": "boolean"
-                            }
-                          },
-                          "required": [
-                            "name",
-                            "title",
-                            "version",
-                            "description",
-                            "type",
-                            "categories",
-                            "requirement",
-                            "assets",
-                            "format_version",
-                            "download",
-                            "path"
-                          ]
-                        }
-                      }
-                    },
-                    {
-                      "properties": {
-                        "status": {
-                          "type": "string",
-                          "enum": [
-                            "installed",
-                            "not_installed"
-                          ]
-                        },
-                        "savedObject": {
-                          "type": "string"
-                        }
-                      },
-                      "required": [
-                        "status",
-                        "savedObject"
-                      ]
-                    }
-                  ]
-                }
-              }
-            }
-          }
-        },
-        "operationId": "get-epm-package-pkgkey",
-        "security": [
-          {
-            "basicAuth": []
-          }
-        ]
-      },
-      "parameters": [
-        {
-          "schema": {
-            "type": "string"
-          },
-          "name": "pkgkey",
-          "in": "path",
-          "required": true
-        }
-      ],
-      "post": {
-        "summary": "EPM - Packages - Install",
-        "tags": [],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "response": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "id": {
-                            "type": "string"
-                          },
-                          "type": {
-                            "type": "string"
-                          }
-                        },
-                        "required": [
-                          "id",
-                          "type"
-                        ]
-                      }
-                    }
-                  },
-                  "required": [
-                    "response"
-                  ]
-                }
-              }
-            }
-          }
-        },
-        "operationId": "post-epm-install-pkgkey",
-        "description": "",
-        "parameters": [
-          {
-            "$ref": "#/paths/~1setup/post/parameters/0"
-          }
-        ]
-      },
-      "delete": {
-        "summary": "EPM - Packages - Delete",
-        "tags": [],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "response": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "id": {
-                            "type": "string"
-                          },
-                          "type": {
-                            "type": "string"
-                          }
-                        },
-                        "required": [
-                          "id",
-                          "type"
-                        ]
-                      }
-                    }
-                  },
-                  "required": [
-                    "response"
-                  ]
-                }
-              }
-            }
-          }
-        },
-        "operationId": "post-epm-delete-pkgkey",
-        "parameters": [
-          {
-            "$ref": "#/paths/~1setup/post/parameters/0"
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "force": {
-                    "type": "boolean"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/agents/{agentId}": {
-      "parameters": [
-        {
-          "schema": {
-            "type": "string"
-          },
-          "name": "agentId",
-          "in": "path",
-          "required": true
-        }
-      ],
-      "get": {
-        "summary": "Fleet - Agent - Info",
+        "summary": "Enrollment API Key - Info",
         "tags": [],
         "responses": {
           "200": {
@@ -1270,7 +1390,7 @@
                   "type": "object",
                   "properties": {
                     "item": {
-                      "type": "object"
+                      "$ref": "#/components/schemas/enrollment_api_key"
                     }
                   },
                   "required": [
@@ -1281,52 +1401,45 @@
             }
           }
         },
-        "operationId": "get-fleet-agents-agentId"
-      },
-      "put": {
-        "summary": "Fleet - Agent - Update",
-        "tags": [],
-        "responses": {},
-        "operationId": "put-fleet-agents-agentId",
-        "parameters": [
-          {
-            "$ref": "#/paths/~1setup/post/parameters/0"
-          }
-        ]
+        "operationId": "get-enrollment-api-key"
       },
       "delete": {
-        "summary": "Fleet - Agent - Delete",
+        "summary": "Enrollment API Key - Delete",
         "tags": [],
-        "responses": {},
-        "operationId": "delete-fleet-agents-agentId",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "action": {
+                      "type": "string",
+                      "enum": [
+                        "deleted"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "action"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "operationId": "delete-enrollment-api-key",
         "parameters": [
           {
-            "$ref": "#/paths/~1setup/post/parameters/0"
+            "$ref": "#/components/parameters/kbn_xsrf"
           }
         ]
-      }
-    },
-    "/install/{osType}": {
-      "parameters": [
-        {
-          "schema": {
-            "type": "string"
-          },
-          "name": "osType",
-          "in": "path",
-          "required": true
-        }
-      ],
-      "get": {
-        "summary": "Fleet - Get OS install script",
-        "tags": [],
-        "responses": {},
-        "operationId": "get-fleet-install-osType"
       }
     },
     "/package_policies": {
       "get": {
-        "summary": "PackagePolicies - List",
+        "summary": "Package policies - List",
         "tags": [],
         "responses": {
           "200": {
@@ -1339,7 +1452,7 @@
                     "items": {
                       "type": "array",
                       "items": {
-                        "$ref": "#/paths/~1package_policies~1%7BpackagePolicyId%7D/get/responses/200/content/application~1json/schema/properties/item"
+                        "$ref": "#/components/schemas/package_policy"
                       }
                     },
                     "total": {
@@ -1360,121 +1473,14 @@
             }
           }
         },
-        "operationId": "get-packagePolicies",
+        "operationId": "get-package-policies",
         "security": [],
         "parameters": []
       },
       "parameters": [],
       "post": {
-        "summary": "PackagePolicies - Create",
-        "operationId": "post-packagePolicies",
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        },
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "title": "NewPackagePolicy",
-                "type": "object",
-                "description": "",
-                "properties": {
-                  "enabled": {
-                    "type": "boolean"
-                  },
-                  "package": {
-                    "type": "object",
-                    "properties": {
-                      "name": {
-                        "type": "string"
-                      },
-                      "version": {
-                        "type": "string"
-                      },
-                      "title": {
-                        "type": "string"
-                      }
-                    },
-                    "required": [
-                      "name",
-                      "version",
-                      "title"
-                    ]
-                  },
-                  "namespace": {
-                    "type": "string"
-                  },
-                  "output_id": {
-                    "type": "string"
-                  },
-                  "inputs": {
-                    "type": "array",
-                    "items": {
-                      "type": "object",
-                      "properties": {
-                        "type": {
-                          "type": "string"
-                        },
-                        "enabled": {
-                          "type": "boolean"
-                        },
-                        "processors": {
-                          "type": "array",
-                          "items": {
-                            "type": "string"
-                          }
-                        },
-                        "streams": {
-                          "type": "array",
-                          "items": {}
-                        },
-                        "config": {
-                          "type": "object"
-                        },
-                        "vars": {
-                          "type": "object"
-                        }
-                      },
-                      "required": [
-                        "type",
-                        "enabled",
-                        "streams"
-                      ]
-                    }
-                  },
-                  "policy_id": {
-                    "type": "string"
-                  },
-                  "name": {
-                    "type": "string"
-                  },
-                  "description": {
-                    "type": "string"
-                  }
-                },
-                "required": [
-                  "output_id",
-                  "inputs",
-                  "policy_id",
-                  "name"
-                ]
-              }
-            }
-          }
-        },
-        "parameters": [
-          {
-            "$ref": "#/paths/~1setup/post/parameters/0"
-          }
-        ]
-      }
-    },
-    "/package_policies/{packagePolicyId}": {
-      "get": {
-        "summary": "PackagePolicies - Info",
-        "tags": [],
+        "summary": "Package policy - Create",
+        "operationId": "create-package-policy",
         "responses": {
           "200": {
             "description": "OK",
@@ -1484,31 +1490,7 @@
                   "type": "object",
                   "properties": {
                     "item": {
-                      "title": "PackagePolicy",
-                      "allOf": [
-                        {
-                          "type": "object",
-                          "properties": {
-                            "id": {
-                              "type": "string"
-                            },
-                            "revision": {
-                              "type": "number"
-                            },
-                            "inputs": {
-                              "type": "array",
-                              "items": {}
-                            }
-                          },
-                          "required": [
-                            "id",
-                            "revision"
-                          ]
-                        },
-                        {
-                          "$ref": "#/paths/~1package_policies/post/requestBody/content/application~1json/schema"
-                        }
-                      ]
+                      "$ref": "#/components/schemas/package_policy"
                     }
                   },
                   "required": [
@@ -1519,7 +1501,131 @@
             }
           }
         },
-        "operationId": "get-packagePolicies-packagePolicyId"
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/new_package_policy"
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "force": {
+                        "type": "boolean"
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          }
+        ]
+      }
+    },
+    "/package_policies/delete": {
+      "post": {
+        "summary": "Package policy - Delete",
+        "operationId": "delete-package-policy",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "packagePolicyIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "force": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "packagePolicyIds"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "success": {
+                        "type": "boolean"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "success"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          }
+        ]
+      }
+    },
+    "/package_policies/{packagePolicyId}": {
+      "get": {
+        "summary": "Package policy - Info",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "item": {
+                      "$ref": "#/components/schemas/package_policy"
+                    }
+                  },
+                  "required": [
+                    "item"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "operationId": "get-package-policy"
       },
       "parameters": [
         {
@@ -1532,26 +1638,13 @@
         }
       ],
       "put": {
-        "summary": "PackagePolicies - Update",
-        "operationId": "put-packagePolicies-packagePolicyId",
+        "summary": "Package policy - Update",
+        "operationId": "update-package-policy",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "title": "UpdatePackagePolicy",
-                "allOf": [
-                  {
-                    "type": "object",
-                    "properties": {
-                      "version": {
-                        "type": "string"
-                      }
-                    }
-                  },
-                  {
-                    "$ref": "#/paths/~1package_policies/post/requestBody/content/application~1json/schema"
-                  }
-                ]
+                "$ref": "#/components/schemas/update_package_policy"
               }
             }
           }
@@ -1565,7 +1658,7 @@
                   "type": "object",
                   "properties": {
                     "item": {
-                      "$ref": "#/paths/~1package_policies~1%7BpackagePolicyId%7D/get/responses/200/content/application~1json/schema/properties/item"
+                      "$ref": "#/components/schemas/package_policy"
                     },
                     "sucess": {
                       "type": "boolean"
@@ -1582,14 +1675,14 @@
         },
         "parameters": [
           {
-            "$ref": "#/paths/~1setup/post/parameters/0"
+            "$ref": "#/components/parameters/kbn_xsrf"
           }
         ]
       }
     },
-    "/setup": {
-      "post": {
-        "summary": "Ingest Manager - Setup",
+    "/outputs": {
+      "get": {
+        "summary": "Outputs",
         "tags": [],
         "responses": {
           "200": {
@@ -1599,23 +1692,20 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "isInitialized": {
-                      "type": "boolean"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal Server Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "message": {
-                      "type": "string"
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/output"
+                      }
+                    },
+                    "total": {
+                      "type": "integer"
+                    },
+                    "page": {
+                      "type": "integer"
+                    },
+                    "perPage": {
+                      "type": "integer"
                     }
                   }
                 }
@@ -1623,18 +1713,139 @@
             }
           }
         },
-        "operationId": "post-setup",
+        "operationId": "get-outputs"
+      }
+    },
+    "/outputs/{outputId}": {
+      "get": {
+        "summary": "Output - Info",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "item": {
+                      "$ref": "#/components/schemas/output"
+                    }
+                  },
+                  "required": [
+                    "item"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "operationId": "get-output"
+      },
+      "parameters": [
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "outputId",
+          "in": "path",
+          "required": true
+        }
+      ],
+      "put": {
+        "summary": "Output - Update",
+        "operationId": "update-output",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "hosts": {
+                    "type": "string"
+                  },
+                  "ca_sha256": {
+                    "type": "string"
+                  },
+                  "config": {
+                    "type": "object"
+                  },
+                  "config_yaml": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "item": {
+                      "$ref": "#/components/schemas/output"
+                    }
+                  },
+                  "required": [
+                    "item"
+                  ]
+                }
+              }
+            }
+          }
+        },
         "parameters": [
           {
-            "schema": {
-              "type": "string"
-            },
-            "in": "header",
-            "name": "kbn-xsrf",
-            "required": true
+            "$ref": "#/components/parameters/kbn_xsrf"
           }
         ]
       }
+    },
+    "/epm/packages/{pkgName}/stats": {
+      "get": {
+        "summary": "Get stats for a package",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "response": {
+                      "$ref": "#/components/schemas/package_usage_stats"
+                    }
+                  },
+                  "required": [
+                    "response"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "operationId": "get-package-stats",
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ]
+      },
+      "parameters": [
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "pkgName",
+          "in": "path",
+          "required": true
+        }
+      ]
     }
   },
   "components": {
@@ -1643,17 +1854,838 @@
         "type": "http",
         "scheme": "basic"
       },
-      "Enrollment API Key": {
+      "Enrollment_API_Key": {
         "name": "Authorization",
         "type": "apiKey",
         "in": "header",
         "description": "e.g. Authorization: ApiKey base64EnrollmentApiKey"
       },
-      "Access API Key": {
+      "Access_API_Key": {
         "name": "Authorization",
         "type": "apiKey",
         "in": "header",
         "description": "e.g. Authorization: ApiKey base64AccessApiKey"
+      }
+    },
+    "parameters": {
+      "kbn_xsrf": {
+        "schema": {
+          "type": "string"
+        },
+        "in": "header",
+        "name": "kbn-xsrf",
+        "required": true
+      },
+      "page_size": {
+        "name": "perPage",
+        "in": "query",
+        "description": "The number of items to return",
+        "required": false,
+        "schema": {
+          "type": "integer",
+          "default": 50
+        }
+      },
+      "page_index": {
+        "name": "page",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "integer",
+          "default": 1
+        }
+      },
+      "kuery": {
+        "name": "kuery",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "string"
+        }
+      }
+    },
+    "schemas": {
+      "fleet_setup_response": {
+        "title": "Fleet Setup response",
+        "type": "object",
+        "properties": {
+          "isInitialized": {
+            "type": "boolean"
+          },
+          "nonFatalErrors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "name",
+                "message"
+              ]
+            }
+          }
+        },
+        "required": [
+          "isInitialized",
+          "nonFatalErrors"
+        ]
+      },
+      "settings": {
+        "title": "Settings",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "has_seen_add_data_notice": {
+            "type": "boolean"
+          },
+          "has_seen_fleet_migration_notice": {
+            "type": "boolean"
+          },
+          "fleet_server_hosts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "fleet_server_hosts",
+          "id"
+        ]
+      },
+      "fleet_settings_response": {
+        "title": "Fleet settings response",
+        "type": "object",
+        "properties": {
+          "item": {
+            "$ref": "#/components/schemas/settings"
+          }
+        },
+        "required": [
+          "item"
+        ]
+      },
+      "search_result": {
+        "title": "Search result",
+        "type": "object",
+        "properties": {
+          "description": {
+            "type": "string"
+          },
+          "download": {
+            "type": "string"
+          },
+          "icons": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "version": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "savedObject": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "description",
+          "download",
+          "icons",
+          "name",
+          "path",
+          "title",
+          "type",
+          "version",
+          "status"
+        ]
+      },
+      "package_info": {
+        "title": "Package information",
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "version": {
+            "type": "string"
+          },
+          "readme": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "categories": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "requirement": {
+            "oneOf": [
+              {
+                "properties": {
+                  "kibana": {
+                    "type": "object",
+                    "properties": {
+                      "versions": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "properties": {
+                  "elasticsearch": {
+                    "type": "object",
+                    "properties": {
+                      "versions": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            ],
+            "type": "object"
+          },
+          "screenshots": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "src": {
+                  "type": "string"
+                },
+                "path": {
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string"
+                },
+                "size": {
+                  "type": "string"
+                },
+                "type": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "src",
+                "path"
+              ]
+            }
+          },
+          "icons": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "assets": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "internal": {
+            "type": "boolean"
+          },
+          "format_version": {
+            "type": "string"
+          },
+          "data_streams": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "title": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "release": {
+                  "type": "string"
+                },
+                "ingeset_pipeline": {
+                  "type": "string"
+                },
+                "vars": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string"
+                      },
+                      "default": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "name",
+                      "default"
+                    ]
+                  }
+                },
+                "type": {
+                  "type": "string"
+                },
+                "package": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "title",
+                "name",
+                "release",
+                "ingeset_pipeline",
+                "type",
+                "package"
+              ]
+            }
+          },
+          "download": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          },
+          "removable": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "name",
+          "title",
+          "version",
+          "description",
+          "type",
+          "categories",
+          "requirement",
+          "assets",
+          "format_version",
+          "download",
+          "path"
+        ]
+      },
+      "kibana_saved_object_type": {
+        "title": "Kibana saved object asset type",
+        "type": "string",
+        "enum": [
+          "dashboard",
+          "visualization",
+          "search",
+          "index-pattern",
+          "map",
+          "lens",
+          "ml-module",
+          "security-rule"
+        ]
+      },
+      "elasticsearch_asset_type": {
+        "title": "Elasticsearch asset type",
+        "type": "string",
+        "enum": [
+          "component_template",
+          "ingest_pipeline",
+          "index_template",
+          "ilm_policy",
+          "transform",
+          "data_stream_ilm_policy"
+        ]
+      },
+      "fleet_status_response": {
+        "title": "Fleet status response",
+        "type": "object",
+        "properties": {
+          "isReady": {
+            "type": "boolean"
+          },
+          "missing_requirements": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "tls_required",
+                "api_keys",
+                "fleet_admin_user",
+                "fleet_server",
+                "encrypted_saved_object_encryption_key_required"
+              ]
+            }
+          }
+        },
+        "required": [
+          "isReady",
+          "missing_requirements"
+        ]
+      },
+      "agent_type": {
+        "type": "string",
+        "title": "Agent type",
+        "enum": [
+          "PERMANENT",
+          "EPHEMERAL",
+          "TEMPORARY"
+        ]
+      },
+      "agent_metadata": {
+        "title": "Agent metadata",
+        "type": "object"
+      },
+      "agent_status": {
+        "type": "string",
+        "title": "Agent status",
+        "enum": [
+          "offline",
+          "error",
+          "online",
+          "inactive",
+          "warning"
+        ]
+      },
+      "agent": {
+        "title": "Agent",
+        "type": "object",
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/agent_type"
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "enrolled_at": {
+            "type": "string"
+          },
+          "unenrolled_at": {
+            "type": "string"
+          },
+          "unenrollment_started_at": {
+            "type": "string"
+          },
+          "shared_id": {
+            "type": "string",
+            "deprecated": true
+          },
+          "access_api_key_id": {
+            "type": "string"
+          },
+          "default_api_key_id": {
+            "type": "string"
+          },
+          "policy_id": {
+            "type": "string"
+          },
+          "policy_revision": {
+            "type": "number"
+          },
+          "last_checkin": {
+            "type": "string"
+          },
+          "user_provided_metadata": {
+            "$ref": "#/components/schemas/agent_metadata"
+          },
+          "local_metadata": {
+            "$ref": "#/components/schemas/agent_metadata"
+          },
+          "id": {
+            "type": "string"
+          },
+          "access_api_key": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/agent_status"
+          },
+          "default_api_key": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "active",
+          "enrolled_at",
+          "id",
+          "status"
+        ]
+      },
+      "bulk_upgrade_agents": {
+        "title": "Bulk upgrade agents",
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "string"
+          },
+          "source_uri": {
+            "type": "string"
+          },
+          "agents": {
+            "oneOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              {
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "required": [
+          "agents",
+          "version"
+        ]
+      },
+      "upgrade_agent": {
+        "title": "Upgrade agent",
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "version": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "version"
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "version": {
+                "type": "string"
+              },
+              "source_uri": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "version"
+            ]
+          }
+        ]
+      },
+      "new_agent_policy": {
+        "title": "New agent policy",
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "namespace": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          }
+        }
+      },
+      "new_package_policy": {
+        "title": "New package policy",
+        "type": "object",
+        "description": "",
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "package": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "version": {
+                "type": "string"
+              },
+              "title": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "name",
+              "version",
+              "title"
+            ]
+          },
+          "namespace": {
+            "type": "string"
+          },
+          "output_id": {
+            "type": "string"
+          },
+          "inputs": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string"
+                },
+                "enabled": {
+                  "type": "boolean"
+                },
+                "processors": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "streams": {
+                  "type": "array",
+                  "items": {}
+                },
+                "config": {
+                  "type": "object"
+                },
+                "vars": {
+                  "type": "object"
+                }
+              },
+              "required": [
+                "type",
+                "enabled",
+                "streams"
+              ]
+            }
+          },
+          "policy_id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "output_id",
+          "inputs",
+          "policy_id",
+          "name"
+        ]
+      },
+      "package_policy": {
+        "title": "Package policy",
+        "allOf": [
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "revision": {
+                "type": "number"
+              },
+              "inputs": {
+                "type": "array",
+                "items": {}
+              }
+            },
+            "required": [
+              "id",
+              "revision"
+            ]
+          },
+          {
+            "$ref": "#/components/schemas/new_package_policy"
+          }
+        ]
+      },
+      "agent_policy": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/new_agent_policy"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "active",
+                  "inactive"
+                ]
+              },
+              "packagePolicies": {
+                "oneOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/package_policy"
+                    }
+                  }
+                ]
+              },
+              "updated_on": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "updated_by": {
+                "type": "string"
+              },
+              "revision": {
+                "type": "number"
+              },
+              "agents": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "id",
+              "status"
+            ]
+          }
+        ]
+      },
+      "enrollment_api_key": {
+        "title": "Enrollment API key",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "api_key_id": {
+            "type": "string"
+          },
+          "api_key": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "policy_id": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "api_key_id",
+          "api_key",
+          "active",
+          "created_at"
+        ]
+      },
+      "update_package_policy": {
+        "title": "Update package policy",
+        "allOf": [
+          {
+            "type": "object",
+            "properties": {
+              "version": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "$ref": "#/components/schemas/new_package_policy"
+          }
+        ]
+      },
+      "output": {
+        "title": "Output",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "is_default": {
+            "type": "boolean"
+          },
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "elasticsearch"
+            ]
+          },
+          "hosts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "ca_sha256": {
+            "type": "string"
+          },
+          "api_key": {
+            "type": "string"
+          },
+          "config": {
+            "type": "object"
+          },
+          "config_yaml": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "is_default",
+          "name",
+          "type"
+        ]
+      },
+      "package_usage_stats": {
+        "title": "Package usage stats",
+        "type": "object",
+        "properties": {
+          "agent_policy_count": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "agent_policy_count"
+        ]
       }
     }
   },

@@ -18,10 +18,9 @@ import { i18n } from '@kbn/i18n';
 
 import './search_experience.scss';
 
-import { externalUrl } from '../../../../shared/enterprise_search_url';
+import { HttpLogic } from '../../../../shared/http';
 import { useLocalStorage } from '../../../../shared/use_local_storage';
 import { EngineLogic } from '../../engine';
-import { EmptyState } from '../components';
 
 import { buildSearchUIConfig } from './build_search_ui_config';
 import { buildSortOptions } from './build_sort_options';
@@ -53,7 +52,8 @@ const DEFAULT_SORT_OPTIONS: SortOption[] = [
 
 export const SearchExperience: React.FC = () => {
   const { engine } = useValues(EngineLogic);
-  const endpointBase = externalUrl.enterpriseSearchUrl;
+  const { http } = useValues(HttpLogic);
+  const endpointBase = http.basePath.prepend('/api/app_search/search-ui');
 
   const [showCustomizationModal, setShowCustomizationModal] = useState(false);
   const openCustomizationModal = () => setShowCustomizationModal(true);
@@ -73,7 +73,9 @@ export const SearchExperience: React.FC = () => {
     cacheResponses: false,
     endpointBase,
     engineName: engine.name,
-    searchKey: engine.apiKey,
+    additionalHeaders: {
+      'kbn-xsrf': true,
+    },
   });
 
   const searchProviderConfig = buildSearchUIConfig(connector, engine.schema || {}, fields);
@@ -141,11 +143,7 @@ export const SearchExperience: React.FC = () => {
             )}
           </EuiFlexItem>
           <EuiFlexItem className="documentsSearchExperience__content">
-            {engine.document_count && engine.document_count > 0 ? (
-              <SearchExperienceContent />
-            ) : (
-              <EmptyState />
-            )}
+            <SearchExperienceContent />
           </EuiFlexItem>
         </EuiFlexGroup>
       </SearchProvider>

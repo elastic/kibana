@@ -5,33 +5,35 @@
  * 2.0.
  */
 
+import type { EVENT_KIND as EVENT_KIND_TYPED } from '@kbn/rule-data-utils';
+// @ts-expect-error
+import { EVENT_KIND as EVENT_KIND_NON_TYPED } from '@kbn/rule-data-utils/target_node/technical_field_names';
+import { IRuleDataClient } from '../../../../rule_registry/server';
 import {
   SERVICE_NAME,
   TRANSACTION_TYPE,
 } from '../../../common/elasticsearch_fieldnames';
-import type { PromiseReturnType } from '../../../../observability/typings/common';
-import type { APMRuleRegistry } from '../../plugin';
-import { environmentQuery, rangeQuery } from '../../utils/queries';
+import { rangeQuery } from '../../../../observability/server';
+import { environmentQuery } from '../../../common/utils/environment_query';
+
+const EVENT_KIND: typeof EVENT_KIND_TYPED = EVENT_KIND_NON_TYPED;
 
 export async function getServiceAlerts({
-  apmRuleRegistryClient,
+  ruleDataClient,
   start,
   end,
   serviceName,
   environment,
   transactionType,
 }: {
-  apmRuleRegistryClient: Exclude<
-    PromiseReturnType<APMRuleRegistry['createScopedRuleRegistryClient']>,
-    undefined
-  >;
+  ruleDataClient: IRuleDataClient;
   start: number;
   end: number;
   serviceName: string;
-  environment?: string;
+  environment: string;
   transactionType: string;
 }) {
-  const response = await apmRuleRegistryClient.search({
+  const response = await ruleDataClient.getReader().search({
     body: {
       query: {
         bool: {
@@ -39,6 +41,7 @@ export async function getServiceAlerts({
             ...rangeQuery(start, end),
             ...environmentQuery(environment),
             { term: { [SERVICE_NAME]: serviceName } },
+            { term: { [EVENT_KIND]: 'signal' } },
           ],
           should: [
             {
@@ -67,14 +70,12 @@ export async function getServiceAlerts({
       },
       size: 100,
       fields: ['*'],
-      collapse: {
-        field: 'kibana.rac.alert.uuid',
-      },
       sort: {
         '@timestamp': 'desc',
       },
     },
+    allow_no_indices: true,
   });
 
-  return response.events;
+  return response.hits.hits.map((hit) => hit.fields);
 }

@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
+import { useInvalidFilterQuery } from '../../../../common/hooks/use_invalid_filter_query';
 import { FlowTarget } from '../../../../../common/search_strategy';
 import { NetworkDetailsLink } from '../../../../common/components/links';
 import { IpOverview } from '../../../../network/components/details';
@@ -97,7 +98,7 @@ export const ExpandableNetworkDetails = ({
   } = useKibana();
 
   const { docValueFields, indicesExist, indexPattern, selectedPatterns } = useSourcererScope();
-  const filterQuery = convertToBuildEsQuery({
+  const [filterQuery, kqlError] = convertToBuildEsQuery({
     config: esQuery.getEsQueryConfig(uiSettings),
     indexPattern,
     queries: [query],
@@ -106,11 +107,13 @@ export const ExpandableNetworkDetails = ({
 
   const [loading, { id, networkDetails }] = useNetworkDetails({
     docValueFields,
-    skip: isInitializing,
+    skip: isInitializing || filterQuery === undefined,
     filterQuery,
     indexNames: selectedPatterns,
     ip,
   });
+
+  useInvalidFilterQuery({ id, filterQuery, kqlError, query, startDate: from, endDate: to });
 
   const [isLoadingAnomaliesData, anomaliesData] = useAnomaliesTableData({
     criteriaFields: networkToCriteria(ip, flowTarget),

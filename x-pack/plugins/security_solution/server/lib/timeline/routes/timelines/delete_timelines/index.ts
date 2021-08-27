@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithExcess } from '../../../../../utils/build_validation/route_validation';
 import { ConfigType } from '../../../../..';
 import { deleteTimelinesSchema } from '../../../schemas/timelines/delete_timelines_schema';
 import { SecuritySolutionPluginRouter } from '../../../../../types';
 import { SetupPlugins } from '../../../../../plugin';
 import { TIMELINE_URL } from '../../../../../../common/constants';
-import { transformError, buildSiemResponse } from '../../../../detection_engine/routes/utils';
+import { buildSiemResponse } from '../../../../detection_engine/routes/utils';
+
 import { buildFrameworkRequest } from '../../../utils/common';
 import { deleteTimeline } from '../../../saved_object/timelines';
 

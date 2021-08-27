@@ -11,13 +11,13 @@ import React, { Component } from 'react';
 import { FeatureCollection } from 'geojson';
 import { EuiPanel } from '@elastic/eui';
 import { DEFAULT_MAX_RESULT_WINDOW, SCALING_TYPES } from '../../../../common/constants';
-import { getFileUpload } from '../../../kibana_services';
 import { GeoJsonFileSource } from '../../sources/geojson_file_source';
 import { VectorLayer } from '../../layers/vector_layer';
 import { createDefaultLayerDescriptor } from '../../sources/es_search_source';
 import { RenderWizardArguments } from '../../layers/layer_wizard_registry';
-import { FileUploadComponentProps, FileUploadGeoResults } from '../../../../../file_upload/public';
+import { FileUploadGeoResults } from '../../../../../file_upload/public';
 import { ES_FIELD_TYPES } from '../../../../../../../src/plugins/data/public';
+import { getFileUploadComponent } from '../../../kibana_services';
 
 export enum UPLOAD_STEPS {
   CONFIGURE_UPLOAD = 'CONFIGURE_UPLOAD',
@@ -34,7 +34,6 @@ enum INDEXING_STAGE {
 
 interface State {
   indexingStage: INDEXING_STAGE;
-  fileUploadComponent: React.ComponentType<FileUploadComponentProps> | null;
   results?: FileUploadGeoResults;
 }
 
@@ -43,12 +42,10 @@ export class ClientFileCreateSourceEditor extends Component<RenderWizardArgument
 
   state: State = {
     indexingStage: INDEXING_STAGE.CONFIGURE,
-    fileUploadComponent: null,
   };
 
   componentDidMount() {
     this._isMounted = true;
-    this._loadFileUploadComponent();
   }
 
   componentWillUnmount() {
@@ -91,13 +88,6 @@ export class ClientFileCreateSourceEditor extends Component<RenderWizardArgument
     this.props.advanceToNextStep();
   });
 
-  async _loadFileUploadComponent() {
-    const fileUploadComponent = await getFileUpload().getFileUploadComponent();
-    if (this._isMounted) {
-      this.setState({ fileUploadComponent });
-    }
-  }
-
   _onFileSelect = (geojsonFile: FeatureCollection, name: string, previewCoverage: number) => {
     if (!this._isMounted) {
       return;
@@ -116,7 +106,7 @@ export class ClientFileCreateSourceEditor extends Component<RenderWizardArgument
         ? i18n.translate('xpack.maps.fileUpload.trimmedResultsMsg', {
             defaultMessage: `Results limited to {numFeatures} features, {previewCoverage}% of file.`,
             values: {
-              numFeatures: geojsonFile.features.length,
+              numFeatures: geojsonFile.features.length.toLocaleString(),
               previewCoverage,
             },
           })
@@ -157,11 +147,8 @@ export class ClientFileCreateSourceEditor extends Component<RenderWizardArgument
   };
 
   render() {
-    if (!this.state.fileUploadComponent) {
-      return null;
-    }
+    const FileUpload = getFileUploadComponent();
 
-    const FileUpload = this.state.fileUploadComponent;
     return (
       <EuiPanel>
         <FileUpload

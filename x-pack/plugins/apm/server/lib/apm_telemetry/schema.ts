@@ -74,6 +74,7 @@ const apmPerAgentSchema: Pick<
   //  In the meanwhile, we'll have to maintain these lists up to date (TS will remind us to update)
   services_per_agent: {
     dotnet: long,
+    'iOS/swift': long,
     go: long,
     java: long,
     'js-base': long,
@@ -92,10 +93,12 @@ const apmPerAgentSchema: Pick<
     'opentelemetry/php': long,
     'opentelemetry/python': long,
     'opentelemetry/ruby': long,
+    'opentelemetry/swift': long,
     'opentelemetry/webjs': long,
   },
   agents: {
     dotnet: agentSchema,
+    'iOS/swift': agentSchema,
     go: agentSchema,
     java: agentSchema,
     'js-base': agentSchema,
@@ -135,6 +138,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage> = {
     provider: { type: 'array', items: { type: 'keyword' } },
     region: { type: 'array', items: { type: 'keyword' } },
   },
+  host: { os: { platform: { type: 'array', items: { type: 'keyword' } } } },
   counts: {
     transaction: timeframeMapSchema,
     span: timeframeMapSchema,
@@ -185,6 +189,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage> = {
   tasks: {
     aggregated_transactions: { took: { ms: long } },
     cloud: { took: { ms: long } },
+    host: { took: { ms: long } },
     processor_events: { took: { ms: long } },
     agent_configuration: { took: { ms: long } },
     services: { took: { ms: long } },

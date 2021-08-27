@@ -50,9 +50,7 @@ export interface DeleteDataFrameAnalyticsWithIndexResponse {
 }
 
 export interface JobsExistsResponse {
-  results: {
-    [jobId: string]: boolean;
-  };
+  [jobId: string]: { exists: boolean };
 }
 
 export const dataFrameAnalytics = {
@@ -108,7 +106,7 @@ export const dataFrameAnalytics = {
       query: { treatAsRoot, type },
     });
   },
-  jobsExists(analyticsIds: string[], allSpaces: boolean = false) {
+  jobsExist(analyticsIds: string[], allSpaces: boolean = false) {
     const body = JSON.stringify({ analyticsIds, allSpaces });
     return http<JobsExistsResponse>({
       path: `${basePath()}/data_frame/analytics/jobs_exist`,

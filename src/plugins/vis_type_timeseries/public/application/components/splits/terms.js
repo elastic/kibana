@@ -27,6 +27,7 @@ import {
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import { KBN_FIELD_TYPES } from '../../../../../data/public';
 import { STACKED_OPTIONS } from '../../visualizations/constants';
+import { getIndexPatternKey } from '../../../../common/index_patterns_utils';
 
 const DEFAULTS = { terms_direction: 'desc', terms_size: 10, terms_order_by: '_count' };
 
@@ -75,10 +76,11 @@ export const SplitByTermsUI = ({
       }),
     },
   ];
+  const fieldsSelector = getIndexPatternKey(indexPattern);
   const selectedDirectionOption = dirOptions.find((option) => {
     return model.terms_direction === option.value;
   });
-  const selectedField = find(fields[indexPattern], ({ name }) => name === model.terms_field);
+  const selectedField = find(fields[fieldsSelector], ({ name }) => name === model.terms_field);
   const selectedFieldType = get(selectedField, 'type');
 
   if (
@@ -144,6 +146,7 @@ export const SplitByTermsUI = ({
               <EuiFieldText
                 value={model.terms_include}
                 onChange={handleTextChange('terms_include')}
+                data-test-subj="groupByInclude"
               />
             </EuiFormRow>
           </EuiFlexItem>
@@ -160,6 +163,7 @@ export const SplitByTermsUI = ({
               <EuiFieldText
                 value={model.terms_exclude}
                 onChange={handleTextChange('terms_exclude')}
+                data-test-subj="groupByExclude"
               />
             </EuiFormRow>
           </EuiFlexItem>
@@ -198,7 +202,7 @@ export const SplitByTermsUI = ({
               metrics={metrics}
               clearable={false}
               additionalOptions={[defaultCount, terms]}
-              fields={fields[indexPattern]}
+              fields={fields[fieldsSelector]}
               onChange={handleSelectChange('terms_order_by')}
               restrict="basic"
               value={model.terms_order_by}

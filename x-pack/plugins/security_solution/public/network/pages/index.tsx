@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { Route, Switch, RouteComponentProps, useHistory } from 'react-router-dom';
+import { Redirect, Route, Switch } from 'react-router-dom';
 
 import { useMlCapabilities } from '../../common/components/ml/hooks/use_ml_capabilities';
 import { hasMlUserPermissions } from '../../../common/machine_learning/has_ml_user_permissions';
@@ -17,14 +17,11 @@ import { getNetworkRoutePath } from './navigation';
 import { NetworkRouteType } from './navigation/types';
 import { MlNetworkConditionalContainer } from '../../common/components/ml/conditional_links/ml_network_conditional_container';
 import { FlowTarget } from '../../../common/search_strategy';
+import { NETWORK_PATH } from '../../../common/constants';
 
-type Props = Partial<RouteComponentProps<{}>> & { url: string };
+const ipDetailsPageBasePath = `${NETWORK_PATH}/ip/:detailName`;
 
-const networkPagePath = '';
-const ipDetailsPageBasePath = `/ip/:detailName`;
-
-const NetworkContainerComponent: React.FC<Props> = () => {
-  const history = useHistory();
+const NetworkContainerComponent = () => {
   const capabilities = useMlCapabilities();
   const capabilitiesFetched = capabilities.capabilitiesFetched;
   const userHasMlUserPermissions = useMemo(() => hasMlUserPermissions(capabilities), [
@@ -38,14 +35,18 @@ const NetworkContainerComponent: React.FC<Props> = () => {
   return (
     <Switch>
       <Route
-        path="/ml-network"
-        render={({ location, match }) => (
-          <MlNetworkConditionalContainer location={location} url={match.url} />
+        exact
+        strict
+        path={NETWORK_PATH}
+        render={({ location: { search = '' } }) => (
+          <Redirect to={{ pathname: `${NETWORK_PATH}/${NetworkRouteType.flows}`, search }} />
         )}
       />
+      <Route path={`${NETWORK_PATH}/ml-network`}>
+        <MlNetworkConditionalContainer />
+      </Route>
       <Route strict path={networkRoutePath}>
         <Network
-          networkPagePath={networkPagePath}
           capabilitiesFetched={capabilities.capabilitiesFetched}
           hasMlUserPermissions={userHasMlUserPermissions}
         />
@@ -60,17 +61,14 @@ const NetworkContainerComponent: React.FC<Props> = () => {
           match: {
             params: { detailName },
           },
-        }) => {
-          history.replace(`ip/${detailName}/${FlowTarget.source}${search}`);
-          return null;
-        }}
-      />
-      <Route
-        path="/"
-        render={({ location: { search = '' } }) => {
-          history.replace(`${NetworkRouteType.flows}${search}`);
-          return null;
-        }}
+        }) => (
+          <Redirect
+            to={{
+              pathname: `${NETWORK_PATH}/ip/${detailName}/${FlowTarget.source}`,
+              search,
+            }}
+          />
+        )}
       />
     </Switch>
   );

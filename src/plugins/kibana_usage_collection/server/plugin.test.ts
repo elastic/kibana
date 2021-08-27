@@ -16,7 +16,6 @@ import {
   createUsageCollectionSetupMock,
 } from '../../usage_collection/server/mocks';
 import { cloudDetailsMock } from './mocks';
-
 import { plugin } from './';
 
 describe('kibana_usage_collection', () => {
@@ -70,6 +69,10 @@ describe('kibana_usage_collection', () => {
           "type": "kibana",
         },
         Object {
+          "isReady": true,
+          "type": "saved_objects_counts",
+        },
+        Object {
           "isReady": false,
           "type": "stack_management",
         },
@@ -100,6 +103,10 @@ describe('kibana_usage_collection', () => {
         Object {
           "isReady": true,
           "type": "localization",
+        },
+        Object {
+          "isReady": false,
+          "type": "event_loop_delays",
         },
       ]
     `);

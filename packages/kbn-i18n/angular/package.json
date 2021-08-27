@@ -1,5 +1,5 @@
 {
-  "browser": "../target/web/angular",
-  "main": "../target/node/angular",
-  "types": "../target/types/angular/index.d.ts"
+  "browser": "../target_web/angular",
+  "main": "../target_node/angular",
+  "types": "../target_types/angular/index.d.ts"
 }

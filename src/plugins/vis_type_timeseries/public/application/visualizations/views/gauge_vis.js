@@ -12,6 +12,7 @@ import _ from 'lodash';
 import reactcss from 'reactcss';
 import { calculateCoordinates } from '../lib/calculate_coordinates';
 import { COLORS } from '../constants/chart';
+import { isEmptyValue } from '../../../../common/last_value_utils';
 
 export class GaugeVis extends Component {
   constructor(props) {
@@ -55,10 +56,14 @@ export class GaugeVis extends Component {
 
   render() {
     const { type, value, max, color } = this.props;
+
+    // if value is empty array, no metrics to display.
+    const formattedValue = isEmptyValue(value) ? 1 : value;
+
     const { scale, translateX, translateY } = this.state;
     const size = 2 * Math.PI * 50;
     const sliceSize = type === 'half' ? 0.6 : 1;
-    const percent = value < max ? value / max : 1;
+    const percent = formattedValue < max ? formattedValue / max : 1;
     const styles = reactcss(
       {
         default: {
@@ -126,15 +131,19 @@ export class GaugeVis extends Component {
     if (type === 'half') {
       svg = (
         <svg width={120.72} height={78.72}>
-          <circle {...props.circleBackground} style={styles.innerLine} />
-          <circle {...props.circle} style={styles.gaugeLine} />
+          <circle
+            {...props.circleBackground}
+            style={styles.innerLine}
+            data-test-subj="gaugeCircleInner"
+          />
+          <circle {...props.circle} style={styles.gaugeLine} data-test-subj="gaugeCircle" />
         </svg>
       );
     } else {
       svg = (
         <svg width={120.72} height={120.72}>
-          <circle {...props.circleBackground} />
-          <circle {...props.circle} />
+          <circle {...props.circleBackground} data-test-subj="gaugeCircleInner" />
+          <circle {...props.circle} data-test-subj="gaugeCircle" />
         </svg>
       );
     }
@@ -161,6 +170,6 @@ GaugeVis.propTypes = {
   max: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   metric: PropTypes.object,
   reversed: PropTypes.bool,
-  value: PropTypes.number,
+  value: PropTypes.oneOfType([PropTypes.string, PropTypes.number, PropTypes.array]),
   type: PropTypes.oneOf(['half', 'circle']),
 };

@@ -9,10 +9,10 @@
     "logs-endpoint.events.*",
     "logs-windows.*"
   ],
-  "language": "kuery",
+  "language": "eql",
   "license": "Elastic License v2",
   "name": "Remote File Download via Desktopimgdownldr Utility",
-  "query": "event.category:process and event.type:(start or process_started) and (process.name:desktopimgdownldr.exe or process.pe.original_file_name:desktopimgdownldr.exe) and process.args:/lockscreenurl\\:http*",
+  "query": "process where event.type in (\"start\", \"process_started\") and\n  (process.name : \"desktopimgdownldr.exe\" or process.pe.original_file_name == \"desktopimgdownldr.exe\") and\n  process.args : \"/lockscreenurl:http*\"\n",
   "references": [
     "https://labs.sentinelone.com/living-off-windows-land-a-new-native-file-downldr/"
   ],
@@ -44,6 +44,6 @@
     }
   ],
   "timestamp_override": "event.ingested",
-  "type": "query",
-  "version": 4
+  "type": "eql",
+  "version": 5
 }

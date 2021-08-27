@@ -52,7 +52,12 @@ export const Append: FunctionComponent = () => {
         })}
       />
 
-      <UseField config={fieldsConfig.value} component={ComboBoxField} path="fields.value" />
+      <UseField
+        data-test-subj="appendValueField"
+        config={fieldsConfig.value}
+        component={ComboBoxField}
+        path="fields.value"
+      />
     </>
   );
 };

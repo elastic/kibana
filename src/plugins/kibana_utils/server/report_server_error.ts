@@ -24,6 +24,7 @@ export class KbnServerError extends KbnError {
  * @returns `KbnServerError`
  */
 export function getKbnServerError(e: Error) {
+  if (e instanceof KbnServerError) return e;
   return new KbnServerError(
     e.message ?? 'Unknown error',
     e instanceof ResponseError ? e.statusCode : 500,

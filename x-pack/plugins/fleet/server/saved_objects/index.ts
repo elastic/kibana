@@ -15,7 +15,6 @@ import {
   PACKAGES_SAVED_OBJECT_TYPE,
   ASSETS_SAVED_OBJECT_TYPE,
   AGENT_SAVED_OBJECT_TYPE,
-  AGENT_EVENT_SAVED_OBJECT_TYPE,
   AGENT_ACTION_SAVED_OBJECT_TYPE,
   ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE,
   GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
@@ -24,7 +23,6 @@ import {
 
 import {
   migrateAgentActionToV7100,
-  migrateAgentEventToV7100,
   migrateAgentPolicyToV7100,
   migrateAgentToV7100,
   migrateEnrollmentApiKeysToV7100,
@@ -44,6 +42,8 @@ import {
   migrateSettingsToV7130,
   migrateOutputToV7130,
 } from './migrations/to_v7_13_0';
+import { migratePackagePolicyToV7140, migrateInstallationToV7140 } from './migrations/to_v7_14_0';
+import { migratePackagePolicyToV7150 } from './migrations/to_v7_15_0';
 
 /*
  * Saved object types and mappings
@@ -133,33 +133,6 @@ const getSavedObjectTypes = (
       '7.10.0': migrateAgentActionToV7100(encryptedSavedObjects),
     },
   },
-  // TODO: Remove this saved object type. Core will drop any saved objects of
-  // this type during migrations. See https://github.com/elastic/kibana/issues/91869
-  [AGENT_EVENT_SAVED_OBJECT_TYPE]: {
-    name: AGENT_EVENT_SAVED_OBJECT_TYPE,
-    hidden: false,
-    namespaceType: 'agnostic',
-    management: {
-      importableAndExportable: false,
-    },
-    mappings: {
-      properties: {
-        type: { type: 'keyword' },
-        subtype: { type: 'keyword' },
-        agent_id: { type: 'keyword' },
-        action_id: { type: 'keyword' },
-        policy_id: { type: 'keyword' },
-        stream_id: { type: 'keyword' },
-        timestamp: { type: 'date' },
-        message: { type: 'text' },
-        payload: { type: 'text' },
-        data: { type: 'text' },
-      },
-    },
-    migrations: {
-      '7.10.0': migrateAgentEventToV7100,
-    },
-  },
   [AGENT_POLICY_SAVED_OBJECT_TYPE]: {
     name: AGENT_POLICY_SAVED_OBJECT_TYPE,
     hidden: false,
@@ -177,6 +150,7 @@ const getSavedObjectTypes = (
         is_managed: { type: 'boolean' },
         status: { type: 'keyword' },
         package_policies: { type: 'keyword' },
+        unenroll_timeout: { type: 'integer' },
         updated_at: { type: 'date' },
         updated_by: { type: 'keyword' },
         revision: { type: 'integer' },
@@ -257,11 +231,13 @@ const getSavedObjectTypes = (
             version: { type: 'keyword' },
           },
         },
+        vars: { type: 'flattened' },
         inputs: {
           type: 'nested',
           enabled: false,
           properties: {
             type: { type: 'keyword' },
+            policy_template: { type: 'keyword' },
             enabled: { type: 'boolean' },
             vars: { type: 'flattened' },
             config: { type: 'flattened' },
@@ -296,6 +272,8 @@ const getSavedObjectTypes = (
       '7.11.0': migratePackagePolicyToV7110,
       '7.12.0': migratePackagePolicyToV7120,
       '7.13.0': migratePackagePolicyToV7130,
+      '7.14.0': migratePackagePolicyToV7140,
+      '7.15.0': migratePackagePolicyToV7150,
     },
   },
   [PACKAGES_SAVED_OBJECT_TYPE]: {
@@ -341,6 +319,10 @@ const getSavedObjectTypes = (
         install_status: { type: 'keyword' },
         install_source: { type: 'keyword' },
       },
+    },
+    migrations: {
+      '7.14.0': migrateInstallationToV7140,
+      '7.14.1': migrateInstallationToV7140,
     },
   },
   [ASSETS_SAVED_OBJECT_TYPE]: {

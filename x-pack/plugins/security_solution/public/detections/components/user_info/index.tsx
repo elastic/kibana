@@ -8,7 +8,7 @@
 import { noop } from 'lodash/fp';
 import React, { useEffect, useReducer, Dispatch, createContext, useContext } from 'react';
 
-import { usePrivilegeUser } from '../../containers/detection_engine/alerts/use_privilege_user';
+import { useAlertsPrivileges } from '../../containers/detection_engine/alerts/use_alerts_privileges';
 import { useSignalIndex } from '../../containers/detection_engine/alerts/use_signal_index';
 import { useKibana } from '../../../common/lib/kibana';
 import { useCreateTransforms } from '../../../transforms/containers/use_create_transforms';
@@ -18,6 +18,7 @@ export interface State {
   hasIndexManage: boolean | null;
   hasIndexMaintenance: boolean | null;
   hasIndexWrite: boolean | null;
+  hasIndexRead: boolean | null;
   hasIndexUpdateDelete: boolean | null;
   isSignalIndexExists: boolean | null;
   isAuthenticated: boolean | null;
@@ -32,6 +33,7 @@ export const initialState: State = {
   hasIndexManage: null,
   hasIndexMaintenance: null,
   hasIndexWrite: null,
+  hasIndexRead: null,
   hasIndexUpdateDelete: null,
   isSignalIndexExists: null,
   isAuthenticated: null,
@@ -54,6 +56,10 @@ export type Action =
   | {
       type: 'updateHasIndexWrite';
       hasIndexWrite: boolean | null;
+    }
+  | {
+      type: 'updateHasIndexRead';
+      hasIndexRead: boolean | null;
     }
   | {
       type: 'updateHasIndexUpdateDelete';
@@ -108,6 +114,12 @@ export const userInfoReducer = (state: State, action: Action): State => {
       return {
         ...state,
         hasIndexWrite: action.hasIndexWrite,
+      };
+    }
+    case 'updateHasIndexRead': {
+      return {
+        ...state,
+        hasIndexRead: action.hasIndexRead,
       };
     }
     case 'updateHasIndexUpdateDelete': {
@@ -178,6 +190,7 @@ export const useUserInfo = (): State => {
       hasIndexManage,
       hasIndexMaintenance,
       hasIndexWrite,
+      hasIndexRead,
       hasIndexUpdateDelete,
       isSignalIndexExists,
       isAuthenticated,
@@ -194,9 +207,10 @@ export const useUserInfo = (): State => {
     hasEncryptionKey: isApiEncryptionKey,
     hasIndexManage: hasApiIndexManage,
     hasIndexMaintenance: hasApiIndexMaintenance,
-    hasIndexWrite: hasApiIndexWrite,
     hasIndexUpdateDelete: hasApiIndexUpdateDelete,
-  } = usePrivilegeUser();
+    hasIndexWrite: hasApiIndexWrite,
+    hasIndexRead: hasApiIndexRead,
+  } = useAlertsPrivileges();
   const {
     loading: indexNameLoading,
     signalIndexExists: isApiSignalIndexExists,
@@ -208,8 +222,7 @@ export const useUserInfo = (): State => {
   const { createTransforms } = useCreateTransforms();
 
   const uiCapabilities = useKibana().services.application.capabilities;
-  const capabilitiesCanUserCRUD: boolean =
-    typeof uiCapabilities.siem.crud === 'boolean' ? uiCapabilities.siem.crud : false;
+  const capabilitiesCanUserCRUD: boolean = uiCapabilities.siem.crud === true;
 
   useEffect(() => {
     if (loading !== (privilegeLoading || indexNameLoading)) {
@@ -228,6 +241,12 @@ export const useUserInfo = (): State => {
       dispatch({ type: 'updateHasIndexWrite', hasIndexWrite: hasApiIndexWrite });
     }
   }, [dispatch, loading, hasIndexWrite, hasApiIndexWrite]);
+
+  useEffect(() => {
+    if (!loading && hasIndexRead !== hasApiIndexRead && hasApiIndexRead != null) {
+      dispatch({ type: 'updateHasIndexRead', hasIndexRead: hasApiIndexRead });
+    }
+  }, [dispatch, loading, hasIndexRead, hasApiIndexRead]);
 
   useEffect(() => {
     if (
@@ -275,7 +294,7 @@ export const useUserInfo = (): State => {
   }, [dispatch, loading, hasEncryptionKey, isApiEncryptionKey]);
 
   useEffect(() => {
-    if (!loading && canUserCRUD !== capabilitiesCanUserCRUD && capabilitiesCanUserCRUD != null) {
+    if (!loading && canUserCRUD !== capabilitiesCanUserCRUD) {
       dispatch({ type: 'updateCanUserCRUD', canUserCRUD: capabilitiesCanUserCRUD });
     }
   }, [dispatch, loading, canUserCRUD, capabilitiesCanUserCRUD]);
@@ -335,6 +354,7 @@ export const useUserInfo = (): State => {
     hasIndexManage,
     hasIndexMaintenance,
     hasIndexWrite,
+    hasIndexRead,
     hasIndexUpdateDelete,
     signalIndexName,
     signalIndexMappingOutdated,

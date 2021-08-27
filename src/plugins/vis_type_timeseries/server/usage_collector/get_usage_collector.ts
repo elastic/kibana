@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { TIME_RANGE_DATA_MODES } from '../../common/timerange_data_modes';
+import { TIME_RANGE_DATA_MODES } from '../../common/enums';
 import { findByValueEmbeddables } from '../../../dashboard/server';
 
 import type {

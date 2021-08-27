@@ -21,6 +21,8 @@ import {
   tooltipContentIsExplicitlyNull,
 } from '.';
 
+jest.mock('../../lib/kibana');
+
 describe('draggables', () => {
   const mount = useMountAppended();
 

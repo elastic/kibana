@@ -25,18 +25,21 @@ import {
   EuiComboBox,
   EuiComboBoxOptionOption,
 } from '@elastic/eui';
+import type {
+  ExceptionListType,
+  OsTypeArray,
+  ExceptionListItemSchema,
+  CreateExceptionListItemSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
+import { ExceptionsBuilderExceptionItem } from '@kbn/securitysolution-list-utils';
 import {
   hasEqlSequenceQuery,
   isEqlRule,
   isThresholdRule,
 } from '../../../../../common/detection_engine/utils';
 import { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
-import {
-  ExceptionListItemSchema,
-  CreateExceptionListItemSchema,
-  ExceptionListType,
-  ExceptionBuilder,
-} from '../../../../../public/shared_imports';
+import { ExceptionBuilder } from '../../../../../public/shared_imports';
+
 import * as i18nCommon from '../../../translations';
 import * as i18n from './translations';
 import * as sharedI18n from '../translations';
@@ -59,10 +62,9 @@ import {
   filterIndexPatterns,
 } from '../helpers';
 import { ErrorInfo, ErrorCallout } from '../error_callout';
-import { AlertData, ExceptionsBuilderExceptionItem } from '../types';
+import { AlertData } from '../types';
 import { useFetchIndex } from '../../../containers/source';
 import { useGetInstalledJob } from '../../ml/hooks/use_get_jobs';
-import { OsTypeArray, OsType } from '../../../../../../lists/common/schemas';
 
 export interface AddExceptionModalProps {
   ruleName: string;
@@ -300,10 +302,10 @@ export const AddExceptionModal = memo(function AddExceptionModal({
     return alertData !== undefined;
   }, [alertData]);
 
-  const [selectedOs, setSelectedOs] = useState<OsType | undefined>();
+  const [selectedOs, setSelectedOs] = useState<OsTypeArray | undefined>();
 
   const osTypesSelection = useMemo((): OsTypeArray => {
-    return hasAlertData ? retrieveAlertOsTypes(alertData) : selectedOs ? [selectedOs] : [];
+    return hasAlertData ? retrieveAlertOsTypes(alertData) : selectedOs ? [...selectedOs] : [];
   }, [hasAlertData, alertData, selectedOs]);
 
   const enrichExceptionItems = useCallback((): Array<
@@ -356,21 +358,25 @@ export const AddExceptionModal = memo(function AddExceptionModal({
     return false;
   }, [maybeRule]);
 
-  const OsOptions: Array<EuiComboBoxOptionOption<OsType>> = useMemo((): Array<
-    EuiComboBoxOptionOption<OsType>
+  const OsOptions: Array<EuiComboBoxOptionOption<OsTypeArray>> = useMemo((): Array<
+    EuiComboBoxOptionOption<OsTypeArray>
   > => {
     return [
       {
         label: sharedI18n.OPERATING_SYSTEM_WINDOWS,
-        value: 'windows',
+        value: ['windows'],
       },
       {
         label: sharedI18n.OPERATING_SYSTEM_MAC,
-        value: 'macos',
+        value: ['macos'],
       },
       {
         label: sharedI18n.OPERATING_SYSTEM_LINUX,
-        value: 'linux',
+        value: ['linux'],
+      },
+      {
+        label: sharedI18n.OPERATING_SYSTEM_WINDOWS_AND_MAC,
+        value: ['windows', 'macos'],
       },
     ];
   }, []);
@@ -382,7 +388,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
     [setSelectedOs]
   );
 
-  const selectedOStoOptions = useMemo((): Array<EuiComboBoxOptionOption<OsType>> => {
+  const selectedOStoOptions = useMemo((): Array<EuiComboBoxOptionOption<OsTypeArray>> => {
     return OsOptions.filter((option) => {
       return selectedOs === option.value;
     });
@@ -469,28 +475,27 @@ export const AddExceptionModal = memo(function AddExceptionModal({
                   <EuiSpacer size="l" />
                 </>
               )}
-              <ExceptionBuilder.ExceptionBuilderComponent
-                allowLargeValueLists={
-                  !isEqlRule(maybeRule?.type) && !isThresholdRule(maybeRule?.type)
-                }
-                httpService={http}
-                autocompleteService={data.autocomplete}
-                exceptionListItems={initialExceptionItems}
-                listType={exceptionListType}
-                osTypes={osTypesSelection}
-                listId={ruleExceptionList.list_id}
-                listNamespaceType={ruleExceptionList.namespace_type}
-                listTypeSpecificIndexPatternFilter={filterIndexPatterns}
-                ruleName={ruleName}
-                indexPatterns={indexPatterns}
-                isOrDisabled={isExceptionBuilderFormDisabled}
-                isAndDisabled={isExceptionBuilderFormDisabled}
-                isNestedDisabled={isExceptionBuilderFormDisabled}
-                data-test-subj="alert-exception-builder"
-                id-aria="alert-exception-builder"
-                onChange={handleBuilderOnChange}
-                isDisabled={isExceptionBuilderFormDisabled}
-              />
+              {ExceptionBuilder.getExceptionBuilderComponentLazy({
+                allowLargeValueLists:
+                  !isEqlRule(maybeRule?.type) && !isThresholdRule(maybeRule?.type),
+                httpService: http,
+                autocompleteService: data.autocomplete,
+                exceptionListItems: initialExceptionItems,
+                listType: exceptionListType,
+                osTypes: osTypesSelection,
+                listId: ruleExceptionList.list_id,
+                listNamespaceType: ruleExceptionList.namespace_type,
+                listTypeSpecificIndexPatternFilter: filterIndexPatterns,
+                ruleName,
+                indexPatterns,
+                isOrDisabled: isExceptionBuilderFormDisabled,
+                isAndDisabled: isExceptionBuilderFormDisabled,
+                isNestedDisabled: isExceptionBuilderFormDisabled,
+                dataTestSubj: 'alert-exception-builder',
+                idAria: 'alert-exception-builder',
+                onChange: handleBuilderOnChange,
+                isDisabled: isExceptionBuilderFormDisabled,
+              })}
 
               <EuiSpacer />
 

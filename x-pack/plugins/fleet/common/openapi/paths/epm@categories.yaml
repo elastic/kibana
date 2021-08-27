@@ -1,5 +1,5 @@
 get:
-  summary: EPM - Categories
+  summary: Package categories
   tags: []
   responses:
     '200':
@@ -21,4 +21,4 @@ get:
                 - id
                 - title
                 - count
-  operationId: get-epm-categories
+  operationId: get-package-categories

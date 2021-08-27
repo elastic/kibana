@@ -24,7 +24,6 @@ export interface KibanaVersionContext {
 
 export interface ContextValue {
   http: HttpSetup;
-  isCloudEnabled: boolean;
   docLinks: DocLinksStart;
   kibanaVersionInfo: KibanaVersionContext;
   notifications: NotificationsStart;

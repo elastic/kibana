@@ -94,7 +94,7 @@ interface PersistentState {
 
 export interface State {
   app: StoreAppState;
-  assets: { [assetKey: string]: AssetType | undefined };
+  assets: { [assetKey: string]: AssetType };
   transient: TransientState;
   persistent: PersistentState;
 }

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { SerializableState } from '../../../../src/plugins/kibana_utils/common';
+import type { SerializableRecord } from '@kbn/utility-types';
 
-export type BaseActionConfig = SerializableState;
+export type BaseActionConfig = SerializableRecord;
 
 export type SerializedAction<Config extends BaseActionConfig = BaseActionConfig> = {
   readonly factoryId: string;

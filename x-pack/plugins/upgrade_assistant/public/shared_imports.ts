@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { useKibana as _useKibana } from '../../../../src/plugins/kibana_react/public';
+import { AppServicesContext } from './types';
+
 export {
   sendRequest,
   SendRequestConfig,
@@ -12,4 +15,11 @@ export {
   useRequest,
   UseRequestConfig,
   SectionLoading,
+  GlobalFlyout,
 } from '../../../../src/plugins/es_ui_shared/public/';
+
+export { KibanaContextProvider } from '../../../../src/plugins/kibana_react/public';
+
+export { DataPublicPluginStart } from '../../../../src/plugins/data/public';
+
+export const useKibana = () => _useKibana<AppServicesContext>();

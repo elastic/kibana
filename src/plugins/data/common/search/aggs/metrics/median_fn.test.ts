@@ -27,6 +27,7 @@ describe('agg_expression_functions', () => {
               "customLabel": undefined,
               "field": "machine.os.keyword",
               "json": undefined,
+              "timeShift": undefined,
             },
             "schema": undefined,
             "type": "median",

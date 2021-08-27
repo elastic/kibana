@@ -6,10 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { Logger } from 'src/core/server';
-import { Collector, CollectorOptions } from './collector';
+import type { Logger } from 'src/core/server';
+import type { CollectorOptions } from './types';
+import { Collector } from './collector';
 
-// Enforce the `schema` property for UsageCollectors
+/**
+ * Same as {@link CollectorOptions} but with the `schema` property enforced
+ */
 export type UsageCollectorOptions<
   TFetchReturn = unknown,
   WithKibanaRequest extends boolean = false,
@@ -17,6 +20,9 @@ export type UsageCollectorOptions<
 > = CollectorOptions<TFetchReturn, WithKibanaRequest, ExtraOptions> &
   Required<Pick<CollectorOptions<TFetchReturn, boolean>, 'schema'>>;
 
+/**
+ * @private Only used in fixtures as a type
+ */
 export class UsageCollector<TFetchReturn, ExtraOptions extends object = {}> extends Collector<
   TFetchReturn,
   ExtraOptions

@@ -9,7 +9,9 @@
 import { createStreamingBatchedFunction } from './create_streaming_batched_function';
 import { fetchStreaming as fetchStreamingReal } from '../streaming/fetch_streaming';
 import { AbortError, defer, of } from '../../../kibana_utils/public';
-import { Subject } from 'rxjs';
+import { Subject, of as rxof } from 'rxjs';
+
+const flushPromises = () => new Promise((resolve) => setImmediate(resolve));
 
 const getPromiseState = (promise: Promise<unknown>): Promise<'resolved' | 'rejected' | 'pending'> =>
   Promise.race<'resolved' | 'rejected' | 'pending'>([
@@ -47,11 +49,19 @@ const setup = () => {
 };
 
 describe('createStreamingBatchedFunction()', () => {
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
   test('returns a function', () => {
     const { fetchStreaming } = setup();
     const fn = createStreamingBatchedFunction({
       url: '/test',
       fetchStreaming,
+      compressionDisabled$: rxof(true),
     });
     expect(typeof fn).toBe('function');
   });
@@ -61,6 +71,7 @@ describe('createStreamingBatchedFunction()', () => {
     const fn = createStreamingBatchedFunction({
       url: '/test',
       fetchStreaming,
+      compressionDisabled$: rxof(true),
     });
     const res = fn({});
     expect(typeof res.then).toBe('function');
@@ -74,6 +85,7 @@ describe('createStreamingBatchedFunction()', () => {
         fetchStreaming,
         maxItemAge: 5,
         flushOnMaxItems: 3,
+        compressionDisabled$: rxof(true),
       });
 
       expect(fetchStreaming).toHaveBeenCalledTimes(0);
@@ -81,8 +93,8 @@ describe('createStreamingBatchedFunction()', () => {
       expect(fetchStreaming).toHaveBeenCalledTimes(0);
       fn({ baz: 'quix' });
       expect(fetchStreaming).toHaveBeenCalledTimes(0);
+      jest.advanceTimersByTime(6);
 
-      await new Promise((r) => setTimeout(r, 6));
       expect(fetchStreaming).toHaveBeenCalledTimes(1);
     });
 
@@ -93,10 +105,11 @@ describe('createStreamingBatchedFunction()', () => {
         fetchStreaming,
         maxItemAge: 5,
         flushOnMaxItems: 3,
+        compressionDisabled$: rxof(true),
       });
 
       expect(fetchStreaming).toHaveBeenCalledTimes(0);
-      await new Promise((r) => setTimeout(r, 6));
+      jest.advanceTimersByTime(6);
       expect(fetchStreaming).toHaveBeenCalledTimes(0);
     });
 
@@ -107,10 +120,11 @@ describe('createStreamingBatchedFunction()', () => {
         fetchStreaming,
         maxItemAge: 5,
         flushOnMaxItems: 3,
+        compressionDisabled$: rxof(true),
       });
 
       fn({ foo: 'bar' });
-      await new Promise((r) => setTimeout(r, 6));
+      jest.advanceTimersByTime(6);
 
       expect(fetchStreaming.mock.calls[0][0]).toMatchObject({
         url: '/test',
@@ -125,12 +139,13 @@ describe('createStreamingBatchedFunction()', () => {
         fetchStreaming,
         maxItemAge: 5,
         flushOnMaxItems: 3,
+        compressionDisabled$: rxof(true),
       });
 
       fn({ foo: 'bar' });
       fn({ baz: 'quix' });
 
-      await new Promise((r) => setTimeout(r, 6));
+      jest.advanceTimersByTime(6);
       const { body } = fetchStreaming.mock.calls[0][0];
       expect(JSON.parse(body)).toEqual({
         batch: [{ foo: 'bar' }, { baz: 'quix' }],
@@ -146,6 +161,7 @@ describe('createStreamingBatchedFunction()', () => {
         fetchStreaming,
         maxItemAge: 5,
         flushOnMaxItems: 3,
+        compressionDisabled$: rxof(true),
       });
 
       expect(fetchStreaming).toHaveBeenCalledTimes(0);
@@ -164,6 +180,7 @@ describe('createStreamingBatchedFunction()', () => {
         fetchStreaming,
         maxItemAge: 5,
         flushOnMaxItems: 3,
+        compressionDisabled$: rxof(true),
       });
 
       const abortController = new AbortController();
@@ -172,7 +189,7 @@ describe('createStreamingBatchedFunction()', () => {
       of(fn({ foo: 'bar' }, abortController.signal));
       fn({ baz: 'quix' });
 
-      await new Promise((r) => setTimeout(r, 6));
+      jest.advanceTimersByTime(6);
       const { body } = fetchStreaming.mock.calls[0][0];
       expect(JSON.parse(body)).toEqual({
         batch: [{ baz: 'quix' }],
@@ -186,6 +203,7 @@ describe('createStreamingBatchedFunction()', () => {
         fetchStreaming,
         maxItemAge: 5,
         flushOnMaxItems: 3,
+        compressionDisabled$: rxof(true),
       });
 
       fn({ a: '1' });
@@ -209,6 +227,7 @@ describe('createStreamingBatchedFunction()', () => {
         fetchStreaming,
         maxItemAge: 5,
         flushOnMaxItems: 3,
+        compressionDisabled$: rxof(true),
       });
 
       fn({ a: '1' });
@@ -216,7 +235,7 @@ describe('createStreamingBatchedFunction()', () => {
       fn({ c: '3' });
       expect(fetchStreaming).toHaveBeenCalledTimes(1);
       fn({ d: '4' });
-      await new Promise((r) => setTimeout(r, 6));
+      jest.advanceTimersByTime(6);
       expect(fetchStreaming).toHaveBeenCalledTimes(2);
     });
   });
@@ -229,11 +248,12 @@ describe('createStreamingBatchedFunction()', () => {
         fetchStreaming,
         maxItemAge: 5,
         flushOnMaxItems: 3,
+        compressionDisabled$: rxof(true),
       });
 
       const promise1 = fn({ a: '1' });
       const promise2 = fn({ b: '2' });
-      await new Promise((r) => setTimeout(r, 6));
+      jest.advanceTimersByTime(6);
 
       expect(await isPending(promise1)).toBe(true);
       expect(await isPending(promise2)).toBe(true);
@@ -246,12 +266,15 @@ describe('createStreamingBatchedFunction()', () => {
         fetchStreaming,
         maxItemAge: 5,
         flushOnMaxItems: 3,
+        compressionDisabled$: rxof(true),
       });
+
+      await flushPromises();
 
       const promise1 = fn({ a: '1' });
       const promise2 = fn({ b: '2' });
       const promise3 = fn({ c: '3' });
-      await new Promise((r) => setTimeout(r, 6));
+      jest.advanceTimersByTime(6);
 
       expect(await isPending(promise1)).toBe(true);
       expect(await isPending(promise2)).toBe(true);
@@ -287,12 +310,13 @@ describe('createStreamingBatchedFunction()', () => {
         fetchStreaming,
         maxItemAge: 5,
         flushOnMaxItems: 3,
+        compressionDisabled$: rxof(true),
       });
 
       const promise1 = fn({ a: '1' });
       const promise2 = fn({ b: '2' });
       const promise3 = fn({ c: '3' });
-      await new Promise((r) => setTimeout(r, 6));
+      jest.advanceTimersByTime(6);
 
       stream.next(
         JSON.stringify({
@@ -314,6 +338,20 @@ describe('createStreamingBatchedFunction()', () => {
       expect(await promise3).toEqual({ foo: 'bar 2' });
     });
 
+    test('compression is false by default', async () => {
+      const { fetchStreaming } = setup();
+      const fn = createStreamingBatchedFunction({
+        url: '/test',
+        flushOnMaxItems: 1,
+        fetchStreaming,
+      });
+
+      fn({ a: '1' });
+
+      const dontCompress = await fetchStreaming.mock.calls[0][0].compressionDisabled$.toPromise();
+      expect(dontCompress).toBe(false);
+    });
+
     test('resolves falsy results', async () => {
       const { fetchStreaming, stream } = setup();
       const fn = createStreamingBatchedFunction({
@@ -321,12 +359,13 @@ describe('createStreamingBatchedFunction()', () => {
         fetchStreaming,
         maxItemAge: 5,
         flushOnMaxItems: 3,
+        compressionDisabled$: rxof(true),
       });
 
       const promise1 = fn({ a: '1' });
       const promise2 = fn({ b: '2' });
       const promise3 = fn({ c: '3' });
-      await new Promise((r) => setTimeout(r, 6));
+      jest.advanceTimersByTime(6);
 
       stream.next(
         JSON.stringify({
@@ -362,10 +401,11 @@ describe('createStreamingBatchedFunction()', () => {
         fetchStreaming,
         maxItemAge: 5,
         flushOnMaxItems: 3,
+        compressionDisabled$: rxof(true),
       });
 
       const promise = fn({ a: '1' });
-      await new Promise((r) => setTimeout(r, 6));
+      jest.advanceTimersByTime(6);
 
       expect(await isPending(promise)).toBe(true);
 
@@ -390,13 +430,14 @@ describe('createStreamingBatchedFunction()', () => {
         fetchStreaming,
         maxItemAge: 5,
         flushOnMaxItems: 3,
+        compressionDisabled$: rxof(true),
       });
 
       const promise1 = of(fn({ a: '1' }));
       const promise2 = of(fn({ a: '2' }));
       const promise3 = of(fn({ a: '3' }));
 
-      await new Promise((r) => setTimeout(r, 6));
+      jest.advanceTimersByTime(6);
 
       stream.next(
         JSON.stringify({
@@ -405,7 +446,7 @@ describe('createStreamingBatchedFunction()', () => {
         }) + '\n'
       );
 
-      await new Promise((r) => setTimeout(r, 1));
+      jest.advanceTimersByTime(1);
 
       stream.next(
         JSON.stringify({
@@ -414,7 +455,7 @@ describe('createStreamingBatchedFunction()', () => {
         }) + '\n'
       );
 
-      await new Promise((r) => setTimeout(r, 1));
+      jest.advanceTimersByTime(1);
 
       stream.next(
         JSON.stringify({
@@ -423,7 +464,7 @@ describe('createStreamingBatchedFunction()', () => {
         }) + '\n'
       );
 
-      await new Promise((r) => setTimeout(r, 1));
+      jest.advanceTimersByTime(1);
 
       const [result1] = await promise1;
       const [, error2] = await promise2;
@@ -442,18 +483,20 @@ describe('createStreamingBatchedFunction()', () => {
           fetchStreaming,
           maxItemAge: 5,
           flushOnMaxItems: 3,
+          compressionDisabled$: rxof(true),
         });
 
         const abortController = new AbortController();
         const promise = fn({ a: '1' }, abortController.signal);
         const promise2 = fn({ a: '2' }, abortController.signal);
-        await new Promise((r) => setTimeout(r, 6));
+        jest.advanceTimersByTime(6);
 
         expect(await isPending(promise)).toBe(true);
         expect(await isPending(promise2)).toBe(true);
 
         abortController.abort();
-        await new Promise((r) => setTimeout(r, 6));
+        jest.advanceTimersByTime(6);
+        await flushPromises();
 
         expect(await isPending(promise)).toBe(false);
         expect(await isPending(promise2)).toBe(false);
@@ -471,17 +514,19 @@ describe('createStreamingBatchedFunction()', () => {
           fetchStreaming,
           maxItemAge: 5,
           flushOnMaxItems: 3,
+          compressionDisabled$: rxof(true),
         });
 
         const abortController = new AbortController();
         const promise = fn({ a: '1' }, abortController.signal);
         const promise2 = fn({ a: '2' });
-        await new Promise((r) => setTimeout(r, 6));
+        jest.advanceTimersByTime(6);
 
         expect(await isPending(promise)).toBe(true);
 
         abortController.abort();
-        await new Promise((r) => setTimeout(r, 6));
+        jest.advanceTimersByTime(6);
+        await flushPromises();
 
         expect(await isPending(promise)).toBe(false);
         const [, error] = await of(promise);
@@ -494,7 +539,7 @@ describe('createStreamingBatchedFunction()', () => {
           }) + '\n'
         );
 
-        await new Promise((r) => setTimeout(r, 1));
+        jest.advanceTimersByTime(1);
 
         const [result2] = await of(promise2);
         expect(result2).toEqual({ b: '2' });
@@ -509,16 +554,17 @@ describe('createStreamingBatchedFunction()', () => {
           fetchStreaming,
           maxItemAge: 5,
           flushOnMaxItems: 3,
+          compressionDisabled$: rxof(true),
         });
 
         const promise1 = of(fn({ a: '1' }));
         const promise2 = of(fn({ a: '2' }));
 
-        await new Promise((r) => setTimeout(r, 6));
+        jest.advanceTimersByTime(6);
 
         stream.complete();
 
-        await new Promise((r) => setTimeout(r, 1));
+        jest.advanceTimersByTime(1);
 
         const [, error1] = await promise1;
         const [, error2] = await promise2;
@@ -539,12 +585,13 @@ describe('createStreamingBatchedFunction()', () => {
           fetchStreaming,
           maxItemAge: 5,
           flushOnMaxItems: 3,
+          compressionDisabled$: rxof(true),
         });
 
         const promise1 = of(fn({ a: '1' }));
         const promise2 = of(fn({ a: '2' }));
 
-        await new Promise((r) => setTimeout(r, 6));
+        jest.advanceTimersByTime(6);
 
         stream.next(
           JSON.stringify({
@@ -554,7 +601,7 @@ describe('createStreamingBatchedFunction()', () => {
         );
         stream.complete();
 
-        await new Promise((r) => setTimeout(r, 1));
+        jest.advanceTimersByTime(1);
 
         const [, error1] = await promise1;
         const [result1] = await promise2;
@@ -576,18 +623,19 @@ describe('createStreamingBatchedFunction()', () => {
           fetchStreaming,
           maxItemAge: 5,
           flushOnMaxItems: 3,
+          compressionDisabled$: rxof(true),
         });
 
         const promise1 = of(fn({ a: '1' }));
         const promise2 = of(fn({ a: '2' }));
 
-        await new Promise((r) => setTimeout(r, 6));
+        jest.advanceTimersByTime(6);
 
         stream.error({
           message: 'something went wrong',
         });
 
-        await new Promise((r) => setTimeout(r, 1));
+        jest.advanceTimersByTime(1);
 
         const [, error1] = await promise1;
         const [, error2] = await promise2;
@@ -608,12 +656,13 @@ describe('createStreamingBatchedFunction()', () => {
           fetchStreaming,
           maxItemAge: 5,
           flushOnMaxItems: 3,
+          compressionDisabled$: rxof(true),
         });
 
         const promise1 = of(fn({ a: '1' }));
         const promise2 = of(fn({ a: '2' }));
 
-        await new Promise((r) => setTimeout(r, 6));
+        jest.advanceTimersByTime(6);
 
         stream.next(
           JSON.stringify({
@@ -623,7 +672,7 @@ describe('createStreamingBatchedFunction()', () => {
         );
         stream.error('oops');
 
-        await new Promise((r) => setTimeout(r, 1));
+        jest.advanceTimersByTime(1);
 
         const [, error1] = await promise1;
         const [result1] = await promise2;
@@ -644,12 +693,14 @@ describe('createStreamingBatchedFunction()', () => {
         fetchStreaming,
         maxItemAge: 5,
         flushOnMaxItems: 3,
+        compressionDisabled$: rxof(true),
       });
+      await flushPromises();
 
       const promise1 = of(fn({ a: '1' }));
       const promise2 = of(fn({ a: '2' }));
 
-      await new Promise((r) => setTimeout(r, 6));
+      jest.advanceTimersByTime(6);
 
       stream.next(
         JSON.stringify({
@@ -660,7 +711,7 @@ describe('createStreamingBatchedFunction()', () => {
 
       stream.next('Not a JSON\n');
 
-      await new Promise((r) => setTimeout(r, 1));
+      jest.advanceTimersByTime(1);
 
       const [, error1] = await promise1;
       const [result1] = await promise2;

@@ -8,3 +8,4 @@
 export * from './common';
 export * from './security_solution';
 export * from './timeline';
+export * from './index_fields';

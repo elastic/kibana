@@ -9,12 +9,20 @@
 import type { estypes } from '@elastic/elasticsearch';
 import { validateAndConvertAggregations } from './validation';
 
-type AggsMap = Record<string, estypes.AggregationContainer>;
+type AggsMap = Record<string, estypes.AggregationsAggregationContainer>;
 
 const mockMappings = {
   properties: {
     updated_at: {
       type: 'date',
+    },
+    references: {
+      type: 'nested',
+      properties: {
+        id: {
+          type: 'keyword',
+        },
+      },
     },
     foo: {
       properties: {
@@ -25,7 +33,7 @@ const mockMappings = {
           type: 'text',
         },
         bytes: {
-          type: 'number',
+          type: 'integer',
         },
       },
     },
@@ -67,7 +75,7 @@ const mockMappings = {
       },
     },
   },
-};
+} as const;
 
 describe('validateAndConvertAggregations', () => {
   it('validates a simple aggregations', () => {
@@ -175,6 +183,40 @@ describe('validateAndConvertAggregations', () => {
                   field: 'alert.actions.actionTypeId',
                 },
               },
+            },
+          },
+        },
+      },
+    });
+  });
+
+  it('validates a nested root aggregations', () => {
+    expect(
+      validateAndConvertAggregations(
+        ['alert'],
+        {
+          aggName: {
+            nested: {
+              path: 'alert.references',
+            },
+            aggregations: {
+              aggName2: {
+                terms: { field: 'alert.references.id' },
+              },
+            },
+          },
+        },
+        mockMappings
+      )
+    ).toEqual({
+      aggName: {
+        nested: {
+          path: 'references',
+        },
+        aggregations: {
+          aggName2: {
+            terms: {
+              field: 'references.id',
             },
           },
         },
@@ -426,6 +468,52 @@ describe('validateAndConvertAggregations', () => {
       validateAndConvertAggregations(['foo'], aggregations, mockMappings);
     }).toThrowErrorMatchingInlineSnapshot(
       `"[someAgg.aggs.nested.max.script]: definition for this key is missing"`
+    );
+  });
+
+  it('throws an error when trying to access a property via {type}.{type}.attributes.{attr}', () => {
+    expect(() => {
+      validateAndConvertAggregations(
+        ['alert'],
+        {
+          aggName: {
+            cardinality: {
+              field: 'alert.alert.attributes.actions.group',
+            },
+            aggs: {
+              aggName: {
+                max: { field: 'alert.alert.attributes.actions.group' },
+              },
+            },
+          },
+        },
+        mockMappings
+      );
+    }).toThrowErrorMatchingInlineSnapshot(
+      '"[aggName.cardinality.field] Invalid attribute path: alert.alert.attributes.actions.group"'
+    );
+  });
+
+  it('throws an error when trying to access a property via {type}.{type}.{attr}', () => {
+    expect(() => {
+      validateAndConvertAggregations(
+        ['alert'],
+        {
+          aggName: {
+            cardinality: {
+              field: 'alert.alert.actions.group',
+            },
+            aggs: {
+              aggName: {
+                max: { field: 'alert.alert.actions.group' },
+              },
+            },
+          },
+        },
+        mockMappings
+      );
+    }).toThrowErrorMatchingInlineSnapshot(
+      '"[aggName.cardinality.field] Invalid attribute path: alert.alert.actions.group"'
     );
   });
 });

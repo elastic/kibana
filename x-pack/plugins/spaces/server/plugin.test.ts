@@ -14,7 +14,7 @@ import { licensingMock } from '../../licensing/server/mocks';
 import type { PluginsStart } from './plugin';
 import { SpacesPlugin } from './plugin';
 
-describe('Spaces Plugin', () => {
+describe('Spaces plugin', () => {
   describe('#setup', () => {
     it('can setup with all optional plugins disabled, exposing the expected contract', () => {
       const initializerContext = coreMock.createPluginInitializerContext({});

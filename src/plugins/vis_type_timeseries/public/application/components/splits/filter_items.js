@@ -73,6 +73,7 @@ class FilterItemsUi extends Component {
             }}
             onChange={(query) => this.handleQueryChange(model, query)}
             indexPatterns={[indexPatterns]}
+            data-test-subj="filterItemsQueryBar"
           />
         </EuiFlexItem>
         <EuiFlexItem>
@@ -88,6 +89,7 @@ class FilterItemsUi extends Component {
             onChange={this.handleChange(model, 'label')}
             value={model.label}
             fullWidth
+            data-test-subj="filterItemsLabel"
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -96,6 +98,7 @@ class FilterItemsUi extends Component {
             onDelete={handleDelete}
             disableDelete={items.length < 2}
             responsive={false}
+            testSubj="filterRow"
           />
         </EuiFlexItem>
       </EuiFlexGroup>

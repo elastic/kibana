@@ -15,18 +15,17 @@
     "enums": [],
     "misc": [
       {
+        "parentPluginId": "telemetryCollectionXpack",
         "id": "def-server.ESLicense",
         "type": "Type",
-        "label": "ESLicense",
         "tags": [],
+        "label": "ESLicense",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/telemetry_collection_xpack/server/telemetry_collection/get_license.ts",
-          "lineNumber": 10
-        },
         "signature": [
-          "estypes.LicenseInformation"
+          "LicenseGetLicenseInformation"
         ],
+        "path": "x-pack/plugins/telemetry_collection_xpack/server/telemetry_collection/get_license.ts",
+        "deprecated": false,
         "initialIsOpen": false
       }
     ],

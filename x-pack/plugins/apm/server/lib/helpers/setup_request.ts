@@ -10,7 +10,7 @@ import { isActivePlatinumLicense } from '../../../common/license_check';
 import { APMConfig } from '../..';
 import { KibanaRequest } from '../../../../../../src/core/server';
 import { UI_SETTINGS } from '../../../../../../src/plugins/data/common';
-import { UIFilters } from '../../../typings/ui_filters';
+import { UxUIFilters } from '../../../typings/ui_filters';
 import { APMRouteHandlerResources } from '../../routes/typings';
 import {
   ApmIndicesConfig,
@@ -35,7 +35,7 @@ export interface Setup {
   ml?: ReturnType<typeof getMlSetup>;
   config: APMConfig;
   indices: ApmIndicesConfig;
-  uiFilters: UIFilters;
+  uiFilters: UxUIFilters;
 }
 
 export interface SetupTimeRange {
@@ -62,7 +62,10 @@ interface SetupRequestParams {
 
 type InferSetup<TParams extends SetupRequestParams> = Setup &
   (TParams extends { query: { start: number } } ? { start: number } : {}) &
-  (TParams extends { query: { end: number } } ? { end: number } : {});
+  (TParams extends { query: { end: number } } ? { end: number } : {}) &
+  (TParams extends { query: Partial<SetupTimeRange> }
+    ? Partial<SetupTimeRange>
+    : {});
 
 export async function setupRequest<TParams extends SetupRequestParams>({
   context,
@@ -136,7 +139,10 @@ function getMlSetup(
   };
 }
 
-function decodeUiFilters(logger: Logger, uiFiltersEncoded?: string): UIFilters {
+function decodeUiFilters(
+  logger: Logger,
+  uiFiltersEncoded?: string
+): UxUIFilters {
   if (!uiFiltersEncoded) {
     return {};
   }

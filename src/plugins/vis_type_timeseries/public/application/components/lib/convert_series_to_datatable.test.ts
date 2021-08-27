@@ -15,6 +15,18 @@ jest.mock('../../../services', () => {
     getDataStart: jest.fn(() => {
       return {
         indexPatterns: jest.fn(),
+        query: {
+          timefilter: {
+            timefilter: {
+              getTime: jest.fn(() => {
+                return {
+                  from: '2021-04-30T16:42:24.502Z',
+                  to: '2021-05-05T14:42:24.502Z',
+                };
+              }),
+            },
+          },
+        },
       };
     }),
   };
@@ -25,9 +37,12 @@ describe('convert series to datatables', () => {
 
   beforeEach(() => {
     const fieldMap: Record<string, IndexPatternField> = {
-      test1: { name: 'test1', spec: { type: 'date' } } as IndexPatternField,
-      test2: { name: 'test2' } as IndexPatternField,
-      test3: { name: 'test3', spec: { type: 'boolean' } } as IndexPatternField,
+      test1: { name: 'test1', spec: { type: 'date', name: 'test1' } } as IndexPatternField,
+      test2: {
+        name: 'test2',
+        spec: { type: 'number', name: 'Average of test2' },
+      } as IndexPatternField,
+      test3: { name: 'test3', spec: { type: 'boolean', name: 'test3' } } as IndexPatternField,
     };
 
     const getFieldByName = (name: string): IndexPatternField | undefined => fieldMap[name];
@@ -41,8 +56,8 @@ describe('convert series to datatables', () => {
 
   describe('addMetaColumns()', () => {
     test('adds the correct meta to a date column', () => {
-      const columns = [{ id: 0, name: 'test1', isSplit: false }];
-      const columnsWithMeta = addMetaToColumns(columns, indexPattern, 'count');
+      const columns = [{ id: 0, name: 'test1', isMetric: true, type: 'date_histogram' }];
+      const columnsWithMeta = addMetaToColumns(columns, indexPattern);
       expect(columnsWithMeta).toEqual([
         {
           id: '0',
@@ -54,6 +69,13 @@ describe('convert series to datatables', () => {
               enabled: true,
               indexPatternId: 'index1',
               type: 'date_histogram',
+              schema: 'metric',
+              params: {
+                timeRange: {
+                  from: '2021-04-30T16:42:24.502Z',
+                  to: '2021-05-05T14:42:24.502Z',
+                },
+              },
             },
             type: 'date',
           },
@@ -63,8 +85,8 @@ describe('convert series to datatables', () => {
     });
 
     test('adds the correct meta to a non date column', () => {
-      const columns = [{ id: 1, name: 'Average of test2', isSplit: false }];
-      const columnsWithMeta = addMetaToColumns(columns, indexPattern, 'avg');
+      const columns = [{ id: 1, name: 'test2', isMetric: true, type: 'avg' }];
+      const columnsWithMeta = addMetaToColumns(columns, indexPattern);
       expect(columnsWithMeta).toEqual([
         {
           id: '1',
@@ -76,17 +98,21 @@ describe('convert series to datatables', () => {
               enabled: true,
               indexPatternId: 'index1',
               type: 'avg',
+              schema: 'metric',
+              params: {
+                field: 'Average of test2',
+              },
             },
             type: 'number',
           },
-          name: 'Average of test2',
+          name: 'test2',
         },
       ]);
     });
 
     test('adds the correct meta for a split column', () => {
-      const columns = [{ id: 2, name: 'test3', isSplit: true }];
-      const columnsWithMeta = addMetaToColumns(columns, indexPattern, 'avg');
+      const columns = [{ id: 2, name: 'test3', isMetric: false, type: 'terms' }];
+      const columnsWithMeta = addMetaToColumns(columns, indexPattern);
       expect(columnsWithMeta).toEqual([
         {
           id: '2',
@@ -98,6 +124,10 @@ describe('convert series to datatables', () => {
               enabled: true,
               indexPatternId: 'index1',
               type: 'terms',
+              schema: 'group',
+              params: {
+                field: 'test3',
+              },
             },
             type: 'boolean',
           },

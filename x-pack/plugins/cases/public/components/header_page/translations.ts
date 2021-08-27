@@ -7,6 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 
+export * from '../../common/translations';
+
 export const SAVE = i18n.translate('xpack.cases.header.editableTitle.save', {
   defaultMessage: 'Save',
 });

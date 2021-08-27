@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { resolve, relative } from 'path';
+import { relative } from 'path';
 import Fs from 'fs';
-import { createGunzip, createGzip, Z_BEST_COMPRESSION } from 'zlib';
+import { createGunzip, createGzip, constants } from 'zlib';
 import { promisify } from 'util';
 import globby from 'globby';
 import { ToolingLog } from '@kbn/dev-utils';
@@ -17,24 +17,22 @@ import { createPromiseFromStreams } from '@kbn/utils';
 const unlinkAsync = promisify(Fs.unlink);
 
 export async function editAction({
-  prefix,
-  dataDir,
+  path,
   log,
   handler,
 }: {
-  prefix: string;
-  dataDir: string;
+  path: string;
   log: ToolingLog;
   handler: () => Promise<any>;
 }) {
   const archives = (
     await globby('**/*.gz', {
-      cwd: prefix ? resolve(dataDir, prefix) : dataDir,
+      cwd: path,
       absolute: true,
     })
-  ).map((path) => ({
-    path,
-    rawPath: path.slice(0, -3),
+  ).map((found) => ({
+    path: found,
+    rawPath: found.slice(0, -3),
   }));
 
   await Promise.all(
@@ -61,7 +59,7 @@ export async function editAction({
     archives.map(async (archive) => {
       await createPromiseFromStreams([
         Fs.createReadStream(archive.rawPath),
-        createGzip({ level: Z_BEST_COMPRESSION }),
+        createGzip({ level: constants.Z_BEST_COMPRESSION }),
         Fs.createWriteStream(archive.path),
       ]);
 

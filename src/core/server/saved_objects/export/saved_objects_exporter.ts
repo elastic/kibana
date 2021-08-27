@@ -12,17 +12,15 @@ import { Logger } from '../../logging';
 import { SavedObject, SavedObjectsClientContract } from '../types';
 import { SavedObjectsFindResult } from '../service';
 import { ISavedObjectTypeRegistry } from '../saved_objects_type_registry';
-import { fetchNestedDependencies } from './fetch_nested_dependencies';
 import { sortObjects } from './sort_objects';
 import {
   SavedObjectsExportResultDetails,
   SavedObjectExportBaseOptions,
   SavedObjectsExportByObjectOptions,
   SavedObjectsExportByTypeOptions,
-  SavedObjectsExportTransform,
 } from './types';
 import { SavedObjectsExportError } from './errors';
-import { applyExportTransforms } from './apply_export_transforms';
+import { collectExportedObjects } from './collect_exported_objects';
 import { byIdAscComparator, getPreservedOrderComparator, SavedObjectComparator } from './utils';
 
 /**
@@ -35,8 +33,8 @@ export type ISavedObjectsExporter = PublicMethodsOf<SavedObjectsExporter>;
  */
 export class SavedObjectsExporter {
   readonly #savedObjectsClient: SavedObjectsClientContract;
-  readonly #exportTransforms: Record<string, SavedObjectsExportTransform>;
   readonly #exportSizeLimit: number;
+  readonly #typeRegistry: ISavedObjectTypeRegistry;
   readonly #log: Logger;
 
   constructor({
@@ -53,15 +51,7 @@ export class SavedObjectsExporter {
     this.#log = logger;
     this.#savedObjectsClient = savedObjectsClient;
     this.#exportSizeLimit = exportSizeLimit;
-    this.#exportTransforms = typeRegistry.getAllTypes().reduce((transforms, type) => {
-      if (type.management?.onExport) {
-        return {
-          ...transforms,
-          [type.name]: type.management.onExport,
-        };
-      }
-      return transforms;
-    }, {} as Record<string, SavedObjectsExportTransform>);
+    this.#typeRegistry = typeRegistry;
   }
 
   /**
@@ -77,6 +67,7 @@ export class SavedObjectsExporter {
     return this.processObjects(objects, byIdAscComparator, {
       request: options.request,
       includeReferencesDeep: options.includeReferencesDeep,
+      includeNamespaces: options.includeNamespaces,
       excludeExportDetails: options.excludeExportDetails,
       namespace: options.namespace,
     });
@@ -99,6 +90,7 @@ export class SavedObjectsExporter {
     return this.processObjects(objects, comparator, {
       request: options.request,
       includeReferencesDeep: options.includeReferencesDeep,
+      includeNamespaces: options.includeNamespaces,
       excludeExportDetails: options.excludeExportDetails,
       namespace: options.namespace,
     });
@@ -111,42 +103,40 @@ export class SavedObjectsExporter {
       request,
       excludeExportDetails = false,
       includeReferencesDeep = false,
+      includeNamespaces = false,
       namespace,
     }: SavedObjectExportBaseOptions
   ) {
     this.#log.debug(`Processing [${savedObjects.length}] saved objects.`);
-    let exportedObjects: Array<SavedObject<unknown>>;
-    let missingReferences: SavedObjectsExportResultDetails['missingReferences'] = [];
 
-    savedObjects = await applyExportTransforms({
-      request,
+    const {
+      objects: collectedObjects,
+      missingRefs: missingReferences,
+      excludedObjects,
+    } = await collectExportedObjects({
       objects: savedObjects,
-      transforms: this.#exportTransforms,
-      sortFunction,
+      includeReferences: includeReferencesDeep,
+      namespace,
+      request,
+      typeRegistry: this.#typeRegistry,
+      savedObjectsClient: this.#savedObjectsClient,
+      logger: this.#log,
     });
 
-    if (includeReferencesDeep) {
-      this.#log.debug(`Fetching saved objects references.`);
-      const fetchResult = await fetchNestedDependencies(
-        savedObjects,
-        this.#savedObjectsClient,
-        namespace
-      );
-      exportedObjects = sortObjects(fetchResult.objects);
-      missingReferences = fetchResult.missingRefs;
-    } else {
-      exportedObjects = sortObjects(savedObjects);
-    }
+    // sort with the provided sort function then with the default export sorting
+    const exportedObjects = sortObjects(collectedObjects.sort(sortFunction));
 
     // redact attributes that should not be exported
-    const redactedObjects = exportedObjects.map<SavedObject<unknown>>(
-      ({ namespaces, ...object }) => object
-    );
+    const redactedObjects = includeNamespaces
+      ? exportedObjects
+      : exportedObjects.map<SavedObject<unknown>>(({ namespaces, ...object }) => object);
 
     const exportDetails: SavedObjectsExportResultDetails = {
       exportedCount: exportedObjects.length,
       missingRefCount: missingReferences.length,
       missingReferences,
+      excludedObjectsCount: excludedObjects.length,
+      excludedObjects,
     };
     this.#log.debug(`Exporting [${redactedObjects.length}] saved objects.`);
     return createListStream([...redactedObjects, ...(excludeExportDetails ? [] : [exportDetails])]);

@@ -20,10 +20,10 @@ import {
 } from '@elastic/eui';
 
 import { clearFlashMessages } from '../../../../../shared/flash_messages';
-import { Loading } from '../../../../../shared/loading';
 import { UnsavedChangesPrompt } from '../../../../../shared/unsaved_changes_prompt';
 import { ViewContentHeader } from '../../../../components/shared/view_content_header';
-import { SAVE_BUTTON } from '../../../../constants';
+import { NAV, SAVE_BUTTON } from '../../../../constants';
+import { SourceLayout } from '../source_layout';
 
 import {
   UNSAVED_MESSAGE,
@@ -64,8 +64,6 @@ export const DisplaySettings: React.FC<DisplaySettingsProps> = ({ tabId }) => {
     return clearFlashMessages;
   }, []);
 
-  if (dataLoading) return <Loading />;
-
   const tabs = [
     {
       id: 'search_results',
@@ -89,7 +87,11 @@ export const DisplaySettings: React.FC<DisplaySettingsProps> = ({ tabId }) => {
   };
 
   return (
-    <>
+    <SourceLayout
+      pageChrome={[NAV.DISPLAY_SETTINGS]}
+      pageViewTelemetry="source_display_settings"
+      isLoading={dataLoading}
+    >
       <UnsavedChangesPrompt
         hasUnsavedChanges={!navigatingBetweenTabs && hasUnsavedChanges}
         messageText={UNSAVED_MESSAGE}
@@ -123,6 +125,6 @@ export const DisplaySettings: React.FC<DisplaySettingsProps> = ({ tabId }) => {
         )}
       </form>
       {addFieldModalVisible && <FieldEditorModal />}
-    </>
+    </SourceLayout>
   );
 };

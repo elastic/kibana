@@ -36,9 +36,9 @@ describe('[Snapshot and Restore API Routes] Snapshots', () => {
    */
   const getClusterSettingsFn = router.getMockApiFn('cluster.getSettings');
   const getLifecycleFn = router.getMockApiFn('slm.getLifecycle');
-  const getRepoFn = router.getMockApiFn('snapshot.getRepository');
   const getSnapshotFn = router.getMockApiFn('snapshot.get');
   const deleteSnapshotFn = router.getMockApiFn('snapshot.delete');
+  const getRepoFn = router.getMockApiFn('snapshot.getRepository');
 
   beforeAll(() => {
     registerSnapshotsRoutes({
@@ -60,42 +60,33 @@ describe('[Snapshot and Restore API Routes] Snapshots', () => {
     };
 
     test('combines snapshots and their repositories returned from ES', async () => {
-      const mockSnapshotGetPolicyEsResponse = {
+      const mockGetPolicyEsResponse = {
         fooPolicy: {},
       };
 
-      const mockSnapshotGetRepositoryEsResponse = {
+      const mockGetSnapshotsResponse = {
+        snapshots: [
+          { snapshot: 'snapshot1', repository: 'fooRepository' },
+          { snapshot: 'snapshot2', repository: 'barRepository' },
+        ],
+      };
+
+      const mockGetRepositoryEsResponse = {
         fooRepository: {},
         barRepository: {},
+        // Test that there may be a repository that does not yet have any snapshots associated to it
+        bazRepository: {},
       };
 
-      const mockGetSnapshotsFooResponse = {
-        responses: [
-          {
-            repository: 'fooRepository',
-            snapshots: [{ snapshot: 'snapshot1' }],
-          },
-        ],
-      };
-
-      const mockGetSnapshotsBarResponse = {
-        responses: [
-          {
-            repository: 'barRepository',
-            snapshots: [{ snapshot: 'snapshot2' }],
-          },
-        ],
-      };
-
-      getClusterSettingsFn.mockResolvedValue({ body: mockSnapshotGetManagedRepositoryEsResponse });
-      getLifecycleFn.mockResolvedValue({ body: mockSnapshotGetPolicyEsResponse });
-      getRepoFn.mockResolvedValue({ body: mockSnapshotGetRepositoryEsResponse });
-      getSnapshotFn.mockResolvedValueOnce({ body: mockGetSnapshotsFooResponse });
-      getSnapshotFn.mockResolvedValueOnce({ body: mockGetSnapshotsBarResponse });
+      getClusterSettingsFn.mockResolvedValue({
+        body: mockSnapshotGetManagedRepositoryEsResponse,
+      });
+      getLifecycleFn.mockResolvedValue({ body: mockGetPolicyEsResponse });
+      getRepoFn.mockResolvedValue({ body: mockGetRepositoryEsResponse });
+      getSnapshotFn.mockResolvedValue({ body: mockGetSnapshotsResponse });
 
       const expectedResponse = {
-        errors: {},
-        repositories: ['fooRepository', 'barRepository'],
+        repositories: ['fooRepository', 'barRepository', 'bazRepository'],
         policies: ['fooPolicy'],
         snapshots: [
           {
@@ -123,16 +114,68 @@ describe('[Snapshot and Restore API Routes] Snapshots', () => {
       expect(response).toEqual({ body: expectedResponse });
     });
 
-    test('returns empty arrays if no snapshots returned from ES', async () => {
-      const mockSnapshotGetPolicyEsResponse = {};
-      const mockSnapshotGetRepositoryEsResponse = {};
+    test('returns an error object if ES request contains repository failures', async () => {
+      const mockGetPolicyEsResponse = {
+        fooPolicy: {},
+      };
 
-      getClusterSettingsFn.mockResolvedValue({ body: mockSnapshotGetManagedRepositoryEsResponse });
-      getLifecycleFn.mockResolvedValue({ body: mockSnapshotGetPolicyEsResponse });
-      getRepoFn.mockResolvedValue({ body: mockSnapshotGetRepositoryEsResponse });
+      const mockGetSnapshotsResponse = {
+        snapshots: [{ snapshot: 'snapshot1', repository: 'fooRepository' }],
+        failures: {
+          bar: {
+            type: 'repository_exception',
+            reason:
+              "[barRepository] Could not read repository data because the contents of the repository do not match its expected state. This is likely the result of either concurrently modifying the contents of the repository by a process other than this cluster or an issue with the repository's underlying storage. The repository has been disabled to prevent corrupting its contents. To re-enable it and continue using it please remove the repository from the cluster and add it again to make the cluster recover the known state of the repository from its physical contents.",
+          },
+        },
+      };
+
+      const mockGetRepositoryEsResponse = {
+        fooRepository: {},
+      };
+
+      getClusterSettingsFn.mockResolvedValue({
+        body: mockSnapshotGetManagedRepositoryEsResponse,
+      });
+      getLifecycleFn.mockResolvedValue({ body: mockGetPolicyEsResponse });
+      getRepoFn.mockResolvedValue({ body: mockGetRepositoryEsResponse });
+      getSnapshotFn.mockResolvedValue({ body: mockGetSnapshotsResponse });
 
       const expectedResponse = {
-        errors: [],
+        repositories: ['fooRepository'],
+        policies: ['fooPolicy'],
+        snapshots: [
+          {
+            ...defaultSnapshot,
+            repository: 'fooRepository',
+            snapshot: 'snapshot1',
+            managedRepository:
+              mockSnapshotGetManagedRepositoryEsResponse.defaults[
+                'cluster.metadata.managed_repository'
+              ],
+          },
+        ],
+        errors: {
+          bar: {
+            type: 'repository_exception',
+            reason:
+              "[barRepository] Could not read repository data because the contents of the repository do not match its expected state. This is likely the result of either concurrently modifying the contents of the repository by a process other than this cluster or an issue with the repository's underlying storage. The repository has been disabled to prevent corrupting its contents. To re-enable it and continue using it please remove the repository from the cluster and add it again to make the cluster recover the known state of the repository from its physical contents.",
+          },
+        },
+      };
+
+      const response = await router.runRequest(mockRequest);
+      expect(response).toEqual({ body: expectedResponse });
+    });
+
+    test('returns empty arrays if no repositories returned from ES', async () => {
+      getClusterSettingsFn.mockResolvedValue({
+        body: mockSnapshotGetManagedRepositoryEsResponse,
+      });
+      getLifecycleFn.mockResolvedValue({ body: {} });
+      getRepoFn.mockResolvedValue({ body: {} });
+
+      const expectedResponse = {
         snapshots: [],
         repositories: [],
         policies: [],
@@ -142,10 +185,33 @@ describe('[Snapshot and Restore API Routes] Snapshots', () => {
       expect(response).toEqual({ body: expectedResponse });
     });
 
+    test('returns an empty snapshot array if no snapshots returned from ES', async () => {
+      const mockGetRepositoryEsResponse = {
+        fooRepository: {},
+      };
+
+      getClusterSettingsFn.mockResolvedValue({
+        body: mockSnapshotGetManagedRepositoryEsResponse,
+      });
+      getLifecycleFn.mockResolvedValue({ body: {} });
+      getRepoFn.mockResolvedValue({ body: mockGetRepositoryEsResponse });
+      getSnapshotFn.mockResolvedValue({ body: {} });
+
+      const expectedResponse = {
+        snapshots: [],
+        repositories: ['fooRepository'],
+        policies: [],
+      };
+
+      const response = await router.runRequest(mockRequest);
+      expect(response).toEqual({ body: expectedResponse });
+    });
+
     test('throws if ES error', async () => {
-      getClusterSettingsFn.mockRejectedValueOnce(new Error());
-      getLifecycleFn.mockRejectedValueOnce(new Error());
-      getRepoFn.mockRejectedValueOnce(new Error());
+      getClusterSettingsFn.mockRejectedValue(new Error());
+      getLifecycleFn.mockRejectedValue(new Error());
+      getRepoFn.mockRejectedValue(new Error());
+      getSnapshotFn.mockRejectedValue(new Error());
 
       await expect(router.runRequest(mockRequest)).rejects.toThrowError();
     });
@@ -171,17 +237,14 @@ describe('[Snapshot and Restore API Routes] Snapshots', () => {
     };
 
     test('returns snapshot object with repository name if returned from ES', async () => {
-      const mockSnapshotGetEsResponse = {
-        responses: [
-          {
-            repository,
-            snapshots: [{ snapshot }],
-          },
-        ],
+      const mockGetSnapshotEsResponse = {
+        snapshots: [{ snapshot, repository }],
       };
 
-      getClusterSettingsFn.mockResolvedValue({ body: mockSnapshotGetManagedRepositoryEsResponse });
-      getSnapshotFn.mockResolvedValueOnce({ body: mockSnapshotGetEsResponse });
+      getClusterSettingsFn.mockResolvedValue({
+        body: mockSnapshotGetManagedRepositoryEsResponse,
+      });
+      getSnapshotFn.mockResolvedValue({ body: mockGetSnapshotEsResponse });
 
       const expectedResponse = {
         ...defaultSnapshot,
@@ -216,8 +279,10 @@ describe('[Snapshot and Restore API Routes] Snapshots', () => {
         ],
       };
 
-      getClusterSettingsFn.mockResolvedValue({ body: mockSnapshotGetManagedRepositoryEsResponse });
-      getSnapshotFn.mockResolvedValueOnce({ body: mockSnapshotGetEsResponse });
+      getClusterSettingsFn.mockResolvedValue({
+        body: mockSnapshotGetManagedRepositoryEsResponse,
+      });
+      getSnapshotFn.mockResolvedValue({ body: mockSnapshotGetEsResponse });
 
       await expect(router.runRequest(mockRequest)).resolves.toEqual({
         body: 'Snapshot not found',

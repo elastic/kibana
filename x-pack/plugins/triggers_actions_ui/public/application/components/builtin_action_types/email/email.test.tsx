@@ -30,7 +30,7 @@ describe('actionTypeRegistry.get() works', () => {
 });
 
 describe('connector validation', () => {
-  test('connector validation succeeds when connector config is valid', () => {
+  test('connector validation succeeds when connector config is valid', async () => {
     const actionConnector = {
       secrets: {
         user: 'user',
@@ -49,7 +49,7 @@ describe('connector validation', () => {
       },
     } as EmailActionConnector;
 
-    expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
+    expect(await actionTypeModel.validateConnector(actionConnector)).toEqual({
       config: {
         errors: {
           from: [],
@@ -66,7 +66,7 @@ describe('connector validation', () => {
     });
   });
 
-  test('connector validation succeeds when connector config is valid with empty user/password', () => {
+  test('connector validation succeeds when connector config is valid with empty user/password', async () => {
     const actionConnector = {
       secrets: {
         user: null,
@@ -85,7 +85,7 @@ describe('connector validation', () => {
       },
     } as EmailActionConnector;
 
-    expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
+    expect(await actionTypeModel.validateConnector(actionConnector)).toEqual({
       config: {
         errors: {
           from: [],
@@ -101,7 +101,7 @@ describe('connector validation', () => {
       },
     });
   });
-  test('connector validation fails when connector config is not valid', () => {
+  test('connector validation fails when connector config is not valid', async () => {
     const actionConnector = {
       secrets: {
         user: 'user',
@@ -116,7 +116,7 @@ describe('connector validation', () => {
       },
     } as EmailActionConnector;
 
-    expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
+    expect(await actionTypeModel.validateConnector(actionConnector)).toEqual({
       config: {
         errors: {
           from: [],
@@ -132,7 +132,7 @@ describe('connector validation', () => {
       },
     });
   });
-  test('connector validation fails when user specified but not password', () => {
+  test('connector validation fails when user specified but not password', async () => {
     const actionConnector = {
       secrets: {
         user: 'user',
@@ -151,7 +151,7 @@ describe('connector validation', () => {
       },
     } as EmailActionConnector;
 
-    expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
+    expect(await actionTypeModel.validateConnector(actionConnector)).toEqual({
       config: {
         errors: {
           from: [],
@@ -167,7 +167,7 @@ describe('connector validation', () => {
       },
     });
   });
-  test('connector validation fails when password specified but not user', () => {
+  test('connector validation fails when password specified but not user', async () => {
     const actionConnector = {
       secrets: {
         user: null,
@@ -186,7 +186,7 @@ describe('connector validation', () => {
       },
     } as EmailActionConnector;
 
-    expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
+    expect(await actionTypeModel.validateConnector(actionConnector)).toEqual({
       config: {
         errors: {
           from: [],
@@ -205,7 +205,7 @@ describe('connector validation', () => {
 });
 
 describe('action params validation', () => {
-  test('action params validation succeeds when action params is valid', () => {
+  test('action params validation succeeds when action params is valid', async () => {
     const actionParams = {
       to: [],
       cc: ['test1@test.com'],
@@ -213,7 +213,7 @@ describe('action params validation', () => {
       subject: 'test',
     };
 
-    expect(actionTypeModel.validateParams(actionParams)).toEqual({
+    expect(await actionTypeModel.validateParams(actionParams)).toEqual({
       errors: {
         to: [],
         cc: [],
@@ -224,13 +224,13 @@ describe('action params validation', () => {
     });
   });
 
-  test('action params validation fails when action params is not valid', () => {
+  test('action params validation fails when action params is not valid', async () => {
     const actionParams = {
       to: ['test@test.com'],
       subject: 'test',
     };
 
-    expect(actionTypeModel.validateParams(actionParams)).toEqual({
+    expect(await actionTypeModel.validateParams(actionParams)).toEqual({
       errors: {
         to: [],
         cc: [],

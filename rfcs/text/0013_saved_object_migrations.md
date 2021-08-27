@@ -253,26 +253,29 @@ Note:
 4. Fail the migration if:
    1. `.kibana` is pointing to an index that belongs to a later version of Kibana .e.g. `.kibana_7.12.0_001`
    2. (Only in 8.x) The source index contains documents that belong to an unknown Saved Object type (from a disabled plugin). Log an error explaining that the plugin that created these documents needs to be enabled again or that these objects should be deleted. See section (4.2.1.4).
-5. Set a write block on the source index. This prevents any further writes from outdated nodes.
-6. Create a new temporary index `.kibana_7.10.0_reindex_temp` with `dynamic: false` on the top-level mappings so that any kind of document can be written to the index. This allows us to write untransformed documents to the index which might have fields which have been removed from the latest mappings defined by the plugin. Define minimal mappings for the `migrationVersion` and `type` fields so that we're still able to search for outdated documents that need to be transformed.
+5. Search the source index for documents with types not registered within Kibana. Fail the migration if any document is found.  
+6. Set a write block on the source index. This prevents any further writes from outdated nodes.
+7. Create a new temporary index `.kibana_7.10.0_reindex_temp` with `dynamic: false` on the top-level mappings so that any kind of document can be written to the index. This allows us to write untransformed documents to the index which might have fields which have been removed from the latest mappings defined by the plugin. Define minimal mappings for the `migrationVersion` and `type` fields so that we're still able to search for outdated documents that need to be transformed.
    1. Ignore errors if the target index already exists.
-7. Reindex the source index into the new temporary index.
-   1. Use `op_type=create` `conflicts=proceed` and `wait_for_completion=false` so that multiple instances can perform the reindex in parallel but only one write per document will succeed.
-   2. Wait for the reindex task to complete. If reindexing doesn’t complete within the 60s timeout, log a warning for visibility and poll again.
-8. Clone the temporary index into the target index `.kibana_7.10.0_001`. Since any further writes will only happen against the cloned target index this prevents a lost delete from occuring where one instance finishes the migration and deletes a document and another instance's reindex operation re-creates the deleted document.
+8. Reindex the source index into the new temporary index using a 'client-side' reindex, by reading batches of documents from the source, migrating them, and indexing them into the temp index.
+   1. Use `op_type=index` so that multiple instances can perform the reindex in parallel (last node running will override the documents, with no effect as the input data is the same)
+   2. Ignore `version_conflict_engine_exception` exceptions as they just mean that another node was indexing the same documents
+   3. If a `target_index_had_write_block` exception is encountered for all document of a batch, assume that another node already completed the temporary index reindex, and jump to the next step
+   4. If a document transform throws an exception, add the document to a failure list and continue trying to transform all other documents (without writing them to the temp index). If any failures occured, log the complete list of documents that failed to transform, then fail the migration.
+9. Clone the temporary index into the target index `.kibana_7.10.0_001`. Since any further writes will only happen against the cloned target index this prevents a lost delete from occuring where one instance finishes the migration and deletes a document and another instance's reindex operation re-creates the deleted document.
    1. Set a write block on the temporary index
    2. Clone the temporary index into the target index while specifying that the target index should have writes enabled.
    3. If the clone operation fails because the target index already exist, ignore the error and wait for the target index to become green before proceeding.
    4. (The `001` postfix in the target index name isn't used by Kibana, but allows for re-indexing an index should this be required by an Elasticsearch upgrade. E.g. re-index `.kibana_7.10.0_001` into `.kibana_7.10.0_002` and point the `.kibana_7.10.0` alias to `.kibana_7.10.0_002`.)
-9.  Transform documents by reading batches of outdated documents from the target index then transforming and updating them with optimistic concurrency control. 
+10. Transform documents by reading batches of outdated documents from the target index then transforming and updating them with optimistic concurrency control. 
     1. Ignore any version conflict errors.
     2. If a document transform throws an exception, add the document to a failure list and continue trying to transform all other documents. If any failures occured, log the complete list of documents that failed to transform. Fail the migration.
-10. Update the mappings of the target index
+11. Update the mappings of the target index
     1. Retrieve the existing mappings including the `migrationMappingPropertyHashes` metadata.
     2. Update the mappings with `PUT /.kibana_7.10.0_001/_mapping`. The API deeply merges any updates so this won't remove the mappings of any plugins that are disabled on this instance but have been enabled on another instance that also migrated this index.
     3. Ensure that fields are correctly indexed using the target index's latest mappings `POST /.kibana_7.10.0_001/_update_by_query?conflicts=proceed`. In the future we could optimize this query by only targeting documents:
       1. That belong to a known saved object type.
-11.  Mark the migration as complete. This is done as a single atomic
+12. Mark the migration as complete. This is done as a single atomic
     operation (requires https://github.com/elastic/elasticsearch/pull/58100)
     to guarantee that when multiple versions of Kibana are performing the
     migration in parallel, only one version will win. E.g. if 7.11 and 7.12
@@ -284,7 +287,7 @@ Note:
      4. If this fails with a "required alias [.kibana] does not exist" error or "index_not_found_exception" for the temporary index, fetch `.kibana` again:
         1. If `.kibana` is _not_ pointing to our target index fail the migration.
         2. If `.kibana` is pointing to our target index the migration has succeeded and we can proceed to step (12).
-12.  Start serving traffic. All saved object reads/writes happen through the
+13. Start serving traffic. All saved object reads/writes happen through the
     version-specific alias `.kibana_7.10.0`.
 
 Together with the limitations, this algorithm ensures that migrations are

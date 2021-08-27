@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import '../../../../__mocks__/kea.mock';
-import { mockTelemetryActions } from '../../../../__mocks__';
+import { mockTelemetryActions } from '../../../../__mocks__/kea_logic';
 
 import React from 'react';
 

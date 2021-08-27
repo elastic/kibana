@@ -66,7 +66,7 @@ async function createEsDocument(es: any, epochMillis: number, testedValue: numbe
   });
   // console.log(`writing document to ${ES_TEST_INDEX_NAME}:`, JSON.stringify(document, null, 4));
 
-  if (response.result !== 'created') {
+  if (response.body.result !== 'created') {
     throw new Error(`document not created: ${JSON.stringify(response)}`);
   }
 }

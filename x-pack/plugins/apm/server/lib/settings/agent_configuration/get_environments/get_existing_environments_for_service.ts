@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { withApmSpan } from '../../../../utils/with_apm_span';
 import { Setup } from '../../../helpers/setup_request';
 import {
   SERVICE_NAME,
@@ -20,36 +19,37 @@ export async function getExistingEnvironmentsForService({
   serviceName: string | undefined;
   setup: Setup;
 }) {
-  return withApmSpan('get_existing_environments_for_service', async () => {
-    const { internalClient, indices, config } = setup;
-    const maxServiceEnvironments = config['xpack.apm.maxServiceEnvironments'];
+  const { internalClient, indices, config } = setup;
+  const maxServiceEnvironments = config['xpack.apm.maxServiceEnvironments'];
 
-    const bool = serviceName
-      ? { filter: [{ term: { [SERVICE_NAME]: serviceName } }] }
-      : { must_not: [{ exists: { field: SERVICE_NAME } }] };
+  const bool = serviceName
+    ? { filter: [{ term: { [SERVICE_NAME]: serviceName } }] }
+    : { must_not: [{ exists: { field: SERVICE_NAME } }] };
 
-    const params = {
-      index: indices.apmAgentConfigurationIndex,
-      body: {
-        size: 0,
-        query: { bool },
-        aggs: {
-          environments: {
-            terms: {
-              field: SERVICE_ENVIRONMENT,
-              missing: ALL_OPTION_VALUE,
-              size: maxServiceEnvironments,
-            },
+  const params = {
+    index: indices.apmAgentConfigurationIndex,
+    body: {
+      size: 0,
+      query: { bool },
+      aggs: {
+        environments: {
+          terms: {
+            field: SERVICE_ENVIRONMENT,
+            missing: ALL_OPTION_VALUE,
+            size: maxServiceEnvironments,
           },
         },
       },
-    };
+    },
+  };
 
-    const resp = await internalClient.search(params);
-    const existingEnvironments =
-      resp.aggregations?.environments.buckets.map(
-        (bucket) => bucket.key as string
-      ) || [];
-    return existingEnvironments;
-  });
+  const resp = await internalClient.search(
+    'get_existing_environments_for_service',
+    params
+  );
+  const existingEnvironments =
+    resp.aggregations?.environments.buckets.map(
+      (bucket) => bucket.key as string
+    ) || [];
+  return existingEnvironments;
 }

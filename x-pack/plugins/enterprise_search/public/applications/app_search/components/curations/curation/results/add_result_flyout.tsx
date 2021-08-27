@@ -24,6 +24,7 @@ import { i18n } from '@kbn/i18n';
 
 import { FlashMessages } from '../../../../../shared/flash_messages';
 
+import { SearchLogic } from '../../../search';
 import {
   RESULT_ACTIONS_DIRECTIONS,
   PROMOTE_DOCUMENT_ACTION,
@@ -36,8 +37,10 @@ import { CurationLogic } from '../curation_logic';
 import { AddResultLogic, CurationResult } from './';
 
 export const AddResultFlyout: React.FC = () => {
-  const { searchQuery, searchResults, dataLoading } = useValues(AddResultLogic);
-  const { search, closeFlyout } = useActions(AddResultLogic);
+  const searchLogic = SearchLogic({ id: 'add-results-flyout' });
+  const { searchQuery, searchResults, searchDataLoading } = useValues(searchLogic);
+  const { closeFlyout } = useActions(AddResultLogic);
+  const { search } = useActions(searchLogic);
 
   const { promotedIds, hiddenIds } = useValues(CurationLogic);
   const { addPromotedId, removePromotedId, addHiddenId, removeHiddenId } = useActions(
@@ -63,7 +66,7 @@ export const AddResultFlyout: React.FC = () => {
           <EuiFieldSearch
             value={searchQuery}
             onChange={(e) => search(e.target.value)}
-            isLoading={dataLoading}
+            isLoading={searchDataLoading}
             placeholder={i18n.translate(
               'xpack.enterpriseSearch.appSearch.engine.curations.addResult.searchPlaceholder',
               { defaultMessage: 'Search engine documents' }

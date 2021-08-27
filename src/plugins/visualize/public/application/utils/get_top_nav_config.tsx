@@ -8,6 +8,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { METRIC_TYPE } from '@kbn/analytics';
 
 import { Capabilities } from 'src/core/public';
 import { TopNavMenuData } from 'src/plugins/navigation/public';
@@ -29,7 +30,7 @@ import {
   VisualizeAppStateContainer,
   VisualizeEditorVisInstance,
 } from '../types';
-import { VisualizeConstants } from '../visualize_constants';
+import { APP_NAME, VisualizeConstants } from '../visualize_constants';
 import { getEditBreadcrumbs } from './breadcrumbs';
 import { EmbeddableStateTransfer } from '../../../../embeddable/public';
 
@@ -80,6 +81,7 @@ export const getTopNavConfig = (
     embeddableId,
   }: TopNavConfigParams,
   {
+    data,
     application,
     chrome,
     history,
@@ -92,10 +94,22 @@ export const getTopNavConfig = (
     dashboard,
     savedObjectsTagging,
     presentationUtil,
+    usageCollection,
   }: VisualizeServices
 ) => {
   const { vis, embeddableHandler } = visInstance;
   const savedVis = visInstance.savedVis;
+
+  const doTelemetryForSaveEvent = (visType: string) => {
+    if (usageCollection) {
+      usageCollection.reportUiCounter(
+        originatingApp ?? APP_NAME,
+        METRIC_TYPE.CLICK,
+        `${visType}:save`
+      );
+    }
+  };
+
   /**
    * Called when the user clicks "Save" button.
    */
@@ -141,17 +155,17 @@ export const getTopNavConfig = (
               saveOptions.dashboardId === 'new' ? '#/create' : `#/view/${saveOptions.dashboardId}`;
           }
 
-          if (newlyCreated && stateTransfer) {
+          if (stateTransfer) {
             stateTransfer.navigateToWithEmbeddablePackage(app, {
               state: {
                 type: VISUALIZE_EMBEDDABLE_TYPE,
                 input: { savedObjectId: id },
-                embeddableId,
+                embeddableId: savedVis.copyOnSave ? undefined : embeddableId,
+                searchSessionId: data.search.session.getSessionId(),
               },
               path,
             });
           } else {
-            // TODO: need the same thing here?
             application.navigateToApp(app, { path });
           }
         } else {
@@ -201,6 +215,7 @@ export const getTopNavConfig = (
       } as VisualizeInput,
       embeddableId,
       type: VISUALIZE_EMBEDDABLE_TYPE,
+      searchSessionId: data.search.session.getSessionId(),
     };
     stateTransfer.navigateToWithEmbeddablePackage(originatingApp, { state });
   };
@@ -381,6 +396,7 @@ export const getTopNavConfig = (
                     } as VisualizeInput,
                     embeddableId,
                     type: VISUALIZE_EMBEDDABLE_TYPE,
+                    searchSessionId: data.search.session.getSessionId(),
                   };
 
                   const path = dashboardId === 'new' ? '#/create' : `#/view/${dashboardId}`;
@@ -393,6 +409,8 @@ export const getTopNavConfig = (
                   // TODO: Saved Object Modal requires `id` to be defined so this is a workaround
                   return { id: true };
                 }
+
+                doTelemetryForSaveEvent(vis.type.name);
 
                 // We're adding the viz to a library so we need to save it and then
                 // add to a dashboard if necessary
@@ -434,7 +452,9 @@ export const getTopNavConfig = (
                     onSave={onSave}
                     options={tagOptions}
                     getAppNameFromId={stateTransfer.getAppNameFromId}
-                    objectType={'visualization'}
+                    objectType={i18n.translate('visualize.topNavMenu.saveVisualizationObjectType', {
+                      defaultMessage: 'visualization',
+                    })}
                     onClose={() => {}}
                     originatingApp={originatingApp}
                     returnToOriginSwitchLabel={
@@ -460,7 +480,9 @@ export const getTopNavConfig = (
                     canSaveByReference={Boolean(visualizeCapabilities.save)}
                     onSave={onSave}
                     tagOptions={tagOptions}
-                    objectType={'visualization'}
+                    objectType={i18n.translate('visualize.topNavMenu.saveVisualizationObjectType', {
+                      defaultMessage: 'visualization',
+                    })}
                     onClose={() => {}}
                   />
                 );
@@ -503,6 +525,8 @@ export const getTopNavConfig = (
               }
             },
             run: async () => {
+              doTelemetryForSaveEvent(vis.type.name);
+
               if (!savedVis?.id) {
                 return createVisReference();
               }

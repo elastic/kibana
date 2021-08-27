@@ -9,12 +9,15 @@
 import { featureCatalogueRegistryMock } from './services/feature_catalogue/feature_catalogue_registry.mock';
 import { environmentServiceMock } from './services/environment/environment.mock';
 import { tutorialServiceMock } from './services/tutorials/tutorial_service.mock';
+import { addDataServiceMock } from './services/add_data/add_data_service.mock';
 
 export const registryMock = featureCatalogueRegistryMock.create();
 export const environmentMock = environmentServiceMock.create();
 export const tutorialMock = tutorialServiceMock.create();
+export const addDataMock = addDataServiceMock.create();
 jest.doMock('./services', () => ({
   FeatureCatalogueRegistry: jest.fn(() => registryMock),
   EnvironmentService: jest.fn(() => environmentMock),
   TutorialService: jest.fn(() => tutorialMock),
+  AddDataService: jest.fn(() => addDataMock),
 }));

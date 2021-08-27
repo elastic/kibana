@@ -17,17 +17,18 @@ import {
   EuiIconTip,
 } from '@elastic/eui';
 import classNames from 'classnames';
-import { DataPublicPluginStart } from 'src/plugins/data/public';
+import { FieldFormatsStart } from 'src/plugins/field_formats/public';
 import { IndexPatternField } from './types';
 import { FieldItem } from './field_item';
 import { Query, Filter } from '../../../../../src/plugins/data/public';
 import { DatasourceDataPanelProps } from '../types';
 import { IndexPattern } from './types';
 import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
+import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
 
 export interface FieldItemSharedProps {
   core: DatasourceDataPanelProps['core'];
-  data: DataPublicPluginStart;
+  fieldFormats: FieldFormatsStart;
   chartsThemeService: ChartsPluginSetup['theme'];
   indexPattern: IndexPattern;
   highlight?: string;
@@ -57,6 +58,7 @@ export interface FieldsAccordionProps {
   hasSuggestionForField: DatasourceDataPanelProps['hasSuggestionForField'];
   editField?: (name: string) => void;
   removeField?: (name: string) => void;
+  uiActions: UiActionsStart;
 }
 
 export const FieldsAccordion = memo(function InnerFieldsAccordion({
@@ -80,6 +82,7 @@ export const FieldsAccordion = memo(function InnerFieldsAccordion({
   hasSuggestionForField,
   editField,
   removeField,
+  uiActions,
 }: FieldsAccordionProps) {
   const renderField = useCallback(
     (field: IndexPatternField, index) => (
@@ -95,6 +98,7 @@ export const FieldsAccordion = memo(function InnerFieldsAccordion({
         hasSuggestionForField={hasSuggestionForField}
         editField={editField}
         removeField={removeField}
+        uiActions={uiActions}
       />
     ),
     [
@@ -106,6 +110,7 @@ export const FieldsAccordion = memo(function InnerFieldsAccordion({
       groupIndex,
       editField,
       removeField,
+      uiActions,
     ]
   );
 

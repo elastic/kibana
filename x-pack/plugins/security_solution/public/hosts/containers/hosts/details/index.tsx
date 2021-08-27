@@ -145,14 +145,14 @@ export const useHostDetails = ({
       }
       return prevRequest;
     });
-    return () => {
-      searchSubscription$.current.unsubscribe();
-      abortCtrl.current.abort();
-    };
   }, [endDate, hostName, indexNames, startDate]);
 
   useEffect(() => {
     hostDetailsSearch(hostDetailsRequest);
+    return () => {
+      searchSubscription$.current.unsubscribe();
+      abortCtrl.current.abort();
+    };
   }, [hostDetailsRequest, hostDetailsSearch]);
 
   return [loading, hostDetailsResponse];

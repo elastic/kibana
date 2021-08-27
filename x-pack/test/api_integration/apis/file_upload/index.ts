@@ -10,5 +10,6 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('File upload', function () {
     loadTestFile(require.resolve('./has_import_permission'));
+    loadTestFile(require.resolve('./index_exists'));
   });
 }

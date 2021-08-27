@@ -61,7 +61,7 @@ export type HostDetailsTabsProps = HostBodyComponentDispatchProps &
     docValueFields?: DocValueFields[];
     indexNames: string[];
     pageFilters?: Filter[];
-    filterQuery: string;
+    filterQuery?: string;
     indexPattern: IIndexPattern;
     type: hostsModel.HostsType;
   };

@@ -96,7 +96,7 @@ describe('visiblity', () => {
 });
 
 describe('icon', () => {
-  it('should use vector icon', async () => {
+  it('should use no data icon', async () => {
     const layer: TiledVectorLayer = createLayer({}, {});
 
     const iconAndTooltipContent = layer.getCustomIconAndTooltipContent();

@@ -8,12 +8,13 @@
 import { Observable } from 'rxjs';
 import type {
   IRouter,
-  ILegacyClusterClient,
   Logger,
-  ILegacyCustomClusterClient,
+  ICustomClusterClient,
   RequestHandlerContext,
   ElasticsearchClient,
 } from 'kibana/server';
+import type Boom from '@hapi/boom';
+import { ElasticsearchClientError, ResponseError } from '@elastic/elasticsearch/lib/errors';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { LicenseFeature, ILicense } from '../../licensing/server';
 import type {
@@ -21,15 +22,18 @@ import type {
   ActionsApiRequestHandlerContext,
 } from '../../actions/server';
 import type { AlertingApiRequestHandlerContext } from '../../alerting/server';
+import type { RacApiRequestHandlerContext } from '../../rule_registry/server';
 import {
   PluginStartContract as AlertingPluginStartContract,
   PluginSetupContract as AlertingPluginSetupContract,
 } from '../../alerting/server';
-import { InfraPluginSetup } from '../../infra/server';
+import { InfraPluginSetup, InfraRequestHandlerContext } from '../../infra/server';
 import { LicensingPluginStart } from '../../licensing/server';
 import { PluginSetupContract as FeaturesPluginSetupContract } from '../../features/server';
 import { EncryptedSavedObjectsPluginSetup } from '../../encrypted_saved_objects/server';
 import { CloudSetup } from '../../cloud/server';
+import { ElasticsearchModifiedSource } from '../common/types/es';
+import { RulesByType } from '../common/types/alerts';
 
 export interface MonitoringLicenseService {
   refresh: () => Promise<any>;
@@ -57,6 +61,8 @@ export interface PluginsSetup {
 export interface RequestHandlerContextMonitoringPlugin extends RequestHandlerContext {
   actions?: ActionsApiRequestHandlerContext;
   alerting?: AlertingApiRequestHandlerContext;
+  infra: InfraRequestHandlerContext;
+  ruleRegistry?: RacApiRequestHandlerContext;
 }
 
 export interface PluginsStart {
@@ -70,7 +76,7 @@ export interface MonitoringCoreConfig {
 }
 
 export interface RouteDependencies {
-  cluster: ILegacyCustomClusterClient;
+  cluster: ICustomClusterClient;
   router: IRouter<RequestHandlerContextMonitoringPlugin>;
   licenseService: MonitoringLicenseService;
   encryptedSavedObjects?: EncryptedSavedObjectsPluginSetup;
@@ -86,7 +92,7 @@ export interface MonitoringCore {
 export interface LegacyShimDependencies {
   router: IRouter<RequestHandlerContextMonitoringPlugin>;
   instanceUuid: string;
-  esDataClient: ILegacyClusterClient;
+  esDataClient: ElasticsearchClient;
   kibanaStatsCollector: any;
 }
 
@@ -113,7 +119,7 @@ export interface LegacyRequest {
   getKibanaStatsCollector: () => any;
   getUiSettingsService: () => any;
   getActionTypeRegistry: () => any;
-  getAlertsClient: () => any;
+  getRulesClient: () => any;
   getActionsClient: () => any;
   server: LegacyServer;
 }
@@ -144,3 +150,36 @@ export interface LegacyServer {
     };
   };
 }
+
+export type Cluster = ElasticsearchModifiedSource & {
+  ml?: { jobs: any };
+  logs?: any;
+  alerts?: AlertsOnCluster;
+};
+
+export interface AlertsOnCluster {
+  list: RulesByType;
+  alertsMeta: {
+    enabled: boolean;
+  };
+}
+
+export interface Bucket {
+  key: string;
+  uuids: {
+    buckets: unknown[];
+  };
+}
+
+export interface Aggregation {
+  buckets: Bucket[];
+}
+export interface ClusterSettingsReasonResponse {
+  found: boolean;
+  reason?: {
+    property?: string;
+    data?: string;
+  };
+}
+
+export type ErrorTypes = Error | Boom.Boom | ResponseError | ElasticsearchClientError;

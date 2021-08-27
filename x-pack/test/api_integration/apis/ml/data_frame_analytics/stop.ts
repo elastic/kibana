@@ -22,7 +22,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('POST data_frame/analytics/{analyticsId}/_stop', () => {
     before(async () => {
-      await esArchiver.loadIfNeeded('ml/bm_classification');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/bm_classification');
       await ml.testResources.setKibanaTimeZoneToUTC();
       // job config with high training percent so it takes longer to run
       const slowRunningConfig = ml.commonConfig.getDFABmClassificationJobConfig(analyticsId);

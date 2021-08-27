@@ -11,11 +11,14 @@ import type { LicensingApiRequestHandlerContext } from '../../licensing/server';
 import type { AlertingApiRequestHandlerContext } from '../../alerting/server';
 
 import { AppClient } from './client';
+import { RuleExecutionLogClient } from './lib/detection_engine/rule_execution_log/rule_execution_log_client';
 
 export { AppClient };
 
 export interface AppRequestContext {
   getAppClient: () => AppClient;
+  getSpaceId: () => string;
+  getExecutionLogClient: () => RuleExecutionLogClient;
 }
 
 export type SecuritySolutionRequestHandlerContext = RequestHandlerContext & {

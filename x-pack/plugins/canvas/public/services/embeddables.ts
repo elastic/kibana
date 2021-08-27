@@ -6,17 +6,7 @@
  */
 
 import { EmbeddableFactory } from '../../../../../src/plugins/embeddable/public';
-import { CanvasServiceFactory } from '.';
 
-export interface EmbeddablesService {
+export interface CanvasEmbeddablesService {
   getEmbeddableFactories: () => IterableIterator<EmbeddableFactory>;
 }
-
-export const embeddablesServiceFactory: CanvasServiceFactory<EmbeddablesService> = async (
-  _coreSetup,
-  _coreStart,
-  _setupPlugins,
-  startPlugins
-) => ({
-  getEmbeddableFactories: startPlugins.embeddable.getEmbeddableFactories,
-});

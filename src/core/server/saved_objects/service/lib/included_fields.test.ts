@@ -6,125 +6,63 @@
  * Side Public License, v 1.
  */
 
-import { includedFields } from './included_fields';
+import { getRootFields, includedFields } from './included_fields';
 
-const BASE_FIELD_COUNT = 10;
+describe('getRootFields', () => {
+  it('returns copy of root fields', () => {
+    const fields = getRootFields();
+    expect(fields).toMatchInlineSnapshot(`
+      Array [
+        "namespace",
+        "namespaces",
+        "type",
+        "references",
+        "migrationVersion",
+        "coreMigrationVersion",
+        "updated_at",
+        "originId",
+      ]
+    `);
+  });
+});
 
 describe('includedFields', () => {
+  const rootFields = getRootFields();
+
   it('returns undefined if fields are not provided', () => {
     expect(includedFields()).toBe(undefined);
   });
 
-  it('accepts type string', () => {
+  it('accepts type and field as string', () => {
     const fields = includedFields('config', 'foo');
-    expect(fields).toHaveLength(BASE_FIELD_COUNT);
-    expect(fields).toContain('type');
+    expect(fields).toEqual(['config.foo', ...rootFields, 'foo']);
   });
 
-  it('accepts type as string array', () => {
+  it('accepts type as array and field as string', () => {
     const fields = includedFields(['config', 'secret'], 'foo');
-    expect(fields).toMatchInlineSnapshot(`
-Array [
-  "config.foo",
-  "secret.foo",
-  "namespace",
-  "namespaces",
-  "type",
-  "references",
-  "migrationVersion",
-  "coreMigrationVersion",
-  "updated_at",
-  "originId",
-  "foo",
-]
-`);
+    expect(fields).toEqual(['config.foo', 'secret.foo', ...rootFields, 'foo']);
   });
 
-  it('accepts field as string', () => {
-    const fields = includedFields('config', 'foo');
-    expect(fields).toHaveLength(BASE_FIELD_COUNT);
-    expect(fields).toContain('config.foo');
-  });
-
-  it('accepts fields as an array', () => {
+  it('accepts type as string and field as array', () => {
     const fields = includedFields('config', ['foo', 'bar']);
-
-    expect(fields).toHaveLength(BASE_FIELD_COUNT + 2);
-    expect(fields).toContain('config.foo');
-    expect(fields).toContain('config.bar');
+    expect(fields).toEqual(['config.foo', 'config.bar', ...rootFields, 'foo', 'bar']);
   });
 
-  it('accepts type as string array and fields as string array', () => {
+  it('accepts type as array and field as array', () => {
     const fields = includedFields(['config', 'secret'], ['foo', 'bar']);
-    expect(fields).toMatchInlineSnapshot(`
-Array [
-  "config.foo",
-  "config.bar",
-  "secret.foo",
-  "secret.bar",
-  "namespace",
-  "namespaces",
-  "type",
-  "references",
-  "migrationVersion",
-  "coreMigrationVersion",
-  "updated_at",
-  "originId",
-  "foo",
-  "bar",
-]
-`);
-  });
-
-  it('includes namespace', () => {
-    const fields = includedFields('config', 'foo');
-    expect(fields).toHaveLength(BASE_FIELD_COUNT);
-    expect(fields).toContain('namespace');
-  });
-
-  it('includes namespaces', () => {
-    const fields = includedFields('config', 'foo');
-    expect(fields).toHaveLength(BASE_FIELD_COUNT);
-    expect(fields).toContain('namespaces');
-  });
-
-  it('includes references', () => {
-    const fields = includedFields('config', 'foo');
-    expect(fields).toHaveLength(BASE_FIELD_COUNT);
-    expect(fields).toContain('references');
-  });
-
-  it('includes migrationVersion', () => {
-    const fields = includedFields('config', 'foo');
-    expect(fields).toHaveLength(BASE_FIELD_COUNT);
-    expect(fields).toContain('migrationVersion');
-  });
-
-  it('includes updated_at', () => {
-    const fields = includedFields('config', 'foo');
-    expect(fields).toHaveLength(BASE_FIELD_COUNT);
-    expect(fields).toContain('updated_at');
-  });
-
-  it('includes originId', () => {
-    const fields = includedFields('config', 'foo');
-    expect(fields).toHaveLength(BASE_FIELD_COUNT);
-    expect(fields).toContain('originId');
+    expect(fields).toEqual([
+      'config.foo',
+      'config.bar',
+      'secret.foo',
+      'secret.bar',
+      ...rootFields,
+      'foo',
+      'bar',
+    ]);
   });
 
   it('uses wildcard when type is not provided', () => {
     const fields = includedFields(undefined, 'foo');
-    expect(fields).toHaveLength(BASE_FIELD_COUNT);
-    expect(fields).toContain('*.foo');
-  });
-
-  describe('v5 compatibility', () => {
-    it('includes legacy field path', () => {
-      const fields = includedFields('config', ['foo', 'bar']);
-
-      expect(fields).toHaveLength(BASE_FIELD_COUNT + 2);
-      expect(fields).toContain('foo');
-      expect(fields).toContain('bar');
-    });
+    expect(fields).toEqual(['*.foo', ...rootFields, 'foo']);
   });
 });

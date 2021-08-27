@@ -24,20 +24,21 @@ import {
   ElementClickListener,
 } from '@elastic/charts';
 import { RenderMode } from 'src/plugins/expressions';
-import { FormatFactory, LensFilterEvent } from '../types';
+import type { LensFilterEvent } from '../types';
 import { VisualizationContainer } from '../visualization_container';
 import { CHART_NAMES, DEFAULT_PERCENT_DECIMALS } from './constants';
-import { PieExpressionProps } from './types';
+import type { FormatFactory } from '../../common';
+import type { PieExpressionProps } from '../../common/expressions';
 import { getSliceValue, getFilterContext } from './render_helpers';
 import { EmptyPlaceholder } from '../shared_components';
 import './visualization.scss';
-import { desanitizeFilterContext } from '../utils';
 import {
   ChartsPluginSetup,
   PaletteRegistry,
   SeriesLayer,
 } from '../../../../../src/plugins/charts/public';
 import { LensIconChartDonut } from '../assets/chart_donut';
+import { getLegendAction } from './get_legend_action';
 
 declare global {
   interface Window {
@@ -74,6 +75,8 @@ export function PieComponent(
     legendPosition,
     nestedLegend,
     percentDecimals,
+    legendMaxLines,
+    truncateLegend,
     hideLabels,
     palette,
   } = props.args;
@@ -150,7 +153,7 @@ export function PieComponent(
             }
           }
 
-          const outputColor = paletteService.get(palette.name).getColor(
+          const outputColor = paletteService.get(palette.name).getCategoricalColor(
             seriesLayers,
             {
               behindText: categoryDisplay !== 'hide',
@@ -222,14 +225,26 @@ export function PieComponent(
     const value = row[metricColumn.id];
     return typeof value === 'number' && value < 0;
   });
+
+  const isMetricEmpty = firstTable.rows.every((row) => {
+    return !row[metricColumn.id];
+  });
+
   const isEmpty =
     firstTable.rows.length === 0 ||
-    firstTable.rows.every((row) =>
-      groups.every((colId) => !row[colId] || typeof row[colId] === 'undefined')
-    );
+    firstTable.rows.every((row) => groups.every((colId) => typeof row[colId] === 'undefined')) ||
+    isMetricEmpty;
 
   if (isEmpty) {
-    return <EmptyPlaceholder icon={LensIconChartDonut} />;
+    return (
+      <VisualizationContainer
+        reportTitle={props.args.title}
+        reportDescription={props.args.description}
+        className="lnsPieExpression__container"
+      >
+        <EmptyPlaceholder icon={LensIconChartDonut} />;
+      </VisualizationContainer>
+    );
   }
 
   if (hasNegative) {
@@ -237,7 +252,7 @@ export function PieComponent(
       <EuiText className="lnsChart__empty" textAlign="center" color="subdued" size="xs">
         <FormattedMessage
           id="xpack.lens.pie.pieWithNegativeWarningLabel"
-          defaultMessage="{chartType} charts can't render with negative values. Try a different chart type."
+          defaultMessage="{chartType} charts can't render with negative values. Try a different visualization type."
           values={{
             chartType: CHART_NAMES[shape].label,
           }}
@@ -249,7 +264,7 @@ export function PieComponent(
   const onElementClickHandler: ElementClickListener = (args) => {
     const context = getFilterContext(args[0][0] as LayerValue[], groups, firstTable);
 
-    onClickValue(desanitizeFilterContext(context));
+    onClickValue(context);
   };
 
   return (
@@ -277,11 +292,15 @@ export function PieComponent(
           onElementClick={
             props.renderMode !== 'noInteractivity' ? onElementClickHandler : undefined
           }
+          legendAction={getLegendAction(firstTable, onClickValue)}
           theme={{
             ...chartTheme,
             background: {
               ...chartTheme.background,
               color: undefined, // removes background for embeddables
+            },
+            legend: {
+              labelOptions: { maxLines: truncateLegend ? legendMaxLines ?? 1 : 0 },
             },
           }}
           baseTheme={chartBaseTheme}

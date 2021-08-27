@@ -7,8 +7,9 @@
 
 // custom edits or fixes for default kibana types which are incomplete
 
-import { SimpleSavedObject } from 'kibana/public';
-import { IndexPatternAttributes } from 'src/plugins/data/common';
+import type { SimpleSavedObject } from 'kibana/public';
+import type { IndexPatternAttributes } from 'src/plugins/data/common';
+import type { FieldFormatsRegistry } from '../../../../../src/plugins/field_formats/common';
 
 export type IndexPatternTitle = string;
 
@@ -26,3 +27,5 @@ export function isSavedSearchSavedObject(
 ): ss is SavedSearchSavedObject {
   return ss !== null;
 }
+
+export type FieldFormatsRegistryProvider = () => Promise<FieldFormatsRegistry>;

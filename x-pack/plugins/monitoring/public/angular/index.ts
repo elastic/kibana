@@ -29,6 +29,7 @@ export class AngularApp {
       triggersActionsUi,
       usageCollection,
       kibanaLegacy,
+      appMountParameters,
     } = deps;
     const app: IModule = localAppModule(deps);
     app.run(($injector: angular.auto.IInjectorService) => {
@@ -45,6 +46,7 @@ export class AngularApp {
           kibanaLegacy,
           triggersActionsUi,
           usageCollection,
+          appMountParameters,
         },
         this.injector
       );

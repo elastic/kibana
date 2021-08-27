@@ -22,7 +22,7 @@ export const RunCommand: ICommand = {
     log.warning(dedent`
       We are migrating packages into the Bazel build system and we will no longer support running npm scripts on
       packages using 'yarn kbn run' on Bazel built packages. If the package you are trying to act on contains a
-      BUILD.bazel file please just use 'yarn kbn build-bazel' to build it or 'yarn kbn watch-bazel' to watch it
+      BUILD.bazel file please just use 'yarn kbn build' to build it or 'yarn kbn watch' to watch it
     `);
 
     const batchedProjects = topologicallyBatchProjects(projects, projectGraph);

@@ -15,8 +15,9 @@ import { IUiSettingsClient } from 'kibana/public';
 
 import { VisualizationContainer, PersistedState } from '../../visualizations/public';
 
-import { isVisTableData, TimeseriesVisData } from '../common/types';
-import { getChartsSetup } from './services';
+import type { TimeseriesVisData } from '../common/types';
+import { isVisTableData } from '../common/vis_data_utils';
+import { getCharts } from './services';
 
 import type { TimeseriesVisParams } from './types';
 import type { ExpressionRenderDefinition } from '../../expressions/common';
@@ -48,7 +49,7 @@ export const getTimeseriesVisRenderer: (deps: {
     handlers.onDestroy(() => {
       unmountComponentAtNode(domNode);
     });
-    const { palettes } = getChartsSetup();
+    const { palettes } = getCharts();
     const showNoResult = !checkIfDataExists(config.visData, config.visParams);
     const palettesService = await palettes.getPalettes();
 

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { mockKibanaValues } from '../../../../__mocks__';
+import { mockKibanaValues } from '../../../../__mocks__/kea_logic';
+import '../../../../__mocks__/react_router';
 import '../../../__mocks__/engine_logic.mock';
 
 import React from 'react';

@@ -95,17 +95,6 @@ You can use standard Markdown in here, but you can also access your piped-in dat
   | progress shape="gauge" label={formatnumber 0%} font={font size=24 family="Helvetica" color="#000000" align=center}
   | render`,
   },
-  revealImage: {
-    name: 'revealImage',
-    displayName: 'Image reveal',
-    type: 'image',
-    help: 'Reveals a percentage of an image',
-    expression: `filters
-  | demodata
-  | math "mean(percent_uptime)"
-  | revealImage origin=bottom image=null
-  | render`,
-  },
   shape: {
     name: 'shape',
     displayName: 'Shape',

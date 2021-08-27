@@ -16,6 +16,7 @@ import { useParams } from 'react-router-dom';
 import { useAppToastsMock } from '../../../../../common/hooks/use_app_toasts.mock';
 import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
 
+jest.mock('../../../../../common/lib/kibana');
 jest.mock('../../../../containers/detection_engine/lists/use_lists_config');
 jest.mock('../../../../../common/components/link_to');
 jest.mock('../../../../components/user_info');

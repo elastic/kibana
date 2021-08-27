@@ -3,6 +3,7 @@
   "client": {
     "classes": [
       {
+        "parentPluginId": "maps",
         "id": "def-public.MapEmbeddable",
         "type": "Class",
         "tags": [],
@@ -33,7 +34,13 @@
             "text": "MapEmbeddableInput"
           },
           ", ",
-          "MapEmbeddableOutput",
+          {
+            "pluginId": "maps",
+            "scope": "public",
+            "docId": "kibMapsPluginApi",
+            "section": "def-public.MapEmbeddableOutput",
+            "text": "MapEmbeddableOutput"
+          },
           "> implements ",
           {
             "pluginId": "embeddable",
@@ -41,48 +48,70 @@
             "docId": "kibEmbeddablePluginApi",
             "section": "def-public.ReferenceOrValueEmbeddable",
             "text": "ReferenceOrValueEmbeddable"
-          }
+          },
+          "<",
+          "MapByValueInput",
+          ", ",
+          "MapByReferenceInput",
+          ">"
         ],
+        "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+        "deprecated": false,
         "children": [
           {
-            "tags": [],
+            "parentPluginId": "maps",
             "id": "def-public.MapEmbeddable.type",
             "type": "string",
+            "tags": [],
             "label": "type",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-              "lineNumber": 94
-            }
+            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+            "deprecated": false
           },
           {
+            "parentPluginId": "maps",
+            "id": "def-public.MapEmbeddable.deferEmbeddableLoad",
+            "type": "boolean",
+            "tags": [],
+            "label": "deferEmbeddableLoad",
+            "description": [],
+            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "maps",
             "id": "def-public.MapEmbeddable.Unnamed",
             "type": "Function",
+            "tags": [],
             "label": "Constructor",
+            "description": [],
             "signature": [
               "any"
             ],
-            "description": [],
+            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+            "deprecated": false,
             "children": [
               {
+                "parentPluginId": "maps",
                 "id": "def-public.MapEmbeddable.Unnamed.$1",
                 "type": "Object",
+                "tags": [],
                 "label": "config",
-                "isRequired": true,
+                "description": [],
                 "signature": [
                   "MapEmbeddableConfig"
                 ],
-                "description": [],
-                "source": {
-                  "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-                  "lineNumber": 111
-                }
+                "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+                "deprecated": false,
+                "isRequired": true
               },
               {
+                "parentPluginId": "maps",
                 "id": "def-public.MapEmbeddable.Unnamed.$2",
                 "type": "CompoundType",
+                "tags": [],
                 "label": "initialInput",
-                "isRequired": true,
+                "description": [],
                 "signature": [
                   {
                     "pluginId": "maps",
@@ -92,17 +121,17 @@
                     "text": "MapEmbeddableInput"
                   }
                 ],
-                "description": [],
-                "source": {
-                  "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-                  "lineNumber": 111
-                }
+                "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+                "deprecated": false,
+                "isRequired": true
               },
               {
+                "parentPluginId": "maps",
                 "id": "def-public.MapEmbeddable.Unnamed.$3",
                 "type": "Object",
+                "tags": [],
                 "label": "parent",
-                "isRequired": false,
+                "description": [],
                 "signature": [
                   {
                     "pluginId": "embeddable",
@@ -129,24 +158,20 @@
                   },
                   "> | undefined"
                 ],
-                "description": [],
-                "source": {
-                  "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-                  "lineNumber": 111
-                }
+                "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+                "deprecated": false,
+                "isRequired": false
               }
             ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-              "lineNumber": 111
-            }
+            "returnComment": []
           },
           {
+            "parentPluginId": "maps",
             "id": "def-public.MapEmbeddable.inputIsRefType",
             "type": "Function",
+            "tags": [],
             "label": "inputIsRefType",
+            "description": [],
             "signature": [
               "(input: ",
               {
@@ -159,13 +184,16 @@
               ") => input is ",
               "MapByReferenceInput"
             ],
-            "description": [],
+            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+            "deprecated": false,
             "children": [
               {
+                "parentPluginId": "maps",
                 "id": "def-public.MapEmbeddable.inputIsRefType.$1",
                 "type": "CompoundType",
+                "tags": [],
                 "label": "input",
-                "isRequired": true,
+                "description": [],
                 "signature": [
                   {
                     "pluginId": "maps",
@@ -175,158 +203,208 @@
                     "text": "MapEmbeddableInput"
                   }
                 ],
-                "description": [],
-                "source": {
-                  "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-                  "lineNumber": 186
-                }
+                "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+                "deprecated": false,
+                "isRequired": true
               }
             ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-              "lineNumber": 185
-            }
+            "returnComment": []
           },
           {
+            "parentPluginId": "maps",
             "id": "def-public.MapEmbeddable.getInputAsRefType",
             "type": "Function",
+            "tags": [],
             "label": "getInputAsRefType",
+            "description": [],
             "signature": [
               "() => Promise<",
               "MapByReferenceInput",
               ">"
             ],
-            "description": [],
+            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+            "deprecated": false,
             "children": [],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-              "lineNumber": 191
-            }
+            "returnComment": []
           },
           {
+            "parentPluginId": "maps",
             "id": "def-public.MapEmbeddable.getInputAsValueType",
             "type": "Function",
+            "tags": [],
             "label": "getInputAsValueType",
+            "description": [],
             "signature": [
               "() => Promise<",
               "MapByValueInput",
               ">"
             ],
-            "description": [],
+            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+            "deprecated": false,
             "children": [],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-              "lineNumber": 199
-            }
+            "returnComment": []
           },
           {
+            "parentPluginId": "maps",
             "id": "def-public.MapEmbeddable.getDescription",
             "type": "Function",
+            "tags": [],
             "label": "getDescription",
+            "description": [],
             "signature": [
               "() => string | undefined"
             ],
-            "description": [],
+            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+            "deprecated": false,
             "children": [],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-              "lineNumber": 204
-            }
+            "returnComment": []
           },
           {
+            "parentPluginId": "maps",
             "id": "def-public.MapEmbeddable.supportedTriggers",
             "type": "Function",
+            "tags": [],
             "label": "supportedTriggers",
+            "description": [],
             "signature": [
               "() => string[]"
             ],
-            "description": [],
+            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+            "deprecated": false,
             "children": [],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-              "lineNumber": 208
-            }
+            "returnComment": []
           },
           {
+            "parentPluginId": "maps",
             "id": "def-public.MapEmbeddable.setRenderTooltipContent",
             "type": "Function",
-            "children": [
-              {
-                "id": "def-public.MapEmbeddable.setRenderTooltipContent.$1",
-                "type": "Function",
-                "label": "renderTooltipContent",
-                "isRequired": true,
-                "signature": [
-                  "RenderToolTipContent"
-                ],
-                "description": [],
-                "source": {
-                  "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-                  "lineNumber": 212
-                }
-              }
-            ],
+            "tags": [],
+            "label": "setRenderTooltipContent",
+            "description": [],
             "signature": [
               "(renderTooltipContent: ",
               "RenderToolTipContent",
               ") => void"
             ],
-            "description": [],
-            "label": "setRenderTooltipContent",
-            "source": {
-              "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-              "lineNumber": 212
-            },
-            "tags": [],
+            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "maps",
+                "id": "def-public.MapEmbeddable.setRenderTooltipContent.$1",
+                "type": "Function",
+                "tags": [],
+                "label": "renderTooltipContent",
+                "description": [],
+                "signature": [
+                  "RenderToolTipContent"
+                ],
+                "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
             "returnComment": []
           },
           {
+            "parentPluginId": "maps",
             "id": "def-public.MapEmbeddable.setEventHandlers",
             "type": "Function",
-            "children": [
-              {
-                "id": "def-public.MapEmbeddable.setEventHandlers.$1",
-                "type": "Object",
-                "label": "eventHandlers",
-                "isRequired": true,
-                "signature": [
-                  "EventHandlers"
-                ],
-                "description": [],
-                "source": {
-                  "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-                  "lineNumber": 216
-                }
-              }
-            ],
+            "tags": [],
+            "label": "setEventHandlers",
+            "description": [],
             "signature": [
               "(eventHandlers: ",
               "EventHandlers",
               ") => void"
             ],
-            "description": [],
-            "label": "setEventHandlers",
-            "source": {
-              "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-              "lineNumber": 216
-            },
-            "tags": [],
+            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "maps",
+                "id": "def-public.MapEmbeddable.setEventHandlers.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "eventHandlers",
+                "description": [],
+                "signature": [
+                  "EventHandlers"
+                ],
+                "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
             "returnComment": []
           },
           {
+            "parentPluginId": "maps",
+            "id": "def-public.MapEmbeddable.setOnInitialRenderComplete",
+            "type": "Function",
+            "tags": [],
+            "label": "setOnInitialRenderComplete",
+            "description": [],
+            "signature": [
+              "(onInitialRenderComplete?: (() => void) | undefined) => void"
+            ],
+            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "maps",
+                "id": "def-public.MapEmbeddable.setOnInitialRenderComplete.$1",
+                "type": "Function",
+                "tags": [],
+                "label": "onInitialRenderComplete",
+                "description": [],
+                "signature": [
+                  "(() => void) | undefined"
+                ],
+                "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "maps",
+            "id": "def-public.MapEmbeddable.setIsSharable",
+            "type": "Function",
+            "tags": [],
+            "label": "setIsSharable",
+            "description": [],
+            "signature": [
+              "(isSharable: boolean) => void"
+            ],
+            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "maps",
+                "id": "def-public.MapEmbeddable.setIsSharable.$1",
+                "type": "boolean",
+                "tags": [],
+                "label": "isSharable",
+                "description": [],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "maps",
             "id": "def-public.MapEmbeddable.getInspectorAdapters",
             "type": "Function",
+            "tags": [],
             "label": "getInspectorAdapters",
+            "description": [],
             "signature": [
               "() => ",
               {
@@ -337,268 +415,198 @@
                 "text": "Adapters"
               }
             ],
-            "description": [],
+            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+            "deprecated": false,
             "children": [],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-              "lineNumber": 220
-            }
+            "returnComment": []
           },
           {
+            "parentPluginId": "maps",
             "id": "def-public.MapEmbeddable.onUpdate",
             "type": "Function",
+            "tags": [],
             "label": "onUpdate",
+            "description": [],
             "signature": [
               "() => void"
             ],
-            "description": [],
+            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+            "deprecated": false,
             "children": [],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-              "lineNumber": 224
-            }
+            "returnComment": []
           },
           {
+            "parentPluginId": "maps",
+            "id": "def-public.MapEmbeddable._getFilters",
+            "type": "Function",
+            "tags": [],
+            "label": "_getFilters",
+            "description": [],
+            "signature": [
+              "() => ",
+              "Filter",
+              "[]"
+            ],
+            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "maps",
+            "id": "def-public.MapEmbeddable._getSearchSessionId",
+            "type": "Function",
+            "tags": [],
+            "label": "_getSearchSessionId",
+            "description": [],
+            "signature": [
+              "() => string | undefined"
+            ],
+            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "maps",
             "id": "def-public.MapEmbeddable._dispatchSetQuery",
             "type": "Function",
+            "tags": [],
             "label": "_dispatchSetQuery",
+            "description": [],
             "signature": [
               "({ forceRefresh }: { forceRefresh: boolean; }) => void"
             ],
-            "description": [],
+            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+            "deprecated": false,
             "children": [
               {
+                "parentPluginId": "maps",
                 "id": "def-public.MapEmbeddable._dispatchSetQuery.$1.forceRefresh",
                 "type": "Object",
-                "label": "{ forceRefresh }",
                 "tags": [],
+                "label": "{ forceRefresh }",
                 "description": [],
+                "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+                "deprecated": false,
                 "children": [
                   {
-                    "tags": [],
+                    "parentPluginId": "maps",
                     "id": "def-public.MapEmbeddable._dispatchSetQuery.$1.forceRefresh.forceRefresh",
                     "type": "boolean",
+                    "tags": [],
                     "label": "forceRefresh",
                     "description": [],
-                    "source": {
-                      "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-                      "lineNumber": 256
-                    }
+                    "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+                    "deprecated": false
                   }
-                ],
-                "source": {
-                  "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-                  "lineNumber": 256
-                }
+                ]
               }
             ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-              "lineNumber": 256
-            }
+            "returnComment": []
           },
           {
-            "id": "def-public.MapEmbeddable._dispatchSetRefreshConfig",
-            "type": "Function",
-            "label": "_dispatchSetRefreshConfig",
-            "signature": [
-              "(refreshConfig: ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataQueryPluginApi",
-                "section": "def-common.RefreshInterval",
-                "text": "RefreshInterval"
-              },
-              ") => void"
-            ],
-            "description": [],
-            "children": [
-              {
-                "id": "def-public.MapEmbeddable._dispatchSetRefreshConfig.$1",
-                "type": "Object",
-                "label": "refreshConfig",
-                "isRequired": true,
-                "signature": [
-                  {
-                    "pluginId": "data",
-                    "scope": "common",
-                    "docId": "kibDataQueryPluginApi",
-                    "section": "def-common.RefreshInterval",
-                    "text": "RefreshInterval"
-                  }
-                ],
-                "description": [],
-                "source": {
-                  "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-                  "lineNumber": 278
-                }
-              }
-            ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-              "lineNumber": 278
-            }
-          },
-          {
+            "parentPluginId": "maps",
             "id": "def-public.MapEmbeddable._dispatchSetChartsPaletteServiceGetColor",
             "type": "Function",
+            "tags": [],
             "label": "_dispatchSetChartsPaletteServiceGetColor",
+            "description": [],
             "signature": [
               "(syncColors?: boolean | undefined) => Promise<void>"
             ],
-            "description": [],
+            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+            "deprecated": false,
             "children": [
               {
+                "parentPluginId": "maps",
                 "id": "def-public.MapEmbeddable._dispatchSetChartsPaletteServiceGetColor.$1",
                 "type": "CompoundType",
+                "tags": [],
                 "label": "syncColors",
-                "isRequired": false,
+                "description": [],
                 "signature": [
                   "boolean | undefined"
                 ],
-                "description": [],
-                "source": {
-                  "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-                  "lineNumber": 288
-                }
+                "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+                "deprecated": false,
+                "isRequired": false
               }
             ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-              "lineNumber": 288
-            }
+            "returnComment": []
           },
           {
+            "parentPluginId": "maps",
             "id": "def-public.MapEmbeddable.render",
             "type": "Function",
+            "tags": [],
             "label": "render",
-            "signature": [
-              "(domNode: HTMLElement) => void"
-            ],
             "description": [
               "\n"
             ],
+            "signature": [
+              "(domNode: HTMLElement) => void"
+            ],
+            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+            "deprecated": false,
             "children": [
               {
+                "parentPluginId": "maps",
                 "id": "def-public.MapEmbeddable.render.$1",
                 "type": "Object",
+                "tags": [],
                 "label": "domNode",
-                "isRequired": true,
+                "description": [],
                 "signature": [
                   "HTMLElement"
                 ],
-                "description": [],
-                "source": {
-                  "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-                  "lineNumber": 306
-                }
+                "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+                "deprecated": false,
+                "isRequired": true
               }
             ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-              "lineNumber": 306
-            }
+            "returnComment": []
           },
           {
+            "parentPluginId": "maps",
             "id": "def-public.MapEmbeddable.setLayerList",
             "type": "Function",
+            "tags": [],
             "label": "setLayerList",
+            "description": [],
             "signature": [
               "(layerList: ",
               "LayerDescriptor",
               "[]) => void"
             ],
-            "description": [],
+            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+            "deprecated": false,
             "children": [
               {
+                "parentPluginId": "maps",
                 "id": "def-public.MapEmbeddable.setLayerList.$1",
                 "type": "Array",
+                "tags": [],
                 "label": "layerList",
-                "isRequired": true,
+                "description": [],
                 "signature": [
                   "LayerDescriptor",
                   "[]"
                 ],
-                "description": [],
-                "source": {
-                  "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-                  "lineNumber": 332
-                }
+                "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+                "deprecated": false,
+                "isRequired": true
               }
             ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-              "lineNumber": 332
-            }
+            "returnComment": []
           },
           {
+            "parentPluginId": "maps",
             "id": "def-public.MapEmbeddable.onSingleValueTrigger",
             "type": "Function",
-            "children": [
-              {
-                "id": "def-public.MapEmbeddable.onSingleValueTrigger.$1",
-                "type": "string",
-                "label": "actionId",
-                "isRequired": true,
-                "signature": [
-                  "string"
-                ],
-                "description": [],
-                "source": {
-                  "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-                  "lineNumber": 349
-                }
-              },
-              {
-                "id": "def-public.MapEmbeddable.onSingleValueTrigger.$2",
-                "type": "string",
-                "label": "key",
-                "isRequired": true,
-                "signature": [
-                  "string"
-                ],
-                "description": [],
-                "source": {
-                  "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-                  "lineNumber": 349
-                }
-              },
-              {
-                "id": "def-public.MapEmbeddable.onSingleValueTrigger.$3",
-                "type": "CompoundType",
-                "label": "value",
-                "isRequired": false,
-                "signature": [
-                  {
-                    "pluginId": "maps",
-                    "scope": "common",
-                    "docId": "kibMapsPluginApi",
-                    "section": "def-common.RawValue",
-                    "text": "RawValue"
-                  }
-                ],
-                "description": [],
-                "source": {
-                  "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-                  "lineNumber": 349
-                }
-              }
-            ],
+            "tags": [],
+            "label": "onSingleValueTrigger",
+            "description": [],
             "signature": [
               "(actionId: string, key: string, value: ",
               {
@@ -610,79 +618,114 @@
               },
               ") => void"
             ],
-            "description": [],
-            "label": "onSingleValueTrigger",
-            "source": {
-              "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-              "lineNumber": 349
-            },
-            "tags": [],
-            "returnComment": []
-          },
-          {
-            "id": "def-public.MapEmbeddable.addFilters",
-            "type": "Function",
+            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+            "deprecated": false,
             "children": [
               {
-                "id": "def-public.MapEmbeddable.addFilters.$1",
-                "type": "Array",
-                "label": "filters",
-                "isRequired": true,
-                "signature": [
-                  {
-                    "pluginId": "data",
-                    "scope": "common",
-                    "docId": "kibDataPluginApi",
-                    "section": "def-common.Filter",
-                    "text": "Filter"
-                  },
-                  "[]"
-                ],
-                "description": [],
-                "source": {
-                  "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-                  "lineNumber": 363
-                }
-              },
-              {
-                "id": "def-public.MapEmbeddable.addFilters.$2",
+                "parentPluginId": "maps",
+                "id": "def-public.MapEmbeddable.onSingleValueTrigger.$1",
                 "type": "string",
+                "tags": [],
                 "label": "actionId",
-                "isRequired": true,
+                "description": [],
                 "signature": [
                   "string"
                 ],
+                "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "maps",
+                "id": "def-public.MapEmbeddable.onSingleValueTrigger.$2",
+                "type": "string",
+                "tags": [],
+                "label": "key",
                 "description": [],
-                "source": {
-                  "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-                  "lineNumber": 363
-                }
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "maps",
+                "id": "def-public.MapEmbeddable.onSingleValueTrigger.$3",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "maps",
+                    "scope": "common",
+                    "docId": "kibMapsPluginApi",
+                    "section": "def-common.RawValue",
+                    "text": "RawValue"
+                  }
+                ],
+                "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+                "deprecated": false,
+                "isRequired": false
               }
             ],
-            "signature": [
-              "(filters: ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
-              "[], actionId?: string) => Promise<void>"
-            ],
-            "description": [],
-            "label": "addFilters",
-            "source": {
-              "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-              "lineNumber": 363
-            },
-            "tags": [],
             "returnComment": []
           },
           {
+            "parentPluginId": "maps",
+            "id": "def-public.MapEmbeddable.addFilters",
+            "type": "Function",
+            "tags": [],
+            "label": "addFilters",
+            "description": [],
+            "signature": [
+              "(filters: ",
+              "Filter",
+              "[], actionId?: string) => Promise<void>"
+            ],
+            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "maps",
+                "id": "def-public.MapEmbeddable.addFilters.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "filters",
+                "description": [],
+                "signature": [
+                  "Filter",
+                  "[]"
+                ],
+                "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "maps",
+                "id": "def-public.MapEmbeddable.addFilters.$2",
+                "type": "string",
+                "tags": [],
+                "label": "actionId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "maps",
             "id": "def-public.MapEmbeddable.getFilterActions",
             "type": "Function",
-            "children": [],
+            "tags": [],
+            "label": "getFilterActions",
+            "description": [],
             "signature": [
               "() => Promise<",
               {
@@ -694,19 +737,18 @@
               },
               "<object>[]>"
             ],
-            "description": [],
-            "label": "getFilterActions",
-            "source": {
-              "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-              "lineNumber": 375
-            },
-            "tags": [],
+            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+            "deprecated": false,
+            "children": [],
             "returnComment": []
           },
           {
+            "parentPluginId": "maps",
             "id": "def-public.MapEmbeddable.getActionContext",
             "type": "Function",
-            "children": [],
+            "tags": [],
+            "label": "getActionContext",
+            "description": [],
             "signature": [
               "() => ",
               {
@@ -718,328 +760,577 @@
               },
               "<object>"
             ],
-            "description": [],
-            "label": "getActionContext",
-            "source": {
-              "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-              "lineNumber": 396
-            },
-            "tags": [],
+            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+            "deprecated": false,
+            "children": [],
             "returnComment": []
           },
           {
+            "parentPluginId": "maps",
+            "id": "def-public.MapEmbeddable.setMapExtentFilter",
+            "type": "Function",
+            "tags": [],
+            "label": "setMapExtentFilter",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "maps",
+            "id": "def-public.MapEmbeddable.clearMapExtentFilter",
+            "type": "Function",
+            "tags": [],
+            "label": "clearMapExtentFilter",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "maps",
             "id": "def-public.MapEmbeddable.destroy",
             "type": "Function",
+            "tags": [],
             "label": "destroy",
+            "description": [],
             "signature": [
               "() => void"
             ],
-            "description": [],
+            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+            "deprecated": false,
             "children": [],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-              "lineNumber": 407
-            }
+            "returnComment": []
           },
           {
+            "parentPluginId": "maps",
             "id": "def-public.MapEmbeddable.reload",
             "type": "Function",
+            "tags": [],
             "label": "reload",
+            "description": [],
             "signature": [
               "() => void"
             ],
-            "description": [],
+            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+            "deprecated": false,
             "children": [],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-              "lineNumber": 423
-            }
+            "returnComment": []
           },
           {
+            "parentPluginId": "maps",
             "id": "def-public.MapEmbeddable._handleStoreChanges",
             "type": "Function",
+            "tags": [],
             "label": "_handleStoreChanges",
+            "description": [],
             "signature": [
               "() => void"
             ],
-            "description": [],
+            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+            "deprecated": false,
             "children": [],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-              "lineNumber": 429
-            }
+            "returnComment": []
           }
         ],
-        "source": {
-          "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-          "lineNumber": 91
-        },
         "initialIsOpen": false
       }
     ],
     "functions": [],
     "interfaces": [
       {
-        "id": "def-public.RenderTooltipContentParams",
+        "parentPluginId": "maps",
+        "id": "def-public.EMSTermJoinConfig",
         "type": "Interface",
-        "label": "RenderTooltipContentParams",
-        "description": [],
         "tags": [],
+        "label": "EMSTermJoinConfig",
+        "description": [],
+        "path": "x-pack/plugins/maps/public/ems_autosuggest/ems_autosuggest.ts",
+        "deprecated": false,
         "children": [
           {
-            "id": "def-public.RenderTooltipContentParams.addFilters",
-            "type": "Function",
-            "label": "addFilters",
-            "signature": [
-              "(filter: object, actionId: string) => void"
-            ],
-            "description": [],
-            "children": [
-              {
-                "id": "def-public.RenderTooltipContentParams.addFilters.$1",
-                "type": "Uncategorized",
-                "label": "filter",
-                "isRequired": true,
-                "signature": [
-                  "object"
-                ],
-                "description": [],
-                "source": {
-                  "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
-                  "lineNumber": 32
-                }
-              },
-              {
-                "id": "def-public.RenderTooltipContentParams.addFilters.$2",
-                "type": "string",
-                "label": "actionId",
-                "isRequired": true,
-                "signature": [
-                  "string"
-                ],
-                "description": [],
-                "source": {
-                  "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
-                  "lineNumber": 32
-                }
-              }
-            ],
+            "parentPluginId": "maps",
+            "id": "def-public.EMSTermJoinConfig.layerId",
+            "type": "string",
             "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
-              "lineNumber": 32
-            }
+            "label": "layerId",
+            "description": [],
+            "path": "x-pack/plugins/maps/public/ems_autosuggest/ems_autosuggest.ts",
+            "deprecated": false
           },
           {
+            "parentPluginId": "maps",
+            "id": "def-public.EMSTermJoinConfig.field",
+            "type": "string",
+            "tags": [],
+            "label": "field",
+            "description": [],
+            "path": "x-pack/plugins/maps/public/ems_autosuggest/ems_autosuggest.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maps",
+        "id": "def-public.RenderTooltipContentParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "RenderTooltipContentParams",
+        "description": [],
+        "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "maps",
+            "id": "def-public.RenderTooltipContentParams.addFilters",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "addFilters",
+            "description": [],
+            "signature": [
+              "((filters: ",
+              "Filter",
+              "[], actionId: string) => Promise<void>) | null"
+            ],
+            "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "maps",
             "id": "def-public.RenderTooltipContentParams.closeTooltip",
             "type": "Function",
+            "tags": [],
             "label": "closeTooltip",
+            "description": [],
             "signature": [
               "() => void"
             ],
-            "description": [],
+            "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
+            "deprecated": false,
             "children": [],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
-              "lineNumber": 33
-            }
+            "returnComment": []
           },
           {
-            "tags": [],
+            "parentPluginId": "maps",
             "id": "def-public.RenderTooltipContentParams.features",
             "type": "Array",
+            "tags": [],
             "label": "features",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
-              "lineNumber": 34
-            },
             "signature": [
               "TooltipFeature",
               "[]"
-            ]
+            ],
+            "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
+            "deprecated": false
           },
           {
+            "parentPluginId": "maps",
+            "id": "def-public.RenderTooltipContentParams.getActionContext",
+            "type": "Function",
             "tags": [],
-            "id": "def-public.RenderTooltipContentParams.isLocked",
-            "type": "boolean",
-            "label": "isLocked",
+            "label": "getActionContext",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
-              "lineNumber": 35
-            }
+            "signature": [
+              "(() => ",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.ActionExecutionContext",
+                "text": "ActionExecutionContext"
+              },
+              "<object>) | undefined"
+            ],
+            "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
           },
           {
+            "parentPluginId": "maps",
+            "id": "def-public.RenderTooltipContentParams.getFilterActions",
+            "type": "Function",
+            "tags": [],
+            "label": "getFilterActions",
+            "description": [],
+            "signature": [
+              "(() => Promise<",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.Action",
+                "text": "Action"
+              },
+              "<object>[]>) | undefined"
+            ],
+            "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "maps",
             "id": "def-public.RenderTooltipContentParams.getLayerName",
             "type": "Function",
+            "tags": [],
             "label": "getLayerName",
-            "signature": [
-              "(layerId: string) => Promise<string>"
-            ],
             "description": [],
+            "signature": [
+              "(layerId: string) => Promise<string | null>"
+            ],
+            "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
+            "deprecated": false,
             "children": [
               {
+                "parentPluginId": "maps",
                 "id": "def-public.RenderTooltipContentParams.getLayerName.$1",
                 "type": "string",
+                "tags": [],
                 "label": "layerId",
-                "isRequired": true,
+                "description": [],
                 "signature": [
                   "string"
                 ],
-                "description": [],
-                "source": {
-                  "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
-                  "lineNumber": 36
-                }
+                "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
+                "deprecated": false,
+                "isRequired": true
               }
             ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
-              "lineNumber": 36
-            }
+            "returnComment": []
           },
           {
+            "parentPluginId": "maps",
+            "id": "def-public.RenderTooltipContentParams.isLocked",
+            "type": "boolean",
+            "tags": [],
+            "label": "isLocked",
+            "description": [],
+            "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "maps",
             "id": "def-public.RenderTooltipContentParams.loadFeatureProperties",
             "type": "Function",
+            "tags": [],
             "label": "loadFeatureProperties",
+            "description": [],
             "signature": [
-              "({ layerId, featureId }: ",
-              "LoadFeatureProps",
-              ") => Promise<",
+              "({ layerId, featureId, mbProperties, }: { layerId: string; featureId?: string | number | undefined; mbProperties: GeoJSON.GeoJsonProperties; }) => Promise<",
               "ITooltipProperty",
               "[]>"
             ],
-            "description": [],
+            "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
+            "deprecated": false,
             "children": [
               {
-                "id": "def-public.RenderTooltipContentParams.loadFeatureProperties.$1",
+                "parentPluginId": "maps",
+                "id": "def-public.RenderTooltipContentParams.loadFeatureProperties.$1.layerIdfeatureIdmbProperties",
                 "type": "Object",
-                "label": "{ layerId, featureId }",
-                "isRequired": true,
-                "signature": [
-                  "LoadFeatureProps"
-                ],
+                "tags": [],
+                "label": "{\n    layerId,\n    featureId,\n    mbProperties,\n  }",
                 "description": [],
-                "source": {
-                  "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
-                  "lineNumber": 37
-                }
+                "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
+                "deprecated": false,
+                "children": [
+                  {
+                    "parentPluginId": "maps",
+                    "id": "def-public.RenderTooltipContentParams.loadFeatureProperties.$1.layerIdfeatureIdmbProperties.layerId",
+                    "type": "string",
+                    "tags": [],
+                    "label": "layerId",
+                    "description": [],
+                    "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "maps",
+                    "id": "def-public.RenderTooltipContentParams.loadFeatureProperties.$1.layerIdfeatureIdmbProperties.featureId",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "featureId",
+                    "description": [],
+                    "signature": [
+                      "string | number | undefined"
+                    ],
+                    "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "maps",
+                    "id": "def-public.RenderTooltipContentParams.loadFeatureProperties.$1.layerIdfeatureIdmbProperties.mbProperties",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "mbProperties",
+                    "description": [],
+                    "signature": [
+                      "{ [name: string]: any; } | null"
+                    ],
+                    "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
+                    "deprecated": false
+                  }
+                ]
               }
             ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
-              "lineNumber": 37
-            }
+            "returnComment": []
           },
           {
+            "parentPluginId": "maps",
             "id": "def-public.RenderTooltipContentParams.loadFeatureGeometry",
             "type": "Function",
+            "tags": [],
             "label": "loadFeatureGeometry",
-            "signature": [
-              "({ layerId, featureId }: ",
-              "LoadFeatureProps",
-              ") => ",
-              "FeatureGeometry"
-            ],
             "description": [],
+            "signature": [
+              "({ layerId, featureId, }: { layerId: string; featureId?: string | number | undefined; }) => GeoJSON.Point | GeoJSON.MultiPoint | GeoJSON.LineString | GeoJSON.MultiLineString | GeoJSON.Polygon | GeoJSON.MultiPolygon | GeoJSON.GeometryCollection | null"
+            ],
+            "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
+            "deprecated": false,
             "children": [
               {
-                "id": "def-public.RenderTooltipContentParams.loadFeatureGeometry.$1",
+                "parentPluginId": "maps",
+                "id": "def-public.RenderTooltipContentParams.loadFeatureGeometry.$1.layerIdfeatureId",
                 "type": "Object",
-                "label": "{ layerId, featureId }",
-                "isRequired": true,
-                "signature": [
-                  "LoadFeatureProps"
-                ],
+                "tags": [],
+                "label": "{\n    layerId,\n    featureId,\n  }",
                 "description": [],
-                "source": {
-                  "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
-                  "lineNumber": 38
-                }
+                "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
+                "deprecated": false,
+                "children": [
+                  {
+                    "parentPluginId": "maps",
+                    "id": "def-public.RenderTooltipContentParams.loadFeatureGeometry.$1.layerIdfeatureId.layerId",
+                    "type": "string",
+                    "tags": [],
+                    "label": "layerId",
+                    "description": [],
+                    "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "maps",
+                    "id": "def-public.RenderTooltipContentParams.loadFeatureGeometry.$1.layerIdfeatureId.featureId",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "featureId",
+                    "description": [],
+                    "signature": [
+                      "string | number | undefined"
+                    ],
+                    "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
+                    "deprecated": false
+                  }
+                ]
               }
             ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "maps",
+            "id": "def-public.RenderTooltipContentParams.onSingleValueTrigger",
+            "type": "Function",
             "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
-              "lineNumber": 38
-            }
+            "label": "onSingleValueTrigger",
+            "description": [],
+            "signature": [
+              "((actionId: string, key: string, value: ",
+              {
+                "pluginId": "maps",
+                "scope": "common",
+                "docId": "kibMapsPluginApi",
+                "section": "def-common.RawValue",
+                "text": "RawValue"
+              },
+              ") => void) | undefined"
+            ],
+            "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "maps",
+                "id": "def-public.RenderTooltipContentParams.onSingleValueTrigger.$1",
+                "type": "string",
+                "tags": [],
+                "label": "actionId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "maps",
+                "id": "def-public.RenderTooltipContentParams.onSingleValueTrigger.$2",
+                "type": "string",
+                "tags": [],
+                "label": "key",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "maps",
+                "id": "def-public.RenderTooltipContentParams.onSingleValueTrigger.$3",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "maps",
+                    "scope": "common",
+                    "docId": "kibMapsPluginApi",
+                    "section": "def-common.RawValue",
+                    "text": "RawValue"
+                  }
+                ],
+                "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
           }
         ],
-        "source": {
-          "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
-          "lineNumber": 31
-        },
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maps",
+        "id": "def-public.SampleValuesConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "SampleValuesConfig",
+        "description": [],
+        "path": "x-pack/plugins/maps/public/ems_autosuggest/ems_autosuggest.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "maps",
+            "id": "def-public.SampleValuesConfig.sampleValues",
+            "type": "Array",
+            "tags": [],
+            "label": "sampleValues",
+            "description": [],
+            "signature": [
+              "React.ReactText[] | undefined"
+            ],
+            "path": "x-pack/plugins/maps/public/ems_autosuggest/ems_autosuggest.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "maps",
+            "id": "def-public.SampleValuesConfig.sampleValuesColumnName",
+            "type": "string",
+            "tags": [],
+            "label": "sampleValuesColumnName",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/maps/public/ems_autosuggest/ems_autosuggest.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       }
     ],
     "enums": [],
     "misc": [
       {
-        "tags": [],
+        "parentPluginId": "maps",
         "id": "def-public.MAP_SAVED_OBJECT_TYPE",
         "type": "string",
+        "tags": [],
         "label": "MAP_SAVED_OBJECT_TYPE",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 29
-        },
         "signature": [
           "\"map\""
         ],
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "maps",
         "id": "def-public.MapEmbeddableInput",
         "type": "Type",
-        "label": "MapEmbeddableInput",
         "tags": [],
+        "label": "MapEmbeddableInput",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/maps/public/embeddable/types.ts",
-          "lineNumber": 41
-        },
         "signature": [
           "MapByValueInput",
           " | ",
           "MapByReferenceInput"
         ],
+        "path": "x-pack/plugins/maps/public/embeddable/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maps",
+        "id": "def-public.MapEmbeddableOutput",
+        "type": "Type",
+        "tags": [],
+        "label": "MapEmbeddableOutput",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.EmbeddableOutput",
+            "text": "EmbeddableOutput"
+          },
+          " & { indexPatterns: ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataIndexPatternsPluginApi",
+            "section": "def-common.IndexPattern",
+            "text": "IndexPattern"
+          },
+          "[]; }"
+        ],
+        "path": "x-pack/plugins/maps/public/embeddable/types.ts",
+        "deprecated": false,
         "initialIsOpen": false
       }
     ],
     "objects": [],
     "start": {
+      "parentPluginId": "maps",
       "id": "def-public.MapsStartApi",
       "type": "Interface",
+      "tags": [],
       "label": "MapsStartApi",
       "description": [],
-      "tags": [],
+      "path": "x-pack/plugins/maps/public/api/start_api.ts",
+      "deprecated": false,
       "children": [
         {
-          "tags": [],
+          "parentPluginId": "maps",
           "id": "def-public.MapsStartApi.createLayerDescriptors",
           "type": "Object",
+          "tags": [],
           "label": "createLayerDescriptors",
           "description": [],
-          "source": {
-            "path": "x-pack/plugins/maps/public/api/start_api.ts",
-            "lineNumber": 15
-          },
           "signature": [
             "{ createSecurityLayerDescriptors: (indexPatternId: string, indexPatternTitle: string) => Promise<",
             "LayerDescriptor",
@@ -1050,114 +1341,127 @@
             ") => Promise<",
             "LayerDescriptor",
             ">; }"
-          ]
+          ],
+          "path": "x-pack/plugins/maps/public/api/start_api.ts",
+          "deprecated": false
         },
         {
+          "parentPluginId": "maps",
           "id": "def-public.MapsStartApi.registerLayerWizard",
           "type": "Function",
+          "tags": [],
           "label": "registerLayerWizard",
+          "description": [],
           "signature": [
             "(layerWizard: ",
             "LayerWizard",
             ") => Promise<void>"
           ],
-          "description": [],
+          "path": "x-pack/plugins/maps/public/api/start_api.ts",
+          "deprecated": false,
           "children": [
             {
+              "parentPluginId": "maps",
               "id": "def-public.MapsStartApi.registerLayerWizard.$1",
               "type": "Object",
+              "tags": [],
               "label": "layerWizard",
-              "isRequired": true,
+              "description": [],
               "signature": [
                 "LayerWizard"
               ],
-              "description": [],
-              "source": {
-                "path": "x-pack/plugins/maps/public/api/start_api.ts",
-                "lineNumber": 25
-              }
+              "path": "x-pack/plugins/maps/public/api/start_api.ts",
+              "deprecated": false,
+              "isRequired": true
             }
           ],
-          "tags": [],
-          "returnComment": [],
-          "source": {
-            "path": "x-pack/plugins/maps/public/api/start_api.ts",
-            "lineNumber": 25
-          }
+          "returnComment": []
         },
         {
+          "parentPluginId": "maps",
           "id": "def-public.MapsStartApi.registerSource",
           "type": "Function",
+          "tags": [],
           "label": "registerSource",
+          "description": [],
           "signature": [
             "(entry: ",
             "SourceRegistryEntry",
             ") => Promise<void>"
           ],
-          "description": [],
+          "path": "x-pack/plugins/maps/public/api/start_api.ts",
+          "deprecated": false,
           "children": [
             {
+              "parentPluginId": "maps",
               "id": "def-public.MapsStartApi.registerSource.$1",
               "type": "Object",
+              "tags": [],
               "label": "entry",
-              "isRequired": true,
+              "description": [],
               "signature": [
                 "SourceRegistryEntry"
               ],
-              "description": [],
-              "source": {
-                "path": "x-pack/plugins/maps/public/api/start_api.ts",
-                "lineNumber": 26
-              }
+              "path": "x-pack/plugins/maps/public/api/start_api.ts",
+              "deprecated": false,
+              "isRequired": true
             }
           ],
-          "tags": [],
-          "returnComment": [],
-          "source": {
-            "path": "x-pack/plugins/maps/public/api/start_api.ts",
-            "lineNumber": 26
-          }
+          "returnComment": []
         },
         {
+          "parentPluginId": "maps",
           "id": "def-public.MapsStartApi.suggestEMSTermJoinConfig",
           "type": "Function",
+          "tags": [],
           "label": "suggestEMSTermJoinConfig",
+          "description": [],
           "signature": [
             "(config: ",
-            "SampleValuesConfig",
+            {
+              "pluginId": "maps",
+              "scope": "public",
+              "docId": "kibMapsPluginApi",
+              "section": "def-public.SampleValuesConfig",
+              "text": "SampleValuesConfig"
+            },
             ") => Promise<",
-            "EMSTermJoinConfig",
+            {
+              "pluginId": "maps",
+              "scope": "public",
+              "docId": "kibMapsPluginApi",
+              "section": "def-public.EMSTermJoinConfig",
+              "text": "EMSTermJoinConfig"
+            },
             " | null>"
           ],
-          "description": [],
+          "path": "x-pack/plugins/maps/public/api/start_api.ts",
+          "deprecated": false,
           "children": [
             {
+              "parentPluginId": "maps",
               "id": "def-public.MapsStartApi.suggestEMSTermJoinConfig.$1",
               "type": "Object",
+              "tags": [],
               "label": "config",
-              "isRequired": true,
-              "signature": [
-                "SampleValuesConfig"
-              ],
               "description": [],
-              "source": {
-                "path": "x-pack/plugins/maps/public/api/start_api.ts",
-                "lineNumber": 27
-              }
+              "signature": [
+                {
+                  "pluginId": "maps",
+                  "scope": "public",
+                  "docId": "kibMapsPluginApi",
+                  "section": "def-public.SampleValuesConfig",
+                  "text": "SampleValuesConfig"
+                }
+              ],
+              "path": "x-pack/plugins/maps/public/api/start_api.ts",
+              "deprecated": false,
+              "isRequired": true
             }
           ],
-          "tags": [],
-          "returnComment": [],
-          "source": {
-            "path": "x-pack/plugins/maps/public/api/start_api.ts",
-            "lineNumber": 27
-          }
+          "returnComment": []
         }
       ],
-      "source": {
-        "path": "x-pack/plugins/maps/public/api/start_api.ts",
-        "lineNumber": 14
-      },
       "lifecycle": "start",
       "initialIsOpen": true
     }
@@ -1174,1083 +1478,1078 @@
     "classes": [],
     "functions": [
       {
+        "parentPluginId": "maps",
         "id": "def-common.getEditPath",
         "type": "Function",
+        "tags": [],
         "label": "getEditPath",
-        "signature": [
-          "(id: string) => string"
-        ],
         "description": [],
+        "signature": [
+          "(id: string | undefined) => string"
+        ],
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
         "children": [
           {
+            "parentPluginId": "maps",
             "id": "def-common.getEditPath.$1",
             "type": "string",
+            "tags": [],
             "label": "id",
-            "isRequired": true,
-            "signature": [
-              "string"
-            ],
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/maps/common/constants.ts",
-              "lineNumber": 64
-            }
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/maps/common/constants.ts",
+            "deprecated": false,
+            "isRequired": false
           }
         ],
-        "tags": [],
         "returnComment": [],
-        "source": {
-          "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 64
-        },
         "initialIsOpen": false
       },
       {
-        "id": "def-common.getExistingMapPath",
+        "parentPluginId": "maps",
+        "id": "def-common.getFullPath",
         "type": "Function",
-        "label": "getExistingMapPath",
-        "signature": [
-          "(id: string) => string"
-        ],
+        "tags": [],
+        "label": "getFullPath",
         "description": [],
+        "signature": [
+          "(id: string | undefined) => string"
+        ],
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
         "children": [
           {
-            "id": "def-common.getExistingMapPath.$1",
+            "parentPluginId": "maps",
+            "id": "def-common.getFullPath.$1",
             "type": "string",
+            "tags": [],
             "label": "id",
-            "isRequired": true,
-            "signature": [
-              "string"
-            ],
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/maps/common/constants.ts",
-              "lineNumber": 61
-            }
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/maps/common/constants.ts",
+            "deprecated": false,
+            "isRequired": false
           }
         ],
-        "tags": [],
         "returnComment": [],
-        "source": {
-          "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 61
-        },
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "maps",
         "id": "def-common.getNewMapPath",
         "type": "Function",
+        "tags": [],
         "label": "getNewMapPath",
+        "description": [],
         "signature": [
           "() => string"
         ],
-        "description": [],
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
         "children": [],
-        "tags": [],
         "returnComment": [],
-        "source": {
-          "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 58
-        },
         "initialIsOpen": false
       }
     ],
     "interfaces": [
       {
+        "parentPluginId": "maps",
         "id": "def-common.BodySettings",
         "type": "Interface",
+        "tags": [],
         "label": "BodySettings",
         "description": [],
-        "tags": [],
+        "path": "x-pack/plugins/maps/common/types.ts",
+        "deprecated": false,
         "children": [
           {
+            "parentPluginId": "maps",
             "id": "def-common.BodySettings.Unnamed",
             "type": "Any",
-            "label": "Unnamed",
             "tags": [],
+            "label": "Unnamed",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/maps/common/types.ts",
-              "lineNumber": 23
-            },
             "signature": [
               "any"
-            ]
+            ],
+            "path": "x-pack/plugins/maps/common/types.ts",
+            "deprecated": false
           }
         ],
-        "source": {
-          "path": "x-pack/plugins/maps/common/types.ts",
-          "lineNumber": 22
-        },
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "maps",
         "id": "def-common.CreateDocSourceResp",
         "type": "Interface",
+        "tags": [],
         "label": "CreateDocSourceResp",
         "description": [],
-        "tags": [],
+        "path": "x-pack/plugins/maps/common/types.ts",
+        "deprecated": false,
         "children": [
           {
+            "parentPluginId": "maps",
+            "id": "def-common.CreateDocSourceResp.indexPatternId",
+            "type": "string",
             "tags": [],
+            "label": "indexPatternId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/maps/common/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "maps",
             "id": "def-common.CreateDocSourceResp.success",
             "type": "boolean",
+            "tags": [],
             "label": "success",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/maps/common/types.ts",
-              "lineNumber": 9
-            }
+            "path": "x-pack/plugins/maps/common/types.ts",
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "maps",
             "id": "def-common.CreateDocSourceResp.error",
             "type": "Object",
+            "tags": [],
             "label": "error",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/maps/common/types.ts",
-              "lineNumber": 10
-            },
             "signature": [
               "Error | undefined"
-            ]
+            ],
+            "path": "x-pack/plugins/maps/common/types.ts",
+            "deprecated": false
           }
         ],
-        "source": {
-          "path": "x-pack/plugins/maps/common/types.ts",
-          "lineNumber": 8
-        },
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "maps",
         "id": "def-common.IndexSourceMappings",
         "type": "Interface",
+        "tags": [],
         "label": "IndexSourceMappings",
         "description": [],
-        "tags": [],
+        "path": "x-pack/plugins/maps/common/types.ts",
+        "deprecated": false,
         "children": [
           {
-            "tags": [],
+            "parentPluginId": "maps",
             "id": "def-common.IndexSourceMappings._meta",
             "type": "Object",
+            "tags": [],
             "label": "_meta",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/maps/common/types.ts",
-              "lineNumber": 14
-            },
             "signature": [
               "{ created_by: string; } | undefined"
-            ]
+            ],
+            "path": "x-pack/plugins/maps/common/types.ts",
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "maps",
             "id": "def-common.IndexSourceMappings.properties",
             "type": "Object",
+            "tags": [],
             "label": "properties",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/maps/common/types.ts",
-              "lineNumber": 17
-            },
             "signature": [
               "{ [key: string]: any; }"
-            ]
+            ],
+            "path": "x-pack/plugins/maps/common/types.ts",
+            "deprecated": false
           }
         ],
-        "source": {
-          "path": "x-pack/plugins/maps/common/types.ts",
-          "lineNumber": 13
-        },
         "initialIsOpen": false
       },
       {
-        "id": "def-common.WriteSettings",
+        "parentPluginId": "maps",
+        "id": "def-common.MatchingIndexesResp",
         "type": "Interface",
-        "label": "WriteSettings",
-        "description": [],
         "tags": [],
+        "label": "MatchingIndexesResp",
+        "description": [],
+        "path": "x-pack/plugins/maps/common/types.ts",
+        "deprecated": false,
         "children": [
           {
+            "parentPluginId": "maps",
+            "id": "def-common.MatchingIndexesResp.matchingIndexes",
+            "type": "Array",
             "tags": [],
-            "id": "def-common.WriteSettings.index",
-            "type": "string",
-            "label": "index",
+            "label": "matchingIndexes",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/maps/common/types.ts",
-              "lineNumber": 27
-            }
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/plugins/maps/common/types.ts",
+            "deprecated": false
           },
           {
+            "parentPluginId": "maps",
+            "id": "def-common.MatchingIndexesResp.success",
+            "type": "boolean",
             "tags": [],
-            "id": "def-common.WriteSettings.body",
-            "type": "Uncategorized",
-            "label": "body",
+            "label": "success",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/maps/common/types.ts",
-              "lineNumber": 28
-            },
-            "signature": [
-              "object"
-            ]
+            "path": "x-pack/plugins/maps/common/types.ts",
+            "deprecated": false
           },
           {
-            "id": "def-common.WriteSettings.Unnamed",
-            "type": "Any",
-            "label": "Unnamed",
+            "parentPluginId": "maps",
+            "id": "def-common.MatchingIndexesResp.error",
+            "type": "Object",
             "tags": [],
+            "label": "error",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/maps/common/types.ts",
-              "lineNumber": 29
-            },
             "signature": [
-              "any"
-            ]
+              "Error | undefined"
+            ],
+            "path": "x-pack/plugins/maps/common/types.ts",
+            "deprecated": false
           }
         ],
-        "source": {
-          "path": "x-pack/plugins/maps/common/types.ts",
-          "lineNumber": 26
-        },
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maps",
+        "id": "def-common.WriteSettings",
+        "type": "Interface",
+        "tags": [],
+        "label": "WriteSettings",
+        "description": [],
+        "path": "x-pack/plugins/maps/common/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "maps",
+            "id": "def-common.WriteSettings.index",
+            "type": "string",
+            "tags": [],
+            "label": "index",
+            "description": [],
+            "path": "x-pack/plugins/maps/common/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "maps",
+            "id": "def-common.WriteSettings.body",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "body",
+            "description": [],
+            "signature": [
+              "object"
+            ],
+            "path": "x-pack/plugins/maps/common/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "maps",
+            "id": "def-common.WriteSettings.Unnamed",
+            "type": "Any",
+            "tags": [],
+            "label": "Unnamed",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/plugins/maps/common/types.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       }
     ],
     "enums": [
       {
+        "parentPluginId": "maps",
         "id": "def-common.AGG_TYPE",
         "type": "Enum",
-        "label": "AGG_TYPE",
         "tags": [],
+        "label": "AGG_TYPE",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 161
-        },
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "maps",
         "id": "def-common.COLOR_MAP_TYPE",
         "type": "Enum",
-        "label": "COLOR_MAP_TYPE",
         "tags": [],
+        "label": "COLOR_MAP_TYPE",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 209
-        },
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "maps",
         "id": "def-common.DATA_MAPPING_FUNCTION",
         "type": "Enum",
+        "tags": [],
         "label": "DATA_MAPPING_FUNCTION",
-        "tags": [],
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 290
-        },
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
-        "id": "def-common.DRAW_TYPE",
+        "parentPluginId": "maps",
+        "id": "def-common.DRAW_MODE",
         "type": "Enum",
-        "label": "DRAW_TYPE",
         "tags": [],
+        "label": "DRAW_MODE",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 154
-        },
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "maps",
+        "id": "def-common.DRAW_SHAPE",
+        "type": "Enum",
+        "tags": [],
+        "label": "DRAW_SHAPE",
+        "description": [],
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maps",
         "id": "def-common.ES_GEO_FIELD_TYPE",
         "type": "Enum",
-        "label": "ES_GEO_FIELD_TYPE",
         "tags": [],
+        "label": "ES_GEO_FIELD_TYPE",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 121
-        },
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "maps",
         "id": "def-common.ES_SPATIAL_RELATIONS",
         "type": "Enum",
-        "label": "ES_SPATIAL_RELATIONS",
         "tags": [],
+        "label": "ES_SPATIAL_RELATIONS",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 129
-        },
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "maps",
         "id": "def-common.FIELD_ORIGIN",
         "type": "Enum",
+        "tags": [],
         "label": "FIELD_ORIGIN",
-        "tags": [],
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 94
-        },
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
-        "id": "def-common.FORMAT_TYPE",
-        "type": "Enum",
-        "label": "FORMAT_TYPE",
-        "tags": [],
-        "description": [],
-        "source": {
-          "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 253
-        },
-        "initialIsOpen": false
-      },
-      {
+        "parentPluginId": "maps",
         "id": "def-common.GEO_JSON_TYPE",
         "type": "Enum",
-        "label": "GEO_JSON_TYPE",
         "tags": [],
+        "label": "GEO_JSON_TYPE",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 135
-        },
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "maps",
         "id": "def-common.GRID_RESOLUTION",
         "type": "Enum",
-        "label": "GRID_RESOLUTION",
         "tags": [],
+        "label": "GRID_RESOLUTION",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 178
-        },
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "maps",
         "id": "def-common.INITIAL_LOCATION",
         "type": "Enum",
-        "label": "INITIAL_LOCATION",
         "tags": [],
+        "label": "INITIAL_LOCATION",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 265
-        },
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "maps",
         "id": "def-common.LABEL_BORDER_SIZES",
         "type": "Enum",
-        "label": "LABEL_BORDER_SIZES",
         "tags": [],
+        "label": "LABEL_BORDER_SIZES",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 222
-        },
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "maps",
         "id": "def-common.LAYER_STYLE_TYPE",
         "type": "Enum",
-        "label": "LAYER_STYLE_TYPE",
         "tags": [],
+        "label": "LAYER_STYLE_TYPE",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 203
-        },
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "maps",
         "id": "def-common.LAYER_TYPE",
         "type": "Enum",
-        "label": "LAYER_TYPE",
         "tags": [],
+        "label": "LAYER_TYPE",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 68
-        },
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "maps",
         "id": "def-common.LAYER_WIZARD_CATEGORY",
         "type": "Enum",
-        "label": "LAYER_WIZARD_CATEGORY",
         "tags": [],
+        "label": "LAYER_WIZARD_CATEGORY",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 272
-        },
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "maps",
         "id": "def-common.MB_LOOKUP_FUNCTION",
         "type": "Enum",
-        "label": "MB_LOOKUP_FUNCTION",
         "tags": [],
+        "label": "MB_LOOKUP_FUNCTION",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 285
-        },
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "maps",
         "id": "def-common.MVT_FIELD_TYPE",
         "type": "Enum",
-        "label": "MVT_FIELD_TYPE",
         "tags": [],
+        "label": "MVT_FIELD_TYPE",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 258
-        },
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "maps",
         "id": "def-common.RENDER_AS",
         "type": "Enum",
-        "label": "RENDER_AS",
         "tags": [],
+        "label": "RENDER_AS",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 172
-        },
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "maps",
         "id": "def-common.SCALING_TYPES",
         "type": "Enum",
-        "label": "SCALING_TYPES",
         "tags": [],
+        "label": "SCALING_TYPES",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 246
-        },
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "maps",
         "id": "def-common.SOURCE_TYPES",
         "type": "Enum",
-        "label": "SOURCE_TYPES",
         "tags": [],
+        "label": "SOURCE_TYPES",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 77
-        },
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "maps",
         "id": "def-common.STYLE_TYPE",
         "type": "Enum",
-        "label": "STYLE_TYPE",
         "tags": [],
+        "label": "STYLE_TYPE",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 198
-        },
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "maps",
         "id": "def-common.SYMBOLIZE_AS_TYPES",
         "type": "Enum",
-        "label": "SYMBOLIZE_AS_TYPES",
         "tags": [],
+        "label": "SYMBOLIZE_AS_TYPES",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 217
-        },
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "maps",
         "id": "def-common.VECTOR_SHAPE_TYPE",
         "type": "Enum",
-        "label": "VECTOR_SHAPE_TYPE",
         "tags": [],
+        "label": "VECTOR_SHAPE_TYPE",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 278
-        },
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "maps",
         "id": "def-common.VECTOR_STYLES",
         "type": "Enum",
-        "label": "VECTOR_STYLES",
         "tags": [],
+        "label": "VECTOR_STYLES",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 231
-        },
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
         "initialIsOpen": false
       }
     ],
     "misc": [
       {
-        "tags": [],
+        "parentPluginId": "maps",
         "id": "def-common.AGG_DELIMITER",
         "type": "string",
+        "tags": [],
         "label": "AGG_DELIMITER",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 160
-        },
         "signature": [
           "\"_of_\""
         ],
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
-        "tags": [],
+        "parentPluginId": "maps",
         "id": "def-common.API_ROOT_PATH",
         "type": "string",
+        "tags": [],
         "label": "API_ROOT_PATH",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 44
-        },
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
-        "tags": [],
+        "parentPluginId": "maps",
         "id": "def-common.APP_ICON",
         "type": "string",
+        "tags": [],
         "label": "APP_ICON",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 31
-        },
         "signature": [
           "\"gisApp\""
         ],
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
-        "tags": [],
+        "parentPluginId": "maps",
         "id": "def-common.APP_ICON_SOLUTION",
         "type": "string",
+        "tags": [],
         "label": "APP_ICON_SOLUTION",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 32
-        },
         "signature": [
           "\"logoKibana\""
         ],
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
-        "tags": [],
+        "parentPluginId": "maps",
         "id": "def-common.APP_ID",
         "type": "string",
+        "tags": [],
         "label": "APP_ID",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 30
-        },
         "signature": [
           "\"maps\""
         ],
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
-        "tags": [],
+        "parentPluginId": "maps",
         "id": "def-common.APP_NAME",
         "type": "string",
+        "tags": [],
         "label": "APP_NAME",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 33
-        },
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
-        "tags": [],
+        "parentPluginId": "maps",
         "id": "def-common.CATEGORICAL_DATA_TYPES",
         "type": "Array",
+        "tags": [],
         "label": "CATEGORICAL_DATA_TYPES",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 214
-        },
         "signature": [
           "string[]"
         ],
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "maps",
+        "id": "def-common.CHECK_IS_DRAWING_INDEX",
+        "type": "string",
         "tags": [],
+        "label": "CHECK_IS_DRAWING_INDEX",
+        "description": [],
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maps",
         "id": "def-common.COUNT_PROP_LABEL",
         "type": "string",
+        "tags": [],
         "label": "COUNT_PROP_LABEL",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 192
-        },
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
-        "tags": [],
+        "parentPluginId": "maps",
         "id": "def-common.COUNT_PROP_NAME",
         "type": "string",
+        "tags": [],
         "label": "COUNT_PROP_NAME",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 196
-        },
         "signature": [
           "\"doc_count\""
         ],
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
-        "tags": [],
+        "parentPluginId": "maps",
         "id": "def-common.DECIMAL_DEGREES_PRECISION",
         "type": "number",
+        "tags": [],
         "label": "DECIMAL_DEGREES_PRECISION",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 110
-        },
         "signature": [
           "5"
         ],
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
-        "tags": [],
+        "parentPluginId": "maps",
         "id": "def-common.DEFAULT_ICON",
         "type": "string",
+        "tags": [],
         "label": "DEFAULT_ICON",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 229
-        },
         "signature": [
           "\"marker\""
         ],
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
-        "tags": [],
+        "parentPluginId": "maps",
         "id": "def-common.DEFAULT_MAX_BUCKETS_LIMIT",
         "type": "number",
+        "tags": [],
         "label": "DEFAULT_MAX_BUCKETS_LIMIT",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 114
-        },
         "signature": [
           "65535"
         ],
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
-        "tags": [],
+        "parentPluginId": "maps",
         "id": "def-common.DEFAULT_MAX_INNER_RESULT_WINDOW",
         "type": "number",
+        "tags": [],
         "label": "DEFAULT_MAX_INNER_RESULT_WINDOW",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 113
-        },
         "signature": [
           "100"
         ],
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
-        "tags": [],
+        "parentPluginId": "maps",
         "id": "def-common.DEFAULT_MAX_RESULT_WINDOW",
         "type": "number",
+        "tags": [],
         "label": "DEFAULT_MAX_RESULT_WINDOW",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 112
-        },
         "signature": [
           "10000"
         ],
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
-        "tags": [],
+        "parentPluginId": "maps",
         "id": "def-common.DEFAULT_PERCENTILE",
         "type": "number",
+        "tags": [],
         "label": "DEFAULT_PERCENTILE",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 190
-        },
         "signature": [
           "50"
         ],
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
-        "tags": [],
+        "parentPluginId": "maps",
         "id": "def-common.DEFAULT_PERCENTILES",
         "type": "Array",
+        "tags": [],
         "label": "DEFAULT_PERCENTILES",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 294
-        },
         "signature": [
           "number[]"
         ],
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
-        "tags": [],
+        "parentPluginId": "maps",
         "id": "def-common.EMS_APP_NAME",
         "type": "string",
+        "tags": [],
         "label": "EMS_APP_NAME",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 11
-        },
         "signature": [
           "\"kibana\""
         ],
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
-        "tags": [],
+        "parentPluginId": "maps",
         "id": "def-common.EMS_CATALOGUE_PATH",
         "type": "string",
+        "tags": [],
         "label": "EMS_CATALOGUE_PATH",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 12
-        },
         "signature": [
           "\"ems/catalogue\""
         ],
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
-        "tags": [],
+        "parentPluginId": "maps",
         "id": "def-common.EMS_FILES_API_PATH",
         "type": "string",
+        "tags": [],
         "label": "EMS_FILES_API_PATH",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 15
-        },
         "signature": [
           "\"ems/files\""
         ],
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
-        "tags": [],
+        "parentPluginId": "maps",
         "id": "def-common.EMS_FILES_CATALOGUE_PATH",
         "type": "string",
+        "tags": [],
         "label": "EMS_FILES_CATALOGUE_PATH",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 14
-        },
         "signature": [
           "\"ems/files\""
         ],
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
-        "tags": [],
+        "parentPluginId": "maps",
         "id": "def-common.EMS_FILES_DEFAULT_JSON_PATH",
         "type": "string",
+        "tags": [],
         "label": "EMS_FILES_DEFAULT_JSON_PATH",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 16
-        },
         "signature": [
           "\"file\""
         ],
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
-        "tags": [],
+        "parentPluginId": "maps",
         "id": "def-common.EMS_GLYPHS_PATH",
         "type": "string",
+        "tags": [],
         "label": "EMS_GLYPHS_PATH",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 17
-        },
         "signature": [
           "\"fonts\""
         ],
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
-        "tags": [],
+        "parentPluginId": "maps",
         "id": "def-common.EMS_SPRITES_PATH",
         "type": "string",
+        "tags": [],
         "label": "EMS_SPRITES_PATH",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 18
-        },
         "signature": [
           "\"sprites\""
         ],
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
-        "tags": [],
+        "parentPluginId": "maps",
         "id": "def-common.EMS_TILES_API_PATH",
         "type": "string",
+        "tags": [],
         "label": "EMS_TILES_API_PATH",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 21
-        },
         "signature": [
           "\"ems/tiles\""
         ],
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
-        "tags": [],
+        "parentPluginId": "maps",
         "id": "def-common.EMS_TILES_CATALOGUE_PATH",
         "type": "string",
+        "tags": [],
         "label": "EMS_TILES_CATALOGUE_PATH",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 20
-        },
         "signature": [
           "\"ems/tiles\""
         ],
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
-        "tags": [],
+        "parentPluginId": "maps",
         "id": "def-common.EMS_TILES_RASTER_STYLE_PATH",
         "type": "string",
+        "tags": [],
         "label": "EMS_TILES_RASTER_STYLE_PATH",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 22
-        },
         "signature": [
           "\"raster/style\""
         ],
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
-        "tags": [],
+        "parentPluginId": "maps",
         "id": "def-common.EMS_TILES_RASTER_TILE_PATH",
         "type": "string",
+        "tags": [],
         "label": "EMS_TILES_RASTER_TILE_PATH",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 23
-        },
         "signature": [
           "\"raster/tile\""
         ],
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
-        "tags": [],
+        "parentPluginId": "maps",
         "id": "def-common.EMS_TILES_VECTOR_SOURCE_PATH",
         "type": "string",
+        "tags": [],
         "label": "EMS_TILES_VECTOR_SOURCE_PATH",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 26
-        },
         "signature": [
           "\"vector/source\""
         ],
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
-        "tags": [],
+        "parentPluginId": "maps",
         "id": "def-common.EMS_TILES_VECTOR_STYLE_PATH",
         "type": "string",
+        "tags": [],
         "label": "EMS_TILES_VECTOR_STYLE_PATH",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 25
-        },
         "signature": [
           "\"vector/style\""
         ],
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
-        "tags": [],
+        "parentPluginId": "maps",
         "id": "def-common.EMS_TILES_VECTOR_TILE_PATH",
         "type": "string",
+        "tags": [],
         "label": "EMS_TILES_VECTOR_TILE_PATH",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 27
-        },
         "signature": [
           "\"vector/tile\""
         ],
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
-        "tags": [],
+        "parentPluginId": "maps",
         "id": "def-common.emsRegionLayerId",
         "type": "string",
+        "tags": [],
         "label": "emsRegionLayerId",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 305
-        },
         "signature": [
           "\"administrative_regions_lvl2\""
         ],
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
-        "tags": [],
+        "parentPluginId": "maps",
         "id": "def-common.emsUsaZipLayerId",
         "type": "string",
+        "tags": [],
         "label": "emsUsaZipLayerId",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 306
-        },
         "signature": [
           "\"usa_zip_codes\""
         ],
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
-        "tags": [],
+        "parentPluginId": "maps",
         "id": "def-common.emsWorldLayerId",
         "type": "string",
+        "tags": [],
         "label": "emsWorldLayerId",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 304
-        },
         "signature": [
           "\"world_countries\""
         ],
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
-        "tags": [],
+        "parentPluginId": "maps",
         "id": "def-common.ES_GEO_FIELD_TYPES",
         "type": "Array",
+        "tags": [],
         "label": "ES_GEO_FIELD_TYPES",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 127
-        },
         "signature": [
           "string[]"
         ],
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
-        "tags": [],
+        "parentPluginId": "maps",
         "id": "def-common.FEATURE_ID_PROPERTY_NAME",
         "type": "string",
+        "tags": [],
         "label": "FEATURE_ID_PROPERTY_NAME",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 116
-        },
         "signature": [
           "\"__kbn__feature_id__\""
         ],
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
-        "tags": [],
+        "parentPluginId": "maps",
         "id": "def-common.FEATURE_VISIBLE_PROPERTY_NAME",
         "type": "string",
+        "tags": [],
         "label": "FEATURE_VISIBLE_PROPERTY_NAME",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 117
-        },
         "signature": [
           "\"__kbn_isvisibleduetojoin__\""
         ],
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "maps",
         "id": "def-common.FieldFormatter",
         "type": "Type",
-        "label": "FieldFormatter",
         "tags": [],
+        "label": "FieldFormatter",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 298
-        },
         "signature": [
           "(value: ",
           {
@@ -2262,581 +2561,651 @@
           },
           ") => React.ReactText"
         ],
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "maps",
+            "id": "def-common.value",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              "string | number | boolean | string[] | null | undefined"
+            ],
+            "path": "x-pack/plugins/maps/common/constants.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
-        "tags": [],
+        "parentPluginId": "maps",
         "id": "def-common.FONTS_API_PATH",
         "type": "string",
+        "tags": [],
         "label": "FONTS_API_PATH",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 42
-        },
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
-        "tags": [],
+        "parentPluginId": "maps",
         "id": "def-common.FORMATTERS_DATA_REQUEST_ID_SUFFIX",
         "type": "string",
+        "tags": [],
         "label": "FORMATTERS_DATA_REQUEST_ID_SUFFIX",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 101
-        },
         "signature": [
           "\"formatters\""
         ],
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
-        "tags": [],
+        "parentPluginId": "maps",
         "id": "def-common.GEOCENTROID_AGG_NAME",
         "type": "string",
+        "tags": [],
         "label": "GEOCENTROID_AGG_NAME",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 187
-        },
         "signature": [
           "\"gridCentroid\""
         ],
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
-        "tags": [],
+        "parentPluginId": "maps",
         "id": "def-common.GEOTILE_GRID_AGG_NAME",
         "type": "string",
+        "tags": [],
         "label": "GEOTILE_GRID_AGG_NAME",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 186
-        },
         "signature": [
           "\"gridSplit\""
         ],
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "maps",
+        "id": "def-common.GET_MATCHING_INDEXES_PATH",
+        "type": "string",
         "tags": [],
+        "label": "GET_MATCHING_INDEXES_PATH",
+        "description": [],
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maps",
         "id": "def-common.GIS_API_PATH",
         "type": "string",
+        "tags": [],
         "label": "GIS_API_PATH",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 40
-        },
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
-        "tags": [],
-        "id": "def-common.INDEX_META_DATA_CREATED_BY",
+        "parentPluginId": "maps",
+        "id": "def-common.INDEX_FEATURE_PATH",
         "type": "string",
-        "label": "INDEX_META_DATA_CREATED_BY",
+        "tags": [],
+        "label": "INDEX_FEATURE_PATH",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 300
-        },
-        "signature": [
-          "\"maps-drawing-data-ingest\""
-        ],
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
-        "tags": [],
+        "parentPluginId": "maps",
         "id": "def-common.INDEX_SETTINGS_API_PATH",
         "type": "string",
+        "tags": [],
         "label": "INDEX_SETTINGS_API_PATH",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 41
-        },
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
-        "tags": [],
+        "parentPluginId": "maps",
         "id": "def-common.INDEX_SOURCE_API_PATH",
         "type": "string",
+        "tags": [],
         "label": "INDEX_SOURCE_API_PATH",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 43
-        },
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
-        "tags": [],
+        "parentPluginId": "maps",
         "id": "def-common.INITIAL_LAYERS_KEY",
         "type": "string",
+        "tags": [],
         "label": "INITIAL_LAYERS_KEY",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 36
-        },
         "signature": [
           "\"initialLayers\""
         ],
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
-        "tags": [],
+        "parentPluginId": "maps",
         "id": "def-common.JOIN_FIELD_NAME_PREFIX",
         "type": "string",
+        "tags": [],
         "label": "JOIN_FIELD_NAME_PREFIX",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 98
-        },
         "signature": [
           "\"__kbnjoin__\""
         ],
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "maps",
+        "id": "def-common.KBN_FEATURE_COUNT",
+        "type": "string",
         "tags": [],
+        "label": "KBN_FEATURE_COUNT",
+        "description": [],
+        "signature": [
+          "\"__kbn_feature_count__\""
+        ],
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maps",
         "id": "def-common.KBN_IS_CENTROID_FEATURE",
         "type": "string",
+        "tags": [],
         "label": "KBN_IS_CENTROID_FEATURE",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 55
-        },
         "signature": [
           "\"__kbn_is_centroid_feature__\""
         ],
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "maps",
+        "id": "def-common.KBN_IS_TILE_COMPLETE",
+        "type": "string",
         "tags": [],
+        "label": "KBN_IS_TILE_COMPLETE",
+        "description": [],
+        "signature": [
+          "\"__kbn_is_tile_complete__\""
+        ],
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maps",
+        "id": "def-common.KBN_METADATA_FEATURE",
+        "type": "string",
+        "tags": [],
+        "label": "KBN_METADATA_FEATURE",
+        "description": [],
+        "signature": [
+          "\"__kbn_metadata_feature__\""
+        ],
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maps",
         "id": "def-common.KBN_TOO_MANY_FEATURES_IMAGE_ID",
         "type": "string",
+        "tags": [],
         "label": "KBN_TOO_MANY_FEATURES_IMAGE_ID",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 52
-        },
         "signature": [
           "\"__kbn_too_many_features_image_id__\""
         ],
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
-        "tags": [],
-        "id": "def-common.KBN_TOO_MANY_FEATURES_PROPERTY",
+        "parentPluginId": "maps",
+        "id": "def-common.KBN_VECTOR_SHAPE_TYPE_COUNTS",
         "type": "string",
-        "label": "KBN_TOO_MANY_FEATURES_PROPERTY",
+        "tags": [],
+        "label": "KBN_VECTOR_SHAPE_TYPE_COUNTS",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 51
-        },
         "signature": [
-          "\"__kbn_too_many_features__\""
+          "\"__kbn_vector_shape_type_counts__\""
         ],
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
-        "tags": [],
+        "parentPluginId": "maps",
         "id": "def-common.LAT_INDEX",
         "type": "number",
+        "tags": [],
         "label": "LAT_INDEX",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 147
-        },
         "signature": [
           "1"
         ],
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
-        "tags": [],
+        "parentPluginId": "maps",
         "id": "def-common.LON_INDEX",
         "type": "number",
+        "tags": [],
         "label": "LON_INDEX",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 146
-        },
         "signature": [
           "0"
         ],
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
-        "tags": [],
+        "parentPluginId": "maps",
         "id": "def-common.MAP_PATH",
         "type": "string",
+        "tags": [],
         "label": "MAP_PATH",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 39
-        },
         "signature": [
           "\"map\""
         ],
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
-        "tags": [],
+        "parentPluginId": "maps",
         "id": "def-common.MAP_SAVED_OBJECT_TYPE",
         "type": "string",
+        "tags": [],
         "label": "MAP_SAVED_OBJECT_TYPE",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 29
-        },
         "signature": [
           "\"map\""
         ],
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
-        "tags": [],
+        "parentPluginId": "maps",
         "id": "def-common.MAPS_APP_PATH",
         "type": "string",
+        "tags": [],
         "label": "MAPS_APP_PATH",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 38
-        },
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "maps",
+        "id": "def-common.MAPS_NEW_VECTOR_LAYER_META_CREATED_BY",
+        "type": "string",
         "tags": [],
+        "label": "MAPS_NEW_VECTOR_LAYER_META_CREATED_BY",
+        "description": [],
+        "signature": [
+          "\"maps-new-vector-layer\""
+        ],
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maps",
         "id": "def-common.MAX_DRAWING_SIZE_BYTES",
         "type": "number",
+        "tags": [],
         "label": "MAX_DRAWING_SIZE_BYTES",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 302
-        },
         "signature": [
           "10485760"
         ],
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
-        "tags": [],
+        "parentPluginId": "maps",
         "id": "def-common.MAX_ZOOM",
         "type": "number",
+        "tags": [],
         "label": "MAX_ZOOM",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 108
-        },
         "signature": [
           "24"
         ],
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
-        "tags": [],
+        "parentPluginId": "maps",
         "id": "def-common.MB_SOURCE_ID_LAYER_ID_PREFIX_DELIMITER",
         "type": "string",
+        "tags": [],
         "label": "MB_SOURCE_ID_LAYER_ID_PREFIX_DELIMITER",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 119
-        },
         "signature": [
           "\"_\""
         ],
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
-        "tags": [],
+        "parentPluginId": "maps",
         "id": "def-common.META_DATA_REQUEST_ID_SUFFIX",
         "type": "string",
+        "tags": [],
         "label": "META_DATA_REQUEST_ID_SUFFIX",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 100
-        },
         "signature": [
           "\"meta\""
         ],
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
-        "tags": [],
+        "parentPluginId": "maps",
         "id": "def-common.MIN_ZOOM",
         "type": "number",
+        "tags": [],
         "label": "MIN_ZOOM",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 107
-        },
         "signature": [
           "0"
         ],
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
-        "tags": [],
+        "parentPluginId": "maps",
         "id": "def-common.MVT_GETGRIDTILE_API_PATH",
         "type": "string",
+        "tags": [],
         "label": "MVT_GETGRIDTILE_API_PATH",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 47
-        },
         "signature": [
           "\"mvt/getGridTile\""
         ],
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
-        "tags": [],
+        "parentPluginId": "maps",
         "id": "def-common.MVT_GETTILE_API_PATH",
         "type": "string",
+        "tags": [],
         "label": "MVT_GETTILE_API_PATH",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 46
-        },
         "signature": [
           "\"mvt/getTile\""
         ],
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
-        "tags": [],
+        "parentPluginId": "maps",
         "id": "def-common.MVT_SOURCE_LAYER_NAME",
         "type": "string",
+        "tags": [],
         "label": "MVT_SOURCE_LAYER_NAME",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 48
-        },
         "signature": [
           "\"source_layer\""
         ],
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "maps",
+        "id": "def-common.MVT_TOKEN_PARAM_NAME",
+        "type": "string",
         "tags": [],
+        "label": "MVT_TOKEN_PARAM_NAME",
+        "description": [],
+        "signature": [
+          "\"token\""
+        ],
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maps",
         "id": "def-common.ORDINAL_DATA_TYPES",
         "type": "Array",
+        "tags": [],
         "label": "ORDINAL_DATA_TYPES",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 215
-        },
         "signature": [
           "string[]"
         ],
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
-        "tags": [],
+        "parentPluginId": "maps",
         "id": "def-common.POLYGON_COORDINATES_EXTERIOR_INDEX",
         "type": "number",
+        "tags": [],
         "label": "POLYGON_COORDINATES_EXTERIOR_INDEX",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 145
-        },
         "signature": [
           "0"
         ],
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "maps",
         "id": "def-common.RawValue",
         "type": "Type",
-        "label": "RawValue",
         "tags": [],
+        "label": "RawValue",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 296
-        },
         "signature": [
-          "undefined | null | string | number | false | true"
+          "string | number | boolean | string[] | null | undefined"
         ],
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
-        "tags": [],
+        "parentPluginId": "maps",
         "id": "def-common.SOURCE_BOUNDS_DATA_REQUEST_ID",
         "type": "string",
+        "tags": [],
         "label": "SOURCE_BOUNDS_DATA_REQUEST_ID",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 105
-        },
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
-        "tags": [],
+        "parentPluginId": "maps",
         "id": "def-common.SOURCE_DATA_REQUEST_ID",
         "type": "string",
+        "tags": [],
         "label": "SOURCE_DATA_REQUEST_ID",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 102
-        },
         "signature": [
           "\"source\""
         ],
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
-        "tags": [],
+        "parentPluginId": "maps",
         "id": "def-common.SOURCE_FORMATTERS_DATA_REQUEST_ID",
         "type": "string",
+        "tags": [],
         "label": "SOURCE_FORMATTERS_DATA_REQUEST_ID",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 104
-        },
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
-        "tags": [],
+        "parentPluginId": "maps",
         "id": "def-common.SOURCE_META_DATA_REQUEST_ID",
         "type": "string",
+        "tags": [],
         "label": "SOURCE_META_DATA_REQUEST_ID",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 103
-        },
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
-        "tags": [],
+        "parentPluginId": "maps",
         "id": "def-common.SPATIAL_FILTERS_LAYER_ID",
         "type": "string",
+        "tags": [],
         "label": "SPATIAL_FILTERS_LAYER_ID",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 263
-        },
         "signature": [
           "\"SPATIAL_FILTERS_LAYER_ID\""
         ],
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
-        "tags": [],
+        "parentPluginId": "maps",
         "id": "def-common.SUPER_FINE_ZOOM_DELTA",
         "type": "number",
+        "tags": [],
         "label": "SUPER_FINE_ZOOM_DELTA",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 185
-        },
         "signature": [
           "7"
         ],
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "maps",
+        "id": "def-common.SUPPORTS_FEATURE_EDITING_REQUEST_ID",
+        "type": "string",
         "tags": [],
+        "label": "SUPPORTS_FEATURE_EDITING_REQUEST_ID",
+        "description": [],
+        "signature": [
+          "\"SUPPORTS_FEATURE_EDITING_REQUEST_ID\""
+        ],
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maps",
         "id": "def-common.TOP_TERM_PERCENTAGE_SUFFIX",
         "type": "string",
+        "tags": [],
         "label": "TOP_TERM_PERCENTAGE_SUFFIX",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 189
-        },
         "signature": [
           "\"__percentage\""
         ],
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
-        "tags": [],
+        "parentPluginId": "maps",
         "id": "def-common.ZOOM_PRECISION",
         "type": "number",
+        "tags": [],
         "label": "ZOOM_PRECISION",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 111
-        },
         "signature": [
           "2"
         ],
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
         "initialIsOpen": false
       }
     ],
     "objects": [
       {
+        "parentPluginId": "maps",
         "id": "def-common.EMPTY_FEATURE_COLLECTION",
         "type": "Object",
         "tags": [],
+        "label": "EMPTY_FEATURE_COLLECTION",
+        "description": [],
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
         "children": [
           {
-            "tags": [],
+            "parentPluginId": "maps",
             "id": "def-common.EMPTY_FEATURE_COLLECTION.type",
             "type": "string",
+            "tags": [],
             "label": "type",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/maps/common/constants.ts",
-              "lineNumber": 150
-            },
             "signature": [
               "\"FeatureCollection\""
-            ]
+            ],
+            "path": "x-pack/plugins/maps/common/constants.ts",
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "maps",
             "id": "def-common.EMPTY_FEATURE_COLLECTION.features",
             "type": "Array",
+            "tags": [],
             "label": "features",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/maps/common/constants.ts",
-              "lineNumber": 151
-            },
             "signature": [
               "never[]"
-            ]
+            ],
+            "path": "x-pack/plugins/maps/common/constants.ts",
+            "deprecated": false
           }
         ],
-        "description": [],
-        "label": "EMPTY_FEATURE_COLLECTION",
-        "source": {
-          "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 149
-        },
         "initialIsOpen": false
       }
     ]

@@ -18,7 +18,10 @@ export type HttpSetupMock = jest.Mocked<HttpSetup> & {
   anonymousPaths: jest.Mocked<HttpSetup['anonymousPaths']>;
 };
 
-const createServiceMock = ({ basePath = '' } = {}): HttpSetupMock => ({
+const createServiceMock = ({
+  basePath = '',
+  publicBaseUrl,
+}: { basePath?: string; publicBaseUrl?: string } = {}): HttpSetupMock => ({
   fetch: jest.fn(),
   get: jest.fn(),
   head: jest.fn(),
@@ -27,7 +30,7 @@ const createServiceMock = ({ basePath = '' } = {}): HttpSetupMock => ({
   patch: jest.fn(),
   delete: jest.fn(),
   options: jest.fn(),
-  basePath: new BasePath(basePath),
+  basePath: new BasePath(basePath, undefined, publicBaseUrl),
   anonymousPaths: {
     register: jest.fn(),
     isAnonymous: jest.fn(),

@@ -24,6 +24,8 @@ import {
   FeatureCatalogueRegistrySetup,
   TutorialService,
   TutorialServiceSetup,
+  AddDataService,
+  AddDataServiceSetup,
 } from './services';
 import { ConfigSchema } from '../config';
 import { setServices } from './application/kibana_services';
@@ -56,6 +58,7 @@ export class HomePublicPlugin
   private readonly featuresCatalogueRegistry = new FeatureCatalogueRegistry();
   private readonly environmentService = new EnvironmentService();
   private readonly tutorialService = new TutorialService();
+  private readonly addDataService = new AddDataService();
 
   constructor(private readonly initializerContext: PluginInitializerContext<ConfigSchema>) {}
 
@@ -94,6 +97,7 @@ export class HomePublicPlugin
           urlForwarding: urlForwardingStart,
           homeConfig: this.initializerContext.config.get(),
           tutorialService: this.tutorialService,
+          addDataService: this.addDataService,
           featureCatalogue: this.featuresCatalogueRegistry,
         });
         coreStart.chrome.docTitle.change(
@@ -126,6 +130,7 @@ export class HomePublicPlugin
       featureCatalogue,
       environment: { ...this.environmentService.setup() },
       tutorials: { ...this.tutorialService.setup() },
+      addData: { ...this.addDataService.setup() },
     };
   }
 
@@ -164,8 +169,12 @@ export type EnvironmentSetup = EnvironmentServiceSetup;
 export type TutorialSetup = TutorialServiceSetup;
 
 /** @public */
+export type AddDataSetup = AddDataServiceSetup;
+
+/** @public */
 export interface HomePublicPluginSetup {
   tutorials: TutorialServiceSetup;
+  addData: AddDataServiceSetup;
   featureCatalogue: FeatureCatalogueSetup;
   /**
    * The environment service is only available for a transition period and will

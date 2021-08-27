@@ -12,7 +12,8 @@ import { EuiBasicTable, EuiButton, EuiFieldText, EuiFormRow, EuiSpacer } from '@
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { DefaultFormatEditor } from '../default';
+import { DefaultFormatEditor } from '../default/default';
+import { formatId } from './constants';
 
 export interface StaticLookupFormatEditorFormatParams {
   lookupEntries: Array<{ key: string; value: string }>;
@@ -26,7 +27,7 @@ interface StaticLookupItem {
 }
 
 export class StaticLookupFormatEditor extends DefaultFormatEditor<StaticLookupFormatEditorFormatParams> {
-  static formatId = 'static_lookup';
+  static formatId = formatId;
   onLookupChange = (newLookupParams: { value?: string; key?: string }, index: number) => {
     const lookupEntries = [...this.props.formatParams.lookupEntries];
     lookupEntries[index] = {
@@ -80,6 +81,7 @@ export class StaticLookupFormatEditor extends DefaultFormatEditor<StaticLookupFo
           return (
             <EuiFieldText
               value={value || ''}
+              data-test-subj={`staticLookupEditorKey ${item.index}`}
               onChange={(e) => {
                 this.onLookupChange(
                   {
@@ -104,6 +106,7 @@ export class StaticLookupFormatEditor extends DefaultFormatEditor<StaticLookupFo
           return (
             <EuiFieldText
               value={value || ''}
+              data-test-subj={`staticLookupEditorValue ${item.index}`}
               onChange={(e) => {
                 this.onLookupChange(
                   {
@@ -135,6 +138,7 @@ export class StaticLookupFormatEditor extends DefaultFormatEditor<StaticLookupFo
             type: 'icon',
             icon: 'trash',
             color: 'danger',
+            'data-test-subj': 'staticLookupEditorRemoveEntry',
             available: () => items.length > 1,
           },
         ],
@@ -146,7 +150,12 @@ export class StaticLookupFormatEditor extends DefaultFormatEditor<StaticLookupFo
       <Fragment>
         <EuiBasicTable items={items} columns={columns} style={{ maxWidth: '400px' }} />
         <EuiSpacer size="m" />
-        <EuiButton iconType="plusInCircle" size="s" onClick={this.addLookup}>
+        <EuiButton
+          iconType="plusInCircle"
+          size="s"
+          onClick={this.addLookup}
+          data-test-subj={'staticLookupEditorAddEntry'}
+        >
           <FormattedMessage
             id="indexPatternFieldEditor.staticLookup.addEntryButton"
             defaultMessage="Add entry"
@@ -163,6 +172,7 @@ export class StaticLookupFormatEditor extends DefaultFormatEditor<StaticLookupFo
         >
           <EuiFieldText
             value={formatParams.unknownKeyValue || ''}
+            data-test-subj={'staticLookupEditorUnknownValue'}
             placeholder={i18n.translate(
               'indexPatternFieldEditor.staticLookup.leaveBlankPlaceholder',
               {

@@ -134,12 +134,13 @@ export const useDeleteCases = (): UseDeleteCase => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.isDisplayConfirmDeleteModal]);
 
-  useEffect(() => {
-    return () => {
+  useEffect(
+    () => () => {
       isCancelledRef.current = true;
       abortCtrlRef.current.abort();
-    };
-  }, []);
+    },
+    []
+  );
 
   return { ...state, dispatchResetIsDeleted, handleOnDeleteConfirm, handleToggleModal };
 };

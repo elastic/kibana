@@ -9,10 +9,10 @@
     "logs-endpoint.events.*",
     "logs-windows.*"
   ],
-  "language": "kuery",
+  "language": "eql",
   "license": "Elastic License v2",
   "name": "Svchost spawning Cmd",
-  "query": "event.category:process and event.type:(start or process_started) and process.parent.name:svchost.exe and process.name:cmd.exe",
+  "query": "process where event.type in (\"start\", \"process_started\") and\n  process.parent.name : \"svchost.exe\" and process.name : \"cmd.exe\" and \n  not (process.pe.original_file_name == \"Cmd.Exe\" and process.args : \"?:\\\\Program Files\\\\Npcap\\\\CheckStatus.bat??\")\n",
   "risk_score": 21,
   "rule_id": "fd7a6052-58fa-4397-93c3-4795249ccfa2",
   "severity": "low",
@@ -41,6 +41,6 @@
     }
   ],
   "timestamp_override": "event.ingested",
-  "type": "query",
-  "version": 7
+  "type": "eql",
+  "version": 8
 }

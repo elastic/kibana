@@ -6,11 +6,14 @@
  */
 
 import { SavedObjectsType } from 'src/core/server';
-import { commentsMigrations } from './migrations';
+import { CASE_COMMENT_SAVED_OBJECT } from '../../common';
+import { createCommentsMigrations, CreateCommentsMigrationsDeps } from './migrations';
 
-export const CASE_COMMENT_SAVED_OBJECT = 'cases-comments';
-
-export const caseCommentSavedObjectType: SavedObjectsType = {
+export const createCaseCommentSavedObjectType = ({
+  migrationDeps,
+}: {
+  migrationDeps: CreateCommentsMigrationsDeps;
+}): SavedObjectsType => ({
   name: CASE_COMMENT_SAVED_OBJECT,
   hidden: false,
   namespaceType: 'single',
@@ -22,8 +25,23 @@ export const caseCommentSavedObjectType: SavedObjectsType = {
       comment: {
         type: 'text',
       },
+      owner: {
+        type: 'keyword',
+      },
       type: {
         type: 'keyword',
+      },
+      actions: {
+        properties: {
+          targets: {
+            type: 'nested',
+            properties: {
+              hostname: { type: 'keyword' },
+              endpointId: { type: 'keyword' },
+            },
+          },
+          type: { type: 'keyword' },
+        },
       },
       alertId: {
         type: 'keyword',
@@ -91,5 +109,5 @@ export const caseCommentSavedObjectType: SavedObjectsType = {
       },
     },
   },
-  migrations: commentsMigrations,
-};
+  migrations: () => createCommentsMigrations(migrationDeps),
+});

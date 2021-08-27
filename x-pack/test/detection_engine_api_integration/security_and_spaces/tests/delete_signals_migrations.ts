@@ -15,7 +15,7 @@ import {
 import { ROLES } from '../../../../plugins/security_solution/common/test';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { createSignalsIndex, deleteSignalsIndex, getIndexNameFromLoad, waitFor } from '../../utils';
-import { createUserAndRole } from '../roles_users_utils';
+import { createUserAndRole } from '../../../common/services/security_solution';
 
 interface CreateResponse {
   index: string;
@@ -43,7 +43,7 @@ export default ({ getService }: FtrProviderContext): void => {
     beforeEach(async () => {
       await createSignalsIndex(supertest);
       outdatedSignalsIndexName = getIndexNameFromLoad(
-        await esArchiver.load('signals/outdated_signals_index')
+        await esArchiver.load('x-pack/test/functional/es_archives/signals/outdated_signals_index')
       );
 
       ({
@@ -72,7 +72,7 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     afterEach(async () => {
-      await esArchiver.unload('signals/outdated_signals_index');
+      await esArchiver.unload('x-pack/test/functional/es_archives/signals/outdated_signals_index');
       await deleteSignalsIndex(supertest);
     });
 
@@ -96,6 +96,7 @@ export default ({ getService }: FtrProviderContext): void => {
         .expect(200);
 
       const { body } = await es.indices.getSettings({ index: createdMigration.index });
+      // @ts-expect-error @elastic/elasticsearch supports flatten 'index.*' keys only
       const indexSettings = body[createdMigration.index].settings.index;
       expect(indexSettings.lifecycle.name).to.eql(
         `${DEFAULT_SIGNALS_INDEX}-default-migration-cleanup`

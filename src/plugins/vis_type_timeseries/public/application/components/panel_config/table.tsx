@@ -38,7 +38,7 @@ import { YesNo } from '../yes_no';
 import { QueryBarWrapper } from '../query_bar_wrapper';
 import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
 import { VisDataContext } from '../../contexts/vis_data_context';
-import { BUCKET_TYPES } from '../../../../common/metric_types';
+import { BUCKET_TYPES } from '../../../../common/enums';
 import { PanelConfigProps, PANEL_CONFIG_TABS } from './types';
 import { TimeseriesVisParams } from '../../../types';
 import { getIndexPatternKey } from '../../../../common/index_patterns_utils';
@@ -207,6 +207,7 @@ export class TablePanelConfig extends Component<
               <EuiFieldText
                 onChange={this.handleTextChange('drilldown_url')}
                 value={model.drilldown_url ?? ''}
+                data-test-subj="drilldownUrl"
               />
             </EuiFormRow>
 

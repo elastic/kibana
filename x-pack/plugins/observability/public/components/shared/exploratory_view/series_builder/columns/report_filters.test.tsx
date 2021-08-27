@@ -7,22 +7,21 @@
 
 import React from 'react';
 import { screen } from '@testing-library/react';
-import { render } from '../../../../../utils/test_helper';
 import { ReportFilters } from './report_filters';
 import { getDefaultConfigs } from '../../configurations/default_configs';
-import { mockIndexPattern, mockUrlStorage } from '../../rtl_helpers';
+import { mockIndexPattern, render } from '../../rtl_helpers';
 
 describe('Series Builder ReportFilters', function () {
   const seriesId = 'test-series-id';
 
   const dataViewSeries = getDefaultConfigs({
-    seriesId,
-    reportType: 'pld',
+    reportType: 'data-distribution',
     indexPattern: mockIndexPattern,
+    dataType: 'ux',
   });
-  mockUrlStorage({});
+
   it('should render properly', function () {
-    render(<ReportFilters dataViewSeries={dataViewSeries} seriesId={seriesId} />);
+    render(<ReportFilters seriesConfig={dataViewSeries} seriesId={seriesId} />);
 
     screen.getByText('Add filter');
   });

@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export { ByFieldSelector } from './by_field';
 export { SplitFieldSelector } from './split_field';

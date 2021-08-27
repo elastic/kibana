@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { setMockActions, setMockValues } from '../../../../../__mocks__';
+import { setMockActions, setMockValues } from '../../../../../__mocks__/kea_logic';
 
 import React from 'react';
 
@@ -17,7 +17,7 @@ import { CurationResult, AddResultFlyout } from './';
 
 describe('AddResultFlyout', () => {
   const values = {
-    dataLoading: false,
+    searchDataLoading: false,
     searchQuery: '',
     searchResults: [],
     promotedIds: [],
@@ -48,7 +48,7 @@ describe('AddResultFlyout', () => {
 
   describe('search input', () => {
     it('renders isLoading state correctly', () => {
-      setMockValues({ ...values, dataLoading: true });
+      setMockValues({ ...values, searchDataLoading: true });
       const wrapper = shallow(<AddResultFlyout />);
 
       expect(wrapper.find(EuiFieldSearch).prop('isLoading')).toEqual(true);

@@ -7,31 +7,33 @@
  */
 
 const Path = require('path');
-
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-const CssMinimizerPlugin = require('css-minimizer-webpack-plugin');
-const TerserPlugin = require('terser-webpack-plugin');
 
-const CompressionPlugin = require('compression-webpack-plugin');
 const { REPO_ROOT } = require('@kbn/utils');
-const webpack = require('webpack');
-const { RawSource } = require('webpack-sources');
 
-const UiSharedDeps = require('./index');
+const UiSharedDeps = require('./src/index');
 
 const MOMENT_SRC = require.resolve('moment/min/moment-with-locales.js');
+const WEBPACK_SRC = require.resolve('webpack');
 
-exports.getWebpackConfig = ({ dev = false } = {}) => ({
-  mode: dev ? 'development' : 'production',
+module.exports = {
+  node: {
+    child_process: 'empty',
+    fs: 'empty',
+  },
+  externals: {
+    module: 'module',
+  },
+  mode: 'production',
   entry: {
-    'kbn-ui-shared-deps': './entry.js',
+    'kbn-ui-shared-deps': './src/entry.js',
     'kbn-ui-shared-deps.v7.dark': ['@elastic/eui/dist/eui_theme_dark.css'],
     'kbn-ui-shared-deps.v7.light': ['@elastic/eui/dist/eui_theme_light.css'],
     'kbn-ui-shared-deps.v8.dark': ['@elastic/eui/dist/eui_theme_amsterdam_dark.css'],
     'kbn-ui-shared-deps.v8.light': ['@elastic/eui/dist/eui_theme_amsterdam_light.css'],
   },
   context: __dirname,
-  devtool: dev ? '#cheap-source-map' : false,
+  devtool: 'cheap-source-map',
   output: {
     path: UiSharedDeps.distDir,
     filename: '[name].js',
@@ -39,13 +41,14 @@ exports.getWebpackConfig = ({ dev = false } = {}) => ({
     devtoolModuleFilenameTemplate: (info) =>
       `kbn-ui-shared-deps/${Path.relative(REPO_ROOT, info.absoluteResourcePath)}`,
     library: '__kbnSharedDeps__',
+    futureEmitAssets: true,
   },
 
   module: {
-    noParse: [MOMENT_SRC],
+    noParse: [MOMENT_SRC, WEBPACK_SRC],
     rules: [
       {
-        include: [require.resolve('./entry.js')],
+        include: [require.resolve('./src/entry.js')],
         use: [
           {
             loader: UiSharedDeps.publicPathLoader,
@@ -60,7 +63,7 @@ exports.getWebpackConfig = ({ dev = false } = {}) => ({
         use: [MiniCssExtractPlugin.loader, 'css-loader'],
       },
       {
-        include: [require.resolve('./theme.ts')],
+        include: [require.resolve('./src/theme.ts')],
         use: [
           {
             loader: 'babel-loader',
@@ -71,7 +74,7 @@ exports.getWebpackConfig = ({ dev = false } = {}) => ({
         ],
       },
       {
-        test: !dev ? /[\\\/]@elastic[\\\/]eui[\\\/].*\.js$/ : () => false,
+        test: /[\\\/]@elastic[\\\/]eui[\\\/].*\.js$/,
         use: [
           {
             loader: 'babel-loader',
@@ -102,34 +105,17 @@ exports.getWebpackConfig = ({ dev = false } = {}) => ({
   resolve: {
     alias: {
       moment: MOMENT_SRC,
+      // NOTE: Used to include react profiling on bundles
+      // https://gist.github.com/bvaughn/25e6233aeb1b4f0cdb8d8366e54a3977#webpack-4
+      'react-dom$': 'react-dom/profiling',
+      'scheduler/tracing': 'scheduler/tracing-profiling',
     },
     extensions: ['.js', '.ts'],
     symlinks: false,
   },
 
   optimization: {
-    minimizer: [
-      new CssMinimizerPlugin({
-        minimizerOptions: {
-          preset: [
-            'default',
-            {
-              discardComments: false,
-            },
-          ],
-        },
-      }),
-      new TerserPlugin({
-        cache: false,
-        sourceMap: false,
-        extractComments: false,
-        parallel: false,
-        terserOptions: {
-          compress: true,
-          mangle: true,
-        },
-      }),
-    ],
+    minimize: false,
     noEmitOnErrors: true,
     splitChunks: {
       cacheGroups: {
@@ -154,54 +140,5 @@ exports.getWebpackConfig = ({ dev = false } = {}) => ({
     new MiniCssExtractPlugin({
       filename: '[name].css',
     }),
-    new webpack.DefinePlugin({
-      'process.env.NODE_ENV': dev ? '"development"' : '"production"',
-    }),
-    ...(dev
-      ? []
-      : [
-          new CompressionPlugin({
-            algorithm: 'brotliCompress',
-            filename: '[path].br',
-            test: /\.(js|css)$/,
-            cache: false,
-          }),
-          new CompressionPlugin({
-            algorithm: 'gzip',
-            filename: '[path].gz',
-            test: /\.(js|css)$/,
-            cache: false,
-          }),
-          new (class MetricsPlugin {
-            apply(compiler) {
-              compiler.hooks.emit.tap('MetricsPlugin', (compilation) => {
-                const metrics = [
-                  {
-                    group: 'page load bundle size',
-                    id: 'kbnUiSharedDeps-js',
-                    value: compilation.assets['kbn-ui-shared-deps.js'].size(),
-                  },
-                  {
-                    group: 'page load bundle size',
-                    id: 'kbnUiSharedDeps-css',
-                    value:
-                      compilation.assets['kbn-ui-shared-deps.css'].size() +
-                      compilation.assets['kbn-ui-shared-deps.v7.light.css'].size(),
-                  },
-                  {
-                    group: 'page load bundle size',
-                    id: 'kbnUiSharedDeps-elastic',
-                    value: compilation.assets['kbn-ui-shared-deps.@elastic.js'].size(),
-                  },
-                ];
-
-                compilation.emitAsset(
-                  'metrics.json',
-                  new RawSource(JSON.stringify(metrics, null, 2))
-                );
-              });
-            }
-          })(),
-        ]),
   ],
-});
+};

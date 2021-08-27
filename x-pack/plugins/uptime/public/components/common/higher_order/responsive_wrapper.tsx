@@ -32,11 +32,11 @@ export const withResponsiveWrapper = <P extends {} & ResponsiveWrapperProps>(
   Component: FC<P>
 ): FC<ResponsiveWrapperProps & P> => ({ isResponsive, ...rest }: ResponsiveWrapperProps) =>
   isResponsive ? (
-    <ResponsiveWrapper>
+    <ResponsiveWrapper data-test-subj="uptimeWithResponsiveWrapper--wrapper">
       <Component {...(rest as P)} />
     </ResponsiveWrapper>
   ) : (
-    <EuiPanel paddingSize="m">
+    <EuiPanel paddingSize="m" hasBorder data-test-subj="uptimeWithResponsiveWrapper--panel">
       <Component {...(rest as P)} />
     </EuiPanel>
   );

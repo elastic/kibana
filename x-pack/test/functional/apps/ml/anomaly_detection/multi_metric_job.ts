@@ -74,7 +74,7 @@ export default function ({ getService }: FtrProviderContext) {
   describe('multi metric', function () {
     this.tags(['mlqa']);
     before(async () => {
-      await esArchiver.loadIfNeeded('ml/farequote');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
       await ml.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');
       await ml.testResources.setKibanaTimeZoneToUTC();
 
@@ -299,7 +299,7 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.jobWizardCommon.ensureAdditionalSettingsSectionOpen();
 
       await ml.testExecution.logTestStep('job cloning persists custom urls');
-      await ml.customUrls.assertCustomUrlItem(0, 'check-kibana-dashboard');
+      await ml.customUrls.assertCustomUrlLabel(0, 'check-kibana-dashboard');
 
       await ml.testExecution.logTestStep('job cloning persists assigned calendars');
       await ml.jobWizardCommon.assertCalendarsSelection([calendarId]);

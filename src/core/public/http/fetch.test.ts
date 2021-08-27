@@ -227,6 +227,24 @@ describe('Fetch', () => {
       );
     });
 
+    it('should inject context headers if provided', async () => {
+      fetchMock.get('*', {});
+
+      await fetchInstance.fetch('/my/path', {
+        context: {
+          type: 'test-type',
+          name: 'test-name',
+          description: 'test-description',
+          id: '42',
+        },
+      });
+
+      expect(fetchMock.lastOptions()!.headers).toMatchObject({
+        'x-kbn-context':
+          '%7B%22type%22%3A%22test-type%22%2C%22name%22%3A%22test-name%22%2C%22description%22%3A%22test-description%22%2C%22id%22%3A%2242%22%7D',
+      });
+    });
+
     // Deprecated header used by legacy platform pre-7.7. Remove in 8.x.
     it('should not allow overwriting of kbn-system-api when asSystemRequest: true', async () => {
       fetchMock.get('*', {});

@@ -31,6 +31,27 @@ describe('Stats', () => {
     ).toBeTruthy();
   });
 
+  it('it renders with the pop over enabled by default', async () => {
+    const wrapper = mount(<Status type={CaseStatuses.open} withArrow={true} onClick={onClick} />);
+
+    expect(
+      wrapper
+        .find(`[data-test-subj="status-badge-open"] .euiBadge__iconButton`)
+        .first()
+        .prop('disabled')
+    ).toBe(false);
+  });
+
+  it('renders without the arrow and is not clickable when initialized disabled', async () => {
+    const wrapper = mount(
+      <Status disabled={true} type={CaseStatuses.open} withArrow={true} onClick={onClick} />
+    );
+
+    expect(
+      wrapper.find(`[data-test-subj="status-badge-open"] .euiBadge__iconButton`).exists()
+    ).toBeFalsy();
+  });
+
   it('it calls onClick when pressing the badge', async () => {
     const wrapper = mount(<Status type={CaseStatuses.open} withArrow={true} onClick={onClick} />);
 

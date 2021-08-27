@@ -14,7 +14,7 @@
   "language": "kuery",
   "license": "Elastic License v2",
   "name": "Enumeration of Kernel Modules",
-  "query": "event.category:process and event.type:(start or process_started) and process.args:(kmod and list and sudo or sudo and (depmod or lsmod or modinfo))",
+  "query": "event.category:process and event.type:(start or process_started) and\n  process.args:(kmod and list and sudo or sudo and (depmod or lsmod or modinfo))\n",
   "risk_score": 47,
   "rule_id": "2d8043ed-5bda-4caf-801c-c1feb7410504",
   "severity": "medium",

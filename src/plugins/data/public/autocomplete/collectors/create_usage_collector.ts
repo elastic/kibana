@@ -7,8 +7,9 @@
  */
 
 import { first } from 'rxjs/operators';
-import { StartServicesAccessor } from '../../../../../core/public';
-import { METRIC_TYPE, UsageCollectionSetup } from '../../../../usage_collection/public';
+import { METRIC_TYPE } from '@kbn/analytics';
+import type { StartServicesAccessor } from 'src/core/public';
+import type { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
 import { AUTOCOMPLETE_EVENT_TYPE, AutocompleteUsageCollector } from './types';
 
 export const createUsageCollector = (

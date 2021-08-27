@@ -262,7 +262,7 @@ describe('alertInstanceToListItem', () => {
     };
     expect(alertInstanceToListItem(fakeNow.getTime(), alertType, 'id', instance)).toEqual({
       instance: 'id',
-      status: { label: 'OK', healthColor: 'subdued' },
+      status: { label: 'Recovered', healthColor: 'subdued' },
       start: undefined,
       duration: 0,
       sortPriority: 1,

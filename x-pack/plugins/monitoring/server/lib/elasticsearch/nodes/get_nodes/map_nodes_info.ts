@@ -6,9 +6,7 @@
  */
 
 import { isUndefined } from 'lodash';
-// @ts-ignore
 import { calculateNodeType } from '../calculate_node_type';
-// @ts-ignore
 import { getNodeTypeClassLabel } from '../get_node_type_class_label';
 import {
   ElasticsearchResponseHit,
@@ -31,6 +29,7 @@ export function mapNodesInfo(
 
   return nodeHits.reduce((prev, node) => {
     const sourceNode = node._source.source_node || node._source.elasticsearch?.node;
+    if (!sourceNode) return prev;
 
     const calculatedNodeType = calculateNodeType(sourceNode, clusterState?.master_node);
     const { nodeType, nodeTypeLabel, nodeTypeClass } = getNodeTypeClassLabel(

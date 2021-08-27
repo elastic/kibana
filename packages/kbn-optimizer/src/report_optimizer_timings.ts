@@ -50,10 +50,10 @@ export function reportOptimizerTimings(log: ToolingLog, config: OptimizerConfig)
               id: 'overall time',
               ms: time,
               meta: {
-                optimizerBundleCount: config.bundles.length,
+                optimizerBundleCount: config.filteredBundles.length,
                 optimizerBundleCacheCount: cachedBundles.size,
                 optimizerBundleCachePct: Math.floor(
-                  (cachedBundles.size / config.bundles.length) * 100
+                  (cachedBundles.size / config.filteredBundles.length) * 100
                 ),
                 optimizerWatch: config.watch,
                 optimizerProduction: config.dist,

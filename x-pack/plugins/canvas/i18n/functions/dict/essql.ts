@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { essql } from '../../../canvas_plugin_src/functions/server/essql';
+import { essql } from '../../../canvas_plugin_src/functions/browser/essql';
 import { FunctionHelp } from '../function_help';
 import { FunctionFactory } from '../../../types';
 import { ELASTICSEARCH, SQL, ISO8601, UTC } from '../../constants';
@@ -24,6 +24,12 @@ export const help: FunctionHelp<FunctionFactory<typeof essql>> = {
       defaultMessage: 'An {ELASTICSEARCH} {SQL} query.',
       values: {
         ELASTICSEARCH,
+        SQL,
+      },
+    }),
+    parameter: i18n.translate('xpack.canvas.functions.essql.args.parameterHelpText', {
+      defaultMessage: 'A parameter to be passed to the {SQL} query.',
+      values: {
         SQL,
       },
     }),

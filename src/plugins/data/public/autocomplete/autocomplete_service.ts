@@ -7,6 +7,7 @@
  */
 
 import { CoreSetup, PluginInitializerContext } from 'src/core/public';
+import moment from 'moment';
 import { TimefilterSetup } from '../query';
 import { QuerySuggestionGetFn } from './providers/query_suggestion_provider';
 import {
@@ -27,7 +28,7 @@ import { DataPublicPluginStart, DataStartDependencies } from '../types';
 export class AutocompleteService {
   autocompleteConfig: ConfigSchema['autocomplete'];
 
-  constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
+  constructor(private initializerContext: PluginInitializerContext<ConfigSchema>) {
     const { autocomplete } = initializerContext.config.get<ConfigSchema>();
 
     this.autocompleteConfig = autocomplete;
@@ -55,6 +56,8 @@ export class AutocompleteService {
       usageCollection,
     }: { timefilter: TimefilterSetup; usageCollection?: UsageCollectionSetup }
   ) {
+    const { autocomplete } = this.initializerContext.config.get<ConfigSchema>();
+    const { terminateAfter, timeout } = autocomplete.valueSuggestions;
     const usageCollector = createUsageCollector(core.getStartServices, usageCollection);
 
     this.getValueSuggestions = this.autocompleteConfig.valueSuggestions.enabled
@@ -71,6 +74,10 @@ export class AutocompleteService {
        * please use "getQuerySuggestions" from the start contract
        */
       getQuerySuggestions: this.getQuerySuggestions,
+      getAutocompleteSettings: () => ({
+        terminateAfter: moment.duration(terminateAfter).asMilliseconds(),
+        timeout: moment.duration(timeout).asMilliseconds(),
+      }),
     };
   }
 

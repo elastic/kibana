@@ -55,8 +55,6 @@ interface ConnectInstanceProps {
   objTypes?: string[];
   name: string;
   serviceType: string;
-  sourceDescription: string;
-  connectStepDescription: string;
   needsPermissions: boolean;
   onFormCreated(name: string): void;
 }
@@ -67,8 +65,6 @@ export const ConnectInstance: React.FC<ConnectInstanceProps> = ({
   objTypes,
   name,
   serviceType,
-  sourceDescription,
-  connectStepDescription,
   needsPermissions,
   onFormCreated,
   header,
@@ -161,13 +157,13 @@ export const ConnectInstance: React.FC<ConnectInstanceProps> = ({
   const permissionField = (
     <>
       <EuiPanel paddingSize="l" hasShadow={false} color="subdued">
-        <EuiTitle size="xs">
-          <h3>
+        <EuiTitle size="s">
+          <h1>
             <strong>{CONNECT_DOC_PERMISSIONS_TITLE}</strong>
-          </h3>
+          </h1>
         </EuiTitle>
         <EuiSpacer size="s" />
-        <EuiText size="xs" color="subdued">
+        <EuiText color="subdued" size="s">
           {!needsPermissions && (
             <span>
               <FormattedMessage
@@ -191,11 +187,9 @@ export const ConnectInstance: React.FC<ConnectInstanceProps> = ({
             </span>
           )}
         </EuiText>
-        <EuiSpacer size="s" />
         {!indexPermissionsValue && (
           <>
-            <EuiSpacer size="s" />
-            <EuiCallOut title={CONNECT_NOT_SYNCED_TITLE} color="warning" size="s">
+            <EuiCallOut title={CONNECT_NOT_SYNCED_TITLE} color="warning">
               <p>
                 {CONNECT_NOT_SYNCED_TEXT}
                 {needsPermissions && whichDocsLink}

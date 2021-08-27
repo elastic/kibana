@@ -77,6 +77,13 @@ export const aggBucketMin = (): FunctionDefinition => ({
         defaultMessage: 'Represents a custom label for this aggregation',
       }),
     },
+    timeShift: {
+      types: ['string'],
+      help: i18n.translate('data.search.aggs.metrics.timeShift.help', {
+        defaultMessage:
+          'Shift the time range for the metric by a set time, for example 1h or 7d. "previous" will use the closest time range from the date histogram or time range filter.',
+      }),
+    },
   },
   fn: (input, args) => {
     const { id, enabled, schema, ...rest } = args;
