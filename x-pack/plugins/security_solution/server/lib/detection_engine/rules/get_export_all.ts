@@ -19,7 +19,9 @@ export const getExportAll = async (
 }> => {
   const ruleAlertTypes = await getNonPackagedRules({ rulesClient });
   const rules = transformAlertsToRules(ruleAlertTypes);
-  const rulesNdjson = transformDataToNdjson(rules);
+  // We do not support importing/exporting actions. When we do, delete this line of code
+  const rulesWithoutActions = rules.map((rule) => ({ ...rule, actions: [] }));
+  const rulesNdjson = transformDataToNdjson(rulesWithoutActions);
   const exportDetails = getExportDetailsNdjson(rules);
   return { rulesNdjson, exportDetails };
 };
