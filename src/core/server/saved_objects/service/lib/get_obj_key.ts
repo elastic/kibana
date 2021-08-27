@@ -13,10 +13,11 @@ export type ObjectKey = string;
 export const getObjKey = (
   obj: { type: string; id: string; namespaces?: string[] },
   typeRegistry: ISavedObjectTypeRegistry,
-  currentNamespace = 'default'
+  currentNamespace?: string
 ): ObjectKey => {
   if (typeRegistry.isSingleNamespace(obj.type)) {
-    return `${obj.namespaces ? obj.namespaces[0] : currentNamespace}:${obj.type}:${obj.id}`;
+    const namespace = obj.namespaces ? obj.namespaces[0] : currentNamespace;
+    return `${namespace ? `${namespace}:` : ''}${obj.type}:${obj.id}`;
   }
   return `${obj.type}:${obj.id}`;
 };

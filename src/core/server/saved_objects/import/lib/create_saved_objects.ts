@@ -18,6 +18,7 @@ interface CreateSavedObjectsParams<T> {
   savedObjectsClient: SavedObjectsClientContract;
   typeRegistry: ISavedObjectTypeRegistry;
   importIdMap: Map<string, { id?: string; omitOriginId?: boolean }>;
+  importNamespaces: boolean;
   namespace?: string;
   overwrite?: boolean;
 }
@@ -37,6 +38,7 @@ export const createSavedObjects = async <T>({
   savedObjectsClient,
   typeRegistry,
   importIdMap,
+  importNamespaces,
   namespace,
   overwrite,
 }: CreateSavedObjectsParams<T>): Promise<CreateSavedObjectsResult<T>> => {
@@ -81,12 +83,14 @@ export const createSavedObjects = async <T>({
       }
       return reference;
     });
-    const objKey = getObjKey(object, typeRegistry, namespace);
     // use the import ID map to ensure that each object is being created with the correct ID, also ensure that the `originId` is set on
     // the created object if it did not have one (or is omitted if specified)
-    const importIdEntry = importIdMap.get(objKey);
+    const importIdEntry = importIdMap.get(getObjKey(object, typeRegistry, namespace));
     if (importIdEntry?.id) {
-      objectIdMap.set(objKey, object);
+      objectIdMap.set(
+        getObjKey({ ...object, id: importIdEntry.id }, typeRegistry, namespace),
+        object
+      );
       const originId = importIdEntry.omitOriginId ? undefined : object.originId ?? object.id;
       return { ...object, id: importIdEntry.id, originId, ...(references && { references }) };
     }
@@ -99,7 +103,7 @@ export const createSavedObjects = async <T>({
     const bulkCreateResponse = await savedObjectsClient.bulkCreate(
       objectsToCreate.map(({ namespaces, ...obj }) => ({
         ...obj,
-        ...(namespaces ? { initialNamespaces: namespaces } : {}),
+        ...(namespaces && importNamespaces ? { initialNamespaces: namespaces } : {}),
       })),
       {
         namespace,
@@ -112,9 +116,27 @@ export const createSavedObjects = async <T>({
   // remap results to reflect the object IDs that were submitted for import
   // this ensures that consumers understand the results
   const remappedResults = expectedResults.map<CreatedObject<T>>((result) => {
-    const { id } = objectIdMap.get(getObjKey(result, typeRegistry, namespace))!;
+    // the (non-agnostic) created objects will always have a `namespaces` field populated is spaces is enabled,
+    // but the keys we're using in rest of the algorithm don't have it, so in that case, we exclude the namespaces
+    // when generating the remapping key.
+    const resultKey = getObjKey(
+      importNamespaces
+        ? result
+        : {
+            ...result,
+            namespaces: undefined,
+          },
+      typeRegistry,
+      namespace
+    );
+
+    const { id } = objectIdMap.get(resultKey)!;
     // also, include a `destinationId` field if the object create attempt was made with a different ID
-    return { ...result, id, ...(id !== result.id && { destinationId: result.id }) };
+    return {
+      ...result,
+      id,
+      ...(id !== result.id && { destinationId: result.id }),
+    };
   });
 
   return {

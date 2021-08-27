@@ -44,6 +44,10 @@ export interface ImportSavedObjectsOptions {
   namespace?: string;
   /** If true, will create new copies of import objects, each with a random `id` and undefined `originId`. */
   createNewCopies: boolean;
+  /**
+   * If true
+   */
+  importNamespaces: boolean;
 }
 
 /**
@@ -61,6 +65,7 @@ export async function importSavedObjectsFromStream({
   typeRegistry,
   importHooks,
   namespace,
+  importNamespaces,
 }: ImportSavedObjectsOptions): Promise<SavedObjectsImportResponse> {
   let errorAccumulator: SavedObjectsImportFailure[] = [];
 
@@ -75,6 +80,9 @@ export async function importSavedObjectsFromStream({
   /** Map of all IDs for objects that we are attempting to import; each value is empty by default */
   let importIdMap = collectSavedObjectsResult.importIdMap;
   let pendingOverwrites = new Set<string>();
+
+  // validate the presence of namespaces or not depending on `importNamespaces`
+  // TODO
 
   // Validate references
   const validateReferencesResult = await validateReferences({
@@ -130,6 +138,7 @@ export async function importSavedObjectsFromStream({
     importIdMap,
     overwrite,
     namespace,
+    importNamespaces,
   });
   errorAccumulator = [...errorAccumulator, ...createSavedObjectsResult.errors];
 
