@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 
@@ -22,13 +22,14 @@ export const FILTER_OUT_VALUE_KEYBOARD_SHORTCUT = 'o';
 
 const FilterOutValueButton: React.FC<HoverActionComponentProps & FilterValueFnArgs> = React.memo(
   ({
-    closePopOver,
+    Component,
     defaultFocusedButtonRef,
     field,
     filterManager,
     keyboardEvent,
     onFilterAdded,
     ownFocus,
+    onClick,
     showTooltip = false,
     value,
   }) => {
@@ -49,10 +50,10 @@ const FilterOutValueButton: React.FC<HoverActionComponentProps & FilterValueFnAr
           onFilterAdded();
         }
       }
-      if (closePopOver != null) {
-        closePopOver();
+      if (onClick != null) {
+        onClick();
       }
-    }, [closePopOver, field, filterManager, onFilterAdded, value]);
+    }, [field, filterManager, onClick, onFilterAdded, value]);
 
     useEffect(() => {
       if (!ownFocus) {
@@ -63,6 +64,33 @@ const FilterOutValueButton: React.FC<HoverActionComponentProps & FilterValueFnAr
         filterOutValueFn();
       }
     }, [filterOutValueFn, keyboardEvent, ownFocus]);
+
+    const button = useMemo(
+      () =>
+        Component ? (
+          <Component
+            aria-label={FILTER_OUT_VALUE}
+            buttonRef={defaultFocusedButtonRef}
+            data-test-subj="filter-out-value"
+            iconType="minusInCircle"
+            onClick={filterOutValueFn}
+            title={FILTER_OUT_VALUE}
+          >
+            {FILTER_OUT_VALUE}
+          </Component>
+        ) : (
+          <EuiButtonIcon
+            aria-label={FILTER_OUT_VALUE}
+            buttonRef={defaultFocusedButtonRef}
+            className="timelines__hoverActionButton"
+            data-test-subj="filter-out-value"
+            iconSize="s"
+            iconType="minusInCircle"
+            onClick={filterOutValueFn}
+          />
+        ),
+      [Component, defaultFocusedButtonRef, filterOutValueFn]
+    );
 
     return showTooltip ? (
       <EuiToolTip
@@ -78,26 +106,10 @@ const FilterOutValueButton: React.FC<HoverActionComponentProps & FilterValueFnAr
           />
         }
       >
-        <EuiButtonIcon
-          aria-label={FILTER_OUT_VALUE}
-          buttonRef={defaultFocusedButtonRef}
-          className="timelines__hoverActionButton"
-          data-test-subj="filter-out-value"
-          iconSize="s"
-          iconType="minusInCircle"
-          onClick={filterOutValueFn}
-        />
+        {button}
       </EuiToolTip>
     ) : (
-      <EuiButtonIcon
-        aria-label={FILTER_OUT_VALUE}
-        buttonRef={defaultFocusedButtonRef}
-        className="timelines__hoverActionButton"
-        data-test-subj="filter-out-value"
-        iconSize="s"
-        iconType="minusInCircle"
-        onClick={filterOutValueFn}
-      />
+      button
     );
   }
 );

@@ -1255,4 +1255,346 @@ describe('Exception helpers', () => {
       ]);
     });
   });
+  describe('behavior protection exception items', () => {
+    test('it should return pre-populated behavior protection items', () => {
+      const defaultItems = defaultEndpointExceptionItems('list_id', 'my_rule', {
+        _id: '123',
+        rule: {
+          id: '123',
+        },
+        process: {
+          command_line: 'command_line',
+          executable: 'some file path',
+          parent: {
+            executable: 'parent file path',
+          },
+          code_signature: {
+            subject_name: 'subject-name',
+            trusted: 'true',
+          },
+        },
+        event: {
+          code: 'behavior',
+        },
+        file: {
+          path: 'fake-file-path',
+          name: 'fake-file-name',
+        },
+        source: {
+          ip: '0.0.0.0',
+        },
+        destination: {
+          ip: '0.0.0.0',
+        },
+        registry: {
+          path: 'registry-path',
+          value: 'registry-value',
+          data: {
+            strings: 'registry-strings',
+          },
+        },
+        dll: {
+          path: 'dll-path',
+          code_signature: {
+            subject_name: 'dll-code-signature-subject-name',
+            trusted: 'false',
+          },
+          pe: {
+            original_file_name: 'dll-pe-original-file-name',
+          },
+        },
+        dns: {
+          question: {
+            name: 'dns-question-name',
+            type: 'dns-question-type',
+          },
+        },
+        user: {
+          id: '0987',
+        },
+      });
+
+      expect(defaultItems[0].entries).toEqual([
+        {
+          id: '123',
+          field: 'rule.id',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: '123',
+        },
+        {
+          id: '123',
+          field: 'process.executable.caseless',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: 'some file path',
+        },
+        {
+          id: '123',
+          field: 'process.command_line',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: 'command_line',
+        },
+        {
+          id: '123',
+          field: 'process.parent.executable',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: 'parent file path',
+        },
+        {
+          id: '123',
+          field: 'process.code_signature.subject_name',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: 'subject-name',
+        },
+        {
+          id: '123',
+          field: 'file.path',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: 'fake-file-path',
+        },
+        {
+          id: '123',
+          field: 'file.name',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: 'fake-file-name',
+        },
+        {
+          id: '123',
+          field: 'source.ip',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: '0.0.0.0',
+        },
+        {
+          id: '123',
+          field: 'destination.ip',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: '0.0.0.0',
+        },
+        {
+          id: '123',
+          field: 'registry.path',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: 'registry-path',
+        },
+        {
+          id: '123',
+          field: 'registry.value',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: 'registry-value',
+        },
+        {
+          id: '123',
+          field: 'registry.data.strings',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: 'registry-strings',
+        },
+        {
+          id: '123',
+          field: 'dll.path',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: 'dll-path',
+        },
+        {
+          id: '123',
+          field: 'dll.code_signature.subject_name',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: 'dll-code-signature-subject-name',
+        },
+        {
+          id: '123',
+          field: 'dll.pe.original_file_name',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: 'dll-pe-original-file-name',
+        },
+        {
+          id: '123',
+          field: 'dns.question.name',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: 'dns-question-name',
+        },
+        {
+          id: '123',
+          field: 'dns.question.type',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: 'dns-question-type',
+        },
+        {
+          id: '123',
+          field: 'user.id',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: '0987',
+        },
+      ]);
+    });
+    test('it should return pre-populated behavior protection fields and skip empty', () => {
+      const defaultItems = defaultEndpointExceptionItems('list_id', 'my_rule', {
+        _id: '123',
+        rule: {
+          id: '123',
+        },
+        process: {
+          // command_line: 'command_line', intentionally left commented
+          executable: 'some file path',
+          parent: {
+            executable: 'parent file path',
+          },
+          code_signature: {
+            subject_name: 'subject-name',
+            trusted: 'true',
+          },
+        },
+        event: {
+          code: 'behavior',
+        },
+        file: {
+          // path: 'fake-file-path', intentionally left commented
+          name: 'fake-file-name',
+        },
+        source: {
+          ip: '0.0.0.0',
+        },
+        destination: {
+          ip: '0.0.0.0',
+        },
+        // intentionally left commented
+        // registry: {
+        // path: 'registry-path',
+        // value: 'registry-value',
+        // data: {
+        // strings: 'registry-strings',
+        // },
+        // },
+        dll: {
+          path: 'dll-path',
+          code_signature: {
+            subject_name: 'dll-code-signature-subject-name',
+            trusted: 'false',
+          },
+          pe: {
+            original_file_name: 'dll-pe-original-file-name',
+          },
+        },
+        dns: {
+          question: {
+            name: 'dns-question-name',
+            type: 'dns-question-type',
+          },
+        },
+        user: {
+          id: '0987',
+        },
+      });
+
+      expect(defaultItems[0].entries).toEqual([
+        {
+          id: '123',
+          field: 'rule.id',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: '123',
+        },
+        {
+          id: '123',
+          field: 'process.executable.caseless',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: 'some file path',
+        },
+        {
+          id: '123',
+          field: 'process.parent.executable',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: 'parent file path',
+        },
+        {
+          id: '123',
+          field: 'process.code_signature.subject_name',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: 'subject-name',
+        },
+        {
+          id: '123',
+          field: 'file.name',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: 'fake-file-name',
+        },
+        {
+          id: '123',
+          field: 'source.ip',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: '0.0.0.0',
+        },
+        {
+          id: '123',
+          field: 'destination.ip',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: '0.0.0.0',
+        },
+        {
+          id: '123',
+          field: 'dll.path',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: 'dll-path',
+        },
+        {
+          id: '123',
+          field: 'dll.code_signature.subject_name',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: 'dll-code-signature-subject-name',
+        },
+        {
+          id: '123',
+          field: 'dll.pe.original_file_name',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: 'dll-pe-original-file-name',
+        },
+        {
+          id: '123',
+          field: 'dns.question.name',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: 'dns-question-name',
+        },
+        {
+          id: '123',
+          field: 'dns.question.type',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: 'dns-question-type',
+        },
+        {
+          id: '123',
+          field: 'user.id',
+          operator: 'included' as const,
+          type: 'match' as const,
+          value: '0987',
+        },
+      ]);
+    });
+  });
 });

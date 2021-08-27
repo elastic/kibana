@@ -73,6 +73,8 @@ const ConnectorNoneTypeFieldsRt = rt.type({
   fields: rt.null,
 });
 
+export const noneConnectorId: string = 'none';
+
 export const ConnectorTypeFieldsRt = rt.union([
   ConnectorJiraTypeFieldsRt,
   ConnectorNoneTypeFieldsRt,
@@ -102,16 +104,3 @@ export type ConnectorServiceNowSIRTypeFields = rt.TypeOf<typeof ConnectorService
 
 // we need to change these types back and forth for storing in ES (arrays overwrite, objects merge)
 export type ConnectorFields = rt.TypeOf<typeof ConnectorFieldsRt>;
-
-export type ESConnectorFields = Array<{
-  key: string;
-  value: unknown;
-}>;
-
-export type ESCaseConnectorTypes = ConnectorTypes;
-export interface ESCaseConnector {
-  id: string;
-  name: string;
-  type: ESCaseConnectorTypes;
-  fields: ESConnectorFields | null;
-}

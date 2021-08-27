@@ -16,7 +16,7 @@
     "indexPatternFieldEditor"
   ],
   "optionalPlugins": ["home", "share", "usageCollection"],
-  "requiredBundles": ["kibanaUtils", "home", "kibanaReact"],
+  "requiredBundles": ["kibanaUtils", "home", "kibanaReact", "fieldFormats"],
   "owner": {
     "name": "Kibana App",
     "githubTeam": "kibana-app"

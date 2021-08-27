@@ -35,5 +35,5 @@ export const SERIES = {
 export const PANEL = {
   type: 'timeseries',
   index_pattern: INDEX_PATTERN,
-  series: SERIES,
+  series: [SERIES],
 };

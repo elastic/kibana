@@ -9,6 +9,14 @@
 import { PromiseType } from 'utility-types';
 export { $Values, Assign, Class, Optional, Required } from 'utility-types';
 
+export type {
+  JsonArray,
+  JsonValue,
+  JsonObject,
+  SerializableRecord,
+  Serializable,
+} from './serializable';
+
 /**
  * A type that may or may not be a `Promise`.
  */

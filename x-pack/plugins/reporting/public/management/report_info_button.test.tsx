@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { mountWithIntl } from '@kbn/test/jest';
+import { coreMock } from '../../../../../src/core/public/mocks';
 import { Job } from '../lib/job';
 import { ReportInfoButton } from './report_info_button';
 
@@ -14,8 +15,9 @@ jest.mock('../lib/reporting_api_client');
 
 import { ReportingAPIClient } from '../lib/reporting_api_client';
 
-const httpSetup = {} as any;
-const apiClient = new ReportingAPIClient(httpSetup);
+const coreSetup = coreMock.createSetup();
+const apiClient = new ReportingAPIClient(coreSetup.http, coreSetup.uiSettings, '7.15.0');
+
 const job = new Job({
   id: 'abc-123',
   index: '.reporting-2020.04.12',
@@ -29,6 +31,7 @@ const job = new Job({
   meta: { layout: 'preserve_layout', objectType: 'canvas workpad' },
   payload: {
     browserTimezone: 'America/Phoenix',
+    version: '7.15.0-test',
     layout: { dimensions: { height: 720, width: 1080 }, id: 'preserve_layout' },
     objectType: 'canvas workpad',
     title: 'My Canvas Workpad',

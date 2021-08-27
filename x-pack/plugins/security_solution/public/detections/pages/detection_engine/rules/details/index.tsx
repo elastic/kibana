@@ -23,7 +23,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { noop } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
+import { connect, ConnectedProps, useDispatch } from 'react-redux';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
 import {
@@ -31,6 +31,7 @@ import {
   ExceptionListIdentifiers,
 } from '@kbn/securitysolution-io-ts-list-types';
 
+import { Dispatch } from 'redux';
 import { isTab } from '../../../../../../../timelines/public';
 import {
   useDeepEqualSelector,
@@ -58,11 +59,12 @@ import { AlertsHistogramPanel } from '../../../../components/alerts_kpis/alerts_
 import { AlertsTable } from '../../../../components/alerts_table';
 import { useUserData } from '../../../../components/user_info';
 import { OverviewEmpty } from '../../../../../overview/components/overview_empty';
-import { useAlertInfo } from '../../../../components/alerts_info';
 import { StepDefineRule } from '../../../../components/rules/step_define_rule';
 import { StepScheduleRule } from '../../../../components/rules/step_schedule_rule';
 import {
   buildAlertsRuleIdFilter,
+  buildAlertStatusFilter,
+  buildAlertStatusFilterRuleRegistry,
   buildShowBuildingBlockFilter,
   buildShowBuildingBlockFilterRuleRegistry,
   buildThreatMatchFilter,
@@ -98,7 +100,7 @@ import {
   resetKeyboardFocus,
   showGlobalFilters,
 } from '../../../../../timelines/components/timeline/helpers';
-import { timelineSelectors } from '../../../../../timelines/store/timeline';
+import { timelineActions, timelineSelectors } from '../../../../../timelines/store/timeline';
 import { timelineDefaults } from '../../../../../timelines/store/timeline/defaults';
 import { useSourcererScope } from '../../../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../../../common/store/sourcerer/model';
@@ -118,6 +120,11 @@ import { MissingPrivilegesCallOut } from '../../../../components/callouts/missin
 import { useRuleWithFallback } from '../../../../containers/detection_engine/rules/use_rule_with_fallback';
 import { BadgeOptions } from '../../../../../common/components/header_page/types';
 import { AlertsStackByField } from '../../../../components/alerts_kpis/common/types';
+import { Status } from '../../../../../../common/detection_engine/schemas/common/schemas';
+import {
+  AlertsTableFilterGroup,
+  FILTER_OPEN,
+} from '../../../../components/alerts_table/alerts_filter_group';
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
@@ -155,7 +162,13 @@ const ruleDetailTabs = [
   },
 ];
 
-const RuleDetailsPageComponent = () => {
+type DetectionEngineComponentProps = PropsFromRedux;
+
+const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
+  clearEventsDeleted,
+  clearEventsLoading,
+  clearSelected,
+}) => {
   const { navigateToApp } = useKibana().services.application;
   const dispatch = useDispatch();
   const containerElement = useRef<HTMLDivElement | null>(null);
@@ -163,6 +176,9 @@ const RuleDetailsPageComponent = () => {
   const graphEventId = useShallowEqualSelector(
     (state) =>
       (getTimeline(state, TimelineId.detectionsRulesDetailsPage) ?? timelineDefaults).graphEventId
+  );
+  const updatedAt = useShallowEqualSelector(
+    (state) => (getTimeline(state, TimelineId.detectionsPage) ?? timelineDefaults).updated
   );
   const getGlobalFiltersQuerySelector = useMemo(
     () => inputsSelectors.globalFiltersQuerySelector(),
@@ -181,6 +197,7 @@ const RuleDetailsPageComponent = () => {
       hasEncryptionKey,
       canUserCRUD,
       hasIndexWrite,
+      hasIndexRead,
       hasIndexMaintenance,
       signalIndexName,
     },
@@ -211,6 +228,7 @@ const RuleDetailsPageComponent = () => {
   // This is used to re-trigger api rule status when user de/activate rule
   const [ruleEnabled, setRuleEnabled] = useState<boolean | null>(null);
   const [ruleDetailTab, setRuleDetailTab] = useState(RuleDetailTabs.alerts);
+  const [pageTabs, setTabs] = useState(ruleDetailTabs);
   const { aboutRuleData, modifiedAboutRuleDetailsData, defineRuleData, scheduleRuleData } =
     rule != null
       ? getStepsData({ rule, detailsView: true })
@@ -220,12 +238,12 @@ const RuleDetailsPageComponent = () => {
           defineRuleData: null,
           scheduleRuleData: null,
         };
-  const [lastAlerts] = useAlertInfo({ ruleId });
   const [showBuildingBlockAlerts, setShowBuildingBlockAlerts] = useState(false);
   const [showOnlyThreatIndicatorAlerts, setShowOnlyThreatIndicatorAlerts] = useState(false);
   const mlCapabilities = useMlCapabilities();
   const { formatUrl } = useFormatUrl(SecurityPageName.rules);
   const { globalFullScreen } = useGlobalFullScreen();
+  const [filterGroup, setFilterGroup] = useState<Status>(FILTER_OPEN);
 
   // TODO: Once we are past experimental phase this code should be removed
   const ruleRegistryEnabled = useIsExperimentalFeatureEnabled('ruleRegistryEnabled');
@@ -240,6 +258,7 @@ const RuleDetailsPageComponent = () => {
       application: {
         capabilities: { actions },
       },
+      timelines: timelinesUi,
     },
   } = useKibana();
   const hasActionsPrivileges = useMemo(() => {
@@ -255,6 +274,16 @@ const RuleDetailsPageComponent = () => {
       setRule(maybeRule);
     }
   }, [maybeRule]);
+
+  useEffect(() => {
+    if (!hasIndexRead) {
+      setTabs(ruleDetailTabs.filter(({ id }) => id !== RuleDetailTabs.alerts));
+      setRuleDetailTab(RuleDetailTabs.exceptions);
+    } else {
+      setTabs(ruleDetailTabs);
+      setRuleDetailTab(RuleDetailTabs.alerts);
+    }
+  }, [hasIndexRead]);
 
   const title = useMemo(
     () => (
@@ -315,6 +344,18 @@ const RuleDetailsPageComponent = () => {
     [rule, ruleLoading]
   );
 
+  // Callback for when open/closed filter changes
+  const onFilterGroupChangedCallback = useCallback(
+    (newFilterGroup: Status) => {
+      const timelineId = TimelineId.detectionsPage;
+      clearEventsLoading!({ id: timelineId });
+      clearEventsDeleted!({ id: timelineId });
+      clearSelected!({ id: timelineId });
+      setFilterGroup(newFilterGroup);
+    },
+    [clearEventsLoading, clearEventsDeleted, clearSelected, setFilterGroup]
+  );
+
   // Set showBuildingBlockAlerts if rule is a Building Block Rule otherwise we won't show alerts
   useEffect(() => {
     setShowBuildingBlockAlerts(rule?.building_block_type != null);
@@ -324,11 +365,38 @@ const RuleDetailsPageComponent = () => {
     () => [
       ...buildAlertsRuleIdFilter(ruleId),
       ...(ruleRegistryEnabled
-        ? buildShowBuildingBlockFilterRuleRegistry(showBuildingBlockAlerts) // TODO: Once we are past experimental phase this code should be removed
-        : buildShowBuildingBlockFilter(showBuildingBlockAlerts)),
+        ? [
+            ...buildShowBuildingBlockFilterRuleRegistry(showBuildingBlockAlerts), // TODO: Once we are past experimental phase this code should be removed
+            ...buildAlertStatusFilterRuleRegistry(filterGroup),
+          ]
+        : [
+            ...buildShowBuildingBlockFilter(showBuildingBlockAlerts),
+            ...buildAlertStatusFilter(filterGroup),
+          ]),
       ...buildThreatMatchFilter(showOnlyThreatIndicatorAlerts),
     ],
-    [ruleId, ruleRegistryEnabled, showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts]
+    [
+      ruleId,
+      ruleRegistryEnabled,
+      showBuildingBlockAlerts,
+      showOnlyThreatIndicatorAlerts,
+      filterGroup,
+    ]
+  );
+
+  const alertsTableDefaultFilters = useMemo(
+    () => [
+      ...buildAlertsRuleIdFilter(ruleId),
+      ...filters,
+      ...(ruleRegistryEnabled
+        ? [
+            // TODO: Once we are past experimental phase this code should be removed
+            ...buildShowBuildingBlockFilterRuleRegistry(showBuildingBlockAlerts),
+          ]
+        : [...buildShowBuildingBlockFilter(showBuildingBlockAlerts)]),
+      ...buildThreatMatchFilter(showOnlyThreatIndicatorAlerts),
+    ],
+    [ruleId, filters, ruleRegistryEnabled, showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts]
   );
 
   const alertMergedFilters = useMemo(() => [...alertDefaultFilters, ...filters], [
@@ -339,7 +407,7 @@ const RuleDetailsPageComponent = () => {
   const tabs = useMemo(
     () => (
       <EuiTabs>
-        {ruleDetailTabs.map((tab) => (
+        {pageTabs.map((tab) => (
           <EuiTab
             onClick={() => setRuleDetailTab(tab.id)}
             isSelected={tab.id === ruleDetailTab}
@@ -352,7 +420,7 @@ const RuleDetailsPageComponent = () => {
         ))}
       </EuiTabs>
     ),
-    [ruleDetailTab, setRuleDetailTab]
+    [ruleDetailTab, setRuleDetailTab, pageTabs]
   );
   const ruleIndices = useMemo(
     () =>
@@ -401,7 +469,7 @@ const RuleDetailsPageComponent = () => {
       );
     } else if (
       currentStatus?.status === 'failed' &&
-      ruleDetailTab === RuleDetailTabs.alerts &&
+      (ruleDetailTab === RuleDetailTabs.alerts || ruleDetailTab === RuleDetailTabs.failures) &&
       currentStatus?.last_failure_at != null
     ) {
       return (
@@ -412,7 +480,7 @@ const RuleDetailsPageComponent = () => {
       );
     } else if (
       (currentStatus?.status === 'warning' || currentStatus?.status === 'partial failure') &&
-      ruleDetailTab === RuleDetailTabs.alerts &&
+      (ruleDetailTab === RuleDetailTabs.alerts || ruleDetailTab === RuleDetailTabs.failures) &&
       currentStatus?.last_success_at != null
     ) {
       return (
@@ -595,16 +663,7 @@ const RuleDetailsPageComponent = () => {
                 }}
                 border
                 subtitle={subTitle}
-                subtitle2={[
-                  ...(lastAlerts != null
-                    ? [
-                        <>
-                          {detectionI18n.LAST_ALERT}
-                          {': '}
-                          {lastAlerts}
-                        </>,
-                      ]
-                    : []),
+                subtitle2={
                   <>
                     <EuiFlexGroup gutterSize="xs" alignItems="center" justifyContent="flexStart">
                       <EuiFlexItem grow={false}>
@@ -613,8 +672,8 @@ const RuleDetailsPageComponent = () => {
                       </EuiFlexItem>
                       {ruleStatusInfo}
                     </EuiFlexGroup>
-                  </>,
-                ]}
+                  </>
+                }
                 title={title}
                 badgeOptions={badgeOptions}
               >
@@ -703,8 +762,23 @@ const RuleDetailsPageComponent = () => {
               {tabs}
               <EuiSpacer />
             </Display>
-            {ruleDetailTab === RuleDetailTabs.alerts && (
+            {ruleDetailTab === RuleDetailTabs.alerts && hasIndexRead && (
               <>
+                <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+                  <EuiFlexItem grow={false}>
+                    <AlertsTableFilterGroup
+                      status={filterGroup}
+                      onFilterGroupChanged={onFilterGroupChangedCallback}
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    {timelinesUi.getLastUpdated({
+                      updatedAt: updatedAt || 0,
+                      showUpdating: loading,
+                    })}
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+                <EuiSpacer size="l" />
                 <Display show={!globalFullScreen}>
                   <AlertsHistogramPanel
                     filters={alertMergedFilters}
@@ -717,8 +791,9 @@ const RuleDetailsPageComponent = () => {
                 </Display>
                 {ruleId != null && (
                   <AlertsTable
+                    filterGroup={filterGroup}
                     timelineId={TimelineId.detectionsRulesDetailsPage}
-                    defaultFilters={alertDefaultFilters}
+                    defaultFilters={alertsTableDefaultFilters}
                     hasIndexWrite={hasIndexWrite ?? false}
                     hasIndexMaintenance={hasIndexMaintenance ?? false}
                     from={from}
@@ -760,8 +835,20 @@ const RuleDetailsPageComponent = () => {
   );
 };
 
+const mapDispatchToProps = (dispatch: Dispatch) => ({
+  clearSelected: ({ id }: { id: string }) => dispatch(timelineActions.clearSelected({ id })),
+  clearEventsLoading: ({ id }: { id: string }) =>
+    dispatch(timelineActions.clearEventsLoading({ id })),
+  clearEventsDeleted: ({ id }: { id: string }) =>
+    dispatch(timelineActions.clearEventsDeleted({ id })),
+});
+
+const connector = connect(null, mapDispatchToProps);
+
+type PropsFromRedux = ConnectedProps<typeof connector>;
+
 RuleDetailsPageComponent.displayName = 'RuleDetailsPageComponent';
 
-export const RuleDetailsPage = React.memo(RuleDetailsPageComponent);
+export const RuleDetailsPage = connector(React.memo(RuleDetailsPageComponent));
 
 RuleDetailsPage.displayName = 'RuleDetailsPage';

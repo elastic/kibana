@@ -27,7 +27,7 @@ import {
 } from '@elastic/eui';
 import { MonitoringTimeseriesContainer } from '../../../components/chart';
 import { MonitoringViewBaseController } from '../../base_controller';
-import { CODE_PATH_LOGSTASH, ALERT_LOGSTASH_VERSION_MISMATCH } from '../../../../common/constants';
+import { CODE_PATH_LOGSTASH, RULE_LOGSTASH_VERSION_MISMATCH } from '../../../../common/constants';
 import { AlertsCallout } from '../../../alerts/callout';
 
 function getPageData($injector) {
@@ -74,7 +74,7 @@ uiRoutes.when('/logstash/node/:uuid', {
         alerts: {
           shouldFetch: true,
           options: {
-            alertTypeIds: [ALERT_LOGSTASH_VERSION_MISMATCH],
+            alertTypeIds: [RULE_LOGSTASH_VERSION_MISMATCH],
           },
         },
         telemetryPageViewTitle: 'logstash_node',

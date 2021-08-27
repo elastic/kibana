@@ -51,7 +51,6 @@ import { help as pie } from './dict/pie';
 import { help as plot } from './dict/plot';
 import { help as ply } from './dict/ply';
 import { help as pointseries } from './dict/pointseries';
-import { help as progress } from './dict/progress';
 import { help as render } from './dict/render';
 import { help as replace } from './dict/replace';
 import { help as rounddate } from './dict/rounddate';
@@ -207,7 +206,6 @@ export const getFunctionHelp = (): FunctionHelpDict => ({
   plot,
   ply,
   pointseries,
-  progress,
   render,
   replace,
   rounddate,

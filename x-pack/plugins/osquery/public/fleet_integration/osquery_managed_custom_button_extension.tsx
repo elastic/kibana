@@ -5,16 +5,42 @@
  * 2.0.
  */
 
-import React from 'react';
+import { EuiLoadingContent } from '@elastic/eui';
+import React, { useEffect } from 'react';
 
 import { PackageCustomExtensionComponentProps } from '../../../fleet/public';
 import { NavigationButtons } from './navigation_buttons';
+import { DisabledCallout } from './disabled_callout';
+import { useKibana } from '../common/lib/kibana';
 
 /**
  * Exports Osquery-specific package policy instructions
  * for use in the Fleet app custom tab
  */
 export const OsqueryManagedCustomButtonExtension = React.memo<PackageCustomExtensionComponentProps>(
-  () => <NavigationButtons />
+  () => {
+    const [disabled, setDisabled] = React.useState<boolean | null>(null);
+    const { http } = useKibana().services;
+
+    useEffect(() => {
+      const fetchStatus = () => {
+        http.get('/internal/osquery/status').then((response) => {
+          setDisabled(response.install_status !== 'installed');
+        });
+      };
+      fetchStatus();
+    }, [http]);
+
+    if (disabled === null) {
+      return <EuiLoadingContent lines={5} />;
+    }
+
+    return (
+      <>
+        {disabled ? <DisabledCallout /> : null}
+        <NavigationButtons isDisabled={disabled} />
+      </>
+    );
+  }
 );
 OsqueryManagedCustomButtonExtension.displayName = 'OsqueryManagedCustomButtonExtension';

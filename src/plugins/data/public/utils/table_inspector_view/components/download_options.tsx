@@ -22,7 +22,7 @@ import {
 import { CSV_MIME_TYPE, datatableToCSV, tableHasFormulas } from '../../../../common';
 import { Datatable } from '../../../../../expressions';
 import { downloadMultipleAs } from '../../../../../share/public';
-import { FieldFormatsStart } from '../../../field_formats';
+import { FieldFormatsStart } from '../../../../../field_formats/public';
 import { IUiSettingsClient } from '../../../../../../core/public';
 
 interface DataDownloadOptionsState {
@@ -122,7 +122,7 @@ class DataDownloadOptions extends Component<DataDownloadOptionsProps, DataDownlo
         position="top"
         content={i18n.translate('data.inspector.table.exportButtonFormulasWarning', {
           defaultMessage:
-            'Your CSV contains characters which spreadsheet applications can interpret as formulas',
+            'Your CSV contains characters that spreadsheet applications might interpret as formulas.',
         })}
       >
         {button}

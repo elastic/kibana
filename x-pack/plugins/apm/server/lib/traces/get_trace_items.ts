@@ -15,14 +15,9 @@ import {
   TRANSACTION_ID,
   ERROR_LOG_LEVEL,
 } from '../../../common/elasticsearch_fieldnames';
-import { APMError } from '../../../typings/es_schemas/ui/apm_error';
 import { rangeQuery } from '../../../../observability/server';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { PromiseValueType } from '../../../typings/common';
-
-export interface ErrorsPerTransaction {
-  [transactionId: string]: number;
-}
 
 export async function getTraceItems(
   traceId: string,
@@ -96,10 +91,7 @@ export async function getTraceItems(
 
   const items = traceResponse.hits.hits.map((hit) => hit._source);
 
-  const errorFrequencies: {
-    errorsPerTransaction: ErrorsPerTransaction;
-    errorDocs: APMError[];
-  } = {
+  const errorFrequencies = {
     errorDocs: errorResponse.hits.hits.map(({ _source }) => _source),
     errorsPerTransaction:
       errorResponse.aggregations?.by_transaction_id.buckets.reduce(
@@ -109,7 +101,7 @@ export async function getTraceItems(
             [current.key]: current.doc_count,
           };
         },
-        {} as ErrorsPerTransaction
+        {} as Record<string, number>
       ) ?? {},
   };
 

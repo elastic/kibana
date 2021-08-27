@@ -6,17 +6,8 @@
  * Side Public License, v 1.
  */
 
+import type { SerializableRecord } from '@kbn/utility-types';
 import { SavedObjectReference } from '../../../../core/types';
-
-/**
- * Serializable state is something is a POJO JavaScript object that can be
- * serialized to a JSON string.
- */
-export type SerializableState = {
-  [key: string]: Serializable;
-};
-export type SerializableValue = string | number | boolean | null | undefined | SerializableState;
-export type Serializable = SerializableValue | SerializableValue[];
 
 /**
  * Versioned state is a POJO JavaScript object that can be serialized to JSON,
@@ -35,7 +26,7 @@ export type Serializable = SerializableValue | SerializableValue[];
  * };
  * ```
  */
-export interface VersionedState<S extends SerializableState = SerializableState> {
+export interface VersionedState<S extends SerializableRecord = SerializableRecord> {
   version: string;
   state: S;
 }
@@ -50,7 +41,7 @@ export interface VersionedState<S extends SerializableState = SerializableState>
  *
  * @todo Maybe rename it to `PersistableStateItem`?
  */
-export interface PersistableState<P extends SerializableState = SerializableState> {
+export interface PersistableState<P extends SerializableRecord = SerializableRecord> {
   /**
    * Function which reports telemetry information. This function is essentially
    * a "reducer" - it receives the existing "stats" object and returns an
@@ -101,8 +92,8 @@ export interface PersistableState<P extends SerializableState = SerializableStat
  */
 export type MigrateFunctionsObject = { [semver: string]: MigrateFunction<any, any> };
 export type MigrateFunction<
-  FromVersion extends SerializableState = SerializableState,
-  ToVersion extends SerializableState = SerializableState
+  FromVersion extends SerializableRecord = SerializableRecord,
+  ToVersion extends SerializableRecord = SerializableRecord
 > = (state: FromVersion) => ToVersion;
 
 /**
@@ -111,21 +102,21 @@ export type MigrateFunction<
  * @param version
  */
 export type PersistableStateMigrateFn = (
-  state: SerializableState,
+  state: SerializableRecord,
   version: string
-) => SerializableState;
+) => SerializableRecord;
 
 /**
  * @todo Shall we remove this?
  */
-export type PersistableStateDefinition<P extends SerializableState = SerializableState> = Partial<
+export type PersistableStateDefinition<P extends SerializableRecord = SerializableRecord> = Partial<
   PersistableState<P>
 >;
 
 /**
  * @todo Add description.
  */
-export interface PersistableStateService<P extends SerializableState = SerializableState> {
+export interface PersistableStateService<P extends SerializableRecord = SerializableRecord> {
   /**
    * Function which reports telemetry information. This function is essentially
    * a "reducer" - it receives the existing "stats" object and returns an

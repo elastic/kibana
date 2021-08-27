@@ -6,7 +6,7 @@
  */
 
 import { getSortingCriteria } from './sorting';
-import { FieldFormat } from 'src/plugins/data/public';
+import type { FieldFormat } from 'src/plugins/field_formats/common';
 import { DatatableColumnType } from 'src/plugins/expressions';
 
 function getMockFormatter() {

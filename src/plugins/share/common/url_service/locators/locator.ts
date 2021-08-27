@@ -6,9 +6,10 @@
  * Side Public License, v 1.
  */
 
+import type { SerializableRecord } from '@kbn/utility-types';
 import type { SavedObjectReference } from 'kibana/server';
 import { DependencyList } from 'react';
-import type { PersistableState, SerializableState } from 'src/plugins/kibana_utils/common';
+import type { PersistableState } from 'src/plugins/kibana_utils/common';
 import { useLocatorUrl } from './use_locator_url';
 import type {
   LocatorDefinition,
@@ -30,7 +31,7 @@ export interface LocatorDependencies {
   getUrl: (location: KibanaLocation, getUrlParams: LocatorGetUrlParams) => Promise<string>;
 }
 
-export class Locator<P extends SerializableState> implements LocatorPublic<P> {
+export class Locator<P extends SerializableRecord> implements LocatorPublic<P> {
   public readonly migrations: PersistableState<P>['migrations'];
 
   constructor(

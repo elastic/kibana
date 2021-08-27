@@ -25,6 +25,7 @@ import { useContextAppFetch } from './use_context_app_fetch';
 import { popularizeField } from '../../helpers/popularize_field';
 import { ContextAppContent } from './context_app_content';
 import { SurrDocType } from '../../angular/context/api/context';
+import { DocViewFilterFn } from '../../doc_views/doc_views_types';
 
 const ContextAppContentMemoized = memo(ContextAppContent);
 
@@ -108,10 +109,10 @@ export const ContextApp = ({ indexPattern, indexPatternId, anchorId }: ContextAp
       filterManager.addFilters(newFilters);
       if (indexPatterns) {
         const fieldName = typeof field === 'string' ? field : field.name;
-        await popularizeField(indexPattern, fieldName, indexPatterns);
+        await popularizeField(indexPattern, fieldName, indexPatterns, capabilities);
       }
     },
-    [filterManager, indexPatternId, indexPatterns, indexPattern]
+    [filterManager, indexPatternId, indexPatterns, indexPattern, capabilities]
   );
 
   const TopNavMenu = navigation.ui.TopNavMenu;
@@ -161,7 +162,7 @@ export const ContextApp = ({ indexPattern, indexPatternId, anchorId }: ContextAp
                 predecessorCount={appState.predecessorCount}
                 successorCount={appState.successorCount}
                 setAppState={setAppState}
-                addFilter={addFilter}
+                addFilter={addFilter as DocViewFilterFn}
                 rows={rows}
                 predecessors={fetchedState.predecessors}
                 successors={fetchedState.successors}

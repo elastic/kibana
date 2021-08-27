@@ -14,10 +14,7 @@
       "tags": [],
       "label": "OsqueryPluginSetup",
       "description": [],
-      "source": {
-        "path": "x-pack/plugins/osquery/public/types.ts",
-        "lineNumber": 22
-      },
+      "path": "x-pack/plugins/osquery/public/types.ts",
       "deprecated": false,
       "children": [],
       "lifecycle": "setup",
@@ -30,10 +27,7 @@
       "tags": [],
       "label": "OsqueryPluginStart",
       "description": [],
-      "source": {
-        "path": "x-pack/plugins/osquery/public/types.ts",
-        "lineNumber": 23
-      },
+      "path": "x-pack/plugins/osquery/public/types.ts",
       "deprecated": false,
       "children": [
         {
@@ -46,10 +40,7 @@
           "signature": [
             "((props: any) => JSX.Element) | undefined"
           ],
-          "source": {
-            "path": "x-pack/plugins/osquery/public/types.ts",
-            "lineNumber": 24
-          },
+          "path": "x-pack/plugins/osquery/public/types.ts",
           "deprecated": false
         }
       ],
@@ -71,10 +62,7 @@
       "tags": [],
       "label": "OsqueryPluginSetup",
       "description": [],
-      "source": {
-        "path": "x-pack/plugins/osquery/server/types.ts",
-        "lineNumber": 19
-      },
+      "path": "x-pack/plugins/osquery/server/types.ts",
       "deprecated": false,
       "children": [],
       "lifecycle": "setup",
@@ -87,10 +75,7 @@
       "tags": [],
       "label": "OsqueryPluginStart",
       "description": [],
-      "source": {
-        "path": "x-pack/plugins/osquery/server/types.ts",
-        "lineNumber": 21
-      },
+      "path": "x-pack/plugins/osquery/server/types.ts",
       "deprecated": false,
       "children": [],
       "lifecycle": "start",
@@ -113,10 +98,7 @@
         "signature": [
           "\"/app/osquery\""
         ],
-        "source": {
-          "path": "x-pack/plugins/osquery/common/constants.ts",
-          "lineNumber": 11
-        },
+        "path": "x-pack/plugins/osquery/common/constants.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -130,10 +112,7 @@
         "signature": [
           "\"theme:darkMode\""
         ],
-        "source": {
-          "path": "x-pack/plugins/osquery/common/constants.ts",
-          "lineNumber": 9
-        },
+        "path": "x-pack/plugins/osquery/common/constants.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -147,10 +126,7 @@
         "signature": [
           "10000"
         ],
-        "source": {
-          "path": "x-pack/plugins/osquery/common/constants.ts",
-          "lineNumber": 8
-        },
+        "path": "x-pack/plugins/osquery/common/constants.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -164,10 +140,7 @@
         "signature": [
           "\"osquery_manager\""
         ],
-        "source": {
-          "path": "x-pack/plugins/osquery/common/constants.ts",
-          "lineNumber": 10
-        },
+        "path": "x-pack/plugins/osquery/common/constants.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -181,10 +154,7 @@
         "signature": [
           "\"osquery\""
         ],
-        "source": {
-          "path": "x-pack/plugins/osquery/common/index.ts",
-          "lineNumber": 10
-        },
+        "path": "x-pack/plugins/osquery/common/index.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -198,10 +168,7 @@
         "signature": [
           "\"Osquery\""
         ],
-        "source": {
-          "path": "x-pack/plugins/osquery/common/index.ts",
-          "lineNumber": 11
-        },
+        "path": "x-pack/plugins/osquery/common/index.ts",
         "deprecated": false,
         "initialIsOpen": false
       }

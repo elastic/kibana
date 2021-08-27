@@ -45,7 +45,7 @@ import { SavedObjectsType } from 'src/core/server';
 export const dashboardVisualization: SavedObjectsType = {
   name: 'dashboard_visualization', // <1>
   hidden: false,
-  namespaceType: 'single',
+  namespaceType: 'multiple-isolated', // <2>
   mappings: {
     dynamic: false,
     properties: {
@@ -66,6 +66,8 @@ export const dashboardVisualization: SavedObjectsType = {
 <1> Since the name of a Saved Object type forms part of the url path for the
 public Saved Objects HTTP API, these should follow our API URL path convention
 and always be written as snake case.
+<2> This field determines "space behavior" -- whether these objects can exist in one space, multiple spaces, or all spaces. This value means
+that objects of this type can only exist in a single space. See <<sharing-saved-objects,Sharing Saved Objects>> for more information.
 
 .src/plugins/my_plugin/server/saved_objects/index.ts
 [source,typescript]
@@ -153,6 +155,7 @@ should carefully consider the fields they add to the mappings. Similarly,
 Saved Object types should never use `dynamic: true` as this can cause an
 arbitrary amount of fields to be added to the `.kibana` index.
 
+[[saved-objects-service-writing-migrations]]
 ==== Writing Migrations
 
 Saved Objects support schema changes between Kibana versions, which we call

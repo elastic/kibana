@@ -17,11 +17,17 @@ export const wrapSequencesFactory = ({
   ruleSO: SearchAfterAndBulkCreateParams['ruleSO'];
   signalsIndex: string;
   mergeStrategy: ConfigType['alertMergeStrategy'];
-}): WrapSequences => (sequences) =>
+}): WrapSequences => (sequences, buildReasonMessage) =>
   sequences.reduce(
     (acc: WrappedSignalHit[], sequence) => [
       ...acc,
-      ...buildSignalGroupFromSequence(sequence, ruleSO, signalsIndex, mergeStrategy),
+      ...buildSignalGroupFromSequence(
+        sequence,
+        ruleSO,
+        signalsIndex,
+        mergeStrategy,
+        buildReasonMessage
+      ),
     ],
     []
   );

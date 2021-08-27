@@ -57,13 +57,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     throw new Error(`Could not find ${policyName} in policy table`);
   };
 
-  const clickPolicyActionsButton = async (policyName: string) => {
-    const actionsCell = await testSubjects.find(`policyTableCell-actions-${policyName}`);
-    const actionsButton = await actionsCell.findByTestSubject('policyActionsContextMenuButton');
-
-    await actionsButton.click();
-  };
-
   describe('Index Lifecycle Management', async () => {
     before(async () => {
       await esClient.ilm.putLifecycle({ policy: POLICY_NAME, body: POLICY_ALL_PHASES });
@@ -149,34 +142,26 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('Add policy to index template modal', async () => {
-      await clickPolicyActionsButton(POLICY_NAME);
+      const policyRow = await testSubjects.find(`policyTableRow-${POLICY_NAME}`);
+      const addPolicyButton = await policyRow.findByTestSubject('addPolicyToTemplate');
 
-      const buttonSelector = 'addPolicyToTemplate';
-
-      await retry.waitFor('ILM add policy to index template button', async () => {
-        return testSubjects.isDisplayed(buttonSelector);
-      });
-      await testSubjects.click(buttonSelector);
+      await addPolicyButton.click();
 
       await retry.waitFor('ILM add policy to index template modal to be present', async () => {
-        return testSubjects.isDisplayed('confirmModalTitleText');
+        return testSubjects.isDisplayed('addPolicyToTemplateModal');
       });
 
       await a11y.testAppSnapshot();
     });
 
     it('Delete policy modal', async () => {
-      await clickPolicyActionsButton(POLICY_NAME);
+      const policyRow = await testSubjects.find(`policyTableRow-${POLICY_NAME}`);
+      const deleteButton = await policyRow.findByTestSubject('deletePolicy');
 
-      const buttonSelector = 'deletePolicy';
-
-      await retry.waitFor('ILM delete policy button', async () => {
-        return testSubjects.isDisplayed(buttonSelector);
-      });
-      await testSubjects.click(buttonSelector);
+      await deleteButton.click();
 
       await retry.waitFor('ILM delete policy modal to be present', async () => {
-        return testSubjects.isDisplayed('confirmModalTitleText');
+        return testSubjects.isDisplayed('deletePolicyModal');
       });
 
       await a11y.testAppSnapshot();

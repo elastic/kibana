@@ -26,6 +26,7 @@ import { initialTrustedAppsPageState } from './builders';
 import { trustedAppsPageReducer } from './reducer';
 import { createTrustedAppsPageMiddleware } from './middleware';
 import { Immutable } from '../../../../../common/endpoint/types';
+import { getGeneratedPolicyResponse } from './mocks';
 
 const initialNow = 111111;
 const dateNowMock = jest.fn();
@@ -189,8 +190,10 @@ describe('middleware', () => {
       const location = createLocationState();
       const service = createTrustedAppsServiceMock();
       const { store, spyMiddleware } = createStoreSetup(service);
+      const policiesResponse = getGeneratedPolicyResponse();
 
       service.getTrustedAppsList.mockResolvedValue(createGetTrustedListAppsResponse(pagination));
+      service.getPolicyList.mockResolvedValue(policiesResponse);
 
       store.dispatch(createUserChangedUrlAction('/administration/trusted_apps'));
 
@@ -215,10 +218,15 @@ describe('middleware', () => {
       });
 
       await spyMiddleware.waitForAction('trustedAppsListResourceStateChanged');
+      await spyMiddleware.waitForAction('trustedAppsPoliciesStateChanged');
 
       expect(store.getState()).toStrictEqual({
         ...initialState,
         ...entriesExistLoadedState(),
+        policies: {
+          data: policiesResponse,
+          type: 'LoadedResourceState',
+        },
         listView: createLoadedListViewWithPagination(newNow, pagination),
         active: true,
         location,
@@ -304,9 +312,11 @@ describe('middleware', () => {
     it('submits successfully when entry is defined', async () => {
       const service = createTrustedAppsServiceMock();
       const { store, spyMiddleware } = createStoreSetup(service);
+      const policiesResponse = getGeneratedPolicyResponse();
 
       service.getTrustedAppsList.mockResolvedValue(getTrustedAppsListResponse);
       service.deleteTrustedApp.mockResolvedValue();
+      service.getPolicyList.mockResolvedValue(policiesResponse);
 
       store.dispatch(createUserChangedUrlAction('/administration/trusted_apps'));
 
@@ -335,6 +345,10 @@ describe('middleware', () => {
       expect(store.getState()).toStrictEqual({
         ...testStartState,
         ...entriesExistLoadedState(),
+        policies: {
+          data: policiesResponse,
+          type: 'LoadedResourceState',
+        },
         listView: listViewNew,
       });
       expect(service.deleteTrustedApp).toBeCalledWith({ id: '3' });
@@ -344,9 +358,11 @@ describe('middleware', () => {
     it('does not submit twice', async () => {
       const service = createTrustedAppsServiceMock();
       const { store, spyMiddleware } = createStoreSetup(service);
+      const policiesResponse = getGeneratedPolicyResponse();
 
       service.getTrustedAppsList.mockResolvedValue(getTrustedAppsListResponse);
       service.deleteTrustedApp.mockResolvedValue();
+      service.getPolicyList.mockResolvedValue(policiesResponse);
 
       store.dispatch(createUserChangedUrlAction('/administration/trusted_apps'));
 
@@ -376,6 +392,10 @@ describe('middleware', () => {
       expect(store.getState()).toStrictEqual({
         ...testStartState,
         ...entriesExistLoadedState(),
+        policies: {
+          data: policiesResponse,
+          type: 'LoadedResourceState',
+        },
         listView: listViewNew,
       });
       expect(service.deleteTrustedApp).toBeCalledWith({ id: '3' });
@@ -385,9 +405,11 @@ describe('middleware', () => {
     it('does not submit when server response with failure', async () => {
       const service = createTrustedAppsServiceMock();
       const { store, spyMiddleware } = createStoreSetup(service);
+      const policiesResponse = getGeneratedPolicyResponse();
 
       service.getTrustedAppsList.mockResolvedValue(getTrustedAppsListResponse);
       service.deleteTrustedApp.mockRejectedValue({ body: notFoundError });
+      service.getPolicyList.mockResolvedValue(policiesResponse);
 
       store.dispatch(createUserChangedUrlAction('/administration/trusted_apps'));
 
@@ -409,10 +431,15 @@ describe('middleware', () => {
       });
 
       await spyMiddleware.waitForAction('trustedAppDeletionSubmissionResourceStateChanged');
+      await spyMiddleware.waitForAction('trustedAppsPoliciesStateChanged');
 
       expect(store.getState()).toStrictEqual({
         ...testStartState,
         ...entriesExistLoadedState(),
+        policies: {
+          data: policiesResponse,
+          type: 'LoadedResourceState',
+        },
         deletionDialog: {
           entry,
           confirmed: true,

@@ -655,6 +655,136 @@ export const getPrepopulatedMemoryShellcodeException = ({
   };
 };
 
+export const getPrepopulatedBehaviorException = ({
+  listId,
+  ruleName,
+  eventCode,
+  listNamespace = 'agnostic',
+  alertEcsData,
+}: {
+  listId: string;
+  listNamespace?: NamespaceType;
+  ruleName: string;
+  eventCode: string;
+  alertEcsData: Flattened<Ecs>;
+}): ExceptionsBuilderExceptionItem => {
+  const { process } = alertEcsData;
+  const entries = filterEmptyExceptionEntries([
+    {
+      field: 'rule.id',
+      operator: 'included' as const,
+      type: 'match' as const,
+      value: alertEcsData.rule?.id ?? '',
+    },
+    {
+      field: 'process.executable.caseless',
+      operator: 'included' as const,
+      type: 'match' as const,
+      value: process?.executable ?? '',
+    },
+    {
+      field: 'process.command_line',
+      operator: 'included' as const,
+      type: 'match' as const,
+      value: process?.command_line ?? '',
+    },
+    {
+      field: 'process.parent.executable',
+      operator: 'included' as const,
+      type: 'match' as const,
+      value: process?.parent?.executable ?? '',
+    },
+    {
+      field: 'process.code_signature.subject_name',
+      operator: 'included' as const,
+      type: 'match' as const,
+      value: process?.code_signature?.subject_name ?? '',
+    },
+    {
+      field: 'file.path',
+      operator: 'included' as const,
+      type: 'match' as const,
+      value: alertEcsData.file?.path ?? '',
+    },
+    {
+      field: 'file.name',
+      operator: 'included' as const,
+      type: 'match' as const,
+      value: alertEcsData.file?.name ?? '',
+    },
+    {
+      field: 'source.ip',
+      operator: 'included' as const,
+      type: 'match' as const,
+      value: alertEcsData.source?.ip ?? '',
+    },
+    {
+      field: 'destination.ip',
+      operator: 'included' as const,
+      type: 'match' as const,
+      value: alertEcsData.destination?.ip ?? '',
+    },
+    {
+      field: 'registry.path',
+      operator: 'included' as const,
+      type: 'match' as const,
+      value: alertEcsData.registry?.path ?? '',
+    },
+    {
+      field: 'registry.value',
+      operator: 'included' as const,
+      type: 'match' as const,
+      value: alertEcsData.registry?.value ?? '',
+    },
+    {
+      field: 'registry.data.strings',
+      operator: 'included' as const,
+      type: 'match' as const,
+      value: alertEcsData.registry?.data?.strings ?? '',
+    },
+    {
+      field: 'dll.path',
+      operator: 'included' as const,
+      type: 'match' as const,
+      value: alertEcsData.dll?.path ?? '',
+    },
+    {
+      field: 'dll.code_signature.subject_name',
+      operator: 'included' as const,
+      type: 'match' as const,
+      value: alertEcsData.dll?.code_signature?.subject_name ?? '',
+    },
+    {
+      field: 'dll.pe.original_file_name',
+      operator: 'included' as const,
+      type: 'match' as const,
+      value: alertEcsData.dll?.pe?.original_file_name ?? '',
+    },
+    {
+      field: 'dns.question.name',
+      operator: 'included' as const,
+      type: 'match' as const,
+      value: alertEcsData.dns?.question?.name ?? '',
+    },
+    {
+      field: 'dns.question.type',
+      operator: 'included' as const,
+      type: 'match' as const,
+      value: alertEcsData.dns?.question?.type ?? '',
+    },
+    {
+      field: 'user.id',
+      operator: 'included' as const,
+      type: 'match' as const,
+      value: alertEcsData.user?.id ?? '',
+    },
+  ]);
+  return {
+    ...getNewExceptionItem({ listId, namespaceType: listNamespace, ruleName }),
+    entries: addIdToEntries(entries),
+  };
+};
+
 /**
  * Determines whether or not any entries within the given exceptionItems contain values not in the specified ECS mapping
  */
@@ -697,6 +827,15 @@ export const defaultEndpointExceptionItems = (
   const eventCode = alertEvent?.code ?? '';
 
   switch (eventCode) {
+    case 'behavior':
+      return [
+        getPrepopulatedBehaviorException({
+          listId,
+          ruleName,
+          eventCode,
+          alertEcsData,
+        }),
+      ];
     case 'memory_signature':
       return [
         getPrepopulatedMemorySignatureException({

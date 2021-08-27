@@ -5,12 +5,18 @@
  * 2.0.
  */
 
-import React, { useEffect, useRef } from 'react';
+import { EuiContextMenuItem, EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
+import copy from 'copy-to-clipboard';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
+
 import { stopPropagationAndPreventDefault } from '../../../../common';
 import { WithCopyToClipboard } from '../../clipboard/with_copy_to_clipboard';
 import { HoverActionComponentProps } from './types';
 import { COPY_TO_CLIPBOARD_BUTTON_CLASS_NAME } from '../../clipboard';
+import { useAppToasts } from '../../../hooks/use_app_toasts';
+import { COPY_TO_CLIPBOARD } from '../../t_grid/body/translations';
+import { SUCCESS_TOAST_TITLE } from '../../clipboard/translations';
 
 export const FIELD = i18n.translate('xpack.timelines.hoverActions.fieldLabel', {
   defaultMessage: 'Field',
@@ -19,11 +25,14 @@ export const FIELD = i18n.translate('xpack.timelines.hoverActions.fieldLabel', {
 export const COPY_TO_CLIPBOARD_KEYBOARD_SHORTCUT = 'c';
 
 export interface CopyProps extends HoverActionComponentProps {
+  /** `Component` is only used with `EuiDataGrid`; the grid keeps a reference to `Component` for show / hide functionality */
+  Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon | typeof EuiContextMenuItem;
   isHoverAction?: boolean;
 }
 
 const CopyButton: React.FC<CopyProps> = React.memo(
-  ({ closePopOver, field, isHoverAction, keyboardEvent, ownFocus, value }) => {
+  ({ Component, field, isHoverAction, onClick, keyboardEvent, ownFocus, value }) => {
+    const { addSuccess } = useAppToasts();
     const panelRef = useRef<HTMLDivElement | null>(null);
     useEffect(() => {
       if (!ownFocus) {
@@ -37,18 +46,43 @@ const CopyButton: React.FC<CopyProps> = React.memo(
         if (copyToClipboardButton != null) {
           copyToClipboardButton.click();
         }
-        if (closePopOver != null) {
-          closePopOver();
+        if (onClick != null) {
+          onClick();
         }
       }
-    }, [closePopOver, keyboardEvent, ownFocus]);
-    return (
+    }, [onClick, keyboardEvent, ownFocus]);
+
+    const text = useMemo(() => `${field}${value != null ? `: "${value}"` : ''}`, [field, value]);
+
+    const handleOnClick = useCallback(() => {
+      const isSuccess = copy(text, { debug: true });
+      if (onClick != null) {
+        onClick();
+      }
+
+      if (isSuccess) {
+        addSuccess(SUCCESS_TOAST_TITLE(field), { toastLifeTimeMs: 800 });
+      }
+    }, [addSuccess, field, onClick, text]);
+
+    return Component ? (
+      <Component
+        aria-label={COPY_TO_CLIPBOARD}
+        data-test-subj="copy-to-clipboard"
+        icon="copyClipboard"
+        iconType="copyClipboard"
+        onClick={handleOnClick}
+        title={COPY_TO_CLIPBOARD}
+      >
+        {COPY_TO_CLIPBOARD}
+      </Component>
+    ) : (
       <div ref={panelRef}>
         <WithCopyToClipboard
           data-test-subj="copy-to-clipboard"
           isHoverAction={isHoverAction}
           keyboardShortcut={ownFocus ? COPY_TO_CLIPBOARD_KEYBOARD_SHORTCUT : ''}
-          text={`${field}${value != null ? `: "${value}"` : ''}`}
+          text={text}
           titleSummary={FIELD}
         />
       </div>

@@ -34,6 +34,7 @@ exports[`Storyshots Home/Components/Empty Prompt Empty Prompt 1`] = `
         </h2>
         <span
           className="euiTextColor euiTextColor--subdued"
+          style={Object {}}
         >
           <div
             className="euiSpacer euiSpacer--m"

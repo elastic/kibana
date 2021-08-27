@@ -1,14 +1,7 @@
 {
   "extends": "../../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./target",
-    "skipLibCheck": true,
-    "types": [
-      "node",
-      "jest",
-      "react",
-      "@emotion/react/types/css-prop"
-    ]
+    "outDir": "./target/types"
   },
   "include": [
     "index.ts",
@@ -18,6 +11,9 @@
   ],
   "exclude": [],
   "references": [
-    { "path": "../../../../src/core/tsconfig.json" }
+    { "path": "../../../../src/core/tsconfig.json" },
+    { "path": "../../../../src/plugins/data/tsconfig.json" },
+    { "path": "../../../../src/plugins/visualizations/tsconfig.json" },
+    { "path": "../../../../src/plugins/expressions/tsconfig.json" },
   ]
 }

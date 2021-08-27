@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import { SearchResponse } from 'elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import { HostMetadata } from '../../../../../common/endpoint/types';
 
-export function createV2SearchResponse(hostMetadata?: HostMetadata): SearchResponse<HostMetadata> {
+export function createV2SearchResponse(
+  hostMetadata?: HostMetadata
+): estypes.SearchResponse<HostMetadata> {
   return ({
     took: 15,
     timed_out: false,
@@ -38,5 +40,5 @@ export function createV2SearchResponse(hostMetadata?: HostMetadata): SearchRespo
           ]
         : [],
     },
-  } as unknown) as SearchResponse<HostMetadata>;
+  } as unknown) as estypes.SearchResponse<HostMetadata>;
 }

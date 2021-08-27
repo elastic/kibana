@@ -4,10 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ConfigKeys, DataStream, ICustomFields, Validation, ScheduleUnit } from './types';
+import {
+  ConfigKeys,
+  DataStream,
+  ICustomFields,
+  Validator,
+  Validation,
+  ScheduleUnit,
+} from './types';
 
 export const digitsOnly = /^[0-9]*$/g;
 export const includesValidPort = /[^\:]+:[0-9]{1,5}$/g;
+
+type ValidationLibrary = Record<string, Validator>;
 
 // returns true if invalid
 function validateHeaders<T>(headers: T): boolean {
@@ -22,7 +31,7 @@ function validateHeaders<T>(headers: T): boolean {
 }
 
 // returns true if invalid
-function validateTimeout({
+const validateTimeout = ({
   scheduleNumber,
   scheduleUnit,
   timeout,
@@ -30,7 +39,7 @@ function validateTimeout({
   scheduleNumber: string;
   scheduleUnit: ScheduleUnit;
   timeout: string;
-}): boolean {
+}): boolean => {
   let schedule: number;
   switch (scheduleUnit) {
     case ScheduleUnit.SECONDS:
@@ -44,63 +53,76 @@ function validateTimeout({
   }
 
   return parseFloat(timeout) > schedule;
-}
+};
 
 // validation functions return true when invalid
-const validateCommon = {
-  [ConfigKeys.SCHEDULE]: (value: unknown) => {
+const validateCommon: ValidationLibrary = {
+  [ConfigKeys.SCHEDULE]: ({ [ConfigKeys.SCHEDULE]: value }) => {
     const { number, unit } = value as ICustomFields[ConfigKeys.SCHEDULE];
     const parsedFloat = parseFloat(number);
     return !parsedFloat || !unit || parsedFloat < 1;
   },
-  [ConfigKeys.TIMEOUT]: (
-    timeoutValue: unknown,
-    scheduleNumber: string,
-    scheduleUnit: ScheduleUnit
-  ) =>
-    !timeoutValue ||
-    parseFloat(timeoutValue as ICustomFields[ConfigKeys.TIMEOUT]) < 0 ||
-    validateTimeout({
-      timeout: timeoutValue as ICustomFields[ConfigKeys.TIMEOUT],
-      scheduleNumber,
-      scheduleUnit,
-    }),
+  [ConfigKeys.TIMEOUT]: ({ [ConfigKeys.TIMEOUT]: timeout, [ConfigKeys.SCHEDULE]: schedule }) => {
+    const { number, unit } = schedule as ICustomFields[ConfigKeys.SCHEDULE];
+
+    return (
+      !timeout ||
+      parseFloat(timeout) < 0 ||
+      validateTimeout({
+        timeout,
+        scheduleNumber: number,
+        scheduleUnit: unit,
+      })
+    );
+  },
 };
 
-const validateHTTP = {
-  [ConfigKeys.RESPONSE_STATUS_CHECK]: (value: unknown) => {
+const validateHTTP: ValidationLibrary = {
+  [ConfigKeys.RESPONSE_STATUS_CHECK]: ({ [ConfigKeys.RESPONSE_STATUS_CHECK]: value }) => {
     const statusCodes = value as ICustomFields[ConfigKeys.RESPONSE_STATUS_CHECK];
     return statusCodes.length ? statusCodes.some((code) => !`${code}`.match(digitsOnly)) : false;
   },
-  [ConfigKeys.RESPONSE_HEADERS_CHECK]: (value: unknown) => {
+  [ConfigKeys.RESPONSE_HEADERS_CHECK]: ({ [ConfigKeys.RESPONSE_HEADERS_CHECK]: value }) => {
     const headers = value as ICustomFields[ConfigKeys.RESPONSE_HEADERS_CHECK];
     return validateHeaders<ICustomFields[ConfigKeys.RESPONSE_HEADERS_CHECK]>(headers);
   },
-  [ConfigKeys.REQUEST_HEADERS_CHECK]: (value: unknown) => {
+  [ConfigKeys.REQUEST_HEADERS_CHECK]: ({ [ConfigKeys.REQUEST_HEADERS_CHECK]: value }) => {
     const headers = value as ICustomFields[ConfigKeys.REQUEST_HEADERS_CHECK];
     return validateHeaders<ICustomFields[ConfigKeys.REQUEST_HEADERS_CHECK]>(headers);
   },
-  [ConfigKeys.MAX_REDIRECTS]: (value: unknown) =>
+  [ConfigKeys.MAX_REDIRECTS]: ({ [ConfigKeys.MAX_REDIRECTS]: value }) =>
     (!!value && !`${value}`.match(digitsOnly)) ||
     parseFloat(value as ICustomFields[ConfigKeys.MAX_REDIRECTS]) < 0,
-  [ConfigKeys.URLS]: (value: unknown) => !value,
+  [ConfigKeys.URLS]: ({ [ConfigKeys.URLS]: value }) => !value,
   ...validateCommon,
 };
 
-const validateTCP = {
-  [ConfigKeys.HOSTS]: (value: unknown) => {
+const validateTCP: Record<string, Validator> = {
+  [ConfigKeys.HOSTS]: ({ [ConfigKeys.HOSTS]: value }) => {
     return !value || !`${value}`.match(includesValidPort);
   },
   ...validateCommon,
 };
 
-const validateICMP = {
-  [ConfigKeys.HOSTS]: (value: unknown) => !value,
-  [ConfigKeys.WAIT]: (value: unknown) =>
+const validateICMP: ValidationLibrary = {
+  [ConfigKeys.HOSTS]: ({ [ConfigKeys.HOSTS]: value }) => !value,
+  [ConfigKeys.WAIT]: ({ [ConfigKeys.WAIT]: value }) =>
     !!value &&
     !digitsOnly.test(`${value}`) &&
     parseFloat(value as ICustomFields[ConfigKeys.WAIT]) < 0,
   ...validateCommon,
+};
+
+const validateBrowser: ValidationLibrary = {
+  ...validateCommon,
+  [ConfigKeys.SOURCE_ZIP_URL]: ({
+    [ConfigKeys.SOURCE_ZIP_URL]: zipUrl,
+    [ConfigKeys.SOURCE_INLINE]: inlineScript,
+  }) => !zipUrl && !inlineScript,
+  [ConfigKeys.SOURCE_INLINE]: ({
+    [ConfigKeys.SOURCE_ZIP_URL]: zipUrl,
+    [ConfigKeys.SOURCE_INLINE]: inlineScript,
+  }) => !zipUrl && !inlineScript,
 };
 
 export type ValidateDictionary = Record<DataStream, Validation>;
@@ -109,4 +131,5 @@ export const validate: ValidateDictionary = {
   [DataStream.HTTP]: validateHTTP,
   [DataStream.TCP]: validateTCP,
   [DataStream.ICMP]: validateICMP,
+  [DataStream.BROWSER]: validateBrowser,
 };

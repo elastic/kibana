@@ -19,6 +19,7 @@ import {
   ICustomClusterClient,
 } from '../../../core/server';
 import {
+  getTelemetryChannelEndpoint,
   getTelemetryOptIn,
   getTelemetrySendUsageFrom,
   getTelemetryFailureDetails,
@@ -139,7 +140,10 @@ export class FetcherTask {
     const configTelemetrySendUsageFrom = config.sendUsageFrom;
     const allowChangingOptInStatus = config.allowChangingOptInStatus;
     const configTelemetryOptIn = typeof config.optIn === 'undefined' ? null : config.optIn;
-    const telemetryUrl = config.url;
+    const telemetryUrl = getTelemetryChannelEndpoint({
+      channelName: 'main',
+      env: config.sendUsageTo,
+    });
     const { failureCount, failureVersion } = getTelemetryFailureDetails({
       telemetrySavedObject,
     });
@@ -208,17 +212,17 @@ export class FetcherTask {
     });
   }
 
-  private async sendTelemetry(url: string, cluster: string): Promise<void> {
+  private async sendTelemetry(telemetryUrl: string, cluster: string): Promise<void> {
     this.logger.debug(`Sending usage stats.`);
     /**
      * send OPTIONS before sending usage data.
      * OPTIONS is less intrusive as it does not contain any payload and is used here to check if the endpoint is reachable.
      */
-    await fetch(url, {
+    await fetch(telemetryUrl, {
       method: 'options',
     });
 
-    await fetch(url, {
+    await fetch(telemetryUrl, {
       method: 'post',
       body: cluster,
       headers: { 'X-Elastic-Stack-Version': this.currentKibanaVersion },

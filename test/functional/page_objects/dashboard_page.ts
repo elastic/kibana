@@ -228,9 +228,13 @@ export class DashboardPageObject extends FtrService {
 
    */
   public async expectToolbarPaginationDisplayed() {
-    const isLegacyDefault = this.discover.useLegacyTable();
+    const isLegacyDefault = await this.discover.useLegacyTable();
     if (isLegacyDefault) {
-      const subjects = ['btnPrevPage', 'btnNextPage', 'toolBarPagerText'];
+      const subjects = [
+        'pagination-button-previous',
+        'pagination-button-next',
+        'toolBarTotalDocsText',
+      ];
       await Promise.all(subjects.map(async (subj) => await this.testSubjects.existOrFail(subj)));
     } else {
       const subjects = ['pagination-button-previous', 'pagination-button-next'];
@@ -532,7 +536,6 @@ export class DashboardPageObject extends FtrService {
       { name: AREA_CHART_VIS_NAME, description: 'AreaChart' },
       { name: 'Visualization☺漢字 DataTable', description: 'DataTable' },
       { name: LINE_CHART_VIS_NAME, description: 'LineChart' },
-      { name: 'Visualization TileMap', description: 'TileMap' },
       { name: 'Visualization MetricChart', description: 'MetricChart' },
     ];
   }

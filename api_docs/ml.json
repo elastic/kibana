@@ -29,10 +29,7 @@
           "MlLocatorParams",
           ">"
         ],
-        "source": {
-          "path": "x-pack/plugins/ml/public/locator/ml_locator.ts",
-          "lineNumber": 32
-        },
+        "path": "x-pack/plugins/ml/public/locator/ml_locator.ts",
         "deprecated": false,
         "children": [
           {
@@ -45,10 +42,7 @@
             "signature": [
               "\"ML_APP_LOCATOR\""
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/public/locator/ml_locator.ts",
-              "lineNumber": 33
-            },
+            "path": "x-pack/plugins/ml/public/locator/ml_locator.ts",
             "deprecated": false
           },
           {
@@ -65,10 +59,7 @@
               "KibanaLocation",
               "<object>>"
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/public/locator/ml_locator.ts",
-              "lineNumber": 35
-            },
+            "path": "x-pack/plugins/ml/public/locator/ml_locator.ts",
             "deprecated": false,
             "children": [
               {
@@ -81,10 +72,7 @@
                 "signature": [
                   "MlLocatorParams"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/ml/public/locator/ml_locator.ts",
-                  "lineNumber": 35
-                },
+                "path": "x-pack/plugins/ml/public/locator/ml_locator.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -108,10 +96,7 @@
         "signature": [
           "(score: number) => string"
         ],
-        "source": {
-          "path": "x-pack/plugins/ml/common/util/anomaly_utils.ts",
-          "lineNumber": 124
-        },
+        "path": "x-pack/plugins/ml/common/util/anomaly_utils.ts",
         "deprecated": false,
         "children": [
           {
@@ -124,10 +109,7 @@
             "signature": [
               "number"
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/common/util/anomaly_utils.ts",
-              "lineNumber": 124
-            },
+            "path": "x-pack/plugins/ml/common/util/anomaly_utils.ts",
             "deprecated": false,
             "isRequired": true
           }
@@ -147,10 +129,7 @@
           "x-pack/plugins/ml/public/shared",
           ">"
         ],
-        "source": {
-          "path": "x-pack/plugins/ml/public/index.ts",
-          "lineNumber": 61
-        },
+        "path": "x-pack/plugins/ml/public/index.ts",
         "deprecated": false,
         "children": [],
         "returnComment": [],
@@ -167,10 +146,7 @@
           "(normalizedScore: number) => ",
           "SeverityType"
         ],
-        "source": {
-          "path": "x-pack/plugins/ml/common/util/anomaly_utils.ts",
-          "lineNumber": 130
-        },
+        "path": "x-pack/plugins/ml/common/util/anomaly_utils.ts",
         "deprecated": false,
         "children": [
           {
@@ -183,10 +159,7 @@
             "signature": [
               "number"
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/common/util/anomaly_utils.ts",
-              "lineNumber": 130
-            },
+            "path": "x-pack/plugins/ml/common/util/anomaly_utils.ts",
             "deprecated": false,
             "isRequired": true
           }
@@ -204,10 +177,7 @@
         "signature": [
           "(normalizedScore: number) => string"
         ],
-        "source": {
-          "path": "x-pack/plugins/ml/common/util/anomaly_utils.ts",
-          "lineNumber": 185
-        },
+        "path": "x-pack/plugins/ml/common/util/anomaly_utils.ts",
         "deprecated": false,
         "children": [
           {
@@ -220,10 +190,7 @@
             "signature": [
               "number"
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/common/util/anomaly_utils.ts",
-              "lineNumber": 185
-            },
+            "path": "x-pack/plugins/ml/common/util/anomaly_utils.ts",
             "deprecated": false,
             "isRequired": true
           }
@@ -248,10 +215,7 @@
             "text": "ANOMALY_SEVERITY"
           }
         ],
-        "source": {
-          "path": "x-pack/plugins/ml/common/util/anomaly_utils.ts",
-          "lineNumber": 146
-        },
+        "path": "x-pack/plugins/ml/common/util/anomaly_utils.ts",
         "deprecated": false,
         "children": [
           {
@@ -264,10 +228,7 @@
             "signature": [
               "number"
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/common/util/anomaly_utils.ts",
-              "lineNumber": 146
-            },
+            "path": "x-pack/plugins/ml/common/util/anomaly_utils.ts",
             "deprecated": false,
             "isRequired": true
           }
@@ -291,10 +252,7 @@
           "MlLocatorParams",
           ") => string"
         ],
-        "source": {
-          "path": "x-pack/plugins/ml/public/locator/use_ml_href.ts",
-          "lineNumber": 15
-        },
+        "path": "x-pack/plugins/ml/public/locator/use_ml_href.ts",
         "deprecated": false,
         "children": [
           {
@@ -309,10 +267,7 @@
               "MlLocator",
               " | undefined; } | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/public/locator/use_ml_href.ts",
-              "lineNumber": 16
-            },
+            "path": "x-pack/plugins/ml/public/locator/use_ml_href.ts",
             "deprecated": false,
             "isRequired": false
           },
@@ -326,10 +281,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/public/locator/use_ml_href.ts",
-              "lineNumber": 17
-            },
+            "path": "x-pack/plugins/ml/public/locator/use_ml_href.ts",
             "deprecated": false,
             "isRequired": false
           },
@@ -343,10 +295,7 @@
             "signature": [
               "MlLocatorParams"
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/public/locator/use_ml_href.ts",
-              "lineNumber": 18
-            },
+            "path": "x-pack/plugins/ml/public/locator/use_ml_href.ts",
             "deprecated": false,
             "isRequired": true
           }
@@ -363,10 +312,7 @@
         "tags": [],
         "label": "AnomaliesTableRecord",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-          "lineNumber": 45
-        },
+        "path": "x-pack/plugins/ml/common/types/anomalies.ts",
         "deprecated": false,
         "children": [
           {
@@ -376,10 +322,7 @@
             "tags": [],
             "label": "time",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 46
-            },
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
             "deprecated": false
           },
           {
@@ -392,10 +335,7 @@
             "signature": [
               "AnomalyRecordDoc"
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 47
-            },
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
             "deprecated": false
           },
           {
@@ -405,10 +345,7 @@
             "tags": [],
             "label": "rowId",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 48
-            },
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
             "deprecated": false
           },
           {
@@ -418,10 +355,7 @@
             "tags": [],
             "label": "jobId",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 49
-            },
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
             "deprecated": false
           },
           {
@@ -431,10 +365,7 @@
             "tags": [],
             "label": "detectorIndex",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 50
-            },
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
             "deprecated": false
           },
           {
@@ -444,10 +375,7 @@
             "tags": [],
             "label": "severity",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 51
-            },
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
             "deprecated": false
           },
           {
@@ -460,10 +388,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 52
-            },
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
             "deprecated": false
           },
           {
@@ -476,10 +401,7 @@
             "signature": [
               "any"
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 53
-            },
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
             "deprecated": false
           },
           {
@@ -492,10 +414,7 @@
             "signature": [
               "{ [key: string]: any; }[] | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 54
-            },
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
             "deprecated": false
           },
           {
@@ -508,10 +427,7 @@
             "signature": [
               "number[] | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 55
-            },
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
             "deprecated": false
           },
           {
@@ -524,10 +440,7 @@
             "signature": [
               "any"
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 56
-            },
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
             "deprecated": false
           },
           {
@@ -540,10 +453,7 @@
             "signature": [
               "number[] | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 57
-            },
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
             "deprecated": false
           },
           {
@@ -556,10 +466,7 @@
             "signature": [
               "any"
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 58
-            },
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
             "deprecated": false
           },
           {
@@ -572,10 +479,7 @@
             "signature": [
               "number | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 59
-            },
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
             "deprecated": false
           }
         ],
@@ -588,10 +492,7 @@
         "tags": [],
         "label": "DataRecognizerConfigResponse",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/ml/common/types/modules.ts",
-          "lineNumber": 93
-        },
+        "path": "x-pack/plugins/ml/common/types/modules.ts",
         "deprecated": false,
         "children": [
           {
@@ -605,10 +506,7 @@
               "DatafeedResponse",
               "[]"
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/modules.ts",
-              "lineNumber": 94
-            },
+            "path": "x-pack/plugins/ml/common/types/modules.ts",
             "deprecated": false
           },
           {
@@ -622,10 +520,7 @@
               "JobResponse",
               "[]"
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/modules.ts",
-              "lineNumber": 95
-            },
+            "path": "x-pack/plugins/ml/common/types/modules.ts",
             "deprecated": false
           },
           {
@@ -644,10 +539,7 @@
               "KibanaObjectResponse",
               "[]; }"
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/modules.ts",
-              "lineNumber": 96
-            },
+            "path": "x-pack/plugins/ml/common/types/modules.ts",
             "deprecated": false
           }
         ],
@@ -660,10 +552,7 @@
         "tags": [],
         "label": "Influencer",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-          "lineNumber": 10
-        },
+        "path": "x-pack/plugins/ml/common/types/anomalies.ts",
         "deprecated": false,
         "children": [
           {
@@ -673,10 +562,7 @@
             "tags": [],
             "label": "influencer_field_name",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 11
-            },
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
             "deprecated": false
           },
           {
@@ -689,10 +575,7 @@
             "signature": [
               "string[]"
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 12
-            },
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
             "deprecated": false
           }
         ],
@@ -705,10 +588,7 @@
         "tags": [],
         "label": "JobExistResult",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/ml/common/types/data_recognizer.ts",
-          "lineNumber": 15
-        },
+        "path": "x-pack/plugins/ml/common/types/data_recognizer.ts",
         "deprecated": false,
         "children": [
           {
@@ -718,10 +598,7 @@
             "tags": [],
             "label": "jobsExist",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/data_recognizer.ts",
-              "lineNumber": 16
-            },
+            "path": "x-pack/plugins/ml/common/types/data_recognizer.ts",
             "deprecated": false
           },
           {
@@ -735,10 +612,7 @@
               "JobStat",
               "[]"
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/data_recognizer.ts",
-              "lineNumber": 17
-            },
+            "path": "x-pack/plugins/ml/common/types/data_recognizer.ts",
             "deprecated": false
           }
         ],
@@ -751,10 +625,7 @@
         "tags": [],
         "label": "JobStat",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/ml/common/types/data_recognizer.ts",
-          "lineNumber": 8
-        },
+        "path": "x-pack/plugins/ml/common/types/data_recognizer.ts",
         "deprecated": false,
         "children": [
           {
@@ -764,10 +635,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/data_recognizer.ts",
-              "lineNumber": 9
-            },
+            "path": "x-pack/plugins/ml/common/types/data_recognizer.ts",
             "deprecated": false
           },
           {
@@ -777,10 +645,7 @@
             "tags": [],
             "label": "earliestTimestampMs",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/data_recognizer.ts",
-              "lineNumber": 10
-            },
+            "path": "x-pack/plugins/ml/common/types/data_recognizer.ts",
             "deprecated": false
           },
           {
@@ -790,10 +655,7 @@
             "tags": [],
             "label": "latestTimestampMs",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/data_recognizer.ts",
-              "lineNumber": 11
-            },
+            "path": "x-pack/plugins/ml/common/types/data_recognizer.ts",
             "deprecated": false
           },
           {
@@ -806,10 +668,7 @@
             "signature": [
               "number | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/data_recognizer.ts",
-              "lineNumber": 12
-            },
+            "path": "x-pack/plugins/ml/common/types/data_recognizer.ts",
             "deprecated": false
           }
         ],
@@ -822,10 +681,7 @@
         "tags": [],
         "label": "MlCapabilitiesResponse",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/ml/common/types/capabilities.ts",
-          "lineNumber": 157
-        },
+        "path": "x-pack/plugins/ml/common/types/capabilities.ts",
         "deprecated": false,
         "children": [
           {
@@ -836,12 +692,9 @@
             "label": "capabilities",
             "description": [],
             "signature": [
-              "{ canAccessML: boolean; canGetJobs: boolean; canGetDatafeeds: boolean; canGetCalendars: boolean; canFindFileStructure: boolean; canGetDataFrameAnalytics: boolean; canGetAnnotations: boolean; canCreateAnnotation: boolean; canDeleteAnnotation: boolean; canUseMlAlerts: boolean; } & { canCreateJob: boolean; canDeleteJob: boolean; canOpenJob: boolean; canCloseJob: boolean; canUpdateJob: boolean; canForecastJob: boolean; canCreateDatafeed: boolean; canDeleteDatafeed: boolean; canStartStopDatafeed: boolean; canUpdateDatafeed: boolean; canPreviewDatafeed: boolean; canGetFilters: boolean; canCreateCalendar: boolean; canDeleteCalendar: boolean; canCreateFilter: boolean; canDeleteFilter: boolean; canCreateDataFrameAnalytics: boolean; canDeleteDataFrameAnalytics: boolean; canStartStopDataFrameAnalytics: boolean; canCreateMlAlerts: boolean; canUseMlAlerts: boolean; }"
+              "{ canAccessML: boolean; canGetJobs: boolean; canGetDatafeeds: boolean; canGetCalendars: boolean; canFindFileStructure: boolean; canGetDataFrameAnalytics: boolean; canGetAnnotations: boolean; canCreateAnnotation: boolean; canDeleteAnnotation: boolean; canUseMlAlerts: boolean; } & { canCreateJob: boolean; canDeleteJob: boolean; canOpenJob: boolean; canCloseJob: boolean; canResetJob: boolean; canUpdateJob: boolean; canForecastJob: boolean; canCreateDatafeed: boolean; canDeleteDatafeed: boolean; canStartStopDatafeed: boolean; canUpdateDatafeed: boolean; canPreviewDatafeed: boolean; canGetFilters: boolean; canCreateCalendar: boolean; canDeleteCalendar: boolean; canCreateFilter: boolean; canDeleteFilter: boolean; canCreateDataFrameAnalytics: boolean; canDeleteDataFrameAnalytics: boolean; canStartStopDataFrameAnalytics: boolean; canCreateMlAlerts: boolean; canUseMlAlerts: boolean; }"
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/capabilities.ts",
-              "lineNumber": 158
-            },
+            "path": "x-pack/plugins/ml/common/types/capabilities.ts",
             "deprecated": false
           },
           {
@@ -851,10 +704,7 @@
             "tags": [],
             "label": "upgradeInProgress",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/capabilities.ts",
-              "lineNumber": 159
-            },
+            "path": "x-pack/plugins/ml/common/types/capabilities.ts",
             "deprecated": false
           },
           {
@@ -864,10 +714,7 @@
             "tags": [],
             "label": "isPlatinumOrTrialLicense",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/capabilities.ts",
-              "lineNumber": 160
-            },
+            "path": "x-pack/plugins/ml/common/types/capabilities.ts",
             "deprecated": false
           },
           {
@@ -877,10 +724,7 @@
             "tags": [],
             "label": "mlFeatureEnabledInSpace",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/capabilities.ts",
-              "lineNumber": 161
-            },
+            "path": "x-pack/plugins/ml/common/types/capabilities.ts",
             "deprecated": false
           }
         ],
@@ -893,10 +737,7 @@
         "tags": [],
         "label": "MlSummaryJob",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-          "lineNumber": 15
-        },
+        "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
         "deprecated": false,
         "children": [
           {
@@ -906,10 +747,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-              "lineNumber": 16
-            },
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false
           },
           {
@@ -919,10 +757,7 @@
             "tags": [],
             "label": "description",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-              "lineNumber": 17
-            },
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false
           },
           {
@@ -935,10 +770,7 @@
             "signature": [
               "string[]"
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-              "lineNumber": 18
-            },
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false
           },
           {
@@ -951,10 +783,7 @@
             "signature": [
               "number | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-              "lineNumber": 19
-            },
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false
           },
           {
@@ -967,10 +796,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-              "lineNumber": 20
-            },
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false
           },
           {
@@ -980,10 +806,7 @@
             "tags": [],
             "label": "jobState",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-              "lineNumber": 21
-            },
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false
           },
           {
@@ -996,10 +819,7 @@
             "signature": [
               "string[]"
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-              "lineNumber": 22
-            },
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false
           },
           {
@@ -1009,10 +829,7 @@
             "tags": [],
             "label": "hasDatafeed",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-              "lineNumber": 23
-            },
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false
           },
           {
@@ -1022,10 +839,7 @@
             "tags": [],
             "label": "datafeedId",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-              "lineNumber": 24
-            },
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false
           },
           {
@@ -1035,10 +849,7 @@
             "tags": [],
             "label": "datafeedState",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-              "lineNumber": 25
-            },
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false
           },
           {
@@ -1051,10 +862,7 @@
             "signature": [
               "number | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-              "lineNumber": 26
-            },
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false
           },
           {
@@ -1067,10 +875,7 @@
             "signature": [
               "number | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-              "lineNumber": 27
-            },
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false
           },
           {
@@ -1083,10 +888,7 @@
             "signature": [
               "number | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-              "lineNumber": 28
-            },
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false
           },
           {
@@ -1100,10 +902,7 @@
               "CombinedJob",
               " | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-              "lineNumber": 29
-            },
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false
           },
           {
@@ -1116,10 +915,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-              "lineNumber": 30
-            },
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false
           },
           {
@@ -1134,10 +930,7 @@
               "AuditMessage",
               "> | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-              "lineNumber": 31
-            },
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false
           },
           {
@@ -1147,10 +940,7 @@
             "tags": [],
             "label": "isSingleMetricViewerJob",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-              "lineNumber": 32
-            },
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false
           },
           {
@@ -1163,26 +953,21 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-              "lineNumber": 33
-            },
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false
           },
           {
             "parentPluginId": "ml",
-            "id": "def-public.MlSummaryJob.deleting",
-            "type": "CompoundType",
+            "id": "def-public.MlSummaryJob.blocked",
+            "type": "Object",
             "tags": [],
-            "label": "deleting",
+            "label": "blocked",
             "description": [],
             "signature": [
-              "boolean | undefined"
+              "MlJobBlocked",
+              " | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-              "lineNumber": 34
-            },
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false
           },
           {
@@ -1195,10 +980,7 @@
             "signature": [
               "number | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-              "lineNumber": 35
-            },
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false
           },
           {
@@ -1211,10 +993,7 @@
             "signature": [
               "number | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-              "lineNumber": 36
-            },
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false
           },
           {
@@ -1224,10 +1003,7 @@
             "tags": [],
             "label": "awaitingNodeAssignment",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-              "lineNumber": 37
-            },
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false
           },
           {
@@ -1250,10 +1026,7 @@
               "MlAnomalyDetectionAlertParams",
               ">, \"enabled\" | \"id\" | \"name\" | \"params\" | \"actions\" | \"throttle\" | \"tags\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"notifyWhen\" | \"muteAll\" | \"mutedInstanceIds\" | \"executionStatus\">[] | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-              "lineNumber": 38
-            },
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false
           },
           {
@@ -1266,10 +1039,7 @@
             "signature": [
               "{ [x: string]: string; }"
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-              "lineNumber": 39
-            },
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false
           }
         ],
@@ -1294,10 +1064,7 @@
           "UseDataGridReturnType",
           ", \"status\" | \"rowCount\" | \"errorMessage\" | \"baseline\" | \"chartsVisible\" | \"chartsButtonVisible\" | \"ccsWarning\" | \"columnsWithCharts\" | \"invalidSortingColumnns\" | \"noDataMessage\" | \"onChangeItemsPerPage\" | \"onChangePage\" | \"onSort\" | \"pagination\" | \"setPagination\" | \"setVisibleColumns\" | \"rowCountRelation\" | \"sortingColumns\" | \"tableItems\" | \"toggleChartVisibility\" | \"visibleColumns\" | \"predictionFieldName\" | \"resultsField\">"
         ],
-        "source": {
-          "path": "x-pack/plugins/ml/public/application/components/data_grid/types.ts",
-          "lineNumber": 57
-        },
+        "path": "x-pack/plugins/ml/public/application/components/data_grid/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -1312,10 +1079,7 @@
               "CommonProps",
               " & React.HTMLAttributes<HTMLDivElement>) => void; }) => any"
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/public/application/components/data_grid/types.ts",
-              "lineNumber": 84
-            },
+            "path": "x-pack/plugins/ml/public/application/components/data_grid/types.ts",
             "deprecated": false,
             "returnComment": [],
             "children": [
@@ -1331,10 +1095,7 @@
                   "CommonProps",
                   " & React.HTMLAttributes<HTMLDivElement>) => void; }"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/ml/public/application/components/data_grid/types.ts",
-                  "lineNumber": 43
-                },
+                "path": "x-pack/plugins/ml/public/application/components/data_grid/types.ts",
                 "deprecated": false
               }
             ]
@@ -1349,10 +1110,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/public/application/components/data_grid/types.ts",
-              "lineNumber": 85
-            },
+            "path": "x-pack/plugins/ml/public/application/components/data_grid/types.ts",
             "deprecated": false
           }
         ],
@@ -1367,10 +1125,7 @@
         "tags": [],
         "label": "ANOMALY_SEVERITY",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/ml/common/constants/anomalies.ts",
-          "lineNumber": 8
-        },
+        "path": "x-pack/plugins/ml/common/constants/anomalies.ts",
         "deprecated": false,
         "initialIsOpen": false
       }
@@ -1386,10 +1141,7 @@
         "signature": [
           "\"ml_anomaly_swimlane\""
         ],
-        "source": {
-          "path": "x-pack/plugins/ml/public/embeddables/constants.ts",
-          "lineNumber": 8
-        },
+        "path": "x-pack/plugins/ml/public/embeddables/constants.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -1411,10 +1163,7 @@
           " & ",
           "AnomalySwimlaneEmbeddableCustomInput"
         ],
-        "source": {
-          "path": "x-pack/plugins/ml/public/embeddables/types.ts",
-          "lineNumber": 45
-        },
+        "path": "x-pack/plugins/ml/public/embeddables/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -1428,10 +1177,7 @@
         "signature": [
           "\"anomaly-swim-lane\""
         ],
-        "source": {
-          "path": "x-pack/plugins/ml/public/ui_actions/constants.ts",
-          "lineNumber": 8
-        },
+        "path": "x-pack/plugins/ml/public/ui_actions/constants.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -1446,10 +1192,7 @@
           "Dictionary",
           "<{ order: \"asc\" | \"desc\"; }>"
         ],
-        "source": {
-          "path": "x-pack/plugins/ml/public/application/components/data_grid/types.ts",
-          "lineNumber": 53
-        },
+        "path": "x-pack/plugins/ml/public/application/components/data_grid/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -1464,10 +1207,7 @@
           "typeof ",
           "x-pack/plugins/ml/public/shared"
         ],
-        "source": {
-          "path": "x-pack/plugins/ml/public/index.ts",
-          "lineNumber": 66
-        },
+        "path": "x-pack/plugins/ml/public/index.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -1490,10 +1230,7 @@
           "MlLocatorParams",
           ">"
         ],
-        "source": {
-          "path": "x-pack/plugins/ml/common/types/locator.ts",
-          "lineNumber": 258
-        },
+        "path": "x-pack/plugins/ml/common/types/locator.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -1509,11 +1246,26 @@
           "CommonProps",
           " & React.HTMLAttributes<HTMLDivElement>) => void; }) => any"
         ],
-        "source": {
-          "path": "x-pack/plugins/ml/public/application/components/data_grid/types.ts",
-          "lineNumber": 43
-        },
+        "path": "x-pack/plugins/ml/public/application/components/data_grid/types.ts",
         "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "ml",
+            "id": "def-public.__0",
+            "type": "Object",
+            "tags": [],
+            "label": "__0",
+            "description": [],
+            "signature": [
+              "{ rowIndex: number; columnId: string; setCellProps: (props: ",
+              "CommonProps",
+              " & React.HTMLAttributes<HTMLDivElement>) => void; }"
+            ],
+            "path": "x-pack/plugins/ml/public/application/components/data_grid/types.ts",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       }
     ],
@@ -1532,10 +1284,7 @@
           "SearchTotalHitsRelation",
           "; }"
         ],
-        "source": {
-          "path": "x-pack/plugins/ml/common/types/es_client.ts",
-          "lineNumber": 21
-        },
+        "path": "x-pack/plugins/ml/common/types/es_client.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -1549,10 +1298,7 @@
         "signature": [
           "{ readonly ANOMALY_DETECTION_JOBS_MANAGE: \"jobs\"; readonly ANOMALY_EXPLORER: \"explorer\"; readonly SINGLE_METRIC_VIEWER: \"timeseriesexplorer\"; readonly DATA_FRAME_ANALYTICS_JOBS_MANAGE: \"data_frame_analytics\"; readonly DATA_FRAME_ANALYTICS_CREATE_JOB: \"data_frame_analytics/new_job\"; readonly DATA_FRAME_ANALYTICS_MODELS_MANAGE: \"data_frame_analytics/models\"; readonly DATA_FRAME_ANALYTICS_EXPLORATION: \"data_frame_analytics/exploration\"; readonly DATA_FRAME_ANALYTICS_MAP: \"data_frame_analytics/map\"; readonly DATA_VISUALIZER: \"datavisualizer\"; readonly DATA_VISUALIZER_INDEX_SELECT: \"datavisualizer_index_select\"; readonly DATA_VISUALIZER_FILE: \"filedatavisualizer\"; readonly DATA_VISUALIZER_INDEX_VIEWER: \"jobs/new_job/datavisualizer\"; readonly ANOMALY_DETECTION_CREATE_JOB: \"jobs/new_job\"; readonly ANOMALY_DETECTION_CREATE_JOB_ADVANCED: \"jobs/new_job/advanced\"; readonly ANOMALY_DETECTION_CREATE_JOB_SELECT_TYPE: \"jobs/new_job/step/job_type\"; readonly ANOMALY_DETECTION_CREATE_JOB_SELECT_INDEX: \"jobs/new_job/step/index_or_search\"; readonly SETTINGS: \"settings\"; readonly CALENDARS_MANAGE: \"settings/calendars_list\"; readonly CALENDARS_NEW: \"settings/calendars_list/new_calendar\"; readonly CALENDARS_EDIT: \"settings/calendars_list/edit_calendar\"; readonly FILTER_LISTS_MANAGE: \"settings/filter_lists\"; readonly FILTER_LISTS_NEW: \"settings/filter_lists/new_filter_list\"; readonly FILTER_LISTS_EDIT: \"settings/filter_lists/edit_filter_list\"; readonly ACCESS_DENIED: \"access-denied\"; readonly OVERVIEW: \"overview\"; }"
         ],
-        "source": {
-          "path": "x-pack/plugins/ml/common/constants/locator.ts",
-          "lineNumber": 10
-        },
+        "path": "x-pack/plugins/ml/common/constants/locator.ts",
         "deprecated": false,
         "initialIsOpen": false
       }
@@ -1569,10 +1315,7 @@
         "MlLocator",
         " | undefined; }"
       ],
-      "source": {
-        "path": "x-pack/plugins/ml/public/plugin.ts",
-        "lineNumber": 198
-      },
+      "path": "x-pack/plugins/ml/public/plugin.ts",
       "deprecated": false,
       "lifecycle": "start",
       "initialIsOpen": true
@@ -1597,10 +1340,7 @@
           },
           " extends Error"
         ],
-        "source": {
-          "path": "x-pack/plugins/ml/server/lib/capabilities/errors.ts",
-          "lineNumber": 17
-        },
+        "path": "x-pack/plugins/ml/server/lib/capabilities/errors.ts",
         "deprecated": false,
         "children": [
           {
@@ -1613,10 +1353,7 @@
             "signature": [
               "any"
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/server/lib/capabilities/errors.ts",
-              "lineNumber": 18
-            },
+            "path": "x-pack/plugins/ml/server/lib/capabilities/errors.ts",
             "deprecated": false,
             "children": [
               {
@@ -1629,10 +1366,7 @@
                 "signature": [
                   "string | undefined"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/ml/server/lib/capabilities/errors.ts",
-                  "lineNumber": 18
-                },
+                "path": "x-pack/plugins/ml/server/lib/capabilities/errors.ts",
                 "deprecated": false,
                 "isRequired": false
               }
@@ -1659,10 +1393,7 @@
           },
           " extends Error"
         ],
-        "source": {
-          "path": "x-pack/plugins/ml/server/lib/capabilities/errors.ts",
-          "lineNumber": 24
-        },
+        "path": "x-pack/plugins/ml/server/lib/capabilities/errors.ts",
         "deprecated": false,
         "children": [
           {
@@ -1675,10 +1406,7 @@
             "signature": [
               "any"
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/server/lib/capabilities/errors.ts",
-              "lineNumber": 25
-            },
+            "path": "x-pack/plugins/ml/server/lib/capabilities/errors.ts",
             "deprecated": false,
             "children": [
               {
@@ -1691,10 +1419,7 @@
                 "signature": [
                   "string | undefined"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/ml/server/lib/capabilities/errors.ts",
-                  "lineNumber": 25
-                },
+                "path": "x-pack/plugins/ml/server/lib/capabilities/errors.ts",
                 "deprecated": false,
                 "isRequired": false
               }
@@ -1721,10 +1446,7 @@
           },
           " extends Error"
         ],
-        "source": {
-          "path": "x-pack/plugins/ml/server/lib/capabilities/errors.ts",
-          "lineNumber": 10
-        },
+        "path": "x-pack/plugins/ml/server/lib/capabilities/errors.ts",
         "deprecated": false,
         "children": [
           {
@@ -1737,10 +1459,7 @@
             "signature": [
               "any"
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/server/lib/capabilities/errors.ts",
-              "lineNumber": 11
-            },
+            "path": "x-pack/plugins/ml/server/lib/capabilities/errors.ts",
             "deprecated": false,
             "children": [
               {
@@ -1753,10 +1472,7 @@
                 "signature": [
                   "string | undefined"
                 ],
-                "source": {
-                  "path": "x-pack/plugins/ml/server/lib/capabilities/errors.ts",
-                  "lineNumber": 11
-                },
+                "path": "x-pack/plugins/ml/server/lib/capabilities/errors.ts",
                 "deprecated": false,
                 "isRequired": false
               }
@@ -1790,10 +1506,7 @@
           "MappingRuntimeField",
           "> | undefined) => Promise<ChartData[]>"
         ],
-        "source": {
-          "path": "x-pack/plugins/ml/server/models/data_visualizer/data_visualizer.ts",
-          "lineNumber": 240
-        },
+        "path": "x-pack/plugins/ml/server/models/data_visualizer/data_visualizer.ts",
         "deprecated": false,
         "children": [
           {
@@ -1812,10 +1525,7 @@
                 "text": "IScopedClusterClient"
               }
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/server/models/data_visualizer/data_visualizer.ts",
-              "lineNumber": 241
-            },
+            "path": "x-pack/plugins/ml/server/models/data_visualizer/data_visualizer.ts",
             "deprecated": false,
             "isRequired": true
           },
@@ -1829,10 +1539,7 @@
             "signature": [
               "string"
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/server/models/data_visualizer/data_visualizer.ts",
-              "lineNumber": 242
-            },
+            "path": "x-pack/plugins/ml/server/models/data_visualizer/data_visualizer.ts",
             "deprecated": false,
             "isRequired": true
           },
@@ -1846,10 +1553,7 @@
             "signature": [
               "any"
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/server/models/data_visualizer/data_visualizer.ts",
-              "lineNumber": 243
-            },
+            "path": "x-pack/plugins/ml/server/models/data_visualizer/data_visualizer.ts",
             "deprecated": false,
             "isRequired": true
           },
@@ -1864,10 +1568,7 @@
               "HistogramField",
               "[]"
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/server/models/data_visualizer/data_visualizer.ts",
-              "lineNumber": 244
-            },
+            "path": "x-pack/plugins/ml/server/models/data_visualizer/data_visualizer.ts",
             "deprecated": false,
             "isRequired": true
           },
@@ -1881,10 +1582,7 @@
             "signature": [
               "number"
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/server/models/data_visualizer/data_visualizer.ts",
-              "lineNumber": 245
-            },
+            "path": "x-pack/plugins/ml/server/models/data_visualizer/data_visualizer.ts",
             "deprecated": false,
             "isRequired": true
           },
@@ -1900,10 +1598,7 @@
               "MappingRuntimeField",
               "> | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/server/models/data_visualizer/data_visualizer.ts",
-              "lineNumber": 246
-            },
+            "path": "x-pack/plugins/ml/server/models/data_visualizer/data_visualizer.ts",
             "deprecated": false,
             "isRequired": false
           }
@@ -1921,10 +1616,7 @@
         "signature": [
           "(arg: any) => boolean"
         ],
-        "source": {
-          "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/combined_job.ts",
-          "lineNumber": 29
-        },
+        "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/combined_job.ts",
         "deprecated": false,
         "children": [
           {
@@ -1937,10 +1629,7 @@
             "signature": [
               "any"
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/combined_job.ts",
-              "lineNumber": 29
-            },
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/combined_job.ts",
             "deprecated": false,
             "isRequired": true
           }
@@ -1957,10 +1646,7 @@
         "tags": [],
         "label": "AnomaliesTableRecord",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-          "lineNumber": 45
-        },
+        "path": "x-pack/plugins/ml/common/types/anomalies.ts",
         "deprecated": false,
         "children": [
           {
@@ -1970,10 +1656,7 @@
             "tags": [],
             "label": "time",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 46
-            },
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
             "deprecated": false
           },
           {
@@ -1986,10 +1669,7 @@
             "signature": [
               "AnomalyRecordDoc"
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 47
-            },
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
             "deprecated": false
           },
           {
@@ -1999,10 +1679,7 @@
             "tags": [],
             "label": "rowId",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 48
-            },
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
             "deprecated": false
           },
           {
@@ -2012,10 +1689,7 @@
             "tags": [],
             "label": "jobId",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 49
-            },
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
             "deprecated": false
           },
           {
@@ -2025,10 +1699,7 @@
             "tags": [],
             "label": "detectorIndex",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 50
-            },
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
             "deprecated": false
           },
           {
@@ -2038,10 +1709,7 @@
             "tags": [],
             "label": "severity",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 51
-            },
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
             "deprecated": false
           },
           {
@@ -2054,10 +1722,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 52
-            },
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
             "deprecated": false
           },
           {
@@ -2070,10 +1735,7 @@
             "signature": [
               "any"
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 53
-            },
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
             "deprecated": false
           },
           {
@@ -2086,10 +1748,7 @@
             "signature": [
               "{ [key: string]: any; }[] | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 54
-            },
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
             "deprecated": false
           },
           {
@@ -2102,10 +1761,7 @@
             "signature": [
               "number[] | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 55
-            },
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
             "deprecated": false
           },
           {
@@ -2118,10 +1774,7 @@
             "signature": [
               "any"
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 56
-            },
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
             "deprecated": false
           },
           {
@@ -2134,10 +1787,7 @@
             "signature": [
               "number[] | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 57
-            },
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
             "deprecated": false
           },
           {
@@ -2150,10 +1800,7 @@
             "signature": [
               "any"
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 58
-            },
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
             "deprecated": false
           },
           {
@@ -2166,10 +1813,7 @@
             "signature": [
               "number | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 59
-            },
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
             "deprecated": false
           }
         ],
@@ -2182,10 +1826,7 @@
         "tags": [],
         "label": "AnomalyCategorizerStatsDoc",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-          "lineNumber": 64
-        },
+        "path": "x-pack/plugins/ml/common/types/anomalies.ts",
         "deprecated": false,
         "children": [
           {
@@ -2198,10 +1839,7 @@
             "signature": [
               "any"
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 65
-            },
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
             "deprecated": false
           },
           {
@@ -2211,10 +1849,7 @@
             "tags": [],
             "label": "job_id",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 66
-            },
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
             "deprecated": false
           },
           {
@@ -2227,10 +1862,7 @@
             "signature": [
               "\"categorizer_stats\""
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 67
-            },
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
             "deprecated": false
           },
           {
@@ -2243,10 +1875,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 68
-            },
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
             "deprecated": false
           },
           {
@@ -2259,10 +1888,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 69
-            },
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
             "deprecated": false
           },
           {
@@ -2272,10 +1898,7 @@
             "tags": [],
             "label": "categorized_doc_count",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 70
-            },
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
             "deprecated": false
           },
           {
@@ -2285,10 +1908,7 @@
             "tags": [],
             "label": "total_category_count",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 71
-            },
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
             "deprecated": false
           },
           {
@@ -2298,10 +1918,7 @@
             "tags": [],
             "label": "frequent_category_count",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 72
-            },
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
             "deprecated": false
           },
           {
@@ -2311,10 +1928,7 @@
             "tags": [],
             "label": "rare_category_count",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 73
-            },
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
             "deprecated": false
           },
           {
@@ -2324,10 +1938,7 @@
             "tags": [],
             "label": "dead_category_count",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 74
-            },
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
             "deprecated": false
           },
           {
@@ -2337,10 +1948,7 @@
             "tags": [],
             "label": "failed_category_count",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 75
-            },
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
             "deprecated": false
           },
           {
@@ -2353,10 +1961,7 @@
             "signature": [
               "\"ok\" | \"warn\""
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 76
-            },
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
             "deprecated": false
           },
           {
@@ -2366,10 +1971,7 @@
             "tags": [],
             "label": "log_time",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 77
-            },
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
             "deprecated": false
           },
           {
@@ -2379,10 +1981,7 @@
             "tags": [],
             "label": "timestamp",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 78
-            },
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
             "deprecated": false
           }
         ],
@@ -2395,10 +1994,7 @@
         "tags": [],
         "label": "AnomalyRecordDoc",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-          "lineNumber": 17
-        },
+        "path": "x-pack/plugins/ml/common/types/anomalies.ts",
         "deprecated": false,
         "children": [
           {
@@ -2411,10 +2007,7 @@
             "signature": [
               "any"
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 18
-            },
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
             "deprecated": false
           },
           {
@@ -2424,10 +2017,7 @@
             "tags": [],
             "label": "job_id",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 19
-            },
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
             "deprecated": false
           },
           {
@@ -2437,10 +2027,7 @@
             "tags": [],
             "label": "result_type",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 20
-            },
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
             "deprecated": false
           },
           {
@@ -2450,10 +2037,7 @@
             "tags": [],
             "label": "probability",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 21
-            },
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
             "deprecated": false
           },
           {
@@ -2463,10 +2047,7 @@
             "tags": [],
             "label": "record_score",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 22
-            },
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
             "deprecated": false
           },
           {
@@ -2476,10 +2057,7 @@
             "tags": [],
             "label": "initial_record_score",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 23
-            },
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
             "deprecated": false
           },
           {
@@ -2489,10 +2067,7 @@
             "tags": [],
             "label": "bucket_span",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 24
-            },
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
             "deprecated": false
           },
           {
@@ -2502,10 +2077,7 @@
             "tags": [],
             "label": "detector_index",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 25
-            },
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
             "deprecated": false
           },
           {
@@ -2515,10 +2087,7 @@
             "tags": [],
             "label": "is_interim",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 26
-            },
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
             "deprecated": false
           },
           {
@@ -2528,10 +2097,7 @@
             "tags": [],
             "label": "timestamp",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 27
-            },
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
             "deprecated": false
           },
           {
@@ -2544,10 +2110,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 28
-            },
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
             "deprecated": false
           },
           {
@@ -2560,10 +2123,7 @@
             "signature": [
               "string | number | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 29
-            },
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
             "deprecated": false
           },
           {
@@ -2573,10 +2133,7 @@
             "tags": [],
             "label": "function",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 30
-            },
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
             "deprecated": false
           },
           {
@@ -2586,10 +2143,7 @@
             "tags": [],
             "label": "function_description",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 31
-            },
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
             "deprecated": false
           },
           {
@@ -2602,10 +2156,7 @@
             "signature": [
               "number[] | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 32
-            },
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
             "deprecated": false
           },
           {
@@ -2618,10 +2169,7 @@
             "signature": [
               "number[] | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 33
-            },
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
             "deprecated": false
           },
           {
@@ -2635,10 +2183,7 @@
               "Influencer",
               "[] | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 34
-            },
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
             "deprecated": false
           },
           {
@@ -2651,10 +2196,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 35
-            },
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
             "deprecated": false
           },
           {
@@ -2667,10 +2209,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 36
-            },
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
             "deprecated": false
           },
           {
@@ -2683,10 +2222,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 37
-            },
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
             "deprecated": false
           },
           {
@@ -2699,10 +2235,7 @@
             "signature": [
               "number | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 38
-            },
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
             "deprecated": false
           },
           {
@@ -2715,10 +2248,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 39
-            },
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
             "deprecated": false
           },
           {
@@ -2731,10 +2261,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 40
-            },
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
             "deprecated": false
           },
           {
@@ -2747,10 +2274,7 @@
             "signature": [
               "any[] | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 42
-            },
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
             "deprecated": false
           }
         ],
@@ -2763,10 +2287,7 @@
         "tags": [],
         "label": "AuditMessage",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-          "lineNumber": 42
-        },
+        "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
         "deprecated": false,
         "children": [
           {
@@ -2776,10 +2297,7 @@
             "tags": [],
             "label": "job_id",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-              "lineNumber": 43
-            },
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false
           },
           {
@@ -2789,10 +2307,7 @@
             "tags": [],
             "label": "msgTime",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-              "lineNumber": 44
-            },
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false
           },
           {
@@ -2802,10 +2317,10 @@
             "tags": [],
             "label": "level",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-              "lineNumber": 45
-            },
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false
           },
           {
@@ -2815,10 +2330,7 @@
             "tags": [],
             "label": "highestLevel",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-              "lineNumber": 46
-            },
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false
           },
           {
@@ -2828,10 +2340,7 @@
             "tags": [],
             "label": "highestLevelText",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-              "lineNumber": 47
-            },
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false
           },
           {
@@ -2841,10 +2350,10 @@
             "tags": [],
             "label": "text",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-              "lineNumber": 48
-            },
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false
           },
           {
@@ -2857,10 +2366,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-              "lineNumber": 49
-            },
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false
           }
         ],
@@ -2878,10 +2384,7 @@
           " extends ",
           "MlJob"
         ],
-        "source": {
-          "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/combined_job.ts",
-          "lineNumber": 19
-        },
+        "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/combined_job.ts",
         "deprecated": false,
         "children": [
           {
@@ -2894,10 +2397,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/combined_job.ts",
-              "lineNumber": 20
-            },
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/combined_job.ts",
             "deprecated": false
           },
           {
@@ -2910,10 +2410,7 @@
             "signature": [
               "MlDatafeed"
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/combined_job.ts",
-              "lineNumber": 21
-            },
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/combined_job.ts",
             "deprecated": false
           }
         ],
@@ -2931,10 +2428,7 @@
           " extends ",
           "JobWithStats"
         ],
-        "source": {
-          "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/combined_job.ts",
-          "lineNumber": 24
-        },
+        "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/combined_job.ts",
         "deprecated": false,
         "children": [
           {
@@ -2947,10 +2441,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/combined_job.ts",
-              "lineNumber": 25
-            },
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/combined_job.ts",
             "deprecated": false
           },
           {
@@ -2965,10 +2456,7 @@
               " & ",
               "MlDatafeedStats"
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/combined_job.ts",
-              "lineNumber": 26
-            },
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/combined_job.ts",
             "deprecated": false
           }
         ],
@@ -2981,10 +2469,7 @@
         "tags": [],
         "label": "Influencer",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-          "lineNumber": 10
-        },
+        "path": "x-pack/plugins/ml/common/types/anomalies.ts",
         "deprecated": false,
         "children": [
           {
@@ -2994,10 +2479,7 @@
             "tags": [],
             "label": "influencer_field_name",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 11
-            },
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
             "deprecated": false
           },
           {
@@ -3010,10 +2492,7 @@
             "signature": [
               "string[]"
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-              "lineNumber": 12
-            },
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
             "deprecated": false
           }
         ],
@@ -3031,10 +2510,7 @@
           " extends ",
           "CombinedJobWithStats"
         ],
-        "source": {
-          "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-          "lineNumber": 54
-        },
+        "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
         "deprecated": false,
         "children": [
           {
@@ -3044,10 +2520,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-              "lineNumber": 55
-            },
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false
           },
           {
@@ -3060,10 +2533,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-              "lineNumber": 56
-            },
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false
           },
           {
@@ -3076,10 +2546,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-              "lineNumber": 57
-            },
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false
           },
           {
@@ -3092,10 +2559,7 @@
             "signature": [
               "{ from: number; to: number; fromPx: number; toPx: number; fromMoment: moment.Moment; toMoment: moment.Moment; widthPx: number; label: string; }"
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-              "lineNumber": 58
-            },
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false
           }
         ],
@@ -3108,10 +2572,7 @@
         "tags": [],
         "label": "MlSummaryJob",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-          "lineNumber": 15
-        },
+        "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
         "deprecated": false,
         "children": [
           {
@@ -3121,10 +2582,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-              "lineNumber": 16
-            },
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false
           },
           {
@@ -3134,10 +2592,7 @@
             "tags": [],
             "label": "description",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-              "lineNumber": 17
-            },
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false
           },
           {
@@ -3150,10 +2605,7 @@
             "signature": [
               "string[]"
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-              "lineNumber": 18
-            },
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false
           },
           {
@@ -3166,10 +2618,7 @@
             "signature": [
               "number | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-              "lineNumber": 19
-            },
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false
           },
           {
@@ -3182,10 +2631,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-              "lineNumber": 20
-            },
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false
           },
           {
@@ -3195,10 +2641,7 @@
             "tags": [],
             "label": "jobState",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-              "lineNumber": 21
-            },
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false
           },
           {
@@ -3211,10 +2654,7 @@
             "signature": [
               "string[]"
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-              "lineNumber": 22
-            },
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false
           },
           {
@@ -3224,10 +2664,7 @@
             "tags": [],
             "label": "hasDatafeed",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-              "lineNumber": 23
-            },
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false
           },
           {
@@ -3237,10 +2674,7 @@
             "tags": [],
             "label": "datafeedId",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-              "lineNumber": 24
-            },
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false
           },
           {
@@ -3250,10 +2684,7 @@
             "tags": [],
             "label": "datafeedState",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-              "lineNumber": 25
-            },
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false
           },
           {
@@ -3266,10 +2697,7 @@
             "signature": [
               "number | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-              "lineNumber": 26
-            },
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false
           },
           {
@@ -3282,10 +2710,7 @@
             "signature": [
               "number | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-              "lineNumber": 27
-            },
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false
           },
           {
@@ -3298,10 +2723,7 @@
             "signature": [
               "number | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-              "lineNumber": 28
-            },
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false
           },
           {
@@ -3315,10 +2737,7 @@
               "CombinedJob",
               " | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-              "lineNumber": 29
-            },
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false
           },
           {
@@ -3331,10 +2750,7 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-              "lineNumber": 30
-            },
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false
           },
           {
@@ -3349,10 +2765,7 @@
               "AuditMessage",
               "> | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-              "lineNumber": 31
-            },
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false
           },
           {
@@ -3362,10 +2775,7 @@
             "tags": [],
             "label": "isSingleMetricViewerJob",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-              "lineNumber": 32
-            },
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false
           },
           {
@@ -3378,26 +2788,21 @@
             "signature": [
               "string | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-              "lineNumber": 33
-            },
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false
           },
           {
             "parentPluginId": "ml",
-            "id": "def-server.MlSummaryJob.deleting",
-            "type": "CompoundType",
+            "id": "def-server.MlSummaryJob.blocked",
+            "type": "Object",
             "tags": [],
-            "label": "deleting",
+            "label": "blocked",
             "description": [],
             "signature": [
-              "boolean | undefined"
+              "MlJobBlocked",
+              " | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-              "lineNumber": 34
-            },
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false
           },
           {
@@ -3410,10 +2815,7 @@
             "signature": [
               "number | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-              "lineNumber": 35
-            },
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false
           },
           {
@@ -3426,10 +2828,7 @@
             "signature": [
               "number | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-              "lineNumber": 36
-            },
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false
           },
           {
@@ -3439,10 +2838,7 @@
             "tags": [],
             "label": "awaitingNodeAssignment",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-              "lineNumber": 37
-            },
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false
           },
           {
@@ -3465,10 +2861,7 @@
               "MlAnomalyDetectionAlertParams",
               ">, \"enabled\" | \"id\" | \"name\" | \"params\" | \"actions\" | \"throttle\" | \"tags\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"notifyWhen\" | \"muteAll\" | \"mutedInstanceIds\" | \"executionStatus\">[] | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-              "lineNumber": 38
-            },
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false
           },
           {
@@ -3481,10 +2874,7 @@
             "signature": [
               "{ [x: string]: string; }"
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-              "lineNumber": 39
-            },
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false
           }
         ],
@@ -3497,10 +2887,7 @@
         "tags": [],
         "label": "PerPartitionCategorization",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
-          "lineNumber": 27
-        },
+        "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
         "deprecated": false,
         "children": [
           {
@@ -3513,10 +2900,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
-              "lineNumber": 28
-            },
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
             "deprecated": false
           },
           {
@@ -3529,10 +2913,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
-              "lineNumber": 29
-            },
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
             "deprecated": false
           }
         ],
@@ -3553,10 +2934,7 @@
           "AggregationsAggregationContainer",
           "; }"
         ],
-        "source": {
-          "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/datafeed.ts",
-          "lineNumber": 16
-        },
+        "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/datafeed.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -3570,10 +2948,7 @@
         "signature": [
           "MlAnalysisConfig"
         ],
-        "source": {
-          "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
-          "lineNumber": 15
-        },
+        "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -3587,10 +2962,7 @@
         "signature": [
           "MlAnalysisLimits"
         ],
-        "source": {
-          "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
-          "lineNumber": 19
-        },
+        "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -3604,10 +2976,7 @@
         "signature": [
           "\"record\" | \"bucket\" | \"influencer\""
         ],
-        "source": {
-          "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-          "lineNumber": 83
-        },
+        "path": "x-pack/plugins/ml/common/types/anomalies.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -3621,10 +2990,7 @@
         "signature": [
           "string"
         ],
-        "source": {
-          "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
-          "lineNumber": 11
-        },
+        "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -3638,10 +3004,7 @@
         "signature": [
           "MlChunkingConfig"
         ],
-        "source": {
-          "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/datafeed.ts",
-          "lineNumber": 14
-        },
+        "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/datafeed.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -3655,10 +3018,7 @@
         "signature": [
           "MlDetectionRule"
         ],
-        "source": {
-          "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
-          "lineNumber": 25
-        },
+        "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -3672,10 +3032,7 @@
         "signature": [
           "MlCustomSettings"
         ],
-        "source": {
-          "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
-          "lineNumber": 32
-        },
+        "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -3689,10 +3046,7 @@
         "signature": [
           "MlDataCounts"
         ],
-        "source": {
-          "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts",
-          "lineNumber": 12
-        },
+        "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -3706,10 +3060,7 @@
         "signature": [
           "MlDataDescription"
         ],
-        "source": {
-          "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
-          "lineNumber": 21
-        },
+        "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -3723,10 +3074,7 @@
         "signature": [
           "MlDatafeed"
         ],
-        "source": {
-          "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/datafeed.ts",
-          "lineNumber": 12
-        },
+        "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/datafeed.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -3740,10 +3088,7 @@
         "signature": [
           "string"
         ],
-        "source": {
-          "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/datafeed.ts",
-          "lineNumber": 10
-        },
+        "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/datafeed.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -3757,10 +3102,7 @@
         "signature": [
           "MlDatafeedStats"
         ],
-        "source": {
-          "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/datafeed_stats.ts",
-          "lineNumber": 10
-        },
+        "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/datafeed_stats.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -3776,10 +3118,7 @@
           " & ",
           "MlDatafeedStats"
         ],
-        "source": {
-          "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/combined_job.ts",
-          "lineNumber": 15
-        },
+        "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/combined_job.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -3793,10 +3132,7 @@
         "signature": [
           "MlDetector"
         ],
-        "source": {
-          "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
-          "lineNumber": 17
-        },
+        "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -3810,10 +3146,7 @@
         "signature": [
           "\"partition_field\" | \"over_field\" | \"by_field\""
         ],
-        "source": {
-          "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-          "lineNumber": 81
-        },
+        "path": "x-pack/plugins/ml/common/types/anomalies.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -3827,10 +3160,7 @@
         "signature": [
           "MlJobForecastStatistics"
         ],
-        "source": {
-          "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts",
-          "lineNumber": 18
-        },
+        "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -3844,10 +3174,7 @@
         "signature": [
           "MlDatafeedIndicesOptions"
         ],
-        "source": {
-          "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/datafeed.ts",
-          "lineNumber": 18
-        },
+        "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/datafeed.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -3861,10 +3188,7 @@
         "signature": [
           "MlJob"
         ],
-        "source": {
-          "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
-          "lineNumber": 13
-        },
+        "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -3878,10 +3202,7 @@
         "signature": [
           "string"
         ],
-        "source": {
-          "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
-          "lineNumber": 10
-        },
+        "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -3895,10 +3216,7 @@
         "signature": [
           "MlJobStats"
         ],
-        "source": {
-          "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts",
-          "lineNumber": 10
-        },
+        "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -3916,10 +3234,7 @@
           " & ",
           "JobAlertingRuleStats"
         ],
-        "source": {
-          "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/combined_job.ts",
-          "lineNumber": 14
-        },
+        "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/combined_job.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -3933,10 +3248,21 @@
         "signature": [
           "AnomalyRecordDoc"
         ],
-        "source": {
-          "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-          "lineNumber": 15
-        },
+        "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "ml",
+        "id": "def-server.MlJobBlocked",
+        "type": "Type",
+        "tags": [],
+        "label": "MlJobBlocked",
+        "description": [],
+        "signature": [
+          "MlJobBlocked"
+        ],
+        "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -3951,10 +3277,7 @@
           "MlSummaryJob",
           "[]"
         ],
-        "source": {
-          "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-          "lineNumber": 52
-        },
+        "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -3968,10 +3291,7 @@
         "signature": [
           "MlModelPlotConfig"
         ],
-        "source": {
-          "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
-          "lineNumber": 23
-        },
+        "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -3985,10 +3305,7 @@
         "signature": [
           "MlModelSizeStats"
         ],
-        "source": {
-          "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts",
-          "lineNumber": 14
-        },
+        "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -4002,10 +3319,7 @@
         "signature": [
           "MlModelSnapshot"
         ],
-        "source": {
-          "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/model_snapshot.ts",
-          "lineNumber": 10
-        },
+        "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/model_snapshot.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -4019,10 +3333,7 @@
         "signature": [
           "Readonly<{} & { moduleId: string; }> & Readonly<{ start?: number | undefined; query?: any; prefix?: string | undefined; end?: number | undefined; groups?: string[] | undefined; indexPatternName?: string | undefined; useDedicatedIndex?: boolean | undefined; startDatafeed?: boolean | undefined; jobOverrides?: any; datafeedOverrides?: any; estimateModelMemory?: boolean | undefined; applyToAllSpaces?: boolean | undefined; } & {}>"
         ],
-        "source": {
-          "path": "x-pack/plugins/ml/server/shared_services/providers/modules.ts",
-          "lineNumber": 16
-        },
+        "path": "x-pack/plugins/ml/server/shared_services/providers/modules.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -4036,10 +3347,7 @@
         "signature": [
           "MlDiscoveryNode"
         ],
-        "source": {
-          "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts",
-          "lineNumber": 20
-        },
+        "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -4053,10 +3361,7 @@
         "signature": [
           "\"partition_field\" | \"over_field\" | \"by_field\""
         ],
-        "source": {
-          "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-          "lineNumber": 62
-        },
+        "path": "x-pack/plugins/ml/common/types/anomalies.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -4070,10 +3375,7 @@
         "signature": [
           "MlTimingStats"
         ],
-        "source": {
-          "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts",
-          "lineNumber": 16
-        },
+        "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts",
         "deprecated": false,
         "initialIsOpen": false
       }
@@ -4116,10 +3418,7 @@
         "AnomalyDetectionAlertContext",
         " | undefined>; }; }"
       ],
-      "source": {
-        "path": "x-pack/plugins/ml/server/plugin.ts",
-        "lineNumber": 64
-      },
+      "path": "x-pack/plugins/ml/server/plugin.ts",
       "deprecated": false,
       "lifecycle": "setup",
       "initialIsOpen": true
@@ -4134,10 +3433,7 @@
       "signature": [
         "void"
       ],
-      "source": {
-        "path": "x-pack/plugins/ml/server/plugin.ts",
-        "lineNumber": 65
-      },
+      "path": "x-pack/plugins/ml/server/plugin.ts",
       "deprecated": false,
       "lifecycle": "start",
       "initialIsOpen": true
@@ -4158,10 +3454,7 @@
         "signature": [
           "(validators: ((value: any) => { [key: string]: any; } | null)[]) => (value: any) => { [key: string]: any; } | null"
         ],
-        "source": {
-          "path": "x-pack/plugins/ml/common/util/validators.ts",
-          "lineNumber": 51
-        },
+        "path": "x-pack/plugins/ml/common/util/validators.ts",
         "deprecated": false,
         "children": [
           {
@@ -4174,10 +3467,7 @@
             "signature": [
               "((value: any) => { [key: string]: any; } | null)[]"
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/common/util/validators.ts",
-              "lineNumber": 52
-            },
+            "path": "x-pack/plugins/ml/common/util/validators.ts",
             "deprecated": false,
             "isRequired": true
           }
@@ -4197,10 +3487,7 @@
           "ErrorType",
           ") => string"
         ],
-        "source": {
-          "path": "x-pack/plugins/ml/common/util/errors/process_errors.ts",
-          "lineNumber": 106
-        },
+        "path": "x-pack/plugins/ml/common/util/errors/process_errors.ts",
         "deprecated": false,
         "children": [
           {
@@ -4213,10 +3500,7 @@
             "signature": [
               "ErrorType"
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/common/util/errors/process_errors.ts",
-              "lineNumber": 106
-            },
+            "path": "x-pack/plugins/ml/common/util/errors/process_errors.ts",
             "deprecated": false,
             "isRequired": false
           }
@@ -4234,10 +3518,7 @@
         "signature": [
           "(normalizedScore: number) => string"
         ],
-        "source": {
-          "path": "x-pack/plugins/ml/common/util/anomaly_utils.ts",
-          "lineNumber": 185
-        },
+        "path": "x-pack/plugins/ml/common/util/anomaly_utils.ts",
         "deprecated": false,
         "children": [
           {
@@ -4250,10 +3531,7 @@
             "signature": [
               "number"
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/common/util/anomaly_utils.ts",
-              "lineNumber": 185
-            },
+            "path": "x-pack/plugins/ml/common/util/anomaly_utils.ts",
             "deprecated": false,
             "isRequired": true
           }
@@ -4278,10 +3556,7 @@
             "text": "ANOMALY_SEVERITY"
           }
         ],
-        "source": {
-          "path": "x-pack/plugins/ml/common/util/anomaly_utils.ts",
-          "lineNumber": 146
-        },
+        "path": "x-pack/plugins/ml/common/util/anomaly_utils.ts",
         "deprecated": false,
         "children": [
           {
@@ -4294,10 +3569,7 @@
             "signature": [
               "number"
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/common/util/anomaly_utils.ts",
-              "lineNumber": 146
-            },
+            "path": "x-pack/plugins/ml/common/util/anomaly_utils.ts",
             "deprecated": false,
             "isRequired": true
           }
@@ -4315,10 +3587,7 @@
         "signature": [
           "<U extends string = string>(arg: unknown, requiredAttributes?: U[]) => arg is Record<U, unknown>"
         ],
-        "source": {
-          "path": "x-pack/plugins/ml/common/util/object_utils.ts",
-          "lineNumber": 25
-        },
+        "path": "x-pack/plugins/ml/common/util/object_utils.ts",
         "deprecated": false,
         "children": [
           {
@@ -4331,10 +3600,7 @@
             "signature": [
               "unknown"
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/common/util/object_utils.ts",
-              "lineNumber": 26
-            },
+            "path": "x-pack/plugins/ml/common/util/object_utils.ts",
             "deprecated": false,
             "isRequired": true
           },
@@ -4348,10 +3614,7 @@
             "signature": [
               "U[]"
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/common/util/object_utils.ts",
-              "lineNumber": 27
-            },
+            "path": "x-pack/plugins/ml/common/util/object_utils.ts",
             "deprecated": false,
             "isRequired": true
           }
@@ -4369,10 +3632,7 @@
         "signature": [
           "(arg: unknown) => boolean"
         ],
-        "source": {
-          "path": "x-pack/plugins/ml/common/util/runtime_field_utils.ts",
-          "lineNumber": 14
-        },
+        "path": "x-pack/plugins/ml/common/util/runtime_field_utils.ts",
         "deprecated": false,
         "children": [
           {
@@ -4385,10 +3645,7 @@
             "signature": [
               "unknown"
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/common/util/runtime_field_utils.ts",
-              "lineNumber": 14
-            },
+            "path": "x-pack/plugins/ml/common/util/runtime_field_utils.ts",
             "deprecated": false,
             "isRequired": true
           }
@@ -4406,10 +3663,7 @@
         "signature": [
           "(arg: unknown) => boolean"
         ],
-        "source": {
-          "path": "x-pack/plugins/ml/common/util/runtime_field_utils.ts",
-          "lineNumber": 27
-        },
+        "path": "x-pack/plugins/ml/common/util/runtime_field_utils.ts",
         "deprecated": false,
         "children": [
           {
@@ -4422,10 +3676,7 @@
             "signature": [
               "unknown"
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/common/util/runtime_field_utils.ts",
-              "lineNumber": 27
-            },
+            "path": "x-pack/plugins/ml/common/util/runtime_field_utils.ts",
             "deprecated": false,
             "isRequired": true
           }
@@ -4445,10 +3696,7 @@
         "signature": [
           "(pattern: RegExp) => (value: string) => { pattern: { matchPattern: string; }; } | null"
         ],
-        "source": {
-          "path": "x-pack/plugins/ml/common/util/validators.ts",
-          "lineNumber": 34
-        },
+        "path": "x-pack/plugins/ml/common/util/validators.ts",
         "deprecated": false,
         "children": [
           {
@@ -4461,10 +3709,7 @@
             "signature": [
               "RegExp"
             ],
-            "source": {
-              "path": "x-pack/plugins/ml/common/util/validators.ts",
-              "lineNumber": 35
-            },
+            "path": "x-pack/plugins/ml/common/util/validators.ts",
             "deprecated": false,
             "isRequired": true
           }
@@ -4482,10 +3727,7 @@
         "tags": [],
         "label": "ANOMALY_SEVERITY",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/ml/common/constants/anomalies.ts",
-          "lineNumber": 8
-        },
+        "path": "x-pack/plugins/ml/common/constants/anomalies.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -4496,10 +3738,7 @@
         "tags": [],
         "label": "ANOMALY_THRESHOLD",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/ml/common/constants/anomalies.ts",
-          "lineNumber": 17
-        },
+        "path": "x-pack/plugins/ml/common/constants/anomalies.ts",
         "deprecated": false,
         "initialIsOpen": false
       }
@@ -4519,10 +3758,7 @@
           " | ",
           "UnsupportedChartData"
         ],
-        "source": {
-          "path": "x-pack/plugins/ml/common/types/field_histograms.ts",
-          "lineNumber": 68
-        },
+        "path": "x-pack/plugins/ml/common/types/field_histograms.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -4538,10 +3774,7 @@
           "MappingRuntimeField",
           "; }"
         ],
-        "source": {
-          "path": "x-pack/plugins/ml/common/types/fields.ts",
-          "lineNumber": 115
-        },
+        "path": "x-pack/plugins/ml/common/types/fields.ts",
         "deprecated": false,
         "initialIsOpen": false
       }
@@ -4561,10 +3794,7 @@
           "SearchTotalHitsRelation",
           "; }"
         ],
-        "source": {
-          "path": "x-pack/plugins/ml/common/types/es_client.ts",
-          "lineNumber": 21
-        },
+        "path": "x-pack/plugins/ml/common/types/es_client.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -4575,10 +3805,7 @@
         "tags": [],
         "label": "SEVERITY_COLORS",
         "description": [],
-        "source": {
-          "path": "x-pack/plugins/ml/common/constants/anomalies.ts",
-          "lineNumber": 25
-        },
+        "path": "x-pack/plugins/ml/common/constants/anomalies.ts",
         "deprecated": false,
         "children": [
           {
@@ -4588,10 +3815,7 @@
             "tags": [],
             "label": "CRITICAL",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/ml/common/constants/anomalies.ts",
-              "lineNumber": 26
-            },
+            "path": "x-pack/plugins/ml/common/constants/anomalies.ts",
             "deprecated": false
           },
           {
@@ -4601,10 +3825,7 @@
             "tags": [],
             "label": "MAJOR",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/ml/common/constants/anomalies.ts",
-              "lineNumber": 27
-            },
+            "path": "x-pack/plugins/ml/common/constants/anomalies.ts",
             "deprecated": false
           },
           {
@@ -4614,10 +3835,7 @@
             "tags": [],
             "label": "MINOR",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/ml/common/constants/anomalies.ts",
-              "lineNumber": 28
-            },
+            "path": "x-pack/plugins/ml/common/constants/anomalies.ts",
             "deprecated": false
           },
           {
@@ -4627,10 +3845,7 @@
             "tags": [],
             "label": "WARNING",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/ml/common/constants/anomalies.ts",
-              "lineNumber": 29
-            },
+            "path": "x-pack/plugins/ml/common/constants/anomalies.ts",
             "deprecated": false
           },
           {
@@ -4640,10 +3855,7 @@
             "tags": [],
             "label": "LOW",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/ml/common/constants/anomalies.ts",
-              "lineNumber": 30
-            },
+            "path": "x-pack/plugins/ml/common/constants/anomalies.ts",
             "deprecated": false
           },
           {
@@ -4653,10 +3865,7 @@
             "tags": [],
             "label": "BLANK",
             "description": [],
-            "source": {
-              "path": "x-pack/plugins/ml/common/constants/anomalies.ts",
-              "lineNumber": 31
-            },
+            "path": "x-pack/plugins/ml/common/constants/anomalies.ts",
             "deprecated": false
           }
         ],

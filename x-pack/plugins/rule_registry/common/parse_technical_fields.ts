@@ -18,7 +18,6 @@ export const parseTechnicalFields = (input: unknown) => {
   if (isLeft(validate)) {
     throw new Error(PathReporter.report(validate).join('\n'));
   }
-
   return technicalFieldRuntimeType.encode(validate.right);
 };
 

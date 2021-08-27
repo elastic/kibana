@@ -24,7 +24,6 @@ import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { unit } from '../../../utils/style';
 import { SparkPlot } from '../charts/spark_plot';
 import { ImpactBar } from '../ImpactBar';
-import { ServiceMapLink } from '../Links/apm/ServiceMapLink';
 import { TableFetchWrapper } from '../table_fetch_wrapper';
 import { TruncateWithTooltip } from '../truncate_with_tooltip';
 import { OverviewTableContainer } from '../overview_table_container';
@@ -39,7 +38,8 @@ export type DependenciesItem = Omit<
 
 interface Props {
   dependencies: DependenciesItem[];
-  serviceName?: string;
+  fixedHeight?: boolean;
+  link?: React.ReactNode;
   title: React.ReactNode;
   nameColumnTitle: React.ReactNode;
   status: FETCH_STATUS;
@@ -49,7 +49,8 @@ interface Props {
 export function DependenciesTable(props: Props) {
   const {
     dependencies,
-    serviceName,
+    fixedHeight,
+    link,
     title,
     nameColumnTitle,
     status,
@@ -69,8 +70,8 @@ export function DependenciesTable(props: Props) {
       field: 'name',
       name: nameColumnTitle,
       render: (_, item) => {
-        const { name, link } = item;
-        return <TruncateWithTooltip text={name} content={link} />;
+        const { name, link: itemLink } = item;
+        return <TruncateWithTooltip text={name} content={itemLink} />;
       },
       sortable: true,
     },
@@ -79,10 +80,11 @@ export function DependenciesTable(props: Props) {
       name: i18n.translate('xpack.apm.dependenciesTable.columnLatency', {
         defaultMessage: 'Latency (avg.)',
       }),
-      width: `${unit * 10}px`,
+      width: `${unit * 11}px`,
       render: (_, { currentStats, previousStats }) => {
         return (
           <SparkPlot
+            compact
             color="euiColorVis1"
             series={currentStats.latency.timeseries}
             comparisonSeries={previousStats?.latency.timeseries}
@@ -97,7 +99,7 @@ export function DependenciesTable(props: Props) {
       name: i18n.translate('xpack.apm.dependenciesTable.columnThroughput', {
         defaultMessage: 'Throughput',
       }),
-      width: `${unit * 10}px`,
+      width: `${unit * 11}px`,
       render: (_, { currentStats, previousStats }) => {
         return (
           <SparkPlot
@@ -114,7 +116,7 @@ export function DependenciesTable(props: Props) {
     {
       field: 'errorRateValue',
       name: i18n.translate('xpack.apm.dependenciesTable.columnErrorRate', {
-        defaultMessage: 'Error rate',
+        defaultMessage: 'Failed transaction rate',
       }),
       width: `${unit * 10}px`,
       render: (_, { currentStats, previousStats }) => {
@@ -177,21 +179,13 @@ export function DependenciesTable(props: Props) {
               <h2>{title}</h2>
             </EuiTitle>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <ServiceMapLink serviceName={serviceName}>
-              {i18n.translate(
-                'xpack.apm.dependenciesTable.serviceMapLinkText',
-                {
-                  defaultMessage: 'View service map',
-                }
-              )}
-            </ServiceMapLink>
-          </EuiFlexItem>
+          {link && <EuiFlexItem grow={false}>{link}</EuiFlexItem>}
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem>
         <TableFetchWrapper status={status}>
           <OverviewTableContainer
+            fixedHeight={fixedHeight}
             isEmptyAndLoading={
               items.length === 0 && status === FETCH_STATUS.LOADING
             }

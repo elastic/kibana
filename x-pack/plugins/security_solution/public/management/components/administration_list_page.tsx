@@ -5,24 +5,19 @@
  * 2.0.
  */
 
-import React, { FC, memo } from 'react';
-import { EuiPanel, CommonProps } from '@elastic/eui';
-import styled from 'styled-components';
+import React, { FC, memo, useMemo } from 'react';
+import {
+  CommonProps,
+  EuiPageHeader,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiTitle,
+  EuiSpacer,
+} from '@elastic/eui';
 import { SecurityPageName } from '../../../common/constants';
-import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
-import { HeaderPage } from '../../common/components/header_page';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
-import { BETA_BADGE_LABEL } from '../common/translations';
-
-/** Ensure that all flyouts z-index in Administation area show the flyout header */
-const EuiPanelStyled = styled(EuiPanel)`
-  .euiFlyout {
-    z-index: ${({ theme }) => theme.eui.euiZNavigation + 1};
-  }
-`;
 
 interface AdministrationListPageProps {
-  beta: boolean;
   title: React.ReactNode;
   subtitle: React.ReactNode;
   actions?: React.ReactNode;
@@ -30,25 +25,41 @@ interface AdministrationListPageProps {
 }
 
 export const AdministrationListPage: FC<AdministrationListPageProps & CommonProps> = memo(
-  ({ beta, title, subtitle, actions, children, headerBackComponent, ...otherProps }) => {
-    const badgeOptions = !beta ? undefined : { beta: true, text: BETA_BADGE_LABEL };
+  ({ title, subtitle, actions, children, headerBackComponent, ...otherProps }) => {
+    const header = useMemo(() => {
+      return (
+        <EuiFlexGroup direction="column" gutterSize="none" alignItems="flexStart">
+          <EuiFlexItem grow={false}>
+            {headerBackComponent && <>{headerBackComponent}</>}
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="l">
+              <span data-test-subj="header-page-title">{title}</span>
+            </EuiTitle>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      );
+    }, [headerBackComponent, title]);
+
+    const description = useMemo(() => {
+      return <span data-test-subj="header-panel-subtitle">{subtitle}</span>;
+    }, [subtitle]);
 
     return (
-      <SecuritySolutionPageWrapper noTimeline {...otherProps}>
-        <HeaderPage
-          hideSourcerer={true}
-          title={title}
-          subtitle={subtitle}
-          backComponent={headerBackComponent}
-          badgeOptions={badgeOptions}
-        >
-          {actions}
-        </HeaderPage>
-
-        <EuiPanelStyled hasBorder>{children}</EuiPanelStyled>
+      <>
+        <EuiPageHeader
+          pageTitle={header}
+          description={description}
+          bottomBorder={true}
+          rightSideItems={[actions]}
+          restrictWidth={false}
+          {...otherProps}
+        />
+        <EuiSpacer size="l" />
+        {children}
 
         <SpyRoute pageName={SecurityPageName.administration} />
-      </SecuritySolutionPageWrapper>
+      </>
     );
   }
 );

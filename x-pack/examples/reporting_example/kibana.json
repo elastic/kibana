@@ -10,5 +10,5 @@
   },
   "description": "Example integration code for applications to feature reports.",
   "optionalPlugins": [],
-  "requiredPlugins": ["reporting", "developerExamples", "navigation", "screenshotMode"]
+  "requiredPlugins": ["reporting", "developerExamples", "navigation", "screenshotMode", "share"]
 }

@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`policy table should change pages when a pagination link is clicked on 1`] = `
+exports[`policy table changes pages when a pagination link is clicked on 1`] = `
 Array [
   "testy0",
   "testy1",
@@ -15,7 +15,7 @@ Array [
 ]
 `;
 
-exports[`policy table should change pages when a pagination link is clicked on 2`] = `
+exports[`policy table changes pages when a pagination link is clicked on 2`] = `
 Array [
   "testy13",
   "testy14",
@@ -30,22 +30,13 @@ Array [
 ]
 `;
 
-exports[`policy table should filter based on content of search input 1`] = `
+exports[`policy table filters based on content of search input 1`] = `
 Array [
   "testy0",
-  "testy1",
-  "testy10",
-  "testy100",
-  "testy101",
-  "testy102",
-  "testy103",
-  "testy104",
-  "testy11",
-  "testy12",
 ]
 `;
 
-exports[`policy table should show empty state when there are not any policies 1`] = `
+exports[`policy table shows empty state when there are no policies 1`] = `
 <div
   class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--subdued euiPanel--noShadow euiPanel--noBorder euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
   role="main"
@@ -106,7 +97,7 @@ exports[`policy table should show empty state when there are not any policies 1`
 </div>
 `;
 
-exports[`policy table should sort when linked index templates header is clicked 1`] = `
+exports[`policy table sorts when linked index templates header is clicked 1`] = `
 Array [
   "testy1",
   "testy3",
@@ -121,22 +112,22 @@ Array [
 ]
 `;
 
-exports[`policy table should sort when linked index templates header is clicked 2`] = `
+exports[`policy table sorts when linked index templates header is clicked 2`] = `
 Array [
   "testy0",
-  "testy104",
-  "testy102",
-  "testy100",
-  "testy98",
-  "testy96",
-  "testy94",
-  "testy92",
-  "testy90",
-  "testy88",
+  "testy2",
+  "testy4",
+  "testy6",
+  "testy8",
+  "testy10",
+  "testy12",
+  "testy14",
+  "testy16",
+  "testy18",
 ]
 `;
 
-exports[`policy table should sort when linked indices header is clicked 1`] = `
+exports[`policy table sorts when linked indices header is clicked 1`] = `
 Array [
   "testy1",
   "testy3",
@@ -151,22 +142,22 @@ Array [
 ]
 `;
 
-exports[`policy table should sort when linked indices header is clicked 2`] = `
+exports[`policy table sorts when linked indices header is clicked 2`] = `
 Array [
-  "testy104",
-  "testy102",
-  "testy100",
-  "testy98",
-  "testy96",
-  "testy94",
-  "testy92",
-  "testy90",
-  "testy88",
-  "testy86",
+  "testy0",
+  "testy2",
+  "testy4",
+  "testy6",
+  "testy8",
+  "testy10",
+  "testy12",
+  "testy14",
+  "testy16",
+  "testy18",
 ]
 `;
 
-exports[`policy table should sort when modified date header is clicked 1`] = `
+exports[`policy table sorts when modified date header is clicked 1`] = `
 Array [
   "testy0",
   "testy104",
@@ -181,7 +172,7 @@ Array [
 ]
 `;
 
-exports[`policy table should sort when modified date header is clicked 2`] = `
+exports[`policy table sorts when modified date header is clicked 2`] = `
 Array [
   "testy1",
   "testy2",
@@ -196,7 +187,7 @@ Array [
 ]
 `;
 
-exports[`policy table should sort when name header is clicked 1`] = `
+exports[`policy table sorts when name header is clicked 1`] = `
 Array [
   "testy99",
   "testy98",
@@ -211,22 +202,7 @@ Array [
 ]
 `;
 
-exports[`policy table should sort when name header is clicked 2`] = `
-Array [
-  "testy0",
-  "testy1",
-  "testy10",
-  "testy100",
-  "testy101",
-  "testy102",
-  "testy103",
-  "testy104",
-  "testy11",
-  "testy12",
-]
-`;
-
-exports[`policy table should sort when version header is clicked 1`] = `
+exports[`policy table sorts when name header is clicked 2`] = `
 Array [
   "testy0",
   "testy1",
@@ -238,20 +214,5 @@ Array [
   "testy7",
   "testy8",
   "testy9",
-]
-`;
-
-exports[`policy table should sort when version header is clicked 2`] = `
-Array [
-  "testy104",
-  "testy103",
-  "testy102",
-  "testy101",
-  "testy100",
-  "testy99",
-  "testy98",
-  "testy97",
-  "testy96",
-  "testy95",
 ]
 `;

@@ -536,6 +536,11 @@ describe('disable button', () => {
     });
     expect(disableAlert).toHaveBeenCalled();
 
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
     // Enable the alert
     await act(async () => {
       wrapper.find('[data-test-subj="enableSwitch"] .euiSwitch__button').first().simulate('click');
@@ -545,6 +550,77 @@ describe('disable button', () => {
 
     // Ensure error banner is back
     expect(wrapper.find('[data-test-subj="dismiss-execution-error"]').length).toBeGreaterThan(0);
+  });
+
+  it('should show the loading spinner when the rule enabled switch was clicked and the server responded with some delay', async () => {
+    const alert = mockAlert({
+      enabled: true,
+      executionStatus: {
+        status: 'error',
+        lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
+        error: {
+          reason: AlertExecutionStatusErrorReasons.Execute,
+          message: 'Fail',
+        },
+      },
+    });
+
+    const alertType: AlertType = {
+      id: '.noop',
+      name: 'No Op',
+      actionGroups: [{ id: 'default', name: 'Default' }],
+      recoveryActionGroup,
+      actionVariables: { context: [], state: [], params: [] },
+      defaultActionGroupId: 'default',
+      producer: ALERTS_FEATURE_ID,
+      authorizedConsumers,
+      minimumLicenseRequired: 'basic',
+      enabledInLicense: true,
+    };
+
+    const disableAlert = jest.fn(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 6000));
+    });
+    const enableAlert = jest.fn();
+    const wrapper = mountWithIntl(
+      <AlertDetails
+        alert={alert}
+        alertType={alertType}
+        actionTypes={[]}
+        {...mockAlertApis}
+        disableAlert={disableAlert}
+        enableAlert={enableAlert}
+      />
+    );
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    // Dismiss the error banner
+    await act(async () => {
+      wrapper.find('[data-test-subj="dismiss-execution-error"]').first().simulate('click');
+      await nextTick();
+    });
+
+    // Disable the alert
+    await act(async () => {
+      wrapper.find('[data-test-subj="enableSwitch"] .euiSwitch__button').first().simulate('click');
+      await nextTick();
+    });
+    expect(disableAlert).toHaveBeenCalled();
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    // Enable the alert
+    await act(async () => {
+      expect(wrapper.find('[data-test-subj="enableSpinner"]').length).toBeGreaterThan(0);
+      await nextTick();
+    });
   });
 });
 

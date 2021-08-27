@@ -21,6 +21,7 @@ import {
   EuiSpacer,
   EuiButtonEmpty,
   EuiButton,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { AlertExecutionStatusErrorReasons } from '../../../../../../alerting/common';
@@ -99,6 +100,8 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
   const alertActions = alert.actions;
   const uniqueActions = Array.from(new Set(alertActions.map((item: any) => item.actionTypeId)));
   const [isEnabled, setIsEnabled] = useState<boolean>(alert.enabled);
+  const [isEnabledUpdating, setIsEnabledUpdating] = useState<boolean>(false);
+  const [isMutedUpdating, setIsMutedUpdating] = useState<boolean>(false);
   const [isMuted, setIsMuted] = useState<boolean>(alert.muteAll);
   const [editFlyoutVisible, setEditFlyoutVisibility] = useState<boolean>(false);
   const [dissmissAlertErrors, setDissmissAlertErrors] = useState<boolean>(false);
@@ -218,54 +221,92 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
             <EuiSpacer />
             <EuiFlexGroup justifyContent="flexEnd" wrap responsive={false} gutterSize="m">
               <EuiFlexItem grow={false}>
-                <EuiSwitch
-                  name="enable"
-                  disabled={!canSaveAlert || !alertType.enabledInLicense}
-                  checked={isEnabled}
-                  data-test-subj="enableSwitch"
-                  onChange={async () => {
-                    if (isEnabled) {
-                      setIsEnabled(false);
-                      await disableAlert(alert);
-                      // Reset dismiss if previously clicked
-                      setDissmissAlertErrors(false);
-                    } else {
-                      setIsEnabled(true);
-                      await enableAlert(alert);
+                {isEnabledUpdating ? (
+                  <EuiFlexGroup>
+                    <EuiFlexItem>
+                      <EuiLoadingSpinner data-test-subj="enableSpinner" size="m" />
+                    </EuiFlexItem>
+
+                    <EuiFlexItem>
+                      <EuiText size="s">
+                        <FormattedMessage
+                          id="xpack.triggersActionsUI.sections.alertDetails.collapsedItemActons.enableLoadingTitle"
+                          defaultMessage="Enable"
+                        />
+                      </EuiText>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                ) : (
+                  <EuiSwitch
+                    name="enable"
+                    disabled={!canSaveAlert || !alertType.enabledInLicense}
+                    checked={isEnabled}
+                    data-test-subj="enableSwitch"
+                    onChange={async () => {
+                      setIsEnabledUpdating(true);
+                      if (isEnabled) {
+                        setIsEnabled(false);
+                        await disableAlert(alert);
+                        // Reset dismiss if previously clicked
+                        setDissmissAlertErrors(false);
+                      } else {
+                        setIsEnabled(true);
+                        await enableAlert(alert);
+                      }
+                      requestRefresh();
+                      setIsEnabledUpdating(false);
+                    }}
+                    label={
+                      <FormattedMessage
+                        id="xpack.triggersActionsUI.sections.alertDetails.collapsedItemActons.enableTitle"
+                        defaultMessage="Enable"
+                      />
                     }
-                    requestRefresh();
-                  }}
-                  label={
-                    <FormattedMessage
-                      id="xpack.triggersActionsUI.sections.alertDetails.collapsedItemActons.enableTitle"
-                      defaultMessage="Enable"
-                    />
-                  }
-                />
+                  />
+                )}
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiSwitch
-                  name="mute"
-                  checked={isMuted}
-                  disabled={!canSaveAlert || !isEnabled || !alertType.enabledInLicense}
-                  data-test-subj="muteSwitch"
-                  onChange={async () => {
-                    if (isMuted) {
-                      setIsMuted(false);
-                      await unmuteAlert(alert);
-                    } else {
-                      setIsMuted(true);
-                      await muteAlert(alert);
+                {isMutedUpdating ? (
+                  <EuiFlexGroup>
+                    <EuiFlexItem>
+                      <EuiLoadingSpinner size="m" />
+                    </EuiFlexItem>
+
+                    <EuiFlexItem>
+                      <EuiText size="s">
+                        <FormattedMessage
+                          id="xpack.triggersActionsUI.sections.alertDetails.collapsedItemActons.muteLoadingTitle"
+                          defaultMessage="Mute"
+                        />
+                      </EuiText>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                ) : (
+                  <EuiSwitch
+                    name="mute"
+                    checked={isMuted}
+                    disabled={!canSaveAlert || !isEnabled || !alertType.enabledInLicense}
+                    data-test-subj="muteSwitch"
+                    onChange={async () => {
+                      setIsMutedUpdating(true);
+                      if (isMuted) {
+                        setIsMuted(false);
+                        await unmuteAlert(alert);
+                      } else {
+                        setIsMuted(true);
+                        await muteAlert(alert);
+                      }
+                      requestRefresh();
+                      setIsMutedUpdating(false);
+                    }}
+                    label={
+                      <FormattedMessage
+                        id="xpack.triggersActionsUI.sections.alertDetails.collapsedItemActons.muteTitle"
+                        defaultMessage="Mute"
+                      />
                     }
-                    requestRefresh();
-                  }}
-                  label={
-                    <FormattedMessage
-                      id="xpack.triggersActionsUI.sections.alertDetails.collapsedItemActons.muteTitle"
-                      defaultMessage="Mute"
-                    />
-                  }
-                />
+                  />
+                )}
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>

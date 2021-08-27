@@ -129,6 +129,10 @@ export const TAGS_HELP = i18n.translate('xpack.cases.createCase.fieldTagsHelpTex
     'Type one or more custom identifying tags for this case. Press enter after each tag to begin a new one.',
 });
 
+export const TAGS_EMPTY_ERROR = i18n.translate('xpack.cases.createCase.fieldTagsEmptyError', {
+  defaultMessage: 'A tag must not be empty',
+});
+
 export const NO_TAGS = i18n.translate('xpack.cases.caseView.noTags', {
   defaultMessage: 'No tags are currently assigned to this case.',
 });

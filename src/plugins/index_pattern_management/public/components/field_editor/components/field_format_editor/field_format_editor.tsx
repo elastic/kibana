@@ -13,7 +13,7 @@ import type {
   FieldFormatEditorFactory,
   FieldFormatEditor as InnerFieldFormatEditor,
 } from 'src/plugins/index_pattern_field_editor/public';
-import type { FieldFormat } from 'src/plugins/data/public';
+import type { FieldFormat } from 'src/plugins/field_formats/common';
 
 export interface FieldFormatEditorProps {
   fieldType: string;

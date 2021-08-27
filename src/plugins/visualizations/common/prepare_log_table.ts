@@ -7,9 +7,13 @@
  */
 
 import { ExpressionValueVisDimension } from './expression_functions/vis_dimension';
+import { ExpressionValueXYDimension } from './expression_functions/xy_dimension';
 import { Datatable } from '../../expressions/common/expression_types/specs';
 
-export type Dimension = [ExpressionValueVisDimension[] | undefined, string];
+export type Dimension = [
+  Array<ExpressionValueVisDimension | ExpressionValueXYDimension> | undefined,
+  string
+];
 
 const getDimensionName = (columnIndex: number, dimensions: Dimension[]) => {
   for (const dimension of dimensions) {

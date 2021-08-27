@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { JsonValue } from '@kbn/common-utils';
+import { JsonValue } from '@kbn/utility-types';
 import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import { LogColumn } from '../../../../common/log_entry';
 import { isFieldColumn, isHighlightFieldColumn } from '../../../utils/log_entry';

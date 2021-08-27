@@ -19,11 +19,6 @@ import {
   getProcessorEventForAggregatedTransactions,
 } from '../helpers/aggregated_transactions';
 
-export interface KeyValue {
-  key: string;
-  value: any | undefined;
-}
-
 export async function getServiceInstanceMetadataDetails({
   serviceName,
   serviceNodeName,

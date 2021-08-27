@@ -8,7 +8,6 @@
 import React, { Fragment, useEffect } from 'react';
 
 import {
-  EuiCodeEditor,
   EuiFieldNumber,
   EuiFieldPassword,
   EuiFieldText,
@@ -19,6 +18,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { EuiCodeEditor } from '../../../../../shared_imports';
 import { ErrableFormRow } from '../../../../../components/form_errors';
 import { WebhookAction } from '../../../../../../../common/types/action_types';
 

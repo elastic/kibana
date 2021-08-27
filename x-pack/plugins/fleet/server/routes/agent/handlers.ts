@@ -202,13 +202,11 @@ export const getAgentStatusForAgentPolicyHandler: RequestHandler<
   undefined,
   TypeOf<typeof GetAgentStatusRequestSchema.query>
 > = async (context, request, response) => {
-  const soClient = context.core.savedObjects.client;
   const esClient = context.core.elasticsearch.client.asCurrentUser;
 
   try {
     // TODO change path
     const results = await AgentService.getAgentStatusForAgentPolicy(
-      soClient,
       esClient,
       request.query.policyId,
       request.query.kuery

@@ -299,8 +299,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                 logging: { file: 'info' },
                 advanced: { agent: { connection_delay: 'true' } },
                 malware: { mode: 'prevent' },
+                behavior_protection: { mode: 'prevent', supported: true },
                 popup: {
                   malware: {
+                    enabled: true,
+                    message: 'Elastic Security {action} {filename}',
+                  },
+                  behavior_protection: {
                     enabled: true,
                     message: 'Elastic Security {action} {filename}',
                   },
@@ -310,8 +315,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                 events: { file: false, network: true, process: true },
                 logging: { file: 'info' },
                 malware: { mode: 'prevent' },
+                behavior_protection: { mode: 'prevent', supported: true },
                 popup: {
                   malware: {
+                    enabled: true,
+                    message: 'Elastic Security {action} {filename}',
+                  },
+                  behavior_protection: {
                     enabled: true,
                     message: 'Elastic Security {action} {filename}',
                   },
@@ -513,8 +523,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                 logging: { file: 'info' },
                 advanced: { agent: { connection_delay: 'true' } },
                 malware: { mode: 'prevent' },
+                behavior_protection: { mode: 'prevent', supported: true },
                 popup: {
                   malware: {
+                    enabled: true,
+                    message: 'Elastic Security {action} {filename}',
+                  },
+                  behavior_protection: {
                     enabled: true,
                     message: 'Elastic Security {action} {filename}',
                   },
@@ -524,8 +539,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                 events: { file: true, network: true, process: true },
                 logging: { file: 'info' },
                 malware: { mode: 'prevent' },
+                behavior_protection: { mode: 'prevent', supported: true },
                 popup: {
                   malware: {
+                    enabled: true,
+                    message: 'Elastic Security {action} {filename}',
+                  },
+                  behavior_protection: {
                     enabled: true,
                     message: 'Elastic Security {action} {filename}',
                   },
@@ -724,8 +744,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                 events: { file: true, network: true, process: true },
                 logging: { file: 'info' },
                 malware: { mode: 'prevent' },
+                behavior_protection: { mode: 'prevent', supported: true },
                 popup: {
                   malware: {
+                    enabled: true,
+                    message: 'Elastic Security {action} {filename}',
+                  },
+                  behavior_protection: {
                     enabled: true,
                     message: 'Elastic Security {action} {filename}',
                   },
@@ -735,8 +760,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                 events: { file: true, network: true, process: true },
                 logging: { file: 'info' },
                 malware: { mode: 'prevent' },
+                behavior_protection: { mode: 'prevent', supported: true },
                 popup: {
                   malware: {
+                    enabled: true,
+                    message: 'Elastic Security {action} {filename}',
+                  },
+                  behavior_protection: {
                     enabled: true,
                     message: 'Elastic Security {action} {filename}',
                   },

@@ -47,6 +47,10 @@ export interface ConnectionStatsItem {
       value: number | null;
       timeseries: Coordinate[];
     };
+    totalTime: {
+      value: number | null;
+      timeseries: Coordinate[];
+    };
   };
 }
 

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import {
+import type {
   CoreSetup,
   CoreStart,
   Plugin,
@@ -14,30 +14,29 @@ import {
   IUiSettingsClient,
   HttpSetup,
 } from 'kibana/public';
-import { Plugin as ExpressionsPlugin } from 'src/plugins/expressions/public';
-import {
+import type { Plugin as ExpressionsPlugin } from 'src/plugins/expressions/public';
+import type {
   DataPublicPluginSetup,
   DataPublicPluginStart,
   TimefilterContract,
 } from 'src/plugins/data/public';
-
-import { VisualizationsSetup } from '../../visualizations/public';
-import { ChartsPluginSetup } from '../../charts/public';
+import type { VisualizationsSetup } from 'src/plugins/visualizations/public';
+import type { ChartsPluginSetup, ChartsPluginStart } from 'src/plugins/charts/public';
 
 import { getTimelionVisualizationConfig } from './timelion_vis_fn';
 import { getTimelionVisDefinition } from './timelion_vis_type';
-import { setIndexPatterns, setDataSearch } from './helpers/plugin_services';
-import { ConfigSchema } from '../config';
+import { setIndexPatterns, setDataSearch, setCharts } from './helpers/plugin_services';
 
 import { getArgValueSuggestions } from './helpers/arg_value_suggestions';
 import { getTimelionVisRenderer } from './timelion_vis_renderer';
+
+import type { ConfigSchema } from '../config';
 
 /** @internal */
 export interface TimelionVisDependencies extends Partial<CoreStart> {
   uiSettings: IUiSettingsClient;
   http: HttpSetup;
   timefilter: TimefilterContract;
-  chartTheme: ChartsPluginSetup['theme'];
 }
 
 /** @internal */
@@ -51,6 +50,7 @@ export interface TimelionVisSetupDependencies {
 /** @internal */
 export interface TimelionVisStartDependencies {
   data: DataPublicPluginStart;
+  charts: ChartsPluginStart;
 }
 
 /** @public */
@@ -82,7 +82,6 @@ export class TimelionVisPlugin
       http,
       uiSettings,
       timefilter: data.query.timefilter.timefilter,
-      chartTheme: charts.theme,
     };
 
     expressions.registerFunction(() => getTimelionVisualizationConfig(dependencies));
@@ -94,9 +93,10 @@ export class TimelionVisPlugin
     };
   }
 
-  public start(core: CoreStart, plugins: TimelionVisStartDependencies) {
-    setIndexPatterns(plugins.data.indexPatterns);
-    setDataSearch(plugins.data.search);
+  public start(core: CoreStart, { data, charts }: TimelionVisStartDependencies) {
+    setIndexPatterns(data.indexPatterns);
+    setDataSearch(data.search);
+    setCharts(charts);
 
     return {
       getArgValueSuggestions,

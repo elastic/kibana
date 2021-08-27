@@ -23,6 +23,7 @@ import { AttributeService, ViewMode } from '../../../../../src/plugins/embeddabl
 import { LensAttributeService } from '../lens_attribute_service';
 import { OnSaveProps } from '../../../../../src/plugins/saved_objects/public/save_modal';
 import { act } from 'react-dom/test-utils';
+import { inspectorPluginMock } from '../../../../../src/plugins/inspector/public/mocks';
 
 jest.mock('../../../../../src/plugins/inspector/public/', () => ({
   isAvailable: false,
@@ -116,6 +117,7 @@ describe('embeddable', () => {
           canSaveDashboards: true,
           canSaveVisualizations: true,
         },
+        inspector: inspectorPluginMock.createStartContract(),
         getTrigger,
         documentToExpression: () =>
           Promise.resolve({
@@ -128,7 +130,6 @@ describe('embeddable', () => {
             },
             errors: undefined,
           }),
-        executionContext: coreMock.createStart().executionContext,
       },
       {
         timeRange: {
@@ -155,6 +156,7 @@ describe('embeddable', () => {
         expressionRenderer,
         basePath,
         indexPatternService: {} as IndexPatternsContract,
+        inspector: inspectorPluginMock.createStartContract(),
         capabilities: { canSaveDashboards: true, canSaveVisualizations: true },
         getTrigger,
         documentToExpression: () =>
@@ -168,7 +170,6 @@ describe('embeddable', () => {
             },
             errors: undefined,
           }),
-        executionContext: coreMock.createStart().executionContext,
       },
       {
         timeRange: {
@@ -195,6 +196,7 @@ describe('embeddable', () => {
         attributeService,
         expressionRenderer,
         basePath,
+        inspector: inspectorPluginMock.createStartContract(),
         indexPatternService: {} as IndexPatternsContract,
         capabilities: {
           canSaveDashboards: true,
@@ -212,7 +214,6 @@ describe('embeddable', () => {
             },
             errors: [{ shortMessage: '', longMessage: 'my validation error' }],
           }),
-        executionContext: coreMock.createStart().executionContext,
       },
       {} as LensEmbeddableInput
     );
@@ -237,6 +238,7 @@ describe('embeddable', () => {
         attributeService,
         expressionRenderer,
         basePath,
+        inspector: inspectorPluginMock.createStartContract(),
         indexPatternService: ({
           get: (id: string) => Promise.resolve({ id }),
         } as unknown) as IndexPatternsContract,
@@ -256,7 +258,6 @@ describe('embeddable', () => {
             },
             errors: undefined,
           }),
-        executionContext: coreMock.createStart().executionContext,
       },
       {} as LensEmbeddableInput
     );
@@ -278,6 +279,7 @@ describe('embeddable', () => {
         attributeService,
         expressionRenderer,
         basePath,
+        inspector: inspectorPluginMock.createStartContract(),
         indexPatternService: {} as IndexPatternsContract,
         capabilities: {
           canSaveDashboards: true,
@@ -295,7 +297,6 @@ describe('embeddable', () => {
             },
             errors: undefined,
           }),
-        executionContext: coreMock.createStart().executionContext,
       },
       { id: '123' } as LensEmbeddableInput
     );
@@ -323,6 +324,7 @@ describe('embeddable', () => {
         attributeService,
         expressionRenderer,
         basePath,
+        inspector: inspectorPluginMock.createStartContract(),
         indexPatternService: {} as IndexPatternsContract,
         capabilities: { canSaveDashboards: true, canSaveVisualizations: true },
         getTrigger,
@@ -337,7 +339,6 @@ describe('embeddable', () => {
             },
             errors: undefined,
           }),
-        executionContext: coreMock.createStart().executionContext,
       },
       { id: '123' } as LensEmbeddableInput
     );
@@ -369,6 +370,7 @@ describe('embeddable', () => {
         attributeService,
         expressionRenderer,
         basePath,
+        inspector: inspectorPluginMock.createStartContract(),
         indexPatternService: {} as IndexPatternsContract,
         capabilities: {
           canSaveDashboards: true,
@@ -386,7 +388,6 @@ describe('embeddable', () => {
             },
             errors: undefined,
           }),
-        executionContext: coreMock.createStart().executionContext,
       },
       { id: '123' } as LensEmbeddableInput
     );
@@ -416,6 +417,7 @@ describe('embeddable', () => {
         attributeService,
         expressionRenderer,
         basePath,
+        inspector: inspectorPluginMock.createStartContract(),
         indexPatternService: {} as IndexPatternsContract,
         capabilities: {
           canSaveDashboards: true,
@@ -433,7 +435,6 @@ describe('embeddable', () => {
             },
             errors: undefined,
           }),
-        executionContext: coreMock.createStart().executionContext,
       },
       { id: '123' } as LensEmbeddableInput
     );
@@ -470,6 +471,7 @@ describe('embeddable', () => {
         attributeService,
         expressionRenderer,
         basePath,
+        inspector: inspectorPluginMock.createStartContract(),
         indexPatternService: {} as IndexPatternsContract,
         capabilities: {
           canSaveDashboards: true,
@@ -487,7 +489,6 @@ describe('embeddable', () => {
             },
             errors: undefined,
           }),
-        executionContext: coreMock.createStart().executionContext,
       },
       input
     );
@@ -524,6 +525,7 @@ describe('embeddable', () => {
         attributeService,
         expressionRenderer,
         basePath,
+        inspector: inspectorPluginMock.createStartContract(),
         indexPatternService: {} as IndexPatternsContract,
         capabilities: {
           canSaveDashboards: true,
@@ -541,7 +543,6 @@ describe('embeddable', () => {
             },
             errors: undefined,
           }),
-        executionContext: coreMock.createStart().executionContext,
       },
       input
     );
@@ -577,6 +578,7 @@ describe('embeddable', () => {
         attributeService,
         expressionRenderer,
         basePath,
+        inspector: inspectorPluginMock.createStartContract(),
         indexPatternService: ({ get: jest.fn() } as unknown) as IndexPatternsContract,
         capabilities: {
           canSaveDashboards: true,
@@ -594,7 +596,6 @@ describe('embeddable', () => {
             },
             errors: undefined,
           }),
-        executionContext: coreMock.createStart().executionContext,
       },
       input
     );
@@ -619,6 +620,7 @@ describe('embeddable', () => {
         attributeService,
         expressionRenderer,
         basePath,
+        inspector: inspectorPluginMock.createStartContract(),
         indexPatternService: {} as IndexPatternsContract,
         capabilities: {
           canSaveDashboards: true,
@@ -636,7 +638,6 @@ describe('embeddable', () => {
             },
             errors: undefined,
           }),
-        executionContext: coreMock.createStart().executionContext,
       },
       { id: '123' } as LensEmbeddableInput
     );
@@ -661,6 +662,7 @@ describe('embeddable', () => {
         attributeService,
         expressionRenderer,
         basePath,
+        inspector: inspectorPluginMock.createStartContract(),
         indexPatternService: {} as IndexPatternsContract,
         capabilities: {
           canSaveDashboards: true,
@@ -678,7 +680,6 @@ describe('embeddable', () => {
             },
             errors: undefined,
           }),
-        executionContext: coreMock.createStart().executionContext,
       },
       { id: '123' } as LensEmbeddableInput
     );
@@ -703,6 +704,7 @@ describe('embeddable', () => {
         attributeService,
         expressionRenderer,
         basePath,
+        inspector: inspectorPluginMock.createStartContract(),
         indexPatternService: {} as IndexPatternsContract,
         capabilities: {
           canSaveDashboards: true,
@@ -720,7 +722,6 @@ describe('embeddable', () => {
             },
             errors: undefined,
           }),
-        executionContext: coreMock.createStart().executionContext,
       },
       { id: '123', timeRange, query, filters } as LensEmbeddableInput
     );
@@ -760,6 +761,7 @@ describe('embeddable', () => {
         attributeService,
         expressionRenderer,
         basePath,
+        inspector: inspectorPluginMock.createStartContract(),
         indexPatternService: {} as IndexPatternsContract,
         capabilities: {
           canSaveDashboards: true,
@@ -777,7 +779,6 @@ describe('embeddable', () => {
             },
             errors: undefined,
           }),
-        executionContext: coreMock.createStart().executionContext,
       },
       ({ id: '123', onLoad } as unknown) as LensEmbeddableInput
     );
@@ -833,6 +834,7 @@ describe('embeddable', () => {
         attributeService,
         expressionRenderer,
         basePath,
+        inspector: inspectorPluginMock.createStartContract(),
         indexPatternService: {} as IndexPatternsContract,
         capabilities: {
           canSaveDashboards: true,
@@ -850,7 +852,6 @@ describe('embeddable', () => {
             },
             errors: undefined,
           }),
-        executionContext: coreMock.createStart().executionContext,
       },
       ({ id: '123', onFilter } as unknown) as LensEmbeddableInput
     );
@@ -881,6 +882,7 @@ describe('embeddable', () => {
         attributeService,
         expressionRenderer,
         basePath,
+        inspector: inspectorPluginMock.createStartContract(),
         indexPatternService: {} as IndexPatternsContract,
         capabilities: {
           canSaveDashboards: true,
@@ -898,7 +900,6 @@ describe('embeddable', () => {
             },
             errors: undefined,
           }),
-        executionContext: coreMock.createStart().executionContext,
       },
       ({ id: '123', onBrushEnd } as unknown) as LensEmbeddableInput
     );
@@ -929,6 +930,7 @@ describe('embeddable', () => {
         attributeService,
         expressionRenderer,
         basePath,
+        inspector: inspectorPluginMock.createStartContract(),
         indexPatternService: {} as IndexPatternsContract,
         capabilities: {
           canSaveDashboards: true,
@@ -946,7 +948,6 @@ describe('embeddable', () => {
             },
             errors: undefined,
           }),
-        executionContext: coreMock.createStart().executionContext,
       },
       ({ id: '123', onTableRowClick } as unknown) as LensEmbeddableInput
     );

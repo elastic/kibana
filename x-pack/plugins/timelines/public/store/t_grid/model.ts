@@ -31,6 +31,7 @@ export interface TGridModelSettings {
   queryFields: string[];
   selectAll: boolean;
   showCheckboxes?: boolean;
+  sort: SortColumnTimeline[];
   title: string;
   unit?: (n: number) => string | React.ReactNode;
 }
@@ -62,6 +63,8 @@ export interface TGridModel extends TGridModelSettings {
   /** Uniquely identifies the timeline */
   id: string;
   indexNames: string[];
+  isAddToExistingCaseOpen: boolean;
+  isCreateNewCaseOpen: boolean;
   isLoading: boolean;
   /** If selectAll checkbox in header is checked **/
   isSelectAllChecked: boolean;
@@ -75,15 +78,17 @@ export interface TGridModel extends TGridModelSettings {
   showCheckboxes: boolean;
   /**  Specifies which column the timeline is sorted on, and the direction (ascending / descending) */
   sort: SortColumnTimeline[];
-  /** Events selected on this timeline -- eventId to TimelineNonEcsData[] mapping of data required for batch actions **/
+  /** Events selected on this timeline -- eventId to TimelineNonEcsData[] mapping of data required for bulk actions **/
   selectedEventIds: Record<string, TimelineNonEcsData[]>;
   savedObjectId: string | null;
   version: string | null;
+  initialized?: boolean;
 }
 
 export type TGridModelForTimeline = Pick<
   TGridModel,
   | 'columns'
+  | 'defaultColumns'
   | 'dataProviders'
   | 'dateRange'
   | 'deletedEventIds'
@@ -111,6 +116,7 @@ export type SubsetTGridModel = Readonly<
   Pick<
     TGridModel,
     | 'columns'
+    | 'defaultColumns'
     | 'dateRange'
     | 'deletedEventIds'
     | 'excludedRowRendererIds'

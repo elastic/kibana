@@ -15,7 +15,10 @@
           "filebeat-*",
           "logs-*",
           "packetbeat-*",
-          "winlogbeat-*"
+          "winlogbeat-*",
+          "metrics-endpoint.metadata_current_*",
+          ".fleet-agents*",
+          ".fleet-actions*"
         ],
         "privileges": ["all"]
       },
@@ -29,7 +32,7 @@
     {
       "feature": {
         "ml": ["all"],
-        "siem": ["all"],
+        "siem": ["all", "read_alerts", "crud_alerts"],
         "actions": ["all"],
         "builtInAlerts": ["all"]
       },

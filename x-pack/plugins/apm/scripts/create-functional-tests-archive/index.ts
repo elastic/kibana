@@ -102,18 +102,6 @@ async function run() {
         ],
       },
     },
-    {
-      index: '.kibana',
-      bool: {
-        filter: [
-          {
-            term: {
-              type: 'ml-job',
-            },
-          },
-        ],
-      },
-    },
   ];
 
   // eslint-disable-next-line no-console
@@ -159,10 +147,7 @@ async function run() {
       (bucket) => bucket.key as string
     ) ?? [];
 
-  const indicesToArchive = indicesWithDocs
-    .filter((index) => !index.startsWith('.kibana'))
-    .concat('.kibana')
-    .join(',');
+  const indicesToArchive = indicesWithDocs.join(',');
 
   // create the archive
   const tmpDir = path.join(__dirname, 'tmp/');

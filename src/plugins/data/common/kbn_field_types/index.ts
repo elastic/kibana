@@ -17,25 +17,25 @@ import {
 
 /**
  * @deprecated Import from the "@kbn/field-types" package directly instead.
- * @removeBy 8.0
+ * @removeBy 8.1
  */
 const castEsToKbnFieldTypeName = oldCastEsToKbnFieldTypeName;
 
 /**
  * @deprecated Import from the "@kbn/field-types" package directly instead.
- * @removeBy 8.0
+ * @removeBy 8.1
  */
 const getFilterableKbnTypeNames = oldGetFilterableKbnTypeNames;
 
 /**
  * @deprecated Import from the "@kbn/field-types" package directly instead.
- * @removeBy 8.0
+ * @removeBy 8.1
  */
 const getKbnFieldType = oldGetKbnFieldType;
 
 /**
  * @deprecated Import from the "@kbn/field-types" package directly instead.
- * @removeBy 8.0
+ * @removeBy 8.1
  */
 const getKbnTypeNames = oldGetKbnTypeNames;
 

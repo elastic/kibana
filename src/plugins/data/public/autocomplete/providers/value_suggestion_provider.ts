@@ -7,15 +7,10 @@
  */
 
 import dateMath from '@elastic/datemath';
+import { buildQueryFromFilters } from '@kbn/es-query';
 import { memoize } from 'lodash';
 import { CoreSetup } from 'src/core/public';
-import {
-  IIndexPattern,
-  IFieldType,
-  UI_SETTINGS,
-  buildQueryFromFilters,
-  ValueSuggestionsMethod,
-} from '../../../common';
+import { IIndexPattern, IFieldType, UI_SETTINGS, ValueSuggestionsMethod } from '../../../common';
 import { TimefilterSetup } from '../../query';
 import { AutocompleteUsageCollector } from '../collectors';
 

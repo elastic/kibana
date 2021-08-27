@@ -7,7 +7,7 @@
  */
 
 import _ from 'lodash';
-import { JsonObject } from '@kbn/common-utils';
+import { JsonObject } from '@kbn/utility-types';
 import * as ast from '../ast';
 import { nodeTypes } from '../node_types';
 import { NamedArgTypeBuildNode } from './types';

@@ -22,7 +22,7 @@ import { FieldStatsResponse } from '../../../../../common';
 import { AggFunctionsMapping, esQuery } from '../../../../../../../../src/plugins/data/public';
 import { buildExpressionFunction } from '../../../../../../../../src/plugins/expressions/public';
 import { updateColumnParam, isReferenced } from '../../layer_helpers';
-import { DataType, FramePublicAPI } from '../../../../types';
+import { DataType, FrameDatasourceAPI } from '../../../../types';
 import { FiltersIndexPatternColumn, OperationDefinition, operationDefinitionMap } from '../index';
 import { FieldBasedIndexPatternColumn } from '../column_types';
 import { ValuesInput } from './values_input';
@@ -77,7 +77,7 @@ function getDisallowedTermsMessage(
       label: i18n.translate('xpack.lens.indexPattern.termsWithMultipleShiftsFixActionLabel', {
         defaultMessage: 'Use filters',
       }),
-      newState: async (core: CoreStart, frame: FramePublicAPI, layerId: string) => {
+      newState: async (core: CoreStart, frame: FrameDatasourceAPI, layerId: string) => {
         const currentColumn = layer.columns[columnId] as TermsIndexPatternColumn;
         const fieldName = currentColumn.sourceField;
         const activeDataFieldNameMatch =

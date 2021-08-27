@@ -20,6 +20,7 @@ import { ChangeIndexPattern } from './change_indexpattern';
 import { EuiProgress, EuiLoadingSpinner } from '@elastic/eui';
 import { documentField } from './document_field';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
+import { fieldFormatsServiceMock } from '../../../../../src/plugins/field_formats/public/mocks';
 import { indexPatternFieldEditorPluginMock } from '../../../../../src/plugins/index_pattern_field_editor/public/mocks';
 import { getFieldByNameFactory } from './pure_helpers';
 import { uiActionsPluginMock } from '../../../../../src/plugins/ui_actions/public/mocks';
@@ -251,6 +252,7 @@ describe('IndexPattern Data Panel', () => {
       indexPatternRefs: [],
       existingFields: {},
       data: dataPluginMock.createStartContract(),
+      fieldFormats: fieldFormatsServiceMock.createStartContract(),
       indexPatternFieldEditor: indexPatternFieldEditorPluginMock.createStartContract(),
       onUpdateIndexPattern: jest.fn(),
       dragDropContext: createMockedDragDropContext(),

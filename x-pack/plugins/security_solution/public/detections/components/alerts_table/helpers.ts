@@ -6,12 +6,7 @@
  */
 
 import { isEmpty } from 'lodash/fp';
-import {
-  Filter,
-  esKuery,
-  KueryNode,
-  esFilters,
-} from '../../../../../../../src/plugins/data/public';
+import { Filter, FilterStateStore, KueryNode, fromKueryExpression } from '@kbn/es-query';
 import {
   DataProvider,
   DataProviderType,
@@ -120,7 +115,7 @@ export const replaceTemplateFieldFromQuery = (
 ): string => {
   if (timelineType === TimelineType.default) {
     if (query.trim() !== '') {
-      const valueToChange = findValueToChangeInQuery(esKuery.fromKueryExpression(query));
+      const valueToChange = findValueToChangeInQuery(fromKueryExpression(query));
       return valueToChange.reduce((newQuery, vtc) => {
         const newValue = getStringArray(vtc.field, eventData);
         if (newValue.length) {
@@ -243,7 +238,7 @@ export const buildTimeRangeFilter = (from: string, to: string): Filter[] => [
       },
     },
     $state: {
-      store: esFilters.FilterStateStore.APP_STATE,
+      store: FilterStateStore.APP_STATE,
     },
   } as Filter,
 ];

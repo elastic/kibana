@@ -7,12 +7,19 @@
 
 import { EcsEventOutcome, EcsEventType } from 'src/core/server';
 import { AuditEvent } from '../../../security/server';
+import { ReadOperations, WriteOperations } from '../../../alerting/server';
 
 export enum AlertAuditAction {
   GET = 'alert_get',
   UPDATE = 'alert_update',
   FIND = 'alert_find',
 }
+
+export const operationAlertAuditActionMap = {
+  [WriteOperations.Update]: AlertAuditAction.UPDATE,
+  [ReadOperations.Find]: AlertAuditAction.FIND,
+  [ReadOperations.Get]: AlertAuditAction.GET,
+};
 
 type VerbsTuple = [string, string, string];
 

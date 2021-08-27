@@ -15,15 +15,18 @@ import { getTimeRangeComparison } from '../../shared/time_comparison/get_time_ra
 import { DependenciesTable } from '../../shared/dependencies_table';
 import { useApmBackendContext } from '../../../context/apm_backend/use_apm_backend_context';
 import { ServiceLink } from '../../shared/service_link';
+import { useTimeRange } from '../../../hooks/use_time_range';
 
 export function BackendDetailDependenciesTable() {
   const {
-    urlParams: { start, end, environment, comparisonEnabled, comparisonType },
+    urlParams: { comparisonEnabled, comparisonType },
   } = useUrlParams();
 
   const {
-    query: { rangeFrom, rangeTo, kuery },
+    query: { rangeFrom, rangeTo, kuery, environment },
   } = useApmParams('/backends/:backendName/overview');
+
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const { offset } = getTimeRangeComparison({
     start,
@@ -46,11 +49,11 @@ export function BackendDetailDependenciesTable() {
           path: {
             backendName,
           },
-          query: { start, end, environment, numBuckets: 20, offset },
+          query: { start, end, environment, numBuckets: 20, offset, kuery },
         },
       });
     },
-    [start, end, environment, offset, backendName]
+    [start, end, environment, offset, backendName, kuery]
   );
 
   const dependencies =

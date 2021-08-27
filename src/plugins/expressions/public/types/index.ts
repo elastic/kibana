@@ -5,13 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { IExecutionContextContainer } from 'src/core/public';
+
+import type { SerializableRecord } from '@kbn/utility-types';
+import type { KibanaExecutionContext } from 'src/core/public';
 import { Adapters } from '../../../inspector/public';
 import {
   IInterpreterRenderHandlers,
   ExpressionValue,
   ExpressionsService,
-  SerializableState,
   RenderMode,
 } from '../../common';
 import { ExpressionRenderHandlerParams } from '../render';
@@ -33,7 +34,7 @@ export interface ExpressionInterpreter {
 }
 
 export interface IExpressionLoaderParams {
-  searchContext?: SerializableState;
+  searchContext?: SerializableRecord;
   context?: ExpressionValue;
   variables?: Record<string, any>;
   // Enables debug tracking on each expression in the AST
@@ -48,7 +49,7 @@ export interface IExpressionLoaderParams {
   renderMode?: RenderMode;
   syncColors?: boolean;
   hasCompatibleActions?: ExpressionRenderHandlerParams['hasCompatibleActions'];
-  executionContext?: IExecutionContextContainer;
+  executionContext?: KibanaExecutionContext;
 
   /**
    * The flag to toggle on emitting partial results.
