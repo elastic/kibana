@@ -48,13 +48,10 @@ export async function getStats(
     (response.saved_objects || []).forEach((so: SavedObjectsFindResult<any>) => {
       if (so.attributes?.visState) {
         const visState: SavedVisState = JSON.parse(so.attributes.visState);
-        const spacePhrases = so.id.toString().split(':');
-        // if in a custom space, the format of a saved object ID is space:type:id
-        const space = spacePhrases.length === 3 ? spacePhrases[0] : 'default';
 
         visSummaries.push({
-          type: visState.type || '_na_',
-          space,
+          type: visState.type ?? '_na_',
+          space: so.namespaces?.[0] ?? 'default',
           past_days: getPastDays(so.updated_at!),
         });
       }
