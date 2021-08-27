@@ -709,8 +709,6 @@
     "data.advancedSettings.histogram.maxBarsTitle": "バケットの最大数",
     "data.advancedSettings.historyLimitText": "履歴があるフィールド (例：クエリインプット) に個の数の最近の値が表示されます",
     "data.advancedSettings.historyLimitTitle": "履歴制限数",
-    "data.advancedSettings.indexPatternPlaceholderText": "「管理 > インデックスパターン > インデックスパターンを作成」で使用される「インデックスパターン名」フィールドのプレースホルダーです。",
-    "data.advancedSettings.indexPatternPlaceholderTitle": "インデックスパターンのプレースホルダー",
     "data.advancedSettings.metaFieldsText": "_source の外にあり、ドキュメントが表示される時に融合されるフィールドです",
     "data.advancedSettings.metaFieldsTitle": "メタフィールド",
     "data.advancedSettings.pinFiltersText": "フィルターがデフォルトでグローバル (ピン付けされた状態) になるかの設定です",
