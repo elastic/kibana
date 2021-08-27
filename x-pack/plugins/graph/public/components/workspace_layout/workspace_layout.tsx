@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment, memo, useCallback, useEffect, useRef, useState } from 'react';
+import React, { Fragment, memo, useCallback, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer } from '@elastic/eui';
 import { connect } from 'react-redux';
@@ -13,8 +13,6 @@ import { SearchBar } from '../search_bar';
 import {
   GraphState,
   hasFieldsSelector,
-  loadSavedWorkspace,
-  submitSearch,
   workspaceInitializedSelector,
 } from '../../state_management';
 import { FieldManager } from '../field_manager';
@@ -31,7 +29,7 @@ import { InspectPanel } from '../inspect_panel';
 import { GuidancePanel } from '../guidance_panel';
 import { GraphTitle } from '../graph_title';
 import { GraphWorkspaceSavedObject, Workspace } from '../../types';
-import { GraphDependencies } from '../../application';
+import { GraphServices } from '../../application';
 import { ControlPanel } from '../control_panel';
 import { GraphVisualization } from '../graph_visualization';
 import { colorChoices } from '../../helpers/style_choices';
@@ -45,7 +43,7 @@ const FieldManagerMemoized = memo(FieldManager);
 const GuidancePanelMemoized = memo(GuidancePanel);
 
 type WorkspaceLayoutProps = Pick<
-  GraphDependencies,
+  GraphServices,
   | 'setHeaderActionMenu'
   | 'graphSavePolicy'
   | 'navigation'
@@ -57,10 +55,10 @@ type WorkspaceLayoutProps = Pick<
   renderCounter: number;
   workspace?: Workspace;
   loading: boolean;
-  urlQuery: string | null;
   indexPatterns: IndexPatternSavedObject[];
   savedWorkspace: GraphWorkspaceSavedObject;
   indexPatternProvider: IndexPatternProvider;
+  urlQuery: string | null;
 };
 
 interface WorkspaceLayoutStateProps {
@@ -68,17 +66,11 @@ interface WorkspaceLayoutStateProps {
   hasFields: boolean;
 }
 
-interface WorkspaceLayoutDispatchProps {
-  submit: (searchTerm: string) => void;
-  loadSavedWorkspace: (savedWorkspace: GraphWorkspaceSavedObject) => void;
-}
-
 const WorkspaceLayoutComponent = ({
   renderCounter,
   workspace,
   loading,
   savedWorkspace,
-  urlQuery,
   hasFields,
   overlays,
   workspaceInitialized,
@@ -89,13 +81,10 @@ const WorkspaceLayoutComponent = ({
   graphSavePolicy,
   navigation,
   canEditDrillDownUrls,
-  loadSavedWorkspace: loadSavedWorkspaceAction,
-  submit,
+  urlQuery,
   setHeaderActionMenu,
-}: WorkspaceLayoutProps & WorkspaceLayoutStateProps & WorkspaceLayoutDispatchProps) => {
-  const [initialQuery, setInitialQuery] = useState<string>();
+}: WorkspaceLayoutProps & WorkspaceLayoutStateProps) => {
   const [currentIndexPattern, setCurrentIndexPattern] = useState<IndexPattern>();
-  const [noIndexPatterns, setNoIndexPatterns] = useState<boolean>(false);
   const [showInspect, setShowInspect] = useState(false);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [mergeCandidates, setMergeCandidates] = useState<TermIntersect[]>([]);
@@ -112,25 +101,6 @@ const WorkspaceLayoutComponent = ({
     selectedNode.current = undefined;
     setControl(newControl);
   }, []);
-
-  // Deal with situation of request to open saved workspace
-  useEffect(() => {
-    if (savedWorkspace.id) {
-      loadSavedWorkspaceAction(savedWorkspace);
-    } else {
-      setNoIndexPatterns(indexPatterns.length === 0);
-    }
-  }, [loadSavedWorkspaceAction, indexPatterns.length, savedWorkspace]);
-
-  // Allow URLs to include a user-defined text query
-  useEffect(() => {
-    if (urlQuery && !initialQuery) {
-      setInitialQuery(urlQuery);
-    }
-    if (urlQuery && initialQuery && workspace) {
-      submit(urlQuery);
-    }
-  }, [initialQuery, submit, urlQuery, workspace]);
 
   const onIndexPatternChange = useCallback(
     (indexPattern?: IndexPattern) => setCurrentIndexPattern(indexPattern),
@@ -211,10 +181,9 @@ const WorkspaceLayoutComponent = ({
       <div className="gphGraph__bar">
         <SearchBar
           isLoading={loading}
-          initialQuery={initialQuery}
+          urlQuery={urlQuery}
           currentIndexPattern={currentIndexPattern}
           indexPatternProvider={indexPatternProvider}
-          onQuerySubmit={submit}
           confirmWipeWorkspace={confirmWipeWorkspace}
           onIndexPatternChange={onIndexPatternChange}
         />
@@ -224,7 +193,7 @@ const WorkspaceLayoutComponent = ({
       {!isInitialized && (
         <div>
           <GuidancePanelMemoized
-            noIndexPatterns={noIndexPatterns}
+            noIndexPatterns={indexPatterns.length === 0}
             onOpenFieldPicker={onOpenFieldPicker}
           />
         </div>
@@ -257,22 +226,9 @@ const WorkspaceLayoutComponent = ({
   );
 };
 
-export const WorkspaceLayout = connect<
-  WorkspaceLayoutStateProps,
-  WorkspaceLayoutDispatchProps,
-  {},
-  GraphState
->(
+export const WorkspaceLayout = connect<WorkspaceLayoutStateProps, {}, {}, GraphState>(
   (state: GraphState) => ({
     workspaceInitialized: workspaceInitializedSelector(state),
     hasFields: hasFieldsSelector(state),
-  }),
-  (dispatch) => ({
-    submit: (searchTerm: string) => {
-      dispatch(submitSearch(searchTerm));
-    },
-    loadSavedWorkspace: (savedWorkspace: GraphWorkspaceSavedObject) => {
-      dispatch(loadSavedWorkspace(savedWorkspace));
-    },
   })
 )(WorkspaceLayoutComponent);

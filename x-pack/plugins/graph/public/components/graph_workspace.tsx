@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { I18nProvider } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { Provider } from 'react-redux';
 import { IHttpFetchError } from 'kibana/public';
-import { useHistory } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 import { showSaveModal } from '../../../../../src/plugins/saved_objects/public';
 import {
@@ -28,12 +28,12 @@ import { createWorkspace } from '../services/workspace/graph_client_workspace';
 import { WorkspaceLayout } from '../components/workspace_layout';
 import { GraphServices } from '../application';
 import { formatHttpError } from '../helpers/format_http_error';
+import { useWorkspaceLoader } from '../helpers/use_workspace_loader';
 
 export interface GraphWorkspaceProps {
   indexPatternProvider: IndexPatternProvider;
   indexPatterns: IndexPatternSavedObject[];
   savedWorkspace: GraphWorkspaceSavedObject;
-  urlQuery: string | null;
   deps: GraphServices;
 }
 
@@ -52,6 +52,7 @@ export const GraphWorkspace = (props: GraphWorkspaceProps) => {
    */
   const [renderCounter, setRenderCounter] = useState(0);
   const [loading, setLoading] = useState(false);
+  const urlQuery = new URLSearchParams(useLocation().search).get('query');
   const history = useHistory();
 
   const handleHttpError = useCallback(
@@ -152,8 +153,7 @@ export const GraphWorkspace = (props: GraphWorkspaceProps) => {
           searchProxy: callSearchNodeProxy,
           exploreControls,
         };
-        const createdWorkspace = createWorkspace(options);
-        workspaceRef.current = createdWorkspace;
+        const createdWorkspace = (workspaceRef.current = createWorkspace(options));
         return createdWorkspace;
       },
       getWorkspace: () => workspaceRef.current,
@@ -172,18 +172,16 @@ export const GraphWorkspace = (props: GraphWorkspaceProps) => {
     })
   );
 
-  /**
-   * Clean objects when navigating to a new workspace, except initial load
-   */
-  useEffect(() => {
-    const unregisterListener = history.listen((location, action) => {
-      if (location.pathname === '/workspace/') {
-        workspaceRef.current?.clearGraph();
-        store.dispatch({ type: 'x-pack/graph/RESET' });
-      }
+  const loadWorkspace = useCallback(() => {
+    store.dispatch({
+      type: 'x-pack/graph/LOAD_WORKSPACE',
+      payload: { savedWorkspace: props.savedWorkspace, urlQuery },
     });
-    return () => unregisterListener();
-  }, [history, store]);
+  }, [props.savedWorkspace, store, urlQuery]);
+
+  const resetStore = useCallback(() => store.dispatch({ type: 'x-pack/graph/RESET' }), [store]);
+
+  useWorkspaceLoader({ urlQuery, loadWorkspace, resetStore });
 
   const services = useMemo(
     () => ({
@@ -210,10 +208,10 @@ export const GraphWorkspace = (props: GraphWorkspaceProps) => {
             coreStart={props.deps.coreStart}
             canEditDrillDownUrls={props.deps.canEditDrillDownUrls}
             overlays={props.deps.overlays}
-            urlQuery={props.urlQuery}
             indexPatterns={props.indexPatterns}
             savedWorkspace={props.savedWorkspace}
             indexPatternProvider={props.indexPatternProvider}
+            urlQuery={urlQuery}
           />
         </Provider>
       </KibanaContextProvider>

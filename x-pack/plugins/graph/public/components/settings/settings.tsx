@@ -14,7 +14,7 @@ import { bindActionCreators } from 'redux';
 import { AdvancedSettingsForm } from './advanced_settings_form';
 import { BlocklistForm } from './blocklist_form';
 import { UrlTemplateList } from './url_template_list';
-import { AdvancedSettings, UrlTemplate, WorkspaceField, WorkspaceNode } from '../../types';
+import { AdvancedSettings, BlockListedNode, UrlTemplate, WorkspaceField } from '../../types';
 import {
   GraphState,
   settingsSelector,
@@ -60,8 +60,8 @@ export interface DispatchProps {
 }
 
 export interface SettingsWorkspaceProps {
-  blocklistedNodes: WorkspaceNode[];
-  unblockNode: (node: WorkspaceNode) => void;
+  blocklistedNodes: BlockListedNode[];
+  unblockNode: (node: BlockListedNode) => void;
   unblockAll: () => void;
   canEditDrillDownUrls: boolean;
 }

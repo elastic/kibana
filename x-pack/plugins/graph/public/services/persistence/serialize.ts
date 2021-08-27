@@ -17,11 +17,12 @@ import {
   Workspace,
   AdvancedSettings,
   SerializedNode,
+  BlockListedNode,
 } from '../../types';
 import { IndexpatternDatasource } from '../../state_management';
 
 function serializeNode(
-  { data, scaledSize, parent, x, y, label, color }: WorkspaceNode,
+  { data, scaledSize, parent, x, y, label, color }: BlockListedNode,
   allNodes: WorkspaceNode[] = []
 ) {
   return {

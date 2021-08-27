@@ -17,7 +17,7 @@ import { I18nProvider, InjectedIntl } from '@kbn/i18n/react';
 
 import { openSourceModal } from '../services/source_modal';
 
-import { GraphStore, setDatasource } from '../state_management';
+import { GraphStore, setDatasource, submitSearchSaga } from '../state_management';
 import { ReactWrapper } from 'enzyme';
 import { createMockGraphStore } from '../state_management/mocks';
 import { Provider } from 'react-redux';
@@ -67,6 +67,7 @@ function wrapSearchBarInContext(testProps: SearchBarProps) {
 }
 
 describe('search_bar', () => {
+  let dispatchSpy: jest.Mock;
   let instance: ReactWrapper<
     SearchBarProps & { intl: InjectedIntl },
     Readonly<{}>,
@@ -75,7 +76,6 @@ describe('search_bar', () => {
   let store: GraphStore;
   const defaultProps = {
     isLoading: false,
-    onQuerySubmit: jest.fn(),
     indexPatternProvider: {
       get: jest.fn(() => Promise.resolve(({ fields: [] } as unknown) as IndexPattern)),
     },
@@ -91,7 +91,10 @@ describe('search_bar', () => {
   };
 
   beforeEach(() => {
-    store = createMockGraphStore({}).store;
+    store = createMockGraphStore({
+      sagas: [submitSearchSaga],
+    }).store;
+
     store.dispatch(
       setDatasource({
         type: 'indexpattern',
@@ -99,6 +102,9 @@ describe('search_bar', () => {
         title: 'test-index',
       })
     );
+
+    dispatchSpy = jest.fn(store.dispatch);
+    store.dispatch = dispatchSpy;
   });
 
   async function mountSearchBar() {
@@ -133,7 +139,10 @@ describe('search_bar', () => {
       instance.find('form').simulate('submit', { preventDefault: () => {} });
     });
 
-    expect(defaultProps.onQuerySubmit).toHaveBeenCalledWith('testQuery');
+    expect(dispatchSpy).toHaveBeenCalledWith({
+      type: 'x-pack/graph/workspace/SUBMIT_SEARCH',
+      payload: 'testQuery',
+    });
   });
 
   it('should translate kql query into JSON dsl', async () => {
@@ -149,7 +158,7 @@ describe('search_bar', () => {
       instance.find('form').simulate('submit', { preventDefault: () => {} });
     });
 
-    const parsedQuery = JSON.parse(defaultProps.onQuerySubmit.mock.calls[0][0]);
+    const parsedQuery = JSON.parse(dispatchSpy.mock.calls[0][0].payload);
     expect(parsedQuery).toEqual({
       bool: { should: [{ match: { test: 'abc' } }], minimum_should_match: 1 },
     });

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { memo, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { useHistory, useLocation, useParams } from 'react-router-dom';
+import { useHistory, useParams } from 'react-router-dom';
 import { GraphServices } from '../application';
 import { getSavedWorkspace } from '../helpers/saved_workspace_utils';
 import { GraphWorkspace } from '../components/graph_workspace';
@@ -22,15 +22,18 @@ interface WorkspaceUrlParams {
   id?: string;
 }
 
+const GraphWorkspaceMemoized = memo(GraphWorkspace);
+
 export const WorkspaceRoute = ({ deps }: WorkspaceRouteProps) => {
   const { savedObjectsClient, toastNotifications, indexPatterns: getIndexPatternProvider } = deps;
   const history = useHistory();
   const { id } = useParams<WorkspaceUrlParams>();
-  const query = new URLSearchParams(useLocation().search);
   const [savedWorkspace, setSavedWorkspace] = useState<GraphWorkspaceSavedObject>();
   const [indexPatterns, setIndexPatterns] = useState<IndexPatternSavedObject[]>();
-  const indexPatternProvider = createCachedIndexPatternProvider(getIndexPatternProvider.get);
-  const urlQuery = query.get('query');
+  const indexPatternProvider = useMemo(
+    () => createCachedIndexPatternProvider(getIndexPatternProvider.get),
+    [getIndexPatternProvider.get]
+  );
 
   useEffect(() => {
     const fetchSavedWorkspace = async () => {
@@ -72,11 +75,10 @@ export const WorkspaceRoute = ({ deps }: WorkspaceRouteProps) => {
   }
 
   return (
-    <GraphWorkspace
+    <GraphWorkspaceMemoized
       indexPatternProvider={indexPatternProvider}
       indexPatterns={indexPatterns}
       savedWorkspace={savedWorkspace}
-      urlQuery={urlQuery}
       deps={deps}
     />
   );

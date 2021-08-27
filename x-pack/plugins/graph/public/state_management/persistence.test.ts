@@ -6,8 +6,14 @@
  */
 
 import { createMockGraphStore, MockedGraphEnvironment } from './mocks';
-import { loadSavedWorkspace, loadingSaga, saveWorkspace, savingSaga } from './persistence';
-import { GraphWorkspaceSavedObject, UrlTemplate, AdvancedSettings, WorkspaceField } from '../types';
+import {
+  loadSavedWorkspace,
+  loadingSaga,
+  saveWorkspace,
+  savingSaga,
+  LoadSavedWorkspacePayload,
+} from './persistence';
+import { UrlTemplate, AdvancedSettings, WorkspaceField } from '../types';
 import { IndexpatternDatasource, datasourceSelector } from './datasource';
 import { fieldsSelector } from './fields';
 import { metaDataSelector, updateMetaData } from './meta_data';
@@ -55,7 +61,9 @@ describe('persistence sagas', () => {
     });
     it('should deserialize saved object and populate state', async () => {
       env.store.dispatch(
-        loadSavedWorkspace({ title: 'my workspace' } as GraphWorkspaceSavedObject)
+        loadSavedWorkspace({
+          savedWorkspace: { title: 'my workspace' },
+        } as LoadSavedWorkspacePayload)
       );
       await waitForPromise();
       const resultingState = env.store.getState();
@@ -70,7 +78,7 @@ describe('persistence sagas', () => {
 
     it('should warn with a toast and abort if index pattern is not found', async () => {
       (migrateLegacyIndexPatternRef as jest.Mock).mockReturnValueOnce({ success: false });
-      env.store.dispatch(loadSavedWorkspace({} as GraphWorkspaceSavedObject));
+      env.store.dispatch(loadSavedWorkspace({ savedWorkspace: {} } as LoadSavedWorkspacePayload));
       await waitForPromise();
       expect(env.mockedDeps.notifications.toasts.addDanger).toHaveBeenCalled();
       const resultingState = env.store.getState();
