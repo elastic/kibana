@@ -21,6 +21,7 @@ import { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 
 type SavedObjectType = SavedObject<{ title?: string }>;
 type CheckOriginConflictsParams = Parameters<typeof checkOriginConflicts>[0];
+type GetImportIdMapForRetriesParams = Parameters<typeof getImportIdMapForRetries>[0];
 
 /**
  * Function to create a realistic-looking import object given a type, ID, optional originId, and optional updated_at
@@ -69,6 +70,7 @@ describe('#checkOriginConflicts', () => {
     find.mockResolvedValue(getResultMock()); // mock zero hits response by default
     typeRegistry = typeRegistryMock.create();
     typeRegistry.isMultiNamespace.mockImplementation((type) => type === MULTI_NS_TYPE);
+    typeRegistry.isSingleNamespace.mockImplementation((type) => type !== MULTI_NS_TYPE);
     return {
       importIdMap: new Map<string, unknown>(), // empty by default
       ...partial,
@@ -522,6 +524,9 @@ describe('#checkOriginConflicts', () => {
 });
 
 describe('#getImportIdMapForRetries', () => {
+  let typeRegistry: jest.Mocked<ISavedObjectTypeRegistry>;
+  const namespace = 'foo-ns';
+
   const createRetry = (
     { type, id }: { type: string; id: string },
     params: { destinationId?: string; createNewCopy?: boolean } = {}
@@ -530,12 +535,29 @@ describe('#getImportIdMapForRetries', () => {
     return { type, id, overwrite: false, destinationId, replaceReferences: [], createNewCopy };
   };
 
+  const setupParams = (partials: {
+    objects: SavedObjectType[];
+    retries: SavedObjectsImportRetry[];
+    createNewCopies: boolean;
+    namespace?: string;
+  }): GetImportIdMapForRetriesParams => {
+    typeRegistry = typeRegistryMock.create();
+    typeRegistry.isMultiNamespace.mockImplementation((type) => type === MULTI_NS_TYPE);
+    typeRegistry.isSingleNamespace.mockImplementation((type) => type !== MULTI_NS_TYPE);
+
+    return {
+      typeRegistry,
+      namespace,
+      ...partials,
+    };
+  };
+
   test('throws an error if retry is not found for an object', async () => {
     const obj1 = createObject(MULTI_NS_TYPE, 'id-1');
     const obj2 = createObject(MULTI_NS_TYPE, 'id-2');
     const objects = [obj1, obj2];
     const retries = [createRetry(obj1)];
-    const params = { objects, retries, createNewCopies: false };
+    const params = setupParams({ objects, retries, createNewCopies: false });
 
     expect(() => getImportIdMapForRetries(params)).toThrowErrorMatchingInlineSnapshot(
       `"Retry was expected for \\"multi:id-2\\" but not found"`
@@ -554,13 +576,13 @@ describe('#getImportIdMapForRetries', () => {
       createRetry(obj3, { destinationId: 'id-X' }), // this retry will get added to the `importIdMap`!
       createRetry(obj4, { destinationId: 'id-Y', createNewCopy: true }), // this retry will get added to the `importIdMap`!
     ];
-    const params = { objects, retries, createNewCopies: false };
+    const params = setupParams({ objects, retries, createNewCopies: false });
 
     const checkOriginConflictsResult = await getImportIdMapForRetries(params);
     expect(checkOriginConflictsResult).toEqual(
       new Map([
-        [`${obj3.type}:${obj3.id}`, { id: 'id-X', omitOriginId: false }],
-        [`${obj4.type}:${obj4.id}`, { id: 'id-Y', omitOriginId: true }],
+        [`${namespace}:${obj3.type}:${obj3.id}`, { id: 'id-X', omitOriginId: false }],
+        [`${namespace}:${obj4.type}:${obj4.id}`, { id: 'id-Y', omitOriginId: true }],
       ])
     );
   });
@@ -569,11 +591,11 @@ describe('#getImportIdMapForRetries', () => {
     const obj = createObject('type-1', 'id-1');
     const objects = [obj];
     const retries = [createRetry(obj, { destinationId: 'id-X' })];
-    const params = { objects, retries, createNewCopies: true };
+    const params = setupParams({ objects, retries, createNewCopies: true });
 
     const checkOriginConflictsResult = await getImportIdMapForRetries(params);
     expect(checkOriginConflictsResult).toEqual(
-      new Map([[`${obj.type}:${obj.id}`, { id: 'id-X', omitOriginId: true }]])
+      new Map([[`${namespace}:${obj.type}:${obj.id}`, { id: 'id-X', omitOriginId: true }]])
     );
   });
 });

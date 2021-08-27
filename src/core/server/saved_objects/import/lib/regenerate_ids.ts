@@ -13,8 +13,6 @@ import { getObjKey } from '../../service/lib';
 
 /**
  * Takes an array of saved objects and returns an importIdMap of randomly-generated new IDs.
- *
- * @param objects The saved objects to generate new IDs for.
  */
 export const regenerateIds = ({
   objects,
@@ -25,11 +23,10 @@ export const regenerateIds = ({
   typeRegistry: ISavedObjectTypeRegistry;
   namespace?: string;
 }) => {
-  const importIdMap = objects.reduce((acc, object) => {
+  return objects.reduce((acc, object) => {
     return acc.set(getObjKey(object, typeRegistry, namespace), {
       id: uuidv4(),
       omitOriginId: true,
     });
   }, new Map<string, { id: string; omitOriginId?: boolean }>());
-  return importIdMap;
 };

@@ -6,22 +6,68 @@
  * Side Public License, v 1.
  */
 
+import { typeRegistryMock } from '../../saved_objects_type_registry.mock';
 import { getNonUniqueEntries } from './get_non_unique_entries';
 
-const foo1 = { type: 'foo', id: '1' };
-const foo2 = { type: 'foo', id: '2' }; // same type as foo1, different ID
-const bar1 = { type: 'bar', id: '1' }; // same ID as foo1, different type
-
 describe('#getNonUniqueEntries', () => {
-  test('returns empty array if entries are unique', () => {
-    const result = getNonUniqueEntries([foo1, foo2, bar1]);
-    expect(result).toEqual([]);
+  const namespace = 'foo-ns';
+  let typeRegistry: ReturnType<typeof typeRegistryMock.create>;
+
+  beforeEach(() => {
+    typeRegistry = typeRegistryMock.create();
+    typeRegistry.isSingleNamespace.mockImplementation((type) => {
+      return type !== 'multiple';
+    });
   });
 
-  test('returns non-empty array for non-unique results', () => {
-    const result1 = getNonUniqueEntries([foo1, foo2, foo1]);
-    const result2 = getNonUniqueEntries([foo1, foo2, foo1, foo2]);
-    expect(result1).toEqual([`${foo1.type}:${foo1.id}`]);
-    expect(result2).toEqual([`${foo1.type}:${foo1.id}`, `${foo2.type}:${foo2.id}`]);
+  describe('objects with namespace unspecified', () => {
+    const foo1 = { type: 'foo', id: '1' };
+    const foo2 = { type: 'foo', id: '2' }; // same type as foo1, different ID
+    const bar1 = { type: 'bar', id: '1' }; // same ID as foo1, different type
+
+    it('returns empty array if entries are unique', () => {
+      expect(getNonUniqueEntries([foo1, foo2, bar1], typeRegistry, namespace)).toEqual([]);
+    });
+
+    it('returns non-empty array for non-unique results', () => {
+      expect(getNonUniqueEntries([foo1, foo2, foo1], typeRegistry, namespace)).toEqual([
+        `${namespace}:${foo1.type}:${foo1.id}`,
+      ]);
+    });
+
+    it('returns all the duplicates', () => {
+      expect(getNonUniqueEntries([foo1, foo2, foo1, foo2], typeRegistry, namespace)).toEqual([
+        `${namespace}:${foo1.type}:${foo1.id}`,
+        `${namespace}:${foo2.type}:${foo2.id}`,
+      ]);
+    });
+  });
+
+  describe('objects with namespace specified', () => {
+    it('returns empty array for single-ns objects with same id/type from different namespaces', () => {
+      expect(
+        getNonUniqueEntries(
+          [
+            { type: 'single', id: '1', namespaces: ['ns-1'] },
+            { type: 'single', id: '1', namespaces: ['ns-2'] },
+          ],
+          typeRegistry,
+          namespace
+        )
+      ).toEqual([]);
+    });
+
+    it('finds duplicates for single-ns objects with same id/type from different namespaces', () => {
+      expect(
+        getNonUniqueEntries(
+          [
+            { type: 'single', id: '1', namespaces: ['ns-1'] },
+            { type: 'single', id: '1', namespaces: ['ns-1'] },
+          ],
+          typeRegistry,
+          namespace
+        )
+      ).toEqual(['ns-1:single:1']);
+    });
   });
 });

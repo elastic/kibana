@@ -204,12 +204,12 @@ export async function resolveSavedObjectsImportErrors({
       }),
     ];
   };
-  const { objectsToOverwrite, objectsToNotOverwrite } = splitOverwrites(
-    objectsToResolve,
+  const { objectsToOverwrite, objectsToNotOverwrite } = splitOverwrites({
+    savedObjects: objectsToResolve,
     retries,
     typeRegistry,
-    namespace
-  );
+    namespace,
+  });
   await bulkCreateObjects(objectsToOverwrite, true);
   await bulkCreateObjects(objectsToNotOverwrite);
 

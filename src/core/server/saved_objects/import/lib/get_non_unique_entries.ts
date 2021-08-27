@@ -17,7 +17,7 @@ export const getNonUniqueEntries = (
   namespace?: string
 ) => {
   const idCountMap = objects.reduce((acc, obj) => {
-    const key = getObjKey(obj, typeRegistry);
+    const key = getObjKey(obj, typeRegistry, namespace);
     const val = acc.get(key) ?? 0;
     return acc.set(key, val + 1);
   }, new Map<string, number>());

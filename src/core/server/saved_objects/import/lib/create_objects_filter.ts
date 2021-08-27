@@ -15,7 +15,7 @@ export function createObjectsFilter(
   retries: SavedObjectsImportRetry[],
   typeRegistry: ISavedObjectTypeRegistry,
   namespace?: string
-) {
+): (obj: SavedObject) => boolean {
   const retryKeys = new Set<string>(
     retries.map((retry) => getObjKey(retry, typeRegistry, namespace))
   );

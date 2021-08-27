@@ -7,18 +7,30 @@
  */
 
 import { getNonExistingReferenceAsKeys, validateReferences } from './validate_references';
+import { typeRegistryMock } from '../../saved_objects_type_registry.mock';
 import { savedObjectsClientMock } from '../../../mocks';
 import { SavedObjectsErrorHelpers } from '../../service';
 
 describe('getNonExistingReferenceAsKeys()', () => {
-  const savedObjectsClient = savedObjectsClientMock.create();
+  const namespace = 'foo-ns';
+
+  let typeRegistry: ReturnType<typeof typeRegistryMock.create>;
+  let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
 
   beforeEach(() => {
     jest.resetAllMocks();
+
+    savedObjectsClient = savedObjectsClientMock.create();
+    typeRegistry = typeRegistryMock.create();
   });
 
   test('returns empty response when no objects exist', async () => {
-    const result = await getNonExistingReferenceAsKeys([], savedObjectsClient);
+    const result = await getNonExistingReferenceAsKeys({
+      savedObjects: [],
+      savedObjectsClient,
+      typeRegistry,
+      namespace,
+    });
     expect(result).toEqual([]);
     expect(savedObjectsClient.bulkGet).toHaveBeenCalledTimes(0);
   });
@@ -41,12 +53,13 @@ describe('getNonExistingReferenceAsKeys()', () => {
         ignoreMissingReferences: true,
       },
     ];
-    const result = await getNonExistingReferenceAsKeys(
+    const result = await getNonExistingReferenceAsKeys({
       savedObjects,
+      retries,
       savedObjectsClient,
-      undefined,
-      retries
-    );
+      typeRegistry,
+      namespace,
+    });
     expect(result).toEqual([]);
     expect(savedObjectsClient.bulkGet).not.toHaveBeenCalled();
   });
@@ -72,7 +85,12 @@ describe('getNonExistingReferenceAsKeys()', () => {
         ],
       },
     ];
-    const result = await getNonExistingReferenceAsKeys(savedObjects, savedObjectsClient);
+    const result = await getNonExistingReferenceAsKeys({
+      savedObjects,
+      savedObjectsClient,
+      typeRegistry,
+      namespace,
+    });
     expect(result).toEqual([]);
     expect(savedObjectsClient.bulkGet).toHaveBeenCalledTimes(0);
   });
@@ -102,34 +120,25 @@ describe('getNonExistingReferenceAsKeys()', () => {
         },
       ],
     });
-    const result = await getNonExistingReferenceAsKeys(savedObjects, savedObjectsClient);
+    const result = await getNonExistingReferenceAsKeys({
+      savedObjects,
+      savedObjectsClient,
+      typeRegistry,
+      namespace,
+    });
     expect(result).toEqual([]);
-    expect(savedObjectsClient.bulkGet).toMatchInlineSnapshot(`
-      [MockFunction] {
-        "calls": Array [
-          Array [
-            Array [
-              Object {
-                "fields": Array [
-                  "id",
-                ],
-                "id": "1",
-                "type": "index-pattern",
-              },
-            ],
-            Object {
-              "namespace": undefined,
-            },
-          ],
-        ],
-        "results": Array [
-          Object {
-            "type": "return",
-            "value": Promise {},
-          },
-        ],
-      }
-    `);
+
+    expect(savedObjectsClient.bulkGet).toHaveBeenCalledTimes(1);
+    expect(savedObjectsClient.bulkGet).toHaveBeenCalledWith(
+      [
+        {
+          id: '1',
+          type: 'index-pattern',
+          fields: ['id'],
+        },
+      ],
+      { namespace }
+    );
   });
 
   test(`doesn't handle saved object types outside of ENFORCED_TYPES`, async () => {
@@ -147,7 +156,12 @@ describe('getNonExistingReferenceAsKeys()', () => {
         ],
       },
     ];
-    const result = await getNonExistingReferenceAsKeys(savedObjects, savedObjectsClient);
+    const result = await getNonExistingReferenceAsKeys({
+      savedObjects,
+      savedObjectsClient,
+      typeRegistry,
+      namespace,
+    });
     expect(result).toEqual([]);
     expect(savedObjectsClient.bulkGet).toHaveBeenCalledTimes(0);
   });
@@ -196,53 +210,53 @@ describe('getNonExistingReferenceAsKeys()', () => {
         },
       ],
     });
-    const result = await getNonExistingReferenceAsKeys(savedObjects, savedObjectsClient);
-    expect(result).toEqual(['index-pattern:1', 'search:3']);
-    expect(savedObjectsClient.bulkGet).toMatchInlineSnapshot(`
-      [MockFunction] {
-        "calls": Array [
-          Array [
-            Array [
-              Object {
-                "fields": Array [
-                  "id",
-                ],
-                "id": "1",
-                "type": "index-pattern",
-              },
-              Object {
-                "fields": Array [
-                  "id",
-                ],
-                "id": "3",
-                "type": "search",
-              },
-            ],
-            Object {
-              "namespace": undefined,
-            },
-          ],
-        ],
-        "results": Array [
-          Object {
-            "type": "return",
-            "value": Promise {},
-          },
-        ],
-      }
-    `);
+    const result = await getNonExistingReferenceAsKeys({
+      savedObjects,
+      savedObjectsClient,
+      typeRegistry,
+      namespace,
+    });
+    expect(result).toEqual([`${namespace}:index-pattern:1`, `${namespace}:search:3`]);
+
+    expect(savedObjectsClient.bulkGet).toHaveBeenCalledTimes(1);
+    expect(savedObjectsClient.bulkGet).toHaveBeenCalledWith(
+      [
+        {
+          type: 'index-pattern',
+          id: '1',
+          fields: ['id'],
+        },
+        {
+          type: 'search',
+          id: '3',
+          fields: ['id'],
+        },
+      ],
+      { namespace }
+    );
   });
 });
 
 describe('validateReferences()', () => {
-  const savedObjectsClient = savedObjectsClientMock.create();
+  const namespace = 'foo-ns';
+
+  let typeRegistry: ReturnType<typeof typeRegistryMock.create>;
+  let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
 
   beforeEach(() => {
     jest.resetAllMocks();
+
+    savedObjectsClient = savedObjectsClientMock.create();
+    typeRegistry = typeRegistryMock.create();
   });
 
   test('returns empty when no objects are passed in', async () => {
-    const result = await validateReferences([], savedObjectsClient);
+    const result = await validateReferences({
+      savedObjects: [],
+      savedObjectsClient,
+      typeRegistry,
+      namespace,
+    });
     expect(result).toEqual([]);
     expect(savedObjectsClient.bulkGet).toHaveBeenCalledTimes(0);
   });
@@ -289,6 +303,7 @@ describe('validateReferences()', () => {
         },
       ],
     });
+
     const savedObjects = [
       {
         id: '1',
@@ -340,107 +355,89 @@ describe('validateReferences()', () => {
         ],
       },
     ];
-    const result = await validateReferences(savedObjects, savedObjectsClient);
-    expect(result).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "error": Object {
-            "references": Array [
-              Object {
-                "id": "3",
-                "type": "index-pattern",
-              },
-            ],
-            "type": "missing_references",
-          },
-          "id": "2",
-          "meta": Object {
-            "title": "My Visualization 2",
-          },
-          "title": "My Visualization 2",
-          "type": "visualization",
+
+    const result = await validateReferences({
+      savedObjects,
+      savedObjectsClient,
+      typeRegistry,
+      namespace,
+    });
+    expect(result).toEqual([
+      {
+        type: 'visualization',
+        id: '2',
+        meta: {
+          title: 'My Visualization 2',
         },
-        Object {
-          "error": Object {
-            "references": Array [
-              Object {
-                "id": "5",
-                "type": "index-pattern",
-              },
-              Object {
-                "id": "6",
-                "type": "index-pattern",
-              },
-              Object {
-                "id": "7",
-                "type": "search",
-              },
-            ],
-            "type": "missing_references",
-          },
-          "id": "4",
-          "meta": Object {
-            "title": "My Visualization 4",
-          },
-          "title": "My Visualization 4",
-          "type": "visualization",
-        },
-      ]
-    `);
-    expect(savedObjectsClient.bulkGet).toMatchInlineSnapshot(`
-      [MockFunction] {
-        "calls": Array [
-          Array [
-            Array [
-              Object {
-                "fields": Array [
-                  "id",
-                ],
-                "id": "3",
-                "type": "index-pattern",
-              },
-              Object {
-                "fields": Array [
-                  "id",
-                ],
-                "id": "5",
-                "type": "index-pattern",
-              },
-              Object {
-                "fields": Array [
-                  "id",
-                ],
-                "id": "6",
-                "type": "index-pattern",
-              },
-              Object {
-                "fields": Array [
-                  "id",
-                ],
-                "id": "7",
-                "type": "search",
-              },
-              Object {
-                "fields": Array [
-                  "id",
-                ],
-                "id": "8",
-                "type": "search",
-              },
-            ],
-            Object {
-              "namespace": undefined,
+        title: 'My Visualization 2',
+        error: {
+          type: 'missing_references',
+          references: [
+            {
+              id: '3',
+              type: 'index-pattern',
             },
           ],
-        ],
-        "results": Array [
-          Object {
-            "type": "return",
-            "value": Promise {},
-          },
-        ],
-      }
-    `);
+        },
+      },
+      {
+        type: 'visualization',
+        id: '4',
+        meta: {
+          title: 'My Visualization 4',
+        },
+        title: 'My Visualization 4',
+        error: {
+          type: 'missing_references',
+          references: [
+            {
+              id: '5',
+              type: 'index-pattern',
+            },
+            {
+              id: '6',
+              type: 'index-pattern',
+            },
+            {
+              id: '7',
+              type: 'search',
+            },
+          ],
+        },
+      },
+    ]);
+
+    expect(savedObjectsClient.bulkGet).toHaveBeenCalledTimes(1);
+    expect(savedObjectsClient.bulkGet).toHaveBeenCalledWith(
+      [
+        {
+          id: '3',
+          type: 'index-pattern',
+          fields: ['id'],
+        },
+        {
+          id: '5',
+          type: 'index-pattern',
+          fields: ['id'],
+        },
+        {
+          id: '6',
+          type: 'index-pattern',
+          fields: ['id'],
+        },
+        {
+          id: '7',
+          type: 'search',
+          fields: ['id'],
+        },
+        {
+          id: '8',
+          type: 'search',
+          fields: ['id'],
+        },
+      ],
+      { namespace }
+    );
   });
 
   test(`doesn't return errors when ignoreMissingReferences is included in retry`, async () => {
@@ -461,7 +458,13 @@ describe('validateReferences()', () => {
         ignoreMissingReferences: true,
       },
     ];
-    const result = await validateReferences(savedObjects, savedObjectsClient, undefined, retries);
+    const result = await validateReferences({
+      savedObjects,
+      retries,
+      savedObjectsClient,
+      typeRegistry,
+      namespace,
+    });
     expect(result).toEqual([]);
     expect(savedObjectsClient.bulkGet).not.toHaveBeenCalled();
   });
@@ -491,7 +494,12 @@ describe('validateReferences()', () => {
         ],
       },
     ];
-    const result = await validateReferences(savedObjects, savedObjectsClient);
+    const result = await validateReferences({
+      savedObjects,
+      savedObjectsClient,
+      typeRegistry,
+      namespace,
+    });
     expect(result).toEqual([]);
     expect(savedObjectsClient.bulkGet).toHaveBeenCalledTimes(1);
   });
@@ -517,7 +525,12 @@ describe('validateReferences()', () => {
         ],
       },
     ];
-    const result = await validateReferences(savedObjects, savedObjectsClient);
+    const result = await validateReferences({
+      savedObjects,
+      savedObjectsClient,
+      typeRegistry,
+      namespace,
+    });
     expect(result).toEqual([]);
     expect(savedObjectsClient.bulkGet).toHaveBeenCalledTimes(0);
   });
@@ -542,7 +555,12 @@ describe('validateReferences()', () => {
         ],
       },
     ];
-    const result = await validateReferences(savedObjects, savedObjectsClient);
+    const result = await validateReferences({
+      savedObjects,
+      savedObjectsClient,
+      typeRegistry,
+      namespace,
+    });
     expect(result).toEqual([]);
     expect(savedObjectsClient.bulkGet).toHaveBeenCalledTimes(0);
   });
@@ -574,7 +592,12 @@ describe('validateReferences()', () => {
       },
     ];
     await expect(
-      validateReferences(savedObjects, savedObjectsClient)
+      validateReferences({
+        savedObjects,
+        savedObjectsClient,
+        typeRegistry,
+        namespace,
+      })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Error fetching references for imported objects"`
     );

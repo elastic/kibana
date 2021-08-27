@@ -15,8 +15,7 @@ export const getObjKey = (
   typeRegistry: ISavedObjectTypeRegistry,
   currentNamespace = 'default'
 ): ObjectKey => {
-  const namespaceType = typeRegistry.getType(obj.type)!.namespaceType;
-  if (namespaceType === 'single') {
+  if (typeRegistry.isSingleNamespace(obj.type)) {
     return `${obj.namespaces ? obj.namespaces[0] : currentNamespace}:${obj.type}:${obj.id}`;
   }
   return `${obj.type}:${obj.id}`;

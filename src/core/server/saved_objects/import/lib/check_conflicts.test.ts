@@ -8,6 +8,7 @@
 
 import { mockUuidv4 } from './__mocks__';
 import { savedObjectsClientMock } from '../../../mocks';
+import { typeRegistryMock } from '../../saved_objects_type_registry.mock';
 import { SavedObjectReference, SavedObjectsImportRetry } from 'kibana/public';
 import { SavedObjectsClientContract, SavedObject } from '../../types';
 import { SavedObjectsErrorHelpers } from '../../service';
@@ -56,6 +57,7 @@ const obj4Error = getResultMock.invalidType(obj4.type, obj4.id);
 
 describe('#checkConflicts', () => {
   let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
+  let typeRegistry: ReturnType<typeof typeRegistryMock.create>;
   let socCheckConflicts: typeof savedObjectsClient['checkConflicts'];
 
   const setupParams = (partial: {
@@ -66,9 +68,13 @@ describe('#checkConflicts', () => {
     createNewCopies?: boolean;
   }): CheckConflictsParams => {
     savedObjectsClient = savedObjectsClientMock.create();
+    typeRegistry = typeRegistryMock.create();
+    typeRegistry.isSingleNamespace.mockImplementation((type) => {
+      return type !== 'multiple';
+    });
     socCheckConflicts = savedObjectsClient.checkConflicts;
     socCheckConflicts.mockResolvedValue({ errors: [] }); // by default, mock to empty results
-    return { ...partial, savedObjectsClient };
+    return { ...partial, savedObjectsClient, typeRegistry };
   };
 
   beforeEach(() => {
@@ -121,7 +127,7 @@ describe('#checkConflicts', () => {
           error: { ...obj4Error.error, type: 'unknown' },
         },
       ],
-      importIdMap: new Map([[`${obj3.type}:${obj3.id}`, { id: `new-object-id` }]]),
+      importIdMap: new Map([[`${namespace}:${obj3.type}:${obj3.id}`, { id: `new-object-id` }]]),
       pendingOverwrites: new Set(),
     });
   });
@@ -188,9 +194,9 @@ describe('#checkConflicts', () => {
         },
       ],
       importIdMap: new Map([
-        [`${obj3.type}:${obj3.id}`, { id: `new-object-id`, omitOriginId: true }],
+        [`${namespace}:${obj3.type}:${obj3.id}`, { id: `new-object-id`, omitOriginId: true }],
       ]),
-      pendingOverwrites: new Set([`${obj5.type}:${obj5.id}`]),
+      pendingOverwrites: new Set([`${namespace}:${obj5.type}:${obj5.id}`]),
     });
   });
 

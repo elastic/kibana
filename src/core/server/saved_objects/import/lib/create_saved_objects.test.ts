@@ -7,8 +7,9 @@
  */
 
 import { savedObjectsClientMock } from '../../../mocks';
+import { typeRegistryMock } from '../../saved_objects_type_registry.mock';
 import { createSavedObjects } from './create_saved_objects';
-import { SavedObjectsClientContract, SavedObject, SavedObjectsImportFailure } from '../../types';
+import type { SavedObject, SavedObjectsImportFailure } from '../../types';
 import { SavedObjectsErrorHelpers } from '../../service';
 import { extractErrors } from './extract_errors';
 
@@ -59,7 +60,9 @@ const importIdMap = new Map([
 ]);
 
 describe('#createSavedObjects', () => {
-  let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
+  let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
+  let typeRegistry: ReturnType<typeof typeRegistryMock.create>;
+
   let bulkCreate: typeof savedObjectsClient['bulkCreate'];
 
   /**
@@ -73,8 +76,10 @@ describe('#createSavedObjects', () => {
     overwrite?: boolean;
   }): CreateSavedObjectsParams => {
     savedObjectsClient = savedObjectsClientMock.create();
+    typeRegistry = typeRegistryMock.create();
+
     bulkCreate = savedObjectsClient.bulkCreate;
-    return { accumulatedErrors: [], ...partial, savedObjectsClient, importIdMap };
+    return { accumulatedErrors: [], ...partial, savedObjectsClient, typeRegistry, importIdMap };
   };
 
   const getExpectedBulkCreateArgsObjects = (objects: SavedObject[], retry?: boolean) =>
@@ -142,7 +147,7 @@ describe('#createSavedObjects', () => {
     const remappedResults = resultObjects.map((result, i) => ({ ...result, id: objects[i].id }));
     return {
       createdObjects: remappedResults.filter((obj) => !obj.error),
-      errors: extractErrors(remappedResults, objects),
+      errors: extractErrors(remappedResults, objects, typeRegistry),
     };
   };
 

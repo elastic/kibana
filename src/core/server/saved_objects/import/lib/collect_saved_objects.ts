@@ -80,7 +80,7 @@ export async function collectSavedObjects({
   ]);
 
   // throw a BadRequest error if we see the same import object type/id more than once
-  const nonUniqueEntries = getNonUniqueEntries(entries, typeRegistry);
+  const nonUniqueEntries = getNonUniqueEntries(entries, typeRegistry, namespace);
   if (nonUniqueEntries.length > 0) {
     throw SavedObjectsImportError.nonUniqueImportObjects(nonUniqueEntries);
   }

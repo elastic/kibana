@@ -11,12 +11,17 @@ import { getObjKey } from '../../service/lib';
 import type { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import { SavedObjectsImportRetry } from '../types';
 
-export function splitOverwrites<T>(
-  savedObjects: Array<SavedObject<T>>,
-  retries: SavedObjectsImportRetry[],
-  typeRegistry: ISavedObjectTypeRegistry,
-  namespace?: string
-) {
+export function splitOverwrites<T>({
+  savedObjects,
+  retries,
+  typeRegistry,
+  namespace,
+}: {
+  savedObjects: Array<SavedObject<T>>;
+  retries: SavedObjectsImportRetry[];
+  typeRegistry: ISavedObjectTypeRegistry;
+  namespace?: string;
+}) {
   const objectsToOverwrite: Array<SavedObject<T>> = [];
   const objectsToNotOverwrite: Array<SavedObject<T>> = [];
   const overwrites = retries

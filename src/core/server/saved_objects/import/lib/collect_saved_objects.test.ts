@@ -11,6 +11,7 @@ import { SavedObjectsImportError } from '../errors';
 import { collectSavedObjects } from './collect_saved_objects';
 import { createLimitStream } from './create_limit_stream';
 import { getNonUniqueEntries } from './get_non_unique_entries';
+import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 
 jest.mock('./create_limit_stream');
 jest.mock('./get_non_unique_entries');
@@ -41,11 +42,30 @@ describe('collectSavedObjects()', () => {
 
   const obj1 = { type: 'a', id: '1', attributes: { title: 'my title 1' } };
   const obj2 = { type: 'b', id: '2', attributes: { title: 'my title 2' } };
+  const namespace = 'foo-ns';
+
+  let typeRegistry: SavedObjectTypeRegistry;
+
+  const registerType = (name: string) => {
+    typeRegistry.registerType({
+      name,
+      hidden: false,
+      namespaceType: 'single',
+      mappings: { properties: {} },
+      management: {
+        importableAndExportable: true,
+      },
+    });
+  };
+
+  beforeEach(() => {
+    typeRegistry = new SavedObjectTypeRegistry();
+  });
 
   describe('module calls', () => {
     test('limit stream with empty input stream is called with null', async () => {
       const readStream = createReadStream();
-      await collectSavedObjects({ readStream, supportedTypes: [], objectLimit });
+      await collectSavedObjects({ readStream, objectLimit, typeRegistry, namespace });
 
       expect(createLimitStream).toHaveBeenCalledWith(objectLimit);
       expect(limitStreamPush).toHaveBeenCalledTimes(1);
@@ -54,8 +74,8 @@ describe('collectSavedObjects()', () => {
 
     test('limit stream with non-empty input stream is called with all objects', async () => {
       const readStream = createReadStream(obj1, obj2);
-      const supportedTypes = [obj2.type];
-      await collectSavedObjects({ readStream, supportedTypes, objectLimit });
+      registerType(obj2.type);
+      await collectSavedObjects({ readStream, objectLimit, typeRegistry, namespace });
 
       expect(createLimitStream).toHaveBeenCalledWith(objectLimit);
       expect(limitStreamPush).toHaveBeenCalledTimes(3);
@@ -66,26 +86,30 @@ describe('collectSavedObjects()', () => {
 
     test('get non-unique entries with empty input stream is called with empty array', async () => {
       const readStream = createReadStream();
-      await collectSavedObjects({ readStream, supportedTypes: [], objectLimit });
+      await collectSavedObjects({ readStream, objectLimit, typeRegistry, namespace });
 
-      expect(getNonUniqueEntries).toHaveBeenCalledWith([]);
+      expect(getNonUniqueEntries).toHaveBeenCalledWith([], typeRegistry, namespace);
     });
 
     test('get non-unique entries with non-empty input stream is called with all entries', async () => {
       const readStream = createReadStream(obj1, obj2);
-      const supportedTypes = [obj2.type];
-      await collectSavedObjects({ readStream, supportedTypes, objectLimit });
+      registerType(obj2.type);
+      await collectSavedObjects({ readStream, objectLimit, typeRegistry, namespace });
 
-      expect(getNonUniqueEntries).toHaveBeenCalledWith([
-        { type: obj1.type, id: obj1.id },
-        { type: obj2.type, id: obj2.id },
-      ]);
+      expect(getNonUniqueEntries).toHaveBeenCalledWith(
+        [
+          { type: obj1.type, id: obj1.id },
+          { type: obj2.type, id: obj2.id },
+        ],
+        typeRegistry,
+        namespace
+      );
     });
 
     test('filter with empty input stream is not called', async () => {
       const readStream = createReadStream();
       const filter = jest.fn();
-      await collectSavedObjects({ readStream, supportedTypes: [], objectLimit, filter });
+      await collectSavedObjects({ readStream, objectLimit, typeRegistry, namespace, filter });
 
       expect(filter).not.toHaveBeenCalled();
     });
@@ -93,8 +117,8 @@ describe('collectSavedObjects()', () => {
     test('filter with non-empty input stream is called with all objects of supported types', async () => {
       const readStream = createReadStream(obj1, obj2);
       const filter = jest.fn();
-      const supportedTypes = [obj2.type];
-      await collectSavedObjects({ readStream, supportedTypes, objectLimit, filter });
+      registerType(obj2.type);
+      await collectSavedObjects({ readStream, objectLimit, typeRegistry, namespace, filter });
 
       expect(filter).toHaveBeenCalledTimes(1);
       expect(filter).toHaveBeenCalledWith(obj2);
@@ -107,7 +131,7 @@ describe('collectSavedObjects()', () => {
       const readStream = createReadStream();
       expect.assertions(2);
       try {
-        await collectSavedObjects({ readStream, supportedTypes: [], objectLimit });
+        await collectSavedObjects({ readStream, objectLimit, typeRegistry, namespace });
       } catch (e) {
         expect(e).toBeInstanceOf(SavedObjectsImportError);
         expect(e.message).toMatchInlineSnapshot(
@@ -118,25 +142,40 @@ describe('collectSavedObjects()', () => {
 
     test('collects nothing when stream is empty', async () => {
       const readStream = createReadStream();
-      const result = await collectSavedObjects({ readStream, supportedTypes: [], objectLimit });
+      const result = await collectSavedObjects({
+        readStream,
+        objectLimit,
+        typeRegistry,
+        namespace,
+      });
 
       expect(result).toEqual({ collectedObjects: [], errors: [], importIdMap: new Map() });
     });
 
     test('collects objects from stream', async () => {
       const readStream = createReadStream(obj1);
-      const supportedTypes = [obj1.type];
-      const result = await collectSavedObjects({ readStream, supportedTypes, objectLimit });
+      registerType(obj1.type);
+      const result = await collectSavedObjects({
+        readStream,
+        objectLimit,
+        typeRegistry,
+        namespace,
+      });
 
       const collectedObjects = [{ ...obj1, migrationVersion: {} }];
-      const importIdMap = new Map([[`${obj1.type}:${obj1.id}`, {}]]);
+      const importIdMap = new Map([[`${namespace}:${obj1.type}:${obj1.id}`, {}]]);
       expect(result).toEqual({ collectedObjects, errors: [], importIdMap });
     });
 
     test('unsupported types return as import errors', async () => {
       const readStream = createReadStream(obj1);
-      const supportedTypes = ['not-obj1-type'];
-      const result = await collectSavedObjects({ readStream, supportedTypes, objectLimit });
+      registerType('not-obj1-type');
+      const result = await collectSavedObjects({
+        readStream,
+        objectLimit,
+        typeRegistry,
+        namespace,
+      });
 
       const error = { type: 'unsupported_type' };
       const { title } = obj1.attributes;
@@ -146,11 +185,16 @@ describe('collectSavedObjects()', () => {
 
     test('returns mixed results', async () => {
       const readStream = createReadStream(obj1, obj2);
-      const supportedTypes = [obj2.type];
-      const result = await collectSavedObjects({ readStream, supportedTypes, objectLimit });
+      registerType(obj2.type);
+      const result = await collectSavedObjects({
+        readStream,
+        objectLimit,
+        typeRegistry,
+        namespace,
+      });
 
       const collectedObjects = [{ ...obj2, migrationVersion: {} }];
-      const importIdMap = new Map([[`${obj2.type}:${obj2.id}`, {}]]);
+      const importIdMap = new Map([[`${namespace}:${obj2.type}:${obj2.id}`, {}]]);
       const error = { type: 'unsupported_type' };
       const { title } = obj1.attributes;
       const errors = [{ error, type: obj1.type, id: obj1.id, title, meta: { title } }];
@@ -161,11 +205,12 @@ describe('collectSavedObjects()', () => {
       test('filters out objects when result === false', async () => {
         const readStream = createReadStream(obj1, obj2);
         const filter = jest.fn().mockReturnValue(false);
-        const supportedTypes = [obj2.type];
+        registerType(obj2.type);
         const result = await collectSavedObjects({
           readStream,
-          supportedTypes,
           objectLimit,
+          typeRegistry,
+          namespace,
           filter,
         });
 
@@ -178,16 +223,17 @@ describe('collectSavedObjects()', () => {
       test('does not filter out objects when result === true', async () => {
         const readStream = createReadStream(obj1, obj2);
         const filter = jest.fn().mockReturnValue(true);
-        const supportedTypes = [obj2.type];
+        registerType(obj2.type);
         const result = await collectSavedObjects({
           readStream,
-          supportedTypes,
+          typeRegistry,
+          namespace,
           objectLimit,
           filter,
         });
 
         const collectedObjects = [{ ...obj2, migrationVersion: {} }];
-        const importIdMap = new Map([[`${obj2.type}:${obj2.id}`, {}]]);
+        const importIdMap = new Map([[`${namespace}:${obj2.type}:${obj2.id}`, {}]]);
         const error = { type: 'unsupported_type' };
         const { title } = obj1.attributes;
         const errors = [{ error, type: obj1.type, id: obj1.id, title, meta: { title } }];
