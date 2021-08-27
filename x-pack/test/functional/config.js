@@ -451,7 +451,7 @@ export default async function ({ readConfigFile }) {
             indices: [
               {
                 names: ['*'],
-                privileges: ['read', 'delete', 'create_index', 'view_index_metadata'],
+                privileges: ['view_index_metadata'],
               },
             ],
           },
