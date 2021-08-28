@@ -34,7 +34,7 @@ const standardSelectItem = (
     <EuiDescriptionListTitle>
       <FormattedMessage
         id="indexPatternEditor.typeSelect.standardTitle"
-        defaultMessage="Standard index pattern"
+        defaultMessage="Standard data view"
       />
     </EuiDescriptionListTitle>
     <EuiDescriptionListDescription>
@@ -51,7 +51,7 @@ const rollupSelectItem = (
     <EuiDescriptionListTitle>
       <FormattedMessage
         id="indexPatternEditor.typeSelect.rollupTitle"
-        defaultMessage="Rollup index pattern"
+        defaultMessage="Rollup data view"
       />
       &nbsp;
       <EuiBadge color={euiColorAccent}>

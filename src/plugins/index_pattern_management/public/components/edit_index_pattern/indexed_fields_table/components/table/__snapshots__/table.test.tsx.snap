@@ -14,7 +14,7 @@ exports[`Table render name 2`] = `
     <EuiIconTip
       content={
         <span>
-          This field exists on the index pattern only.
+          This field exists on the data view only.
         </span>
       }
       title="Runtime field"
