@@ -2327,7 +2327,6 @@ export const UI_SETTINGS: {
     readonly TIMEPICKER_REFRESH_INTERVAL_DEFAULTS: "timepicker:refreshIntervalDefaults";
     readonly TIMEPICKER_QUICK_RANGES: "timepicker:quickRanges";
     readonly TIMEPICKER_TIME_DEFAULTS: "timepicker:timeDefaults";
-    readonly INDEXPATTERN_PLACEHOLDER: "indexPattern:placeholder";
     readonly FILTERS_PINNED_BY_DEFAULT: "filters:pinnedByDefault";
     readonly FILTERS_EDITOR_SUGGEST_VALUES: "filterEditor:suggestValues";
     readonly AUTOCOMPLETE_USE_TIMERANGE: "autocomplete:useTimeRange";
