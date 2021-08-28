@@ -5,27 +5,25 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { Observable, combineLatest, Subscription, Subject } from 'rxjs';
-import { map, distinctUntilChanged, shareReplay, take, debounceTime } from 'rxjs/operators';
+import type { Logger, LogMeta } from '@kbn/logging';
+import { combineLatest, Observable, Subject, Subscription } from 'rxjs';
+import { debounceTime, distinctUntilChanged, map, shareReplay, take } from 'rxjs/operators';
 import { isDeepStrictEqual } from 'util';
-
-import { CoreService } from '../../types';
-import { CoreContext } from '../core_context';
-import { Logger, LogMeta } from '../logging';
-import { InternalElasticsearchServiceSetup } from '../elasticsearch';
-import { InternalHttpServiceSetup } from '../http';
-import { InternalSavedObjectsServiceSetup } from '../saved_objects';
-import { PluginName } from '../plugins';
-import { InternalMetricsServiceSetup } from '../metrics';
-import { registerStatusRoute } from './routes';
-import { InternalEnvironmentServiceSetup } from '../environment';
-
-import { config, StatusConfigType } from './status_config';
-import { ServiceStatus, CoreStatus, InternalStatusServiceSetup } from './types';
+import type { CoreService } from '../../types/core_service';
+import type { CoreContext } from '../core_context';
+import type { InternalElasticsearchServiceSetup } from '../elasticsearch/types';
+import type { InternalEnvironmentServiceSetup } from '../environment/environment_service';
+import type { InternalHttpServiceSetup } from '../http/types';
+import type { InternalMetricsServiceSetup } from '../metrics/types';
+import type { PluginName } from '../plugins/types';
+import type { InternalSavedObjectsServiceSetup } from '../saved_objects/saved_objects_service';
 import { getSummaryStatus } from './get_summary_status';
-import { PluginsStatusService } from './plugins_status';
 import { getOverallStatusChanges } from './log_overall_status';
+import { PluginsStatusService } from './plugins_status';
+import { registerStatusRoute } from './routes/status';
+import type { StatusConfigType } from './status_config';
+import { config } from './status_config';
+import type { CoreStatus, InternalStatusServiceSetup, ServiceStatus } from './types';
 
 interface StatusLogMeta extends LogMeta {
   kibana: { status: ServiceStatus };

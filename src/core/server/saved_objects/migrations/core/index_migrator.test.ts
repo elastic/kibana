@@ -6,14 +6,15 @@
  * Side Public License, v 1.
  */
 
-import _ from 'lodash';
 import type { estypes } from '@elastic/elasticsearch';
+import _ from 'lodash';
 import { elasticsearchClientMock } from '../../../elasticsearch/client/mocks';
-import { SavedObjectUnsanitizedDoc, SavedObjectsSerializer } from '../../serialization';
-import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
-import { IndexMigrator } from './index_migrator';
-import { MigrationOpts } from './migration_context';
 import { loggingSystemMock } from '../../../logging/logging_system.mock';
+import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
+import { SavedObjectsSerializer } from '../../serialization/serializer';
+import type { SavedObjectUnsanitizedDoc } from '../../serialization/types';
+import { IndexMigrator } from './index_migrator';
+import type { MigrationOpts } from './migration_context';
 
 describe('IndexMigrator', () => {
   let testOpts: jest.Mocked<MigrationOpts> & {

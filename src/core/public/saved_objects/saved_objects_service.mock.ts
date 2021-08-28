@@ -5,8 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { SavedObjectsService, SavedObjectsStart } from './saved_objects_service';
+import type { SavedObjectsStart } from './saved_objects_service';
+import { SavedObjectsService } from './saved_objects_service';
 
 const createStartContractMock = () => {
   const mock: jest.Mocked<SavedObjectsStart> = {

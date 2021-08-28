@@ -5,12 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { Observable } from 'rxjs';
-
-import { PersistedLog } from './persisted_log';
+import type { HttpSetup } from '../../http/types';
 import { createLogKey } from './create_log_key';
-import { HttpSetup } from '../../http';
+import { PersistedLog } from './persisted_log';
 
 /** @public */
 export interface ChromeRecentlyAccessedHistoryItem {

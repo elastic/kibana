@@ -5,8 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { SavedObjectsFieldMapping, IndexMapping, SavedObjectsMappingProperties } from '../types';
+import type {
+  IndexMapping,
+  SavedObjectsFieldMapping,
+  SavedObjectsMappingProperties,
+} from '../types';
 import { getRootProperties } from './get_root_properties';
 
 /**

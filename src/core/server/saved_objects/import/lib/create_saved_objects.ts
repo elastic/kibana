@@ -5,10 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { SavedObject, SavedObjectsClientContract, SavedObjectsImportFailure } from '../../types';
+import type { SavedObject } from '../../../../types/saved_objects';
+import type { SavedObjectsClientContract } from '../../types';
+import type { CreatedObject, SavedObjectsImportFailure } from '../types';
 import { extractErrors } from './extract_errors';
-import { CreatedObject } from '../types';
 
 interface CreateSavedObjectsParams<T> {
   objects: Array<SavedObject<T>>;

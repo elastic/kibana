@@ -24,9 +24,167 @@
  * @packageDocumentation
  */
 
+import type { PluginOpaqueId } from '../server/plugins/types';
+import type { Capabilities } from '../types/capabilities';
+import type { ApplicationSetup, ApplicationStart } from './application/types';
+import type { ChromeDocTitle } from './chrome/doc_title/doc_title_service';
+import type {
+  ChromeNavControl,
+  ChromeNavControls,
+} from './chrome/nav_controls/nav_controls_service';
+import type { ChromeNavLink } from './chrome/nav_links/nav_link';
+import type { ChromeNavLinks } from './chrome/nav_links/nav_links_service';
+import type {
+  ChromeRecentlyAccessed,
+  ChromeRecentlyAccessedHistoryItem,
+} from './chrome/recently_accessed/recently_accessed_service';
+import type {
+  ChromeBadge,
+  ChromeBreadcrumb,
+  ChromeHelpExtension,
+  ChromeStart,
+  ChromeUserBanner,
+} from './chrome/types';
+import type {
+  ChromeHelpExtensionLinkBase,
+  ChromeHelpExtensionMenuCustomLink,
+  ChromeHelpExtensionMenuDiscussLink,
+  ChromeHelpExtensionMenuDocumentationLink,
+  ChromeHelpExtensionMenuGitHubLink,
+  ChromeHelpExtensionMenuLink,
+} from './chrome/ui/header/header_help_menu';
+import type { NavType } from './chrome/ui/header/types';
+import type { DeprecationsServiceStart } from './deprecations/deprecations_service';
+import type { DocLinksStart } from './doc_links/doc_links_service';
+import type { FatalErrorsSetup, FatalErrorsStart } from './fatal_errors/fatal_errors_service';
+import type { FatalErrorInfo } from './fatal_errors/get_error_info';
+import type { HttpSetup, HttpStart } from './http/types';
+import type { I18nStart } from './i18n/i18n_service';
 import './index.scss';
+import type { NotificationsSetup, NotificationsStart } from './notifications/notifications_service';
+import type { OverlayStart } from './overlays/overlay_service';
+import type { AsyncPlugin, Plugin, PluginInitializer } from './plugins/plugin';
+import type { PluginInitializerContext } from './plugins/plugin_context';
+import type { SavedObjectsStart } from './saved_objects/saved_objects_service';
+import type { IUiSettingsClient, UiSettingsState } from './ui_settings/types';
 
-import {
+export type {
+  DomainDeprecationDetails,
+  EnvironmentMode,
+  IExternalUrlPolicy,
+  PackageInfo,
+} from '../server/types';
+export type { AppCategory, UiSettingsParams, UiSettingsType, UserProvidedValues } from '../types';
+export { APP_WRAPPER_CLASS, DEFAULT_APP_CATEGORIES } from '../utils';
+export { AppNavLinkStatus, AppStatus, ScopedHistory } from './application';
+export type {
+  App,
+  AppDeepLink,
+  AppLeaveAction,
+  AppLeaveActionType,
+  AppLeaveConfirmAction,
+  AppLeaveDefaultAction,
+  AppLeaveHandler,
+  ApplicationSetup,
+  ApplicationStart,
+  AppMount,
+  AppMountParameters,
+  AppNavOptions,
+  AppUnmount,
+  AppUpdatableFields,
+  AppUpdater,
+  NavigateToAppOptions,
+  PublicAppDeepLinkInfo,
+  PublicAppInfo,
+} from './application';
+export { URL_MAX_LENGTH } from './core_app';
+export type { CoreContext, CoreSystem } from './core_system';
+export type { DeprecationsServiceStart, ResolveDeprecationResponse } from './deprecations';
+export type { KibanaExecutionContext } from './execution_context';
+export { HttpFetchError } from './http';
+export type {
+  HttpFetchOptions,
+  HttpFetchOptionsWithPath,
+  HttpFetchQuery,
+  HttpHandler,
+  HttpHeadersInit,
+  HttpInterceptor,
+  HttpInterceptorRequestError,
+  HttpInterceptorResponseError,
+  HttpRequestInit,
+  HttpResponse,
+  IAnonymousPaths,
+  IBasePath,
+  IExternalUrl,
+  IHttpFetchError,
+  IHttpInterceptController,
+  IHttpResponseInterceptorOverrides,
+} from './http';
+export { __kbnBootstrap__ } from './kbn_bootstrap';
+export type {
+  ErrorToastOptions,
+  IToasts,
+  Toast,
+  ToastInput,
+  ToastInputFields,
+  ToastOptions,
+  ToastsApi,
+  ToastsSetup,
+  ToastsStart,
+} from './notifications';
+export type {
+  OverlayBannersStart,
+  OverlayFlyoutOpenOptions,
+  OverlayFlyoutStart,
+  OverlayModalConfirmOptions,
+  OverlayModalOpenOptions,
+  OverlayModalStart,
+  OverlayRef,
+  OverlayStart,
+} from './overlays';
+export { SimpleSavedObject } from './saved_objects';
+export type {
+  ResolvedSimpleSavedObject,
+  SavedObject,
+  SavedObjectAttribute,
+  SavedObjectAttributes,
+  SavedObjectAttributeSingle,
+  SavedObjectError,
+  SavedObjectReference,
+  SavedObjectReferenceWithContext,
+  SavedObjectsBaseOptions,
+  SavedObjectsBatchResponse,
+  SavedObjectsBulkCreateObject,
+  SavedObjectsBulkCreateOptions,
+  SavedObjectsBulkUpdateObject,
+  SavedObjectsBulkUpdateOptions,
+  SavedObjectsClient,
+  SavedObjectsClientContract,
+  SavedObjectsCollectMultiNamespaceReferencesResponse,
+  SavedObjectsCreateOptions,
+  SavedObjectsFindOptions,
+  SavedObjectsFindOptionsReference,
+  SavedObjectsFindResponsePublic,
+  SavedObjectsImportActionRequiredWarning,
+  SavedObjectsImportAmbiguousConflictError,
+  SavedObjectsImportConflictError,
+  SavedObjectsImportFailure,
+  SavedObjectsImportMissingReferencesError,
+  SavedObjectsImportResponse,
+  SavedObjectsImportRetry,
+  SavedObjectsImportSimpleWarning,
+  SavedObjectsImportSuccess,
+  SavedObjectsImportUnknownError,
+  SavedObjectsImportUnsupportedTypeError,
+  SavedObjectsImportWarning,
+  SavedObjectsMigrationVersion,
+  SavedObjectsNamespaceType,
+  SavedObjectsResolveResponse,
+  SavedObjectsUpdateOptions,
+} from './saved_objects';
+export type { MountPoint, PublicUiSettingsParams, UnmountCallback } from './types';
+export type {
+  Capabilities,
   ChromeBadge,
   ChromeBreadcrumb,
   ChromeHelpExtension,
@@ -41,154 +199,29 @@ import {
   ChromeNavLink,
   ChromeNavLinks,
   ChromeDocTitle,
-  ChromeStart,
   ChromeRecentlyAccessed,
   ChromeRecentlyAccessedHistoryItem,
   ChromeUserBanner,
-  NavType,
-} from './chrome';
-import { FatalErrorsSetup, FatalErrorsStart, FatalErrorInfo } from './fatal_errors';
-import { HttpSetup, HttpStart } from './http';
-import { I18nStart } from './i18n';
-import { NotificationsSetup, NotificationsStart } from './notifications';
-import { OverlayStart } from './overlays';
-import {
+  ChromeStart,
+  DocLinksStart,
+  FatalErrorInfo,
+  FatalErrorsSetup,
+  FatalErrorsStart,
+  HttpSetup,
+  HttpStart,
+  I18nStart,
+  NotificationsSetup,
+  NotificationsStart,
   Plugin,
   AsyncPlugin,
   PluginInitializer,
   PluginInitializerContext,
+  SavedObjectsStart,
   PluginOpaqueId,
-} from './plugins';
-import { UiSettingsState, IUiSettingsClient } from './ui_settings';
-import { ApplicationSetup, Capabilities, ApplicationStart } from './application';
-import { DocLinksStart } from './doc_links';
-import { SavedObjectsStart } from './saved_objects';
-import { DeprecationsServiceStart } from './deprecations';
-
-export type {
-  PackageInfo,
-  EnvironmentMode,
-  IExternalUrlPolicy,
-  DomainDeprecationDetails,
-} from '../server/types';
-export type { CoreContext, CoreSystem } from './core_system';
-export { DEFAULT_APP_CATEGORIES, APP_WRAPPER_CLASS } from '../utils';
-export type { AppCategory, UiSettingsParams, UserProvidedValues, UiSettingsType } from '../types';
-
-export { AppNavLinkStatus, AppStatus, ScopedHistory } from './application';
-export type {
-  ApplicationSetup,
-  ApplicationStart,
-  App,
-  AppMount,
-  AppUnmount,
-  AppMountParameters,
-  AppLeaveHandler,
-  AppLeaveActionType,
-  AppLeaveAction,
-  AppLeaveDefaultAction,
-  AppLeaveConfirmAction,
-  AppUpdatableFields,
-  AppUpdater,
-  AppNavOptions,
-  AppDeepLink,
-  PublicAppInfo,
-  PublicAppDeepLinkInfo,
-  NavigateToAppOptions,
-} from './application';
-
-export { SimpleSavedObject } from './saved_objects';
-export type { ResolvedSimpleSavedObject } from './saved_objects';
-export type {
-  SavedObjectsBatchResponse,
-  SavedObjectsBulkCreateObject,
-  SavedObjectsBulkCreateOptions,
-  SavedObjectsBulkUpdateObject,
-  SavedObjectsBulkUpdateOptions,
-  SavedObjectsCreateOptions,
-  SavedObjectsFindResponsePublic,
-  SavedObjectsResolveResponse,
-  SavedObjectsUpdateOptions,
-  SavedObject,
-  SavedObjectAttribute,
-  SavedObjectAttributes,
-  SavedObjectAttributeSingle,
-  SavedObjectError,
-  SavedObjectReference,
-  SavedObjectsBaseOptions,
-  SavedObjectsFindOptions,
-  SavedObjectsFindOptionsReference,
-  SavedObjectsMigrationVersion,
-  SavedObjectsClientContract,
-  SavedObjectsClient,
-  SavedObjectsImportResponse,
-  SavedObjectsImportSuccess,
-  SavedObjectsImportConflictError,
-  SavedObjectsImportAmbiguousConflictError,
-  SavedObjectsImportUnsupportedTypeError,
-  SavedObjectsImportMissingReferencesError,
-  SavedObjectsImportUnknownError,
-  SavedObjectsImportFailure,
-  SavedObjectsImportRetry,
-  SavedObjectsNamespaceType,
-  SavedObjectsImportSimpleWarning,
-  SavedObjectsImportActionRequiredWarning,
-  SavedObjectsImportWarning,
-  SavedObjectReferenceWithContext,
-  SavedObjectsCollectMultiNamespaceReferencesResponse,
-} from './saved_objects';
-
-export { HttpFetchError } from './http';
-
-export type {
-  HttpHeadersInit,
-  HttpRequestInit,
-  HttpFetchOptions,
-  HttpFetchOptionsWithPath,
-  HttpFetchQuery,
-  HttpInterceptorResponseError,
-  HttpInterceptorRequestError,
-  HttpInterceptor,
-  HttpResponse,
-  HttpHandler,
-  IBasePath,
-  IAnonymousPaths,
-  IExternalUrl,
-  IHttpInterceptController,
-  IHttpFetchError,
-  IHttpResponseInterceptorOverrides,
-} from './http';
-
-export type {
-  OverlayStart,
-  OverlayBannersStart,
-  OverlayRef,
-  OverlayFlyoutStart,
-  OverlayFlyoutOpenOptions,
-  OverlayModalOpenOptions,
-  OverlayModalConfirmOptions,
-  OverlayModalStart,
-} from './overlays';
-
-export type {
-  Toast,
-  ToastInput,
-  IToasts,
-  ToastsApi,
-  ToastInputFields,
-  ToastsSetup,
-  ToastsStart,
-  ToastOptions,
-  ErrorToastOptions,
-} from './notifications';
-
-export type { DeprecationsServiceStart, ResolveDeprecationResponse } from './deprecations';
-
-export type { MountPoint, UnmountCallback, PublicUiSettingsParams } from './types';
-
-export { URL_MAX_LENGTH } from './core_app';
-
-export type { KibanaExecutionContext } from './execution_context';
+  IUiSettingsClient,
+  UiSettingsState,
+  NavType,
+};
 
 /**
  * Core services exposed to the `Plugin` setup lifecycle
@@ -282,45 +315,3 @@ export interface CoreStart {
     getInjectedVar: (name: string, defaultValue?: any) => unknown;
   };
 }
-
-export type {
-  Capabilities,
-  ChromeBadge,
-  ChromeBreadcrumb,
-  ChromeHelpExtension,
-  ChromeHelpExtensionMenuLink,
-  ChromeHelpExtensionLinkBase,
-  ChromeHelpExtensionMenuCustomLink,
-  ChromeHelpExtensionMenuDiscussLink,
-  ChromeHelpExtensionMenuDocumentationLink,
-  ChromeHelpExtensionMenuGitHubLink,
-  ChromeNavControl,
-  ChromeNavControls,
-  ChromeNavLink,
-  ChromeNavLinks,
-  ChromeDocTitle,
-  ChromeRecentlyAccessed,
-  ChromeRecentlyAccessedHistoryItem,
-  ChromeUserBanner,
-  ChromeStart,
-  DocLinksStart,
-  FatalErrorInfo,
-  FatalErrorsSetup,
-  FatalErrorsStart,
-  HttpSetup,
-  HttpStart,
-  I18nStart,
-  NotificationsSetup,
-  NotificationsStart,
-  Plugin,
-  AsyncPlugin,
-  PluginInitializer,
-  PluginInitializerContext,
-  SavedObjectsStart,
-  PluginOpaqueId,
-  IUiSettingsClient,
-  UiSettingsState,
-  NavType,
-};
-
-export { __kbnBootstrap__ } from './kbn_bootstrap';

@@ -6,14 +6,15 @@
  * Side Public License, v 1.
  */
 
+import type { History } from 'history';
+import { createHashHistory, createMemoryHistory } from 'history';
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
-import { createMemoryHistory, History, createHashHistory } from 'history';
-
-import { AppRouter, AppNotFound } from '../ui';
-import { MockedMounterMap, MockedMounterTuple } from '../test_types';
-import { createRenderer, createAppMounter, getUnmounter } from './utils';
+import type { MockedMounterMap, MockedMounterTuple } from '../test_types';
 import { AppStatus } from '../types';
+import { AppNotFound } from '../ui/app_not_found_screen';
+import { AppRouter } from '../ui/app_router';
+import { createAppMounter, createRenderer, getUnmounter } from './utils';
 
 describe('AppRouter', () => {
   let mounters: MockedMounterMap;

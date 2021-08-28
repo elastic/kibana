@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import mockFs from 'mock-fs';
 import { loggerMock } from '@kbn/logging/mocks';
+import mockFs from 'mock-fs';
 import { OsCgroupMetricsCollector } from './cgroup';
 
 describe('OsCgroupMetricsCollector', () => {

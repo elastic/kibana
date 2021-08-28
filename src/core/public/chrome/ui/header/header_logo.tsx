@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import './header_logo.scss';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { Observable } from 'rxjs';
 import Url from 'url';
-import { ChromeNavLink } from '../..';
-import { ElasticMark } from './elastic_mark';
-import { HttpStart } from '../../../http';
+import type { HttpStart } from '../../../http/types';
+import type { ChromeNavLink } from '../../nav_links/nav_link';
 import { LoadingIndicator } from '../loading_indicator';
+import { ElasticMark } from './elastic_mark';
+import './header_logo.scss';
 
 function findClosestAnchor(element: HTMLElement): HTMLAnchorElement | void {
   let current = element;

@@ -6,7 +6,11 @@
  * Side Public License, v 1.
  */
 import { estypes } from '@elastic/elasticsearch';
-import { InferSearchResponseOf, AggregateOf as AggregationResultOf, SearchHit } from './search';
+import type {
+  AggregateOf as AggregationResultOf,
+  InferSearchResponseOf,
+  SearchHit,
+} from './search';
 
 export type ESFilter = estypes.QueryDslQueryContainer;
 export type ESSearchRequest = estypes.SearchRequest;

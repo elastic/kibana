@@ -140,7 +140,8 @@ const promise = filesToProcessNow.reduce(async (prev, file, index) => {
       }
 
       const isValueImport = !!valueDeclaration;
-      const isTypeOnly = !!type && !isValueImport;
+      const isTypeOnly = declaration.isTypeOnly()
+        || (!!type && !isValueImport);
 
       let symbolSourceFile = symbol.getValueDeclaration()?.getSourceFile()
         || symbol.getDeclarations()?.[0]?.getSourceFile();
@@ -345,8 +346,6 @@ const promise = filesToProcessNow.reduce(async (prev, file, index) => {
       }
 
       if (namedExports.length) {
-
-        console.log(namedExports[0], namedExports[1]);
 
         const namespaceExport = exportDeclaration.getNamespaceExport();
 

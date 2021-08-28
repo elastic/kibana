@@ -5,13 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import React, { FunctionComponent, createElement } from 'react';
-
-import { RenderingMetadata } from '../types';
+import type { FunctionComponent } from 'react';
+import React, { createElement } from 'react';
+import type { RenderingMetadata } from '../types';
 import { Fonts } from './fonts';
-import { Styles } from './styles';
 import { Logo } from './logo';
+import { Styles } from './styles';
 
 interface Props {
   metadata: RenderingMetadata;

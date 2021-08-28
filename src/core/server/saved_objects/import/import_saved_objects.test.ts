@@ -5,30 +5,27 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { Readable } from 'stream';
 import { v4 as uuidv4 } from 'uuid';
-import {
-  SavedObjectsClientContract,
-  SavedObjectsType,
-  SavedObject,
-  SavedObjectsImportFailure,
-} from '../types';
-import { savedObjectsClientMock } from '../../mocks';
-import { ISavedObjectTypeRegistry } from '..';
+import type { SavedObject } from '../../../types/saved_objects';
+import type { ISavedObjectTypeRegistry } from '../saved_objects_type_registry';
 import { typeRegistryMock } from '../saved_objects_type_registry.mock';
-import { importSavedObjectsFromStream, ImportSavedObjectsOptions } from './import_saved_objects';
-import { SavedObjectsImportHook, SavedObjectsImportWarning } from './types';
-
-import {
-  collectSavedObjects,
-  regenerateIds,
-  validateReferences,
-  checkConflicts,
-  checkOriginConflicts,
-  createSavedObjects,
-  executeImportHooks,
-} from './lib';
+import { savedObjectsClientMock } from '../service/saved_objects_client.mock';
+import type { SavedObjectsClientContract, SavedObjectsType } from '../types';
+import type { ImportSavedObjectsOptions } from './import_saved_objects';
+import { importSavedObjectsFromStream } from './import_saved_objects';
+import { checkConflicts } from './lib/check_conflicts';
+import { checkOriginConflicts } from './lib/check_origin_conflicts';
+import { collectSavedObjects } from './lib/collect_saved_objects';
+import { createSavedObjects } from './lib/create_saved_objects';
+import { executeImportHooks } from './lib/execute_import_hooks';
+import { regenerateIds } from './lib/regenerate_ids';
+import { validateReferences } from './lib/validate_references';
+import type {
+  SavedObjectsImportFailure,
+  SavedObjectsImportHook,
+  SavedObjectsImportWarning,
+} from './types';
 
 jest.mock('./lib/collect_saved_objects');
 jest.mock('./lib/regenerate_ids');

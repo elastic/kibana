@@ -5,14 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { i18n } from '@kbn/i18n';
-
 import { Subscription } from 'rxjs';
-import { I18nStart } from '../i18n';
-import { ToastsService, ToastsSetup, ToastsStart } from './toasts';
-import { IUiSettingsClient } from '../ui_settings';
-import { OverlayStart } from '../overlays';
+import type { I18nStart } from '../i18n/i18n_service';
+import type { OverlayStart } from '../overlays/overlay_service';
+import type { IUiSettingsClient } from '../ui_settings/types';
+import type { ToastsSetup, ToastsStart } from './toasts/toasts_service';
+import { ToastsService } from './toasts/toasts_service';
 
 interface SetupDeps {
   uiSettings: IUiSettingsClient;

@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import uuid from 'uuid';
+import type { Logger } from '@kbn/logging';
+import type { PathConfigType } from '@kbn/utils';
 import { join } from 'path';
-import { PathConfigType } from '@kbn/utils';
+import uuid from 'uuid';
+import type { HttpConfigType } from '../http/http_config';
 import { readFile, writeFile } from './fs';
-import { HttpConfigType } from '../http';
-import { Logger } from '../logging';
 
 const FILE_ENCODING = 'utf8';
 const FILE_NAME = 'uuid';

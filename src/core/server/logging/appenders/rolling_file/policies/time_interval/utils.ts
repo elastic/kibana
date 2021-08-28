@@ -5,8 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { Duration, unitOfTime } from 'moment-timezone';
+import type { Duration } from 'moment-timezone';
+import { unitOfTime } from 'moment-timezone';
 
 /**
  * Returns the highest time unit of the given duration

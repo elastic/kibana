@@ -5,8 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { OverlayStart } from 'kibana/public';
+import type { OverlayStart } from '../overlays/overlay_service';
 
 export type ConfirmHandlerCallback = (result: boolean) => void;
 export type ConfirmHandler = (message: string, callback: ConfirmHandlerCallback) => void;

@@ -7,15 +7,15 @@
  */
 
 /* eslint-disable max-classes-per-file */
-
-import { EuiFlyout, EuiFlyoutSize } from '@elastic/eui';
+import type { EuiFlyoutSize } from '@elastic/eui';
+import { EuiFlyout } from '@elastic/eui';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Subject } from 'rxjs';
-import { I18nStart } from '../../i18n';
-import { MountPoint } from '../../types';
-import { OverlayRef } from '../types';
-import { MountWrapper } from '../../utils';
+import type { I18nStart } from '../../i18n/i18n_service';
+import type { MountPoint } from '../../types';
+import { MountWrapper } from '../../utils/mount';
+import type { OverlayRef } from '../types';
 
 /**
  * A FlyoutRef is a reference to an opened flyout panel. It offers methods to

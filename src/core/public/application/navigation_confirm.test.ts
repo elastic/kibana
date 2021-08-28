@@ -5,10 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { OverlayStart } from '../overlays';
+import type { OverlayStart } from '../overlays/overlay_service';
 import { overlayServiceMock } from '../overlays/overlay_service.mock';
-import { getUserConfirmationHandler, ConfirmHandler } from './navigation_confirm';
+import type { ConfirmHandler } from './navigation_confirm';
+import { getUserConfirmationHandler } from './navigation_confirm';
 
 const nextTick = () => new Promise((resolve) => setImmediate(resolve));
 

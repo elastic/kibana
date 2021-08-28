@@ -5,9 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { errors as esErrors } from '@elastic/elasticsearch';
 import { get } from 'lodash';
+import { SavedObjectsErrorHelpers } from './errors';
 
 const responseErrors = {
   isServiceUnavailable: (statusCode: number) => statusCode === 503,
@@ -22,9 +22,6 @@ const responseErrors = {
 const { ConnectionError, NoLivingConnectionsError, TimeoutError } = esErrors;
 const SCRIPT_CONTEXT_DISABLED_REGEX = /(?:cannot execute scripts using \[)([a-z]*)(?:\] context)/;
 const INLINE_SCRIPTS_DISABLED_MESSAGE = 'cannot execute [inline] scripts';
-
-import { SavedObjectsErrorHelpers } from './errors';
-
 type EsErrors =
   | esErrors.ConnectionError
   | esErrors.NoLivingConnectionsError

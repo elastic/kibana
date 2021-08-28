@@ -5,9 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { deepFreeze } from '@kbn/std';
-import { SavedObjectsType } from './types';
+import type { SavedObjectsType } from './types';
 
 /**
  * See {@link SavedObjectTypeRegistry} for documentation.

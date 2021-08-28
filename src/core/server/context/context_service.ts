@@ -5,10 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { PluginOpaqueId } from '../../server';
-import { IContextContainer, ContextContainer } from './container';
-import { CoreContext } from '../core_context';
+import type { CoreContext } from '../core_context';
+import type { PluginOpaqueId } from '../plugins/types';
+import type { IContextContainer } from './container/context';
+import { ContextContainer } from './container/context';
 
 type PrebootDeps = SetupDeps;
 

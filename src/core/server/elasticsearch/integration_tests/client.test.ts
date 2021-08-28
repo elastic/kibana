@@ -5,12 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import {
-  createTestServers,
-  TestElasticsearchUtils,
-  TestKibanaUtils,
-} from '../../../test_helpers/kbn_server';
+import type { TestElasticsearchUtils, TestKibanaUtils } from '../../../test_helpers/kbn_server';
+import { createTestServers } from '../../../test_helpers/kbn_server';
 
 describe('elasticsearch clients', () => {
   let esServer: TestElasticsearchUtils;

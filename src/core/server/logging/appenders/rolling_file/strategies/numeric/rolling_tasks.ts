@@ -5,9 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import { access, readdir, rename, unlink } from 'fs/promises';
 import { join } from 'path';
-import { readdir, rename, unlink, access } from 'fs/promises';
 import { getFileNameMatcher, getRollingFileName } from './pattern_matcher';
 
 export const shouldSkipRollout = async ({ logFilePath }: { logFilePath: string }) => {

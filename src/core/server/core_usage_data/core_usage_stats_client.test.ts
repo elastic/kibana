@@ -5,29 +5,32 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { httpServerMock, httpServiceMock, savedObjectsRepositoryMock } from '../mocks';
-import { CORE_USAGE_STATS_TYPE, CORE_USAGE_STATS_ID } from './constants';
-import {
+import { httpServerMock } from '../http/http_server.mocks';
+import { httpServiceMock } from '../http/http_service.mock';
+import { savedObjectsRepositoryMock } from '../saved_objects/service/lib/repository.mock';
+import { DEFAULT_NAMESPACE_STRING } from '../saved_objects/service/lib/utils';
+import { CORE_USAGE_STATS_ID, CORE_USAGE_STATS_TYPE } from './constants';
+import type {
   BaseIncrementOptions,
+  IncrementSavedObjectsExportOptions,
   IncrementSavedObjectsImportOptions,
   IncrementSavedObjectsResolveImportErrorsOptions,
-  IncrementSavedObjectsExportOptions,
+} from './core_usage_stats_client';
+import {
   BULK_CREATE_STATS_PREFIX,
   BULK_GET_STATS_PREFIX,
   BULK_UPDATE_STATS_PREFIX,
+  CoreUsageStatsClient,
   CREATE_STATS_PREFIX,
   DELETE_STATS_PREFIX,
+  EXPORT_STATS_PREFIX,
   FIND_STATS_PREFIX,
   GET_STATS_PREFIX,
-  RESOLVE_STATS_PREFIX,
-  UPDATE_STATS_PREFIX,
   IMPORT_STATS_PREFIX,
   RESOLVE_IMPORT_STATS_PREFIX,
-  EXPORT_STATS_PREFIX,
+  RESOLVE_STATS_PREFIX,
+  UPDATE_STATS_PREFIX,
 } from './core_usage_stats_client';
-import { CoreUsageStatsClient } from '.';
-import { DEFAULT_NAMESPACE_STRING } from '../saved_objects/service/lib/utils';
 
 describe('CoreUsageStatsClient', () => {
   const setup = (namespace?: string) => {

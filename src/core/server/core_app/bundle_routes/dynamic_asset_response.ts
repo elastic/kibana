@@ -5,16 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { createReadStream } from 'fs';
-import { resolve, extname } from 'path';
-import mime from 'mime-types';
 import agent from 'elastic-apm-node';
-
-import { fstat, close } from './fs';
-import { RequestHandler } from '../../http';
-import { IFileHashCache } from './file_hash_cache';
+import { createReadStream } from 'fs';
+import mime from 'mime-types';
+import { extname, resolve } from 'path';
+import type { RequestHandler } from '../../http/router/router';
 import { getFileHash } from './file_hash';
+import type { IFileHashCache } from './file_hash_cache';
+import { close, fstat } from './fs';
 import { selectCompressedFile } from './select_compressed_file';
 
 const MINUTE = 60;

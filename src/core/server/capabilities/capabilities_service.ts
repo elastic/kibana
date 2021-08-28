@@ -5,14 +5,16 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { Capabilities, CapabilitiesProvider, CapabilitiesSwitcher } from './types';
-import { CoreContext } from '../core_context';
-import { Logger } from '../logging';
-import { InternalHttpServicePreboot, InternalHttpServiceSetup, KibanaRequest } from '../http';
+import type { Logger } from '@kbn/logging';
+import type { Capabilities } from '../../types/capabilities';
+import type { CoreContext } from '../core_context';
+import { KibanaRequest } from '../http/router/request';
+import type { InternalHttpServicePreboot, InternalHttpServiceSetup } from '../http/types';
 import { mergeCapabilities } from './merge_capabilities';
-import { getCapabilitiesResolver, CapabilitiesResolver } from './resolve_capabilities';
+import type { CapabilitiesResolver } from './resolve_capabilities';
+import { getCapabilitiesResolver } from './resolve_capabilities';
 import { registerRoutes } from './routes';
+import type { CapabilitiesProvider, CapabilitiesSwitcher } from './types';
 
 /**
  * APIs to manage the {@link Capabilities} that will be used by the application.

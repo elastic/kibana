@@ -5,23 +5,16 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import {
+import Boom from '@hapi/boom';
+import type {
   ResponseObject as HapiResponseObject,
   ResponseToolkit as HapiResponseToolkit,
 } from '@hapi/hapi';
-import typeDetect from 'type-detect';
-import Boom from '@hapi/boom';
 import * as stream from 'stream';
-
+import typeDetect from 'type-detect';
 import { isResponseError as isElasticsearchResponseError } from '../../elasticsearch/client/errors';
-
-import {
-  HttpResponsePayload,
-  KibanaResponse,
-  ResponseError,
-  ResponseErrorAttributes,
-} from './response';
+import type { HttpResponsePayload, ResponseError, ResponseErrorAttributes } from './response';
+import { KibanaResponse } from './response';
 
 function setHeaders(response: HapiResponseObject, headers: Record<string, string | string[]> = {}) {
   Object.entries(headers).forEach(([header, value]) => {

@@ -5,9 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { SavedObject } from '../../types';
-import { SavedObjectsImportHookResult, SavedObjectsImportWarning } from '../types';
+import type { SavedObject } from '../../../../types/saved_objects';
+import type { SavedObjectsImportHookResult, SavedObjectsImportWarning } from '../types';
 import { executeImportHooks } from './execute_import_hooks';
 
 const createObject = (type: string, id: string): SavedObject => ({

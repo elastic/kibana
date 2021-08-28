@@ -5,8 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { CoreWindow, read } from './plugin_reader';
+import type { CoreWindow } from './plugin_reader';
+import { read } from './plugin_reader';
 
 const coreWindow: CoreWindow & {
   __kbnBundles__: { stub(key: string, value: any): void };

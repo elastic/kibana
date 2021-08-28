@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
+import { I18nProvider } from '@kbn/i18n/react';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { I18nProvider } from '@kbn/i18n/react';
-import type { AppMountParameters } from '../../application';
-import type { HttpSetup } from '../../http';
-import type { NotificationsSetup } from '../../notifications';
+import type { AppMountParameters } from '../../application/types';
+import type { HttpSetup } from '../../http/types';
+import type { NotificationsSetup } from '../../notifications/notifications_service';
 import { StatusApp } from './status_app';
 
 interface Deps {

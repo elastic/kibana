@@ -5,15 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { mockReactDomRender, mockReactDomUnmount } from '../overlay.test.mocks';
-
-import React from 'react';
 import { mount } from 'enzyme';
+import React from 'react';
 import { i18nServiceMock } from '../../i18n/i18n_service.mock';
-import { ModalService, OverlayModalStart } from './modal_service';
-import { mountReactNode } from '../../utils';
-import { OverlayRef } from '../types';
+import { mountReactNode } from '../../utils/mount';
+import { mockReactDomRender, mockReactDomUnmount } from '../overlay.test.mocks';
+import type { OverlayRef } from '../types';
+import type { OverlayModalStart } from './modal_service';
+import { ModalService } from './modal_service';
 
 const i18nMock = i18nServiceMock.createStartContract();
 

@@ -5,46 +5,45 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { Server, Request } from '@hapi/hapi';
+import type { Request } from '@hapi/hapi';
+import { Server } from '@hapi/hapi';
 import HapiStaticFiles from '@hapi/inert';
-import url from 'url';
-import uuid from 'uuid';
+import type { Logger, LoggerFactory } from '@kbn/logging';
 import {
   createServer,
   getListenerOptions,
-  getServerOptions,
   getRequestId,
+  getServerOptions,
 } from '@kbn/server-http-tools';
-
 import type { Duration } from 'moment';
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
-import { Logger, LoggerFactory } from '../logging';
-import { HttpConfig } from './http_config';
-import type { InternalExecutionContextSetup } from '../execution_context';
-import { adoptToHapiAuthFormat, AuthenticationHandler } from './lifecycle/auth';
-import { adoptToHapiOnPreAuth, OnPreAuthHandler } from './lifecycle/on_pre_auth';
-import { adoptToHapiOnPostAuthFormat, OnPostAuthHandler } from './lifecycle/on_post_auth';
-import { adoptToHapiOnRequest, OnPreRoutingHandler } from './lifecycle/on_pre_routing';
-import { adoptToHapiOnPreResponseFormat, OnPreResponseHandler } from './lifecycle/on_pre_response';
-import {
-  IRouter,
-  RouteConfigOptions,
-  KibanaRouteOptions,
-  KibanaRequestState,
-  isSafeMethod,
-  RouterRoute,
-} from './router';
-import {
-  SessionStorageCookieOptions,
-  createCookieSessionStorageFactory,
-} from './cookie_session_storage';
+import url from 'url';
+import uuid from 'uuid';
+import type { InternalExecutionContextSetup } from '../execution_context/execution_context_service';
+import type { GetAuthHeaders } from './auth_headers_storage';
+import { AuthHeadersStorage } from './auth_headers_storage';
 import { AuthStateStorage } from './auth_state_storage';
-import { AuthHeadersStorage, GetAuthHeaders } from './auth_headers_storage';
 import { BasePath } from './base_path_service';
-import { getEcsResponseLog } from './logging';
-import { HttpServiceSetup, HttpServerInfo, HttpAuth } from './types';
+import type { SessionStorageCookieOptions } from './cookie_session_storage';
+import { createCookieSessionStorageFactory } from './cookie_session_storage';
+import { HttpConfig } from './http_config';
+import type { AuthenticationHandler } from './lifecycle/auth';
+import { adoptToHapiAuthFormat } from './lifecycle/auth';
+import type { OnPostAuthHandler } from './lifecycle/on_post_auth';
+import { adoptToHapiOnPostAuthFormat } from './lifecycle/on_post_auth';
+import type { OnPreAuthHandler } from './lifecycle/on_pre_auth';
+import { adoptToHapiOnPreAuth } from './lifecycle/on_pre_auth';
+import type { OnPreResponseHandler } from './lifecycle/on_pre_response';
+import { adoptToHapiOnPreResponseFormat } from './lifecycle/on_pre_response';
+import type { OnPreRoutingHandler } from './lifecycle/on_pre_routing';
+import { adoptToHapiOnRequest } from './lifecycle/on_pre_routing';
+import { getEcsResponseLog } from './logging/get_response_log';
+import type { KibanaRequestState, KibanaRouteOptions } from './router/request';
+import type { RouteConfigOptions } from './router/route';
+import { isSafeMethod } from './router/route';
+import type { IRouter, RouterRoute } from './router/router';
+import type { HttpAuth, HttpServerInfo, HttpServiceSetup } from './types';
 
 /** @internal */
 export interface HttpServerSetup {

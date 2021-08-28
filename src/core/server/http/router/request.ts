@@ -5,19 +5,20 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import type { Request, RequestApplicationState, RouteOptions, RouteOptionsApp } from '@hapi/hapi';
+import { deepFreeze } from '@kbn/std';
+import type { RecursiveReadonly } from '@kbn/utility-types';
+import { fromEvent, merge, Observable } from 'rxjs';
+import { first, shareReplay, takeUntil } from 'rxjs/operators';
 import { URL } from 'url';
 import uuid from 'uuid';
-import { Request, RouteOptionsApp, RequestApplicationState, RouteOptions } from '@hapi/hapi';
-import { Observable, fromEvent, merge } from 'rxjs';
-import { shareReplay, first, takeUntil } from 'rxjs/operators';
-import { RecursiveReadonly } from '@kbn/utility-types';
-import { deepFreeze } from '@kbn/std';
-
-import { Headers } from './headers';
-import { RouteMethod, RouteConfigOptions, validBodyOutput, isSafeMethod } from './route';
-import { KibanaSocket, IKibanaSocket } from './socket';
-import { RouteValidator, RouteValidatorFullConfig } from './validator';
+import type { Headers } from './headers';
+import type { RouteConfigOptions, RouteMethod } from './route';
+import { isSafeMethod, validBodyOutput } from './route';
+import type { IKibanaSocket } from './socket';
+import { KibanaSocket } from './socket';
+import type { RouteValidatorFullConfig } from './validator/validator';
+import { RouteValidator } from './validator/validator';
 
 const requestSymbol = Symbol('request');
 

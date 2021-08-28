@@ -5,11 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { schema, ByteSizeValue } from '@kbn/config-schema';
-import { LogRecord } from '@kbn/logging';
+import { ByteSizeValue, schema } from '@kbn/config-schema';
+import type { LogRecord } from '@kbn/logging';
 import { RollingFileContext } from '../../rolling_file_context';
-import { TriggeringPolicy } from '../policy';
+import type { TriggeringPolicy } from '../policy';
 
 export interface SizeLimitTriggeringPolicyConfig {
   type: 'size-limit';

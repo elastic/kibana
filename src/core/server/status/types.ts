@@ -5,10 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { Observable } from 'rxjs';
 import { deepFreeze } from '@kbn/std';
-import { PluginName } from '../plugins';
+import { Observable } from 'rxjs';
+import type { PluginName } from '../plugins/types';
 
 /**
  * The current status of a service at a point in time.

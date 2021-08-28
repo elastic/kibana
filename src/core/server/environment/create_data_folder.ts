@@ -5,10 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { PathConfigType } from '@kbn/utils';
+import type { Logger } from '@kbn/logging';
+import type { PathConfigType } from '@kbn/utils';
 import { mkdir } from './fs';
-import { Logger } from '../logging';
 
 export async function createDataFolder({
   pathConfig,

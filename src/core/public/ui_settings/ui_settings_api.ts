@@ -5,11 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { BehaviorSubject } from 'rxjs';
-
-import { HttpSetup } from '../http';
-import { UiSettingsState } from './types';
+import type { HttpSetup } from '../http/types';
+import type { UiSettingsState } from './types';
 
 export interface UiSettingsApiResponse {
   settings: UiSettingsState;

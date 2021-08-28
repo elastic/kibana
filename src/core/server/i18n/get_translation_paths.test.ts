@@ -5,10 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { resolve, join } from 'path';
-import { globbyMock, readFileMock } from './get_translation_paths.test.mocks';
+import { join, resolve } from 'path';
 import { getTranslationPaths } from './get_translation_paths';
+import { globbyMock, readFileMock } from './get_translation_paths.test.mocks';
 
 describe('getTranslationPaths', () => {
   beforeEach(() => {

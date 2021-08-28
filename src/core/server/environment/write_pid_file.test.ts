@@ -5,10 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { writeFile, exists } from './fs';
-import { writePidFile } from './write_pid_file';
 import { loggingSystemMock } from '../logging/logging_system.mock';
+import { exists, writeFile } from './fs';
+import { writePidFile } from './write_pid_file';
 
 jest.mock('./fs', () => ({
   writeFile: jest.fn(),

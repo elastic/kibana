@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { mount } from 'enzyme';
-import { MountWrapper, mountReactNode } from './mount';
+import React from 'react';
+import { mountReactNode, MountWrapper } from './mount';
 
 describe('MountWrapper', () => {
   it('renders an html element in react tree', () => {

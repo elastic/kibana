@@ -5,10 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import { SavedObjectsErrorHelpers } from '../../service/lib/errors';
+import { savedObjectsClientMock } from '../../service/saved_objects_client.mock';
 import { getNonExistingReferenceAsKeys, validateReferences } from './validate_references';
-import { savedObjectsClientMock } from '../../../mocks';
-import { SavedObjectsErrorHelpers } from '../../service';
 
 describe('getNonExistingReferenceAsKeys()', () => {
   const savedObjectsClient = savedObjectsClientMock.create();

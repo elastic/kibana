@@ -5,13 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import type { Logger } from '@kbn/logging';
 import { Observable, Subscription } from 'rxjs';
-import { Logger } from '@kbn/logging';
-import { CoreService } from '../../types';
-import { LoggingConfig, LoggerContextConfigInput } from './logging_config';
-import { ILoggingSystem } from './logging_system';
-import { CoreContext } from '../core_context';
+import type { CoreService } from '../../types/core_service';
+import type { CoreContext } from '../core_context';
+import type { LoggerContextConfigInput } from './logging_config';
+import { LoggingConfig } from './logging_config';
+import type { ILoggingSystem } from './logging_system';
 
 /**
  * Provides APIs to plugins for customizing the plugin's logger.

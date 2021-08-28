@@ -5,9 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { HttpService } from '../public/http';
 import { fatalErrorsServiceMock } from '../public/fatal_errors/fatal_errors_service.mock';
+import { HttpService } from '../public/http/http_service';
 import { injectedMetadataServiceMock } from '../public/injected_metadata/injected_metadata_service.mock';
 
 export type SetupTap = (

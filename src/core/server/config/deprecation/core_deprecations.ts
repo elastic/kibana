@@ -5,8 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { ConfigDeprecationProvider, ConfigDeprecation } from '@kbn/config';
+import type { ConfigDeprecation, ConfigDeprecationProvider } from '@kbn/config';
 
 const configPathDeprecation: ConfigDeprecation = (settings, fromPath, addDeprecation) => {
   if (process.env?.CONFIG_PATH) {

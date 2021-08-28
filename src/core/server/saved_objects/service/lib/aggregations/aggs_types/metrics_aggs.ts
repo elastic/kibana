@@ -5,8 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { schema as s, ObjectType } from '@kbn/config-schema';
+import { ObjectType, schema as s } from '@kbn/config-schema';
 import { sortSchema } from './common_schemas';
 
 /**

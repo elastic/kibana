@@ -5,12 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { diffMappings } from './build_active_mappings';
 import * as Index from './elastic_index';
 import { migrateRawDocs } from './migrate_raw_docs';
-import { Context, migrationContext, MigrationOpts } from './migration_context';
-import { coordinateMigration, MigrationResult } from './migration_coordinator';
+import type { Context, MigrationOpts } from './migration_context';
+import { migrationContext } from './migration_context';
+import type { MigrationResult } from './migration_coordinator';
+import { coordinateMigration } from './migration_coordinator';
 
 /*
  * Core logic for migrating the mappings and documents in an index.

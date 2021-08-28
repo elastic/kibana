@@ -5,8 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { SavedObjectsClientContract } from '../../saved_objects/types';
+import type { SavedObjectsClientContract } from '../../saved_objects/types';
 import { isConfigVersionUpgradeable } from './is_config_version_upgradeable';
 
 /**

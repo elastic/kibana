@@ -5,11 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import React, { FunctionComponent } from 'react';
-import { EuiText, EuiFlexGroup, EuiFlexItem, EuiTitle, EuiBadge } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import type { FormattedStatus } from '../lib';
+import type { FunctionComponent } from 'react';
+import React from 'react';
+import type { FormattedStatus } from '../lib/load_status';
 
 interface ServerStateProps {
   name: string;

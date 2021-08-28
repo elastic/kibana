@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import Path from 'path';
-import fs from 'fs/promises';
 import { estypes } from '@elastic/elasticsearch';
-import * as kbnTestServer from '../../../../test_helpers/kbn_server';
-import { Root } from '../../../root';
-import JSON5 from 'json5';
-import { ElasticsearchClient } from '../../../elasticsearch';
 import { Env } from '@kbn/config';
 import { REPO_ROOT } from '@kbn/utils';
+import fs from 'fs/promises';
+import JSON5 from 'json5';
+import Path from 'path';
+import * as kbnTestServer from '../../../../test_helpers/kbn_server';
 import { getEnvOptions } from '../../../config/mocks';
+import type { ElasticsearchClient } from '../../../elasticsearch/client/types';
+import { Root } from '../../../root';
 
 const kibanaVersion = Env.createDefault(REPO_ROOT, getEnvOptions()).packageInfo.version;
 const targetIndex = `.kibana_${kibanaVersion}_001`;

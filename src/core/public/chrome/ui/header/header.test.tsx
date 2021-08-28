@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
+import { mountWithIntl, StubBrowserStorage } from '@kbn/test/jest';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { BehaviorSubject } from 'rxjs';
-import { StubBrowserStorage, mountWithIntl } from '@kbn/test/jest';
+import { applicationServiceMock } from '../../../application/application_service.mock';
 import { httpServiceMock } from '../../../http/http_service.mock';
-import { applicationServiceMock } from '../../../mocks';
+import type { ChromeBreadcrumbsAppendExtension } from '../../types';
 import { Header } from './header';
-import { ChromeBreadcrumbsAppendExtension } from '../../types';
 
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
   htmlIdGenerator: () => () => 'mockId',

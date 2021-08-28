@@ -5,8 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { CoreUsageStatsClient } from '.';
+import { CoreUsageStatsClient } from './core_usage_stats_client';
 
 const createUsageStatsClientMock = () =>
   (({

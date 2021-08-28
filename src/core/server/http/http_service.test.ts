@@ -5,23 +5,23 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { mockHttpServer } from './http_service.test.mocks';
-
+import { ConfigService, Env } from '@kbn/config';
+import { REPO_ROOT } from '@kbn/dev-utils';
 import { noop } from 'lodash';
 import { BehaviorSubject } from 'rxjs';
-import { REPO_ROOT } from '@kbn/dev-utils';
 import { getEnvOptions } from '../config/mocks';
-import { HttpService } from '.';
-import { HttpConfigType, config } from './http_config';
-import { httpServerMock } from './http_server.mocks';
-import { ConfigService, Env } from '../config';
-import { loggingSystemMock } from '../logging/logging_system.mock';
 import { contextServiceMock } from '../context/context_service.mock';
+import { config as cspConfig } from '../csp/config';
 import { executionContextServiceMock } from '../execution_context/execution_context_service.mock';
-import { config as cspConfig } from '../csp';
-import { config as externalUrlConfig, ExternalUrlConfig } from '../external_url';
-import { Router } from './router';
+import { config as externalUrlConfig } from '../external_url/config';
+import { ExternalUrlConfig } from '../external_url/external_url_config';
+import { loggingSystemMock } from '../logging/logging_system.mock';
+import type { HttpConfigType } from './http_config';
+import { config } from './http_config';
+import { httpServerMock } from './http_server.mocks';
+import { HttpService } from './http_service';
+import { mockHttpServer } from './http_service.test.mocks';
+import { Router } from './router/router';
 
 const logger = loggingSystemMock.create();
 const env = Env.createDefault(REPO_ROOT, getEnvOptions());

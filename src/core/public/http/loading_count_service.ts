@@ -5,7 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import {
   distinctUntilChanged,
@@ -16,8 +15,8 @@ import {
   takeUntil,
   tap,
 } from 'rxjs/operators';
-import { FatalErrorsSetup } from '../fatal_errors';
-import { CoreService } from '../../types';
+import type { CoreService } from '../../types/core_service';
+import type { FatalErrorsSetup } from '../fatal_errors/fatal_errors_service';
 
 /** @public */
 export interface LoadingCountSetup {

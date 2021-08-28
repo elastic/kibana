@@ -5,38 +5,31 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { Readable } from 'stream';
 import { v4 as uuidv4 } from 'uuid';
-import {
-  SavedObjectsClientContract,
-  SavedObjectsType,
-  SavedObject,
-  SavedObjectsImportFailure,
-  SavedObjectsImportRetry,
-  SavedObjectReference,
-  SavedObjectsImportWarning,
-} from '../types';
-import { savedObjectsClientMock } from '../../mocks';
-import { ISavedObjectTypeRegistry, SavedObjectsImportHook } from '..';
+import type { SavedObject, SavedObjectReference } from '../../../types/saved_objects';
+import type { ISavedObjectTypeRegistry } from '../saved_objects_type_registry';
 import { typeRegistryMock } from '../saved_objects_type_registry.mock';
-import {
-  resolveSavedObjectsImportErrors,
-  ResolveSavedObjectsImportErrorsOptions,
-} from './resolve_import_errors';
-
-import {
-  validateRetries,
-  collectSavedObjects,
-  regenerateIds,
-  validateReferences,
-  checkConflicts,
-  getImportIdMapForRetries,
-  splitOverwrites,
-  createSavedObjects,
-  createObjectsFilter,
-  executeImportHooks,
-} from './lib';
+import { savedObjectsClientMock } from '../service/saved_objects_client.mock';
+import type { SavedObjectsClientContract, SavedObjectsType } from '../types';
+import { checkConflicts } from './lib/check_conflicts';
+import { getImportIdMapForRetries } from './lib/check_origin_conflicts';
+import { collectSavedObjects } from './lib/collect_saved_objects';
+import { createObjectsFilter } from './lib/create_objects_filter';
+import { createSavedObjects } from './lib/create_saved_objects';
+import { executeImportHooks } from './lib/execute_import_hooks';
+import { regenerateIds } from './lib/regenerate_ids';
+import { splitOverwrites } from './lib/split_overwrites';
+import { validateReferences } from './lib/validate_references';
+import { validateRetries } from './lib/validate_retries';
+import type { ResolveSavedObjectsImportErrorsOptions } from './resolve_import_errors';
+import { resolveSavedObjectsImportErrors } from './resolve_import_errors';
+import type {
+  SavedObjectsImportFailure,
+  SavedObjectsImportHook,
+  SavedObjectsImportRetry,
+  SavedObjectsImportWarning,
+} from './types';
 
 jest.mock('./lib/validate_retries');
 jest.mock('./lib/create_objects_filter');

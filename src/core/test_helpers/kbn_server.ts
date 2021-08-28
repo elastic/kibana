@@ -5,22 +5,16 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { ToolingLog, REPO_ROOT } from '@kbn/dev-utils';
-import {
-  createTestEsCluster,
-  CreateTestEsClusterOptions,
-  esTestConfig,
-  kibanaServerTestUser,
-  kibanaTestUser,
-} from '@kbn/test';
+import type { CliArgs } from '@kbn/config';
+import { Env } from '@kbn/config';
+import { REPO_ROOT, ToolingLog } from '@kbn/dev-utils';
+import type { CreateTestEsClusterOptions } from '@kbn/test';
+import { createTestEsCluster, esTestConfig, kibanaServerTestUser, kibanaTestUser } from '@kbn/test';
 import { defaultsDeep } from 'lodash';
 import { resolve } from 'path';
 import { BehaviorSubject } from 'rxjs';
 import supertest from 'supertest';
-
-import { InternalCoreSetup, InternalCoreStart } from '../server/internal_types';
-import { CliArgs, Env } from '../server/config';
+import type { InternalCoreSetup, InternalCoreStart } from '../server/internal_types';
 import { Root } from '../server/root';
 
 export type HttpMethod = 'delete' | 'get' | 'head' | 'post' | 'put';

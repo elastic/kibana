@@ -5,11 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { set } from '@elastic/safer-lodash-set';
 import { get, has } from 'lodash';
-import { SavedObject as SavedObjectType } from '../../server';
-import { SavedObjectsClientContract } from './saved_objects_client';
+import type { SavedObject as SavedObjectType } from '../../types/saved_objects';
+import type { SavedObjectsClientContract } from './saved_objects_client';
 
 /**
  * This class is a very simple wrapper for SavedObjects loaded from the server

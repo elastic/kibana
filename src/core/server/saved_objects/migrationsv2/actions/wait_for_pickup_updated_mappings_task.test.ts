@@ -5,14 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { catchRetryableEsClientErrors } from './catch_retryable_es_client_errors';
 import { errors as EsErrors } from '@elastic/elasticsearch';
-jest.mock('./catch_retryable_es_client_errors');
 import { elasticsearchClientMock } from '../../../elasticsearch/client/mocks';
-import { waitForPickupUpdatedMappingsTask } from './wait_for_pickup_updated_mappings_task';
+import { catchRetryableEsClientErrors } from './catch_retryable_es_client_errors';
 import { setWriteBlock } from './set_write_block';
+import { waitForPickupUpdatedMappingsTask } from './wait_for_pickup_updated_mappings_task';
 
+jest.mock('./catch_retryable_es_client_errors');
 describe('waitForPickupUpdatedMappingsTask', () => {
   beforeEach(() => {
     jest.clearAllMocks();

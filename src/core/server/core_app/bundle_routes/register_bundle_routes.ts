@@ -5,15 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { join } from 'path';
-import { PackageInfo } from '@kbn/config';
-import { fromRoot } from '@kbn/utils';
+import type { PackageInfo } from '@kbn/config';
 import { distDir as uiSharedDepsDistDir } from '@kbn/ui-shared-deps';
-import { IRouter } from '../../http';
-import { UiPlugins } from '../../plugins';
-import { FileHashCache } from './file_hash_cache';
+import { fromRoot } from '@kbn/utils';
+import { join } from 'path';
+import type { IRouter } from '../../http/router/router';
+import type { UiPlugins } from '../../plugins/plugins_service';
 import { registerRouteForBundle } from './bundles_route';
+import { FileHashCache } from './file_hash_cache';
 
 /**
  *  Creates the routes that serves files from `bundlesPath`.

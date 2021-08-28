@@ -5,13 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { schema } from '@kbn/config-schema';
-import { LogRecord } from '@kbn/logging';
 import { set } from '@elastic/safer-lodash-set';
-import { has, unset } from 'lodash';
+import { schema } from '@kbn/config-schema';
+import type { LogRecord } from '@kbn/logging';
 import { assertNever } from '@kbn/std';
-import { RewritePolicy } from '../policy';
+import { has, unset } from 'lodash';
+import type { RewritePolicy } from '../policy';
 
 type MetaRewritePolicyConfigProperties = Array<{
   path: string;

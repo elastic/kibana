@@ -5,13 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { Logger, LogMeta } from '../../../logging';
-
 /*
  * This file provides a helper class for ensuring that all logging
  * in the migration system is done in a fairly uniform way.
  */
+import type { Logger, LogMeta } from '@kbn/logging';
 
 export type LogFn = (path: string[], message: string) => void;
 

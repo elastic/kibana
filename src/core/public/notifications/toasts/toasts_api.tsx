@@ -5,17 +5,15 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { EuiGlobalToastListToast as EuiToast } from '@elastic/eui';
+import type { EuiGlobalToastListToast as EuiToast } from '@elastic/eui';
 import React from 'react';
 import * as Rx from 'rxjs';
-
+import type { I18nStart } from '../../i18n/i18n_service';
+import type { OverlayStart } from '../../overlays/overlay_service';
+import type { MountPoint } from '../../types';
+import type { IUiSettingsClient } from '../../ui_settings/types';
+import { mountReactNode } from '../../utils/mount';
 import { ErrorToast } from './error_toast';
-import { MountPoint } from '../../types';
-import { mountReactNode } from '../../utils';
-import { IUiSettingsClient } from '../../ui_settings';
-import { OverlayStart } from '../../overlays';
-import { I18nStart } from '../../i18n';
 
 /**
  * Allowed fields for {@link ToastInput}.

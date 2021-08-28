@@ -5,11 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { errors } from '@elastic/elasticsearch';
-import { elasticsearchClientMock } from './mocks';
 import { loggingSystemMock } from '../../logging/logging_system.mock';
-import { retryCallCluster, migrationRetryCallCluster } from './retry_call_cluster';
+import { elasticsearchClientMock } from './mocks';
+import { migrationRetryCallCluster, retryCallCluster } from './retry_call_cluster';
 
 const dummyBody: any = { foo: 'bar' };
 const createErrorReturn = (err: any) =>

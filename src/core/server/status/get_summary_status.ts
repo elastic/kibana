@@ -5,8 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { ServiceStatus, ServiceStatusLevels, ServiceStatusLevel } from './types';
+import type { ServiceStatus, ServiceStatusLevel } from './types';
+import { ServiceStatusLevels } from './types';
 
 /**
  * Returns a single {@link ServiceStatus} that summarizes the most severe status level from a group of statuses.

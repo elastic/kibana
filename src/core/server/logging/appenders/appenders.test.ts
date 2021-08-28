@@ -5,12 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { mockCreateLayout } from './appenders.test.mocks';
-
 import { ByteSizeValue } from '@kbn/config-schema';
 import { LegacyAppender } from '../../legacy/logging/appenders/legacy_appender';
 import { Appenders } from './appenders';
+import { mockCreateLayout } from './appenders.test.mocks';
 import { ConsoleAppender } from './console/console_appender';
 import { FileAppender } from './file/file_appender';
 import { RollingFileAppender } from './rolling_file/rolling_file_appender';

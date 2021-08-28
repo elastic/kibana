@@ -5,45 +5,52 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import type { ConfigDeprecationProvider } from '@kbn/config';
 import { Type } from '@kbn/config-schema';
-
-import { CapabilitiesSetup, CapabilitiesStart } from './capabilities';
-import { ConfigDeprecationProvider } from './config';
-import { InternalContextPreboot, ContextSetup } from './context';
-import {
+import type { CapabilitiesSetup, CapabilitiesStart } from './capabilities/capabilities_service';
+import type { ContextSetup, InternalContextPreboot } from './context/context_service';
+import type { CoreUsageDataStart } from './core_usage_data/types';
+import type {
+  InternalDeprecationsServiceSetup,
+  InternalDeprecationsServiceStart,
+} from './deprecations/deprecations_service';
+import type {
   InternalElasticsearchServicePreboot,
   InternalElasticsearchServiceSetup,
   InternalElasticsearchServiceStart,
-} from './elasticsearch';
-import {
-  InternalHttpServicePreboot,
-  InternalHttpServiceSetup,
-  InternalHttpServiceStart,
-} from './http';
-import {
-  InternalSavedObjectsServiceSetup,
-  InternalSavedObjectsServiceStart,
-} from './saved_objects';
-import {
-  InternalUiSettingsServicePreboot,
-  InternalUiSettingsServiceSetup,
-  InternalUiSettingsServiceStart,
-} from './ui_settings';
-import { InternalEnvironmentServiceSetup } from './environment';
-import { InternalMetricsServiceSetup, InternalMetricsServiceStart } from './metrics';
-import { InternalRenderingServiceSetup } from './rendering';
-import { InternalHttpResourcesPreboot, InternalHttpResourcesSetup } from './http_resources';
-import { InternalStatusServiceSetup } from './status';
-import { InternalLoggingServicePreboot, InternalLoggingServiceSetup } from './logging';
-import { CoreUsageDataStart } from './core_usage_data';
-import { I18nServiceSetup } from './i18n';
-import { InternalDeprecationsServiceSetup, InternalDeprecationsServiceStart } from './deprecations';
+} from './elasticsearch/types';
+import type { InternalEnvironmentServiceSetup } from './environment/environment_service';
 import type {
   InternalExecutionContextSetup,
   InternalExecutionContextStart,
-} from './execution_context';
-import { InternalPrebootServicePreboot } from './preboot';
+} from './execution_context/execution_context_service';
+import type {
+  InternalHttpServicePreboot,
+  InternalHttpServiceSetup,
+  InternalHttpServiceStart,
+} from './http/types';
+import type {
+  InternalHttpResourcesPreboot,
+  InternalHttpResourcesSetup,
+} from './http_resources/types';
+import type { I18nServiceSetup } from './i18n/i18n_service';
+import type {
+  InternalLoggingServicePreboot,
+  InternalLoggingServiceSetup,
+} from './logging/logging_service';
+import type { InternalMetricsServiceSetup, InternalMetricsServiceStart } from './metrics/types';
+import type { InternalPrebootServicePreboot } from './preboot/types';
+import type { InternalRenderingServiceSetup } from './rendering/types';
+import type {
+  InternalSavedObjectsServiceSetup,
+  InternalSavedObjectsServiceStart,
+} from './saved_objects/saved_objects_service';
+import type { InternalStatusServiceSetup } from './status/types';
+import type {
+  InternalUiSettingsServicePreboot,
+  InternalUiSettingsServiceSetup,
+  InternalUiSettingsServiceStart,
+} from './ui_settings/types';
 
 /** @internal */
 export interface InternalCorePreboot {

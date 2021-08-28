@@ -5,16 +5,16 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { extname } from 'path';
-import { Readable } from 'stream';
 import { schema } from '@kbn/config-schema';
 import { chain } from 'lodash';
-import { IRouter } from '../../http';
-import { CoreUsageDataSetup } from '../../core_usage_data';
+import { extname } from 'path';
+import { Readable } from 'stream';
+import type { CoreUsageDataSetup } from '../../core_usage_data/types';
+import type { IRouter } from '../../http/router/router';
+import { SavedObjectsImportError } from '../import/errors';
 import { SavedObjectConfig } from '../saved_objects_config';
-import { SavedObjectsImportError } from '../import';
 import { catchAndReturnBoomErrors, createSavedObjectsStreamFromNdJson } from './utils';
+
 interface RouteDependencies {
   config: SavedObjectConfig;
   coreUsageData: CoreUsageDataSetup;

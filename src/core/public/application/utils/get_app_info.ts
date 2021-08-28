@@ -5,15 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import {
-  App,
-  AppNavLinkStatus,
-  AppStatus,
-  AppDeepLink,
-  PublicAppInfo,
-  PublicAppDeepLinkInfo,
-} from '../types';
+import type { App, AppDeepLink, PublicAppDeepLinkInfo, PublicAppInfo } from '../types';
+import { AppNavLinkStatus, AppStatus } from '../types';
 
 export function getAppInfo(app: App): PublicAppInfo {
   const { updater$, mount, navLinkStatus = AppNavLinkStatus.default, ...infos } = app;

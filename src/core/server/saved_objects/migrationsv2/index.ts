@@ -5,19 +5,18 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { ElasticsearchClient } from '../../elasticsearch';
-import { IndexMapping } from '../mappings';
-import { Logger } from '../../logging';
-import type { SavedObjectsMigrationVersion } from '../types';
-import type { TransformRawDocs } from './types';
-import { MigrationResult } from '../migrations/core';
-import { next } from './next';
-import { model } from './model';
+import type { Logger } from '@kbn/logging';
+import type { SavedObjectsMigrationVersion } from '../../../types/saved_objects';
+import type { ElasticsearchClient } from '../../elasticsearch/client/types';
+import type { IndexMapping } from '../mappings/types';
+import type { MigrationResult } from '../migrations/core/migration_coordinator';
+import type { SavedObjectsMigrationConfigType } from '../saved_objects_config';
+import type { ISavedObjectTypeRegistry } from '../saved_objects_type_registry';
 import { createInitialState } from './initial_state';
 import { migrationStateActionMachine } from './migrations_state_action_machine';
-import { SavedObjectsMigrationConfigType } from '../saved_objects_config';
-import type { ISavedObjectTypeRegistry } from '../saved_objects_type_registry';
+import { model } from './model/model';
+import { next } from './next';
+import type { TransformRawDocs } from './types';
 
 /**
  * Migrates the provided indexPrefix index using a resilient algorithm that is

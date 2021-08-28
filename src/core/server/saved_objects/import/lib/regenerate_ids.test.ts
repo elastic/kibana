@@ -5,10 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { mockUuidv4 } from './__mocks__';
+import type { SavedObject } from '../../../../types/saved_objects';
 import { regenerateIds } from './regenerate_ids';
-import { SavedObject } from '../../types';
+import { mockUuidv4 } from './__mocks__';
 
 describe('#regenerateIds', () => {
   const objects = ([

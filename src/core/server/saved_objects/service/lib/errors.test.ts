@@ -7,7 +7,6 @@
  */
 
 import Boom from '@hapi/boom';
-
 import { SavedObjectsErrorHelpers } from './errors';
 
 describe('savedObjectsClient/errorTypes', () => {

@@ -5,11 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import { mountWithIntl } from '@kbn/test/jest';
 import { shallow } from 'enzyme';
 import React from 'react';
-import { mountWithIntl } from '@kbn/test/jest';
-
 import { ErrorToast } from './error_toast';
 
 interface ErrorToastProps {

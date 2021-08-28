@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { MountPoint } from '../../../types';
+import type { MountPoint } from '../../../types';
 
 interface Props {
   extension?: MountPoint<HTMLDivElement>;

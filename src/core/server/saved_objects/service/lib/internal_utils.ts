@@ -5,12 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import type { Payload } from '@hapi/boom';
+import type { SavedObject } from '../../../../types/saved_objects';
 import type { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
-import type { SavedObjectsRawDoc, SavedObjectsRawDocSource } from '../../serialization';
-import type { SavedObject } from '../../types';
-import { decodeRequestVersion, encodeHitVersion } from '../../version';
+import type { SavedObjectsRawDoc, SavedObjectsRawDocSource } from '../../serialization/types';
+import { decodeRequestVersion } from '../../version/decode_request_version';
+import { encodeHitVersion } from '../../version/encode_hit_version';
 import { SavedObjectsErrorHelpers } from './errors';
 import { ALL_NAMESPACES_STRING, SavedObjectsUtils } from './utils';
 

@@ -5,16 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import {
-  PublicAppInfo,
-  AppNavLinkStatus,
-  AppStatus,
-  PublicAppDeepLinkInfo,
-} from '../../application';
-import { IBasePath } from '../../http';
+import type { PublicAppDeepLinkInfo, PublicAppInfo } from '../../application/types';
+import { AppNavLinkStatus, AppStatus } from '../../application/types';
+import { appendAppPath } from '../../application/utils/append_app_path';
+import type { IBasePath } from '../../http/types';
 import { NavLinkWrapper } from './nav_link';
-import { appendAppPath } from '../../application/utils';
 
 export function toNavLink(
   app: PublicAppInfo,

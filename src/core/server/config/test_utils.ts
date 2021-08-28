@@ -7,7 +7,7 @@
  */
 import { set } from '@elastic/safer-lodash-set';
 import type { ConfigDeprecationProvider } from '@kbn/config';
-import { configDeprecationFactory, applyDeprecations } from '@kbn/config';
+import { applyDeprecations, configDeprecationFactory } from '@kbn/config';
 
 function collectDeprecations(
   provider: ConfigDeprecationProvider,

@@ -7,16 +7,16 @@
  */
 
 /* eslint-disable max-classes-per-file */
-
+import type { EuiConfirmModalProps } from '@elastic/eui';
+import { EuiConfirmModal, EuiModal } from '@elastic/eui';
 import { i18n as t } from '@kbn/i18n';
-import { EuiModal, EuiConfirmModal, EuiConfirmModalProps } from '@elastic/eui';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Subject } from 'rxjs';
-import { I18nStart } from '../../i18n';
-import { MountPoint } from '../../types';
-import { OverlayRef } from '../types';
-import { MountWrapper } from '../../utils';
+import type { I18nStart } from '../../i18n/i18n_service';
+import type { MountPoint } from '../../types';
+import { MountWrapper } from '../../utils/mount';
+import type { OverlayRef } from '../types';
 
 /**
  * A ModalRef is a reference to an opened modal. It offers methods to

@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { shallow } from 'enzyme';
+import React from 'react';
+import type { Metric } from '../lib/load_status';
 import { MetricTile } from './metric_tiles';
-import { Metric } from '../lib';
 
 const untypedMetric: Metric = {
   name: 'A metric',

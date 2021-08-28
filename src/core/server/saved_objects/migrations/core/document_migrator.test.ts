@@ -5,17 +5,16 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { mockGetConvertedObjectId } from './document_migrator.test.mock';
 import { set } from '@elastic/safer-lodash-set';
 import _ from 'lodash';
-import { SavedObjectUnsanitizedDoc } from '../../serialization';
-import { DocumentMigrator } from './document_migrator';
-import { TransformSavedObjectDocumentError } from './transform_saved_object_document_error';
 import { loggingSystemMock } from '../../../logging/logging_system.mock';
-import { SavedObjectsType } from '../../types';
+import { LEGACY_URL_ALIAS_TYPE } from '../../object_types/constants';
 import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
-import { LEGACY_URL_ALIAS_TYPE } from '../../object_types';
+import type { SavedObjectUnsanitizedDoc } from '../../serialization/types';
+import type { SavedObjectsType } from '../../types';
+import { DocumentMigrator } from './document_migrator';
+import { mockGetConvertedObjectId } from './document_migrator.test.mock';
+import { TransformSavedObjectDocumentError } from './transform_saved_object_document_error';
 
 const mockLoggerFactory = loggingSystemMock.create();
 const mockLogger = mockLoggerFactory.get('mock logger');

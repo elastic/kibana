@@ -5,24 +5,16 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import type { CapabilitiesSetup, CapabilitiesStart } from './capabilities/capabilities_service';
 import type { ContextSetup } from './context/context_service';
-import type {
-  CoreUsageDataStart,
-} from './core_usage_data/types';
-import type {
-  DeprecationsServiceSetup,
-} from './deprecations/deprecations_service';
-import type {
-  ElasticsearchServiceSetup,
-  ElasticsearchServiceStart,
-} from './elasticsearch/types';
+import type { CoreUsageDataStart } from './core_usage_data/types';
+import type { DeprecationsServiceSetup } from './deprecations/deprecations_service';
+import type { ElasticsearchServiceSetup, ElasticsearchServiceStart } from './elasticsearch/types';
 import type {
   ExecutionContextSetup,
   ExecutionContextStart,
 } from './execution_context/execution_context_service';
-import type {  HttpServiceSetup, HttpServiceStart } from './http/types';
+import type { HttpServiceSetup, HttpServiceStart } from './http/types';
 import type { HttpResources } from './http_resources/types';
 import type { I18nServiceSetup } from './i18n/i18n_service';
 import type { LoggingServiceSetup } from './logging/logging_service';
@@ -32,10 +24,7 @@ import type {
   SavedObjectsServiceStart,
 } from './saved_objects/saved_objects_service';
 import type { StatusServiceSetup } from './status/types';
-import type {
-  UiSettingsServiceSetup,
-  UiSettingsServiceStart,
-} from './ui_settings/types';
+import type { UiSettingsServiceSetup, UiSettingsServiceStart } from './ui_settings/types';
 
 /**
  * Context passed to the `setup` method of `standard` plugins.
@@ -46,7 +35,7 @@ import type {
  *                     consuming {@link Plugin}'s `TStart` type. Used by `getStartServices`.
  * @public
  */
- export interface CoreSetup<TPluginsStart extends object = object, TStart = unknown> {
+export interface CoreSetup<TPluginsStart extends object = object, TStart = unknown> {
   /** {@link CapabilitiesSetup} */
   capabilities: CapabilitiesSetup;
   /** {@link ContextSetup} */

@@ -6,14 +6,12 @@
  * Side Public License, v 1.
  */
 
-import Chance from 'chance';
 import { schema } from '@kbn/config-schema';
-
+import Chance from 'chance';
 import { loggingSystemMock } from '../logging/logging_system.mock';
-import { createOrUpgradeSavedConfigMock } from './create_or_upgrade_saved_config/create_or_upgrade_saved_config.test.mock';
-
-import { SavedObjectsClient } from '../saved_objects';
+import { SavedObjectsClient } from '../saved_objects/service/saved_objects_client';
 import { savedObjectsClientMock } from '../saved_objects/service/saved_objects_client.mock';
+import { createOrUpgradeSavedConfigMock } from './create_or_upgrade_saved_config/create_or_upgrade_saved_config.test.mock';
 import { UiSettingsClient } from './ui_settings_client';
 import { CannotOverrideError } from './ui_settings_errors';
 

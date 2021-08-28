@@ -5,10 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { Observable } from 'rxjs';
-import { distinctUntilChanged, pairwise, startWith, takeUntil, map } from 'rxjs/operators';
-import { ServiceStatus } from './types';
+import { distinctUntilChanged, map, pairwise, startWith, takeUntil } from 'rxjs/operators';
+import type { ServiceStatus } from './types';
 
 export const getOverallStatusChanges = (
   overall$: Observable<ServiceStatus>,

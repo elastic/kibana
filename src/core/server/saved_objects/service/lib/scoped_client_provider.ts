@@ -5,12 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import { KibanaRequest } from '../../../http/router/request';
+import type { SavedObjectsRepositoryFactory } from '../../saved_objects_service';
+import type { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
+import type { SavedObjectsClientContract } from '../../types';
 import { PriorityCollection } from './priority_collection';
-import { SavedObjectsClientContract } from '../../types';
-import { SavedObjectsRepositoryFactory } from '../../saved_objects_service';
-import { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
-import { KibanaRequest } from '../../../http';
 
 /**
  * Options passed to each SavedObjectsClientWrapperFactory to aid in creating the wrapper instance.

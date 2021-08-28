@@ -5,18 +5,21 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { Observable } from 'rxjs';
+import type {
+  ConfigDeprecationProvider,
+  ConfigPath,
+  EnvironmentMode,
+  PackageInfo,
+} from '@kbn/config';
 import { Type } from '@kbn/config-schema';
-import { RecursiveReadonly } from '@kbn/utility-types';
-import { PathConfigType } from '@kbn/utils';
-
-import { ConfigPath, EnvironmentMode, PackageInfo, ConfigDeprecationProvider } from '../config';
-import { LoggerFactory } from '../logging';
-import { KibanaConfigType } from '../kibana_config';
-import { ElasticsearchConfigType } from '../elasticsearch/elasticsearch_config';
-import { SavedObjectsConfigType } from '../saved_objects/saved_objects_config';
-import { CorePreboot, CoreSetup, CoreStart } from '..';
+import type { LoggerFactory } from '@kbn/logging';
+import type { RecursiveReadonly } from '@kbn/utility-types';
+import type { PathConfigType } from '@kbn/utils';
+import { Observable } from 'rxjs';
+import type { CorePreboot, CoreSetup, CoreStart } from '..';
+import type { ElasticsearchConfigType } from '../elasticsearch/elasticsearch_config';
+import type { KibanaConfigType } from '../kibana_config';
+import type { SavedObjectsConfigType } from '../saved_objects/saved_objects_config';
 
 type Maybe<T> = T | undefined;
 

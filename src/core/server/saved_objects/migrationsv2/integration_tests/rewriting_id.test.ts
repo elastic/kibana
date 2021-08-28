@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import Path from 'path';
-import Fs from 'fs';
-import Util from 'util';
 import { kibanaPackageJson as pkg } from '@kbn/utils';
+import Fs from 'fs';
+import Path from 'path';
+import Util from 'util';
 import * as kbnTestServer from '../../../../test_helpers/kbn_server';
-import type { ElasticsearchClient } from '../../../elasticsearch';
+import type { ElasticsearchClient } from '../../../elasticsearch/client/types';
 import { Root } from '../../../root';
 import { deterministicallyRegenerateObjectId } from '../../migrations/core/document_migrator';
 

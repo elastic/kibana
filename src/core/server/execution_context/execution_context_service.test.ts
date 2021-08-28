@@ -6,12 +6,10 @@
  * Side Public License, v 1.
  */
 import { BehaviorSubject } from 'rxjs';
-import {
-  ExecutionContextService,
-  InternalExecutionContextSetup,
-} from './execution_context_service';
 import { mockCoreContext } from '../core_context.mock';
 import { loggingSystemMock } from '../logging/logging_system.mock';
+import type { InternalExecutionContextSetup } from './execution_context_service';
+import { ExecutionContextService } from './execution_context_service';
 
 const delay = (ms: number = 100) => new Promise((resolve) => setTimeout(resolve, ms));
 describe('ExecutionContextService', () => {

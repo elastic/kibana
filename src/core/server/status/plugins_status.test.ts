@@ -5,13 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { PluginName } from '../plugins';
-import { PluginsStatusService } from './plugins_status';
-import { of, Observable, BehaviorSubject, ReplaySubject } from 'rxjs';
-import { ServiceStatusLevels, CoreStatus, ServiceStatus } from './types';
+import { BehaviorSubject, Observable, of, ReplaySubject } from 'rxjs';
 import { first } from 'rxjs/operators';
+import type { PluginName } from '../plugins/types';
+import { PluginsStatusService } from './plugins_status';
 import { ServiceStatusLevelSnapshotSerializer } from './test_utils';
+import type { CoreStatus, ServiceStatus } from './types';
+import { ServiceStatusLevels } from './types';
 
 expect.addSnapshotSerializer(ServiceStatusLevelSnapshotSerializer);
 

@@ -5,21 +5,23 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import type { DisposableAppender, Logger, LoggerFactory } from '@kbn/logging';
+import { LogLevel } from '@kbn/logging';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { DisposableAppender, LogLevel, Logger, LoggerFactory } from '@kbn/logging';
 import { Appenders } from './appenders/appenders';
 import { BufferAppender } from './appenders/buffer/buffer_appender';
 import { BaseLogger } from './logger';
 import { LoggerAdapter } from './logger_adapter';
-import {
-  LoggingConfigType,
+import type {
   LoggerConfigType,
-  LoggingConfig,
-  LoggerContextConfigType,
   LoggerContextConfigInput,
-  loggerContextConfigSchema,
+  LoggerContextConfigType,
+  LoggingConfigType,
+} from './logging_config';
+import {
   config as loggingConfig,
+  loggerContextConfigSchema,
+  LoggingConfig,
 } from './logging_config';
 
 export type ILoggingSystem = PublicMethodsOf<LoggingSystem>;

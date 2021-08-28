@@ -5,10 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { join } from 'path';
-import { rmdir, mkdtemp, readFile, readdir } from 'fs/promises';
+import { mkdtemp, readdir, readFile, rmdir } from 'fs/promises';
 import moment from 'moment-timezone';
+import { join } from 'path';
 import * as kbnTestServer from '../../../test_helpers/kbn_server';
 import { getNextRollingTime } from '../appenders/rolling_file/policies/time_interval/get_next_rolling_time';
 

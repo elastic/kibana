@@ -5,13 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { Observable, merge, of } from 'rxjs';
+import { merge, Observable, of } from 'rxjs';
 import { map } from 'rxjs/operators';
-
-import { ServiceStatus, ServiceStatusLevels } from '../status';
-import { ElasticsearchStatusMeta } from './types';
-import { NodesVersionCompatibility } from './version_check/ensure_es_version';
+import type { ServiceStatus } from '../status/types';
+import { ServiceStatusLevels } from '../status/types';
+import type { ElasticsearchStatusMeta } from './types';
+import type { NodesVersionCompatibility } from './version_check/ensure_es_version';
 
 export const calculateStatus$ = (
   esNodesCompatibility$: Observable<NodesVersionCompatibility>

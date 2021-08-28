@@ -5,11 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import type { ElasticsearchClient } from '../../elasticsearch';
+import type { ElasticsearchClient } from '../../elasticsearch/client/types';
 import * as Actions from './actions';
-import type { State } from './types';
 import type { ExecutionLog } from './migrations_state_action_machine';
+import type { State } from './types';
 
 export async function cleanup(
   client: ElasticsearchClient,

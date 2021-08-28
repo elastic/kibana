@@ -5,10 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { ContextContainer } from './context';
-import { PluginOpaqueId } from '../..';
 import { httpServerMock } from '../../http/http_server.mocks';
+import type { PluginOpaqueId } from '../../plugins/types';
+import { ContextContainer } from './context';
 
 const pluginA = Symbol('pluginA');
 const pluginB = Symbol('pluginB');

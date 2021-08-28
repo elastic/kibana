@@ -5,11 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { gt, valid } from 'semver';
-import { State } from '../types';
-import { IndexMapping } from '../../mappings';
-import { FetchIndexResponse } from '../actions';
+import type { IndexMapping } from '../../mappings/types';
+import type { FetchIndexResponse } from '../actions/fetch_indices';
+import type { State } from '../types';
 
 /**
  * A helper function/type for ensuring that all control state's are handled.

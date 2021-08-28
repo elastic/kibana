@@ -5,9 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { KibanaRequest } from '../../http';
-import { SavedObject, SavedObjectsFindOptionsReference } from '../types';
+import type { SavedObject } from '../../../types/saved_objects';
+import { KibanaRequest } from '../../http/router/request';
+import type { SavedObjectsFindOptionsReference } from '../types';
 
 /** @public */
 export interface SavedObjectExportBaseOptions {

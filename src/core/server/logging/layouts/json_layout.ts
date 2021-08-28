@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import moment from 'moment-timezone';
-import { merge } from '@kbn/std';
 import { schema } from '@kbn/config-schema';
-import { Ecs, LogRecord, Layout } from '@kbn/logging';
+import type { Ecs, Layout, LogRecord } from '@kbn/logging';
+import { merge } from '@kbn/std';
+import moment from 'moment-timezone';
 
 const { literal, object } = schema;
 

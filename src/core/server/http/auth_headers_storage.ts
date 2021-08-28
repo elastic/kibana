@@ -5,9 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { KibanaRequest, ensureRawRequest, LegacyRequest } from './router';
-import { AuthHeaders } from './lifecycle/auth';
+import type { AuthHeaders } from './lifecycle/auth';
+import type { LegacyRequest } from './router/request';
+import { ensureRawRequest, KibanaRequest } from './router/request';
 
 /**
  * Get headers to authenticate a user against Elasticsearch.

@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 import type { estypes } from '@elastic/elasticsearch';
-import type { Logger } from '../../../logging';
-import type { SavedObjectsFindOptions, SavedObjectsClientContract } from '../../types';
-import type { SavedObjectsFindResponse } from '../';
+import type { Logger } from '@kbn/logging';
+import type { SavedObjectsClientContract, SavedObjectsFindOptions } from '../../types';
+import type { SavedObjectsFindResponse } from '../saved_objects_client';
 
 type PointInTimeFinderClient = Pick<
   SavedObjectsClientContract,

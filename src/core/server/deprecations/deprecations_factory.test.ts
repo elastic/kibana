@@ -5,10 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import type { GetDeprecationsContext } from './types';
+import { loggerMock } from '@kbn/logging/mocks';
 import { DeprecationsFactory } from './deprecations_factory';
-import { loggerMock } from '../logging/logger.mock';
+import type { GetDeprecationsContext } from './types';
 
 describe('DeprecationsFactory', () => {
   const logger = loggerMock.create();

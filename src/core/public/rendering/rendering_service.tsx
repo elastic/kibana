@@ -6,14 +6,13 @@
  * Side Public License, v 1.
  */
 
+import { I18nProvider } from '@kbn/i18n/react';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { I18nProvider } from '@kbn/i18n/react';
 import { pairwise, startWith } from 'rxjs/operators';
-
-import { InternalChromeStart } from '../chrome';
-import { InternalApplicationStart } from '../application';
-import { OverlayStart } from '../overlays';
+import type { InternalApplicationStart } from '../application/types';
+import type { InternalChromeStart } from '../chrome/types';
+import type { OverlayStart } from '../overlays/overlay_service';
 import { AppWrapper } from './app_containers';
 
 interface StartDeps {

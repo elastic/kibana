@@ -6,17 +6,15 @@
  * Side Public License, v 1.
  */
 
-import * as Either from 'fp-ts/lib/Either';
-import * as TaskEither from 'fp-ts/lib/TaskEither';
-import { pipe } from 'fp-ts/lib/pipeable';
 import type { estypes } from '@elastic/elasticsearch';
-import { AcknowledgeResponse } from './index';
-import { ElasticsearchClient } from '../../../elasticsearch';
-import { IndexMapping } from '../../mappings';
-import {
-  catchRetryableEsClientErrors,
-  RetryableEsClientError,
-} from './catch_retryable_es_client_errors';
+import * as Either from 'fp-ts/lib/Either';
+import { pipe } from 'fp-ts/lib/pipeable';
+import * as TaskEither from 'fp-ts/lib/TaskEither';
+import type { AcknowledgeResponse } from '.';
+import type { ElasticsearchClient } from '../../../elasticsearch/client/types';
+import type { IndexMapping } from '../../mappings/types';
+import type { RetryableEsClientError } from './catch_retryable_es_client_errors';
+import { catchRetryableEsClientErrors } from './catch_retryable_es_client_errors';
 import {
   DEFAULT_TIMEOUT,
   INDEX_AUTO_EXPAND_REPLICAS,

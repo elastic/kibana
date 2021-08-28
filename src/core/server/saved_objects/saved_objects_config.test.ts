@@ -5,9 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { savedObjectsMigrationConfig } from './saved_objects_config';
 import { getDeprecationsFor } from '../config/test_utils';
+import { savedObjectsMigrationConfig } from './saved_objects_config';
 
 const applyMigrationsDeprecations = (settings: Record<string, any> = {}) =>
   getDeprecationsFor({

@@ -5,27 +5,20 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { URL, format as formatUrl } from 'url';
-import { Request } from '@hapi/hapi';
+import type { Request } from '@hapi/hapi';
+import { schema } from '@kbn/config-schema';
 import { merge } from 'lodash';
 import { Socket } from 'net';
 import { stringify } from 'query-string';
-
-import { schema } from '@kbn/config-schema';
-
-import {
-  KibanaRequest,
-  LifecycleResponseFactory,
-  RouteMethod,
-  KibanaResponseFactory,
-  RouteValidationSpec,
-  KibanaRouteOptions,
-  KibanaRequestState,
-} from './router';
-import { OnPreResponseToolkit } from './lifecycle/on_pre_response';
-import { OnPostAuthToolkit } from './lifecycle/on_post_auth';
-import { OnPreRoutingToolkit } from './lifecycle/on_pre_routing';
+import { format as formatUrl, URL } from 'url';
+import type { OnPostAuthToolkit } from './lifecycle/on_post_auth';
+import type { OnPreResponseToolkit } from './lifecycle/on_pre_response';
+import type { OnPreRoutingToolkit } from './lifecycle/on_pre_routing';
+import type { KibanaRequestState, KibanaRouteOptions } from './router/request';
+import { KibanaRequest } from './router/request';
+import type { KibanaResponseFactory, LifecycleResponseFactory } from './router/response';
+import type { RouteMethod } from './router/route';
+import type { RouteValidationSpec } from './router/validator/validator';
 
 /**
  * @internal

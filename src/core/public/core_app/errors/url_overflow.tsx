@@ -6,16 +6,14 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { History, Location } from 'history';
-
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-
-import { mountReactNode } from '../../utils';
-import { IToasts } from '../../notifications';
-import { IBasePath } from '../../http';
-import { IUiSettingsClient } from '../../ui_settings';
+import type { History, Location } from 'history';
+import React from 'react';
+import type { IBasePath } from '../../http/types';
+import type { IToasts } from '../../notifications/toasts/toasts_api';
+import type { IUiSettingsClient } from '../../ui_settings/types';
+import { mountReactNode } from '../../utils/mount';
 
 const IE_REGEX = /(; ?MSIE |Edge\/\d|Trident\/[\d+\.]+;.*rv:*11\.\d+)/;
 export const IS_IE = IE_REGEX.test(window.navigator.userAgent);

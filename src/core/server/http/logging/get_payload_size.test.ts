@@ -5,17 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import type { Request } from '@hapi/hapi';
 import Boom from '@hapi/boom';
-
-import mockFs from 'mock-fs';
+import type { Request } from '@hapi/hapi';
+import type { MockedLogger } from '@kbn/logging/mocks';
+import { loggerMock } from '@kbn/logging/mocks';
 import { createReadStream } from 'fs';
+import mockFs from 'mock-fs';
 import { PassThrough } from 'stream';
 import { createGunzip, createGzip } from 'zlib';
-
-import { loggerMock, MockedLogger } from '../../logging/logger.mock';
-
 import { getResponsePayloadBytes } from './get_payload_size';
 
 type Response = Request['response'];

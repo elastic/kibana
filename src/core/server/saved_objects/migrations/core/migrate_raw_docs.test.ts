@@ -5,18 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { set } from '@elastic/safer-lodash-set';
 import * as Either from 'fp-ts/lib/Either';
 import _ from 'lodash';
 import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
-import { SavedObjectsSerializer } from '../../serialization';
-import {
-  DocumentsTransformFailed,
-  DocumentsTransformSuccess,
-  migrateRawDocs,
-  migrateRawDocsSafely,
-} from './migrate_raw_docs';
+import { SavedObjectsSerializer } from '../../serialization/serializer';
+import type { DocumentsTransformFailed, DocumentsTransformSuccess } from './migrate_raw_docs';
+import { migrateRawDocs, migrateRawDocsSafely } from './migrate_raw_docs';
 import { TransformSavedObjectDocumentError } from './transform_saved_object_document_error';
 
 describe('migrateRawDocs', () => {

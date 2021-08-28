@@ -5,19 +5,17 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import type { estypes } from '@elastic/elasticsearch';
 import { ObjectType } from '@kbn/config-schema';
 import { isPlainObject } from 'lodash';
-
-import { IndexMapping } from '../../../mappings';
+import type { IndexMapping } from '../../../mappings/types';
+import { aggregationSchemas } from './aggs_types';
 import {
   isObjectTypeAttribute,
-  rewriteObjectTypeAttribute,
   isRootLevelAttribute,
+  rewriteObjectTypeAttribute,
   rewriteRootLevelAttribute,
 } from './validation_utils';
-import { aggregationSchemas } from './aggs_types';
 
 const aggregationKeys = ['aggs', 'aggregations'];
 

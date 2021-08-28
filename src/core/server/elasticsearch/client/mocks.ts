@@ -5,13 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import type { Client, ApiResponse } from '@elastic/elasticsearch';
-import { TransportRequestPromise } from '@elastic/elasticsearch/lib/Transport';
+import type { ApiResponse, Client } from '@elastic/elasticsearch';
+import type { TransportRequestPromise } from '@elastic/elasticsearch/lib/Transport';
 import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
-import { ElasticsearchClient } from './types';
-import { ICustomClusterClient } from './cluster_client';
 import { PRODUCT_RESPONSE_HEADER } from '../supported_server_response_check';
+import type { ICustomClusterClient } from './cluster_client';
+import type { ElasticsearchClient } from './types';
 
 // use jest.requireActual() to prevent weird errors when people mock @elastic/elasticsearch
 const { Client: UnmockedClient } = jest.requireActual('@elastic/elasticsearch');

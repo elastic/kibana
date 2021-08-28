@@ -5,14 +5,17 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { sortBy } from 'lodash';
 import { BehaviorSubject, Observable, ReplaySubject } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
-
-import { InternalApplicationStart, PublicAppDeepLinkInfo, PublicAppInfo } from '../../application';
-import { HttpStart, IBasePath } from '../../http';
-import { ChromeNavLink, NavLinkWrapper } from './nav_link';
+import type {
+  InternalApplicationStart,
+  PublicAppDeepLinkInfo,
+  PublicAppInfo,
+} from '../../application/types';
+import type { HttpStart, IBasePath } from '../../http/types';
+import type { ChromeNavLink } from './nav_link';
+import { NavLinkWrapper } from './nav_link';
 import { toNavLink } from './to_nav_link';
 
 interface StartDeps {

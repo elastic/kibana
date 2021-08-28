@@ -5,16 +5,15 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import { isConfigSchema } from '@kbn/config-schema';
+import type { Logger } from '@kbn/logging';
+import { isPromise } from '@kbn/std';
 import { join } from 'path';
-import typeDetect from 'type-detect';
 import { Subject } from 'rxjs';
 import { first } from 'rxjs/operators';
-import { isPromise } from '@kbn/std';
-import { isConfigSchema } from '@kbn/config-schema';
-
-import { Logger } from '../logging';
-import {
+import typeDetect from 'type-detect';
+import type { CorePreboot, CoreSetup, CoreStart } from '..';
+import type {
   AsyncPlugin,
   Plugin,
   PluginConfigDescriptor,
@@ -22,10 +21,9 @@ import {
   PluginInitializerContext,
   PluginManifest,
   PluginOpaqueId,
-  PluginType,
   PrebootPlugin,
 } from './types';
-import { CorePreboot, CoreSetup, CoreStart } from '..';
+import { PluginType } from './types';
 
 const OSS_PATH_REGEX = /[\/|\\]src[\/|\\]plugins[\/|\\]/; // Matches src/plugins directory on POSIX and Windows
 const XPACK_PATH_REGEX = /[\/|\\]x-pack[\/|\\]plugins[\/|\\]/; // Matches x-pack/plugins directory on POSIX and Windows

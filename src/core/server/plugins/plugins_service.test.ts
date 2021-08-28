@@ -5,26 +5,25 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { mockDiscover, mockPackage } from './plugins_service.test.mocks';
-
-import { resolve, join } from 'path';
-import { BehaviorSubject, from } from 'rxjs';
+import type { ConfigPath } from '@kbn/config';
+import { ConfigService, Env } from '@kbn/config';
 import { schema } from '@kbn/config-schema';
 import { createAbsolutePathSerializer, REPO_ROOT } from '@kbn/dev-utils';
-
-import { ConfigPath, ConfigService, Env } from '../config';
-import { rawConfigServiceMock, getEnvOptions } from '../config/mocks';
-import { coreMock } from '../mocks';
-import { loggingSystemMock } from '../logging/logging_system.mock';
-import { environmentServiceMock } from '../environment/environment_service.mock';
-import { PluginDiscoveryError } from './discovery';
-import { PluginWrapper } from './plugin';
-import { PluginsService } from './plugins_service';
-import { PluginsSystem } from './plugins_system';
-import { config } from './plugins_config';
+import { join, resolve } from 'path';
+import { BehaviorSubject, from } from 'rxjs';
 import { take } from 'rxjs/operators';
-import { DiscoveredPlugin, PluginType } from './types';
+import { getEnvOptions, rawConfigServiceMock } from '../config/mocks';
+import { environmentServiceMock } from '../environment/environment_service.mock';
+import { loggingSystemMock } from '../logging/logging_system.mock';
+import { coreMock } from '../mocks';
+import { PluginDiscoveryError } from './discovery/plugin_discovery_error';
+import { PluginWrapper } from './plugin';
+import { config } from './plugins_config';
+import { PluginsService } from './plugins_service';
+import { mockDiscover, mockPackage } from './plugins_service.test.mocks';
+import { PluginsSystem } from './plugins_system';
+import type { DiscoveredPlugin } from './types';
+import { PluginType } from './types';
 
 const MockPluginsSystem: jest.Mock<PluginsSystem<PluginType>> = PluginsSystem as any;
 

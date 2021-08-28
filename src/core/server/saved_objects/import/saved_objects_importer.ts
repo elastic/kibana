@@ -5,17 +5,16 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { PublicMethodsOf } from '@kbn/utility-types';
-import { SavedObjectsClientContract } from '../types';
-import { ISavedObjectTypeRegistry } from '../saved_objects_type_registry';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { ISavedObjectTypeRegistry } from '../saved_objects_type_registry';
+import type { SavedObjectsClientContract } from '../types';
 import { importSavedObjectsFromStream } from './import_saved_objects';
 import { resolveSavedObjectsImportErrors } from './resolve_import_errors';
-import {
-  SavedObjectsImportResponse,
-  SavedObjectsImportOptions,
-  SavedObjectsResolveImportErrorsOptions,
+import type {
   SavedObjectsImportHook,
+  SavedObjectsImportOptions,
+  SavedObjectsImportResponse,
+  SavedObjectsResolveImportErrorsOptions,
 } from './types';
 
 /**

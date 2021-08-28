@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import * as Either from 'fp-ts/lib/Either';
 import { errors as esErrors } from '@elastic/elasticsearch';
+import * as Either from 'fp-ts/lib/Either';
 import { elasticsearchClientMock } from '../../../elasticsearch/client/mocks';
 import { calculateExcludeFilters } from './calculate_exclude_filters';
 

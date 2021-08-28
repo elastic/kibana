@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import * as Rx from 'rxjs';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { UiSettingsService } from './';
-import { IUiSettingsClient } from './types';
+import * as Rx from 'rxjs';
+import type { IUiSettingsClient } from './types';
+import { UiSettingsService } from './ui_settings_service';
 
 const createSetupContractMock = () => {
   const setupContract: jest.Mocked<IUiSettingsClient> = {

@@ -5,8 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { Appender, LogLevel, LogRecord, LoggerFactory, LogMeta, Logger } from '@kbn/logging';
+import type { Appender, Logger, LoggerFactory, LogMeta, LogRecord } from '@kbn/logging';
+import { LogLevel } from '@kbn/logging';
 
 function isError(x: any): x is Error {
   return x instanceof Error;

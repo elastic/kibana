@@ -5,16 +5,16 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { applyExportTransformsMock } from './collect_exported_objects.test.mocks';
-import { savedObjectsClientMock } from '../../mocks';
+import { loggerMock } from '@kbn/logging/mocks';
+import type { SavedObject, SavedObjectError } from '../../../types/saved_objects';
 import { httpServerMock } from '../../http/http_server.mocks';
-import { loggerMock } from '../../logging/logger.mock';
-import { SavedObject, SavedObjectError } from '../../../types';
 import { SavedObjectTypeRegistry } from '../saved_objects_type_registry';
+import { savedObjectsClientMock } from '../service/saved_objects_client.mock';
+import type { SavedObjectsExportablePredicate } from '../types';
+import type { ExclusionReason } from './collect_exported_objects';
+import { collectExportedObjects } from './collect_exported_objects';
+import { applyExportTransformsMock } from './collect_exported_objects.test.mocks';
 import type { SavedObjectsExportTransform } from './types';
-import { collectExportedObjects, ExclusionReason } from './collect_exported_objects';
-import { SavedObjectsExportablePredicate } from '../types';
 
 const createObject = (parts: Partial<SavedObject>): SavedObject => ({
   id: 'id',

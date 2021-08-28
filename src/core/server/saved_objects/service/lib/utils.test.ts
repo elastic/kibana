@@ -5,11 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { mockUuidv1, mockUuidv5 } from './utils.test.mock';
-
-import { SavedObjectsFindOptions } from '../../types';
+import type { SavedObjectsFindOptions } from '../../types';
 import { SavedObjectsUtils } from './utils';
+import { mockUuidv1, mockUuidv5 } from './utils.test.mock';
 
 describe('SavedObjectsUtils', () => {
   const {

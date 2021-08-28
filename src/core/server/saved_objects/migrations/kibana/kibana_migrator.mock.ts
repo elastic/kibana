@@ -5,13 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { IKibanaMigrator, KibanaMigratorStatus } from './kibana_migrator';
-import { buildActiveMappings } from '../core';
-const { mergeTypes } = jest.requireActual('./kibana_migrator');
-import { SavedObjectsType } from '../../types';
 import { BehaviorSubject } from 'rxjs';
+import type { SavedObjectsType } from '../../types';
+import { buildActiveMappings } from '../core/build_active_mappings';
+import type { IKibanaMigrator, KibanaMigratorStatus } from './kibana_migrator';
 
+const { mergeTypes } = jest.requireActual('./kibana_migrator');
 const defaultSavedObjectTypes: SavedObjectsType[] = [
   {
     name: 'testtype',

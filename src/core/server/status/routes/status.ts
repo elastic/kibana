@@ -5,18 +5,18 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { Observable, combineLatest, ReplaySubject } from 'rxjs';
-import { first } from 'rxjs/operators';
+import type { PackageInfo } from '@kbn/config';
 import { schema } from '@kbn/config-schema';
-
-import { IRouter } from '../../http';
-import { MetricsServiceSetup } from '../../metrics';
-import { ServiceStatus, CoreStatus, ServiceStatusLevels } from '../types';
-import { PluginName } from '../../plugins';
-import { calculateLegacyStatus, LegacyStatusInfo } from '../legacy_status';
-import { PackageInfo } from '../../config';
-import { StatusResponse } from '../../../types/status';
+import { combineLatest, Observable, ReplaySubject } from 'rxjs';
+import { first } from 'rxjs/operators';
+import type { StatusResponse } from '../../../types/status';
+import type { IRouter } from '../../http/router/router';
+import type { MetricsServiceSetup } from '../../metrics/types';
+import type { PluginName } from '../../plugins/types';
+import type { LegacyStatusInfo } from '../legacy_status';
+import { calculateLegacyStatus } from '../legacy_status';
+import type { CoreStatus, ServiceStatus } from '../types';
+import { ServiceStatusLevels } from '../types';
 
 const SNAPSHOT_POSTFIX = /-SNAPSHOT$/;
 

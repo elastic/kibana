@@ -5,14 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import type { EnvironmentMode, PackageInfo } from '@kbn/config';
 import { omit } from 'lodash';
-import { DiscoveredPlugin } from '../../server';
-import { PluginOpaqueId, PackageInfo, EnvironmentMode } from '../../server/types';
-import { CoreContext } from '../core_system';
+import type { CoreSetup, CoreStart } from '..';
+import type { DiscoveredPlugin, PluginOpaqueId } from '../../server/plugins/types';
+import type { CoreContext } from '../core_system';
 import { PluginWrapper } from './plugin';
-import { PluginsServiceSetupDeps, PluginsServiceStartDeps } from './plugins_service';
-import { CoreSetup, CoreStart } from '../';
+import type { PluginsServiceSetupDeps, PluginsServiceStartDeps } from './plugins_service';
 
 /**
  * The available core services passed to a `PluginInitializer`

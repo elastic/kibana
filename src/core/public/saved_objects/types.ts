@@ -5,8 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import type { SavedObjectsResolveResponse } from '../../server';
+import type { SavedObjectsResolveResponse } from '../../server/saved_objects/service/saved_objects_client';
 import { SimpleSavedObject } from './simple_saved_object';
 
 /**

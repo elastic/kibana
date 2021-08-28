@@ -5,18 +5,18 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { cleanupMock } from './migrations_state_machine_cleanup.mocks';
-import { migrationStateActionMachine } from './migrations_state_action_machine';
-import { loggingSystemMock, elasticsearchServiceMock } from '../../mocks';
-import { typeRegistryMock } from '../saved_objects_type_registry.mock';
+import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 import * as Either from 'fp-ts/lib/Either';
 import * as Option from 'fp-ts/lib/Option';
-import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 import { elasticsearchClientMock } from '../../elasticsearch/client/mocks';
+import { elasticsearchServiceMock } from '../../elasticsearch/elasticsearch_service.mock';
 import { LoggerAdapter } from '../../logging/logger_adapter';
-import { AllControlStates, State } from './types';
+import { loggingSystemMock } from '../../logging/logging_system.mock';
+import { typeRegistryMock } from '../saved_objects_type_registry.mock';
 import { createInitialState } from './initial_state';
+import { migrationStateActionMachine } from './migrations_state_action_machine';
+import { cleanupMock } from './migrations_state_machine_cleanup.mocks';
+import type { AllControlStates, State } from './types';
 
 const esClient = elasticsearchServiceMock.createElasticsearchClient();
 

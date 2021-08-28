@@ -5,9 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { PublicMethodsOf } from '@kbn/utility-types';
-import type { I18nServiceSetup, I18nService } from './i18n_service';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { I18nService, I18nServiceSetup } from './i18n_service';
 
 const createSetupContractMock = () => {
   const mock: jest.Mocked<I18nServiceSetup> = {

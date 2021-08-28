@@ -5,9 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import { __kbnBootstrap__ } from './kbn_bootstrap';
 import { apmSystem, fatalErrorMock, i18nLoad } from './kbn_bootstrap.test.mocks';
-import { __kbnBootstrap__ } from './';
 
 describe('kbn_bootstrap', () => {
   beforeAll(() => {

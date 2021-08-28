@@ -5,13 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
-import { OverlayService, OverlayStart } from './overlay_service';
 import { overlayBannersServiceMock } from './banners/banners_service.mock';
 import { overlayFlyoutServiceMock } from './flyout/flyout_service.mock';
 import { overlayModalServiceMock } from './modal/modal_service.mock';
+import type { OverlayStart } from './overlay_service';
+import { OverlayService } from './overlay_service';
 
 const createStartContractMock = () => {
   const overlayStart = overlayModalServiceMock.createStartContract();

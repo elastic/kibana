@@ -5,10 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { duration } from 'moment';
-import { ElasticsearchClientConfig, parseClientOptions } from './client_config';
 import { DEFAULT_HEADERS } from '../default_headers';
+import type { ElasticsearchClientConfig } from './client_config';
+import { parseClientOptions } from './client_config';
 
 const createConfig = (
   parts: Partial<ElasticsearchClientConfig> = {}

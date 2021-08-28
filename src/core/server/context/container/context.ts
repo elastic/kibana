@@ -5,11 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { flatten } from 'lodash';
-import { ShallowPromise } from '@kbn/utility-types';
-import { pick } from 'lodash';
-import type { CoreId, PluginOpaqueId, RequestHandler, RequestHandlerContext } from '../..';
+import type { ShallowPromise } from '@kbn/utility-types';
+import { flatten, pick } from 'lodash';
+import type { RequestHandlerContext } from '../..';
+import type { CoreId } from '../../core_context';
+import type { RequestHandler } from '../../http/router/router';
+import type { PluginOpaqueId } from '../../plugins/types';
 
 /**
  * A function that returns a context value for a specific key of given context type.

@@ -6,19 +6,20 @@
  * Side Public License, v 1.
  */
 
-import Path from 'path';
-import { stringify } from 'querystring';
 import { Env } from '@kbn/config';
 import { schema } from '@kbn/config-schema';
+import type { Logger } from '@kbn/logging';
 import { fromRoot } from '@kbn/utils';
-
-import { IRouter, IBasePath, IKibanaResponse, KibanaResponseFactory } from '../http';
-import { HttpResources, HttpResourcesServiceToolkit } from '../http_resources';
-import { InternalCorePreboot, InternalCoreSetup } from '../internal_types';
-import { CoreContext } from '../core_context';
-import { Logger } from '../logging';
-import { registerBundleRoutes } from './bundle_routes';
-import { UiPlugins } from '../plugins';
+import Path from 'path';
+import { stringify } from 'querystring';
+import type { CoreContext } from '../core_context';
+import type { IBasePath } from '../http/base_path_service';
+import type { IKibanaResponse, KibanaResponseFactory } from '../http/router/response';
+import type { IRouter } from '../http/router/router';
+import type { HttpResources, HttpResourcesServiceToolkit } from '../http_resources/types';
+import type { InternalCorePreboot, InternalCoreSetup } from '../internal_types';
+import type { UiPlugins } from '../plugins/plugins_service';
+import { registerBundleRoutes } from './bundle_routes/register_bundle_routes';
 
 /** @internal */
 interface CommonRoutesParams {

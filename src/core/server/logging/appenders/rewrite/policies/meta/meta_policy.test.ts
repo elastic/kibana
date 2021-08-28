@@ -5,9 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { LogRecord, LogLevel, LogMeta } from '@kbn/logging';
-import { MetaRewritePolicy, MetaRewritePolicyConfig } from './meta_policy';
+import type { LogMeta, LogRecord } from '@kbn/logging';
+import { LogLevel } from '@kbn/logging';
+import type { MetaRewritePolicyConfig } from './meta_policy';
+import { MetaRewritePolicy } from './meta_policy';
 
 describe('MetaRewritePolicy', () => {
   const createPolicy = (

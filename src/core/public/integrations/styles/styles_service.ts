@@ -7,9 +7,8 @@
  */
 
 import { Subscription } from 'rxjs';
-
-import { IUiSettingsClient } from '../../ui_settings';
-import { CoreService } from '../../../types';
+import type { CoreService } from '../../../types/core_service';
+import type { IUiSettingsClient } from '../../ui_settings/types';
 // @ts-expect-error
 import disableAnimationsCss from '!!raw-loader!./disable_animations.css';
 

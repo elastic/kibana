@@ -5,10 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import {
-  securityResponseHeadersSchema as schema,
   parseRawSecurityResponseHeadersConfig as parse,
+  securityResponseHeadersSchema as schema,
 } from './security_response_headers_config';
 
 describe('parseRawSecurityResponseHeadersConfig', () => {

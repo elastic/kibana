@@ -7,13 +7,14 @@
  */
 
 /* eslint-disable dot-notation */
-import { DeprecationsService } from './deprecations_service';
+import { mockCoreContext } from '../core_context.mock';
+import { elasticsearchServiceMock } from '../elasticsearch/elasticsearch_service.mock';
 import { httpServiceMock } from '../http/http_service.mock';
 import { mockRouter } from '../http/router/router.mock';
-import { savedObjectsClientMock, elasticsearchServiceMock } from '../mocks';
-import { mockCoreContext } from '../core_context.mock';
+import { savedObjectsClientMock } from '../saved_objects/service/saved_objects_client.mock';
 import { mockDeprecationsFactory } from './deprecations_factory.mock';
 import { mockDeprecationsRegistry } from './deprecations_registry.mock';
+import { DeprecationsService } from './deprecations_service';
 
 describe('DeprecationsService', () => {
   const coreContext = mockCoreContext.create();

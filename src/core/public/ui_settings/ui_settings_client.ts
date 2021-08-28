@@ -5,14 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { cloneDeep, defaultsDeep } from 'lodash';
-import { Observable, Subject, concat, defer, of } from 'rxjs';
+import { concat, defer, Observable, of, Subject } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
-
-import { UserProvidedValues, PublicUiSettingsParams } from 'src/core/server/types';
-import { IUiSettingsClient, UiSettingsState } from './types';
-
+import type { PublicUiSettingsParams, UserProvidedValues } from '../../types/ui_settings';
+import type { IUiSettingsClient, UiSettingsState } from './types';
 import { UiSettingsApi } from './ui_settings_api';
 
 interface UiSettingsClientParams {

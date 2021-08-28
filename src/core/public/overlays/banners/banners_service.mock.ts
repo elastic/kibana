@@ -5,9 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { OverlayBannersStart, OverlayBannersService } from './banners_service';
+import type { OverlayBannersStart } from './banners_service';
+import { OverlayBannersService } from './banners_service';
 
 const createStartContractMock = () => {
   const startContract: jest.Mocked<OverlayBannersStart> = {

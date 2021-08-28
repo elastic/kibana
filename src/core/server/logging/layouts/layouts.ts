@@ -5,13 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { schema } from '@kbn/config-schema';
-import { Layout } from '@kbn/logging';
+import type { Layout } from '@kbn/logging';
 import { assertNever } from '@kbn/std';
-
-import { JsonLayout, JsonLayoutConfigType } from './json_layout';
-import { PatternLayout, PatternLayoutConfigType } from './pattern_layout';
+import type { JsonLayoutConfigType } from './json_layout';
+import { JsonLayout } from './json_layout';
+import type { PatternLayoutConfigType } from './pattern_layout';
+import { PatternLayout } from './pattern_layout';
 
 const { oneOf } = schema;
 

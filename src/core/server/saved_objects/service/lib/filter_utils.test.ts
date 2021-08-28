@@ -5,15 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { cloneDeep } from 'lodash';
 import * as esKuery from '@kbn/es-query';
-
+import { cloneDeep } from 'lodash';
 import {
-  validateFilterKueryNode,
-  validateConvertFilterToKueryNode,
   fieldDefined,
   hasFilterKeyError,
+  validateConvertFilterToKueryNode,
+  validateFilterKueryNode,
 } from './filter_utils';
 
 const mockMappings = {

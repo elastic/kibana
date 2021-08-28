@@ -5,16 +5,15 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { HttpSetup, HttpStart } from './types';
-import { InjectedMetadataSetup } from '../injected_metadata';
-import { FatalErrorsSetup } from '../fatal_errors';
-import { BasePath } from './base_path';
+import type { CoreService } from '../../types/core_service';
+import type { FatalErrorsSetup } from '../fatal_errors/fatal_errors_service';
+import type { InjectedMetadataSetup } from '../injected_metadata/injected_metadata_service';
 import { AnonymousPathsService } from './anonymous_paths_service';
-import { LoadingCountService } from './loading_count_service';
-import { Fetch } from './fetch';
-import { CoreService } from '../../types';
+import { BasePath } from './base_path';
 import { ExternalUrlService } from './external_url_service';
+import { Fetch } from './fetch';
+import { LoadingCountService } from './loading_count_service';
+import type { HttpSetup, HttpStart } from './types';
 
 interface HttpDeps {
   injectedMetadata: InjectedMetadataSetup;

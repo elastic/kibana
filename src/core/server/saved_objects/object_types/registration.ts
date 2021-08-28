@@ -5,9 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import type { ISavedObjectTypeRegistry } from '../saved_objects_type_registry';
+import { SavedObjectTypeRegistry } from '../saved_objects_type_registry';
+import type { SavedObjectsType } from '../types';
 import { LEGACY_URL_ALIAS_TYPE } from './constants';
-import { ISavedObjectTypeRegistry, SavedObjectsType, SavedObjectTypeRegistry } from '..';
 
 const legacyUrlAliasType: SavedObjectsType = {
   name: LEGACY_URL_ALIAS_TYPE,

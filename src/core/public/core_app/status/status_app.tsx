@@ -5,24 +5,26 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import React, { Component } from 'react';
 import {
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiLoadingSpinner,
-  EuiText,
-  EuiTitle,
   EuiPage,
   EuiPageBody,
   EuiPageContent,
   EuiSpacer,
-  EuiFlexGroup,
-  EuiFlexItem,
+  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { HttpSetup } from '../../http';
-import { NotificationsSetup } from '../../notifications';
-import { loadStatus, ProcessedServerResponse } from './lib';
-import { MetricTiles, StatusTable, ServerStatus } from './components';
+import React, { Component } from 'react';
+import type { HttpSetup } from '../../http/types';
+import type { NotificationsSetup } from '../../notifications/notifications_service';
+import { MetricTiles } from './components/metric_tiles';
+import { ServerStatus } from './components/server_status';
+import { StatusTable } from './components/status_table';
+import type { ProcessedServerResponse } from './lib/load_status';
+import { loadStatus } from './lib/load_status';
 
 interface StatusAppProps {
   http: HttpSetup;

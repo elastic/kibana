@@ -5,14 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { catchRetryableEsClientErrors } from './catch_retryable_es_client_errors';
 import { errors as EsErrors } from '@elastic/elasticsearch';
-jest.mock('./catch_retryable_es_client_errors');
 import { elasticsearchClientMock } from '../../../elasticsearch/client/mocks';
+import { catchRetryableEsClientErrors } from './catch_retryable_es_client_errors';
 import { createIndex } from './create_index';
 import { setWriteBlock } from './set_write_block';
 
+jest.mock('./catch_retryable_es_client_errors');
 describe('createIndex', () => {
   beforeEach(() => {
     jest.clearAllMocks();

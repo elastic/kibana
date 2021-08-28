@@ -5,12 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { ExternalUrlConfig } from 'src/core/server/types';
-
-import { injectedMetadataServiceMock } from '../mocks';
-import { Sha256 } from '../utils';
-
+import { ExternalUrlConfig } from '../../server/external_url/external_url_config';
+import { injectedMetadataServiceMock } from '../injected_metadata/injected_metadata_service.mock';
+import { Sha256 } from '../utils/crypto/sha256';
 import { ExternalUrlService } from './external_url_service';
 
 const setupService = ({

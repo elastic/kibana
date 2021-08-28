@@ -5,10 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { KibanaExecutionContext } from '../../types';
+import type { KibanaExecutionContext } from '../../types/execution_context';
 import {
-  ExecutionContextContainer,
   BAGGAGE_MAX_PER_NAME_VALUE_PAIRS,
+  ExecutionContextContainer,
 } from './execution_context_container';
 
 describe('KibanaExecutionContext', () => {

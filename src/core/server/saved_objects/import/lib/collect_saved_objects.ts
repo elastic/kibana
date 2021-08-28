@@ -5,20 +5,18 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { Readable } from 'stream';
 import {
   createConcatStream,
   createFilterStream,
   createMapStream,
   createPromiseFromStreams,
 } from '@kbn/utils';
-
-import { SavedObject } from '../../types';
-import { SavedObjectsImportFailure } from '../types';
+import { Readable } from 'stream';
+import type { SavedObject } from '../../../../types/saved_objects';
 import { SavedObjectsImportError } from '../errors';
-import { getNonUniqueEntries } from './get_non_unique_entries';
+import type { SavedObjectsImportFailure } from '../types';
 import { createLimitStream } from './create_limit_stream';
+import { getNonUniqueEntries } from './get_non_unique_entries';
 
 interface CollectSavedObjectsOptions {
   readStream: Readable;

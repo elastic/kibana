@@ -5,9 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { migratorInstanceMock } from './migrate.test.mocks';
 import * as kbnTestServer from '../../../../test_helpers/kbn_server';
+import { migratorInstanceMock } from './migrate.test.mocks';
 
 describe('SavedObjects /_migrate endpoint', () => {
   let root: ReturnType<typeof kbnTestServer.createRoot>;

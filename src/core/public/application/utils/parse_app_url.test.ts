@@ -5,9 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { App } from '../types';
 import { BasePath } from '../../http/base_path';
+import type { App } from '../types';
 import { parseAppUrl } from './parse_app_url';
 
 describe('parseAppUrl', () => {

@@ -5,25 +5,20 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import { Env } from '@kbn/config';
+import { schema } from '@kbn/config-schema';
+import { REPO_ROOT } from '@kbn/dev-utils';
 import { join } from 'path';
 import { BehaviorSubject } from 'rxjs';
-import { REPO_ROOT } from '@kbn/dev-utils';
-import { schema } from '@kbn/config-schema';
-
-import { Env } from '../config';
-import { CoreContext } from '../core_context';
-import { coreMock } from '../mocks';
-import { loggingSystemMock } from '../logging/logging_system.mock';
 import { configServiceMock, getEnvOptions } from '../config/mocks';
-
+import type { CoreContext } from '../core_context';
+import { loggingSystemMock } from '../logging/logging_system.mock';
+import { coreMock } from '../mocks';
 import { PluginWrapper } from './plugin';
-import { PluginManifest, PluginType } from './types';
-import {
-  createPluginInitializerContext,
-  createPluginSetupContext,
-  InstanceInfo,
-} from './plugin_context';
+import type { InstanceInfo } from './plugin_context';
+import { createPluginInitializerContext, createPluginSetupContext } from './plugin_context';
+import type { PluginManifest } from './types';
+import { PluginType } from './types';
 
 const mockPluginInitializer = jest.fn();
 const logger = loggingSystemMock.create();

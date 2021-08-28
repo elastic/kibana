@@ -5,8 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { MetricsCollector } from './types';
+import type { MetricsCollector } from './types';
 
 const createCollector = (collectReturnValue: any = {}): jest.Mocked<MetricsCollector<any>> => {
   const collector: jest.Mocked<MetricsCollector<any>> = {

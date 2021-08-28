@@ -5,14 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { registerRouteForBundleMock } from './register_bundle_routes.test.mocks';
-
-import { PackageInfo } from '@kbn/config';
+import type { PackageInfo } from '@kbn/config';
 import { httpServiceMock } from '../../http/http_service.mock';
-import { InternalPluginInfo, UiPlugins } from '../../plugins';
-import { registerBundleRoutes } from './register_bundle_routes';
+import type { UiPlugins } from '../../plugins/plugins_service';
+import type { InternalPluginInfo } from '../../plugins/types';
 import { FileHashCache } from './file_hash_cache';
+import { registerBundleRoutes } from './register_bundle_routes';
+import { registerRouteForBundleMock } from './register_bundle_routes.test.mocks';
 
 const createPackageInfo = (parts: Partial<PackageInfo> = {}): PackageInfo => ({
   ...parts,

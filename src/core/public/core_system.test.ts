@@ -5,36 +5,34 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import { CoreSystem } from './core_system';
 import {
   ChromeServiceConstructor,
+  CoreAppConstructor,
   FatalErrorsServiceConstructor,
   HttpServiceConstructor,
   I18nServiceConstructor,
   InjectedMetadataServiceConstructor,
+  IntegrationsServiceConstructor,
+  MockApplicationService,
   MockChromeService,
+  MockCoreApp,
+  MockDocLinksService,
   MockFatalErrorsService,
   MockHttpService,
   MockI18nService,
   MockInjectedMetadataService,
+  MockIntegrationsService,
   MockNotificationsService,
   MockOverlayService,
   MockPluginsService,
+  MockRenderingService,
   MockUiSettingsService,
   NotificationServiceConstructor,
   OverlayServiceConstructor,
-  UiSettingsServiceConstructor,
-  MockApplicationService,
-  MockDocLinksService,
-  MockRenderingService,
   RenderingServiceConstructor,
-  IntegrationsServiceConstructor,
-  MockIntegrationsService,
-  CoreAppConstructor,
-  MockCoreApp,
+  UiSettingsServiceConstructor,
 } from './core_system.test.mocks';
-
-import { CoreSystem } from './core_system';
 
 jest.spyOn(CoreSystem.prototype, 'stop');
 

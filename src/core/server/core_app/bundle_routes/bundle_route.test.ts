@@ -5,12 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { createDynamicAssetHandlerMock } from './bundle_route.test.mocks';
-
 import { httpServiceMock } from '../../http/http_service.mock';
-import { FileHashCache } from './file_hash_cache';
 import { registerRouteForBundle } from './bundles_route';
+import { createDynamicAssetHandlerMock } from './bundle_route.test.mocks';
+import { FileHashCache } from './file_hash_cache';
 
 describe('registerRouteForBundle', () => {
   let router: ReturnType<typeof httpServiceMock.createRouter>;

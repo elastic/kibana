@@ -5,9 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { IncomingHttpHeaders } from 'http';
 import { pick } from '@kbn/std';
+import type { IncomingHttpHeaders } from 'http';
 
 /**
  * Creates a Union type of all known keys of a given interface.
