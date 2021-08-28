@@ -9,6 +9,8 @@ const Path = require('path');
 const { Project } = require('ts-morph');
 const { CLIEngine } = require('eslint');
 
+const { argv } = require('yargs');
+
 const createTimer = () => {
   let start = process.hrtime.bigint();
   return {
@@ -25,18 +27,17 @@ const createTimer = () => {
 const timer = createTimer();
 
 const project = new Project({
-  tsConfigFilePath: Path.resolve('./tsconfig.json'),
+  tsConfigFilePath: Path.resolve(argv.project || './tsconfig.json'),
 });
 
 timer.measure('createProject');
 
 let dirsAlreadyProcessed = [
-  'src/core',
-  'src/plugins/field_formats',
+
 ];
 
 let dirsToProcess = [
-  './'
+  argv.test ? 'test_imports.ts' : './',
 ];
 
 dirsToProcess = dirsToProcess.map((path) => Path.resolve(__dirname, path));
@@ -55,46 +56,13 @@ const allFilesToProcess = allFilesInProject.filter((file) => {
   return dirsAlreadyProcessed.every((dir) => !file.startsWith(dir));
 });
 
-// console.log(allFilesToProcess);
+console.log(allFilesToProcess);
 
 const filesToProcessNow = allFilesInProject.filter((file) => {
   return allFilesToProcess.includes(file) && dirsToProcess.some((dir) => file.startsWith(dir));
 });
 
-const modified = [
-  'src/plugins/advanced_settings',
-  'src/plugins/apm_oss',
-  'src/plugins/bfetch',
-].map(dir => Path.resolve(dir));
-
-console.log(allFilesInProject.filter(file => {
-  return !modified.some(dir => file.startsWith(dir));
-}));
-
-console.log(
-  Array.from(new Set([...allFilesInProject.map(file => {
-    const rel = Path.relative(__dirname, file);
-
-    if (rel.startsWith('src/core')) {
-      return 'src/core';
-    }
-
-    if (rel.startsWith('typings')
-      || rel.startsWith('packages')
-    ) {
-      return undefined;
-    }
-
-    if (rel.startsWith('src/plugins')
-      || rel.startsWith('x-pack/plugins')
-    ) {
-      return rel.split('/').slice(0, 3).join('/');
-    }
-    return rel;
-  })])).filter(Boolean).join(',')
-);
-
-return;
+console.log(filesToProcessNow);
 
 timer.measure('start processing');
 
@@ -242,13 +210,15 @@ const promise = filesToProcessNow.reduce(async (prev, file, index) => {
 
         if (!exportingFile?.isDeclarationFile()) {
           getNextExport(symbol, exportingFile);
+        } else {
+          symbol = specSymbol;
         }
 
       }
 
       const alias = specSymbol.getName();
 
-      let name = (type && symbol.getName())
+      let name = symbol.compilerSymbol.parent && symbol.getName()
         || spec.compilerNode.propertyName?.text
         || alias;
 
@@ -280,16 +250,18 @@ const promise = filesToProcessNow.reduce(async (prev, file, index) => {
 
       newDeclarations.push(nextImport);
 
-      // console.log(
-      //   ...[
-      //     'import',
-      //     nextImport.isTypeOnly ? 'type' : '',
-      //     nextImport.namedImports[0].name,
-      //     nextImport.namedImports[0].alias ? `as ${nextImport.namedImports[0].alias}` : '',
-      //     'from',
-      //     moduleSpecifier,
-      //   ].filter(Boolean)
-      // );
+      if (argv.test) {
+        console.log(
+          ...[
+            'import',
+            nextImport.isTypeOnly ? 'type' : '',
+            nextImport.namedImports[0].name,
+            nextImport.namedImports[0].alias ? `as ${nextImport.namedImports[0].alias}` : '',
+            'from',
+            moduleSpecifier,
+          ].filter(Boolean)
+        );
+      }
     });
 
     if (newDeclarations.length) {
@@ -325,9 +297,101 @@ const promise = filesToProcessNow.reduce(async (prev, file, index) => {
 
     localTimer.measure('addImportDeclarations');
 
+    for (const exportDeclaration of sourceFile.getExportDeclarations()) {
+
+      if (exportDeclaration.isTypeOnly()) {
+        continue;
+      }
+
+      /**
+       * @type {Array<{
+       *  isTypeOnly:boolean;
+       *  namedExports:Array<{ alias:string; name:string }>
+       * }>} namedExports
+       */
+      let namedExports = [];
+
+
+      for (const spec of exportDeclaration.getNamedExports()) {
+
+        let specSymbol = spec.getSymbol();
+        let symbol = specSymbol
+        if (symbol && symbol.isAlias()) {
+          symbol = symbol.getAliasedSymbol();
+        }
+
+        let type = symbol.getDeclaredType();
+
+        if (type?.compilerType.intrinsicName === 'error') {
+          type = undefined;
+        }
+
+        const name = symbol.getName();
+        const alias = specSymbol.getName();
+
+        namedExports.push(
+          {
+            isTypeOnly: !!type && !symbol.getValueDeclaration(),
+            namedExports: [
+              {
+                name,
+                alias: name === alias ?
+                  undefined
+                  : alias
+              }
+            ]
+          }
+        )
+      }
+
+      if (namedExports.length) {
+
+        console.log(namedExports[0], namedExports[1]);
+
+        const namespaceExport = exportDeclaration.getNamespaceExport();
+
+        let moduleSpecifier = exportDeclaration.getModuleSpecifierValue()
+
+        if (namespaceExport) {
+          sourceFile.addExportDeclaration({
+            isTypeOnly: namespaceExport.isTypeOnly(),
+            namespaceExport: namespaceExport.compilerNode.escapedText,
+            moduleSpecifier,
+          });
+        }
+
+        sourceFile.addExportDeclarations(namedExports.map(({ isTypeOnly, namedExports: thisNamedExports }) => {
+          if (argv.test) {
+            console.log(...[
+              'export',
+              ...(isTypeOnly ? ['type'] : []),
+              thisNamedExports[0].name,
+              ...(thisNamedExports[0].alias ? ['as', thisNamedExports[0].alias] : []),
+              'from',
+              moduleSpecifier
+            ])
+          }
+          return {
+            isTypeOnly,
+            moduleSpecifier,
+            namedExports: thisNamedExports
+          }
+        }))
+
+        exportDeclaration.remove();
+      }
+
+    }
+
+    localTimer.measure('setExportDeclarationTypes');
+
     sourceFile.organizeImports();
 
     localTimer.measure('organizeImports');
+
+    if (argv.test) {
+      return;
+    }
 
     const savePromise = sourceFile.save();
 
