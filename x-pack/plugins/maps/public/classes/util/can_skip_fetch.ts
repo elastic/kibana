@@ -63,11 +63,12 @@ export async function canSkipSourceUpdate({
   extentAware: boolean;
   getUpdateDueToTimeslice: (timeslice?: Timeslice) => boolean;
 }): Promise<boolean> {
-  if (
+  const mustForceRefresh =
     nextRequestMeta.isForceRefresh &&
     nextRequestMeta.applyForceRefresh &&
-    (nextRequestMeta.applyGlobalQuery || nextRequestMeta.applyGlobalTime)
-  ) {
+    (nextRequestMeta.applyGlobalQuery || nextRequestMeta.applyGlobalTime);
+  if (mustForceRefresh) {
+    // Cannot skip
     return false;
   }
 
@@ -137,7 +138,8 @@ export async function canSkipSourceUpdate({
   }
 
   let updateDueToSearchSessionId = false;
-  if (timeAware || isQueryAware) {
+  if ((timeAware || isQueryAware) && nextRequestMeta.applyForceRefresh) {
+    // If the force-refresh flag is turned off, we should ignore refreshes on the dashboard-context
     updateDueToSearchSessionId = prevMeta.searchSessionId !== nextRequestMeta.searchSessionId;
   }
 
