@@ -4,14 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { i18n } from '@kbn/i18n';
 
+export { BASE_ACTION_API_PATH } from '../../../../actions/common';
 export {
   BASE_ALERTING_API_PATH,
   INTERNAL_BASE_ALERTING_API_PATH,
 } from '../../../../alerting/common';
-export { BASE_ACTION_API_PATH } from '../../../../actions/common';
+export { TIME_UNITS } from './time_units';
 
 export type Section = 'connectors' | 'rules';
 
@@ -29,7 +29,6 @@ export const recoveredActionGroupMessage = i18n.translate(
   }
 );
 
-export { TIME_UNITS } from './time_units';
 export enum SORT_ORDERS {
   ASCENDING = 'asc',
   DESCENDING = 'desc',

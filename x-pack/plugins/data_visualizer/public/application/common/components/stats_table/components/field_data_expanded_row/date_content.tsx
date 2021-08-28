@@ -4,18 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { FC, ReactNode } from 'react';
 import { EuiBasicTable, EuiFlexItem } from '@elastic/eui';
 // @ts-ignore
 import { formatDate } from '@elastic/eui/lib/services/format';
-import { FormattedMessage } from '@kbn/i18n/react';
-
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+import type { FC, ReactNode } from 'react';
+import React from 'react';
 import type { FieldDataRowProps } from '../../types/field_data_row';
-import { ExpandedRowFieldHeader } from '../expanded_row_field_header';
+import { ExpandedRowFieldHeader } from '../expanded_row_field_header/expanded_row_field_header';
 import { DocumentStatsTable } from './document_stats';
 import { ExpandedRowContent } from './expanded_row_content';
+
+// @ts-ignore
 const TIME_FORMAT = 'MMM D YYYY, HH:mm:ss.SSS';
 interface SummaryTableItem {
   function: string;

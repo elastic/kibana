@@ -4,13 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { estypes } from '@elastic/elasticsearch';
-import { IScopedClusterClient } from 'kibana/server';
-import { SavedObject } from 'kibana/server';
-import { IndexPatternAttributes } from 'src/plugins/data/server';
-import { SavedObjectsClientContract } from 'kibana/server';
-import { RollupFields } from '../../../../common/types/fields';
+import type { IScopedClusterClient } from '../../../../../../../src/core/server/elasticsearch/client/scoped_cluster_client';
+import type { SavedObjectsClientContract } from '../../../../../../../src/core/server/saved_objects/types';
+import type { SavedObject } from '../../../../../../../src/core/types/saved_objects';
+import type { IndexPatternAttributes } from '../../../../../../../src/plugins/data/common/index_patterns/types';
+import type { RollupFields } from '../../../../common/types/fields';
 
 export interface RollupJob {
   job_id: string;

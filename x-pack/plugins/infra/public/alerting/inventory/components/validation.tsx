@@ -4,15 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { i18n } from '@kbn/i18n';
-import {
-  InventoryMetricConditions,
-  Comparator,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../server/lib/alerting/inventory_metric_threshold/types';
+import type { ValidationResult } from '../../../../../triggers_actions_ui/public/types';
+import { Comparator } from '../../../../server/lib/alerting/common/types';
+import type { InventoryMetricConditions } from '../../../../server/lib/alerting/inventory_metric_threshold/types';
+
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ValidationResult } from '../../../../../triggers_actions_ui/public/types';
 
 export function validateMetricThreshold({
   criteria,

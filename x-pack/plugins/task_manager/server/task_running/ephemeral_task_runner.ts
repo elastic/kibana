@@ -11,41 +11,38 @@
  * rescheduling, middleware application, etc.
  */
 
-import apm from 'elastic-apm-node';
 import { withSpan } from '@kbn/apm-utils';
+import type { Logger } from '@kbn/logging';
+import apm from 'elastic-apm-node';
 import { identity } from 'lodash';
-import { Logger, ExecutionContextStart } from '../../../../../src/core/server';
-
-import { Middleware } from '../lib/middleware';
-import { asOk, asErr, eitherAsync, Result } from '../lib/result_type';
-import {
-  TaskRun,
-  TaskMarkRunning,
-  asTaskRunEvent,
-  asTaskMarkRunningEvent,
-  startTaskTimer,
-  TaskTiming,
-  TaskPersistence,
-} from '../task_events';
+import type { ExecutionContextStart } from '../../../../../src/core/server/execution_context/execution_context_service';
 import { intervalFromDate } from '../lib/intervals';
-import {
+import type { Middleware } from '../lib/middleware';
+import type { Result } from '../lib/result_type';
+import { asErr, asOk, eitherAsync } from '../lib/result_type';
+import type {
   CancellableTask,
   ConcreteTaskInstance,
-  isFailedRunResult,
-  SuccessfulRunResult,
-  FailedRunResult,
-  TaskStatus,
   EphemeralTaskInstance,
+  FailedRunResult,
+  SuccessfulRunResult,
 } from '../task';
+import { isFailedRunResult, TaskStatus } from '../task';
+import type { TaskMarkRunning, TaskRun, TaskTiming } from '../task_events';
+import {
+  asTaskMarkRunningEvent,
+  asTaskRunEvent,
+  startTaskTimer,
+  TaskPersistence,
+} from '../task_events';
 import { TaskTypeDictionary } from '../task_type_dictionary';
+import type { TaskRunner, TaskRunningInstance } from './task_runner';
 import {
   asPending,
   asReadyToRun,
   EMPTY_RUN_RESULT,
   isPending,
   isReadyToRun,
-  TaskRunner,
-  TaskRunningInstance,
   TaskRunResult,
 } from './task_runner';
 

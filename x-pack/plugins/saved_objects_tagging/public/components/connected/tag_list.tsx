@@ -4,16 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { FC, useMemo } from 'react';
+import type { FC } from 'react';
+import React, { useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { SavedObject } from 'src/core/types';
-import { TagListComponentProps } from '../../../../../../src/plugins/saved_objects_tagging_oss/public';
-import { Tag } from '../../../common/types';
-import { getObjectTags } from '../../utils';
-import { TagList } from '../base';
-import { ITagsCache } from '../../services';
-import { byNameTagSorter } from '../../utils';
+import type { SavedObject } from '../../../../../../src/core/types/saved_objects';
+import type { Tag } from '../../../../../../src/plugins/saved_objects_tagging_oss/common/types';
+import type {
+  ITagsCache,
+  TagListComponentProps,
+} from '../../../../../../src/plugins/saved_objects_tagging_oss/public/api';
+import { byNameTagSorter, getObjectTags } from '../../utils';
+import { TagList } from '../base/tag_list';
 
 interface SavedObjectTagListProps {
   object: SavedObject;

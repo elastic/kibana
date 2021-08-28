@@ -4,9 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { EventEcs } from '../event';
-import { UrlEcs } from '../url';
+import type { EventEcs } from '../event';
+import type { UrlEcs } from '../url';
 
 interface ThreatMatchEcs {
   atomic?: string[];

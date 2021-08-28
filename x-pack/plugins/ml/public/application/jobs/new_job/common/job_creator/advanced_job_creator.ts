@@ -4,24 +4,22 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { estypes } from '@elastic/elasticsearch';
-import { SavedSearchSavedObject } from '../../../../../../common/types/kibana';
-
-import { JobCreator } from './job_creator';
-import { Field, Aggregation, SplitField } from '../../../../../../common/types/fields';
-import {
-  Job,
-  Datafeed,
-  Detector,
-  CustomRule,
-} from '../../../../../../common/types/anomaly_detection_jobs';
-import { createBasicDetector } from './util/default_configs';
+import { IndexPattern } from '../../../../../../../../../src/plugins/data/common/index_patterns/index_patterns/index_pattern';
 import { JOB_TYPE } from '../../../../../../common/constants/new_job';
-import { getRichDetectors } from './util/general';
+import type { Datafeed } from '../../../../../../common/types/anomaly_detection_jobs/datafeed';
+import type {
+  CustomRule,
+  Detector,
+  Job,
+} from '../../../../../../common/types/anomaly_detection_jobs/job';
+import type { Aggregation, Field, SplitField } from '../../../../../../common/types/fields';
+import type { SavedSearchSavedObject } from '../../../../../../common/types/kibana';
 import { isValidJson } from '../../../../../../common/util/validation_utils';
 import { ml } from '../../../../services/ml_api_service';
-import { IndexPattern } from '../../../../../../../../../src/plugins/data/public';
+import { JobCreator } from './job_creator';
+import { createBasicDetector } from './util/default_configs';
+import { getRichDetectors } from './util/general';
 
 export interface RichDetector {
   agg: Aggregation | null;

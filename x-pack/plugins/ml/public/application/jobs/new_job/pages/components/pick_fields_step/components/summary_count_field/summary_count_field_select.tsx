@@ -4,16 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { FC, useContext } from 'react';
-import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
-
-import { JobCreatorContext } from '../../../job_creator_context';
-import { Field } from '../../../../../../../../../common/types/fields';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiComboBox } from '@elastic/eui';
+import type { FC } from 'react';
+import React, { useContext } from 'react';
+import type { Field } from '../../../../../../../../../common/types/fields';
 import {
-  createFieldOptions,
   createDocCountFieldOption,
+  createFieldOptions,
 } from '../../../../../common/job_creator/util/general';
+import { JobCreatorContext } from '../../../job_creator_context';
 
 interface Props {
   fields: Field[];

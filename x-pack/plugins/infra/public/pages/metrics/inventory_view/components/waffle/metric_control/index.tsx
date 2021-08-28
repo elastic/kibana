@@ -4,24 +4,23 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useState, useCallback } from 'react';
-import { IFieldType } from 'src/plugins/data/public';
+import React, { useCallback, useState } from 'react';
+import type { IFieldType } from '../../../../../../../../../../src/plugins/data/common/index_patterns/fields/types';
 import { getCustomMetricLabel } from '../../../../../../../common/formatters/get_custom_metric_label';
-import {
-  SnapshotMetricInput,
+import type {
   SnapshotCustomMetricInput,
-  SnapshotCustomMetricInputRT,
+  SnapshotMetricInput,
 } from '../../../../../../../common/http_api/snapshot_api';
+import { SnapshotCustomMetricInputRT } from '../../../../../../../common/http_api/snapshot_api';
+import type { SnapshotMetricType } from '../../../../../../../common/inventory_models/types';
+import { DropdownButton } from '../../dropdown_button';
 import { CustomMetricForm } from './custom_metric_form';
 import { MetricsContextMenu } from './metrics_context_menu';
-import { ModeSwitcher } from './mode_switcher';
 import { MetricsEditMode } from './metrics_edit_mode';
-import { CustomMetricMode } from './types';
-import { SnapshotMetricType } from '../../../../../../../common/inventory_models/types';
-import { DropdownButton } from '../../dropdown_button';
+import { ModeSwitcher } from './mode_switcher';
+import type { CustomMetricMode } from './types';
 
 interface Props {
   options: Array<{ text: string; value: string }>;

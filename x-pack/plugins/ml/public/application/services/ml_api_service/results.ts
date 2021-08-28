@@ -4,24 +4,23 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-// Service for obtaining data for the ML Results dashboards.
-import {
-  GetStoppedPartitionResult,
-  GetDatafeedResultsChartDataResult,
-} from '../../../../common/types/results';
-import { HttpService } from '../http_service';
-import { basePath } from './index';
-import { JobId } from '../../../../common/types/anomaly_detection_jobs';
-import { JOB_ID, PARTITION_FIELD_VALUE } from '../../../../common/constants/anomalies';
-import { PartitionFieldsDefinition } from '../results_service/result_service_rx';
-import { PartitionFieldsConfig } from '../../../../common/types/storage';
-import {
+import { basePath } from '.';
+import type {
   ESSearchRequest,
   ESSearchResponse,
 } from '../../../../../../../src/core/types/elasticsearch';
-import { MLAnomalyDoc } from '../../../../common/types/anomalies';
+import { JOB_ID, PARTITION_FIELD_VALUE } from '../../../../common/constants/anomalies';
+import type { MLAnomalyDoc } from '../../../../common/types/anomalies';
+import type { JobId } from '../../../../common/types/anomaly_detection_jobs/job';
+import type {
+  GetDatafeedResultsChartDataResult,
+  GetStoppedPartitionResult,
+} from '../../../../common/types/results';
+import type { PartitionFieldsConfig } from '../../../../common/types/storage';
+import { HttpService } from '../http_service';
+import type { PartitionFieldsDefinition } from '../results_service/result_service_rx';
 
+// Service for obtaining data for the ML Results dashboards.
 export const resultsApiProvider = (httpService: HttpService) => ({
   getAnomaliesTableData(
     jobIds: string[],

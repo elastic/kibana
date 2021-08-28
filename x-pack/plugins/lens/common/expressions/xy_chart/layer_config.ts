@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { PaletteOutput } from '../../../../../../src/plugins/charts/common';
-import type { ExpressionFunctionDefinition } from '../../../../../../src/plugins/expressions/common';
-import type { LayerType } from '../../types';
+import type { PaletteOutput } from '../../../../../../src/plugins/charts/common/palette';
+import type { ExpressionFunctionDefinition } from '../../../../../../src/plugins/expressions/common/expression_functions/types';
 import { layerTypes } from '../../constants';
-import { axisConfig, YConfig } from './axis_config';
+import type { LayerType } from '../../types';
+import type { YConfig } from './axis_config';
+import { axisConfig } from './axis_config';
 import type { SeriesType } from './series_type';
 
 export interface XYLayerConfig {

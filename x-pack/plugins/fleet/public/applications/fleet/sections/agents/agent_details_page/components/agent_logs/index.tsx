@@ -4,23 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import React, { memo, useEffect, useMemo, useState } from 'react';
 
-import React, { memo, useEffect, useState, useMemo } from 'react';
+import { createStateContainer } from '../../../../../../../../../../../src/plugins/kibana_utils/common/state_containers/create_state_container';
+import type { PureTransition } from '../../../../../../../../../../../src/plugins/kibana_utils/common/state_containers/types';
+import { getStateFromKbnUrl } from '../../../../../../../../../../../src/plugins/kibana_utils/public/state_management/url/kbn_url_storage';
+import { syncState } from '../../../../../../../../../../../src/plugins/kibana_utils/public/state_sync/state_sync';
+import { createKbnUrlStateStorage } from '../../../../../../../../../../../src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/create_kbn_url_state_storage';
+import type { INullableBaseStateContainer } from '../../../../../../../../../../../src/plugins/kibana_utils/public/state_sync/types';
 
-import type {
-  INullableBaseStateContainer,
-  PureTransition,
-} from '../../../../../../../../../../../src/plugins/kibana_utils/public';
-import {
-  createStateContainer,
-  syncState,
-  createKbnUrlStateStorage,
-  getStateFromKbnUrl,
-} from '../../../../../../../../../../../src/plugins/kibana_utils/public';
-
-import { DEFAULT_LOGS_STATE, STATE_STORAGE_KEY } from './constants';
 import type { AgentLogsProps, AgentLogsState } from './agent_logs';
 import { AgentLogsUI, AgentLogsUrlStateHelper } from './agent_logs';
+import { DEFAULT_LOGS_STATE, STATE_STORAGE_KEY } from './constants';
 
 export const AgentLogs: React.FunctionComponent<
   Pick<AgentLogsProps, 'agent' | 'agentPolicy'>

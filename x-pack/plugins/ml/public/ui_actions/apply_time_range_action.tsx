@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
-import { createAction } from '../../../../../src/plugins/ui_actions/public';
-import { MlCoreSetup } from '../plugin';
-import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE, SwimLaneDrilldownContext } from '../embeddables';
+import { createAction } from '../../../../../src/plugins/ui_actions/public/actions/create_action';
+import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '../embeddables/constants';
+import type { SwimLaneDrilldownContext } from '../embeddables/types';
+import type { MlCoreSetup } from '../plugin';
 
 export const APPLY_TIME_RANGE_SELECTION_ACTION = 'applyTimeRangeSelectionAction';
 

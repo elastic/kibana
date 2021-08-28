@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { i18n } from '@kbn/i18n';
+import { Map as MapboxMap } from '@kbn/mapbox-gl';
 import classNames from 'classnames';
 import React, { Component } from 'react';
-import type { Map as MapboxMap } from '@kbn/mapbox-gl';
+
 const MAX_WIDTH = 110;
 
 interface Props {

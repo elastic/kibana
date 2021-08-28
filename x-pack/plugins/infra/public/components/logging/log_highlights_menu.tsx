@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -18,8 +17,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { debounce } from 'lodash';
 import React, { useCallback, useMemo, useState } from 'react';
-
-import { euiStyled } from '../../../../../../src/plugins/kibana_react/common';
+import { euiStyled } from '../../../../../../src/plugins/kibana_react/common/eui_styled_components';
 import { useVisibilityState } from '../../utils/use_visibility_state';
 
 interface LogHighlightsMenuProps {

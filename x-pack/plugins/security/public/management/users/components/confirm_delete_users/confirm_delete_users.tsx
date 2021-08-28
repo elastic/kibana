@@ -4,15 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { EuiConfirmModal } from '@elastic/eui';
 import React, { Component, Fragment } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { NotificationsStart } from 'src/core/public';
 
+import type { NotificationsStart } from '../../../../../../../../src/core/public/notifications/notifications_service';
 import type { UserAPIClient } from '../../user_api_client';
 
 interface Props {

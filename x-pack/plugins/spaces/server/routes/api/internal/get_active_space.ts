@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { InternalRouteDeps } from '.';
 import { wrapError } from '../../../lib/errors';
-import { createLicensedRouteHandler } from '../../lib';
-import type { InternalRouteDeps } from './';
+import { createLicensedRouteHandler } from '../../lib/licensed_route_handler';
 
 export function initGetActiveSpaceApi(deps: InternalRouteDeps) {
   const { internalRouter, getSpacesService } = deps;

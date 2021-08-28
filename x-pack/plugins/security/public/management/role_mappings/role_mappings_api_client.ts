@@ -4,10 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { HttpStart } from 'src/core/public';
-
-import type { RoleMapping } from '../../../common/model';
+import type { HttpStart } from '../../../../../../src/core/public/http/types';
+import type { RoleMapping } from '../../../common/model/role_mapping';
 
 interface CheckRoleMappingFeaturesResponse {
   canManageRoleMappings: boolean;

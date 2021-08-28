@@ -4,11 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { useState, FC } from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
-
 import {
   EuiCallOut,
   EuiModal,
@@ -17,15 +12,16 @@ import {
   EuiModalHeaderTitle,
   EuiSpacer,
 } from '@elastic/eui';
-
-import type { SimpleSavedObject } from 'src/core/public';
-
-import { SavedObjectFinderUi } from '../../../../../../../../../../src/plugins/saved_objects/public';
-import { useMlKibana, useNavigateToPath } from '../../../../../contexts/kibana';
-
-import { getNestedProperty } from '../../../../../util/object_utils';
-
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+import type { FC } from 'react';
+import React, { useState } from 'react';
+import { SimpleSavedObject } from '../../../../../../../../../../src/core/public/saved_objects/simple_saved_object';
+import { SavedObjectFinderUi } from '../../../../../../../../../../src/plugins/saved_objects/public/finder/saved_object_finder';
+import { useMlKibana } from '../../../../../contexts/kibana/kibana_context';
+import { useNavigateToPath } from '../../../../../contexts/kibana/use_navigate_to_path';
 import { getIndexPatternAndSavedSearch, isCcsIndexPattern } from '../../../../../util/index_utils';
+import { getNestedProperty } from '../../../../../util/object_utils';
 
 const fixedPageSize: number = 8;
 

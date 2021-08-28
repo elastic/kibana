@@ -4,24 +4,27 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { Component, CSSProperties, RefObject, ReactNode } from 'react';
 import {
+  EuiButtonEmpty,
   EuiCallOut,
+  EuiContextMenu,
+  EuiIcon,
   EuiLoadingSpinner,
   EuiTextAlign,
-  EuiButtonEmpty,
-  EuiIcon,
-  EuiContextMenu,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ActionExecutionContext, Action } from 'src/plugins/ui_actions/public';
-import { GeoJsonProperties } from 'geojson';
-import { Filter } from 'src/plugins/data/public';
-import { ACTION_GLOBAL_APPLY_FILTER } from '../../../../../../../../src/plugins/data/public';
+import type { GeoJsonProperties } from 'geojson';
+import type { CSSProperties, ReactNode, RefObject } from 'react';
+import React, { Component } from 'react';
+import type { Filter } from '../../../../../../../../src/plugins/data/common/es_query';
+import { ACTION_GLOBAL_APPLY_FILTER } from '../../../../../../../../src/plugins/data/public/actions/apply_filter_action';
+import type {
+  Action,
+  ActionExecutionContext,
+} from '../../../../../../../../src/plugins/ui_actions/public/actions/action';
+import type { RawValue } from '../../../../../common/constants';
+import type { ITooltipProperty } from '../../../../classes/tooltips/tooltip_property';
 import { isUrlDrilldown } from '../../../../trigger_actions/trigger_utils';
-import { RawValue } from '../../../../../common/constants';
-import { ITooltipProperty } from '../../../../classes/tooltips/tooltip_property';
 
 interface Props {
   featureId?: string | number;

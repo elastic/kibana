@@ -6,16 +6,15 @@
  */
 
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
-
-import { FeatureCollection } from 'geojson';
-import { Query } from 'src/plugins/data/public';
-import { SortDirection } from 'src/plugins/data/common/search';
+import type { FeatureCollection } from 'geojson';
+import type { Query } from 'src/plugins/data/public';
+import { SortDirection } from '../../../../../src/plugins/data/common/search/search_source/types';
 import {
   AGG_TYPE,
   GRID_RESOLUTION,
+  MVT_FIELD_TYPE,
   RENDER_AS,
   SCALING_TYPES,
-  MVT_FIELD_TYPE,
   SOURCE_TYPES,
 } from '../constants';
 

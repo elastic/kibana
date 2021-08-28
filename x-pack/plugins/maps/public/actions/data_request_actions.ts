@@ -6,33 +6,43 @@
  */
 
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
-
-import { AnyAction, Dispatch } from 'redux';
-import { ThunkDispatch } from 'redux-thunk';
 import bbox from '@turf/bbox';
-import uuid from 'uuid/v4';
 import { multiPoint } from '@turf/helpers';
-import { FeatureCollection } from 'geojson';
-import { MapStoreState } from '../reducers/store';
+import type { FeatureCollection } from 'geojson';
+import type { AnyAction, Dispatch } from 'redux';
+import type { ThunkDispatch } from 'redux-thunk';
+import uuid from 'uuid/v4';
 import {
   KBN_IS_CENTROID_FEATURE,
   LAYER_TYPE,
   SOURCE_DATA_REQUEST_ID,
 } from '../../common/constants';
+import type {
+  DataMeta,
+  MapFilters,
+} from '../../common/descriptor_types/data_request_descriptor_types';
+import type { MapExtent } from '../../common/descriptor_types/map_descriptor';
+import {
+  scaleBounds,
+  turfBboxToBounds,
+} from '../../common/elasticsearch_util/elasticsearch_geo_utils';
+import type { ILayer } from '../classes/layers/layer';
+import type { IVectorLayer } from '../classes/layers/vector_layer/vector_layer';
+import { DataRequestAbortError } from '../classes/util/data_request';
+import type { ResultMeta } from '../reducers/non_serializable_instances';
+import {
+  cancelRequest,
+  getEventHandlers,
+  registerCancelCallback,
+  unregisterCancelCallback,
+} from '../reducers/non_serializable_instances';
+import type { MapStoreState } from '../reducers/store';
 import {
   getDataFilters,
   getDataRequestDescriptor,
   getLayerById,
   getLayerList,
 } from '../selectors/map_selectors';
-import {
-  cancelRequest,
-  registerCancelCallback,
-  unregisterCancelCallback,
-  getEventHandlers,
-  ResultMeta,
-} from '../reducers/non_serializable_instances';
-import { cleanTooltipStateForLayer } from './tooltip_actions';
 import {
   LAYER_DATA_LOAD_ENDED,
   LAYER_DATA_LOAD_ERROR,
@@ -43,11 +53,7 @@ import {
   UPDATE_LAYER_PROP,
   UPDATE_SOURCE_DATA_REQUEST,
 } from './map_action_constants';
-import { ILayer } from '../classes/layers/layer';
-import { IVectorLayer } from '../classes/layers/vector_layer';
-import { DataMeta, MapExtent, MapFilters } from '../../common/descriptor_types';
-import { DataRequestAbortError } from '../classes/util/data_request';
-import { scaleBounds, turfBboxToBounds } from '../../common/elasticsearch_util';
+import { cleanTooltipStateForLayer } from './tooltip_actions';
 
 const FIT_TO_BOUNDS_SCALE_FACTOR = 0.1;
 

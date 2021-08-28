@@ -6,13 +6,16 @@
  */
 
 import React from 'react';
-
-import { Props, StylePropEditor } from '../style_prop_editor';
+import type {
+  LabelDynamicOptions,
+  LabelStaticOptions,
+} from '../../../../../../common/descriptor_types/style_property_descriptor_types';
+import type { Props } from '../style_prop_editor';
+import { StylePropEditor } from '../style_prop_editor';
 // @ts-expect-error
 import { DynamicLabelForm } from './dynamic_label_form';
 // @ts-expect-error
 import { StaticLabelForm } from './static_label_form';
-import { LabelDynamicOptions, LabelStaticOptions } from '../../../../../../common/descriptor_types';
 
 type LabelEditorProps = Omit<Props<LabelStaticOptions, LabelDynamicOptions>, 'children'>;
 

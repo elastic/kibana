@@ -4,14 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { ReactElement } from 'react';
-import { SearchSessionStatus } from '../../../../../../../src/plugins/data/common';
+import type { ReactElement } from 'react';
+import React from 'react';
+import type { StatusDef as StatusAttributes } from '.';
+import { TableText } from '.';
+import { SearchSessionStatus } from '../../../../../../../src/plugins/data/common/search/session/status';
 import { dateString } from '../lib/date_string';
-import { UISession } from '../types';
-import { StatusDef as StatusAttributes, TableText } from './';
+import type { UISession } from '../types';
 
 // Shared helper function
 export const getStatusText = (statusType: string): string => {

@@ -4,13 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { Fragment, FC } from 'react';
-
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { JobType } from '../../../../common/types/saved_objects';
-import { lazyMlNodesAvailable } from '../../ml_nodes_check';
+import type { FC } from 'react';
+import React, { Fragment } from 'react';
+import type { JobType } from '../../../../common/types/saved_objects';
+import { lazyMlNodesAvailable } from '../../ml_nodes_check/check_ml_nodes';
 
 interface Props {
   jobType: JobType;

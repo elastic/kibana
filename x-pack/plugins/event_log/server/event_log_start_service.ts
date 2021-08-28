@@ -4,15 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { Observable } from 'rxjs';
-import { IClusterClient, KibanaRequest } from 'src/core/server';
-import { SpacesServiceStart } from '../../spaces/server';
-
-import { EsContext } from './es';
-import { IEventLogClientService } from './types';
+import type { IClusterClient } from '../../../../src/core/server/elasticsearch/client/cluster_client';
+import { KibanaRequest } from '../../../../src/core/server/http/router/request';
+import type { SpacesServiceStart } from '../../spaces/server/spaces_service/spaces_service';
+import type { EsContext } from './es/context';
 import { EventLogClient } from './event_log_client';
 import { SavedObjectProviderRegistry } from './saved_object_provider_registry';
+import type { IEventLogClientService } from './types';
+
 export type PluginClusterClient = Pick<IClusterClient, 'asInternalUser'>;
 export type AdminClusterClient$ = Observable<PluginClusterClient>;
 

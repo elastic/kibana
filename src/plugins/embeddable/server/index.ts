@@ -9,6 +9,6 @@ import type { EmbeddableSetup, EmbeddableStart } from './plugin';
 import { EmbeddableServerPlugin } from './plugin';
 
 export { EmbeddableRegistryDefinition, EnhancementRegistryDefinition } from './types';
-export { EmbeddableSetup, EmbeddableStart };
+export type { EmbeddableSetup, EmbeddableStart };
 
 export const plugin = () => new EmbeddableServerPlugin();

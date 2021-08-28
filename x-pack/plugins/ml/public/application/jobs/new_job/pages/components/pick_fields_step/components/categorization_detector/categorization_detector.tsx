@@ -4,14 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { FC, useContext, useEffect, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFlexGroup, EuiSpacer, EuiTitle } from '@elastic/eui';
-
+import { FormattedMessage } from '@kbn/i18n/react';
+import type { FC } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { ML_JOB_AGGREGATION } from '../../../../../../../../../common/constants/aggregation_types';
+import { CategorizationJobCreator } from '../../../../../common/job_creator/categorization_job_creator';
 import { JobCreatorContext } from '../../../job_creator_context';
-import { CategorizationJobCreator } from '../../../../../common/job_creator';
 import { CountCard, RareCard } from './detector_cards';
 
 export const CategorizationDetector: FC = () => {

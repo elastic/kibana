@@ -4,13 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { estypes } from '@elastic/elasticsearch';
 import Boom from '@hapi/boom';
-import type { MlClient } from '../../lib/ml_client';
-
-import type { Job } from '../../../common/types/anomaly_detection_jobs';
+import type { Job } from '../../../common/types/anomaly_detection_jobs/job';
 import type { Filter, FilterStats } from '../../../common/types/filters';
+import type { MlClient } from '../../lib/ml_client/types';
 
 export interface FormFilter {
   filterId: string;

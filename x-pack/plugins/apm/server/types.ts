@@ -4,53 +4,57 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ValuesType } from 'utility-types';
 import { Observable } from 'rxjs';
-import { CoreSetup, CoreStart, KibanaRequest } from 'kibana/server';
-import {
-  RuleRegistryPluginSetupContract,
-  RuleRegistryPluginStartContract,
-} from '../../rule_registry/server';
-import {
-  PluginSetup as DataPluginSetup,
-  PluginStart as DataPluginStart,
-} from '../../../../src/plugins/data/server';
-import { SpacesPluginSetup, SpacesPluginStart } from '../../spaces/server';
-import { APMOSSPluginSetup } from '../../../../src/plugins/apm_oss/server';
-import {
+import type { ValuesType } from 'utility-types';
+import type { APMConfig } from '.';
+import type { CoreSetup, CoreStart } from '../../../../src/core/server';
+import { KibanaRequest } from '../../../../src/core/server/http/router/request';
+import type { APMOSSPluginSetup } from '../../../../src/plugins/apm_oss/server/types';
+import type {
+  DataPluginSetup,
+  DataPluginStart,
+} from '../../../../src/plugins/data/server/plugin';
+import type {
   HomeServerPluginSetup,
   HomeServerPluginStart,
-} from '../../../../src/plugins/home/server';
-import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
-import { ActionsPlugin } from '../../actions/server';
-import { AlertingPlugin } from '../../alerting/server';
-import { CloudSetup } from '../../cloud/server';
-import {
+} from '../../../../src/plugins/home/server/plugin';
+import type { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server/plugin';
+import type { ActionsPlugin } from '../../actions/server/types';
+import type { AlertingPlugin } from '../../alerting/server/types';
+import type { CloudSetup } from '../../cloud/server/plugin';
+import type {
   PluginSetupContract as FeaturesPluginSetup,
   PluginStartContract as FeaturesPluginStart,
-} from '../../features/server';
-import {
-  LicensingPluginSetup,
-  LicensingPluginStart,
-} from '../../licensing/server';
-import { MlPluginSetup, MlPluginStart } from '../../ml/server';
-import { ObservabilityPluginSetup } from '../../observability/server';
-import {
-  SecurityPluginSetup,
-  SecurityPluginStart,
-} from '../../security/server';
-import {
-  TaskManagerSetupContract,
-  TaskManagerStartContract,
-} from '../../task_manager/server';
-import {
+} from '../../features/server/plugin';
+import type {
   FleetSetupContract as FleetPluginSetup,
   FleetStartContract as FleetPluginStart,
-} from '../../fleet/server';
-import { APMConfig } from '.';
-import { getApmIndices } from './lib/settings/apm_indices/get_apm_indices';
+} from '../../fleet/server/plugin';
+import type {
+  LicensingPluginSetup,
+  LicensingPluginStart,
+} from '../../licensing/server/types';
+import type { MlPluginSetup, MlPluginStart } from '../../ml/server/plugin';
+import type { ObservabilityPluginSetup } from '../../observability/server/plugin';
+import type {
+  RuleRegistryPluginSetupContract,
+  RuleRegistryPluginStartContract,
+} from '../../rule_registry/server/plugin';
+import type {
+  SecurityPluginSetup,
+  SecurityPluginStart,
+} from '../../security/server/plugin';
+import type {
+  SpacesPluginSetup,
+  SpacesPluginStart,
+} from '../../spaces/server/plugin';
+import type {
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from '../../task_manager/server/plugin';
 import { createApmEventClient } from './lib/helpers/create_es_client/create_apm_event_client';
-import { ApmPluginRequestHandlerContext } from './routes/typings';
+import { getApmIndices } from './lib/settings/apm_indices/get_apm_indices';
+import type { ApmPluginRequestHandlerContext } from './routes/typings';
 
 export interface APMPluginSetup {
   config$: Observable<APMConfig>;

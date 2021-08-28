@@ -5,8 +5,8 @@
  * 2.0.
  */
 import { LICENSE_TYPE } from '../../../licensing/common/types';
-import { IndexActionTypeId } from '../builtin_action_types/es_index';
-import { ServerLogActionTypeId } from '../builtin_action_types/server_log';
+import { ActionTypeId as IndexActionTypeId } from '../builtin_action_types/es_index';
+import { ActionTypeId as ServerLogActionTypeId } from '../builtin_action_types/server_log';
 import type { ActionType, ActionTypeConfig, ActionTypeParams, ActionTypeSecrets } from '../types';
 
 const CASE_ACTION_TYPE_ID = '.case';

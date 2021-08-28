@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { AuthenticatedUser, LegacyAuditLogger } from '../../../security/server';
-import type { SavedObjectDescriptor } from '../crypto';
-import { descriptorToArray } from '../crypto';
+import type { AuthenticatedUser } from '../../../security/common/model/authenticated_user';
+import type { LegacyAuditLogger } from '../../../security/server/audit/audit_service';
+import type { SavedObjectDescriptor } from '../crypto/encrypted_saved_objects_service';
+import { descriptorToArray } from '../crypto/encrypted_saved_objects_service';
 
 /**
  * Represents all audit events the plugin can log.

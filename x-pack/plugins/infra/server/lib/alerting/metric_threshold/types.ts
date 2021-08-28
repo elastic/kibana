@@ -4,9 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { Unit } from '@elastic/datemath';
-import { Comparator, AlertStates } from '../common/types';
+import type { Unit } from '@elastic/datemath';
+import { AlertStates, Comparator } from '../common/types';
 
 export { Comparator, AlertStates };
 export const METRIC_THRESHOLD_ALERT_TYPE_ID = 'metrics.alert.threshold';

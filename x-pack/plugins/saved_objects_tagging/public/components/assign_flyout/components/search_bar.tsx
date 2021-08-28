@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { FC, useMemo } from 'react';
-import { EuiSearchBar, SearchFilterConfig } from '@elastic/eui';
+import type { SearchFilterConfig } from '@elastic/eui';
+import { EuiSearchBar } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { FC } from 'react';
+import React, { useMemo } from 'react';
 
 export interface AssignFlyoutSearchBarProps {
   onChange: (args: any) => void | boolean;

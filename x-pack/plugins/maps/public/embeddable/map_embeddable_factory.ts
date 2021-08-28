@@ -4,18 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { i18n } from '@kbn/i18n';
-import { EmbeddableStateWithType } from 'src/plugins/embeddable/common';
-import {
-  EmbeddableFactoryDefinition,
-  IContainer,
-} from '../../../../../src/plugins/embeddable/public';
-import { MAP_SAVED_OBJECT_TYPE, APP_ICON } from '../../common/constants';
+import type { EmbeddableStateWithType } from '../../../../../src/plugins/embeddable/common/types';
+import type { IContainer } from '../../../../../src/plugins/embeddable/public/lib/containers/i_container';
+import type { EmbeddableFactoryDefinition } from '../../../../../src/plugins/embeddable/public/lib/embeddables/embeddable_factory_definition';
+import { APP_ICON, MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
 import { getMapEmbeddableDisplayName } from '../../common/i18n_getters';
-import { MapByReferenceInput, MapEmbeddableInput, MapByValueInput } from './types';
-import { lazyLoadMapModules } from '../lazy_load_bundle';
 import { extractReferences } from '../../common/migrations/references';
+import { lazyLoadMapModules } from '../lazy_load_bundle';
+import type { MapByReferenceInput, MapByValueInput, MapEmbeddableInput } from './types';
 
 export class MapEmbeddableFactory implements EmbeddableFactoryDefinition {
   type = MAP_SAVED_OBJECT_TYPE;

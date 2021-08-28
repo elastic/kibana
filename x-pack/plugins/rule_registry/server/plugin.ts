@@ -4,27 +4,24 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import {
-  PluginInitializerContext,
+import type { Logger } from '@kbn/logging';
+import type { CoreSetup, CoreStart } from '../../../../src/core/server';
+import type { IContextProvider } from '../../../../src/core/server/context/container/context';
+import { KibanaRequest } from '../../../../src/core/server/http/router/request';
+import type {
   Plugin,
-  CoreSetup,
-  Logger,
-  KibanaRequest,
-  CoreStart,
-  IContextProvider,
+  PluginInitializerContext,
   SharedGlobalConfig,
-} from 'src/core/server';
-
-import { PluginStartContract as AlertingStart } from '../../alerting/server';
-import { SecurityPluginSetup } from '../../security/server';
-
-import { INDEX_PREFIX, RuleRegistryPluginConfig } from './config';
-import { RuleDataPluginService } from './rule_data_plugin_service';
-import { AlertsClientFactory } from './alert_data_client/alerts_client_factory';
+} from '../../../../src/core/server/plugins/types';
+import type { PluginStartContract as AlertingStart } from '../../alerting/server/plugin';
+import type { SecurityPluginSetup } from '../../security/server/plugin';
 import { AlertsClient } from './alert_data_client/alerts_client';
-import { RacApiRequestHandlerContext, RacRequestHandlerContext } from './types';
+import { AlertsClientFactory } from './alert_data_client/alerts_client_factory';
+import type { RuleRegistryPluginConfig } from './config';
+import { INDEX_PREFIX } from './config';
 import { defineRoutes } from './routes';
+import { RuleDataPluginService } from './rule_data_plugin_service/rule_data_plugin_service';
+import type { RacApiRequestHandlerContext, RacRequestHandlerContext } from './types';
 
 export interface RuleRegistryPluginSetupDependencies {
   security?: SecurityPluginSetup;

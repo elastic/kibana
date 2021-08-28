@@ -4,16 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { SavedObjectReference } from 'src/core/types';
-import { AttributeService } from '../../../../src/plugins/embeddable/public';
-import { MapSavedObjectAttributes } from '../common/map_saved_object_type';
+import type { SavedObjectReference } from '../../../../src/core/types/saved_objects';
+import { AttributeService } from '../../../../src/plugins/embeddable/public/lib/attribute_service/attribute_service';
+import { checkForDuplicateTitle } from '../../../../src/plugins/saved_objects/public/saved_object/helpers/check_for_duplicate_title';
+import type { OnSaveProps } from '../../../../src/plugins/saved_objects/public/save_modal/saved_object_save_modal';
 import { MAP_SAVED_OBJECT_TYPE } from '../common/constants';
 import { getMapEmbeddableDisplayName } from '../common/i18n_getters';
-import { checkForDuplicateTitle, OnSaveProps } from '../../../../src/plugins/saved_objects/public';
-import { getCoreOverlays, getEmbeddableService, getSavedObjectsClient } from './kibana_services';
+import type { MapSavedObjectAttributes } from '../common/map_saved_object_type';
 import { extractReferences, injectReferences } from '../common/migrations/references';
-import { MapByValueInput, MapByReferenceInput } from './embeddable/types';
+import type { MapByReferenceInput, MapByValueInput } from './embeddable/types';
+import { getCoreOverlays, getEmbeddableService, getSavedObjectsClient } from './kibana_services';
 
 type MapDoc = MapSavedObjectAttributes & { references?: SavedObjectReference[] };
 

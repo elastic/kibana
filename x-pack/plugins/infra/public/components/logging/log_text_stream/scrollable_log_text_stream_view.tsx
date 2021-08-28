@@ -4,30 +4,30 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { Fragment } from 'react';
 import moment from 'moment';
-
-import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
-import { TextScale } from '../../../../common/log_text_scale';
-import { TimeKey, UniqueTimeKey } from '../../../../common/time';
+import React, { Fragment } from 'react';
+import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
+import type { LogEntry } from '../../../../common/log_entry/log_entry';
+import type { TextScale } from '../../../../common/log_text_scale/log_text_scale';
+import type { TimeKey, UniqueTimeKey } from '../../../../common/time/time_key';
 import { callWithoutRepeats } from '../../../utils/handlers';
+import type { LogColumnRenderConfiguration } from '../../../utils/log_column_render_configuration';
 import { AutoSizer } from '../../auto_sizer';
-import { NoData } from '../../empty_states';
+import { NoData } from '../../empty_states/no_data';
 import { InfraLoadingPanel } from '../../loading';
-import { getStreamItemBeforeTimeKey, getStreamItemId, parseStreamItemId, StreamItem } from './item';
 import { LogColumnHeaders } from './column_headers';
-import { LogTextStreamLoadingItemView } from './loading_item_view';
+import type { StreamItem } from './item';
+import { getStreamItemBeforeTimeKey, getStreamItemId, parseStreamItemId } from './item';
 import { LogTextStreamJumpToTail } from './jump_to_tail';
+import { LogTextStreamLoadingItemView } from './loading_item_view';
+import { LogDateRow } from './log_date_row';
+import type { LogEntryColumnWidths } from './log_entry_column';
+import { useColumnWidths } from './log_entry_column';
 import { LogEntryRow } from './log_entry_row';
 import { MeasurableItemView } from './measurable_item_view';
 import { VerticalScrollPanel } from './vertical_scroll_panel';
-import { useColumnWidths, LogEntryColumnWidths } from './log_entry_column';
-import { LogDateRow } from './log_date_row';
-import { LogEntry } from '../../../../common/log_entry';
-import { LogColumnRenderConfiguration } from '../../../utils/log_column_render_configuration';
 
 interface ScrollableLogTextStreamViewProps {
   columnConfigurations: LogColumnRenderConfiguration[];

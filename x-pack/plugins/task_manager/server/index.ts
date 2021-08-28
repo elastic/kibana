@@ -4,37 +4,38 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { get } from 'lodash';
-import { PluginConfigDescriptor, PluginInitializerContext } from 'src/core/server';
+import type {
+  PluginConfigDescriptor,
+  PluginInitializerContext,
+} from '../../../../src/core/server/plugins/types';
+import type { TaskManagerConfig } from './config';
+import { configSchema, MAX_WORKERS_LIMIT } from './config';
 import { TaskManagerPlugin } from './plugin';
-import { configSchema, TaskManagerConfig, MAX_WORKERS_LIMIT } from './config';
 
 export const plugin = (initContext: PluginInitializerContext) => new TaskManagerPlugin(initContext);
 
-export {
-  TaskInstance,
-  ConcreteTaskInstance,
-  EphemeralTask,
-  TaskRunCreatorFunction,
-  TaskStatus,
-  RunContext,
-} from './task';
-
 export { asInterval } from './lib/intervals';
-export {
-  isUnrecoverableError,
-  throwUnrecoverableError,
-  isEphemeralTaskRejectedDueToCapacityError,
-} from './task_running';
-export { RunNowResult } from './task_scheduling';
-export { getOldestIdleActionTask } from './queries/oldest_idle_action_task';
-
 export {
   TaskManagerPlugin as TaskManager,
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from './plugin';
+export { getOldestIdleActionTask } from './queries/oldest_idle_action_task';
+export {
+  ConcreteTaskInstance,
+  EphemeralTask,
+  RunContext,
+  TaskInstance,
+  TaskRunCreatorFunction,
+  TaskStatus,
+} from './task';
+export {
+  isEphemeralTaskRejectedDueToCapacityError,
+  isUnrecoverableError,
+  throwUnrecoverableError,
+} from './task_running';
+export { RunNowResult } from './task_scheduling';
 
 export const config: PluginConfigDescriptor<TaskManagerConfig> = {
   schema: configSchema,

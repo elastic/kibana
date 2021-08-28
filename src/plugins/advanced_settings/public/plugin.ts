@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import { i18n } from '@kbn/i18n';
-import type { CoreSetup } from '../../../core/public';
+import type { CoreSetup } from '../../../core/public/types';
 import type { Plugin } from '../../../core/public/plugins/plugin';
 import { FeatureCatalogueCategory } from '../../home/public/services/feature_catalogue/feature_catalogue_registry';
 import { ComponentRegistry } from './component_registry/component_registry';

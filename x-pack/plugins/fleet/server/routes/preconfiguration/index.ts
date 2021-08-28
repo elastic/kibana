@@ -4,16 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { IRouter, RequestHandler } from 'src/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 
-import type { PreconfiguredAgentPolicy } from '../../../common';
-
-import { PLUGIN_ID, PRECONFIGURATION_API_ROUTES } from '../../constants';
-import { PutPreconfigurationSchema } from '../../types';
-import { defaultIngestErrorHandler } from '../../errors';
-import { ensurePreconfiguredPackagesAndPolicies, outputService } from '../../services';
+import type { IRouter, RequestHandler } from '../../../../../../src/core/server/http/router/router';
+import { PLUGIN_ID } from '../../../common/constants/plugin';
+import { PRECONFIGURATION_API_ROUTES } from '../../../common/constants/routes';
+import type { PreconfiguredAgentPolicy } from '../../../common/types/models/preconfiguration';
+import { defaultIngestErrorHandler } from '../../errors/handlers';
+import { outputService } from '../../services/output';
+import { ensurePreconfiguredPackagesAndPolicies } from '../../services/preconfiguration';
+import { PutPreconfigurationSchema } from '../../types/rest_spec/preconfiguration';
 
 export const updatePreconfigurationHandler: RequestHandler<
   undefined,

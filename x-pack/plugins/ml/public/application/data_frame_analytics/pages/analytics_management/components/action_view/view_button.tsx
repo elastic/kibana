@@ -4,13 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { FC } from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiToolTip } from '@elastic/eui';
-
-import { DataFrameAnalyticsListRow } from '../analytics_list/common';
-
+import { i18n } from '@kbn/i18n';
+import type { FC } from 'react';
+import React from 'react';
+import type { DataFrameAnalyticsListRow } from '../analytics_list/common';
 import { getViewLinkStatus } from './get_view_link_status';
 
 export const viewActionButtonText = i18n.translate(

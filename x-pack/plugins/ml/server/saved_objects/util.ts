@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { SavedObjectsServiceStart, KibanaRequest } from 'kibana/server';
-import { SavedObjectsClient } from '../../../../../src/core/server';
+import { KibanaRequest } from '../../../../../src/core/server/http/router/request';
+import type { SavedObjectsServiceStart } from '../../../../../src/core/server/saved_objects/saved_objects_service';
+import { SavedObjectsClient } from '../../../../../src/core/server/saved_objects/service/saved_objects_client';
 import { ML_SAVED_OBJECT_TYPE } from '../../common/types/saved_objects';
 
 export function savedObjectClientsFactory(

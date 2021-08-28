@@ -5,15 +5,16 @@
  * 2.0.
  */
 
+import { EuiCodeBlock, EuiLink, EuiSelect, EuiSpacer, EuiText } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 import styled from 'styled-components';
-import { EuiText, EuiSpacer, EuiLink, EuiCodeBlock, EuiSelect } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { i18n } from '@kbn/i18n';
 
-import type { EnrollmentAPIKey } from '../../../types';
-import { PLATFORM_OPTIONS, usePlatform, useStartServices } from '../../../hooks';
-import type { PLATFORM_TYPE } from '../../../hooks';
+import type { EnrollmentAPIKey } from '../../../../common/types/models/enrollment_api_key';
+import { useStartServices } from '../../../hooks/use_core';
+import type { PLATFORM_TYPE } from '../../../hooks/use_platform';
+import { PLATFORM_OPTIONS, usePlatform } from '../../../hooks/use_platform';
 
 interface Props {
   fleetServerHosts: string[];

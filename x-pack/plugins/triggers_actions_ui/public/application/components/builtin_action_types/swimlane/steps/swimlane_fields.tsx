@@ -4,18 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { useMemo, useCallback, useEffect, useRef } from 'react';
-import { EuiFormRow, EuiComboBox, EuiComboBoxOptionOption, EuiButtonGroup } from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiButtonGroup, EuiComboBox, EuiFormRow } from '@elastic/eui';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import type { IErrorObject } from '../../../../../types';
+import { isValidFieldForConnector } from '../helpers';
 import * as i18n from '../translations';
-import {
+import type {
   SwimlaneActionConnector,
-  SwimlaneConnectorType,
   SwimlaneFieldMappingConfig,
   SwimlaneMappingConfig,
 } from '../types';
-import { IErrorObject } from '../../../../../types';
-import { isValidFieldForConnector } from '../helpers';
+import { SwimlaneConnectorType } from '../types';
 
 const SINGLE_SELECTION = { asPlainText: true };
 const EMPTY_COMBO_BOX_ARRAY: Array<EuiComboBoxOptionOption<string>> | undefined = [];

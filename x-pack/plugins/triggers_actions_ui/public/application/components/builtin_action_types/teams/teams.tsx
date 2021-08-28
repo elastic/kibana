@@ -4,16 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
-import {
+import { lazy } from 'react';
+import type {
   ActionTypeModel,
-  GenericValidationResult,
   ConnectorValidationResult,
+  GenericValidationResult,
 } from '../../../../types';
-import { TeamsActionParams, TeamsSecrets, TeamsActionConnector } from '../types';
 import { isValidUrl } from '../../../lib/value_validators';
+import type { TeamsActionConnector, TeamsActionParams, TeamsSecrets } from '../types';
 
 export function getActionType(): ActionTypeModel<unknown, TeamsSecrets, TeamsActionParams> {
   return {

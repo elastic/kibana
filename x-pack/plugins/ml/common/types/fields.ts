@@ -4,13 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { estypes } from '@elastic/elasticsearch';
 import { ES_FIELD_TYPES } from '../../../../../src/plugins/data/common';
 import {
-  ML_JOB_AGGREGATION,
-  KIBANA_AGGREGATION,
   ES_AGGREGATION,
+  KIBANA_AGGREGATION,
+  ML_JOB_AGGREGATION,
 } from '../constants/aggregation_types';
 import { MLCATEGORY } from '../constants/field_types';
 

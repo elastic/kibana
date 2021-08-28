@@ -4,12 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { i18n } from '@kbn/i18n';
-
-import { hasLicenseExpired } from '../license';
-
-import { MlCapabilities, getDefaultCapabilities } from '../../../common/types/capabilities';
+import type { MlCapabilities } from '../../../common/types/capabilities';
+import { getDefaultCapabilities } from '../../../common/types/capabilities';
+import { hasLicenseExpired } from '../license/check_license';
 import { getCapabilities, getManageMlCapabilities } from './get_capabilities';
 
 let _capabilities: MlCapabilities = getDefaultCapabilities();

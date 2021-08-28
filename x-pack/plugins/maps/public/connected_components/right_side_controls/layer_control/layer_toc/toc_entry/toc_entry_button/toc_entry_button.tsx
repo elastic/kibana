@@ -4,13 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { Component, Fragment, ReactNode } from 'react';
-
-import { EuiButtonEmpty, EuiIcon, EuiToolTip, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiButtonEmpty, EuiIcon, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ILayer } from '../../../../../../classes/layers/layer';
-import { IVectorSource } from '../../../../../../classes/sources/vector_source';
+import type { ReactNode } from 'react';
+import React, { Component, Fragment } from 'react';
+import type { ILayer } from '../../../../../../classes/layers/layer';
+import type { IVectorSource } from '../../../../../../classes/sources/vector_source/vector_source';
 
 interface Footnote {
   icon: ReactNode;

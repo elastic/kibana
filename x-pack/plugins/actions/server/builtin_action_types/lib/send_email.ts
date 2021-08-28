@@ -7,7 +7,7 @@
 
 // info on nodemailer: https://nodemailer.com/about/
 import type { Logger } from '@kbn/logging';
-import { MarkdownIt } from 'markdown-it';
+import { default as MarkdownIt } from 'markdown-it';
 import nodemailer from 'nodemailer';
 import type { ActionsConfigurationUtilities } from '../../actions_config';
 import type { CustomHostSettings } from '../../config';

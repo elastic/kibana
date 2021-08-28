@@ -4,16 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import type { Observable } from 'rxjs';
 
+import type { ConfigDeprecation, ConfigDeprecationProvider } from '@kbn/config';
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
-import type {
-  ConfigDeprecation,
-  ConfigDeprecationProvider,
-  PluginInitializerContext,
-} from 'src/core/server';
+
+import type { PluginInitializerContext } from '../../../../src/core/server/plugins/types';
 
 export const ConfigSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),

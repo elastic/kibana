@@ -4,21 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { i18n } from '@kbn/i18n';
-import React from 'react';
-import { uniq } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
-import {
-  IndexPattern,
-  IndexPatternColumn,
-  IndexPatternLayer,
-  IndexPatternPrivateState,
-} from './types';
-import { Datatable } from '../../../../../src/plugins/expressions';
+import { uniq } from 'lodash';
+import React from 'react';
+import { parseTimeShift } from '../../../../../src/plugins/data/common/search/aggs/utils/parse_time_shift';
 import { search } from '../../../../../src/plugins/data/public';
-import { parseTimeShift } from '../../../../../src/plugins/data/common';
-import { FramePublicAPI } from '../types';
+import type { Datatable } from '../../../../../src/plugins/expressions/common/expression_types/specs/datatable';
+import type { FramePublicAPI } from '../types';
+import type { IndexPatternColumn } from './operations/definitions';
+import type { IndexPattern, IndexPatternLayer, IndexPatternPrivateState } from './types';
 
 export const timeShiftOptions = [
   {

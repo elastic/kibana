@@ -5,15 +5,18 @@
  * 2.0.
  */
 
-import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { SavedObject, SavedObjectReference } from 'src/core/public';
-import {
+import React from 'react';
+import type {
+  SavedObject,
+  SavedObjectReference,
+} from '../../../../../src/core/types/saved_objects';
+import type {
+  ITagsCache,
   SavedObjectsTaggingApiUi,
   SavedObjectsTaggingApiUiComponent,
-} from '../../../../../src/plugins/saved_objects_tagging_oss/public';
-import { ITagsCache } from '../services';
-import { getTagsFromReferences, byNameTagSorter } from '../utils';
+} from '../../../../../src/plugins/saved_objects_tagging_oss/public/api';
+import { byNameTagSorter, getTagsFromReferences } from '../utils';
 
 export interface GetTableColumnDefinitionOptions {
   components: SavedObjectsTaggingApiUiComponent;

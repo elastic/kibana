@@ -4,9 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { EuiSuperDatePickerCommonRange } from '@elastic/eui';
-import { TimePickerQuickRange } from './use_kibana_ui_setting';
+import type { EuiSuperDatePickerCommonRange } from '@elastic/eui';
+import type { TimePickerQuickRange } from './use_kibana_ui_setting';
 
 export const mapKibanaQuickRangesToDatePickerRanges = (
   timepickerQuickRanges: TimePickerQuickRange[] | undefined

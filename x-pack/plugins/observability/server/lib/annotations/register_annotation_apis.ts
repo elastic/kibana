@@ -5,19 +5,21 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
 import { schema } from '@kbn/config-schema';
-import { CoreSetup, RequestHandler, Logger } from 'kibana/server';
-import { PathReporter } from 'io-ts/lib/PathReporter';
+import type { Logger } from '@kbn/logging';
 import { isLeft } from 'fp-ts/lib/Either';
+import * as t from 'io-ts';
+import { PathReporter } from 'io-ts/lib/PathReporter';
+import type { CoreSetup } from '../../../../../../src/core/server';
+import type { RequestHandler } from '../../../../../../src/core/server/http/router/router';
 import {
-  getAnnotationByIdRt,
   createAnnotationRt,
   deleteAnnotationRt,
+  getAnnotationByIdRt,
 } from '../../../common/annotations';
-import { ScopedAnnotationsClient } from './bootstrap_annotations';
-import { createAnnotationsClient } from './create_annotations_client';
 import type { ObservabilityRequestHandlerContext } from '../../types';
+import type { ScopedAnnotationsClient } from './bootstrap_annotations';
+import { createAnnotationsClient } from './create_annotations_client';
 
 const unknowns = schema.object({}, { unknowns: 'allow' });
 

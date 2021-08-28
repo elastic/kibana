@@ -4,9 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { Aggregation, Field, NewJobCaps } from '../../../../common/types/fields';
-import { ES_FIELD_TYPES } from '../../../../../../../src/plugins/data/public';
+import type { Aggregation, Field, NewJobCaps } from '../../../../common/types/fields';
+import { ES_FIELD_TYPES } from '@kbn/field-types';
 
 // create two lists, one removing text fields if there are keyword equivalents and vice versa
 export function processTextAndKeywordFields(fields: Field[]) {

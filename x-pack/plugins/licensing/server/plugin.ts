@@ -4,42 +4,33 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { Observable, Subject, Subscription, timer } from 'rxjs';
-import moment from 'moment';
+import { estypes } from '@elastic/elasticsearch';
+import type { Logger } from '@kbn/logging';
+import { isPromise } from '@kbn/std';
+import type { MaybePromise } from '@kbn/utility-types';
 import { createHash } from 'crypto';
 import stringify from 'json-stable-stringify';
-
-import { estypes } from '@elastic/elasticsearch';
-import { MaybePromise } from '@kbn/utility-types';
-import { isPromise } from '@kbn/std';
-import {
-  CoreSetup,
-  Logger,
-  Plugin,
-  PluginInitializerContext,
-  IClusterClient,
-} from 'src/core/server';
-
-import {
-  ILicense,
-  PublicLicense,
-  PublicFeatures,
-  LicenseType,
-  LicenseStatus,
-} from '../common/types';
-import { LicensingPluginSetup, LicensingPluginStart } from './types';
+import moment from 'moment';
+import { Observable, Subject, Subscription, timer } from 'rxjs';
+import type { CoreSetup } from '../../../../src/core/server';
+import type { IClusterClient } from '../../../../src/core/server/elasticsearch/client/cluster_client';
+import type { Plugin, PluginInitializerContext } from '../../../../src/core/server/plugins/types';
 import { License } from '../common/license';
 import { createLicenseUpdate } from '../common/license_update';
-
-import { ElasticsearchError } from './types';
-import { registerRoutes } from './routes';
-import { FeatureUsageService } from './services';
-
-import { LicenseConfigType } from './licensing_config';
+import type {
+  ILicense,
+  LicenseStatus,
+  LicenseType,
+  PublicFeatures,
+  PublicLicense,
+} from '../common/types';
+import type { LicenseConfigType } from './licensing_config';
 import { createRouteHandlerContext } from './licensing_route_handler_context';
 import { createOnPreResponseHandler } from './on_pre_response_handler';
 import { getPluginStatus$ } from './plugin_status';
+import { registerRoutes } from './routes';
+import { FeatureUsageService } from './services/feature_usage_service';
+import type { ElasticsearchError, LicensingPluginSetup, LicensingPluginStart } from './types';
 
 function normalizeServerLicense(
   license: estypes.XpackInfoMinimalLicenseInformation

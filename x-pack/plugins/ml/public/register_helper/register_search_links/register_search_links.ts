@@ -4,11 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { i18n } from '@kbn/i18n';
 import { BehaviorSubject } from 'rxjs';
-
-import { AppUpdater } from 'src/core/public';
+import type { AppUpdater } from '../../../../../../src/core/public/application/types';
 import { getDeepLinks } from './search_deep_links';
 
 export function registerSearchLinks(

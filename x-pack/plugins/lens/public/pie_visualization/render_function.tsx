@@ -4,41 +4,36 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type {
+  PartitionConfig,
+  Datum,
+  ElementClickListener,
+  PartitionFillLabel,
+  PartitionLayer,
+  LayerValue,
+  RecursivePartial,
+} from '@elastic/charts';
+import { Chart, Partition, PartitionLayout, Position, Settings } from '@elastic/charts';
+import { EuiText } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { uniq } from 'lodash';
 import React, { useEffect, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiText } from '@elastic/eui';
-import {
-  Chart,
-  Datum,
-  LayerValue,
-  Partition,
-  PartitionConfig,
-  PartitionLayer,
-  PartitionLayout,
-  PartitionFillLabel,
-  RecursivePartial,
-  Position,
-  Settings,
-  ElementClickListener,
-} from '@elastic/charts';
-import { RenderMode } from 'src/plugins/expressions';
+import type { ChartsPluginSetup } from '../../../../../src/plugins/charts/public/types';
+import type {
+  PaletteRegistry,
+  SeriesLayer,
+} from '../../../../../src/plugins/charts/public/services/palettes/types';
+import type { RenderMode } from '../../../../../src/plugins/expressions/common/expression_renderers/types';
+import type { PieExpressionProps } from '../../common/expressions/pie_chart/types';
+import type { FormatFactory } from '../../common/types';
+import { LensIconChartDonut } from '../assets/chart_donut';
+import { EmptyPlaceholder } from '../shared_components/empty_placeholder';
 import type { LensFilterEvent } from '../types';
 import { VisualizationContainer } from '../visualization_container';
 import { CHART_NAMES, DEFAULT_PERCENT_DECIMALS } from './constants';
-import type { FormatFactory } from '../../common';
-import type { PieExpressionProps } from '../../common/expressions';
-import { getSliceValue, getFilterContext } from './render_helpers';
-import { EmptyPlaceholder } from '../shared_components';
-import './visualization.scss';
-import {
-  ChartsPluginSetup,
-  PaletteRegistry,
-  SeriesLayer,
-} from '../../../../../src/plugins/charts/public';
-import { LensIconChartDonut } from '../assets/chart_donut';
 import { getLegendAction } from './get_legend_action';
+import { getFilterContext, getSliceValue } from './render_helpers';
+import './visualization.scss';
 
 declare global {
   interface Window {

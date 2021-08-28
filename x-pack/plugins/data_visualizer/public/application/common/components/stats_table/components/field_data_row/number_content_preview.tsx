@@ -4,17 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { FC, useEffect, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import classNames from 'classnames';
-import {
-  MetricDistributionChart,
-  MetricDistributionChartData,
-  buildChartDataFromStats,
-} from '../metric_distribution_chart';
-import { FieldVisConfig } from '../../types';
-import { kibanaFieldFormat, formatSingleValue } from '../../../utils';
+import type { FC } from 'react';
+import React, { useEffect, useState } from 'react';
+import { formatSingleValue } from '../../../utils/format_value';
+import { kibanaFieldFormat } from '../../../utils/kibana_field_format';
+import type { FieldVisConfig } from '../../types/field_vis_config';
+import type { MetricDistributionChartData } from '../metric_distribution_chart/metric_distribution_chart';
+import { MetricDistributionChart } from '../metric_distribution_chart/metric_distribution_chart';
+import { buildChartDataFromStats } from '../metric_distribution_chart/metric_distribution_chart_data_builder';
 
 const METRIC_DISTRIBUTION_CHART_WIDTH = 150;
 const METRIC_DISTRIBUTION_CHART_HEIGHT = 80;

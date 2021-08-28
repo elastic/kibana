@@ -4,12 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { Fragment } from 'react';
 import { EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import React, { Fragment } from 'react';
+import type {
+  LayerWizard,
+  RenderWizardArguments,
+} from '../../../classes/layers/layer_wizard_registry';
 import { LayerWizardSelect } from './layer_wizard_select';
-import { LayerWizard, RenderWizardArguments } from '../../../classes/layers/layer_wizard_registry';
 
 type Props = RenderWizardArguments & {
   layerWizard: LayerWizard | null;

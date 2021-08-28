@@ -4,12 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { AnyAction } from 'redux';
-import { ThunkDispatch } from 'redux-thunk';
 import { connect } from 'react-redux';
-import { MapStoreState } from '../../../reducers/store';
-import { fitToDataBounds } from '../../../actions';
+import type { AnyAction } from 'redux';
+import type { ThunkDispatch } from 'redux-thunk';
+import { fitToDataBounds } from '../../../actions/data_request_actions';
+import type { MapStoreState } from '../../../reducers/store';
 import { FitToData } from './fit_to_data';
 
 function mapStateToProps(state: MapStoreState) {

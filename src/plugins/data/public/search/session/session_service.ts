@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import type { PublicContract } from '@kbn/utility-types';
 import { Observable, Subscription } from 'rxjs';
 import { distinctUntilChanged, map, startWith } from 'rxjs/operators';
-import type { StartServicesAccessor } from '../../../../../core/public';
+import type { StartServicesAccessor } from '../../../../../core/public/types';
 import type { ToastsStart as ToastService } from '../../../../../core/public/notifications/toasts/toasts_service';
 import type { PluginInitializerContext } from '../../../../../core/public/plugins/plugin_context';
 import type {

@@ -4,14 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { uniqWith, isEqual } from 'lodash';
 import cytoscape from 'cytoscape';
-import { ml } from '../../../services/ml_api_service';
+import { isEqual, uniqWith } from 'lodash';
+import { useState } from 'react';
 import { JOB_MAP_NODE_TYPES } from '../../../../../common/constants/data_frame_analytics';
-import { AnalyticsMapReturnType } from '../../../../../common/types/data_frame_analytics';
+import type { AnalyticsMapReturnType } from '../../../../../common/types/data_frame_analytics';
+import { ml } from '../../../services/ml_api_service';
 
 interface GetDataObjectParameter {
   analyticsId?: string;

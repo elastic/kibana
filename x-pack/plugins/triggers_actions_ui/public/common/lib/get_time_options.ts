@@ -4,9 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { TIME_UNITS } from '../../application/constants/time_units';
 import { getTimeUnitLabel } from './get_time_unit_label';
-import { TIME_UNITS } from '../../application/constants';
 
 export const getTimeOptions = (unitSize: number) =>
   Object.entries(TIME_UNITS).map(([_key, value]) => {

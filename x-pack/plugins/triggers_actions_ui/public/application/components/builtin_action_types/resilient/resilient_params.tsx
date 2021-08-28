@@ -4,27 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
-import {
-  EuiFormRow,
-  EuiComboBox,
-  EuiSelect,
-  EuiSpacer,
-  EuiTitle,
-  EuiComboBoxOptionOption,
-  EuiSelectOption,
-} from '@elastic/eui';
+import type { EuiComboBoxOptionOption, EuiSelectOption } from '@elastic/eui';
+import { EuiComboBox, EuiFormRow, EuiSelect, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-
-import { ActionParamsProps } from '../../../../types';
-import { ResilientActionParams } from './types';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import { useKibana } from '../../../../common/lib/kibana/kibana_react';
+import type { ActionParamsProps } from '../../../../types';
 import { TextAreaWithMessageVariables } from '../../text_area_with_message_variables';
 import { TextFieldWithMessageVariables } from '../../text_field_with_message_variables';
-
+import type { ResilientActionParams } from './types';
 import { useGetIncidentTypes } from './use_get_incident_types';
 import { useGetSeverity } from './use_get_severity';
-import { useKibana } from '../../../../common/lib/kibana';
 
 const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<ResilientActionParams>> = ({
   actionConnector,

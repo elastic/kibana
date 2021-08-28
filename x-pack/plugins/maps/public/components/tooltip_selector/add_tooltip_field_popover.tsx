@@ -6,22 +6,21 @@
  */
 
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
-
-import React, { Component, Fragment } from 'react';
+import type { EuiSelectableOption } from '@elastic/eui';
 import {
+  EuiButton,
+  EuiButtonEmpty,
   EuiPopover,
   EuiPopoverFooter,
   EuiPopoverTitle,
-  EuiButtonEmpty,
   EuiSelectable,
-  EuiSelectableOption,
-  EuiButton,
   EuiSpacer,
   EuiTextAlign,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { FieldIcon } from '../../../../../../src/plugins/kibana_react/public';
+import { FormattedMessage } from '@kbn/i18n/react';
+import React, { Component, Fragment } from 'react';
+import { FieldIcon } from '../../../../../../src/plugins/kibana_react/public/field_icon/field_icon';
 
 export type FieldProps = {
   label: string;

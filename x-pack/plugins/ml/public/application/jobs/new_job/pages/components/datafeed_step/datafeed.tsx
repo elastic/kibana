@@ -4,19 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { Fragment, FC, useContext, useEffect, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { WizardNav } from '../wizard_nav';
-import { QueryInput } from './components/query';
-import { QueryDelayInput } from './components/query_delay';
-import { FrequencyInput } from './components/frequency';
-import { ScrollSizeInput } from './components/scroll_size';
-import { ResetQueryButton } from './components/reset_query';
-import { TimeField } from './components/time_field';
-import { WIZARD_STEPS, StepProps } from '../step_types';
+import type { FC } from 'react';
+import React, { Fragment, useContext, useEffect, useState } from 'react';
+import { EDITOR_MODE, JsonEditorFlyout } from '../common/json_editor_flyout/json_editor_flyout';
 import { JobCreatorContext } from '../job_creator_context';
-import { JsonEditorFlyout, EDITOR_MODE } from '../common/json_editor_flyout';
+import type { StepProps } from '../step_types';
+import { WIZARD_STEPS } from '../step_types';
+import { WizardNav } from '../wizard_nav/wizard_nav';
+import { FrequencyInput } from './components/frequency/frequency_input';
+import { QueryInput } from './components/query/query_input';
+import { QueryDelayInput } from './components/query_delay/query_delay_input';
+import { ResetQueryButton } from './components/reset_query/reset_query';
+import { ScrollSizeInput } from './components/scroll_size/scroll_size_input';
+import { TimeField } from './components/time_field/time_field';
 
 export const DatafeedStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) => {
   const { jobValidator, jobValidatorUpdated } = useContext(JobCreatorContext);

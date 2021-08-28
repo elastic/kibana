@@ -4,15 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { memo, useCallback } from 'react';
+import { EuiLoadingSpinner, EuiText } from '@elastic/eui';
 import { isEmpty } from 'lodash';
-import { EuiText, EuiLoadingSpinner } from '@elastic/eui';
-
-import * as i18n from './translations';
-import { CommentType } from '../../../common';
+import React, { memo, useCallback } from 'react';
+import { CommentType } from '../../../common/api/cases/comment';
 import { LinkAnchor } from '../links';
-import { RuleDetailsNavigation } from './helpers';
+import type { RuleDetailsNavigation } from './helpers';
+import * as i18n from './translations';
 
 interface Props {
   alertId: string;

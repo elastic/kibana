@@ -4,23 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { useMemo } from 'react';
 import { EuiFlexItem } from '@elastic/eui';
-import { toMetricOpt } from '../../../snapshot_metric_i18n';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { WaffleSortControls } from '../../../../public/pages/metrics/inventory_view/components/waffle/waffle_sort_controls';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ToolbarProps } from '../../../../public/pages/metrics/inventory_view/components/toolbars/toolbar';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import React, { useMemo } from 'react';
+import type { ToolbarProps } from '../../../../public/pages/metrics/inventory_view/components/toolbars/toolbar';
+import { toGroupByOpt } from '../../../../public/pages/metrics/inventory_view/components/toolbars/toolbar_wrapper';
 import { WaffleMetricControls } from '../../../../public/pages/metrics/inventory_view/components/waffle/metric_control';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { WaffleGroupByControls } from '../../../../public/pages/metrics/inventory_view/components/waffle/waffle_group_by_controls';
-import {
-  toGroupByOpt,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../public/pages/metrics/inventory_view/components/toolbars/toolbar_wrapper';
-import { SnapshotMetricType } from '../../types';
+import { WaffleSortControls } from '../../../../public/pages/metrics/inventory_view/components/waffle/waffle_sort_controls';
+import { toMetricOpt } from '../../../snapshot_metric_i18n';
+import type { SnapshotMetricType } from '../../types';
+
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 
 interface Props extends ToolbarProps {
   metricTypes: SnapshotMetricType[];

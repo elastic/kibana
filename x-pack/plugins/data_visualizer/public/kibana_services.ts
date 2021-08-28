@@ -4,9 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { CoreStart } from 'kibana/public';
-import { DataVisualizerStartDependencies } from './plugin';
+import type { CoreStart } from '../../../../src/core/public/types';
+import type { DataVisualizerStartDependencies } from './plugin';
 
 let coreStart: CoreStart;
 let pluginsStart: DataVisualizerStartDependencies;

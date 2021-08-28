@@ -4,12 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import {
-  StyleMetaDescriptor,
-  RangeFieldMeta,
+import type {
   CategoryFieldMeta,
-} from '../../../../common/descriptor_types';
+  RangeFieldMeta,
+  StyleMetaDescriptor,
+} from '../../../../common/descriptor_types/style_property_descriptor_types';
 
 export class StyleMeta {
   private readonly _descriptor: StyleMetaDescriptor;

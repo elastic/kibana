@@ -4,12 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { memo } from 'react';
 import { EuiTextColor } from '@elastic/eui';
 import { FormattedRelative } from '@kbn/i18n/react';
-
-import { LocalizedDateTooltip } from '../../components/localized_date_tooltip';
+import React, { memo } from 'react';
+import { LocalizedDateTooltip } from '../localized_date_tooltip';
 import * as i18n from './translations';
 
 interface UserActionAvatarProps {

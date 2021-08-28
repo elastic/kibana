@@ -4,21 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { useMemo } from 'react';
-import { mapValues } from 'lodash';
-import { i18n } from '@kbn/i18n';
 import {
-  EuiLoadingSpinner,
+  EuiDescriptionList,
+  EuiDescriptionListDescription,
+  EuiDescriptionListTitle,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiDescriptionList,
-  EuiDescriptionListTitle,
-  EuiDescriptionListDescription,
   EuiHorizontalRule,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
-import { euiStyled } from '../../../../../../../../../../../src/plugins/kibana_react/common';
-import { ProcessListAPIResponse } from '../../../../../../../../common/http_api';
+import { i18n } from '@kbn/i18n';
+import { mapValues } from 'lodash';
+import React, { useMemo } from 'react';
+import { euiStyled } from '../../../../../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
+import type { ProcessListAPIResponse } from '../../../../../../../../common/http_api/host_details/process_list';
 import { STATE_NAMES } from './states';
 
 interface Props {

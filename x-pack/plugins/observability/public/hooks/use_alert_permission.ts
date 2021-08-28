@@ -4,9 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { RecursiveReadonly } from '@kbn/utility-types';
 import { useEffect, useState } from 'react';
-import { RecursiveReadonly } from '@kbn/utility-types';
 
 export interface UseGetUserAlertsPermissionsProps {
   crud: boolean;

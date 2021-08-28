@@ -4,28 +4,26 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { ReactNode } from 'react';
-import React, { Fragment, useCallback, useState } from 'react';
 import type { Query } from '@elastic/eui';
 import {
   EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
-  EuiSpacer,
-  EuiTitle,
-  // @ts-ignore
   EuiSearchBar,
+  EuiSpacer,
   EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import type { ReactNode } from 'react';
+import React, { Fragment, useCallback, useState } from 'react';
 
-import { useStartServices } from '../../../../../hooks';
-import { Loading } from '../../../components';
-import type { PackageList } from '../../../types';
-import { useLocalSearch, searchIdField } from '../../../hooks';
+import type { PackageList } from '../../../../../../common/types/models/epm';
+import { Loading } from '../../../../../components/loading';
+import { useStartServices } from '../../../../../hooks/use_core';
+import { searchIdField, useLocalSearch } from '../../../hooks/use_local_search';
 
 import { PackageCard } from './package_card';
 

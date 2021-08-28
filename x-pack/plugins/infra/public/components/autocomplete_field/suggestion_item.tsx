@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { EuiIcon } from '@elastic/eui';
 import { transparentize } from 'polished';
 import React from 'react';
-import { euiStyled } from '../../../../../../src/plugins/kibana_react/common';
-import { QuerySuggestion, QuerySuggestionTypes } from '../../../../../../src/plugins/data/public';
+import type { QuerySuggestion } from '../../../../../../src/plugins/data/public/autocomplete/providers/query_suggestion_provider';
+import { QuerySuggestionTypes } from '../../../../../../src/plugins/data/public/autocomplete/providers/query_suggestion_provider';
+import { euiStyled } from '../../../../../../src/plugins/kibana_react/common/eui_styled_components';
 
 interface Props {
   isSelected?: boolean;

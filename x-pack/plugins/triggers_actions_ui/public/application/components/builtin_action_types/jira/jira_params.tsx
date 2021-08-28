@@ -4,29 +4,26 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
-
-import { i18n } from '@kbn/i18n';
+import type { EuiSelectOption } from '@elastic/eui';
 import {
-  EuiFormRow,
   EuiComboBox,
-  EuiSelectOption,
-  EuiHorizontalRule,
-  EuiSelect,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFormRow,
+  EuiHorizontalRule,
+  EuiSelect,
   EuiSpacer,
 } from '@elastic/eui';
-
-import { ActionParamsProps } from '../../../../types';
+import { i18n } from '@kbn/i18n';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import { useKibana } from '../../../../common/lib/kibana/kibana_react';
+import type { ActionParamsProps } from '../../../../types';
 import { TextAreaWithMessageVariables } from '../../text_area_with_message_variables';
 import { TextFieldWithMessageVariables } from '../../text_field_with_message_variables';
-import { JiraActionParams } from './types';
-import { useGetIssueTypes } from './use_get_issue_types';
-import { useGetFieldsByIssueType } from './use_get_fields_by_issue_type';
 import { SearchIssues } from './search_issues';
-import { useKibana } from '../../../../common/lib/kibana';
+import type { JiraActionParams } from './types';
+import { useGetFieldsByIssueType } from './use_get_fields_by_issue_type';
+import { useGetIssueTypes } from './use_get_issue_types';
 
 const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionParams>> = ({
   actionConnector,

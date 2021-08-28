@@ -6,10 +6,10 @@
  */
 
 import rt from 'io-ts';
-import { EuiTheme } from '../../../../../../../src/plugins/kibana_react/common';
+import type { EuiTheme } from '../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
+import type { NodeDetailsMetricData } from '../../../../common/http_api/node_details_api';
 import { InventoryFormatterTypeRT } from '../../../../common/inventory_models/types';
-import { MetricsTimeInput } from './hooks/use_metrics_time';
-import { NodeDetailsMetricData } from '../../../../common/http_api/node_details_api';
+import type { MetricsTimeInput } from './hooks/use_metrics_time';
 
 export interface LayoutProps {
   metrics?: NodeDetailsMetricData[];

@@ -10,7 +10,7 @@ import { createMemoryHistory } from 'history';
 import React from 'react';
 import { Observable } from 'rxjs';
 import { renderApp } from '.';
-import type { CoreStart } from '../../../../../src/core/public';
+import type { CoreStart } from '../../../../../src/core/public/types';
 import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
 import { embeddablePluginMock } from '../../../../../src/plugins/embeddable/public/mocks';
 import { mockApmPluginContextValue } from '../context/apm_plugin/mock_apm_plugin_context';

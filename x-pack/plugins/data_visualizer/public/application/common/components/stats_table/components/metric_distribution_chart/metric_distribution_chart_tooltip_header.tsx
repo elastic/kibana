@@ -4,13 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { FC } from 'react';
-
 import { FormattedMessage } from '@kbn/i18n/react';
-
-import { MetricDistributionChartData } from './metric_distribution_chart';
-import { kibanaFieldFormat } from '../../../utils';
+import type { FC } from 'react';
+import React from 'react';
+import { kibanaFieldFormat } from '../../../utils/kibana_field_format';
+import type { MetricDistributionChartData } from './metric_distribution_chart';
 
 interface Props {
   chartPoint: MetricDistributionChartData | undefined;

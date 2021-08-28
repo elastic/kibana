@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { i18n } from '@kbn/i18n';
 
-import type { RegistryRelease } from '../../../types';
+import type { RegistryRelease } from '../../../../../../common/types/models/epm';
 
 export const RELEASE_BADGE_LABEL: { [key in Exclude<RegistryRelease, 'ga'>]: string } = {
   beta: i18n.translate('xpack.fleet.epm.releaseBadge.betaLabel', {

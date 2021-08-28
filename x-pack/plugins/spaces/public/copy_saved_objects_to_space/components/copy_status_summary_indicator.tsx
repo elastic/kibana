@@ -5,16 +5,15 @@
  * 2.0.
  */
 
-import './copy_status_summary_indicator.scss';
-
 import { EuiBadge, EuiIconTip, EuiLoadingSpinner } from '@elastic/eui';
 import React, { Fragment } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
-import type { Space } from 'src/plugins/spaces_oss/common';
 
-import type { SummarizedCopyToSpaceResult } from '../lib';
+import type { Space } from '../../../../../../src/plugins/spaces_oss/common/types';
+import type { SummarizedCopyToSpaceResult } from '../lib/summarize_copy_result';
 import type { ImportRetry } from '../types';
+import './copy_status_summary_indicator.scss';
 import { ResolveAllConflicts } from './resolve_all_conflicts';
 
 interface Props {

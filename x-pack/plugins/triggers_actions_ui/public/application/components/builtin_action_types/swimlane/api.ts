@@ -4,8 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { SwimlaneFieldMappingConfig } from './types';
+import type { SwimlaneFieldMappingConfig } from './types';
 
 const removeUnsafeFields = (fields: SwimlaneFieldMappingConfig[]): SwimlaneFieldMappingConfig[] =>
   fields.filter(

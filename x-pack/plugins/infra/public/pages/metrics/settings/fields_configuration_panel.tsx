@@ -4,22 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import {
-  EuiDescribedFormGroup,
+  EuiCallOut,
   EuiCode,
+  EuiDescribedFormGroup,
   EuiFieldText,
   EuiForm,
   EuiFormRow,
+  EuiLink,
   EuiSpacer,
   EuiTitle,
-  EuiCallOut,
-  EuiLink,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
-import { InputFieldProps } from './input_fields';
+import type { InputFieldProps } from './input_fields';
 
 interface FieldsConfigurationPanelProps {
   containerFieldProps: InputFieldProps;

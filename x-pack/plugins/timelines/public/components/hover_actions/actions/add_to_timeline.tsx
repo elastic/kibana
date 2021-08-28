@@ -4,21 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { useCallback, useEffect, useMemo } from 'react';
-import { EuiContextMenuItem, EuiButtonEmpty, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
-import { DraggableId } from 'react-beautiful-dnd';
-import { useDispatch } from 'react-redux';
-
+import { EuiButtonEmpty, EuiButtonIcon, EuiContextMenuItem, EuiToolTip } from '@elastic/eui';
 import { isEmpty } from 'lodash';
-import { DataProvider, stopPropagationAndPreventDefault, TimelineId } from '../../../../common';
+import React, { useCallback, useEffect, useMemo } from 'react';
+import type { DraggableId } from 'react-beautiful-dnd';
+import { useDispatch } from 'react-redux';
+import { TimelineId } from '../../../../common/types/timeline';
+import type { DataProvider } from '../../../../common/types/timeline/data_provider';
+import { stopPropagationAndPreventDefault } from '../../../../common/utils/accessibility/helpers';
+import { useAddToTimeline } from '../../../hooks/use_add_to_timeline';
+import { useAppToasts } from '../../../hooks/use_app_toasts';
+import * as tGridActions from '../../../store/t_grid/actions';
 import { TooltipWithKeyboardShortcut } from '../../tooltip_with_keyboard_shortcut';
 import { getAdditionalScreenReaderOnlyContext } from '../utils';
-import { useAddToTimeline } from '../../../hooks/use_add_to_timeline';
-import { HoverActionComponentProps } from './types';
-import { tGridActions } from '../../..';
-import { useAppToasts } from '../../../hooks/use_app_toasts';
 import * as i18n from './translations';
+import type { HoverActionComponentProps } from './types';
 
 export const ADD_TO_TIMELINE_KEYBOARD_SHORTCUT = 'a';
 

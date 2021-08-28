@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
+import { EuiBadge, EuiBetaBadge, EuiTitle } from '@elastic/eui';
 import { isString } from 'lodash';
-import { EuiBetaBadge, EuiBadge, EuiTitle } from '@elastic/eui';
+import React from 'react';
 import styled from 'styled-components';
-
-import { BadgeOptions, TitleProp } from './types';
 import { TruncatedText } from '../truncated_text';
+import type { BadgeOptions, TitleProp } from './types';
 
 const StyledEuiBetaBadge = styled(EuiBetaBadge)`
   vertical-align: middle;

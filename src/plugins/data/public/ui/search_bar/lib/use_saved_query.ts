@@ -7,7 +7,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import { useEffect, useState } from 'react';
-import type { CoreStart } from '../../../../../../core/public';
+import type { CoreStart } from '../../../../../../core/public/types';
 import type { SavedQuery } from '../../../query/saved_query/types';
 import type { DataPublicPluginStart } from '../../../types';
 import { clearStateFromSavedQuery } from './clear_saved_query';

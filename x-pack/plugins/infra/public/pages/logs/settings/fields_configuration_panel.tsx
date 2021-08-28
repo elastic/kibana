@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import {
   EuiCallOut,
   EuiCode,
@@ -18,9 +17,9 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useMemo } from 'react';
-import { FormElement } from './form_elements';
+import type { FormElement } from './form_elements';
 import { getFormRowProps, getStringInputFieldProps } from './form_field_props';
-import { FormValidationError } from './validation_errors';
+import type { FormValidationError } from './validation_errors';
 
 interface FieldsConfigurationPanelProps {
   isLoading: boolean;

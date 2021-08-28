@@ -4,13 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { FC } from 'react';
-
 import { EuiListGroup, EuiListGroupItem } from '@elastic/eui';
-
 import { FormattedMessage } from '@kbn/i18n/react';
-import { ExpandedRowFieldHeader } from '../stats_table/components/expanded_row_field_header';
+import type { FC } from 'react';
+import React from 'react';
+import { ExpandedRowFieldHeader } from '../stats_table/components/expanded_row_field_header/expanded_row_field_header';
+
 interface Props {
   examples: Array<string | object>;
 }

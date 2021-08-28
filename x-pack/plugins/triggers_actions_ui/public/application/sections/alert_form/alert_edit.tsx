@@ -4,36 +4,37 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { useReducer, useState, useEffect } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
 import {
-  EuiTitle,
-  EuiFlyoutHeader,
-  EuiFlyout,
-  EuiFlyoutFooter,
+  EuiButton,
+  EuiButtonEmpty,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButtonEmpty,
-  EuiButton,
+  EuiFlyout,
   EuiFlyoutBody,
-  EuiPortal,
-  EuiCallOut,
-  EuiSpacer,
+  EuiFlyoutFooter,
+  EuiFlyoutHeader,
   EuiLoadingSpinner,
+  EuiPortal,
+  EuiSpacer,
+  EuiTitle,
 } from '@elastic/eui';
-import { cloneDeep } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { Alert, AlertFlyoutCloseReason, AlertEditProps, IErrorObject } from '../../../types';
-import { AlertForm, getAlertActionErrors, getAlertErrors, isValidAlert } from './alert_form';
-import { alertReducer, ConcreteAlertReducer } from './alert_reducer';
-import { updateAlert } from '../../lib/alert_api';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { cloneDeep } from 'lodash';
+import React, { useEffect, useReducer, useState } from 'react';
+import { useKibana } from '../../../common/lib/kibana/kibana_react';
+import type { Alert, AlertEditProps, IErrorObject } from '../../../types';
+import { AlertFlyoutCloseReason } from '../../../types';
 import { HealthCheck } from '../../components/health_check';
 import { HealthContextProvider } from '../../context/health_context';
-import { useKibana } from '../../../common/lib/kibana';
+import { updateAlert } from '../../lib/alert_api/update';
+import { getAlertWithInvalidatedFields } from '../../lib/value_validators';
+import { AlertForm, getAlertActionErrors, getAlertErrors, isValidAlert } from './alert_form';
+import type { ConcreteAlertReducer } from './alert_reducer';
+import { alertReducer } from './alert_reducer';
 import { ConfirmAlertClose } from './confirm_alert_close';
 import { hasAlertChanged } from './has_alert_changed';
-import { getAlertWithInvalidatedFields } from '../../lib/value_validators';
 
 export const AlertEdit = ({
   initialAlert,

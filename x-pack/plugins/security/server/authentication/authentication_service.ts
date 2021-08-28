@@ -4,28 +4,24 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { Logger, LoggerFactory } from '@kbn/logging';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type {
-  HttpServiceSetup,
-  HttpServiceStart,
-  IClusterClient,
-  KibanaRequest,
-  Logger,
-  LoggerFactory,
-} from 'src/core/server';
 
+import type { IClusterClient } from '../../../../../src/core/server/elasticsearch/client/cluster_client';
+import type { KibanaRequest } from '../../../../../src/core/server/http/router/request';
+import type { HttpServiceSetup, HttpServiceStart } from '../../../../../src/core/server/http/types';
 import { NEXT_URL_QUERY_STRING_PARAMETER } from '../../common/constants';
-import type { SecurityLicense } from '../../common/licensing';
-import type { AuthenticatedUser } from '../../common/model';
-import { shouldProviderUseLoginForm } from '../../common/model';
-import type { AuditServiceSetup, SecurityAuditLogger } from '../audit';
+import type { SecurityLicense } from '../../common/licensing/license_service';
+import type { AuthenticatedUser } from '../../common/model/authenticated_user';
+import { shouldProviderUseLoginForm } from '../../common/model/authentication_provider';
+import type { AuditServiceSetup } from '../audit/audit_service';
+import type { SecurityAuditLogger } from '../audit/security_audit_logger';
 import type { ConfigType } from '../config';
 import { getDetailedErrorMessage, getErrorStatusCode } from '../errors';
-import type { SecurityFeatureUsageServiceStart } from '../feature_usage';
+import type { SecurityFeatureUsageServiceStart } from '../feature_usage/feature_usage_service';
 import { ROUTE_TAG_AUTH_FLOW } from '../routes/tags';
-import type { Session } from '../session_management';
-import { APIKeys } from './api_keys';
+import type { Session } from '../session_management/session';
+import { APIKeys } from './api_keys/api_keys';
 import type { AuthenticationResult } from './authentication_result';
 import type { ProviderLoginAttempt } from './authenticator';
 import { Authenticator } from './authenticator';

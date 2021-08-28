@@ -6,13 +6,15 @@
  */
 
 import React from 'react';
-import { QuerySuggestion, IIndexPattern, DataPublicPluginStart } from 'src/plugins/data/public';
-import {
-  withKibana,
+import type { IIndexPattern } from '../../../../../src/plugins/data/common/index_patterns/types';
+import type { QuerySuggestion } from '../../../../../src/plugins/data/public/autocomplete/providers/query_suggestion_provider';
+import type { DataPublicPluginStart } from '../../../../../src/plugins/data/public/types';
+import { withKibana } from '../../../../../src/plugins/kibana_react/public/context/context';
+import type {
   KibanaReactContextValue,
   KibanaServices,
-} from '../../../../../src/plugins/kibana_react/public';
-import { RendererFunction } from '../utils/typed_react';
+} from '../../../../../src/plugins/kibana_react/public/context/types';
+import type { RendererFunction } from '../utils/typed_react';
 
 interface WithKueryAutocompletionLifecycleProps {
   kibana: KibanaReactContextValue<{ data: DataPublicPluginStart } & KibanaServices>;

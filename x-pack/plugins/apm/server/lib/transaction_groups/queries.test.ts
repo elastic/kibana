@@ -4,13 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { topTransactionGroupsFetcher } from './fetcher';
-import {
-  SearchParamsMock,
-  inspectSearchParams,
-} from '../../utils/test_helpers';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
+import type { SearchParamsMock } from '../../utils/test_helpers';
+import { inspectSearchParams } from '../../utils/test_helpers';
+import { topTransactionGroupsFetcher } from './fetcher';
 
 describe('transaction group queries', () => {
   let mock: SearchParamsMock;

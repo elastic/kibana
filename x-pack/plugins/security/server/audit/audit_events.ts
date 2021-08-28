@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { EcsEventOutcome, EcsEventType, LogMeta } from '@kbn/logging';
 
-import type { EcsEventOutcome, EcsEventType, KibanaRequest, LogMeta } from 'src/core/server';
-
+import type { KibanaRequest } from '../../../../../src/core/server/http/router/request';
 import type { AuthenticationResult } from '../authentication/authentication_result';
 
 /**

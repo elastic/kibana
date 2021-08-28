@@ -4,18 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { PluginInitializer } from '../../../../src/core/public/plugins/plugin';
+import type { PluginInitializerContext } from '../../../../src/core/public/plugins/plugin_context';
+import type {
+  PluginSetupDependencies,
+  PluginStartDependencies,
+  SecurityPluginSetup,
+  SecurityPluginStart,
+} from './plugin';
+import { SecurityPlugin } from './plugin';
 
-import type { PluginInitializer, PluginInitializerContext } from 'src/core/public';
-
-import type { PluginSetupDependencies, PluginStartDependencies } from './plugin';
-import { SecurityPlugin, SecurityPluginSetup, SecurityPluginStart } from './plugin';
-
-export { SecurityPluginSetup, SecurityPluginStart };
-export { AuthenticatedUser } from '../common/model';
 export { SecurityLicense, SecurityLicenseFeatures } from '../common/licensing';
-export { UserMenuLink, SecurityNavControlServiceStart } from '../public/nav_control';
-
-export { AuthenticationServiceStart, AuthenticationServiceSetup } from './authentication';
+export { AuthenticatedUser } from '../common/model';
+export { SecurityNavControlServiceStart, UserMenuLink } from '../public/nav_control';
+export { AuthenticationServiceSetup, AuthenticationServiceStart } from './authentication';
+export { SecurityPluginSetup, SecurityPluginStart };
 
 export const plugin: PluginInitializer<
   SecurityPluginSetup,

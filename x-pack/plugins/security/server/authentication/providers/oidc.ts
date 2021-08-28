@@ -8,8 +8,7 @@
 import Boom from '@hapi/boom';
 import type from 'type-detect';
 
-import type { KibanaRequest } from 'src/core/server';
-
+import type { KibanaRequest } from '../../../../../../src/core/server/http/router/request';
 import {
   AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER,
   AUTH_URL_HASH_QUERY_STRING_PARAMETER,
@@ -20,7 +19,7 @@ import { getDetailedErrorMessage } from '../../errors';
 import { AuthenticationResult } from '../authentication_result';
 import { canRedirectRequest } from '../can_redirect_request';
 import { DeauthenticationResult } from '../deauthentication_result';
-import { HTTPAuthorizationHeader } from '../http_authentication';
+import { HTTPAuthorizationHeader } from '../http_authentication/http_authorization_header';
 import type { RefreshTokenResult, TokenPair } from '../tokens';
 import { Tokens } from '../tokens';
 import type { AuthenticationProviderOptions, AuthenticationProviderSpecificOptions } from './base';

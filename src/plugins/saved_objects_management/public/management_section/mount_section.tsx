@@ -11,7 +11,7 @@ import { I18nProvider } from '@kbn/i18n/react';
 import React, { lazy, Suspense } from 'react';
 import ReactDOM from 'react-dom';
 import { Route, Router, Switch } from 'react-router-dom';
-import type { CoreSetup } from '../../../../core/public';
+import type { CoreSetup } from '../../../../core/public/types';
 import type { ManagementAppMountParams } from '../../../management/public/types';
 import { getAllowedTypes } from '../lib/get_allowed_types';
 import type { SavedObjectsManagementPluginStart, StartDependencies } from '../plugin';

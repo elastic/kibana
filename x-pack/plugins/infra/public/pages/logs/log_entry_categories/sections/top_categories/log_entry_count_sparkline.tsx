@@ -4,11 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import React, { useMemo } from 'react';
-
-import { LogEntryCategoryHistogram } from '../../../../../../common/log_analysis';
-import { TimeRange } from '../../../../../../common/time';
+import type { LogEntryCategoryHistogram } from '../../../../../../common/log_analysis/log_entry_categories_analysis';
+import type { TimeRange } from '../../../../../../common/time/time_range';
 import { SingleMetricComparison } from './single_metric_comparison';
 import { SingleMetricSparkline } from './single_metric_sparkline';
 

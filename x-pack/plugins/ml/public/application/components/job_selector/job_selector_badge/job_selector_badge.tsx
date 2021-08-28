@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { FC } from 'react';
-import { EuiBadge, EuiBadgeProps } from '@elastic/eui';
+import type { EuiBadgeProps } from '@elastic/eui';
+import { EuiBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { FC } from 'react';
+import React from 'react';
 import { tabColor } from '../../../../../common/util/group_color_utils';
 
 interface JobSelectorBadgeProps {

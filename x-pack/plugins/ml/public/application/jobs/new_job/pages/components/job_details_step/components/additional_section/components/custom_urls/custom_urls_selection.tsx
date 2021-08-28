@@ -4,13 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { FC, useContext } from 'react';
+import type { FC } from 'react';
+import React, { useContext } from 'react';
+import type { CombinedJob } from '../../../../../../../../../../../common/types/anomaly_detection_jobs/combined_job';
+import type { UrlConfig } from '../../../../../../../../../../../common/types/custom_urls';
 import { CustomUrls } from '../../../../../../../../jobs_list/components/edit_job_flyout/tabs/custom_urls';
-import { UrlConfig } from '../../../../../../../../../../../common/types/custom_urls';
 import { JobCreatorContext } from '../../../../../job_creator_context';
 import { Description } from './description';
-import { CombinedJob } from '../../../../../../../../../../../common/types/anomaly_detection_jobs';
 
 export const CustomUrlsSelection: FC = () => {
   const { jobCreator, jobCreatorUpdate } = useContext(JobCreatorContext);

@@ -4,27 +4,24 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useEffect, useState } from 'react';
 import { Redirect } from 'react-router-dom';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiSpacer } from '@elastic/eui';
 
-import { Loading, Error, ExtensionWrapper } from '../../../../../components';
+import type { PackageInfo } from '../../../../../../../../common/types/models/epm';
+import { InstallStatus } from '../../../../../../../../common/types/models/epm';
+import { Error } from '../../../../../../../components/error';
+import { ExtensionWrapper } from '../../../../../../../components/extension_wrapper';
+import { Loading } from '../../../../../../../components/loading';
+import { useStartServices } from '../../../../../../../hooks/use_core';
+import { useLink } from '../../../../../../../hooks/use_link';
+import { useUIExtension } from '../../../../../../../hooks/use_ui_extension';
+import { useGetPackageInstallStatus } from '../../../../../hooks/use_package_install';
 
-import type { PackageInfo } from '../../../../../types';
-import { InstallStatus } from '../../../../../types';
-
-import {
-  useGetPackageInstallStatus,
-  useLink,
-  useStartServices,
-  useUIExtension,
-} from '../../../../../hooks';
-
-import type { AssetSavedObject } from './types';
-import { allowedAssetTypes } from './constants';
 import { AssetsAccordion } from './assets_accordion';
+import { allowedAssetTypes } from './constants';
+import type { AssetSavedObject } from './types';
 
 interface AssetsPanelProps {
   packageInfo: PackageInfo;

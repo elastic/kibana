@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { PluginInitializerContext } from 'kibana/server';
+import type { PluginInitializerContext } from '../../../../src/core/server/plugins/types';
 import { MlServerPlugin } from './plugin';
+
 export type { MlPluginSetup, MlPluginStart } from './plugin';
 export * from './shared';
 

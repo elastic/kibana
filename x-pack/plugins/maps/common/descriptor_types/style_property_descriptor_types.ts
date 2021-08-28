@@ -6,15 +6,14 @@
  */
 
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
-
 import {
   COLOR_MAP_TYPE,
+  DATA_MAPPING_FUNCTION,
   FIELD_ORIGIN,
   LABEL_BORDER_SIZES,
+  STYLE_TYPE,
   SYMBOLIZE_AS_TYPES,
   VECTOR_STYLES,
-  DATA_MAPPING_FUNCTION,
-  STYLE_TYPE,
 } from '../constants';
 
 // Non-static/dynamic options

@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { FC } from 'react';
-import { EuiDataGridColumn } from '@elastic/eui';
-import { ChartData, OrdinalDataItem } from './field_histograms';
-import { ColumnChart } from './column_chart';
+import type { EuiDataGridColumn } from '@elastic/eui';
+import type { FC } from 'react';
+import React from 'react';
 import type { FieldDataRowProps } from '../../types/field_data_row';
+import { ColumnChart } from './column_chart';
+import type { ChartData, OrdinalDataItem } from './field_histograms';
 
 export const TopValuesPreview: FC<FieldDataRowProps> = ({ config }) => {
   const { stats } = config;

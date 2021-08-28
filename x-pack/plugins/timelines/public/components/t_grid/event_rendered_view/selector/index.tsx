@@ -4,15 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import {
-  EuiButtonEmpty,
-  EuiPopover,
-  EuiSelectable,
-  EuiSelectableOption,
-  EuiTitle,
-  EuiTextColor,
-} from '@elastic/eui';
+import type { EuiSelectableOption } from '@elastic/eui';
+import { EuiButtonEmpty, EuiPopover, EuiSelectable, EuiTextColor, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';

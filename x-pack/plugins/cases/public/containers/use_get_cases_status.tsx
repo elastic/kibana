@@ -4,14 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { useCallback, useEffect, useState, useRef } from 'react';
-
+import { useCallback, useEffect, useRef, useState } from 'react';
+import type { CasesStatus } from '../../common/ui/types';
+import { useToasts } from '../common/lib/kibana/hooks';
 import { useOwnerContext } from '../components/owner_context/use_owner_context';
 import { getCasesStatus } from './api';
 import * as i18n from './translations';
-import { CasesStatus } from './types';
-import { useToasts } from '../common/lib/kibana';
 
 interface CasesStatusState extends CasesStatus {
   isLoading: boolean;

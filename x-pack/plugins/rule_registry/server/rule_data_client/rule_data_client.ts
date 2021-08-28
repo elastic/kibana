@@ -4,17 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { ResponseError } from '@elastic/elasticsearch/lib/errors';
-import { Either, isLeft } from 'fp-ts/lib/Either';
-
-import { ElasticsearchClient } from 'kibana/server';
-import { IndexPatternsFetcher } from '../../../../../src/plugins/data/server';
-
+import type { Either } from 'fp-ts/lib/Either';
+import { isLeft } from 'fp-ts/lib/Either';
+import type { ElasticsearchClient } from '../../../../../src/core/server/elasticsearch/client/types';
+import { IndexPatternsFetcher } from '../../../../../src/plugins/data/server/index_patterns/fetcher/index_patterns_fetcher';
 import { RuleDataWriteDisabledError } from '../rule_data_plugin_service/errors';
 import { IndexInfo } from '../rule_data_plugin_service/index_info';
 import { ResourceInstaller } from '../rule_data_plugin_service/resource_installer';
-import { IRuleDataClient, IRuleDataReader, IRuleDataWriter } from './types';
+import type { IRuleDataClient, IRuleDataReader, IRuleDataWriter } from './types';
 
 interface ConstructorOptions {
   indexInfo: IndexInfo;

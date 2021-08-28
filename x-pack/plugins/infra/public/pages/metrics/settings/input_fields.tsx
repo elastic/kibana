@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { ReactText } from 'react';
-
 import { FormattedMessage } from '@kbn/i18n/react';
+import type { ReactText } from 'react';
+import React from 'react';
 
 export interface InputFieldProps<
   Value extends string = string,

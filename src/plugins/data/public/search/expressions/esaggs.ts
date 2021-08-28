@@ -8,13 +8,13 @@
 import { get } from 'lodash';
 import { defer } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
-import type { StartServicesAccessor } from '../../../../../core/public';
+import type { StartServicesAccessor } from '../../../../../core/public/types';
 import type {
   EsaggsExpressionFunctionDefinition,
   EsaggsStartDependencies,
 } from '../../../common/search/expressions/esaggs/esaggs_fn';
 import { getEsaggsMeta } from '../../../common/search/expressions/esaggs/esaggs_fn';
-import { handleEsaggsRequest } from '../../../common/search/expressions/esaggs/request_handler';
+import { handleRequest as handleEsaggsRequest } from '../../../common/search/expressions/esaggs/request_handler';
 import type { DataPublicPluginStart, DataStartDependencies } from '../../types';
 
 /**

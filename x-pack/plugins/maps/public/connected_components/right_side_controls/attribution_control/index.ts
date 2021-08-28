@@ -4,12 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { connect } from 'react-redux';
-import { AttributionControl } from './attribution_control';
+import type { MapStoreState } from '../../../reducers/store';
 import { getLayerList } from '../../../selectors/map_selectors';
 import { getIsFullScreen } from '../../../selectors/ui_selectors';
-import { MapStoreState } from '../../../reducers/store';
+import { AttributionControl } from './attribution_control';
 
 function mapStateToProps(state: MapStoreState) {
   return {

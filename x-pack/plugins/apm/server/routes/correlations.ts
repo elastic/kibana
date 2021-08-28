@@ -8,6 +8,7 @@
 import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
 import * as t from 'io-ts';
+import { environmentRt } from '../../common/environment_rt';
 import { isActivePlatinumLicense } from '../../common/license_check';
 import { getCorrelationsForFailedTransactions } from '../lib/correlations/errors/get_correlations_for_failed_transactions';
 import { getOverallErrorTimeseries } from '../lib/correlations/errors/get_overall_error_timeseries';
@@ -16,7 +17,7 @@ import { getOverallLatencyDistribution } from '../lib/correlations/latency/get_o
 import { setupRequest } from '../lib/helpers/setup_request';
 import { createApmServerRoute } from './create_apm_server_route';
 import { createApmServerRouteRepository } from './create_apm_server_route_repository';
-import { environmentRt, kueryRt, rangeRt } from './default_api_types';
+import { kueryRt, rangeRt } from './default_api_types';
 
 const INVALID_LICENSE = i18n.translate(
   'xpack.apm.significanTerms.license.text',

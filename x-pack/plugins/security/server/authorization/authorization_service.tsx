@@ -10,27 +10,24 @@ import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import type { Observable, Subscription } from 'rxjs';
 
-import type {
-  CapabilitiesSetup,
-  HttpServiceSetup,
-  IClusterClient,
-  KibanaRequest,
-  Logger,
-  LoggerFactory,
-} from 'src/core/server';
-import type { Capabilities as UICapabilities } from 'src/core/types';
+import type { Logger, LoggerFactory } from '@kbn/logging';
 
+import type { CapabilitiesSetup } from '../../../../../src/core/server/capabilities/capabilities_service';
+import type { IClusterClient } from '../../../../../src/core/server/elasticsearch/client/cluster_client';
+import type { KibanaRequest } from '../../../../../src/core/server/http/router/request';
+import type { HttpServiceSetup } from '../../../../../src/core/server/http/types';
+import type { Capabilities as UICapabilities } from '../../../../../src/core/types/capabilities';
 import type {
   PluginSetupContract as FeaturesPluginSetup,
   PluginStartContract as FeaturesPluginStart,
-} from '../../../features/server';
+} from '../../../features/server/plugin';
 import { APPLICATION_PREFIX } from '../../common/constants';
-import type { SecurityLicense } from '../../common/licensing';
-import type { AuthenticatedUser } from '../../common/model';
-import { canRedirectRequest } from '../authentication';
-import type { OnlineStatusRetryScheduler } from '../elasticsearch';
+import type { SecurityLicense } from '../../common/licensing/license_service';
+import type { AuthenticatedUser } from '../../common/model/authenticated_user';
+import { canRedirectRequest } from '../authentication/can_redirect_request';
+import type { OnlineStatusRetryScheduler } from '../elasticsearch/elasticsearch_service';
 import type { SpacesService } from '../plugin';
-import { Actions } from './actions';
+import { Actions } from './actions/actions';
 import { initAPIAuthorization } from './api_authorization';
 import { initAppAuthorization } from './app_authorization';
 import { checkPrivilegesWithRequestFactory } from './check_privileges';
@@ -41,8 +38,8 @@ import { checkSavedObjectsPrivilegesWithRequestFactory } from './check_saved_obj
 import { disableUICapabilitiesFactory } from './disable_ui_capabilities';
 import type { AuthorizationMode } from './mode';
 import { authorizationModeFactory } from './mode';
-import type { PrivilegesService } from './privileges';
-import { privilegesFactory } from './privileges';
+import type { PrivilegesService } from './privileges/privileges';
+import { privilegesFactory } from './privileges/privileges';
 import { registerPrivilegesWithCluster } from './register_privileges_with_cluster';
 import { ResetSessionPage } from './reset_session_page';
 import type { CheckPrivilegesWithRequest } from './types';

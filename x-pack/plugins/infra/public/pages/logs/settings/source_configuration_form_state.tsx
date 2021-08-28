@@ -4,9 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { useMemo } from 'react';
-import { LogSourceConfigurationProperties } from '../../../containers/logs/log_source';
+import type { LogSourceConfigurationProperties } from '../../../../common/log_sources/log_source_configuration';
 import { useCompositeFormElement } from './form_elements';
 import { useFieldsFormElement, useLogIndicesFormElement } from './indices_configuration_form_state';
 import { useLogColumnsFormElement } from './log_columns_configuration_form_state';

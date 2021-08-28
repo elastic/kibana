@@ -4,15 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import type { RouteRepositoryClient } from '@kbn/server-route-repository';
-import { HttpFetchOptions } from 'kibana/public';
+import type { HttpFetchOptions } from '../../../../../../src/core/public/http/types';
+import type { ObservabilityServerRouteRepository } from '../../../server/routes/get_global_observability_server_route_repository';
 import type {
   AbstractObservabilityServerRouteRepository,
-  ObservabilityServerRouteRepository,
   ObservabilityAPIReturnType,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../server';
+} from '../../../server/routes/types';
 
 export type ObservabilityClientOptions = Omit<
   HttpFetchOptions,

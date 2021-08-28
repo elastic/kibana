@@ -4,12 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import React, { useCallback } from 'react';
-
-import * as i18n from '../translations';
-import { useKibana } from '../../../common/lib/kibana';
+import { useKibana } from '../../../common/lib/kibana/kibana_react';
 import { LinkAnchor } from '../../links';
+import * as i18n from '../translations';
 
 const NoCasesComponent = ({
   createCaseHref,

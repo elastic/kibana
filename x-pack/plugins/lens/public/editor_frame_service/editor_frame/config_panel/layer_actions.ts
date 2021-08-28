@@ -4,12 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { mapValues } from 'lodash';
-import type { LayerType } from '../../../../common';
-import { LensAppState } from '../../../state_management';
-
-import { Datasource, Visualization } from '../../../types';
+import type { LayerType } from '../../../../common/types';
+import type { LensAppState } from '../../../state_management/types';
+import type { Datasource, Visualization } from '../../../types';
 
 interface RemoveLayerOptions {
   trackUiEvent: (name: string) => void;

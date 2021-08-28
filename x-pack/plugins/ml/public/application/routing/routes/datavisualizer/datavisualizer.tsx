@@ -4,18 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { FC } from 'react';
-
-import { NavigateToPath } from '../../../contexts/kibana';
-
-import { MlRoute, PageLoader, PageProps } from '../../router';
-import { useResolver } from '../../use_resolver';
-import { DatavisualizerSelector } from '../../../datavisualizer';
-
-import { checkBasicLicense } from '../../../license';
+import type { FC } from 'react';
+import React from 'react';
 import { checkFindFileStructurePrivilegeResolver } from '../../../capabilities/check_capabilities';
+import type { NavigateToPath } from '../../../contexts/kibana/use_navigate_to_path';
+import { DatavisualizerSelector } from '../../../datavisualizer/datavisualizer_selector';
+import { checkBasicLicense } from '../../../license/check_license';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
+import type { MlRoute, PageProps } from '../../router';
+import { PageLoader } from '../../router';
+import { useResolver } from '../../use_resolver';
 
 export const selectorRouteFactory = (
   navigateToPath: NavigateToPath,

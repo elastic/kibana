@@ -4,13 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { connect } from 'react-redux';
-import { ThunkDispatch } from 'redux-thunk';
-import { AnyAction } from 'redux';
-import { Filter, Query, TimeRange } from 'src/plugins/data/public';
-import { MapApp } from './map_app';
-import { getFlyoutDisplay, getIsFullScreen } from '../../../selectors/ui_selectors';
+import type { AnyAction } from 'redux';
+import type { ThunkDispatch } from 'redux-thunk';
+import type { Query } from 'src/plugins/data/public';
+import type { Filter } from '../../../../../../../src/plugins/data/common/es_query';
+import type { TimeRange } from '../../../../../../../src/plugins/data/common/query/timefilter/types';
+import { setQuery } from '../../../actions/map_actions';
+import { enableFullScreen, openMapSettings } from '../../../actions/ui_actions';
+import { getInspectorAdapters } from '../../../reducers/non_serializable_instances';
+import type { MapStoreState } from '../../../reducers/store';
+import { FLYOUT_STATE } from '../../../reducers/ui';
 import {
   getFilters,
   getQuery,
@@ -18,10 +22,8 @@ import {
   getTimeFilters,
   hasDirtyState,
 } from '../../../selectors/map_selectors';
-import { setQuery, enableFullScreen, openMapSettings } from '../../../actions';
-import { FLYOUT_STATE } from '../../../reducers/ui';
-import { getInspectorAdapters } from '../../../reducers/non_serializable_instances';
-import { MapStoreState } from '../../../reducers/store';
+import { getFlyoutDisplay, getIsFullScreen } from '../../../selectors/ui_selectors';
+import { MapApp } from './map_app';
 
 function mapStateToProps(state: MapStoreState) {
   return {

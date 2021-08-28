@@ -4,32 +4,33 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { uniq, mapValues } from 'lodash';
-import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
-import { HttpSetup, SavedObjectReference } from 'kibana/public';
-import { InitializationOptions, StateSetter } from '../types';
+import { mapValues, uniq } from 'lodash';
+import type { HttpSetup } from '../../../../../src/core/public/http/types';
+import type { SavedObjectReference } from '../../../../../src/core/types/saved_objects';
+import { IndexPattern as IndexPatternInstance } from '../../../../../src/plugins/data/common/index_patterns/index_patterns/index_pattern';
+import type { IndexPatternsContract } from '../../../../../src/plugins/data/common/index_patterns/index_patterns/index_patterns';
+import { indexPatterns as indexPatternsUtils } from '../../../../../src/plugins/data/public';
+import type { IStorageWrapper } from '../../../../../src/plugins/kibana_utils/public/storage/types';
+import type { VisualizeFieldContext } from '../../../../../src/plugins/ui_actions/public/types';
+import { BASE_API_URL } from '../../common/constants';
+import type { DateRange, ExistingFields } from '../../common/types';
+import { readFromStorage, writeToStorage } from '../settings_storage';
+import type { InitializationOptions, StateSetter } from '../types';
+import { documentField } from './document_field';
+import { updateLayerIndexPattern } from './operations/layer_helpers';
 import {
+  memoizedGetAvailableOperationsByMetadata,
+  translateToOperationName,
+} from './operations/operations';
+import { getFieldByNameFactory } from './pure_helpers';
+import type {
   IndexPattern,
-  IndexPatternRef,
-  IndexPatternPersistedState,
-  IndexPatternPrivateState,
   IndexPatternField,
   IndexPatternLayer,
+  IndexPatternPersistedState,
+  IndexPatternPrivateState,
+  IndexPatternRef,
 } from './types';
-import { updateLayerIndexPattern, translateToOperationName } from './operations';
-import { DateRange, ExistingFields } from '../../common/types';
-import { BASE_API_URL } from '../../common';
-import {
-  IndexPatternsContract,
-  IndexPattern as IndexPatternInstance,
-  indexPatterns as indexPatternsUtils,
-} from '../../../../../src/plugins/data/public';
-import { VisualizeFieldContext } from '../../../../../src/plugins/ui_actions/public';
-import { documentField } from './document_field';
-import { readFromStorage, writeToStorage } from '../settings_storage';
-import { getFieldByNameFactory } from './pure_helpers';
-import { memoizedGetAvailableOperationsByMetadata } from './operations';
 
 type SetState = StateSetter<IndexPatternPrivateState>;
 type IndexPatternsService = Pick<IndexPatternsContract, 'get' | 'getIdsWithTitle'>;

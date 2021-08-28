@@ -6,13 +6,13 @@
  */
 
 import createContainer from 'constate';
-import { useState, useContext } from 'react';
+import { useContext, useState } from 'react';
 import useThrottle from 'react-use/lib/useThrottle';
+import type { TimeKey } from '../../../../common/time/time_key';
+import { LogPositionState } from '../log_position/log_position_state';
 import { useLogEntryHighlights } from './log_entry_highlights';
 import { useLogSummaryHighlights } from './log_summary_highlights';
 import { useNextAndPrevious } from './next_and_previous';
-import { LogPositionState } from '../log_position';
-import { TimeKey } from '../../../../common/time';
 
 const FETCH_THROTTLE_INTERVAL = 3000;
 

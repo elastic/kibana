@@ -4,20 +4,24 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { Component, Fragment, ReactNode } from 'react';
 import { EuiIcon, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ActionExecutionContext, Action } from 'src/plugins/ui_actions/public';
-import { GeoJsonProperties } from 'geojson';
-import { Filter } from 'src/plugins/data/public';
+import type { GeoJsonProperties } from 'geojson';
+import type { ReactNode } from 'react';
+import React, { Component, Fragment } from 'react';
+import type { Filter } from '../../../../../../../../src/plugins/data/common/es_query';
+import type {
+  Action,
+  ActionExecutionContext,
+} from '../../../../../../../../src/plugins/ui_actions/public/actions/action';
+import type { RawValue } from '../../../../../common/constants';
+import type { TooltipFeature } from '../../../../../common/descriptor_types/map_descriptor';
+import { GEOMETRY_FILTER_ACTION } from '../../../../../common/descriptor_types/map_descriptor';
+import type { IVectorLayer } from '../../../../classes/layers/vector_layer/vector_layer';
+import type { ITooltipProperty } from '../../../../classes/tooltips/tooltip_property';
 import { FeatureProperties } from './feature_properties';
-import { RawValue } from '../../../../../common/constants';
 import { Footer } from './footer';
 import { Header } from './header';
-import { GEOMETRY_FILTER_ACTION, TooltipFeature } from '../../../../../common/descriptor_types';
-import { ITooltipProperty } from '../../../../classes/tooltips/tooltip_property';
-import { IVectorLayer } from '../../../../classes/layers/vector_layer';
 
 const PROPERTIES_VIEW = 'PROPERTIES_VIEW';
 const FILTER_ACTIONS_VIEW = 'FILTER_ACTIONS_VIEW';

@@ -4,11 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { estypes } from '@elastic/elasticsearch';
 import { i18n } from '@kbn/i18n';
-import type { estypes } from '@elastic/elasticsearch';
-import { IScopedClusterClient } from 'kibana/server';
-import { getAnalysisType } from '../../../common/util/analytics_utils';
+import type { IScopedClusterClient } from '../../../../../../src/core/server/elasticsearch/client/scoped_cluster_client';
 import { ANALYSIS_CONFIG_TYPE } from '../../../common/constants/data_frame_analytics';
 import {
   ALL_CATEGORIES,
@@ -20,16 +18,17 @@ import {
   TRAINING_DOCS_UPPER,
   VALIDATION_STATUS,
 } from '../../../common/constants/validation';
-import {
-  getDependentVar,
-  isRegressionAnalysis,
-  isClassificationAnalysis,
-} from '../../../common/util/analytics_utils';
-import { extractErrorMessage } from '../../../common/util/errors';
-import {
+import type {
   AnalysisConfig,
   DataFrameAnalyticsConfig,
 } from '../../../common/types/data_frame_analytics';
+import {
+  getAnalysisType,
+  getDependentVar,
+  isClassificationAnalysis,
+  isRegressionAnalysis,
+} from '../../../common/util/analytics_utils';
+import { extractErrorMessage } from '../../../common/util/errors/process_errors';
 
 interface MissingAgg {
   [key: string]: {

@@ -4,31 +4,30 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { Suspense } from 'react';
 import {
-  EuiForm,
   EuiCallOut,
-  EuiLink,
-  EuiText,
-  EuiSpacer,
-  EuiFieldText,
-  EuiFormRow,
   EuiErrorBoundary,
+  EuiFieldText,
+  EuiForm,
+  EuiFormRow,
+  EuiLink,
+  EuiSpacer,
+  EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import {
-  IErrorObject,
-  ActionTypeRegistryContract,
-  UserConfiguredActionConnector,
+import React, { Suspense } from 'react';
+import { useKibana } from '../../../common/lib/kibana/kibana_react';
+import type {
   ActionTypeModel,
+  ActionTypeRegistryContract,
+  IErrorObject,
+  UserConfiguredActionConnector,
 } from '../../../types';
-import { hasSaveActionsCapability } from '../../lib/capabilities';
-import { useKibana } from '../../../common/lib/kibana';
 import { SectionLoading } from '../../components/section_loading';
-import { ConnectorReducerAction } from './connector_reducer';
+import { hasSaveActionsCapability } from '../../lib/capabilities';
+import type { ConnectorReducerAction } from './connector_reducer';
 
 export function validateBaseProperties<ConnectorConfig, ConnectorSecrets>(
   actionObject: UserConfiguredActionConnector<ConnectorConfig, ConnectorSecrets>

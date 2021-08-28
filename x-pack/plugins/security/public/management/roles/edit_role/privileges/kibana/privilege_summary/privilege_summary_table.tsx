@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiAccordion,
@@ -20,13 +19,14 @@ import {
 import React, { Fragment, useMemo, useState } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
-import type { SpacesApiUi } from 'src/plugins/spaces_oss/public';
 
-import type { Space } from '../../../../../../../../spaces/public';
-import type { Role, RoleKibanaPrivilege } from '../../../../../../../common/model';
-import type { KibanaPrivileges, SecuredFeature } from '../../../../model';
+import type { Space } from '../../../../../../../../../../src/plugins/spaces_oss/common/types';
+import type { SpacesApiUi } from '../../../../../../../../../../src/plugins/spaces_oss/public/api';
+import type { Role, RoleKibanaPrivilege } from '../../../../../../../common/model/role';
+import type { KibanaPrivileges } from '../../../../model/kibana_privileges';
+import type { SecuredFeature } from '../../../../model/secured_feature';
 import { isGlobalPrivilegeDefinition } from '../../../privilege_utils';
-import { FeatureTableCell } from '../feature_table_cell';
+import { FeatureTableCell } from '../feature_table_cell/feature_table_cell';
 import type { EffectiveFeaturePrivileges } from './privilege_summary_calculator';
 import { PrivilegeSummaryCalculator } from './privilege_summary_calculator';
 import { PrivilegeSummaryExpandedRow } from './privilege_summary_expanded_row';

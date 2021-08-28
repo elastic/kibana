@@ -4,15 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { FC, useState, useMemo, useCallback } from 'react';
-import {
-  OriginSaveModalProps,
-  SavedObjectSaveModalOrigin,
+import type { FC } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
+import type {
   OnSaveProps,
   SaveModalState,
-} from '../../../../../src/plugins/saved_objects/public';
-import { SavedObjectTaggingPluginStart } from '../../../saved_objects_tagging/public';
+} from '../../../../../src/plugins/saved_objects/public/save_modal/saved_object_save_modal';
+import type { OriginSaveModalProps } from '../../../../../src/plugins/saved_objects/public/save_modal/saved_object_save_modal_origin';
+import { SavedObjectSaveModalOrigin } from '../../../../../src/plugins/saved_objects/public/save_modal/saved_object_save_modal_origin';
+import type { SavedObjectTaggingPluginStart } from '../../../saved_objects_tagging/public/types';
 
 export type OriginSaveProps = OnSaveProps & { returnToOrigin: boolean; newTags?: string[] };
 

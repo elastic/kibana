@@ -8,7 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import type { CoreStart } from '../../../core/public';
+import type { CoreStart } from '../../../core/public/types';
 import type { OverlayRef } from '../../../core/public/overlays/types';
 import { IndexPatternField } from '../../data/common/index_patterns/fields/index_pattern_field';
 import { IndexPattern } from '../../data/common/index_patterns/index_patterns/index_pattern';

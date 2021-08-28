@@ -4,49 +4,49 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { EuiCode, EuiEmptyPrompt, EuiErrorBoundary, EuiPanel, EuiPortal } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+import type { History } from 'history';
 import type { FunctionComponent } from 'react';
 import React, { memo, useEffect, useState } from 'react';
-import type { AppMountParameters } from 'kibana/public';
-import { EuiCode, EuiEmptyPrompt, EuiErrorBoundary, EuiPanel, EuiPortal } from '@elastic/eui';
-import type { History } from 'history';
-import { Router, Redirect, Route, Switch, useRouteMatch } from 'react-router-dom';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { i18n } from '@kbn/i18n';
-import styled from 'styled-components';
+import { Redirect, Route, Router, Switch, useRouteMatch } from 'react-router-dom';
 import useObservable from 'react-use/lib/useObservable';
+import styled from 'styled-components';
 
-import type { TopNavMenuData } from 'src/plugins/navigation/public';
+import type { AppMountParameters } from '../../../../../../src/core/public/application/types';
+import { EuiThemeProvider } from '../../../../../../src/plugins/kibana_react/common/eui_styled_components';
+import { RedirectAppLinks } from '../../../../../../src/plugins/kibana_react/public/app_links/redirect_app_link';
+import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public/context/context';
+import type { TopNavMenuData } from '../../../../../../src/plugins/navigation/public/top_nav_menu/top_nav_menu_data';
+import type { FleetConfigType } from '../../../common/types';
+import { Error } from '../../components/error';
+import { FleetSetupLoading } from '../../components/fleet_setup_loading';
+import { Loading } from '../../components/loading';
+import { SettingFlyout } from '../../components/settings_flyout';
+import { FLEET_ROUTING_PATHS } from '../../constants/page_paths';
+import { ConfigContext } from '../../hooks/use_config';
+import { useStartServices } from '../../hooks/use_core';
+import { FleetStatusProvider } from '../../hooks/use_fleet_status';
+import { KibanaVersionContext } from '../../hooks/use_kibana_version';
+import { sendGetPermissionsCheck } from '../../hooks/use_request/app';
+import { sendSetup } from '../../hooks/use_request/setup';
+import { UIExtensionsContext } from '../../hooks/use_ui_extension';
+import { useUrlModal } from '../../hooks/use_url_modal';
+import { WithoutHeaderLayout } from '../../layouts/without_header';
+import { WithHeaderLayout } from '../../layouts/with_header';
+import type { FleetStartServices } from '../../plugin';
+import type { UIExtensionsStorage } from '../../types/ui_extensions';
+import { PackageInstallProvider } from '../integrations/hooks/use_package_install';
 
-import type { FleetConfigType, FleetStartServices } from '../../plugin';
-import {
-  KibanaContextProvider,
-  RedirectAppLinks,
-} from '../../../../../../src/plugins/kibana_react/public';
-import { EuiThemeProvider } from '../../../../../../src/plugins/kibana_react/common';
-
-import { PackageInstallProvider, useUrlModal } from '../integrations/hooks';
-
-import {
-  ConfigContext,
-  FleetStatusProvider,
-  KibanaVersionContext,
-  sendGetPermissionsCheck,
-  sendSetup,
-  useBreadcrumbs,
-  useStartServices,
-  UIExtensionsContext,
-} from './hooks';
-import { Error, Loading, SettingFlyout, FleetSetupLoading } from './components';
-import type { UIExtensionsStorage } from './types';
-
-import { FLEET_ROUTING_PATHS } from './constants';
-import { DefaultLayout, DefaultPageTitle, WithoutHeaderLayout, WithHeaderLayout } from './layouts';
-import { AgentPolicyApp } from './sections/agent_policy';
-import { DataStreamApp } from './sections/data_stream';
+import { useBreadcrumbs } from './hooks/use_breadcrumbs';
+import { DefaultLayout } from './layouts/default/default';
+import { DefaultPageTitle } from './layouts/default/default_page_title';
 import { AgentsApp } from './sections/agents';
-import { CreatePackagePolicyPage } from './sections/agent_policy/create_package_policy_page';
 import { EnrollmentTokenListPage } from './sections/agents/enrollment_token_list_page';
+import { AgentPolicyApp } from './sections/agent_policy';
+import { CreatePackagePolicyPage } from './sections/agent_policy/create_package_policy_page';
+import { DataStreamApp } from './sections/data_stream';
 
 const FEEDBACK_URL = 'https://ela.st/fleet-feedback';
 

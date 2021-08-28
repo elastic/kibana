@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiRange } from '@elastic/eui';
-import { useDebouncedValue } from '../../shared_components';
+import { i18n } from '@kbn/i18n';
+import React from 'react';
+import { useDebouncedValue } from '../../shared_components/debounced_value';
 
 export interface FillOpacityOptionProps {
   /**

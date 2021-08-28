@@ -4,12 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { SavedObjectsClientContract } from '../../../../../src/core/server/saved_objects/types';
 
-import type { SavedObjectsClientContract } from 'kibana/server';
-
-import type { ESIndexPatternService } from '../../server';
-
-import { getInstallation } from './epm/packages';
+import type { ESIndexPatternService } from '.';
+import { getInstallation } from './epm/packages/get';
 
 export class ESIndexPatternSavedObjectService implements ESIndexPatternService {
   public async getESIndexPattern(

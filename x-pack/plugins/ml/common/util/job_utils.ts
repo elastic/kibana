@@ -4,28 +4,30 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { each, isEmpty, isEqual, pick } from 'lodash';
-import semverGte from 'semver/functions/gte';
-import moment, { Duration } from 'moment';
 import { estypes } from '@elastic/elasticsearch';
 // @ts-ignore
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
-import { ALLOWED_DATA_UNITS, JOB_ID_MAX_LENGTH } from '../constants/validation';
-import { parseInterval } from './parse_interval';
-import { maxLengthValidator } from './validators';
-import { CREATED_BY_LABEL } from '../constants/new_job';
-import { CombinedJob, CustomSettings, Datafeed, Job, JobId } from '../types/anomaly_detection_jobs';
-import { EntityField } from './anomaly_utils';
-import { MlServerLimits } from '../types/ml_server_info';
-import { JobValidationMessage, JobValidationMessageId } from '../constants/messages';
+import { each, isEmpty, isEqual, pick } from 'lodash';
+import type { Duration } from 'moment';
+import moment from 'moment';
+import semverGte from 'semver/functions/gte';
 import { ES_AGGREGATION, ML_JOB_AGGREGATION } from '../constants/aggregation_types';
 import { MLCATEGORY } from '../constants/field_types';
-import { getAggregations, getDatafeedAggregations } from './datafeed_utils';
-import { findAggField } from './validation_utils';
-import { getFirstKeyInObject, isPopulatedObject } from './object_utils';
+import type { JobValidationMessage, JobValidationMessageId } from '../constants/messages';
+import { CREATED_BY_LABEL } from '../constants/new_job';
+import { ALLOWED_DATA_UNITS, JOB_ID_MAX_LENGTH } from '../constants/validation';
+import type { CombinedJob } from '../types/anomaly_detection_jobs/combined_job';
+import type { Datafeed } from '../types/anomaly_detection_jobs/datafeed';
+import type { CustomSettings, Job, JobId } from '../types/anomaly_detection_jobs/job';
 import { isDefined } from '../types/guards';
+import type { MlServerLimits } from '../types/ml_server_info';
+import type { EntityField } from './anomaly_utils';
+import { getAggregations, getDatafeedAggregations } from './datafeed_utils';
+import { getFirstKeyInObject, isPopulatedObject } from './object_utils';
+import { parseInterval } from './parse_interval';
+import { findAggField } from './validation_utils';
+import { maxLengthValidator } from './validators';
 
 export interface ValidationResults {
   valid: boolean;

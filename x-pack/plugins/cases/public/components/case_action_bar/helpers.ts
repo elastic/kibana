@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { CaseStatuses } from '../../../common';
-import { Case } from '../../containers/types';
-import { statuses } from '../status';
+import { CaseStatuses } from '../../../common/api/cases/status';
+import type { Case } from '../../../common/ui/types';
+import { statuses } from '../status/config';
 
 export const getStatusDate = (theCase: Case): string | null => {
   if (theCase.status === CaseStatuses.open) {

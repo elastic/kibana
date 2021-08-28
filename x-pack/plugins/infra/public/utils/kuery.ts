@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { esKuery, IIndexPattern } from '../../../../../src/plugins/data/public';
+import type { IIndexPattern } from '../../../../../src/plugins/data/common/index_patterns/types';
+import { esKuery } from '../../../../../src/plugins/data/public/deprecated';
 
 export const convertKueryToElasticSearchQuery = (
   kueryExpression: string,

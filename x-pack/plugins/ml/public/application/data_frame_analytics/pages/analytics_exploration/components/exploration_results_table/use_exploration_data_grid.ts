@@ -4,16 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { EuiDataGridColumn } from '@elastic/eui';
 import { useCallback, useMemo } from 'react';
-import { EuiDataGridColumn } from '@elastic/eui';
 import useUpdateEffect from 'react-use/lib/useUpdateEffect';
-import { useDataGrid } from '../../../../../components/data_grid';
+import { INIT_MAX_COLUMNS } from '../../../../../components/data_grid/common';
+import { useDataGrid } from '../../../../../components/data_grid/use_data_grid';
 import {
   getDefaultExplorationPageUrlState,
   useExplorationUrlState,
 } from '../../hooks/use_exploration_url_state';
-import { INIT_MAX_COLUMNS } from '../../../../../components/data_grid/common';
 
 export const useExplorationDataGrid = (
   columns: EuiDataGridColumn[],

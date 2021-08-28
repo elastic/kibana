@@ -4,15 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { IUiSettingsClient } from 'kibana/public';
-import { CustomPaletteState, PaletteRegistry } from 'src/plugins/charts/public';
-import type { IAggType } from 'src/plugins/data/public';
-import type { Datatable, RenderMode } from 'src/plugins/expressions';
+import type { IUiSettingsClient } from '../../../../../../src/core/public/ui_settings/types';
+import type { CustomPaletteState } from '../../../../../../src/plugins/charts/common/palette';
+import type { PaletteRegistry } from '../../../../../../src/plugins/charts/public/services/palettes/types';
+import type { IAggType } from '../../../../../../src/plugins/data/common/search/aggs/agg_type';
+import type { RenderMode } from '../../../../../../src/plugins/expressions/common/expression_renderers/types';
+import type { Datatable } from '../../../../../../src/plugins/expressions/common/expression_types/specs/datatable';
+import type { DatatableProps } from '../../../common/expressions/datatable/datatable';
+import type { LensGridDirection } from '../../../common/expressions/datatable/datatable_column';
+import type { FormatFactory } from '../../../common/types';
 import type { ILensInterpreterRenderHandlers, LensEditEvent } from '../../types';
-import { LENS_EDIT_SORT_ACTION, LENS_EDIT_RESIZE_ACTION, LENS_TOGGLE_ACTION } from './constants';
-import type { FormatFactory } from '../../../common';
-import type { DatatableProps, LensGridDirection } from '../../../common/expressions';
+import { LENS_EDIT_RESIZE_ACTION, LENS_EDIT_SORT_ACTION, LENS_TOGGLE_ACTION } from './constants';
 
 export interface LensSortActionData {
   columnId: string | undefined;

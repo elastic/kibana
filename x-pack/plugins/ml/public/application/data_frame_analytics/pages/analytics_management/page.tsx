@@ -4,11 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { FC, Fragment, useMemo, useState } from 'react';
-
-import { FormattedMessage } from '@kbn/i18n/react';
-
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -19,26 +14,27 @@ import {
   EuiPageHeaderSection,
   EuiTitle,
 } from '@elastic/eui';
-
+import { FormattedMessage } from '@kbn/i18n/react';
+import type { FC } from 'react';
+import React, { Fragment, useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import { useUrlState } from '../../../util/url_state';
-import { NavigationMenu } from '../../../components/navigation_menu';
-import { DatePickerWrapper } from '../../../components/navigation_menu/date_picker_wrapper';
-import { DataFrameAnalyticsList } from './components/analytics_list';
-import { useRefreshInterval } from './components/analytics_list/use_refresh_interval';
-import { RefreshAnalyticsListButton } from './components/refresh_analytics_list_button';
-import { NodeAvailableWarning } from '../../../components/node_available_warning';
-import { SavedObjectsWarning } from '../../../components/saved_objects_warning';
-import { UpgradeWarning } from '../../../components/upgrade';
-import { AnalyticsNavigationBar } from './components/analytics_navigation_bar';
-import { ModelsList } from './components/models_management';
-import { JobMap } from '../job_map';
-import { usePageUrlState } from '../../../util/url_state';
-import { ListingPageUrlState } from '../../../../../common/types/common';
-import { DataFrameAnalyticsListColumn } from './components/analytics_list/common';
 import { ML_PAGES } from '../../../../../common/constants/locator';
-import { HelpMenu } from '../../../components/help_menu';
-import { useMlKibana } from '../../../contexts/kibana';
+import type { ListingPageUrlState } from '../../../../../common/types/common';
+import { HelpMenu } from '../../../components/help_menu/help_menu';
+import { DatePickerWrapper } from '../../../components/navigation_menu/date_picker_wrapper/date_picker_wrapper';
+import { NavigationMenu } from '../../../components/navigation_menu/navigation_menu';
+import { NodeAvailableWarning } from '../../../components/node_available_warning/node_available_warning';
+import { SavedObjectsWarning } from '../../../components/saved_objects_warning/saved_objects_warning';
+import { UpgradeWarning } from '../../../components/upgrade/upgrade_warning';
+import { useMlKibana } from '../../../contexts/kibana/kibana_context';
+import { usePageUrlState, useUrlState } from '../../../util/url_state';
+import { JobMap } from '../job_map/job_map';
+import { DataFrameAnalyticsList } from './components/analytics_list/analytics_list';
+import { DataFrameAnalyticsListColumn } from './components/analytics_list/common';
+import { useRefreshInterval } from './components/analytics_list/use_refresh_interval';
+import { AnalyticsNavigationBar } from './components/analytics_navigation_bar/analytics_navigation_bar';
+import { ModelsList } from './components/models_management/models_list';
+import { RefreshAnalyticsListButton } from './components/refresh_analytics_list_button/refresh_analytics_list_button';
 
 export const getDefaultDFAListState = (): ListingPageUrlState => ({
   pageIndex: 0,

@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
+import { EuiButton, EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiCallOut, EuiLink, EuiButton, EuiSpacer } from '@elastic/eui';
+import React from 'react';
 
-import { useUrlModal, useStartServices } from '../../hooks';
+import { useStartServices } from '../../hooks/use_core';
+import { useUrlModal } from '../../hooks/use_url_modal';
 
 export const MissingFleetServerHostCallout: React.FunctionComponent = () => {
   const { setModal } = useUrlModal();

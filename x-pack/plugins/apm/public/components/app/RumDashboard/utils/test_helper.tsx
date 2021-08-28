@@ -11,7 +11,7 @@ import { createMemoryHistory } from 'history';
 import React from 'react';
 import { Router } from 'react-router-dom';
 import { of } from 'rxjs';
-import type { CoreStart } from '../../../../../../../../src/core/public';
+import type { CoreStart } from '../../../../../../../../src/core/public/types';
 import { EuiThemeProvider } from '../../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
 import { KibanaContextProvider } from '../../../../../../../../src/plugins/kibana_react/public/context/context';
 import { UrlParamsProvider } from '../../../../context/url_params_context/url_params_context';

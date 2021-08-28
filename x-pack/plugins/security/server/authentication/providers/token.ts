@@ -7,15 +7,14 @@
 
 import Boom from '@hapi/boom';
 
-import type { KibanaRequest } from 'src/core/server';
-
+import type { KibanaRequest } from '../../../../../../src/core/server/http/router/request';
 import { NEXT_URL_QUERY_STRING_PARAMETER } from '../../../common/constants';
 import type { AuthenticationInfo } from '../../elasticsearch';
 import { getDetailedErrorMessage } from '../../errors';
 import { AuthenticationResult } from '../authentication_result';
 import { canRedirectRequest } from '../can_redirect_request';
 import { DeauthenticationResult } from '../deauthentication_result';
-import { HTTPAuthorizationHeader } from '../http_authentication';
+import { HTTPAuthorizationHeader } from '../http_authentication/http_authorization_header';
 import type { RefreshTokenResult, TokenPair } from '../tokens';
 import { Tokens } from '../tokens';
 import { BaseAuthenticationProvider } from './base';

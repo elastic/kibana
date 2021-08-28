@@ -4,8 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { LicensingRouter } from '../types';
+import type { LicensingRouter } from '../types';
 
 export function registerInfoRoute(router: LicensingRouter) {
   router.get({ path: '/api/licensing/info', validate: false }, (context, request, response) => {

@@ -10,7 +10,7 @@ import type { SerializableRecord } from '@kbn/utility-types';
 import { identity } from 'lodash';
 import React from 'react';
 import { Subscription } from 'rxjs';
-import type { CoreSetup, CoreStart } from '../../../core/public';
+import type { CoreSetup, CoreStart } from '../../../core/public/types';
 import type { PublicAppInfo } from '../../../core/public/application/types';
 import type { Plugin } from '../../../core/public/plugins/plugin';
 import type { PluginInitializerContext } from '../../../core/public/plugins/plugin_context';

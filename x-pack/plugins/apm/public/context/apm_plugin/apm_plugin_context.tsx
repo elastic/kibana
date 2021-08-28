@@ -6,7 +6,7 @@
  */
 import { createContext } from 'react';
 import type { ConfigSchema } from '../..';
-import type { CoreStart } from '../../../../../../src/core/public';
+import type { CoreStart } from '../../../../../../src/core/public/types';
 import type { AppMountParameters } from '../../../../../../src/core/public/application/types';
 import type { MapsStartApi } from '../../../../maps/public/api/start_api';
 import type { ObservabilityPublicStart } from '../../../../observability/public/plugin';

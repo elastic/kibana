@@ -6,18 +6,17 @@
  */
 
 import React from 'react';
-
-import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
-import { nodesToWaffleMap } from '../../lib/nodes_to_wafflemap';
-import { isWaffleMapGroupWithGroups, isWaffleMapGroupWithNodes } from '../../lib/type_guards';
-import { InfraWaffleMapBounds, InfraWaffleMapOptions } from '../../../../../lib/lib';
+import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
+import type { SnapshotNode } from '../../../../../../common/http_api/snapshot_api';
+import type { InventoryItemType } from '../../../../../../common/inventory_models/types';
 import { AutoSizer } from '../../../../../components/auto_sizer';
+import type { InfraWaffleMapBounds, InfraWaffleMapOptions } from '../../../../../lib/lib';
+import { applyWaffleMapLayout } from '../../lib/apply_wafflemap_layout';
+import { nodesToWaffleMap } from '../../lib/nodes_to_wafflemap';
+import { sortNodes } from '../../lib/sort_nodes';
+import { isWaffleMapGroupWithGroups, isWaffleMapGroupWithNodes } from '../../lib/type_guards';
 import { GroupOfGroups } from './group_of_groups';
 import { GroupOfNodes } from './group_of_nodes';
-import { applyWaffleMapLayout } from '../../lib/apply_wafflemap_layout';
-import { SnapshotNode } from '../../../../../../common/http_api/snapshot_api';
-import { InventoryItemType } from '../../../../../../common/inventory_models/types';
-import { sortNodes } from '../../lib/sort_nodes';
 
 interface Props {
   nodes: SnapshotNode[];

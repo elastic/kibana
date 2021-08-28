@@ -4,14 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { AnyAction } from 'redux';
-import { ThunkDispatch } from 'redux-thunk';
 import { connect } from 'react-redux';
-import { TimesliderToggleButton } from './timeslider_toggle_button';
-import { closeTimeslider, openTimeslider } from '../../../actions';
+import type { AnyAction } from 'redux';
+import type { ThunkDispatch } from 'redux-thunk';
+import { closeTimeslider, openTimeslider } from '../../../actions/ui_actions';
+import type { MapStoreState } from '../../../reducers/store';
 import { getIsTimesliderOpen } from '../../../selectors/ui_selectors';
-import { MapStoreState } from '../../../reducers/store';
+import { TimesliderToggleButton } from './timeslider_toggle_button';
 
 function mapStateToProps(state: MapStoreState) {
   return {

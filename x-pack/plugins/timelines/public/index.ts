@@ -4,38 +4,27 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { PluginInitializerContext } from '../../../../src/core/public';
-
+import type { PluginInitializerContext } from '../../../../src/core/public/plugins/plugin_context';
 import { TimelinesPlugin } from './plugin';
-export * as tGridActions from './store/t_grid/actions';
-export * as tGridSelectors from './store/t_grid/selectors';
+
+export { Direction } from '../common/search_strategy/common';
 export type {
+  CursorType,
+  DocValueFields,
   Inspect,
+  PaginationInputPaginated,
   SortField,
   TimerangeInput,
-  PaginationInputPaginated,
-  DocValueFields,
-  CursorType,
   TotalValue,
 } from '../common/search_strategy/common';
-export { Direction } from '../common/search_strategy/common';
-export { tGridReducer } from './store/t_grid/reducer';
-export type { TGridModelForTimeline, TimelineState, TimelinesUIStart } from './types';
-export { TGridType, SortDirection } from './types';
 export {
   ARIA_COLINDEX_ATTRIBUTE,
   ARIA_ROWINDEX_ATTRIBUTE,
+  arrayIndexToAriaIndex,
   DATA_COLINDEX_ATTRIBUTE,
   DATA_ROWINDEX_ATTRIBUTE,
-  FIRST_ARIA_INDEX,
-  OnColumnFocused,
-  arrayIndexToAriaIndex,
   elementOrChildrenHasFocus,
-  isArrowDownOrArrowUp,
-  isArrowUp,
-  isEscape,
-  isTab,
+  FIRST_ARIA_INDEX,
   focusColumn,
   getFocusedAriaColindexCell,
   getFocusedDataColindexCell,
@@ -43,6 +32,11 @@ export {
   getRowRendererClassName,
   getTableSkipFocus,
   handleSkipFocus,
+  isArrowDownOrArrowUp,
+  isArrowUp,
+  isEscape,
+  isTab,
+  OnColumnFocused,
   onFocusReFocusDraggable,
   onKeyDownFocusHandler,
   skipFocusInContainerTo,
@@ -54,6 +48,11 @@ export {
 } from './components/drag_and_drop/helpers';
 export { StatefulFieldsBrowser } from './components/t_grid/toolbar/fields_browser';
 export { useStatusBulkActionItems } from './hooks/use_status_bulk_action_items';
+export * as tGridActions from './store/t_grid/actions';
+export { tGridReducer } from './store/t_grid/reducer';
+export * as tGridSelectors from './store/t_grid/selectors';
+export { SortDirection, TGridType } from './types';
+export type { TGridModelForTimeline, TimelineState, TimelinesUIStart } from './types';
 // This exports static code and TypeScript types,
 // as well as, Kibana Platform `plugin()` initializer.
 export function plugin(initializerContext: PluginInitializerContext) {

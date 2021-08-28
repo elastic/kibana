@@ -4,11 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { FC } from 'react';
-
 import { EuiIcon, EuiToolTip } from '@elastic/eui';
-import { AuditMessageBase } from '../../../../common/types/audit_message';
+import type { FC } from 'react';
+import React from 'react';
+import type { AuditMessageBase } from '../../../../common/types/audit_message';
 
 interface Props {
   message: AuditMessageBase;

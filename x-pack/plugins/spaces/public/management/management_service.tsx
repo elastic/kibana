@@ -4,12 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { StartServicesAccessor } from 'src/core/public';
-import type { ManagementApp, ManagementSetup } from 'src/plugins/management/public';
-
+import type { StartServicesAccessor } from '../../../../../src/core/public/types';
+import type { ManagementSetup } from '../../../../../src/plugins/management/public/types';
+import type { ManagementApp } from '../../../../../src/plugins/management/public/utils/management_app';
 import type { PluginsStart } from '../plugin';
-import type { SpacesManager } from '../spaces_manager';
+import type { SpacesManager } from '../spaces_manager/spaces_manager';
 import { spacesManagementApp } from './spaces_management_app';
 
 interface SetupDeps {

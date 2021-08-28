@@ -4,15 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { useCallback, useState, useEffect } from 'react';
+import { EuiButton, EuiListGroup, EuiListGroupItem, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EuiButton, EuiPopover, EuiListGroup, EuiListGroupItem } from '@elastic/eui';
-import { SavedViewCreateModal } from './create_modal';
-import { SavedViewUpdateModal } from './update_modal';
-import { SavedViewManageViewsFlyout } from './manage_views_flyout';
-import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
+import React, { useCallback, useEffect, useState } from 'react';
+import { useKibana } from '../../../../../../src/plugins/kibana_react/public/context/context';
 import { useSavedViewContext } from '../../containers/saved_view/saved_view';
+import { SavedViewCreateModal } from './create_modal';
+import { SavedViewManageViewsFlyout } from './manage_views_flyout';
+import { SavedViewUpdateModal } from './update_modal';
 import { SavedViewListModal } from './view_list_modal';
 
 interface Props<ViewState> {

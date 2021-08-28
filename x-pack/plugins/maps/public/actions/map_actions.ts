@@ -5,30 +5,44 @@
  * 2.0.
  */
 
-import _ from 'lodash';
-import { AnyAction, Dispatch } from 'redux';
-import { ThunkDispatch } from 'redux-thunk';
 import turfBboxPolygon from '@turf/bbox-polygon';
 import turfBooleanContains from '@turf/boolean-contains';
-import { Filter, Query, TimeRange } from 'src/plugins/data/public';
-import { Geometry, Position } from 'geojson';
-import { DRAW_MODE, DRAW_SHAPE } from '../../common/constants';
-import { MapStoreState } from '../reducers/store';
+import type { Geometry, Position } from 'geojson';
+import _ from 'lodash';
+import type { AnyAction, Dispatch } from 'redux';
+import type { ThunkDispatch } from 'redux-thunk';
+import type { Query } from 'src/plugins/data/public';
+import type { Filter } from '../../../../../src/plugins/data/common/es_query';
+import type { TimeRange } from '../../../../../src/plugins/data/common/query/timefilter/types';
+import { DRAW_MODE, DRAW_SHAPE, INITIAL_LOCATION } from '../../common/constants';
+import type { Timeslice } from '../../common/descriptor_types/data_request_descriptor_types';
+import type {
+  DrawState,
+  MapCenter,
+  MapCenterAndZoom,
+  MapExtent,
+} from '../../common/descriptor_types/map_descriptor';
+import { expandToTileBoundaries } from '../../common/geo_tile_utils';
+import { VectorLayer } from '../classes/layers/vector_layer/vector_layer';
+import type { MapSettings } from '../reducers/map/types';
+import type { MapStoreState } from '../reducers/store';
 import {
   getDataFilters,
+  getEditState,
   getFilters,
-  getMapSettings,
-  getWaitingForMapReadyLayerListRaw,
-  getQuery,
-  getTimeFilters,
-  getTimeslice,
+  getLayerById,
   getLayerList,
+  getMapSettings,
+  getQuery,
   getSearchSessionId,
   getSearchSessionMapBuffer,
-  getLayerById,
-  getEditState,
   getSelectedLayerId,
+  getTimeFilters,
+  getTimeslice,
+  getWaitingForMapReadyLayerListRaw,
 } from '../selectors/map_selectors';
+import { autoFitToBounds, syncDataForAllLayers, syncDataForLayer } from './data_request_actions';
+import { addLayer, addLayerWithoutDataSync } from './layer_actions';
 import {
   CLEAR_GOTO,
   CLEAR_MOUSE_COORDINATES,
@@ -46,24 +60,11 @@ import {
   SET_SCROLL_ZOOM,
   TRACK_MAP_SETTINGS,
   UPDATE_DRAW_STATE,
-  UPDATE_MAP_SETTING,
   UPDATE_EDIT_STATE,
+  UPDATE_MAP_SETTING,
 } from './map_action_constants';
-import { autoFitToBounds, syncDataForAllLayers, syncDataForLayer } from './data_request_actions';
-import { addLayer, addLayerWithoutDataSync } from './layer_actions';
-import { MapSettings } from '../reducers/map';
-import {
-  DrawState,
-  MapCenter,
-  MapCenterAndZoom,
-  MapExtent,
-  Timeslice,
-} from '../../common/descriptor_types';
-import { INITIAL_LOCATION } from '../../common/constants';
 import { cleanTooltipStateForLayer } from './tooltip_actions';
-import { VectorLayer } from '../classes/layers/vector_layer';
 import { SET_DRAW_MODE } from './ui_actions';
-import { expandToTileBoundaries } from '../../common/geo_tile_utils';
 
 export interface MapExtentState {
   zoom: number;

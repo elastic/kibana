@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import type { EuiBasicTableColumn, EuiInMemoryTableProps } from '@elastic/eui';
 import {
   EuiBadge,
@@ -30,21 +29,21 @@ import { Route } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { NotificationsStart } from 'src/core/public';
 
-import { APP_WRAPPER_CLASS } from '../../../../../../../src/core/public';
-import { SectionLoading } from '../../../../../../../src/plugins/es_ui_shared/public';
-import { reactRouterNavigate } from '../../../../../../../src/plugins/kibana_react/public';
-import type { ApiKey, ApiKeyToInvalidate } from '../../../../common/model';
+import type { NotificationsStart } from '../../../../../../../src/core/public/notifications/notifications_service';
+import { APP_WRAPPER_CLASS } from '../../../../../../../src/core/utils/app_wrapper_class';
+import { SectionLoading } from '../../../../../../../src/plugins/es_ui_shared/public/components/section_loading/section_loading';
+import { reactRouterNavigate } from '../../../../../../../src/plugins/kibana_react/public/react_router_navigate/react_router_navigate';
+import type { ApiKey, ApiKeyToInvalidate } from '../../../../common/model/api_key';
 import { Breadcrumb } from '../../../components/breadcrumb';
 import { SelectableTokenField } from '../../../components/token_field';
 import type { APIKeysAPIClient, CreateApiKeyResponse } from '../api_keys_api_client';
 import { ApiKeysEmptyPrompt } from './api_keys_empty_prompt';
 import { CreateApiKeyFlyout } from './create_api_key_flyout';
-import type { InvalidateApiKeys } from './invalidate_provider';
-import { InvalidateProvider } from './invalidate_provider';
-import { NotEnabled } from './not_enabled';
-import { PermissionDenied } from './permission_denied';
+import type { InvalidateApiKeys } from './invalidate_provider/invalidate_provider';
+import { InvalidateProvider } from './invalidate_provider/invalidate_provider';
+import { NotEnabled } from './not_enabled/not_enabled';
+import { PermissionDenied } from './permission_denied/permission_denied';
 
 interface Props {
   history: History;

@@ -4,20 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import type { CoreSetup } from 'kibana/server';
-
 import type { FleetConfigType } from '..';
+import type { CoreSetup } from '../../../../../src/core/server';
+import type { UsageCollectionSetup } from '../../../../../src/plugins/usage_collection/server/plugin';
 
-import { getIsAgentsEnabled } from './config_collectors';
-import { getAgentUsage } from './agent_collectors';
 import type { AgentUsage } from './agent_collectors';
-import { getInternalClients } from './helpers';
-import { getPackageUsage } from './package_collectors';
-import type { PackageUsage } from './package_collectors';
-import { getFleetServerUsage } from './fleet_server_collector';
+import { getAgentUsage } from './agent_collectors';
+import { getIsAgentsEnabled } from './config_collectors';
 import type { FleetServerUsage } from './fleet_server_collector';
+import { getFleetServerUsage } from './fleet_server_collector';
+import { getInternalClients } from './helpers';
+import type { PackageUsage } from './package_collectors';
+import { getPackageUsage } from './package_collectors';
 
 interface Usage {
   agents_enabled: boolean;

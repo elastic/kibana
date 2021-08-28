@@ -4,31 +4,31 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { useMemo } from 'react';
-import moment from 'moment';
-import { first, last } from 'lodash';
-import { i18n } from '@kbn/i18n';
+import type { TooltipValue } from '@elastic/charts';
+import { Axis, Chart, niceTimeFormatter, Position, Settings } from '@elastic/charts';
 import {
-  EuiDescriptionListTitle,
   EuiDescriptionListDescription,
+  EuiDescriptionListTitle,
+  EuiEmptyPrompt,
   EuiFlexItem,
   EuiLoadingChart,
-  EuiEmptyPrompt,
   EuiText,
 } from '@elastic/eui';
-import { Axis, Chart, Settings, Position, TooltipValue, niceTimeFormatter } from '@elastic/charts';
-import { createFormatter } from '../../../../../../../../common/formatters';
-import { useUiSetting } from '../../../../../../../../../../../src/plugins/kibana_react/public';
-import { getChartTheme } from '../../../../../metrics_explorer/components/helpers/get_chart_theme';
-import { calculateDomain } from '../../../../../metrics_explorer/components/helpers/calculate_domain';
-import { MetricsExplorerChartType } from '../../../../../metrics_explorer/hooks/use_metrics_explorer_options';
-import { MetricExplorerSeriesChart } from '../../../../../metrics_explorer/components/series_chart';
-import { MetricsExplorerAggregation } from '../../../../../../../../common/http_api';
+import { i18n } from '@kbn/i18n';
+import { first, last } from 'lodash';
+import moment from 'moment';
+import React, { useMemo } from 'react';
+import { euiStyled } from '../../../../../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
+import { useUiSetting } from '../../../../../../../../../../../src/plugins/kibana_react/public/ui_settings/use_ui_setting';
 import { Color } from '../../../../../../../../common/color_palette';
-import { euiStyled } from '../../../../../../../../../../../src/plugins/kibana_react/common';
+import { createFormatter } from '../../../../../../../../common/formatters';
+import type { MetricsExplorerAggregation } from '../../../../../../../../common/http_api/metrics_explorer';
+import { calculateDomain } from '../../../../../metrics_explorer/components/helpers/calculate_domain';
+import { getChartTheme } from '../../../../../metrics_explorer/components/helpers/get_chart_theme';
+import { MetricExplorerSeriesChart } from '../../../../../metrics_explorer/components/series_chart';
+import { MetricsExplorerChartType } from '../../../../../metrics_explorer/hooks/use_metrics_explorer_options';
 import { useProcessListRowChart } from '../../../../hooks/use_process_list_row_chart';
-import { Process } from './types';
+import type { Process } from './types';
 
 interface Props {
   command: string;

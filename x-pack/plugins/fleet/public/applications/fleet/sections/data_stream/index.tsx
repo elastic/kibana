@@ -6,10 +6,10 @@
  */
 
 import React from 'react';
-import { Router, Route, Switch, useHistory } from 'react-router-dom';
+import { Route, Router, Switch, useHistory } from 'react-router-dom';
 
-import { FLEET_ROUTING_PATHS } from '../../constants';
-import { DefaultLayout } from '../../layouts';
+import { FLEET_ROUTING_PATHS } from '../../../../constants/page_paths';
+import { DefaultLayout } from '../../layouts/default/default';
 
 import { DataStreamListPage } from './list_page';
 

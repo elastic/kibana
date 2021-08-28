@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { IndexPatternBase } from '@kbn/es-query';
+import type { IndexPatternBase } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo, useState } from 'react';
-import { SearchBar, TimeHistory } from '../../../../../../src/plugins/data/public';
-import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
+import { TimeHistory } from '../../../../../../src/plugins/data/public/query/timefilter/time_history';
+import { SearchBar } from '../../../../../../src/plugins/data/public/ui/search_bar';
+import { Storage } from '../../../../../../src/plugins/kibana_utils/public/storage/storage';
 
 export function AlertsSearchBar({
   dynamicIndexPatterns,

@@ -4,13 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { FC, memo, Fragment } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
-
-import { SplitField } from '../../../../../../../../../common/types/fields';
+import type { FC } from 'react';
+import React, { Fragment, memo } from 'react';
 import { JOB_TYPE } from '../../../../../../../../../common/constants/new_job';
+import type { SplitField } from '../../../../../../../../../common/types/fields';
 
 interface Props {
   fieldValues: string[];

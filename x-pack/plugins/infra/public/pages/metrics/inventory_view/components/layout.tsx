@@ -4,32 +4,30 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useCallback, useEffect, useState } from 'react';
 import useInterval from 'react-use/lib/useInterval';
-
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { SavedView } from '../../../../containers/saved_view/saved_view';
+import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
 import { AutoSizer } from '../../../../components/auto_sizer';
-import { convertIntervalToString } from '../../../../utils/convert_interval_to_string';
-import { NodesOverview } from './nodes_overview';
-import { calculateBoundsFromNodes } from '../lib/calculate_bounds_from_nodes';
 import { PageContent } from '../../../../components/page';
+import { useSourceContext } from '../../../../containers/metrics_source/source';
+import { SavedView } from '../../../../containers/saved_view/saved_view';
+import { InfraFormatterType } from '../../../../lib/lib';
+import { convertIntervalToString } from '../../../../utils/convert_interval_to_string';
 import { useSnapshot } from '../hooks/use_snaphot';
-import { useWaffleTimeContext } from '../hooks/use_waffle_time';
 import { useWaffleFiltersContext } from '../hooks/use_waffle_filters';
 import { DEFAULT_LEGEND, useWaffleOptionsContext } from '../hooks/use_waffle_options';
-import { useSourceContext } from '../../../../containers/metrics_source';
-import { InfraFormatterType } from '../../../../lib/lib';
-import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
-import { Toolbar } from './toolbars/toolbar';
-import { ViewSwitcher } from './waffle/view_switcher';
-import { IntervalLabel } from './waffle/interval_label';
+import { useWaffleTimeContext } from '../hooks/use_waffle_time';
+import { useWaffleViewState } from '../hooks/use_waffle_view_state';
+import { calculateBoundsFromNodes } from '../lib/calculate_bounds_from_nodes';
 import { createInventoryMetricFormatter } from '../lib/create_inventory_metric_formatter';
 import { createLegend } from '../lib/create_legend';
-import { useWaffleViewState } from '../hooks/use_waffle_view_state';
 import { BottomDrawer } from './bottom_drawer';
+import { NodesOverview } from './nodes_overview';
+import { Toolbar } from './toolbars/toolbar';
+import { IntervalLabel } from './waffle/interval_label';
 import { Legend } from './waffle/legend';
+import { ViewSwitcher } from './waffle/view_switcher';
 
 export const Layout = React.memo(
   ({

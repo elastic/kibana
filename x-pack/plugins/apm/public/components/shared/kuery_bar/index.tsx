@@ -18,10 +18,9 @@ import { useApmParams } from '../../../hooks/use_apm_params';
 import { useDynamicIndexPatternFetcher } from '../../../hooks/use_dynamic_index_pattern';
 import { fromQuery, toQuery } from '../Links/url_helpers';
 import { getBoolFilter } from './get_bool_filter';
+// @ts-expect-error
 import { Typeahead } from './Typeahead';
 import { useProcessorEvent } from './use_processor_event';
-
-// @ts-expect-error
 
 interface State {
   suggestions: QuerySuggestion[];

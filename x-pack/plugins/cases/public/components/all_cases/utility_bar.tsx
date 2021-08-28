@@ -4,23 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { FunctionComponent, useCallback, useEffect, useState } from 'react';
 import { EuiContextMenuPanel } from '@elastic/eui';
-import {
-  UtilityBar,
-  UtilityBarAction,
-  UtilityBarGroup,
-  UtilityBarSection,
-  UtilityBarText,
-} from '../utility_bar';
-import * as i18n from './translations';
-import { AllCases, Case, DeleteCase, FilterOptions } from '../../../common';
-import { getBulkItems } from '../bulk_actions';
-import { isSelectedCasesIncludeCollections } from './helpers';
-import { useDeleteCases } from '../../containers/use_delete_cases';
-import { ConfirmDeleteCaseModal } from '../confirm_delete_case';
+import type { FunctionComponent } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
+import type { AllCases, Case, DeleteCase, FilterOptions } from '../../../common/ui/types';
 import { useUpdateCases } from '../../containers/use_bulk_update_case';
+import { useDeleteCases } from '../../containers/use_delete_cases';
+import { getBulkItems } from '../bulk_actions';
+import { ConfirmDeleteCaseModal } from '../confirm_delete_case';
+import { UtilityBar } from '../utility_bar/utility_bar';
+import { UtilityBarAction } from '../utility_bar/utility_bar_action';
+import { UtilityBarGroup } from '../utility_bar/utility_bar_group';
+import { UtilityBarSection } from '../utility_bar/utility_bar_section';
+import { UtilityBarText } from '../utility_bar/utility_bar_text';
+import { isSelectedCasesIncludeCollections } from './helpers';
+import * as i18n from './translations';
 
 interface OwnProps {
   data: AllCases;

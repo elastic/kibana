@@ -17,6 +17,7 @@ import {
   ALERT_EVALUATION_VALUE as ALERT_EVALUATION_VALUE_NON_TYPED,
   ALERT_REASON as ALERT_REASON_NON_TYPED,
   ALERT_SEVERITY as ALERT_SEVERITY_NON_TYPED,
+  // @ts-expect-error
 } from '@kbn/rule-data-utils/target_node/technical_field_names';
 import { compact } from 'lodash';
 import { KibanaRequest } from '../../../../../../src/core/server/http/router/request';

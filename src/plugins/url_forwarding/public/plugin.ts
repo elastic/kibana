@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import { Subscription } from 'rxjs';
-import type { CoreSetup, CoreStart } from '../../../core/public';
+import type { CoreSetup, CoreStart } from '../../../core/public/types';
 import type { KibanaLegacyStart } from '../../kibana_legacy/public/plugin';
 import { createLegacyUrlForwardApp } from './forward_app/forward_app';
 import { navigateToLegacyKibanaUrl } from './forward_app/navigate_to_legacy_kibana_url';

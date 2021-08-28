@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { FC } from 'react';
-import { ScaleType, AreaSeries, CurveType } from '@elastic/charts';
-import { ModelItem } from '../../../../common/results_loader';
+import { AreaSeries, CurveType, ScaleType } from '@elastic/charts';
+import type { FC } from 'react';
+import React from 'react';
+import type { ModelItem } from '../../../../common/results_loader/results_loader';
 import { seriesStyle, useChartColors } from '../common/settings';
 
 interface Props {

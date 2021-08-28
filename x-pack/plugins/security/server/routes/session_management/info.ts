@@ -4,8 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { RouteDefinitionParams } from '../';
+import type { RouteDefinitionParams } from '..';
 import { SESSION_EXPIRATION_WARNING_MS } from '../../../common/constants';
 import type { SessionInfo } from '../../../common/types';
 

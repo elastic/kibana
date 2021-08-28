@@ -9,7 +9,7 @@ import cytoscape from 'cytoscape';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { Popover } from '.';
-import type { CoreStart } from '../../../../../../../../src/core/public';
+import type { CoreStart } from '../../../../../../../../src/core/public/types';
 import { createKibanaReactContext } from '../../../../../../../../src/plugins/kibana_react/public/context/context';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import { MockApmPluginContextWrapper } from '../../../../context/apm_plugin/mock_apm_plugin_context';

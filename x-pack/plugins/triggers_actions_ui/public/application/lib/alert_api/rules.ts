@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { HttpSetup } from 'kibana/public';
-import { BASE_ALERTING_API_PATH } from '../../constants';
-import { Alert, Pagination, Sorting } from '../../../types';
-import { AsApiContract } from '../../../../../actions/common';
-import { mapFiltersToKql } from './map_filters_to_kql';
+import type { HttpSetup } from '../../../../../../../src/core/public/http/types';
+import type { AsApiContract } from '../../../../../actions/common/rewrite_request_case';
+import { BASE_ALERTING_API_PATH } from '../../../../../alerting/common';
+import type { Alert, Pagination, Sorting } from '../../../types';
 import { transformAlert } from './common_transformations';
+import { mapFiltersToKql } from './map_filters_to_kql';
 
 const rewriteResponseRes = (results: Array<AsApiContract<Alert>>): Alert[] => {
   return results.map((item) => transformAlert(item));

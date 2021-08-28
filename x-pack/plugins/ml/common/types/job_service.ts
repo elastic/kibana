@@ -4,11 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { Job, JobStats, IndicesOptions } from './anomaly_detection_jobs';
-import { RuntimeMappings } from './fields';
 import { ES_AGGREGATION } from '../constants/aggregation_types';
-import { ErrorType } from '../util/errors';
+import type { ErrorType } from '../util/errors/types';
+import type { IndicesOptions } from './anomaly_detection_jobs/datafeed';
+import type { Job } from './anomaly_detection_jobs/job';
+import type { JobStats } from './anomaly_detection_jobs/job_stats';
+import type { RuntimeMappings } from './fields';
 
 export interface MlJobsResponse {
   jobs: Job[];

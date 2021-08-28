@@ -4,23 +4,29 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { SavedObjectsServiceSetup, SavedObjectsType } from 'kibana/server';
-
-import type { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
+/*
+ * Saved object types and mappings
+ *
+ * Please update typings in `/common/types` as well as
+ * schemas in `/server/types` if mappings are updated.
+ */
+import type { SavedObjectsServiceSetup } from '../../../../../src/core/server/saved_objects/saved_objects_service';
+import type { SavedObjectsType } from '../../../../../src/core/server/saved_objects/types';
+import type { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server/plugin';
 import {
-  OUTPUT_SAVED_OBJECT_TYPE,
-  AGENT_POLICY_SAVED_OBJECT_TYPE,
-  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-  PACKAGES_SAVED_OBJECT_TYPE,
-  ASSETS_SAVED_OBJECT_TYPE,
-  AGENT_SAVED_OBJECT_TYPE,
   AGENT_ACTION_SAVED_OBJECT_TYPE,
-  ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE,
-  GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
-  PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
-} from '../constants';
+  AGENT_SAVED_OBJECT_TYPE,
+} from '../../common/constants/agent';
+import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../common/constants/agent_policy';
+import { ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE } from '../../common/constants/enrollment_api_key';
+import { ASSETS_SAVED_OBJECT_TYPE, PACKAGES_SAVED_OBJECT_TYPE } from '../../common/constants/epm';
+import { OUTPUT_SAVED_OBJECT_TYPE } from '../../common/constants/output';
+import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../common/constants/package_policy';
+import { PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE } from '../../common/constants/preconfiguration';
+import { GLOBAL_SETTINGS_SAVED_OBJECT_TYPE } from '../../common/constants/settings';
 
+import { migratePackagePolicyToV7110 } from './migrations/security_solution/to_v7_11_0';
+import { migratePackagePolicyToV7120 } from './migrations/security_solution/to_v7_12_0';
 import {
   migrateAgentActionToV7100,
   migrateAgentPolicyToV7100,
@@ -29,28 +35,15 @@ import {
   migratePackagePolicyToV7100,
   migrateSettingsToV7100,
 } from './migrations/to_v7_10_0';
-
-import { migratePackagePolicyToV7110 } from './migrations/to_v7_11_0';
-
+import { migrateAgentPolicyToV7120, migrateAgentToV7120 } from './migrations/to_v7_12_0';
 import {
-  migrateAgentPolicyToV7120,
-  migrateAgentToV7120,
-  migratePackagePolicyToV7120,
-} from './migrations/to_v7_12_0';
-import {
+  migrateOutputToV7130,
   migratePackagePolicyToV7130,
   migrateSettingsToV7130,
-  migrateOutputToV7130,
 } from './migrations/to_v7_13_0';
-import { migratePackagePolicyToV7140, migrateInstallationToV7140 } from './migrations/to_v7_14_0';
+import { migrateInstallationToV7140, migratePackagePolicyToV7140 } from './migrations/to_v7_14_0';
 import { migratePackagePolicyToV7150 } from './migrations/to_v7_15_0';
 
-/*
- * Saved object types and mappings
- *
- * Please update typings in `/common/types` as well as
- * schemas in `/server/types` if mappings are updated.
- */
 const getSavedObjectTypes = (
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
 ): { [key: string]: SavedObjectsType } => ({

@@ -4,13 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { Logger, ElasticsearchClient } from 'src/core/server';
-
-import { EsNames, getEsNames } from './names';
+import type { Logger } from '@kbn/logging';
+import type { ElasticsearchClient } from '../../../../../src/core/server/elasticsearch/client/types';
+import type { ReadySignal } from '../lib/ready_signal';
+import { createReadySignal } from '../lib/ready_signal';
+import type { IClusterClientAdapter } from './cluster_client_adapter';
+import { ClusterClientAdapter } from './cluster_client_adapter';
 import { initializeEs } from './init';
-import { ClusterClientAdapter, IClusterClientAdapter } from './cluster_client_adapter';
-import { createReadySignal, ReadySignal } from '../lib/ready_signal';
+import type { EsNames } from './names';
+import { getEsNames } from './names';
 
 export interface EsContext {
   logger: Logger;

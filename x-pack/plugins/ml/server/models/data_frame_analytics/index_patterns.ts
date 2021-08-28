@@ -4,9 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { SavedObjectsClientContract } from 'kibana/server';
-import { IndexPatternAttributes } from 'src/plugins/data/server';
+import type { SavedObjectsClientContract } from '../../../../../../src/core/server/saved_objects/types';
+import type { IndexPatternAttributes } from '../../../../../../src/plugins/data/common/index_patterns/types';
 
 export class IndexPatternHandler {
   constructor(private savedObjectsClient: SavedObjectsClientContract) {}

@@ -5,34 +5,37 @@
  * 2.0.
  */
 
-import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { ISearchSource, Query } from 'src/plugins/data/public';
+import _ from 'lodash';
+import type { Query } from 'src/plugins/data/public';
+import type { ISearchSource } from '../../../../../../../src/plugins/data/common/search/search_source/types';
+import type { Adapters } from '../../../../../../../src/plugins/inspector/common/adapters/types';
 import {
   AGG_TYPE,
   DEFAULT_MAX_BUCKETS_LIMIT,
   FIELD_ORIGIN,
   SOURCE_TYPES,
 } from '../../../../common/constants';
-import { getJoinAggKey } from '../../../../common/get_agg_key';
-import { ESDocField } from '../../fields/es_doc_field';
-import { AbstractESAggSource } from '../es_agg_source';
-import {
-  getField,
-  addFieldToDSL,
-  extractPropertiesFromBucket,
-  BucketProperties,
-} from '../../../../common/elasticsearch_util';
-import {
-  ESTermSourceDescriptor,
+import type {
   VectorJoinSourceRequestMeta,
   VectorSourceSyncMeta,
-} from '../../../../common/descriptor_types';
-import { Adapters } from '../../../../../../../src/plugins/inspector/common/adapters';
-import { PropertiesMap } from '../../../../common/elasticsearch_util';
+} from '../../../../common/descriptor_types/data_request_descriptor_types';
+import type { ESTermSourceDescriptor } from '../../../../common/descriptor_types/source_descriptor_types';
+import type {
+  BucketProperties,
+  PropertiesMap,
+} from '../../../../common/elasticsearch_util/es_agg_utils';
+import {
+  addFieldToDSL,
+  extractPropertiesFromBucket,
+  getField,
+} from '../../../../common/elasticsearch_util/es_agg_utils';
+import { getJoinAggKey } from '../../../../common/get_agg_key';
+import { ESDocField } from '../../fields/es_doc_field';
+import type { IField } from '../../fields/field';
 import { isValidStringConfig } from '../../util/valid_string_config';
-import { ITermJoinSource } from '../term_join_source/term_join_source';
-import { IField } from '../../fields/field';
+import { AbstractESAggSource } from '../es_agg_source/es_agg_source';
+import type { ITermJoinSource } from '../term_join_source/term_join_source';
 
 const TERMS_AGG_NAME = 'join';
 const TERMS_BUCKET_KEYS_TO_IGNORE = ['key', 'doc_count'];

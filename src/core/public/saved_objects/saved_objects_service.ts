@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { CoreStart } from '..';
+import type { CoreStart } from '../types';
 import type { CoreService } from '../../types/core_service';
 import type { SavedObjectsClientContract } from './saved_objects_client';
 import { SavedObjectsClient } from './saved_objects_client';

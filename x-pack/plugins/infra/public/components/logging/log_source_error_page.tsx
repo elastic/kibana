@@ -4,16 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { EuiButton, EuiButtonEmpty, EuiCallOut, EuiEmptyPrompt, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
-import { SavedObjectNotFound } from '../../../../../../src/plugins/kibana_utils/common';
+import { SavedObjectNotFound } from '../../../../../../src/plugins/kibana_utils/common/errors/errors';
 import {
   FetchLogSourceConfigurationError,
   FetchLogSourceStatusError,
   ResolveLogSourceConfigurationError,
-} from '../../../common/log_sources';
+} from '../../../common/log_sources/errors';
 import { useLinkProps } from '../../hooks/use_link_props';
 import { LogsPageTemplate } from '../../pages/logs/page_template';
 

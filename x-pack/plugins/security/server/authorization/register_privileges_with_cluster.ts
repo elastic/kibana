@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { difference, isEqual, isEqualWith } from 'lodash';
 
-import type { IClusterClient, Logger } from 'src/core/server';
+import type { Logger } from '@kbn/logging';
 
-import type { PrivilegesService } from './privileges';
+import type { IClusterClient } from '../../../../../src/core/server/elasticsearch/client/cluster_client';
+import type { PrivilegesService } from './privileges/privileges';
 import { serializePrivileges } from './privileges_serializer';
 
 export async function registerPrivilegesWithCluster(

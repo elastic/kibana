@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiLoadingContent } from '@elastic/eui';
+import React from 'react';
+import type { Props as IndexNameFormProps } from '../components/geojson_upload_form/index_name_form';
 import { lazyLoadModules } from '../lazy_load_bundle';
-import { IndexNameFormProps } from '../index';
 
 interface State {
   IndexNameForm: React.ComponentType<IndexNameFormProps> | null;

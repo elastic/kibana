@@ -4,8 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { IIndexPattern } from 'src/plugins/data/common';
+import type { IIndexPattern } from '../../../../../../../../../src/plugins/data/common/index_patterns/types';
 
 export function loadSavedDashboards(maxNumber: number): Promise<any[]>;
 export function loadIndexPatterns(maxNumber: number): Promise<IIndexPattern[]>;

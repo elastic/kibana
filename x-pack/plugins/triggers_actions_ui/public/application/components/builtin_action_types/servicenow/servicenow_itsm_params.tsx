@@ -4,25 +4,23 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
-  EuiFormRow,
-  EuiSelect,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFormRow,
+  EuiSelect,
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import { useKibana } from '../../../../common/lib/kibana';
-import { ActionParamsProps } from '../../../../types';
-import { ServiceNowITSMActionParams, Choice, Fields } from './types';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useKibana } from '../../../../common/lib/kibana/kibana_react';
+import type { ActionParamsProps } from '../../../../types';
 import { TextAreaWithMessageVariables } from '../../text_area_with_message_variables';
 import { TextFieldWithMessageVariables } from '../../text_field_with_message_variables';
-import { useGetChoices } from './use_get_choices';
 import { choicesToEuiOptions } from './helpers';
-
 import * as i18n from './translations';
+import type { Choice, Fields, ServiceNowITSMActionParams } from './types';
+import { useGetChoices } from './use_get_choices';
 
 const useGetChoicesFields = ['urgency', 'severity', 'impact', 'category', 'subcategory'];
 const defaultFields: Fields = {

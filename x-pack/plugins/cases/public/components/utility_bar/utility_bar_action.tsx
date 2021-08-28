@@ -4,11 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { EuiPopover } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
-
-import { LinkIcon, LinkIconProps } from '../link_icon';
+import type { LinkIconProps } from '../link_icon';
+import { LinkIcon } from '../link_icon';
 import { BarAction } from './styles';
 
 const Popover = React.memo<UtilityBarActionProps>(

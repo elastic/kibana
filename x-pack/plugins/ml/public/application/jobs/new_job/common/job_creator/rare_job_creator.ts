@@ -4,16 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { SavedSearchSavedObject } from '../../../../../../common/types/kibana';
-import { JobCreator } from './job_creator';
-import { Field, SplitField, Aggregation } from '../../../../../../common/types/fields';
-import { Job, Datafeed, Detector } from '../../../../../../common/types/anomaly_detection_jobs';
-import { JOB_TYPE, CREATED_BY_LABEL } from '../../../../../../common/constants/new_job';
-import { getRichDetectors } from './util/general';
-import { IndexPattern } from '../../../../../../../../../src/plugins/data/public';
-import { isSparseDataJob } from './util/general';
+import { IndexPattern } from '../../../../../../../../../src/plugins/data/common/index_patterns/index_patterns/index_pattern';
 import { ML_JOB_AGGREGATION } from '../../../../../../common/constants/aggregation_types';
+import { CREATED_BY_LABEL, JOB_TYPE } from '../../../../../../common/constants/new_job';
+import type { Datafeed } from '../../../../../../common/types/anomaly_detection_jobs/datafeed';
+import type { Detector, Job } from '../../../../../../common/types/anomaly_detection_jobs/job';
+import type { Aggregation, Field, SplitField } from '../../../../../../common/types/fields';
+import type { SavedSearchSavedObject } from '../../../../../../common/types/kibana';
+import { JobCreator } from './job_creator';
+import { getRichDetectors, isSparseDataJob } from './util/general';
 
 export class RareJobCreator extends JobCreator {
   private _rareField: Field | null = null;

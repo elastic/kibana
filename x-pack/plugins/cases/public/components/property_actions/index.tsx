@@ -4,10 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { EuiButtonEmpty, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiPopover } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiPopover, EuiButtonIcon, EuiButtonEmpty } from '@elastic/eui';
-
 import * as i18n from './translations';
 
 export interface PropertyActionButtonProps {

@@ -28,7 +28,7 @@ import { i18n } from '@kbn/i18n';
 import { debounce } from 'lodash';
 import PropTypes from 'prop-types';
 import React from 'react';
-import type { CoreStart } from '../../../../core/public';
+import type { CoreStart } from '../../../../core/public/types';
 import type { SavedObjectsStart } from '../../../../core/public/saved_objects/saved_objects_service';
 import { SimpleSavedObject } from '../../../../core/public/saved_objects/simple_saved_object';
 import type { IUiSettingsClient } from '../../../../core/public/ui_settings/types';

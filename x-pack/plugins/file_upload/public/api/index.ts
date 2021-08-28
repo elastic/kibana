@@ -4,13 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { FindFileStructureResponse, HasImportPermission } from '../../common/types';
+import { getMaxBytes, getMaxBytesFormatted } from '../importer/get_max_bytes';
+import type { IImporter, ImportFactoryOptions } from '../importer/types';
 import { lazyLoadModules } from '../lazy_load_bundle';
-import type { IImporter, ImportFactoryOptions } from '../importer';
-import type { HasImportPermission, FindFileStructureResponse } from '../../common';
-import type { getMaxBytes, getMaxBytesFormatted } from '../importer/get_max_bytes';
-import { JsonUploadAndParseAsyncWrapper } from './json_upload_and_parse_async_wrapper';
 import { IndexNameFormAsyncWrapper } from './index_name_form_async_wrapper';
+import { JsonUploadAndParseAsyncWrapper } from './json_upload_and_parse_async_wrapper';
 
 export interface FileUploadStartApi {
   FileUploadComponent: typeof JsonUploadAndParseAsyncWrapper;

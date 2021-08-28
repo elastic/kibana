@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { CoreSetup } from '../../../core/public';
+import type { CoreSetup } from '../../../core/public/types';
 import { FieldFormatsRegistry } from '../common/field_formats_registry';
 import { fieldFormatsMock } from '../common/mocks';
 import { baseFormattersPublic } from './lib/constants';

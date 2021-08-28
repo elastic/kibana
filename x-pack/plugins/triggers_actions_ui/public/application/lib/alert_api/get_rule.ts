@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { HttpSetup } from 'kibana/public';
-import { Alert } from '../../../types';
-import { BASE_ALERTING_API_PATH } from '../../constants';
+import type { HttpSetup } from '../../../../../../../src/core/public/http/types';
+import { BASE_ALERTING_API_PATH } from '../../../../../alerting/common';
+import type { Alert } from '../../../types';
 import { transformAlert } from './common_transformations';
 
 export async function loadAlert({

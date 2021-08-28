@@ -15,7 +15,7 @@ import {
   VISUALIZE_GEO_FIELD_TRIGGER,
 } from '../../../../../../../../ui_actions/public/triggers/visualize_geo_field_trigger';
 import { getUiActions } from '../../../../../../kibana_services';
-import { KBN_FIELD_TYPES } from '../common';
+import { KBN_FIELD_TYPES } from '@kbn/field-types';
 
 function getTriggerConstant(type: string) {
   return type === KBN_FIELD_TYPES.GEO_POINT || type === KBN_FIELD_TYPES.GEO_SHAPE

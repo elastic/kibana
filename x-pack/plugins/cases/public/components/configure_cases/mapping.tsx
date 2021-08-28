@@ -4,16 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { useMemo } from 'react';
-
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiTextColor } from '@elastic/eui';
-
-import { TextColor } from '@elastic/eui/src/components/text/text_color';
-import * as i18n from './translations';
-
+import type { TextColor } from '@elastic/eui/src/components/text/text_color';
+import React, { useMemo } from 'react';
+import type { CaseConnectorMapping } from '../../containers/configure/types';
 import { FieldMapping } from './field_mapping';
-import { CaseConnectorMapping } from '../../containers/configure/types';
+import * as i18n from './translations';
 
 export interface MappingProps {
   actionTypeName: string;

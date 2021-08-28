@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { Context, Errors, IntersectionType, Type, UnionType, ValidationError } from 'io-ts';
-import type { RouteValidationFunction } from 'kibana/server';
+import type { Context, Errors, ValidationError } from 'io-ts';
+import { IntersectionType, Type, UnionType } from 'io-ts';
+import type { RouteValidationFunction } from '../../../../src/core/server/http/router/validator/validator';
 
 type ErrorFactory = (message: string) => Error;
 

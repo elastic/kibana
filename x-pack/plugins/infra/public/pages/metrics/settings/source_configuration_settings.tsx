@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import {
   EuiButton,
   EuiCallOut,
@@ -17,18 +16,18 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useCallback, useContext, useMemo } from 'react';
 import { SourceLoadingPage } from '../../../components/source_loading_page';
-import { Source } from '../../../containers/metrics_source';
+import { Source } from '../../../containers/metrics_source/source';
 import { useInfraMLCapabilitiesContext } from '../../../containers/ml/infra_ml_capabilities';
-import { Prompt } from '../../../utils/navigation_warning_prompt';
+import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
+import { settingsTitle } from '../../../translations';
+import { Prompt } from '../../../utils/navigation_warning_prompt/prompt';
+import { MetricsPageTemplate } from '../page_template';
 import { FieldsConfigurationPanel } from './fields_configuration_panel';
 import { IndicesConfigurationPanel } from './indices_configuration_panel';
 import { MLConfigurationPanel } from './ml_configuration_panel';
 import { NameConfigurationPanel } from './name_configuration_panel';
 import { useSourceConfigurationFormState } from './source_configuration_form_state';
-import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
-import { settingsTitle } from '../../../translations';
 
-import { MetricsPageTemplate } from '../page_template';
 interface SourceConfigurationSettingsProps {
   shouldAllowEdit: boolean;
 }

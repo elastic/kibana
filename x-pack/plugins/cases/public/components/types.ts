@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { ActionConnector } from '../../common';
+import type { ActionConnector } from '../../common/api/connectors';
 
 export type CaseActionConnector = ActionConnector;

@@ -13,7 +13,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import type { RouteChildrenProps } from 'react-router-dom';
 import { Redirect, Route, Router, Switch } from 'react-router-dom';
-import type { StartServicesAccessor } from '../../../../core/public';
+import type { StartServicesAccessor } from '../../../../core/public/types';
 import { url } from '../../../kibana_utils/common/url';
 import type { ManagementAppMountParams } from '../../../management/public/types';
 import type { UsageCollectionSetup } from '../../../usage_collection/public/plugin';

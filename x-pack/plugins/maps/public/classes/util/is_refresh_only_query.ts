@@ -4,8 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { MapQuery } from '../../../common/descriptor_types';
+import type { MapQuery } from '../../../common/descriptor_types/map_descriptor';
 
 // Refresh only query is query where timestamps are different but query is the same.
 // Triggered by clicking "Refresh" button in QueryBar

@@ -4,30 +4,25 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { isEqual } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { TopNavMenuData } from '../../../../../src/plugins/navigation/public';
-import {
+import { tableHasFormulas } from '../../../../../src/plugins/data/common/exports/formula_checks';
+import { IndexPattern } from '../../../../../src/plugins/data/common/index_patterns/index_patterns/index_pattern';
+import { exporters } from '../../../../../src/plugins/data/public';
+import { useKibana } from '../../../../../src/plugins/kibana_react/public/context/context';
+import type { TopNavMenuData } from '../../../../../src/plugins/navigation/public/top_nav_menu/top_nav_menu_data';
+import { downloadMultipleAs } from '../../../../../src/plugins/share/public/lib/download_as';
+import { trackUiEvent } from '../lens_ui_telemetry/factory';
+import { setState, useLensDispatch, useLensSelector } from '../state_management';
+import type { DispatchSetState, LensAppState } from '../state_management/types';
+import { getIndexPatternsIds, getIndexPatternsObjects } from '../utils';
+import type {
   LensAppServices,
   LensTopNavActions,
   LensTopNavMenuProps,
   LensTopNavTooltips,
 } from './types';
-import { downloadMultipleAs } from '../../../../../src/plugins/share/public';
-import { trackUiEvent } from '../lens_ui_telemetry';
-import { tableHasFormulas } from '../../../../../src/plugins/data/common';
-import { exporters, IndexPattern } from '../../../../../src/plugins/data/public';
-import { useKibana } from '../../../../../src/plugins/kibana_react/public';
-import {
-  setState,
-  useLensSelector,
-  useLensDispatch,
-  LensAppState,
-  DispatchSetState,
-} from '../state_management';
-import { getIndexPatternsObjects, getIndexPatternsIds } from '../utils';
 
 function getLensTopNavConfig(options: {
   showSaveAndReturn: boolean;

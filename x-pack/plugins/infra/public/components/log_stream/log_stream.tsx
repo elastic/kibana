@@ -4,21 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { buildEsQuery, Query, Filter } from '@kbn/es-query';
-import React, { useMemo, useCallback, useEffect } from 'react';
+import type { Filter, Query } from '@kbn/es-query';
+import { buildEsQuery } from '@kbn/es-query';
+import type { JsonValue } from '@kbn/utility-types';
 import { noop } from 'lodash';
-import { JsonValue } from '@kbn/utility-types';
-import { DataPublicPluginStart } from '../../../../../../src/plugins/data/public';
-import { euiStyled } from '../../../../../../src/plugins/kibana_react/common';
-import { LogEntryCursor } from '../../../common/log_entry';
-
-import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
-import { useLogSource } from '../../containers/logs/log_source';
-import { BuiltEsQuery, useLogStream } from '../../containers/logs/log_stream';
-
-import { ScrollableLogTextStreamView } from '../logging/log_text_stream';
-import { LogColumnRenderConfiguration } from '../../utils/log_column_render_configuration';
+import React, { useCallback, useEffect, useMemo } from 'react';
+import type { DataPublicPluginStart } from '../../../../../../src/plugins/data/public/types';
+import { euiStyled } from '../../../../../../src/plugins/kibana_react/common/eui_styled_components';
+import { useKibana } from '../../../../../../src/plugins/kibana_react/public/context/context';
+import type { LogEntryCursor } from '../../../common/log_entry/log_entry_cursor';
+import { useLogSource } from '../../containers/logs/log_source/log_source';
+import type { BuiltEsQuery } from '../../containers/logs/log_stream';
+import { useLogStream } from '../../containers/logs/log_stream';
+import type { LogColumnRenderConfiguration } from '../../utils/log_column_render_configuration';
+import { ScrollableLogTextStreamView } from '../logging/log_text_stream/scrollable_log_text_stream_view';
 import { LogStreamErrorBoundary } from './log_stream_error_boundary';
 
 interface LogStreamPluginDeps {

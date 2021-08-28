@@ -4,8 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { useCallback, useEffect, useState } from 'react';
 import {
   EuiButton,
   EuiCheckbox,
@@ -21,18 +19,17 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+import React, { useCallback, useEffect, useState } from 'react';
 
-import {
-  sendGetAgents,
-  sendGetOneAgentPolicy,
-  sendPutSettings,
-  useLink,
-  useStartServices,
-} from '../../../hooks';
-import type { PackagePolicy } from '../../../types';
-import { FLEET_SERVER_PACKAGE } from '../../../constants';
+import { FLEET_SERVER_PACKAGE } from '../../../../../../common/constants/epm';
+import type { PackagePolicy } from '../../../../../../common/types/models/package_policy';
+import { useStartServices } from '../../../../../hooks/use_core';
+import { useLink } from '../../../../../hooks/use_link';
+import { sendGetAgents } from '../../../../../hooks/use_request/agents';
+import { sendGetOneAgentPolicy } from '../../../../../hooks/use_request/agent_policy';
+import { sendPutSettings } from '../../../../../hooks/use_request/settings';
 
 interface Props {
   onClose: () => void;

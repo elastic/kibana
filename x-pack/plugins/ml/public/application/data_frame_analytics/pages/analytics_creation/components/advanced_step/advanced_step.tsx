@@ -4,14 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { FC } from 'react';
 import { EuiForm } from '@elastic/eui';
-
-import { CreateAnalyticsStepProps } from '../../../analytics_management/hooks/use_create_analytics_form';
-import { AdvancedStepForm } from './advanced_step_form';
-import { AdvancedStepDetails } from './advanced_step_details';
+import type { FC } from 'react';
+import React from 'react';
+import type { CreateAnalyticsStepProps } from '../../../analytics_management/hooks/use_create_analytics_form/use_create_analytics_form';
 import { ANALYTICS_STEPS } from '../../page';
+import { AdvancedStepDetails } from './advanced_step_details';
+import { AdvancedStepForm } from './advanced_step_form';
 
 export const AdvancedStep: FC<CreateAnalyticsStepProps> = ({
   actions,

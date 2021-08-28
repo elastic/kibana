@@ -4,44 +4,40 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { memo, useEffect, useState } from 'react';
-import type { AppMountParameters } from 'kibana/public';
 import { EuiCode, EuiEmptyPrompt, EuiErrorBoundary, EuiPanel, EuiPortal } from '@elastic/eui';
-import type { History } from 'history';
-import { Router, Redirect, Route, Switch } from 'react-router-dom';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import styled from 'styled-components';
+import { FormattedMessage } from '@kbn/i18n/react';
+import type { History } from 'history';
+import React, { memo, useEffect, useState } from 'react';
+import { Redirect, Route, Router, Switch } from 'react-router-dom';
 import useObservable from 'react-use/lib/useObservable';
+import styled from 'styled-components';
 
-import {
-  ConfigContext,
-  FleetStatusProvider,
-  KibanaVersionContext,
-  sendGetPermissionsCheck,
-  sendSetup,
-} from '../../hooks';
+import type { AppMountParameters } from '../../../../../../src/core/public/application/types';
+import { EuiThemeProvider } from '../../../../../../src/plugins/kibana_react/common/eui_styled_components';
+import { RedirectAppLinks } from '../../../../../../src/plugins/kibana_react/public/app_links/redirect_app_link';
+import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public/context/context';
+import type { FleetConfigType } from '../../../common/types';
+import { Error } from '../../components/error';
+import { Loading } from '../../components/loading';
+import { SettingFlyout } from '../../components/settings_flyout';
+import { INTEGRATIONS_ROUTING_PATHS } from '../../constants/page_paths';
+import { ConfigContext } from '../../hooks/use_config';
+import { FleetStatusProvider } from '../../hooks/use_fleet_status';
+import { KibanaVersionContext } from '../../hooks/use_kibana_version';
+import { sendGetPermissionsCheck } from '../../hooks/use_request/app';
+import { sendSetup } from '../../hooks/use_request/setup';
+import { UIExtensionsContext } from '../../hooks/use_ui_extension';
+import { useUrlModal } from '../../hooks/use_url_modal';
+import { WithoutHeaderLayout } from '../../layouts/without_header';
+import type { FleetStartServices } from '../../plugin';
+import type { UIExtensionsStorage } from '../../types/ui_extensions';
 
-import type { FleetConfigType, FleetStartServices } from '../../plugin';
-
-import {
-  KibanaContextProvider,
-  RedirectAppLinks,
-} from '../../../../../../src/plugins/kibana_react/public';
-import { EuiThemeProvider } from '../../../../../../src/plugins/kibana_react/common';
-
-import { AgentPolicyContextProvider, useUrlModal } from './hooks';
-import { INTEGRATIONS_ROUTING_PATHS } from './constants';
-
-import { Error, Loading, SettingFlyout } from './components';
-
-import type { UIExtensionsStorage } from './types';
-
+import { AgentPolicyContextProvider } from './hooks/use_agent_policy_context';
+import { useBreadcrumbs } from './hooks/use_breadcrumbs';
+import { PackageInstallProvider } from './hooks/use_package_install';
+import { DefaultLayout } from './layouts/default';
 import { EPMApp } from './sections/epm';
-import { DefaultLayout, WithoutHeaderLayout } from './layouts';
-import { PackageInstallProvider } from './hooks';
-import { useBreadcrumbs, UIExtensionsContext } from './hooks';
 
 const ErrorLayout = ({ children }: { children: JSX.Element }) => (
   <EuiErrorBoundary>

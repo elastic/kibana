@@ -4,17 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import type { PopoverAnchorPosition } from '@elastic/eui';
 import { EuiHeaderSectionItemButton, EuiLoadingSpinner, EuiPopover } from '@elastic/eui';
 import React, { Component, lazy, Suspense } from 'react';
 import type { Subscription } from 'rxjs';
 
-import type { ApplicationStart, Capabilities } from 'src/core/public';
-import type { Space } from 'src/plugins/spaces_oss/common';
-
-import { getSpaceAvatarComponent } from '../space_avatar';
-import type { SpacesManager } from '../spaces_manager';
+import type { ApplicationStart } from '../../../../../src/core/public/application/types';
+import type { Capabilities } from '../../../../../src/core/types/capabilities';
+import type { Space } from '../../../../../src/plugins/spaces_oss/common/types';
+import { getSpaceAvatarComponent } from '../space_avatar/space_avatar';
+import type { SpacesManager } from '../spaces_manager/spaces_manager';
 import { SpacesDescription } from './components/spaces_description';
 import { SpacesMenu } from './components/spaces_menu';
 

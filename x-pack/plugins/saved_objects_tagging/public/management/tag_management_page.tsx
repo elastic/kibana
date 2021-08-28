@@ -4,22 +4,27 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { useEffect, useCallback, useState, useMemo, FC } from 'react';
-import { Subject } from 'rxjs';
-import useMount from 'react-use/lib/useMount';
-import { Query } from '@elastic/eui';
+import { EuiSpacer, Query } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ChromeBreadcrumb, CoreStart } from 'src/core/public';
-import { EuiSpacer } from '@elastic/eui';
-import { TagWithRelations, TagsCapabilities } from '../../common';
-import { getCreateModalOpener } from '../components/edition_modal';
-import { ITagInternalClient, ITagAssignmentService, ITagsCache } from '../services';
-import { TagBulkAction } from './types';
-import { Header, TagTable, ActionBar } from './components';
+import type { FC } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import useMount from 'react-use/lib/useMount';
+import { Subject } from 'rxjs';
+import type { CoreStart } from '../../../../../src/core/public/types';
+import type { ChromeBreadcrumb } from '../../../../../src/core/public/chrome/types';
+import type { ITagsCache } from '../../../../../src/plugins/saved_objects_tagging_oss/public/api';
+import type { TagsCapabilities } from '../../common/capabilities';
+import type { TagWithRelations } from '../../common/types';
+import { getCreateModalOpener } from '../components/edition_modal/open_modal';
+import type { ITagAssignmentService } from '../services/assignments/assignment_service';
+import type { ITagInternalClient } from '../services/tags/tags_client';
 import { getTableActions } from './actions';
 import { getBulkActions } from './bulk_actions';
-import { getTagConnectionsUrl } from './utils';
+import { ActionBar } from './components/action_bar';
+import { Header } from './components/header';
+import { TagTable } from './components/table';
+import type { TagBulkAction } from './types';
+import { getTagConnectionsUrl } from './utils/get_tag_connections_url';
 
 interface TagManagementPageParams {
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;

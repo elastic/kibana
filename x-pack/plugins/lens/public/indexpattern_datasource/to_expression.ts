@@ -4,26 +4,23 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { IUiSettingsClient } from 'kibana/public';
 import { partition } from 'lodash';
-import {
-  AggFunctionsMapping,
-  EsaggsExpressionFunctionDefinition,
-  IndexPatternLoadExpressionFunctionDefinition,
-} from '../../../../../src/plugins/data/public';
-import { queryToAst } from '../../../../../src/plugins/data/common';
-import {
-  buildExpression,
-  buildExpressionFunction,
+import type { IUiSettingsClient } from '../../../../../src/core/public/ui_settings/types';
+import type { IndexPatternLoadExpressionFunctionDefinition } from '../../../../../src/plugins/data/common/index_patterns/expressions/load_index_pattern';
+import type { AggFunctionsMapping } from '../../../../../src/plugins/data/common/search/aggs/types';
+import type { EsaggsExpressionFunctionDefinition } from '../../../../../src/plugins/data/common/search/expressions/esaggs/esaggs_fn';
+import { queryToAst } from '../../../../../src/plugins/data/common/search/expressions/query_to_ast';
+import type { ExpressionAstExpressionBuilder } from '../../../../../src/plugins/expressions/common/ast/build_expression';
+import { buildExpression } from '../../../../../src/plugins/expressions/common/ast/build_expression';
+import { buildExpressionFunction } from '../../../../../src/plugins/expressions/common/ast/build_function';
+import type {
   ExpressionAstExpression,
-  ExpressionAstExpressionBuilder,
   ExpressionAstFunction,
-} from '../../../../../src/plugins/expressions/public';
-import { IndexPatternColumn } from './indexpattern';
-import { operationDefinitionMap } from './operations';
-import { IndexPattern, IndexPatternPrivateState, IndexPatternLayer } from './types';
-import { dateHistogramOperation } from './operations/definitions';
+} from '../../../../../src/plugins/expressions/common/ast/types';
+import type { IndexPatternColumn } from './operations/definitions';
+import { operationDefinitionMap } from './operations/definitions';
+import { dateHistogramOperation } from './operations/definitions/date_histogram';
+import type { IndexPattern, IndexPatternLayer, IndexPatternPrivateState } from './types';
 
 type OriginalColumn = { id: string } & IndexPatternColumn;
 

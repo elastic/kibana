@@ -5,14 +5,13 @@
  * 2.0.
  */
 
+import { useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { merge } from 'rxjs';
 import { map } from 'rxjs/operators';
-
-import { useMemo } from 'react';
+import { useTimefilter } from '../contexts/kibana/use_timefilter';
 import { annotationsRefresh$ } from '../services/annotations_service';
 import { mlTimefilterRefresh$ } from '../services/timefilter_refresh_service';
-import { useTimefilter } from '../contexts/kibana';
 
 export interface Refresh {
   lastRefresh: number;

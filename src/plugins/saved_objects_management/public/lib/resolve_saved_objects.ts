@@ -13,7 +13,7 @@ import { DuplicateIndexPatternError } from '../../../data/common/index_patterns/
 import { IndexPattern } from '../../../data/common/index_patterns/index_patterns/index_pattern';
 import type { IndexPatternsContract } from '../../../data/common/index_patterns/index_patterns/index_patterns';
 import type { IndexPatternSpec } from '../../../data/common/index_patterns/types';
-import { injectSearchSourceReferences } from '../../../data/common/search/search_source/inject_references';
+import { injectReferences as injectSearchSourceReferences } from '../../../data/common/search/search_source/inject_references';
 import type { DataPublicPluginStart } from '../../../data/public/types';
 import { SavedObjectLoader } from '../../../saved_objects/public/saved_object/saved_object_loader';
 import type { SavedObject } from '../../../saved_objects/public/types';

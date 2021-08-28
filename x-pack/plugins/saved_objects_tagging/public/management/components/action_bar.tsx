@@ -4,21 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { useState, useCallback, useMemo, FC } from 'react';
+import type { EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
 import {
-  EuiPopover,
-  EuiFlexItem,
-  EuiFlexGroup,
   EuiContextMenu,
-  EuiContextMenuPanelItemDescriptor,
-  EuiText,
-  EuiLink,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiIcon,
+  EuiLink,
+  EuiPopover,
+  EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { TagBulkAction } from '../types';
-
+import type { FC } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
+import type { TagBulkAction } from '../types';
 import './_action_bar.scss';
 
 export interface ActionBarProps {

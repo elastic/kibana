@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import {
   EuiFieldSearch,
   EuiFilterButton,
@@ -15,8 +14,9 @@ import {
   EuiPopoverTitle,
   EuiSpacer,
 } from '@elastic/eui';
-import React, { FC, ReactNode, useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
+import type { FC, ReactNode } from 'react';
+import React, { useEffect, useState } from 'react';
 
 export interface Option {
   name?: string | ReactNode;

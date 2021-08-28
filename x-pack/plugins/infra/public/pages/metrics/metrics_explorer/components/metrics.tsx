@@ -4,15 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { EuiComboBox } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-
 import React, { useCallback, useState } from 'react';
-import { IFieldType } from 'src/plugins/data/public';
-import { colorTransformer, Color } from '../../../../../common/color_palette';
-import { MetricsExplorerMetric } from '../../../../../common/http_api/metrics_explorer';
-import { MetricsExplorerOptions } from '../hooks/use_metrics_explorer_options';
+import type { IFieldType } from '../../../../../../../../src/plugins/data/common/index_patterns/fields/types';
+import { Color, colorTransformer } from '../../../../../common/color_palette';
+import type { MetricsExplorerMetric } from '../../../../../common/http_api/metrics_explorer';
+import type { MetricsExplorerOptions } from '../hooks/use_metrics_explorer_options';
 
 interface Props {
   autoFocus?: boolean;

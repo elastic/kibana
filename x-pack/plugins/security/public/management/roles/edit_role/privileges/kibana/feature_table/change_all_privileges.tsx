@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import './change_all_privileges.scss';
-
 import {
   EuiContextMenuItem,
   EuiContextMenuPanel,
@@ -20,8 +18,9 @@ import React, { Component } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import type { KibanaPrivilege } from '../../../../model';
+import type { KibanaPrivilege } from '../../../../model/kibana_privilege';
 import { NO_PRIVILEGE_VALUE } from '../constants';
+import './change_all_privileges.scss';
 
 interface Props {
   onChange: (privilege: string) => void;

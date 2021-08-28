@@ -6,7 +6,8 @@
  */
 
 import * as rt from 'io-ts';
-import { logEntryCursorRT, logEntryFieldRT } from '../../log_entry';
+import { logEntryFieldRT } from '../../log_entry/log_entry';
+import { logEntryCursorRT } from '../../log_entry/log_entry_cursor';
 import { searchStrategyErrorRT } from '../common/errors';
 
 export const LOG_ENTRY_SEARCH_STRATEGY = 'infra-log-entry';

@@ -20,7 +20,7 @@ import type { History } from 'history';
 import $ from 'jquery';
 import { get } from 'lodash';
 import * as Rx from 'rxjs';
-import type { CoreStart } from '../../../../core/public';
+import type { CoreStart } from '../../../../core/public/types';
 import type { ChromeBreadcrumb } from '../../../../core/public/chrome/types';
 import {
   formatAngularHttpError,

@@ -4,11 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { KibanaRequest } from 'kibana/server';
+import { KibanaRequest } from '../../../../../src/core/server/http/router/request';
+import { ML_ALERT_TYPES } from '../constants/alerts';
 import { PLUGIN_ID } from '../constants/app';
 import { ML_SAVED_OBJECT_TYPE } from './saved_objects';
-import { ML_ALERT_TYPES } from '../constants/alerts';
 
 export const apmUserMlCapabilities = {
   canGetJobs: false,

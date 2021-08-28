@@ -5,22 +5,21 @@
  * 2.0.
  */
 
-import 'brace/mode/json';
-import 'brace/theme/github';
-
 import { EuiButton, EuiFormRow, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
-import React, { Fragment, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { XJsonLang } from '@kbn/monaco';
 
-import {
-  CodeEditorField,
-  useKibana,
-} from '../../../../../../../../src/plugins/kibana_react/public';
-import type { Rule } from '../../model';
-import { generateRulesFromRaw, RuleBuilderError } from '../../model';
+import 'brace/mode/json';
+import 'brace/theme/github';
+import React, { Fragment, useState } from 'react';
+
+import { CodeEditorField } from '../../../../../../../../src/plugins/kibana_react/public/code_editor';
+import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public/context/context';
+import type { Rule } from '../../model/rule';
+import { generateRulesFromRaw } from '../../model/rule_builder';
+import { RuleBuilderError } from '../../model/rule_builder_error';
 
 interface Props {
   rules: Rule | null;

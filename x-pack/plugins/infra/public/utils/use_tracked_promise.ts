@@ -6,8 +6,8 @@
  */
 
 /* eslint-disable max-classes-per-file */
-
-import { DependencyList, useEffect, useMemo, useRef, useState, useCallback } from 'react';
+import type { DependencyList } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
 
 interface UseTrackedPromiseArgs<Arguments extends any[], Result> {

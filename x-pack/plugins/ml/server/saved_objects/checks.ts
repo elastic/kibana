@@ -6,12 +6,12 @@
  */
 
 import Boom from '@hapi/boom';
-import { IScopedClusterClient, KibanaRequest } from 'kibana/server';
+import type { IScopedClusterClient } from '../../../../../src/core/server/elasticsearch/client/scoped_cluster_client';
+import { KibanaRequest } from '../../../../../src/core/server/http/router/request';
+import type { ResolveMlCapabilities } from '../../common/types/capabilities';
+import type { DataFrameAnalyticsConfig } from '../../common/types/data_frame_analytics';
+import type { DeleteJobCheckResponse, JobType } from '../../common/types/saved_objects';
 import type { JobSavedObjectService } from './service';
-import { JobType, DeleteJobCheckResponse } from '../../common/types/saved_objects';
-
-import { DataFrameAnalyticsConfig } from '../../common/types/data_frame_analytics';
-import { ResolveMlCapabilities } from '../../common/types/capabilities';
 
 interface JobSavedObjectStatus {
   jobId: string;

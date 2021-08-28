@@ -4,19 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { enrollmentAPIKeyRouteService } from '../../services';
-
+import type { UseRequestConfig } from '../../../../../../src/plugins/es_ui_shared/public/request/use_request';
+import { enrollmentAPIKeyRouteService } from '../../../common/services/routes';
 import type {
-  GetOneEnrollmentAPIKeyResponse,
-  GetEnrollmentAPIKeysResponse,
   GetEnrollmentAPIKeysRequest,
+  GetEnrollmentAPIKeysResponse,
+  GetOneEnrollmentAPIKeyResponse,
   PostEnrollmentAPIKeyRequest,
   PostEnrollmentAPIKeyResponse,
-} from '../../types';
+} from '../../../common/types/rest_spec/enrollment_api_key';
 
-import { useRequest, sendRequest, useConditionalRequest } from './use_request';
-import type { UseRequestConfig, SendConditionalRequestConfig } from './use_request';
+import type { SendConditionalRequestConfig } from './use_request';
+import { sendRequest, useConditionalRequest, useRequest } from './use_request';
 
 type RequestOptions = Pick<Partial<UseRequestConfig>, 'pollIntervalMs'>;
 

@@ -6,9 +6,8 @@
  */
 
 import React from 'react';
-
-import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
-import {
+import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
+import type {
   InfraFormatter,
   InfraWaffleMapBounds,
   InfraWaffleMapGradientLegend,

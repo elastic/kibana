@@ -4,21 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { FC } from 'react';
-
 import { i18n } from '@kbn/i18n';
-
-import { NavigateToPath, useMlKibana, useMlLocator } from '../../../contexts/kibana';
-
-import { MlRoute, PageLoader, PageProps } from '../../router';
-import { useResolver } from '../../use_resolver';
-import { basicResolvers } from '../../resolvers';
-import { Page } from '../../../data_frame_analytics/pages/analytics_exploration';
-import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
+import type { FC } from 'react';
+import React from 'react';
 import { ML_PAGES } from '../../../../../common/constants/locator';
-import { DataFrameAnalysisConfigType } from '../../../../../common/types/data_frame_analytics';
+import type { DataFrameAnalysisConfigType } from '../../../../../common/types/data_frame_analytics';
+import { useMlKibana } from '../../../contexts/kibana/kibana_context';
+import { useMlLocator } from '../../../contexts/kibana/use_create_url';
+import type { NavigateToPath } from '../../../contexts/kibana/use_navigate_to_path';
+import { Page } from '../../../data_frame_analytics/pages/analytics_exploration/page';
 import { useUrlState } from '../../../util/url_state';
+import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
+import { basicResolvers } from '../../resolvers';
+import type { MlRoute, PageProps } from '../../router';
+import { PageLoader } from '../../router';
+import { useResolver } from '../../use_resolver';
 
 export const analyticsJobExplorationRouteFactory = (
   navigateToPath: NavigateToPath,

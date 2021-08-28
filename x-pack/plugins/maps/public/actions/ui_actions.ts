@@ -4,15 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { AnyAction } from 'redux';
-import { ThunkDispatch } from 'redux-thunk';
-import { MapStoreState } from '../reducers/store';
-import { getFlyoutDisplay } from '../selectors/ui_selectors';
+import type { AnyAction } from 'redux';
+import type { ThunkDispatch } from 'redux-thunk';
+import { DRAW_MODE } from '../../common/constants';
+import type { MapStoreState } from '../reducers/store';
 import { FLYOUT_STATE } from '../reducers/ui';
-import { setQuery, trackMapSettings } from './map_actions';
+import { getFlyoutDisplay } from '../selectors/ui_selectors';
 import { setSelectedLayer } from './layer_actions';
-import { DRAW_MODE } from '../../common';
+import { setQuery, trackMapSettings } from './map_actions';
 import { UPDATE_EDIT_STATE } from './map_action_constants';
 
 export const UPDATE_FLYOUT = 'UPDATE_FLYOUT';

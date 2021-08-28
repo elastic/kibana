@@ -6,7 +6,7 @@
  */
 import type { ComponentProps } from 'react';
 import React from 'react';
-import type { CoreStart } from '../../../../../../../../../../src/core/public';
+import type { CoreStart } from '../../../../../../../../../../src/core/public/types';
 import { createCallApmApi } from '../../../../../../services/rest/createCallApmApi';
 import { LinkPreview } from './link_preview';
 

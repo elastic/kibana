@@ -4,16 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { EuiButtonEmpty, EuiPageHeader, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import type { CoreStart, HttpStart } from 'kibana/public';
 import React from 'react';
-import type { SessionsConfigSchema } from '../';
-import { IManagementSectionsPluginsSetup } from '../';
-import type { SearchSessionsMgmtAPI } from '../lib/api';
-import type { AsyncSearchIntroDocumentation } from '../lib/documentation';
-import { SearchSessionsMgmtTable } from './table';
+import type { IManagementSectionsPluginsSetup, SessionsConfigSchema } from '..';
+import type { CoreStart } from '../../../../../../../src/core/public/types';
+import type { HttpStart } from '../../../../../../../src/core/public/http/types';
+import { SearchSessionsMgmtAPI } from '../lib/api';
+import { AsyncSearchIntroDocumentation } from '../lib/documentation';
+import { SearchSessionsMgmtTable } from './table/table';
 
 interface Props {
   documentation: AsyncSearchIntroDocumentation;

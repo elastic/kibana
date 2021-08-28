@@ -4,22 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { FC, useEffect, useState } from 'react';
-import { EuiCode, EuiFlexItem, EuiFlexGroup, EuiInputPopover } from '@elastic/eui';
+import { EuiCode, EuiFlexGroup, EuiFlexItem, EuiInputPopover } from '@elastic/eui';
+import type { Query } from '@kbn/es-query';
+import { fromKueryExpression, luceneStringToDsl, toElasticsearchQuery } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import { Query, fromKueryExpression, luceneStringToDsl, toElasticsearchQuery } from '@kbn/es-query';
-import { QueryStringInput } from '../../../../../../../../src/plugins/data/public';
-import { ShardSizeFilter } from './shard_size_select';
+import type { FC } from 'react';
+import React, { useEffect, useState } from 'react';
+import { IndexPattern } from '../../../../../../../../src/plugins/data/common/index_patterns/index_patterns/index_pattern';
+import { QueryStringInput } from '../../../../../../../../src/plugins/data/public/ui/query_string_input';
+import type { JobFieldType } from '../../../../../common/types/job_field_type';
+import type { ErrorMessage, SearchQueryLanguage } from '../../types/combined_query';
+import { SEARCH_QUERY_LANGUAGE } from '../../types/combined_query';
 import { DataVisualizerFieldNamesFilter } from './field_name_filter';
 import { DatavisualizerFieldTypeFilter } from './field_type_filter';
-import { IndexPattern } from '../../../../../../../../src/plugins/data/common/index_patterns/index_patterns';
-import { JobFieldType } from '../../../../../common/types';
-import {
-  ErrorMessage,
-  SEARCH_QUERY_LANGUAGE,
-  SearchQueryLanguage,
-} from '../../types/combined_query';
+import { ShardSizeFilter } from './shard_size_select';
 
 interface Props {
   indexPattern: IndexPattern;

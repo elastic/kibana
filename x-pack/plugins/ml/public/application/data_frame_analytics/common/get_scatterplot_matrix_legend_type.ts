@@ -4,12 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { ANALYSIS_CONFIG_TYPE } from './analytics';
-
-import { AnalyticsJobType } from '../pages/analytics_management/hooks/use_create_analytics_form/state';
-
+import { ANALYSIS_CONFIG_TYPE } from '../../../../common/constants/data_frame_analytics';
 import { LEGEND_TYPES } from '../../components/vega_chart/common';
+import type { AnalyticsJobType } from '../pages/analytics_management/hooks/use_create_analytics_form/state';
 
 export const getScatterplotMatrixLegendType = (jobType: AnalyticsJobType | 'unknown') => {
   switch (jobType) {

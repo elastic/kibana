@@ -4,15 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import type { Crypto, EncryptOutput } from '@elastic/node-crypto';
 import stringify from 'json-stable-stringify';
 import typeDetect from 'type-detect';
 
-import type { Logger } from 'src/core/server';
+import type { Logger } from '@kbn/logging';
 
-import type { AuthenticatedUser } from '../../../security/common/model';
-import type { EncryptedSavedObjectsAuditLogger } from '../audit';
+import type { AuthenticatedUser } from '../../../security/common/model/authenticated_user';
+import type { EncryptedSavedObjectsAuditLogger } from '../audit/audit_logger';
 import { EncryptedSavedObjectAttributesDefinition } from './encrypted_saved_object_type_definition';
 import { EncryptionError, EncryptionErrorOperation } from './encryption_error';
 

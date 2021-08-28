@@ -6,68 +6,64 @@
  */
 
 /* eslint-disable react-hooks/exhaustive-deps */
-
-import { i18n } from '@kbn/i18n';
-import { capitalize, sortBy } from 'lodash';
-import { FormattedMessage } from '@kbn/i18n/react';
-import React, { useEffect, useState } from 'react';
+import type { EuiTableSortingType } from '@elastic/eui';
 import {
-  EuiBasicTable,
   EuiBadge,
+  EuiBasicTable,
   EuiButton,
+  EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiCallOut,
+  EuiEmptyPrompt,
   EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIconTip,
-  EuiSpacer,
-  EuiLink,
-  EuiEmptyPrompt,
-  EuiCallOut,
-  EuiButtonEmpty,
   EuiHealth,
+  EuiIconTip,
+  EuiLink,
+  EuiSpacer,
   EuiText,
   EuiToolTip,
-  EuiTableSortingType,
-  EuiButtonIcon,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { capitalize, isEmpty, sortBy } from 'lodash';
+import React, { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
-
-import { isEmpty } from 'lodash';
-import { ActionType, Alert, AlertTableItem, AlertTypeIndex, Pagination } from '../../../../types';
-import { AlertAdd, AlertEdit } from '../../alert_form';
-import { BulkOperationPopover } from '../../common/components/bulk_operation_popover';
-import { AlertQuickEditButtonsWithApi as AlertQuickEditButtons } from '../../common/components/alert_quick_edit_buttons';
-import { CollapsedItemActionsWithApi as CollapsedItemActions } from './collapsed_item_actions';
-import { TypeFilter } from './type_filter';
-import { ActionTypeFilter } from './action_type_filter';
-import { AlertStatusFilter, getHealthColor } from './alert_status_filter';
+import type { ActionType } from '../../../../../../actions/common/types';
+import { ALERTS_FEATURE_ID } from '../../../../../../alerting/common';
+import type { AlertExecutionStatus } from '../../../../../../alerting/common/alert';
 import {
-  loadAlerts,
-  loadAlertAggregations,
-  loadAlertTypes,
-  disableAlert,
-  enableAlert,
-  deleteAlerts,
-} from '../../../lib/alert_api';
-import { loadActionTypes } from '../../../lib/action_connector_api';
-import { hasAllPrivilege, hasExecuteActionsCapability } from '../../../lib/capabilities';
-import { routeToRuleDetails, DEFAULT_SEARCH_PAGE_SIZE } from '../../../constants';
+  AlertExecutionStatusErrorReasons,
+  AlertExecutionStatusValues,
+} from '../../../../../../alerting/common/alert';
+import { DEFAULT_HIDDEN_ACTION_TYPES } from '../../../../common/constants';
+import { useKibana } from '../../../../common/lib/kibana/kibana_react';
+import type { Alert, AlertTableItem, AlertTypeIndex, Pagination } from '../../../../types';
+import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
 import { DeleteModalConfirmation } from '../../../components/delete_modal_confirmation';
 import { EmptyPrompt } from '../../../components/prompts/empty_prompt';
-import {
-  AlertExecutionStatus,
-  AlertExecutionStatusValues,
-  ALERTS_FEATURE_ID,
-  AlertExecutionStatusErrorReasons,
-} from '../../../../../../alerting/common';
-import { alertsStatusesTranslationsMapping, ALERT_STATUS_LICENSE_ERROR } from '../translations';
-import { useKibana } from '../../../../common/lib/kibana';
-import { DEFAULT_HIDDEN_ACTION_TYPES } from '../../../../common/constants';
-import './alerts_list.scss';
-import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
-import { ManageLicenseModal } from './manage_license_modal';
+import { DEFAULT_SEARCH_PAGE_SIZE, routeToRuleDetails } from '../../../constants';
+import { loadActionTypes } from '../../../lib/action_connector_api/connector_types';
+import { loadAlertAggregations } from '../../../lib/alert_api/aggregate';
+import { deleteAlerts } from '../../../lib/alert_api/delete';
+import { disableAlert } from '../../../lib/alert_api/disable';
+import { enableAlert } from '../../../lib/alert_api/enable';
+import { loadAlerts } from '../../../lib/alert_api/rules';
+import { loadAlertTypes } from '../../../lib/alert_api/rule_types';
+import { hasAllPrivilege, hasExecuteActionsCapability } from '../../../lib/capabilities';
 import { checkAlertTypeEnabled } from '../../../lib/check_alert_type_enabled';
+import { AlertAdd, AlertEdit } from '../../alert_form';
+import { AlertQuickEditButtonsWithApi as AlertQuickEditButtons } from '../../common/components/alert_quick_edit_buttons';
+import { BulkOperationPopover } from '../../common/components/bulk_operation_popover';
+import { alertsStatusesTranslationsMapping, ALERT_STATUS_LICENSE_ERROR } from '../translations';
+import { ActionTypeFilter } from './action_type_filter';
+import './alerts_list.scss';
+import { AlertStatusFilter, getHealthColor } from './alert_status_filter';
+import { CollapsedItemActionsWithApi as CollapsedItemActions } from './collapsed_item_actions';
+import { ManageLicenseModal } from './manage_license_modal';
 import { RuleEnabledSwitch } from './rule_enabled_switch';
+import { TypeFilter } from './type_filter';
 
 const ENTER_KEY = 13;
 

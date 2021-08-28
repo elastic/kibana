@@ -4,24 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { useMemo } from 'react';
 import {
   EuiDescribedFormGroup,
-  EuiFormRow,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFormRow,
   EuiLink,
 } from '@elastic/eui';
-
+import React, { useMemo } from 'react';
 import styled from 'styled-components';
-
+import type { ActionConnector, ActionTypeConnector } from '../../../common/api/connectors';
+import { ConnectorTypes } from '../../../common/api/connectors';
+import type { CaseConnectorMapping } from '../../containers/configure/types';
 import { ConnectorsDropdown } from './connectors_dropdown';
-import * as i18n from './translations';
-
-import { ActionConnector, CaseConnectorMapping } from '../../containers/configure/types';
 import { Mapping } from './mapping';
-import { ActionTypeConnector, ConnectorTypes } from '../../../common';
+import * as i18n from './translations';
 
 const EuiFormRowExtended = styled(EuiFormRow)`
   .euiFormRow__labelWrapper {

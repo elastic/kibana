@@ -6,7 +6,6 @@
  */
 
 import euiVars from '@elastic/eui/dist/eui_theme_dark.json';
-
 import { stringHash } from './string_utils';
 
 const COLORS = [

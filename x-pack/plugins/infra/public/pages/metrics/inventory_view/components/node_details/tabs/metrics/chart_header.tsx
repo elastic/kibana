@@ -4,15 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { EuiText } from '@elastic/eui';
-import { EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
 import React from 'react';
-import { EuiFlexGroup } from '@elastic/eui';
-import { EuiIcon } from '@elastic/eui';
+import { euiStyled } from '../../../../../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
 import { colorTransformer } from '../../../../../../../../common/color_palette';
-import { MetricsExplorerOptionsMetric } from '../../../../../metrics_explorer/hooks/use_metrics_explorer_options';
-import { euiStyled } from '../../../../../../../../../../../src/plugins/kibana_react/common';
+import type { MetricsExplorerOptionsMetric } from '../../../../../metrics_explorer/hooks/use_metrics_explorer_options';
 
 interface Props {
   title: string;

@@ -6,8 +6,9 @@
  */
 import { getOr } from 'lodash/fp';
 import { createSelector } from 'reselect';
-import { TGridModel, State } from '.';
-import { tGridDefaults, getTGridManageDefaults } from './defaults';
+import type { State } from '.';
+import { getTGridManageDefaults, tGridDefaults } from './defaults';
+import type { TGridModel } from './model';
 
 interface TGridById {
   [id: string]: TGridModel;

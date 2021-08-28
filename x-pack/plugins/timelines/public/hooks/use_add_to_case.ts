@@ -4,19 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { isEmpty } from 'lodash';
-import { useState, useCallback, useMemo, SyntheticEvent } from 'react';
-import { useLocation } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
 import { ALERT_RULE_NAME, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
-import { useKibana } from '../../../../../src/plugins/kibana_react/public';
-import { Case, SubCase } from '../../../cases/common';
-import { TimelinesStartServices } from '../types';
-import { TimelineItem } from '../../common/';
-import { tGridActions } from '../store/t_grid';
-import { useDeepEqualSelector } from './use_selector';
+import { isEmpty } from 'lodash';
+import type { SyntheticEvent } from 'react';
+import { useCallback, useMemo, useState } from 'react';
+import { useDispatch } from 'react-redux';
+import { useLocation } from 'react-router-dom';
+import { useKibana } from '../../../../../src/plugins/kibana_react/public/context/context';
+import type { Case, SubCase } from '../../../cases/common/ui/types';
+import type { TimelineItem } from '../../common/search_strategy/timeline/events/all';
+import type { AddToCaseActionProps } from '../components/actions/timeline/cases/add_to_case_action';
 import { createUpdateSuccessToaster } from '../components/actions/timeline/cases/helpers';
-import { AddToCaseActionProps } from '../components/actions/timeline/cases/add_to_case_action';
+import * as tGridActions from '../store/t_grid/actions';
+import type { TimelinesStartServices } from '../types';
+import { useDeepEqualSelector } from './use_selector';
 
 interface UseAddToCase {
   addNewCaseClick: () => void;

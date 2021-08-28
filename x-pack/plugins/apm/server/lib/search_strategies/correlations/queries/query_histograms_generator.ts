@@ -4,22 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { estypes } from '@elastic/elasticsearch';
-
-import type { ElasticsearchClient } from 'src/core/server';
-
+import { estypes } from '@elastic/elasticsearch';
+import type { ElasticsearchClient } from '../../../../../../../../src/core/server/elasticsearch/client/types';
 import type { SearchServiceFetchParams } from '../../../../../common/search_strategies/correlations/types';
-
 import type { AsyncSearchServiceLog } from '../async_search_service_log';
 import type { AsyncSearchServiceState } from '../async_search_service_state';
 import { CORRELATION_THRESHOLD, KS_TEST_THRESHOLD } from '../constants';
-
 import { getPrioritizedFieldValuePairs } from './get_prioritized_field_value_pairs';
 import { fetchTransactionDurationCorrelation } from './query_correlation';
-import { fetchTransactionDurationRanges } from './query_ranges';
-
 import type { FieldValuePairs } from './query_field_value_pairs';
+import { fetchTransactionDurationRanges } from './query_ranges';
 
 export async function* fetchTransactionDurationHistograms(
   esClient: ElasticsearchClient,

@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import React, { memo, useEffect, useRef } from 'react';
-import { MarkdownEditorForm } from '../markdown_editor';
-import { UseField, useFormContext } from '../../common/shared_imports';
+import { UseField } from '../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/components/use_field';
+import { useFormContext } from '../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/form_context';
+import { MarkdownEditorForm } from '../markdown_editor/eui_form';
 import { useLensDraftComment } from '../markdown_editor/plugins/lens/use_lens_draft_comment';
 
 interface Props {

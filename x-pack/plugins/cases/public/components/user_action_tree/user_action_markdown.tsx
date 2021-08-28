@@ -4,15 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiButton } from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { forwardRef, useCallback, useImperativeHandle, useMemo, useRef } from 'react';
 import styled from 'styled-components';
-
+import { Form } from '../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/components/form';
+import { UseField } from '../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/components/use_field';
+import { useForm } from '../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/hooks/use_form';
 import * as i18n from '../case_view/translations';
-import { Form, useForm, UseField } from '../../common/shared_imports';
-import { schema, Content } from './schema';
-import { MarkdownRenderer, MarkdownEditorForm } from '../markdown_editor';
+import { MarkdownEditorForm } from '../markdown_editor/eui_form';
+import { MarkdownRenderer } from '../markdown_editor/renderer';
+import type { Content } from './schema';
+import { schema } from './schema';
 
 export const ContentWrapper = styled.div`
   padding: ${({ theme }) => `${theme.eui.euiSizeM} ${theme.eui.euiSizeL}`};

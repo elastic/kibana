@@ -4,17 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { isPopulatedObject } from '../object_utils';
+import type { ErrorType, MLErrorObject } from './types';
 import {
-  ErrorType,
-  MLErrorObject,
   isBoomError,
-  isErrorString,
   isErrorMessage,
+  isErrorString,
   isEsErrorBody,
   isMLResponseError,
 } from './types';
-import { isPopulatedObject } from '../object_utils';
 
 export const extractErrorProperties = (error: ErrorType): MLErrorObject => {
   // extract properties of the error object from within the response error

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, CoreStart } from 'src/core/public';
+// import { CoreSetup, CoreStart } from 'src/core/public';
 import { UiActionsStart } from '../../../ui_actions/public';
 import { uiActionsPluginMock } from '../../../ui_actions/public/mocks';
 import { inspectorPluginMock } from '../../../inspector/public/mocks';

@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiFlexItem } from '@elastic/eui';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ToolbarProps } from '../../../../public/pages/metrics/inventory_view/components/toolbars/toolbar';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import React from 'react';
+import type { ToolbarProps } from '../../../../public/pages/metrics/inventory_view/components/toolbars/toolbar';
 import { WaffleAccountsControls } from '../../../../public/pages/metrics/inventory_view/components/waffle/waffle_accounts_controls';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { WaffleRegionControls } from '../../../../public/pages/metrics/inventory_view/components/waffle/waffle_region_controls';
 
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 type Props = ToolbarProps;
 
 export const CloudToolbarItems = (props: Props) => {

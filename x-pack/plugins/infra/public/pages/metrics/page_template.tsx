@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
+import type { LazyObservabilityPageTemplateProps } from '../../../../observability/public/components/shared/page_template/lazy_page_template';
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
-import type { LazyObservabilityPageTemplateProps } from '../../../../observability/public';
 
 export const MetricsPageTemplate: React.FC<LazyObservabilityPageTemplateProps> = (
   pageTemplateProps

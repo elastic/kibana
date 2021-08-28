@@ -5,7 +5,7 @@
  * 2.0.
  */
 import * as rt from 'io-ts';
-import { ANOMALY_THRESHOLD } from '../../infra_ml';
+import { ANOMALY_THRESHOLD } from '../../infra_ml/anomaly_results';
 
 // TODO: Have threshold and inventory alerts import these types from this file instead of from their
 // local directories

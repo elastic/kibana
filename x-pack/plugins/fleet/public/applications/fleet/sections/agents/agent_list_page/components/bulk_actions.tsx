@@ -4,29 +4,26 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { useState } from 'react';
-import styled from 'styled-components';
 import {
+  EuiButtonEmpty,
+  EuiContextMenu,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiText,
-  EuiPopover,
-  EuiContextMenu,
-  EuiButtonEmpty,
   EuiIcon,
+  EuiPopover,
   EuiPortal,
+  EuiText,
 } from '@elastic/eui';
 import { FormattedMessage, FormattedNumber } from '@kbn/i18n/react';
+import React, { useState } from 'react';
+import styled from 'styled-components';
 
-import { SO_SEARCH_LIMIT } from '../../../../constants';
-import type { Agent } from '../../../../types';
-import {
-  AgentReassignAgentPolicyModal,
-  AgentUnenrollAgentModal,
-  AgentUpgradeAgentModal,
-} from '../../components';
-import { useKibanaVersion } from '../../../../hooks';
+import { SO_SEARCH_LIMIT } from '../../../../../../../common/constants';
+import type { Agent } from '../../../../../../../common/types/models/agent';
+import { useKibanaVersion } from '../../../../../../hooks/use_kibana_version';
+import { AgentReassignAgentPolicyModal } from '../../components/agent_reassign_policy_modal';
+import { AgentUnenrollAgentModal } from '../../components/agent_unenroll_modal';
+import { AgentUpgradeAgentModal } from '../../components/agent_upgrade_modal';
 
 const Divider = styled.div`
   width: 0;

@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import './login_page.scss';
-
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer, EuiTitle } from '@elastic/eui';
 import classNames from 'classnames';
 import React, { Component } from 'react';
@@ -16,14 +14,19 @@ import { parse } from 'url';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import type { CoreStart, FatalErrorsStart, HttpStart, NotificationsStart } from 'src/core/public';
 
+import type { CoreStart } from '../../../../../../src/core/public/types';
+import type { FatalErrorsStart } from '../../../../../../src/core/public/fatal_errors/fatal_errors_service';
+import type { HttpStart } from '../../../../../../src/core/public/http/types';
+import type { NotificationsStart } from '../../../../../../src/core/public/notifications/notifications_service';
 import {
   AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER,
   LOGOUT_REASON_QUERY_STRING_PARAMETER,
 } from '../../../common/constants';
 import type { LoginState } from '../../../common/login_state';
-import { DisabledLoginForm, LoginForm, LoginFormMessageType } from './components';
+import { DisabledLoginForm } from './components/disabled_login_form/disabled_login_form';
+import { LoginForm, MessageType as LoginFormMessageType } from './components/login_form/login_form';
+import './login_page.scss';
 
 interface Props {
   http: HttpStart;

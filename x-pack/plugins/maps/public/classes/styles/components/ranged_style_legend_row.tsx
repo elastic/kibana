@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { ReactElement } from 'react';
-
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
+import type { ReactElement } from 'react';
+import React from 'react';
 
 interface Props {
   header: ReactElement<any>;

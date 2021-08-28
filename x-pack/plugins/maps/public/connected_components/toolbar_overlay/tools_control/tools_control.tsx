@@ -4,26 +4,26 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { Component } from 'react';
 import {
+  EuiButton,
   EuiButtonIcon,
-  EuiPopover,
   EuiContextMenu,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButton,
   EuiPanel,
+  EuiPopover,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { ActionExecutionContext, Action } from 'src/plugins/ui_actions/public';
+import React, { Component } from 'react';
+import type {
+  Action,
+  ActionExecutionContext,
+} from '../../../../../../../src/plugins/ui_actions/public/actions/action';
 import { DRAW_SHAPE, ES_GEO_FIELD_TYPE, ES_SPATIAL_RELATIONS } from '../../../../common/constants';
-import { GeometryFilterForm } from '../../../components/draw_forms/geometry_filter_form/geometry_filter_form';
+import type { DrawState } from '../../../../common/descriptor_types/map_descriptor';
 import { DistanceFilterForm } from '../../../components/draw_forms/distance_filter_form';
-// @ts-expect-error
-import { IndexGeometrySelectPopoverForm } from '../../../components/draw_forms/index_geometry_select_popover_form';
-import { DrawState } from '../../../../common/descriptor_types';
+import { GeometryFilterForm } from '../../../components/draw_forms/geometry_filter_form/geometry_filter_form';
 
 const DRAW_SHAPE_LABEL = i18n.translate('xpack.maps.toolbarOverlay.drawShapeLabel', {
   defaultMessage: 'Draw shape to filter data',

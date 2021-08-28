@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { ReactElement } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import type { ReactElement } from 'react';
+import React from 'react';
 import { VECTOR_STYLES } from '../../../../../../common/constants';
 import { VectorIcon } from './vector_icon';
 

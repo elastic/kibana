@@ -4,20 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { EuiInMemoryTable, EuiTitle } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import React, { useCallback, useRef } from 'react';
 import styled from 'styled-components';
+import type { BrowserFields } from '../../../../../common/search_strategy/index_fields';
 import {
   DATA_COLINDEX_ATTRIBUTE,
   DATA_ROWINDEX_ATTRIBUTE,
   onKeyDownFocusHandler,
-} from '../../../../../common';
-import type { BrowserFields } from '../../../../../common';
+} from '../../../../../common/utils/accessibility/helpers';
 import { getCategoryColumns } from './category_columns';
 import { CATEGORIES_PANE_CLASS_NAME, TABLE_HEIGHT } from './helpers';
-
 import * as i18n from './translations';
 
 const CategoryNames = styled.div<{ height: number; width: number }>`

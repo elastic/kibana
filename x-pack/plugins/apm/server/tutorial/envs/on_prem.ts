@@ -4,12 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { i18n } from '@kbn/i18n';
-import {
-  INSTRUCTION_VARIANT,
-  InstructionsSchema,
-} from '../../../../../../src/plugins/home/server';
+import { INSTRUCTION_VARIANT } from '../../../../../../src/plugins/home/common/instruction_variant';
+import type { InstructionsSchema } from '../../../../../../src/plugins/home/server/services/tutorials/lib/tutorial_schema';
 import {
   createDjangoAgentInstructions,
   createDotNetAgentInstructions,

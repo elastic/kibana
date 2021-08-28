@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
-
 import { EuiLoadingSpinner, EuiSpacer, EuiText } from '@elastic/eui';
+import React from 'react';
 
 export const EmbeddableLoading = () => {
   return (

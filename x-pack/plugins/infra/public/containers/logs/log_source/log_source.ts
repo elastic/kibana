@@ -7,20 +7,20 @@
 
 import createContainer from 'constate';
 import { useCallback, useMemo, useState } from 'react';
-import type { HttpHandler } from 'src/core/public';
-import { IndexPatternsContract } from '../../../../../../../src/plugins/data/common';
-import {
+import type { HttpHandler } from '../../../../../../../src/core/public/http/types';
+import type { IndexPatternsContract } from '../../../../../../../src/plugins/data/common/index_patterns/index_patterns/index_patterns';
+import type {
   LogIndexField,
-  LogSourceConfigurationPropertiesPatch,
   LogSourceStatus,
-} from '../../../../common/http_api/log_sources';
-import {
+} from '../../../../common/http_api/log_sources/get_log_source_status';
+import type { LogSourceConfigurationPropertiesPatch } from '../../../../common/http_api/log_sources/patch_log_source_configuration';
+import { ResolveLogSourceConfigurationError } from '../../../../common/log_sources/errors';
+import type {
   LogSourceConfiguration,
   LogSourceConfigurationProperties,
-  ResolvedLogSourceConfiguration,
-  resolveLogSourceConfiguration,
-  ResolveLogSourceConfigurationError,
-} from '../../../../common/log_sources';
+} from '../../../../common/log_sources/log_source_configuration';
+import type { ResolvedLogSourceConfiguration } from '../../../../common/log_sources/resolved_log_source_configuration';
+import { resolveLogSourceConfiguration } from '../../../../common/log_sources/resolved_log_source_configuration';
 import { isRejectedPromiseState, useTrackedPromise } from '../../../utils/use_tracked_promise';
 import { callFetchLogSourceConfigurationAPI } from './api/fetch_log_source_configuration';
 import { callFetchLogSourceStatusAPI } from './api/fetch_log_source_status';

@@ -4,24 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { useState } from 'react';
-import { i18n } from '@kbn/i18n';
 import {
-  EuiFormRow,
-  EuiColorPaletteDisplay,
-  EuiFlexItem,
-  EuiFlexGroup,
   EuiButtonEmpty,
+  EuiColorPaletteDisplay,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
 } from '@elastic/eui';
-import type { PaletteRegistry } from 'src/plugins/charts/public';
+import { i18n } from '@kbn/i18n';
+import React, { useState } from 'react';
+import type { PaletteRegistry } from '../../../../../src/plugins/charts/public/services/palettes/types';
+import { FIXED_PROGRESSION } from '../shared_components/coloring/constants';
+import { CustomizablePalette } from '../shared_components/coloring/palette_configuration';
+import { PalettePanelContainer } from '../shared_components/coloring/palette_panel_container';
+import { getStopsForFixedMode } from '../shared_components/coloring/utils';
 import type { VisualizationDimensionEditorProps } from '../types';
-import {
-  CustomizablePalette,
-  FIXED_PROGRESSION,
-  getStopsForFixedMode,
-  PalettePanelContainer,
-} from '../shared_components/';
 import './dimension_editor.scss';
 import type { HeatmapVisualizationState } from './types';
 import { getSafePaletteParams } from './utils';

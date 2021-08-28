@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { SavedObjectMigrationFn } from 'kibana/server';
-
-import type { Agent, AgentPolicy } from '../../types';
+import type { SavedObjectMigrationFn } from '../../../../../../src/core/server/saved_objects/migrations/types';
+import type { Agent } from '../../../common/types/models/agent';
+import type { AgentPolicy } from '../../../common/types/models/agent_policy';
 
 export { migratePackagePolicyToV7120 } from './security_solution/to_v7_12_0';
 

@@ -4,12 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { Duration } from 'moment';
-import { Observable, BehaviorSubject, Subject } from 'rxjs';
+import type { Duration } from 'moment';
+import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { ITagsCache } from '../../../../../../src/plugins/saved_objects_tagging_oss/public';
-import { Tag, TagAttributes } from '../../../common/types';
+import type {
+  Tag,
+  TagAttributes,
+} from '../../../../../../src/plugins/saved_objects_tagging_oss/common/types';
+import type { ITagsCache } from '../../../../../../src/plugins/saved_objects_tagging_oss/public/api';
 
 export { ITagsCache };
 

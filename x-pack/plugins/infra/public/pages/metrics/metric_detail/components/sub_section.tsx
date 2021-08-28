@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { isValidElement, cloneElement, FunctionComponent, Children, useMemo } from 'react';
 import { EuiTitle } from '@elastic/eui';
-import { InventoryMetric } from '../../../../../common/inventory_models/types';
-import { LayoutProps } from '../types';
+import type { FunctionComponent } from 'react';
+import React, { Children, cloneElement, isValidElement, useMemo } from 'react';
+import type { InventoryMetric } from '../../../../../common/inventory_models/types';
+import type { LayoutProps } from '../types';
 
 type SubSectionProps = LayoutProps & {
   id: InventoryMetric;

@@ -4,42 +4,38 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { FC, useCallback } from 'react';
-import { DeepPartial } from '@reduxjs/toolkit';
-import { AppMountParameters, CoreSetup, CoreStart } from 'kibana/public';
-import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
-import { HashRouter, Route, RouteComponentProps, Switch } from 'react-router-dom';
-import { History } from 'history';
-import { render, unmountComponentAtNode } from 'react-dom';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
+import type { DeepPartial } from '@reduxjs/toolkit';
+import type { History } from 'history';
+import type { FC } from 'react';
+import React, { useCallback } from 'react';
+import { render, unmountComponentAtNode } from 'react-dom';
 import { Provider } from 'react-redux';
-import { Storage } from '../../../../../src/plugins/kibana_utils/public';
-
-import { LensReportManager, setReportManager, trackUiEvent } from '../lens_ui_telemetry';
-
-import { App } from './app';
-import { EditorFrameStart } from '../types';
-import { addHelpMenuToAppChrome } from '../help_menu_util';
-import { LensPluginStartDependencies } from '../plugin';
-import { LENS_EMBEDDABLE_TYPE, LENS_EDIT_BY_VALUE, APP_ID } from '../../common';
-import {
-  LensEmbeddableInput,
+import type { RouteComponentProps } from 'react-router-dom';
+import { HashRouter, Route, Switch } from 'react-router-dom';
+import type { CoreSetup, CoreStart } from '../../../../../src/core/public/types';
+import type { AppMountParameters } from '../../../../../src/core/public/application/types';
+import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public/context/context';
+import { Storage } from '../../../../../src/plugins/kibana_utils/public/storage/storage';
+import { ACTION_VISUALIZE_LENS_FIELD } from '../../../../../src/plugins/ui_actions/public/types';
+import { APP_ID, LENS_EDIT_BY_VALUE, LENS_EMBEDDABLE_TYPE } from '../../common/constants';
+import type {
   LensByReferenceInput,
   LensByValueInput,
+  LensEmbeddableInput,
 } from '../embeddable/embeddable';
-import { ACTION_VISUALIZE_LENS_FIELD } from '../../../../../src/plugins/ui_actions/public';
-import { LensAttributeService } from '../lens_attribute_service';
-import { LensAppServices, RedirectToOriginProps, HistoryLocationState } from './types';
-import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
-import {
-  makeConfigureStore,
-  navigateAway,
-  LensRootStore,
-  loadInitial,
-  LensState,
-} from '../state_management';
+import { addHelpMenuToAppChrome } from '../help_menu_util';
+import type { LensAttributeService } from '../lens_attribute_service';
+import { LensReportManager, setReportManager, trackUiEvent } from '../lens_ui_telemetry/factory';
+import type { LensPluginStartDependencies } from '../plugin';
+import type { LensRootStore } from '../state_management';
+import { loadInitial, makeConfigureStore, navigateAway } from '../state_management';
 import { getPreloadedState } from '../state_management/lens_slice';
+import type { LensState } from '../state_management/types';
+import type { EditorFrameStart } from '../types';
+import { App } from './app';
+import type { HistoryLocationState, LensAppServices, RedirectToOriginProps } from './types';
 
 export async function getLensServices(
   coreStart: CoreStart,

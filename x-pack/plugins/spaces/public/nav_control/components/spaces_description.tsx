@@ -5,16 +5,15 @@
  * 2.0.
  */
 
-import './spaces_description.scss';
-
 import { EuiContextMenuPanel, EuiText } from '@elastic/eui';
 import type { FC } from 'react';
 import React from 'react';
 
-import type { ApplicationStart, Capabilities } from 'src/core/public';
-
+import type { ApplicationStart } from '../../../../../../src/core/public/application/types';
+import type { Capabilities } from '../../../../../../src/core/types/capabilities';
 import { getSpacesFeatureDescription } from '../../constants';
 import { ManageSpacesButton } from './manage_spaces_button';
+import './spaces_description.scss';
 
 interface Props {
   id: string;

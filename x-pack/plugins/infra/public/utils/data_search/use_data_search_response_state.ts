@@ -4,12 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { useCallback } from 'react';
 import { Observable } from 'rxjs';
-import { IKibanaSearchRequest } from '../../../../../../src/plugins/data/public';
+import type { IKibanaSearchRequest } from '../../../../../../src/plugins/data/common/search/types';
 import { useObservableState } from '../use_observable';
-import { ParsedDataSearchResponseDescriptor } from './types';
+import type { ParsedDataSearchResponseDescriptor } from './types';
 
 export const useDataSearchResponseState = <
   Request extends IKibanaSearchRequest,

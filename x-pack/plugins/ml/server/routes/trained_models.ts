@@ -4,16 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { RouteInitialization } from '../types';
+import type { TrainedModelConfigResponse } from '../../common/types/trained_models';
 import { wrapError } from '../client/error_wrapper';
+import { modelsProvider } from '../models/data_frame_analytics/models_provider';
+import type { RouteInitialization } from '../types';
 import {
   getInferenceQuerySchema,
   modelIdSchema,
   optionalModelIdSchema,
 } from './schemas/inference_schema';
-import { modelsProvider } from '../models/data_frame_analytics';
-import { TrainedModelConfigResponse } from '../../common/types/trained_models';
 
 export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization) {
   /**

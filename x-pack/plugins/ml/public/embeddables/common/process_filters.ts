@@ -4,15 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { estypes } from '@elastic/elasticsearch';
-import {
-  Filter,
-  fromKueryExpression,
-  luceneStringToDsl,
-  Query,
-  toElasticsearchQuery,
-} from '@kbn/es-query';
+import type { Filter, Query } from '@kbn/es-query';
+import { fromKueryExpression, luceneStringToDsl, toElasticsearchQuery } from '@kbn/es-query';
 
 export function processFilters(
   filters: Filter[],

@@ -4,20 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { FC, Fragment, useState, useEffect } from 'react';
 import { EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-
-import { AnalyticsJobType } from '../../../analytics_management/hooks/use_create_analytics_form/state';
-import { ANALYSIS_CONFIG_TYPE } from '../../../../common/analytics';
-import { Field, EVENT_RATE_FIELD_ID } from '../../../../../../../common/types/fields';
+import type { FC } from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
+import { ES_FIELD_TYPES } from '@kbn/field-types';
+import { ANALYSIS_CONFIG_TYPE } from '../../../../../../../common/constants/data_frame_analytics';
 import { OMIT_FIELDS } from '../../../../../../../common/constants/field_types';
-import { BASIC_NUMERICAL_TYPES, EXTENDED_NUMERICAL_TYPES } from '../../../../common/fields';
-import { CATEGORICAL_TYPES } from './form_options_validation';
-import { ES_FIELD_TYPES } from '../../../../../../../../../../src/plugins/data/public';
+import type { DataFrameAnalysisConfigType } from '../../../../../../../common/types/data_frame_analytics';
+import type { Field } from '../../../../../../../common/types/fields';
+import { EVENT_RATE_FIELD_ID } from '../../../../../../../common/types/fields';
 import { newJobCapsServiceAnalytics } from '../../../../../services/new_job_capabilities/new_job_capabilities_service_analytics';
-import { DataFrameAnalysisConfigType } from '../../../../../../../common/types/data_frame_analytics';
+import { BASIC_NUMERICAL_TYPES, EXTENDED_NUMERICAL_TYPES } from '../../../../common/fields';
+import type { AnalyticsJobType } from '../../../analytics_management/hooks/use_create_analytics_form/state';
+import { CATEGORICAL_TYPES } from './form_options_validation';
 
 const containsClassificationFieldsCb = ({ name, type }: Field) =>
   !OMIT_FIELDS.includes(name) &&

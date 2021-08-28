@@ -8,7 +8,7 @@ import { EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import { LogStream } from '../../../../../../infra/public/components/log_stream/lazy_log_stream_wrapper';
+import { LazyLogStreamWrapper as LogStream } from '../../../../../../infra/public/components/log_stream/lazy_log_stream_wrapper';
 import type { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
 import type { IUrlParams } from '../../../../context/url_params_context/types';
 import { fromQuery, toQuery } from '../../../shared/Links/url_helpers';

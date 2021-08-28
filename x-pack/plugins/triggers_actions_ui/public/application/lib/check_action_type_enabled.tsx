@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import React from 'react';
-import { upperFirst } from 'lodash';
+import { EuiCard, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiCard, EuiLink } from '@elastic/eui';
-import { ActionType, ActionConnector } from '../../types';
+import { upperFirst } from 'lodash';
+import React from 'react';
+import type { ActionType } from '../../../../actions/common/types';
 import { VIEW_LICENSE_OPTIONS_LINK } from '../../common/constants';
+import type { ActionConnector } from '../../types';
 import './check_action_type_enabled.scss';
 
 export interface IsEnabledResult {

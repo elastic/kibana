@@ -4,13 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { useEffect, useReducer, useCallback, useRef } from 'react';
-
-import { Case } from './types';
-import * as i18n from './translations';
-import { useToasts } from '../common/lib/kibana';
+import { useCallback, useEffect, useReducer, useRef } from 'react';
+import type { Case } from '../../common/ui/types';
+import { useToasts } from '../common/lib/kibana/hooks';
 import { getCase, getSubCase } from './api';
+import * as i18n from './translations';
 
 interface CaseState {
   data: Case | null;

@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { CATEGORY_EXAMPLES_VALIDATION_STATUS } from '../constants/categorization_job';
 
 export type CategoryId = number;

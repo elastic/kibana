@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { Observable } from 'rxjs';
-import { takeUntil, startWith, map } from 'rxjs/operators';
-import { ServiceStatus, ServiceStatusLevels } from '../../../../src/core/server';
-import { ILicense } from '../common/types';
+import { map, startWith, takeUntil } from 'rxjs/operators';
+import type { ServiceStatus } from '../../../../src/core/server/status/types';
+import { ServiceStatusLevels } from '../../../../src/core/server/status/types';
+import type { ILicense } from '../common/types';
 
 export const getPluginStatus$ = (
   license$: Observable<ILicense>,

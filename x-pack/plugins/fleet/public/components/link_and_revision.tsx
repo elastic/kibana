@@ -4,15 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiLink, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import type { CSSProperties } from 'react';
 import React, { memo } from 'react';
 
-import type { AgentPolicy } from '../../common/types';
-import { useLink } from '../hooks';
+import type { AgentPolicy } from '../../common/types/models/agent_policy';
+import { useLink } from '../hooks/use_link';
+
 const MIN_WIDTH: CSSProperties = { minWidth: 0 };
 const NO_WRAP_WHITE_SPACE: CSSProperties = { whiteSpace: 'nowrap' };
 

@@ -4,23 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiComboBox, EuiFlexItem, EuiFormRow, EuiHealth, EuiHighlight } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { isEqual } from 'lodash';
 import React, { Component } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { i18n } from '@kbn/i18n';
-
-import {
-  EuiComboBox,
-  EuiComboBoxOptionOption,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiHealth,
-  EuiHighlight,
-} from '@elastic/eui';
-import { EntityFieldType } from '../../../../../common/types/anomalies';
-import { UiPartitionFieldConfig } from '../series_controls/series_controls';
-import { getSeverityColor } from '../../../../../common';
+import type { EntityFieldType } from '../../../../../common/types/anomalies';
+import { getSeverityColor } from '../../../../../common/util/anomaly_utils';
+import type { UiPartitionFieldConfig } from '../series_controls/series_controls';
 import { EntityConfig } from './entity_config';
 
 export interface Entity {

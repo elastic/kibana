@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { EuiHideFor, EuiPageSideBar, EuiShowFor, EuiSideNav } from '@elastic/eui';
-import React, { useState, useCallback } from 'react';
-import { NavItem } from '../lib/side_nav_context';
+import React, { useCallback, useState } from 'react';
+import type { NavItem } from '../lib/side_nav_context';
+
 interface Props {
   loading: boolean;
   name: string;

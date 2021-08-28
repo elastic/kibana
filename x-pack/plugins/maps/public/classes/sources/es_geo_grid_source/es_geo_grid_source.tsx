@@ -4,20 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { ReactElement } from 'react';
-
+import { estypes } from '@elastic/elasticsearch';
 import { i18n } from '@kbn/i18n';
+import type { Feature } from 'geojson';
+import type { ReactElement } from 'react';
+import React from 'react';
 import rison from 'rison-node';
-import { Feature } from 'geojson';
-import type { estypes } from '@elastic/elasticsearch';
-import {
-  convertCompositeRespToGeoJson,
-  convertRegularRespToGeoJson,
-  makeESBbox,
-} from '../../../../common/elasticsearch_util';
-// @ts-expect-error
-import { UpdateSourceEditor } from './update_source_editor';
+import { IndexPattern } from '../../../../../../../src/plugins/data/common/index_patterns/index_patterns/index_pattern';
+import type { ISearchSource } from '../../../../../../../src/plugins/data/common/search/search_source/types';
+import type { Adapters } from '../../../../../../../src/plugins/inspector/common/adapters/types';
 import {
   DEFAULT_MAX_BUCKETS_LIMIT,
   ES_GEO_FIELD_TYPE,
@@ -32,27 +27,33 @@ import {
   SOURCE_TYPES,
   VECTOR_SHAPE_TYPE,
 } from '../../../../common/constants';
-import { getDataSourceLabel } from '../../../../common/i18n_getters';
-import { AbstractESAggSource } from '../es_agg_source';
-import { DataRequestAbortError } from '../../util/data_request';
-import { registerSource } from '../source_registry';
-import { LICENSED_FEATURES } from '../../../licensed_features';
-
-import { getHttp } from '../../../kibana_services';
-import { GeoJsonWithMeta } from '../vector_source';
-import { ITiledSingleLayerVectorSource } from '../tiled_single_layer_vector_source';
-import {
-  ESGeoGridSourceDescriptor,
-  MapExtent,
+import type {
   VectorSourceRequestMeta,
   VectorSourceSyncMeta,
-} from '../../../../common/descriptor_types';
-import { ImmutableSourceProperty, SourceEditorArgs } from '../source';
-import { ISearchSource } from '../../../../../../../src/plugins/data/common/search/search_source';
-import { IndexPattern } from '../../../../../../../src/plugins/data/common/index_patterns/index_patterns';
-import { Adapters } from '../../../../../../../src/plugins/inspector/common/adapters';
+} from '../../../../common/descriptor_types/data_request_descriptor_types';
+import type { MapExtent } from '../../../../common/descriptor_types/map_descriptor';
+import type { ESGeoGridSourceDescriptor } from '../../../../common/descriptor_types/source_descriptor_types';
+import {
+  convertCompositeRespToGeoJson,
+  convertRegularRespToGeoJson,
+} from '../../../../common/elasticsearch_util';
+import { makeESBbox } from '../../../../common/elasticsearch_util/elasticsearch_geo_utils';
+import { getDataSourceLabel } from '../../../../common/i18n_getters';
+import { getHttp } from '../../../kibana_services';
+import { LICENSED_FEATURES } from '../../../licensed_features';
+import { DataRequestAbortError } from '../../util/data_request';
 import { isValidStringConfig } from '../../util/valid_string_config';
-import { ITiledSingleLayerMvtParams } from '../tiled_single_layer_vector_source/tiled_single_layer_vector_source';
+import { AbstractESAggSource } from '../es_agg_source/es_agg_source';
+import type { ImmutableSourceProperty, SourceEditorArgs } from '../source';
+import { registerSource } from '../source_registry';
+import type {
+  ITiledSingleLayerMvtParams,
+  ITiledSingleLayerVectorSource,
+} from '../tiled_single_layer_vector_source/tiled_single_layer_vector_source';
+import type { GeoJsonWithMeta } from '../vector_source/vector_source';
+// @ts-expect-error
+import { UpdateSourceEditor } from './update_source_editor';
+
 
 export const MAX_GEOTILE_LEVEL = 29;
 

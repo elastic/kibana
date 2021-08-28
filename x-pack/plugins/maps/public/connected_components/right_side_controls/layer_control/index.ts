@@ -4,22 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { AnyAction } from 'redux';
-import { ThunkDispatch } from 'redux-thunk';
 import { connect } from 'react-redux';
-import { LayerControl } from './layer_control';
-
+import type { AnyAction } from 'redux';
+import type { ThunkDispatch } from 'redux-thunk';
+import { DRAW_MODE } from '../../../../common/constants';
+import { setSelectedLayer } from '../../../actions/layer_actions';
+import { setDrawMode, setIsLayerTOCOpen, updateFlyout } from '../../../actions/ui_actions';
+import type { MapStoreState } from '../../../reducers/store';
 import { FLYOUT_STATE } from '../../../reducers/ui';
-import { setSelectedLayer, updateFlyout, setIsLayerTOCOpen, setDrawMode } from '../../../actions';
-import {
-  getIsReadOnly,
-  getIsLayerTOCOpen,
-  getFlyoutDisplay,
-} from '../../../selectors/ui_selectors';
 import { getLayerList } from '../../../selectors/map_selectors';
-import { MapStoreState } from '../../../reducers/store';
-import { DRAW_MODE } from '../../../../common';
+import {
+  getFlyoutDisplay,
+  getIsLayerTOCOpen,
+  getIsReadOnly,
+} from '../../../selectors/ui_selectors';
+import { LayerControl } from './layer_control';
 
 function mapStateToProps(state: MapStoreState) {
   return {

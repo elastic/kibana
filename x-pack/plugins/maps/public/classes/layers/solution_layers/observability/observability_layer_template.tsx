@@ -4,14 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { Component } from 'react';
 import { EuiPanel } from '@elastic/eui';
-import { RenderWizardArguments } from '../../layer_wizard_registry';
+import React, { Component } from 'react';
+import type { RenderWizardArguments } from '../../layer_wizard_registry';
+import { createLayerDescriptor } from './create_layer_descriptor';
+import { DISPLAY, DisplaySelect } from './display_select';
 import { LayerSelect, OBSERVABILITY_LAYER_TYPE } from './layer_select';
 import { getMetricOptionsForLayer, MetricSelect, OBSERVABILITY_METRIC_TYPE } from './metric_select';
-import { DisplaySelect, DISPLAY } from './display_select';
-import { createLayerDescriptor } from './create_layer_descriptor';
 
 interface State {
   display: DISPLAY;

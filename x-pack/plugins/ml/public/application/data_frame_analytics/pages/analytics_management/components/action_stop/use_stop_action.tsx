@@ -4,18 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import React, { useCallback, useMemo, useState } from 'react';
-
-import {
-  isDataFrameAnalyticsFailed,
-  isDataFrameAnalyticsRunning,
+import { stopAnalytics } from '../../services/analytics_service/stop_analytics';
+import type {
   DataFrameAnalyticsListAction,
   DataFrameAnalyticsListRow,
 } from '../analytics_list/common';
-import { stopAnalytics } from '../../services/analytics_service';
-
-import { stopActionNameText, StopActionName } from './stop_action_name';
+import { isDataFrameAnalyticsFailed, isDataFrameAnalyticsRunning } from '../analytics_list/common';
+import { StopActionName, stopActionNameText } from './stop_action_name';
 
 export type StopAction = ReturnType<typeof useStopAction>;
 export const useStopAction = (canStartStopDataFrameAnalytics: boolean) => {

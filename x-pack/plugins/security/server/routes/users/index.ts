@@ -4,8 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { RouteDefinitionParams } from '../index';
+import type { RouteDefinitionParams } from '..';
 import { defineChangeUserPasswordRoutes } from './change_password';
 import { defineCreateOrUpdateUserRoutes } from './create_or_update';
 import { defineDeleteUserRoutes } from './delete';

@@ -6,26 +6,32 @@
  */
 
 import React from 'react';
-import { CoreSetup, CoreStart } from 'kibana/public';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
-import { ExpressionsSetup, ExpressionsStart } from '../../../../../src/plugins/expressions/public';
-import { EmbeddableSetup, EmbeddableStart } from '../../../../../src/plugins/embeddable/public';
-import {
+import type { CoreSetup, CoreStart } from '../../../../../src/core/public/types';
+import type { ChartsPluginSetup } from '../../../../../src/plugins/charts/public/types';
+import type { DashboardStart } from '../../../../../src/plugins/dashboard/public/plugin_contract';
+import type {
   DataPublicPluginSetup,
   DataPublicPluginStart,
-} from '../../../../../src/plugins/data/public';
-import {
+} from '../../../../../src/plugins/data/public/types';
+import type {
+  EmbeddableSetup,
+  EmbeddableStart,
+} from '../../../../../src/plugins/embeddable/public/plugin';
+import type {
+  ExpressionsSetup,
+  ExpressionsStart,
+} from '../../../../../src/plugins/expressions/public/plugin';
+import type { UiActionsStart } from '../../../../../src/plugins/ui_actions/public/plugin';
+import type { UsageCollectionSetup } from '../../../../../src/plugins/usage_collection/public/plugin';
+import { mergeTables } from '../../common/expressions/merge_tables';
+import type { Document } from '../persistence/saved_object_store';
+import type {
   Datasource,
-  Visualization,
-  EditorFrameSetup,
   EditorFrameInstance,
+  EditorFrameSetup,
   EditorFrameStart,
+  Visualization,
 } from '../types';
-import { Document } from '../persistence/saved_object_store';
-import { mergeTables } from '../../common/expressions';
-import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
-import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
-import { DashboardStart } from '../../../../../src/plugins/dashboard/public';
 
 export interface EditorFrameSetupPlugins {
   data: DataPublicPluginSetup;

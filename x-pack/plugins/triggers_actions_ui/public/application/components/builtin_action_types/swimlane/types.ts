@@ -6,12 +6,11 @@
  */
 
 /* eslint-disable @kbn/eslint/no-restricted-paths */
-
-import { UserConfiguredActionConnector } from '../../../../types';
-import {
+import type {
   ExecutorSubActionPushParams,
   MappingConfigType,
 } from '../../../../../../actions/server/builtin_action_types/swimlane/types';
+import type { UserConfiguredActionConnector } from '../../../../types';
 
 export type SwimlaneActionConnector = UserConfiguredActionConnector<
   SwimlaneConfig,

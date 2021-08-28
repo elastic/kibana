@@ -4,23 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { getFlattenedObject } from '@kbn/std';
 import { i18n } from '@kbn/i18n';
+import { getFlattenedObject } from '@kbn/std';
 import { safeLoad } from 'js-yaml';
 import { keyBy } from 'lodash';
 
+import type { PackageInfo, RegistryStream, RegistryVarsEntry } from '../types/models/epm';
 import type {
   NewPackagePolicy,
+  PackagePolicyConfigRecordEntry,
   PackagePolicyInput,
   PackagePolicyInputStream,
-  PackagePolicyConfigRecordEntry,
-  PackageInfo,
-  RegistryStream,
-  RegistryVarsEntry,
-} from '../types';
+} from '../types/models/package_policy';
 
-import { isValidNamespace, doesPackageHaveIntegrations } from './';
+import { isValidNamespace } from './is_valid_namespace';
+import { doesPackageHaveIntegrations } from './packages_with_integrations';
 
 type Errors = string[] | null;
 

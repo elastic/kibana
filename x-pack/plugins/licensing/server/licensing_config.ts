@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { schema, TypeOf } from '@kbn/config-schema';
-import { PluginConfigDescriptor } from 'kibana/server';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
+import type { PluginConfigDescriptor } from '../../../../src/core/server/plugins/types';
 
 const configSchema = schema.object({
   api_polling_frequency: schema.duration({ defaultValue: '30s' }),

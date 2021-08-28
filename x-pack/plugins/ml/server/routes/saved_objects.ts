@@ -4,18 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { wrapError } from '../client/error_wrapper';
-import { RouteInitialization, SavedObjectsRouteDeps } from '../types';
-import { checksFactory, syncSavedObjectsFactory } from '../saved_objects';
-import {
-  jobsAndSpaces,
-  jobsAndCurrentSpace,
-  syncJobObjects,
-  canDeleteJobSchema,
-  jobTypeSchema,
-} from './schemas/saved_objects';
 import { spacesUtilsProvider } from '../lib/spaces_utils';
+import { checksFactory } from '../saved_objects/checks';
+import { syncSavedObjectsFactory } from '../saved_objects/sync';
+import type { RouteInitialization, SavedObjectsRouteDeps } from '../types';
+import {
+  canDeleteJobSchema,
+  jobsAndCurrentSpace,
+  jobsAndSpaces,
+  jobTypeSchema,
+  syncJobObjects,
+} from './schemas/saved_objects';
 
 /**
  * Routes for job saved object management

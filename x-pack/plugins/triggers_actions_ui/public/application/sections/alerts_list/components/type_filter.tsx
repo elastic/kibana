@@ -4,16 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { Fragment, useEffect, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
 import {
-  EuiFilterGroup,
-  EuiPopover,
   EuiFilterButton,
+  EuiFilterGroup,
   EuiFilterSelectItem,
+  EuiPopover,
   EuiTitle,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
+import React, { Fragment, useEffect, useState } from 'react';
 
 interface TypeFilterProps {
   options: Array<{

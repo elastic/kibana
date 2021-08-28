@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { useEffect, useRef, useState } from 'react';
-import { BehaviorSubject, Observable, OperatorFunction, PartialObserver, Subscription } from 'rxjs';
+import type { OperatorFunction, PartialObserver } from 'rxjs';
+import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 
 export const useLatest = <Value>(value: Value) => {

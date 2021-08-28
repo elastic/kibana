@@ -4,27 +4,28 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { FC, useEffect } from 'react';
-import { CoreStart } from 'kibana/public';
-import { UiActionsStart } from 'src/plugins/ui_actions/public';
-import type { Start as InspectorStartContract } from 'src/plugins/inspector/public';
 import { EuiLoadingChart } from '@elastic/eui';
-import {
-  EmbeddableInput,
+import type { FC } from 'react';
+import React, { useEffect } from 'react';
+import type { CoreStart } from '../../../../../src/core/public/types';
+import type { EmbeddableInput } from '../../../../../src/plugins/embeddable/common/types';
+import { useEmbeddableFactory } from '../../../../../src/plugins/embeddable/public/lib/embeddables/embeddable_renderer';
+import { EmbeddableRoot } from '../../../../../src/plugins/embeddable/public/lib/embeddables/embeddable_root';
+import type {
   EmbeddableOutput,
-  EmbeddablePanel,
-  EmbeddableRoot,
-  EmbeddableStart,
   IEmbeddable,
-  useEmbeddableFactory,
-} from '../../../../../src/plugins/embeddable/public';
-import type { LensByReferenceInput, LensByValueInput } from './embeddable';
-import type { Document } from '../persistence';
-import type { IndexPatternPersistedState } from '../indexpattern_datasource/types';
-import type { XYState } from '../xy_visualization/types';
-import type { PieVisualizationState, MetricState } from '../../common/expressions';
+} from '../../../../../src/plugins/embeddable/public/lib/embeddables/i_embeddable';
+import { EmbeddablePanel } from '../../../../../src/plugins/embeddable/public/lib/panel/embeddable_panel';
+import type { EmbeddableStart } from '../../../../../src/plugins/embeddable/public/plugin';
+import type { Start as InspectorStartContract } from '../../../../../src/plugins/inspector/public/plugin';
+import type { UiActionsStart } from '../../../../../src/plugins/ui_actions/public/plugin';
+import type { MetricState } from '../../common/expressions/metric_chart/types';
+import type { PieVisualizationState } from '../../common/expressions/pie_chart/types';
 import type { DatatableVisualizationState } from '../datatable_visualization/visualization';
+import type { IndexPatternPersistedState } from '../indexpattern_datasource/types';
+import type { Document } from '../persistence/saved_object_store';
+import type { XYState } from '../xy_visualization/types';
+import type { LensByReferenceInput, LensByValueInput } from './embeddable';
 
 type LensAttributes<TVisType, TVisState> = Omit<
   Document,

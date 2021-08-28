@@ -4,9 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { useCallback } from 'react';
-import { useFormContext } from '../../common/shared_imports';
+import { useFormContext } from '../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/form_context';
 import { useTimelineContext } from '../timeline_context/use_timeline_context';
 
 type InsertFields = 'comment' | 'description';

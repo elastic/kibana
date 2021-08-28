@@ -6,7 +6,7 @@
  */
 import { Position } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
-import type { ExpressionFunctionDefinition } from '../../../../../../src/plugins/expressions/common';
+import type { ExpressionFunctionDefinition } from '../../../../../../src/plugins/expressions/common/expression_functions/types';
 
 export const HEATMAP_LEGEND_FUNCTION = 'lens_heatmap_legendConfig';
 

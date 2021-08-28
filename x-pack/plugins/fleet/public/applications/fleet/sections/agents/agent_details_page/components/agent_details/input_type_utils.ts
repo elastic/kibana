@@ -4,13 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { i18n } from '@kbn/i18n';
 
 import {
-  STATE_DATASET_FIELD,
   AGENT_DATASET_FILEBEAT,
   AGENT_DATASET_METRICBEAT,
+  STATE_DATASET_FIELD,
 } from '../agent_logs/constants';
 
 export function displayInputType(inputType: string): string {

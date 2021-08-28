@@ -4,18 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { estypes } from '@elastic/elasticsearch';
-
-import { KibanaRequest, SavedObjectsClientContract } from 'kibana/server';
-import { MlLicense } from '../../../common/license';
-import { CloudSetup } from '../../../../cloud/server';
+import { estypes } from '@elastic/elasticsearch';
+import { KibanaRequest } from '../../../../../../src/core/server/http/router/request';
+import type { SavedObjectsClientContract } from '../../../../../../src/core/server/saved_objects/types';
+import type { CloudSetup } from '../../../../cloud/server/plugin';
+import type { SpacesPluginStart } from '../../../../spaces/server/plugin';
+import { MlLicense } from '../../../common/license/ml_license';
+import type {
+  MlCapabilitiesResponse,
+  ResolveMlCapabilities,
+} from '../../../common/types/capabilities';
+import type { MlInfoResponse } from '../../../common/types/ml_server_info';
+import { capabilitiesProvider } from '../../lib/capabilities/check_capabilities';
 import { spacesUtilsProvider } from '../../lib/spaces_utils';
-import { SpacesPluginStart } from '../../../../spaces/server';
-import { capabilitiesProvider } from '../../lib/capabilities';
-import { MlInfoResponse } from '../../../common/types/ml_server_info';
-import { MlCapabilitiesResponse, ResolveMlCapabilities } from '../../../common/types/capabilities';
-import { GetGuards } from '../shared_services';
+import type { GetGuards } from '../shared_services';
 
 export interface MlSystemProvider {
   mlSystemProvider(

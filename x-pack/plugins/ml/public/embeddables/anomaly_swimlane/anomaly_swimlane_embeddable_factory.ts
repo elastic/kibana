@@ -4,24 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { i18n } from '@kbn/i18n';
-
-import type { StartServicesAccessor } from 'kibana/public';
-
-import { PLUGIN_ID, PLUGIN_ICON, ML_APP_NAME } from '../../../common/constants/app';
-import type {
-  EmbeddableFactoryDefinition,
-  IContainer,
-} from '../../../../../../src/plugins/embeddable/public';
+import type { StartServicesAccessor } from '../../../../../../src/core/public/types';
+import type { IContainer } from '../../../../../../src/plugins/embeddable/public/lib/containers/i_container';
+import type { EmbeddableFactoryDefinition } from '../../../../../../src/plugins/embeddable/public/lib/embeddables/embeddable_factory_definition';
+import { ML_APP_NAME, PLUGIN_ICON, PLUGIN_ID } from '../../../common/constants/app';
+import type { MlDependencies } from '../../application/app';
 import { HttpService } from '../../application/services/http_service';
 import type { MlPluginStart, MlStartDependencies } from '../../plugin';
-import type { MlDependencies } from '../../application/app';
-import {
-  ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
-  AnomalySwimlaneEmbeddableInput,
-  AnomalySwimlaneEmbeddableServices,
-} from '..';
+import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '../constants';
+import type { AnomalySwimlaneEmbeddableInput, AnomalySwimlaneEmbeddableServices } from '../types';
 
 export class AnomalySwimlaneEmbeddableFactory
   implements EmbeddableFactoryDefinition<AnomalySwimlaneEmbeddableInput> {

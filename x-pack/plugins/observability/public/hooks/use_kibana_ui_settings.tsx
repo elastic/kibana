@@ -4,9 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { UI_SETTINGS } from '../../../../../src/plugins/data/public';
-import { useKibana } from '../../../../../src/plugins/kibana_react/public';
+import { UI_SETTINGS } from '../../../../../src/plugins/data/common/constants';
+import { useKibana } from '../../../../../src/plugins/kibana_react/public/context/context';
 
 export { UI_SETTINGS };
 

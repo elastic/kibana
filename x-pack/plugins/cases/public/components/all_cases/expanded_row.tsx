@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiBasicTable as _EuiBasicTable } from '@elastic/eui';
+import React from 'react';
 import styled from 'styled-components';
-import { Case, SubCase } from '../../containers/types';
-import { CasesColumns } from './columns';
-import { AssociationType } from '../../../common';
+import { AssociationType } from '../../../common/api/cases/comment';
+import type { Case, SubCase } from '../../../common/ui/types';
+import type { CasesColumns } from './columns';
 
 type ExpandedRowMap = Record<string, Element> | {};
 

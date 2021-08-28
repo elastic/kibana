@@ -10,7 +10,7 @@ import { merge } from 'lodash';
 import type { ReactNode } from 'react';
 import React from 'react';
 import { ServiceIcons } from '.';
-import type { CoreStart } from '../../../../../../../src/core/public';
+import type { CoreStart } from '../../../../../../../src/core/public/types';
 import { EuiThemeProvider } from '../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
 import { createKibanaReactContext } from '../../../../../../../src/plugins/kibana_react/public/context/context';
 import type { ApmPluginContextValue } from '../../../context/apm_plugin/apm_plugin_context';

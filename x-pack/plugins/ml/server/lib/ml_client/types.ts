@@ -4,8 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { ElasticsearchClient } from 'kibana/server';
+import type { ElasticsearchClient } from '../../../../../../src/core/server/elasticsearch/client/types';
 import { searchProvider } from './search';
 
 type OrigMlClient = ElasticsearchClient['ml'];

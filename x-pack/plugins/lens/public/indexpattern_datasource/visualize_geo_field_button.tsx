@@ -4,15 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { MouseEvent, useEffect, useState } from 'react';
 import { EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import type { MouseEvent } from 'react';
+import React, { useEffect, useState } from 'react';
+import type { UiActionsStart } from '../../../../../src/plugins/ui_actions/public/plugin';
 import {
   visualizeGeoFieldTrigger,
   VISUALIZE_GEO_FIELD_TRIGGER,
-  UiActionsStart,
-} from '../../../../../src/plugins/ui_actions/public';
+} from '../../../../../src/plugins/ui_actions/public/triggers/visualize_geo_field_trigger';
 
 interface Props {
   indexPatternId: string;

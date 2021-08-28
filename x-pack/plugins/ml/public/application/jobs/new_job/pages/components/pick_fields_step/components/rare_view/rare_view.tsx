@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { FC, useEffect, useState } from 'react';
 import { EuiHorizontalRule } from '@elastic/eui';
-
+import type { FC } from 'react';
+import React, { useEffect, useState } from 'react';
 import { RareDetectors } from './metric_selection';
 import { RareDetectorsSummary } from './metric_selection_summary';
 import { RareSettings } from './settings';

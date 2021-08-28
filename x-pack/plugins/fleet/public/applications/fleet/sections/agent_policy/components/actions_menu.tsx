@@ -4,17 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { memo, useState, useMemo, useCallback } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiContextMenuItem, EuiPortal } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
+import React, { memo, useCallback, useMemo, useState } from 'react';
 
-import type { AgentPolicy } from '../../../types';
-import { useCapabilities } from '../../../hooks';
-import { AgentEnrollmentFlyout, ContextMenuActions } from '../../../components';
+import type { AgentPolicy } from '../../../../../../common/types/models/agent_policy';
+import { AgentEnrollmentFlyout } from '../../../../../components/agent_enrollment_flyout';
+import { ContextMenuActions } from '../../../../../components/context_menu_actions';
+import { useCapabilities } from '../../../../../hooks/use_capabilities';
 
-import { AgentPolicyYamlFlyout } from './agent_policy_yaml_flyout';
 import { AgentPolicyCopyProvider } from './agent_policy_copy_provider';
+import { AgentPolicyYamlFlyout } from './agent_policy_yaml_flyout';
 
 export const AgentPolicyActionMenu = memo<{
   agentPolicy: AgentPolicy;

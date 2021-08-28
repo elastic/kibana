@@ -4,15 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
-import {
+import { lazy } from 'react';
+import type {
   ActionTypeModel,
-  GenericValidationResult,
   ConnectorValidationResult,
+  GenericValidationResult,
 } from '../../../../types';
-import { ServerLogActionParams } from '../types';
+import type { ServerLogActionParams } from '../types';
 
 export function getActionType(): ActionTypeModel<unknown, unknown, ServerLogActionParams> {
   return {

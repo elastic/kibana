@@ -4,9 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { ReactElement } from 'react';
-import { StyleDescriptor } from '../../../common/descriptor_types';
+import type { ReactElement } from 'react';
+import type { StyleDescriptor } from '../../../common/descriptor_types/style_property_descriptor_types';
 
 export interface IStyle {
   getType(): string;

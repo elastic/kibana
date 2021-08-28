@@ -4,17 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { i18n } from '@kbn/i18n';
-import { ToastInput, ToastOptions, ToastsStart } from 'kibana/public';
 import { useMemo } from 'react';
+import type {
+  ToastInput,
+  ToastOptions,
+} from '../../../../../../../src/core/public/notifications/toasts/toasts_api';
+import type { ToastsStart } from '../../../../../../../src/core/public/notifications/toasts/toasts_service';
+import { extractErrorProperties } from '../../../../common/util/errors/process_errors';
+import { MLRequestFailure } from '../../../../common/util/errors/request_error';
+import type { ErrorType } from '../../../../common/util/errors/types';
+import { useNotifications } from '../../contexts/kibana/use_notifications_context';
 import { getToastNotifications } from '../../util/dependency_cache';
-import { useNotifications } from '../../contexts/kibana';
-import {
-  ErrorType,
-  extractErrorProperties,
-  MLRequestFailure,
-} from '../../../../common/util/errors';
 
 export type ToastNotificationService = ReturnType<typeof toastNotificationServiceProvider>;
 

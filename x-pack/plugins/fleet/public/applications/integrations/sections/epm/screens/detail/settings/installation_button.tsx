@@ -4,22 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { EuiButton } from '@elastic/eui';
-import React, { Fragment, useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
+import React, { Fragment, useCallback, useMemo, useState } from 'react';
 
-import type { PackageInfo } from '../../../../../types';
-import { InstallStatus } from '../../../../../types';
+import type { PackageInfo } from '../../../../../../../../common/types/models/epm';
+import { InstallStatus } from '../../../../../../../../common/types/models/epm';
+import { useCapabilities } from '../../../../../../../hooks/use_capabilities';
 import {
-  useCapabilities,
-  useUninstallPackage,
   useGetPackageInstallStatus,
   useInstallPackage,
-} from '../../../../../hooks';
+  useUninstallPackage,
+} from '../../../../../hooks/use_package_install';
 
-import { ConfirmPackageUninstall } from './confirm_package_uninstall';
 import { ConfirmPackageInstall } from './confirm_package_install';
+import { ConfirmPackageUninstall } from './confirm_package_uninstall';
 
 type InstallationButtonProps = Pick<PackageInfo, 'assets' | 'name' | 'title' | 'version'> & {
   disabled?: boolean;

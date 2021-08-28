@@ -4,22 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { useMemo } from 'react';
-import { SavedObjectNotFound } from '../../../../../../../src/plugins/kibana_utils/common';
-import { useUiTracker } from '../../../../../observability/public';
-import {
+import { SavedObjectNotFound } from '../../../../../../../src/plugins/kibana_utils/common/errors/errors';
+import { useUiTracker } from '../../../../../observability/public/hooks/use_track_metric';
+import type {
   LogIndexNameReference,
-  logIndexNameReferenceRT,
   LogIndexPatternReference,
-} from '../../../../common/log_sources';
+} from '../../../../common/log_sources/log_source_configuration';
+import { logIndexNameReferenceRT } from '../../../../common/log_sources/log_source_configuration';
 import { useKibanaIndexPatternService } from '../../../hooks/use_kibana_index_patterns';
 import { useCompositeFormElement, useFormElement } from './form_elements';
-import {
-  FormValidationError,
-  validateIndexPattern,
-  validateStringNotEmpty,
-} from './validation_errors';
+import type { FormValidationError } from './validation_errors';
+import { validateIndexPattern, validateStringNotEmpty } from './validation_errors';
 
 export type LogIndicesFormState = LogIndexNameReference | LogIndexPatternReference | undefined;
 

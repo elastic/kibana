@@ -4,8 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { ElasticsearchFeatureConfig } from '../../../features/server';
+import type { ElasticsearchFeatureConfig } from '../../../features/common/elasticsearch_feature';
 
 const userManagementFeature: ElasticsearchFeatureConfig = {
   id: 'users',

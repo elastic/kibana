@@ -6,19 +6,19 @@
  */
 import {
   EuiCallOut,
+  EuiFieldPassword,
   EuiFieldText,
   EuiFormRow,
   EuiLink,
   EuiSpacer,
   EuiText,
-  EuiFieldPassword,
 } from '@elastic/eui';
-import React, { useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
+import React, { useCallback } from 'react';
+import { useKibana } from '../../../../../common/lib/kibana/kibana_react';
+import type { IErrorObject } from '../../../../../types';
 import * as i18n from '../translations';
-import { useKibana } from '../../../../../common/lib/kibana';
-import { SwimlaneActionConnector } from '../types';
-import { IErrorObject } from '../../../../../types';
+import type { SwimlaneActionConnector } from '../types';
 
 interface Props {
   action: SwimlaneActionConnector;

@@ -4,12 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { EuiButton, EuiComboBox, EuiForm, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { IFieldType } from 'src/plugins/data/public';
-import { InfraGroupByOptions } from '../../../../../lib/lib';
+import type { IFieldType } from '../../../../../../../../../src/plugins/data/common/index_patterns/fields/types';
+import type { InfraGroupByOptions } from '../../../../../lib/lib';
 
 interface Props {
   onSubmit: (field: string) => void;

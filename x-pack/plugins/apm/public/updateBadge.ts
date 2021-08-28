@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import type { CoreStart } from '../../../../src/core/public';
+import type { CoreStart } from '../../../../src/core/public/types';
 
 export function setReadonlyBadge({ application, chrome }: CoreStart) {
   const canSave = application.capabilities.apm.save;

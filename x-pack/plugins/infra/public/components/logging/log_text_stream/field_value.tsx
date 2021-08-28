@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import type { JsonArray, JsonValue } from '@kbn/utility-types';
 import stringify from 'json-stable-stringify';
 import React from 'react';
-import { JsonArray, JsonValue } from '@kbn/utility-types';
-import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
+import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
 import { ActiveHighlightMarker, highlightFieldValue, HighlightMarker } from './highlighting';
 
 export const FieldValue: React.FC<{

@@ -4,24 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { FC, useEffect, useMemo, useState } from 'react';
-import { EuiButtonGroup, EuiCode, EuiFlexGroup, EuiFlexItem, EuiInputPopover } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-
-import { debounce } from 'lodash';
-import { fromKueryExpression, luceneStringToDsl, toElasticsearchQuery } from '@kbn/es-query';
 import { estypes } from '@elastic/elasticsearch';
-import { Dictionary } from '../../../../../../../common/types/common';
-import { IIndexPattern } from '../../../../../../../../../../src/plugins/data/common/index_patterns';
-import { Query, QueryStringInput } from '../../../../../../../../../../src/plugins/data/public';
-
-import {
-  SEARCH_QUERY_LANGUAGE,
-  SearchQueryLanguage,
-} from '../../../../../../../common/constants/search';
+import { EuiButtonGroup, EuiCode, EuiFlexGroup, EuiFlexItem, EuiInputPopover } from '@elastic/eui';
+import { fromKueryExpression, luceneStringToDsl, toElasticsearchQuery } from '@kbn/es-query';
+import { i18n } from '@kbn/i18n';
+import { debounce } from 'lodash';
+import type { FC } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import type { IIndexPattern } from '../../../../../../../../../../src/plugins/data/common/index_patterns/types';
+import type { Query } from '../../../../../../../../../../src/plugins/data/public';
+import { QueryStringInput } from '../../../../../../../../../../src/plugins/data/public/ui/query_string_input';
+import type { SearchQueryLanguage } from '../../../../../../../common/constants/search';
+import { SEARCH_QUERY_LANGUAGE } from '../../../../../../../common/constants/search';
+import type { Dictionary } from '../../../../../../../common/types/common';
+import type { SavedSearchQuery } from '../../../../../contexts/ml/ml_context';
 import { removeFilterFromQueryString } from '../../../../../explorer/explorer_utils';
-import { SavedSearchQuery } from '../../../../../contexts/ml';
 
 interface ErrorMessage {
   query: string;

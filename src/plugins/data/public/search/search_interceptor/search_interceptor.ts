@@ -21,10 +21,10 @@ import {
   takeUntil,
   tap,
 } from 'rxjs/operators';
-import type { CoreSetup, CoreStart } from '../../../../../core/public';
+import type { CoreSetup, CoreStart } from '../../../../../core/public/types';
 import type { ToastsSetup } from '../../../../../core/public/notifications/toasts/toasts_service';
 import type { BatchedFunc } from '../../../../bfetch/public/batching/types';
-import type { BfetchPublicSetup } from '../../../../bfetch/public/plugin';
+import type { BfetchPublicSetup } from '../../../../bfetch/public/types';
 import { toMountPoint } from '../../../../kibana_react/public/util/to_mount_point';
 import { AbortError } from '../../../../kibana_utils/common/abort_utils';
 import type { KibanaServerError } from '../../../../kibana_utils/common/errors/types';

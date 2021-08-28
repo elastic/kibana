@@ -6,24 +6,30 @@
  */
 
 import Boom from '@hapi/boom';
-import { jsonRt, isoToEpochRt, toNumberRt } from '@kbn/io-ts-utils';
+import { isoToEpochRt, jsonRt, toNumberRt } from '@kbn/io-ts-utils';
 import * as t from 'io-ts';
 import { uniq } from 'lodash';
+import { environmentRt } from '../../common/environment_rt';
 import { latencyAggregationTypeRt } from '../../common/latency_aggregation_types';
 import { ProfilingValueType } from '../../common/profiling';
+import { offsetPreviousPeriodCoordinates } from '../../common/utils/offset_previous_period_coordinate';
 import { getSearchAggregatedTransactions } from '../lib/helpers/aggregated_transactions';
 import { getThroughputUnit } from '../lib/helpers/calculate_throughput';
+import { getBucketSizeForAggregatedTransactions } from '../lib/helpers/get_bucket_size_for_aggregated_transactions';
 import { setupRequest } from '../lib/helpers/setup_request';
 import { getServiceAnnotations } from '../lib/services/annotations';
 import { getServices } from '../lib/services/get_services';
+import { getServicesDetailedStatistics } from '../lib/services/get_services_detailed_statistics';
 import { getServiceAgent } from '../lib/services/get_service_agent';
 import { getServiceAlerts } from '../lib/services/get_service_alerts';
 import { getServiceDependencies } from '../lib/services/get_service_dependencies';
-import { getServiceInstanceMetadataDetails } from '../lib/services/get_service_instance_metadata_details';
+import { getServiceDependenciesBreakdown } from '../lib/services/get_service_dependencies_breakdown';
 import { getServiceErrorGroupPeriods } from '../lib/services/get_service_error_groups/get_service_error_group_detailed_statistics';
 import { getServiceErrorGroupMainStatistics } from '../lib/services/get_service_error_groups/get_service_error_group_main_statistics';
+import { getServiceInfrastructure } from '../lib/services/get_service_infrastructure';
 import { getServiceInstancesDetailedStatisticsPeriods } from '../lib/services/get_service_instances/detailed_statistics';
 import { getServiceInstancesMainStatistics } from '../lib/services/get_service_instances/main_statistics';
+import { getServiceInstanceMetadataDetails } from '../lib/services/get_service_instance_metadata_details';
 import { getServiceMetadataDetails } from '../lib/services/get_service_metadata_details';
 import { getServiceMetadataIcons } from '../lib/services/get_service_metadata_icons';
 import { getServiceNodeMetadata } from '../lib/services/get_service_node_metadata';
@@ -31,21 +37,15 @@ import { getServiceTransactionTypes } from '../lib/services/get_service_transact
 import { getThroughput } from '../lib/services/get_throughput';
 import { getServiceProfilingStatistics } from '../lib/services/profiling/get_service_profiling_statistics';
 import { getServiceProfilingTimeline } from '../lib/services/profiling/get_service_profiling_timeline';
-import { getServiceInfrastructure } from '../lib/services/get_service_infrastructure';
 import { withApmSpan } from '../utils/with_apm_span';
 import { createApmServerRoute } from './create_apm_server_route';
 import { createApmServerRouteRepository } from './create_apm_server_route_repository';
 import {
   comparisonRangeRt,
-  environmentRt,
   kueryRt,
   offsetRt,
   rangeRt,
 } from './default_api_types';
-import { offsetPreviousPeriodCoordinates } from '../../common/utils/offset_previous_period_coordinate';
-import { getServicesDetailedStatistics } from '../lib/services/get_services_detailed_statistics';
-import { getServiceDependenciesBreakdown } from '../lib/services/get_service_dependencies_breakdown';
-import { getBucketSizeForAggregatedTransactions } from '../lib/helpers/get_bucket_size_for_aggregated_transactions';
 
 const servicesRoute = createApmServerRoute({
   endpoint: 'GET /api/apm/services',

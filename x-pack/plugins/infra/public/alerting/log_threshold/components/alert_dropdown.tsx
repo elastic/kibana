@@ -4,14 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { useState, useCallback, useMemo } from 'react';
+import { EuiContextMenuItem, EuiContextMenuPanel, EuiHeaderLink, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EuiPopover, EuiContextMenuItem, EuiContextMenuPanel, EuiHeaderLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { AlertFlyout } from './alert_flyout';
-import { useLinkProps } from '../../../hooks/use_link_props';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
+import { useLinkProps } from '../../../hooks/use_link_props';
+import { AlertFlyout } from './alert_flyout';
 
 const readOnlyUserTooltipContent = i18n.translate(
   'xpack.infra.logs.alertDropdown.readOnlyCreateAlertContent',

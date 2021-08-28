@@ -7,7 +7,7 @@
  */
 import type { FunctionComponent } from 'react';
 import React, { createContext, useContext, useMemo } from 'react';
-import type { CoreStart } from '../../../../core/public';
+import type { CoreStart } from '../../../../core/public/types';
 import type { NotificationsStart } from '../../../../core/public/notifications/notifications_service';
 import { IndexPattern } from '../../../data/common/index_patterns/index_patterns/index_pattern';
 import type { DataPublicPluginStart } from '../../../data/public/types';

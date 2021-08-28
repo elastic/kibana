@@ -4,10 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { calculatePopoverPosition, EuiPortal } from '@elastic/eui';
 import * as React from 'react';
-
 import { AutoSizer } from '../../auto_sizer';
 
 const POPOVER_ARROW_SIZE = 12; // px, to position it later

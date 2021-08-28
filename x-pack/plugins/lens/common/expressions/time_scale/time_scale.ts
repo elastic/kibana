@@ -5,21 +5,15 @@
  * 2.0.
  */
 
-import moment from 'moment-timezone';
 import { i18n } from '@kbn/i18n';
-import type {
-  ExpressionFunctionDefinition,
-  Datatable,
-} from '../../../../../../src/plugins/expressions/common';
-import {
-  getDateHistogramMetaDataByDatatableColumn,
-  parseInterval,
-  calculateBounds,
-} from '../../../../../../src/plugins/data/common';
-import {
-  buildResultColumns,
-  ExecutionContext,
-} from '../../../../../../src/plugins/expressions/common';
+import moment from 'moment-timezone';
+import { calculateBounds } from '../../../../../../src/plugins/data/common/query/timefilter/get_time';
+import { parseInterval } from '../../../../../../src/plugins/data/common/search/aggs/utils/date_interval_utils/parse_interval';
+import { getDateHistogramMetaDataByDatatableColumn } from '../../../../../../src/plugins/data/common/search/aggs/utils/get_date_histogram_meta';
+import type { ExecutionContext } from '../../../../../../src/plugins/expressions/common/execution/types';
+import { buildResultColumns } from '../../../../../../src/plugins/expressions/common/expression_functions/series_calculation_helpers';
+import type { ExpressionFunctionDefinition } from '../../../../../../src/plugins/expressions/common/expression_functions/types';
+import type { Datatable } from '../../../../../../src/plugins/expressions/common/expression_types/specs/datatable';
 import type { TimeScaleUnit } from './types';
 
 export interface TimeScaleArgs {

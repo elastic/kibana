@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import type { EuiIconProps } from '@elastic/eui';
 import React from 'react';
-import { EuiIconProps } from '@elastic/eui';
 
 export const LensIconChartAreaStacked = ({
   title,

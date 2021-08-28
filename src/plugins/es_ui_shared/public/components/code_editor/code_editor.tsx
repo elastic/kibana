@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 import { EuiI18n } from '@elastic/eui';
+// @ts-expect-error
 import { htmlIdGenerator, keys } from '@elastic/eui/lib/services';
 import classNames from 'classnames';
 import type { AriaAttributes } from 'react';
 import React, { Component } from 'react';
 import type { IAceEditorProps } from 'react-ace';
 import AceEditor from 'react-ace';
-// @ts-ignore
 import './_index.scss';
 
 /**

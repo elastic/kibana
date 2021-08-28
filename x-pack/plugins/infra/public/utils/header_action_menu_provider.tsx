@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { AppMountParameters } from 'kibana/public';
+import type { AppMountParameters } from '../../../../../src/core/public/application/types';
 
 interface ContextProps {
   setHeaderActionMenu?: AppMountParameters['setHeaderActionMenu'];

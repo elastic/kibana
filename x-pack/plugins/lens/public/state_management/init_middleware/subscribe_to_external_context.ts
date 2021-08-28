@@ -4,15 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { delay, finalize, switchMap, tap } from 'rxjs/operators';
 import { debounce, isEqual } from 'lodash';
-import { trackUiEvent } from '../../lens_ui_telemetry';
-import {
-  waitUntilNextSessionCompletes$,
-  DataPublicPluginStart,
-} from '../../../../../../src/plugins/data/public';
-import { setState, LensGetState, LensDispatch } from '..';
+import { delay, finalize, switchMap, tap } from 'rxjs/operators';
+import type { LensDispatch, LensGetState } from '..';
+import { setState } from '..';
+import { waitUntilNextSessionCompletes$ } from '../../../../../../src/plugins/data/public/search/session/session_helpers';
+import type { DataPublicPluginStart } from '../../../../../../src/plugins/data/public/types';
+import { trackUiEvent } from '../../lens_ui_telemetry/factory';
 import { getResolvedDateRange } from '../../utils';
 
 export function subscribeToExternalContext(

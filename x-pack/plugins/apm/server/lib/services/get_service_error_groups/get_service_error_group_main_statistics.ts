@@ -4,8 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { kqlQuery, rangeQuery } from '../../../../../observability/server';
+import {
+  kqlQuery,
+  rangeQuery,
+} from '../../../../../observability/server/utils/queries';
 import {
   ERROR_EXC_MESSAGE,
   ERROR_GROUP_ID,
@@ -16,7 +18,7 @@ import {
 import { ProcessorEvent } from '../../../../common/processor_event';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { getErrorName } from '../../helpers/get_error_name';
-import { Setup, SetupTimeRange } from '../../helpers/setup_request';
+import type { Setup, SetupTimeRange } from '../../helpers/setup_request';
 
 export async function getServiceErrorGroupMainStatistics({
   kuery,

@@ -4,11 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { Query } from 'src/plugins/data/public';
+import type { Query } from 'src/plugins/data/public';
+import type { OperationType } from '.';
+import type { TimeScaleUnit } from '../../../../common/expressions/time_scale/types';
 import type { Operation } from '../../../types';
-import type { TimeScaleUnit } from '../../../../common/expressions';
-import type { OperationType } from '../definitions';
 
 export interface BaseIndexPatternColumn extends Operation {
   // Private

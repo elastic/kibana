@@ -4,15 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { IScopedClusterClient } from 'kibana/server';
-import { mlLog } from '../../lib/log';
-
+import type { IScopedClusterClient } from '../../../../../../src/core/server/elasticsearch/client/scoped_cluster_client';
 import {
   ML_ANNOTATIONS_INDEX_ALIAS_READ,
   ML_ANNOTATIONS_INDEX_ALIAS_WRITE,
   ML_ANNOTATIONS_INDEX_PATTERN,
 } from '../../../common/constants/index_patterns';
+import { mlLog } from '../log';
 
 // Annotations Feature is available if:
 // - ML_ANNOTATIONS_INDEX_PATTERN index is present

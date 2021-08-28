@@ -4,13 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { ElasticsearchClient } from '../../../../../src/core/server/elasticsearch/client/types';
+import type { KibanaRequest } from '../../../../../src/core/server/http/router/request';
+import type { SavedObjectsClientContract } from '../../../../../src/core/server/saved_objects/types';
 
-import type { KibanaRequest } from 'src/core/server';
-import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
-
-import { generateEnrollmentAPIKey, deleteEnrollmentApiKeyForAgentPolicyId } from './api_keys';
-import { unenrollForAgentPolicyId } from './agents';
+import { unenrollForAgentPolicyId } from './agents/update';
 import { agentPolicyService } from './agent_policy';
+import {
+  deleteEnrollmentApiKeyForAgentPolicyId,
+  generateEnrollmentAPIKey,
+} from './api_keys/enrollment_api_key';
 import { appContextService } from './app_context';
 
 const fakeRequest = ({

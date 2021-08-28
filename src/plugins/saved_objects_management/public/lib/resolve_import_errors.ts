@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { AugmentedRequired as Required } from '@kbn/utility-types';
+import type { Required } from '@kbn/utility-types';
 import type { HttpStart } from '../../../../core/public/http/types';
 import type {
   SavedObjectsImportAmbiguousConflictError,

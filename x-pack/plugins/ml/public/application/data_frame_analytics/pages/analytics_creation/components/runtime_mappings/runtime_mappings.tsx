@@ -4,8 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { FC, useState, useEffect } from 'react';
 import {
   EuiButton,
   EuiButtonIcon,
@@ -17,16 +15,18 @@ import {
   EuiSwitch,
   EuiText,
 } from '@elastic/eui';
+import { XJsonMode } from '@kbn/ace';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { XJsonMode } from '@kbn/ace';
-import { useMlContext } from '../../../../../contexts/ml';
-import { CreateAnalyticsFormProps } from '../../../analytics_management/hooks/use_create_analytics_form';
-import { XJson } from '../../../../../../../../../../src/plugins/es_ui_shared/public';
-import { getCombinedRuntimeMappings } from '../../../../../components/data_grid/common';
+import type { FC } from 'react';
+import React, { useEffect, useState } from 'react';
+import * as XJson from '../../../../../../../../../../src/plugins/es_ui_shared/public/xjson';
 import { isPopulatedObject } from '../../../../../../../common/util/object_utils';
+import { isRuntimeMappings } from '../../../../../../../common/util/runtime_field_utils';
+import { getCombinedRuntimeMappings } from '../../../../../components/data_grid/common';
+import { useMlContext } from '../../../../../contexts/ml/use_ml_context';
+import type { CreateAnalyticsFormProps } from '../../../analytics_management/hooks/use_create_analytics_form/use_create_analytics_form';
 import { RuntimeMappingsEditor } from './runtime_mappings_editor';
-import { isRuntimeMappings } from '../../../../../../../common';
 import { SwitchModal } from './switch_modal';
 
 const advancedEditorsSidebarWidth = '220px';

@@ -4,18 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { i18n } from '@kbn/i18n';
 import {
-  isRegressionAnalysis,
-  isOutlierAnalysis,
   isClassificationAnalysis,
-} from '../../../../common/analytics';
+  isOutlierAnalysis,
+  isRegressionAnalysis,
+} from '../../../../../../../common/util/analytics_utils';
+import type { DataFrameAnalyticsListRow } from '../analytics_list/common';
 import {
-  DataFrameAnalyticsListRow,
-  isDataFrameAnalyticsStopped,
-  isDataFrameAnalyticsFailed,
   getDataFrameAnalyticsProgressPhase,
+  isDataFrameAnalyticsFailed,
+  isDataFrameAnalyticsStopped,
 } from '../analytics_list/common';
 
 const unknownJobTypeMessage = i18n.translate(

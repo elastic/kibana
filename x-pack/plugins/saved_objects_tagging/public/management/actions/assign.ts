@@ -4,16 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { Observable, from } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
-import { NotificationsStart, OverlayStart } from 'kibana/public';
-import { TagWithRelations } from '../../../common';
-import { ITagsCache } from '../../services/tags';
-import { getAssignFlyoutOpener } from '../../components/assign_flyout';
-import { ITagAssignmentService } from '../../services/assignments';
-import { TagAction } from './types';
+import { from, Observable } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
+import type { NotificationsStart } from '../../../../../../src/core/public/notifications/notifications_service';
+import type { OverlayStart } from '../../../../../../src/core/public/overlays/overlay_service';
+import type { ITagsCache } from '../../../../../../src/plugins/saved_objects_tagging_oss/public/api';
+import type { TagWithRelations } from '../../../common/types';
+import { getAssignFlyoutOpener } from '../../components/assign_flyout/open_assign_flyout';
+import type { ITagAssignmentService } from '../../services/assignments/assignment_service';
+import type { TagAction } from './types';
 
 interface GetAssignActionOptions {
   overlays: OverlayStart;

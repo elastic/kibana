@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import { BehaviorSubject } from 'rxjs';
-import type { CoreStart } from '../../../../../core/public';
+import type { CoreStart } from '../../../../../core/public/types';
 import type { AppUpdater } from '../../../../../core/public/application/types';
 import type { PluginInitializerContext } from '../../../../../core/public/plugins/plugin_context';
 

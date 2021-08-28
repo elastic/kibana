@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { i18n } from '@kbn/i18n';
+import type { JobId } from '../../../common/types/anomaly_detection_jobs/job';
+import type { Calendar, CalendarId } from '../../../common/types/calendars';
 import { ml } from './ml_api_service';
-import { Calendar, CalendarId } from '../../../common/types/calendars';
-import { JobId } from '../../../common/types/anomaly_detection_jobs';
+
 class CalendarService {
   /**
    * Assigns a job id to the calendar.

@@ -27,6 +27,7 @@ import {
   ALERT_SEVERITY as ALERT_SEVERITY_NON_TYPED,
   ALERT_START as ALERT_START_NON_TYPED,
   ALERT_UUID as ALERT_UUID_NON_TYPED,
+  // @ts-expect-error
 } from '@kbn/rule-data-utils/target_node/technical_field_names';
 import type { Dispatch, SetStateAction } from 'react';
 import React from 'react';

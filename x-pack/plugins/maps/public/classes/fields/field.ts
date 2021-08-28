@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { FIELD_ORIGIN } from '../../../common/constants';
-import { IVectorSource } from '../sources/vector_source';
-import { ITooltipProperty, TooltipProperty } from '../tooltips/tooltip_property';
+import type { IVectorSource } from '../sources/vector_source/vector_source';
+import type { ITooltipProperty } from '../tooltips/tooltip_property';
+import { TooltipProperty } from '../tooltips/tooltip_property';
 
 export interface IField {
   getName(): string;

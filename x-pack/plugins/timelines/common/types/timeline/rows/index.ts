@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { RowRendererId } from '..';
-import { Ecs } from '../../../ecs';
-import { BrowserFields } from '../../../search_strategy/index_fields';
+import type { Ecs } from '../../../ecs';
+import type { BrowserFields } from '../../../search_strategy/index_fields';
 
 export interface RowRenderer {
   id: RowRendererId;

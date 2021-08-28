@@ -8,7 +8,7 @@
 import React, { ComponentType, useEffect, useState } from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n/react';
 import { Observable } from 'rxjs';
-import { CoreStart } from 'src/core/public';
+import { CoreStart } from 'src/core/public/types';
 import { text } from '@storybook/addon-knobs';
 import { createKibanaReactContext } from '../../../../../../../../src/plugins/kibana_react/public';
 import { FieldValueSelectionProps } from '../types';

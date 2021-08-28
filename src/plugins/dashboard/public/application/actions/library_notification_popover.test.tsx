@@ -15,7 +15,7 @@ import {
   LibraryNotificationPopover,
   LibraryNotificationProps,
 } from './library_notification_popover';
-import { CoreStart } from '../../../../../core/public';
+import { CoreStart } from '../../../../../core/public/types';
 import { coreMock, uiSettingsServiceMock } from '../../../../../core/public/mocks';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { EuiPopover } from '@elastic/eui';

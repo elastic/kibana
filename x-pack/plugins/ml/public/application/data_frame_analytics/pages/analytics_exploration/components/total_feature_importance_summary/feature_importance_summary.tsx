@@ -4,39 +4,32 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { FC, useCallback, useMemo } from 'react';
-import { EuiButtonEmpty, EuiSpacer, EuiCallOut } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
-import {
-  Chart,
-  Settings,
-  Axis,
-  ScaleType,
-  Position,
-  BarSeries,
-  RecursivePartial,
-  AxisStyle,
-  PartialTheme,
-  BarSeriesSpec,
-} from '@elastic/charts';
-import { i18n } from '@kbn/i18n';
+import type { AxisStyle, BarSeriesSpec, PartialTheme, RecursivePartial } from '@elastic/charts';
+import { Axis, BarSeries, Chart, Position, ScaleType, Settings } from '@elastic/charts';
+import { EuiButtonEmpty, EuiCallOut, EuiSpacer } from '@elastic/eui';
 import euiVars from '@elastic/eui/dist/eui_theme_light.json';
-import {
-  TotalFeatureImportance,
-  isClassificationTotalFeatureImportance,
-  isRegressionTotalFeatureImportance,
-  RegressionTotalFeatureImportance,
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+import type { FC } from 'react';
+import React, { useCallback, useMemo } from 'react';
+import type { DataFrameAnalyticsConfig } from '../../../../../../../common/types/data_frame_analytics';
+import type {
   ClassificationTotalFeatureImportance,
   FeatureImportanceClassName,
+  RegressionTotalFeatureImportance,
+  TotalFeatureImportance,
 } from '../../../../../../../common/types/feature_importance';
-
-import { useMlKibana } from '../../../../../contexts/kibana';
-
-import { ExpandableSection } from '../expandable_section';
-import { DataFrameAnalyticsConfig } from '../../../../../../../common/types/data_frame_analytics';
-import { getAnalysisType } from '../../../../common';
-import { isClassificationAnalysis, isRegressionAnalysis } from '../../../../common/analytics';
+import {
+  isClassificationTotalFeatureImportance,
+  isRegressionTotalFeatureImportance,
+} from '../../../../../../../common/types/feature_importance';
+import {
+  getAnalysisType,
+  isClassificationAnalysis,
+  isRegressionAnalysis,
+} from '../../../../../../../common/util/analytics_utils';
+import { useMlKibana } from '../../../../../contexts/kibana/kibana_context';
+import { ExpandableSection } from '../expandable_section/expandable_section';
 
 const { euiColorMediumShade } = euiVars;
 const axisColor = euiColorMediumShade;

@@ -9,7 +9,7 @@ import type { MemoryHistory } from 'history';
 import { createMemoryHistory } from 'history';
 import React from 'react';
 import { Router } from 'react-router-dom';
-import type { CoreStart } from '../../../../../../src/core/public';
+import type { CoreStart } from '../../../../../../src/core/public/types';
 import { createKibanaReactContext } from '../../../../../../src/plugins/kibana_react/public/context/context';
 import { MockApmPluginContextWrapper } from '../../context/apm_plugin/mock_apm_plugin_context';
 import { ApmServiceContextProvider } from '../../context/apm_service/apm_service_context';

@@ -9,20 +9,18 @@
  * Service for firing and registering for events across the different
  * components in the Explorer dashboard.
  */
-
 import { isEqual } from 'lodash';
-
 import { from, isObservable, Observable, Subject } from 'rxjs';
 import { distinctUntilChanged, flatMap, map, scan, shareReplay } from 'rxjs/operators';
-
-import { DeepPartial } from '../../../common/types/common';
-
-import { jobSelectionActionCreator } from './actions';
-import { ExplorerChartsData } from './explorer_charts/explorer_charts_container_service';
+import type { DeepPartial } from '../../../common/types/common';
+import type { ExplorerAppState } from '../../../common/types/locator';
+import { jobSelectionActionCreator } from './actions/job_selection';
+import type { ExplorerChartsData } from './explorer_charts/explorer_charts_container_service';
 import { EXPLORER_ACTION } from './explorer_constants';
-import { AppStateSelectedCells } from './explorer_utils';
-import { explorerReducer, getExplorerDefaultState, ExplorerState } from './reducers';
-import { ExplorerAppState } from '../../../common/types/locator';
+import type { AppStateSelectedCells } from './explorer_utils';
+import { explorerReducer } from './reducers/explorer_reducer/reducer';
+import type { ExplorerState } from './reducers/explorer_reducer/state';
+import { getExplorerDefaultState } from './reducers/explorer_reducer/state';
 
 export const ALLOW_CELL_RANGE_SELECTION = true;
 

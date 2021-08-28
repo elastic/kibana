@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
 import { i18n } from '@kbn/i18n';
+import React from 'react';
 
-import { CustomAssetsAccordion } from './components/custom_assets_accordion';
 import type { CustomAssetsAccordionProps } from './components/custom_assets_accordion';
-import { useStartServices } from './hooks';
-import type { PackageAssetsComponent } from './types';
+import { CustomAssetsAccordion } from './components/custom_assets_accordion';
+import { useStartServices } from './hooks/use_core';
+import type { PackageAssetsComponent } from './types/ui_extensions';
 
 export const CustomLogsAssetsExtension: PackageAssetsComponent = () => {
   const { http } = useStartServices();

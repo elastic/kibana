@@ -4,45 +4,49 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { BehaviorSubject } from 'rxjs';
 import { cloneDeep } from 'lodash';
-import { SavedSearchSavedObject } from '../../../../../../common/types/kibana';
-import { UrlConfig } from '../../../../../../common/types/custom_urls';
-import { IndexPatternTitle } from '../../../../../../common/types/kibana';
+import { BehaviorSubject } from 'rxjs';
+import { ES_FIELD_TYPES } from '@kbn/field-types';
+import { IndexPattern } from '../../../../../../../../../src/plugins/data/common/index_patterns/index_patterns/index_pattern';
 import {
-  ML_JOB_AGGREGATION,
   aggregations,
   mlOnlyAggregations,
+  ML_JOB_AGGREGATION,
 } from '../../../../../../common/constants/aggregation_types';
-import { ES_FIELD_TYPES } from '../../../../../../../../../src/plugins/data/public';
 import {
-  Job,
-  Datafeed,
-  Detector,
-  JobId,
-  DatafeedId,
-  BucketSpan,
-  CustomSettings,
-} from '../../../../../../common/types/anomaly_detection_jobs';
-import { Aggregation, Field, RuntimeMappings } from '../../../../../../common/types/fields';
-import { combineFieldsAndAggs } from '../../../../../../common/util/fields_utils';
-import { createEmptyJob, createEmptyDatafeed } from './util/default_configs';
-import { mlJobService } from '../../../../services/job_service';
-import { JobRunner, ProgressSubscriber } from '../job_runner';
-import {
-  JOB_TYPE,
   CREATED_BY_LABEL,
+  JOB_TYPE,
   SHARED_RESULTS_INDEX_NAME,
 } from '../../../../../../common/constants/new_job';
-import { collectAggs } from './util/general';
-import { filterRuntimeMappings } from './util/filter_runtime_mappings';
-import { parseInterval } from '../../../../../../common/util/parse_interval';
-import { Calendar } from '../../../../../../common/types/calendars';
-import { mlCalendarService } from '../../../../services/calendar_service';
-import { IndexPattern } from '../../../../../../../../../src/plugins/data/public';
+import type {
+  Datafeed,
+  DatafeedId,
+} from '../../../../../../common/types/anomaly_detection_jobs/datafeed';
+import type {
+  BucketSpan,
+  CustomSettings,
+  Detector,
+  Job,
+  JobId,
+} from '../../../../../../common/types/anomaly_detection_jobs/job';
+import type { Calendar } from '../../../../../../common/types/calendars';
+import type { UrlConfig } from '../../../../../../common/types/custom_urls';
+import type { Aggregation, Field, RuntimeMappings } from '../../../../../../common/types/fields';
+import type {
+  IndexPatternTitle,
+  SavedSearchSavedObject,
+} from '../../../../../../common/types/kibana';
 import { getDatafeedAggregations } from '../../../../../../common/util/datafeed_utils';
+import { combineFieldsAndAggs } from '../../../../../../common/util/fields_utils';
 import { getFirstKeyInObject } from '../../../../../../common/util/object_utils';
+import { parseInterval } from '../../../../../../common/util/parse_interval';
+import { mlCalendarService } from '../../../../services/calendar_service';
+import { mlJobService } from '../../../../services/job_service';
+import type { ProgressSubscriber } from '../job_runner/job_runner';
+import { JobRunner } from '../job_runner/job_runner';
+import { createEmptyDatafeed, createEmptyJob } from './util/default_configs';
+import { filterRuntimeMappings } from './util/filter_runtime_mappings';
+import { collectAggs } from './util/general';
 
 export class JobCreator {
   protected _type: JOB_TYPE = JOB_TYPE.SINGLE_METRIC;

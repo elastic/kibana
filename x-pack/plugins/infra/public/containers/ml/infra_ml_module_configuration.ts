@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { useMemo } from 'react';
-import { JobSummary } from './api/ml_get_jobs_summary_api';
-import { ModuleDescriptor, ModuleSourceConfiguration } from './infra_ml_module_types';
+import type { JobSummary } from './api/ml_get_jobs_summary_api';
+import type { ModuleDescriptor, ModuleSourceConfiguration } from './infra_ml_module_types';
 
 export const useInfraMLModuleConfiguration = <JobType extends string>({
   moduleDescriptor,

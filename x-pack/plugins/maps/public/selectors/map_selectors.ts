@@ -4,59 +4,63 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { createSelector } from 'reselect';
-import { FeatureCollection } from 'geojson';
+import type { FeatureCollection } from 'geojson';
 import _ from 'lodash';
-import { Adapters } from 'src/plugins/inspector/public';
-import { TileLayer } from '../classes/layers/tile_layer/tile_layer';
-// @ts-ignore
-import { VectorTileLayer } from '../classes/layers/vector_tile_layer/vector_tile_layer';
-import { IVectorLayer, VectorLayer } from '../classes/layers/vector_layer';
-import { VectorStyle } from '../classes/styles/vector/vector_style';
-import { HeatmapLayer } from '../classes/layers/heatmap_layer';
-import { BlendedVectorLayer } from '../classes/layers/blended_vector_layer/blended_vector_layer';
-import { getTimeFilter } from '../kibana_services';
-import {
-  getChartsPaletteServiceGetColor,
-  getInspectorAdapters,
-} from '../reducers/non_serializable_instances';
-import { TiledVectorLayer } from '../classes/layers/tiled_vector_layer/tiled_vector_layer';
-import { copyPersistentState, TRACKED_LAYER_DESCRIPTOR } from '../reducers/copy_persistent_state';
-import { InnerJoin } from '../classes/joins/inner_join';
-import { getSourceByType } from '../classes/sources/source_registry';
-import { GeoJsonFileSource } from '../classes/sources/geojson_file_source';
+import { createSelector } from 'reselect';
+import type { Filter } from '../../../../../src/plugins/data/common/es_query';
+import type { TimeRange } from '../../../../../src/plugins/data/common/query/timefilter/types';
+import type { Adapters } from '../../../../../src/plugins/inspector/common/adapters/types';
 import {
   SOURCE_DATA_REQUEST_ID,
   SPATIAL_FILTERS_LAYER_ID,
   STYLE_TYPE,
   VECTOR_STYLES,
 } from '../../common/constants';
-// @ts-ignore
-import { extractFeaturesFromFilters } from '../../common/elasticsearch_util';
-import { MapStoreState } from '../reducers/store';
-import {
-  AbstractSourceDescriptor,
-  DataRequestDescriptor,
+import type { DataRequestDescriptor } from '../../common/descriptor_types/data_request_descriptor_types';
+import type {
+  HeatmapLayerDescriptor,
+  LayerDescriptor,
+  VectorLayerDescriptor,
+} from '../../common/descriptor_types/layer_descriptor_types';
+import type {
   DrawState,
   EditState,
   Goto,
-  HeatmapLayerDescriptor,
-  LayerDescriptor,
   MapCenter,
   MapExtent,
   MapQuery,
   TooltipState,
-  VectorLayerDescriptor,
-} from '../../common/descriptor_types';
-import { MapSettings } from '../reducers/map';
-import { Filter, TimeRange } from '../../../../../src/plugins/data/public';
-import { ISource } from '../classes/sources/source';
-import { ITMSSource } from '../classes/sources/tms_source';
-import { IVectorSource } from '../classes/sources/vector_source';
-import { ESGeoGridSource } from '../classes/sources/es_geo_grid_source';
-import { ILayer } from '../classes/layers/layer';
+} from '../../common/descriptor_types/map_descriptor';
+import type { AbstractSourceDescriptor } from '../../common/descriptor_types/source_descriptor_types';
+import { extractFeaturesFromFilters } from '../../common/elasticsearch_util/spatial_filter_utils';
+import { InnerJoin } from '../classes/joins/inner_join';
+import { BlendedVectorLayer } from '../classes/layers/blended_vector_layer/blended_vector_layer';
+import { HeatmapLayer } from '../classes/layers/heatmap_layer/heatmap_layer';
+import type { ILayer } from '../classes/layers/layer';
+import { TiledVectorLayer } from '../classes/layers/tiled_vector_layer/tiled_vector_layer';
+import { TileLayer } from '../classes/layers/tile_layer/tile_layer';
+import type { IVectorLayer } from '../classes/layers/vector_layer/vector_layer';
+import { VectorLayer } from '../classes/layers/vector_layer/vector_layer';
+import { VectorTileLayer } from '../classes/layers/vector_tile_layer/vector_tile_layer';
+import { ESGeoGridSource } from '../classes/sources/es_geo_grid_source/es_geo_grid_source';
+import { GeoJsonFileSource } from '../classes/sources/geojson_file_source/geojson_file_source';
+import type { ISource } from '../classes/sources/source';
+import { getSourceByType } from '../classes/sources/source_registry';
+import type { ITMSSource } from '../classes/sources/tms_source';
+import type { IVectorSource } from '../classes/sources/vector_source/vector_source';
+import { VectorStyle } from '../classes/styles/vector/vector_style';
+import { getTimeFilter } from '../kibana_services';
+import { copyPersistentState, TRACKED_LAYER_DESCRIPTOR } from '../reducers/copy_persistent_state';
+import type { MapSettings } from '../reducers/map/types';
+import {
+  getChartsPaletteServiceGetColor,
+  getInspectorAdapters,
+} from '../reducers/non_serializable_instances';
+import type { MapStoreState } from '../reducers/store';
 import { getIsReadOnly } from './ui_selectors';
+
+// @ts-ignore
+// @ts-ignore
 
 export function createLayerInstance(
   layerDescriptor: LayerDescriptor,

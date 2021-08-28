@@ -4,13 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { pick } from 'lodash';
-import { CombinedJobWithStats, Datafeed, Job } from '../types/anomaly_detection_jobs';
-import { resolveMaxTimeInterval } from './job_utils';
+import type { JobsHealthRuleTestsConfig, JobsHealthTests } from '../types/alerts';
+import type { CombinedJobWithStats } from '../types/anomaly_detection_jobs/combined_job';
+import type { Datafeed } from '../types/anomaly_detection_jobs/datafeed';
+import type { Job } from '../types/anomaly_detection_jobs/job';
 import { isDefined } from '../types/guards';
+import { resolveMaxTimeInterval } from './job_utils';
 import { parseInterval } from './parse_interval';
-import { JobsHealthRuleTestsConfig, JobsHealthTests } from '../types/alerts';
 
 const narrowBucketLength = 60;
 

@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { useContext } from 'react';
-
-import { MlContext, MlContextValue } from './ml_context';
+import type { MlContextValue } from './ml_context';
+import { MlContext } from './ml_context';
 
 export const useMlContext = () => {
   const context = useContext(MlContext);

@@ -8,49 +8,38 @@
 /*
  * This module contains helpers for managing the task manager storage layer.
  */
+import type { Logger } from '@kbn/logging';
 import apm from 'elastic-apm-node';
-import { Subject, Observable, from, of } from 'rxjs';
+import { none, some } from 'fp-ts/lib/Option';
+import { countBy, difference, groupBy, isPlainObject, mapValues, partition, pick } from 'lodash';
+import { from, Observable, of, Subject } from 'rxjs';
 import { map, mergeScan } from 'rxjs/operators';
-import { difference, partition, groupBy, mapValues, countBy, pick, isPlainObject } from 'lodash';
-import { some, none } from 'fp-ts/lib/Option';
-
-import { Logger } from '../../../../../src/core/server';
-
-import { asOk, asErr, Result } from '../lib/result_type';
-import { ConcreteTaskInstance, TaskStatus } from '../task';
+import { FillPoolResult } from '../lib/fill_pool';
+import type { Result } from '../lib/result_type';
+import { asErr, asOk } from '../lib/result_type';
+import type { ConcreteTaskInstance } from '../task';
+import { TaskStatus } from '../task';
+import type { TaskClaim, TaskTiming } from '../task_events';
+import { asTaskClaimEvent, startTaskTimer, TaskClaimErrorType } from '../task_events';
+import type { SearchOpts, UpdateByQueryResult } from '../task_store';
+import { correctVersionConflictsForContinuation, TaskStore } from '../task_store';
+import { TaskTypeDictionary } from '../task_type_dictionary';
 import {
-  TaskClaim,
-  asTaskClaimEvent,
-  TaskClaimErrorType,
-  startTaskTimer,
-  TaskTiming,
-} from '../task_events';
-
-import {
-  shouldBeOneOf,
-  mustBeAllOf,
-  filterDownBy,
-  asPinnedQuery,
-  matchesClauses,
-} from './query_clauses';
-
-import {
-  updateFieldsAndMarkAsFailed,
   IdleTaskWithExpiredRunAt,
   InactiveTasks,
   RunningOrClaimingTaskWithExpiredRetryAt,
   SortByRunAtAndRetryAt,
   tasksClaimedByOwner,
   tasksOfType,
+  updateFieldsAndMarkAsFailed,
 } from './mark_available_tasks_as_claimed';
-import { TaskTypeDictionary } from '../task_type_dictionary';
 import {
-  correctVersionConflictsForContinuation,
-  TaskStore,
-  UpdateByQueryResult,
-  SearchOpts,
-} from '../task_store';
-import { FillPoolResult } from '../lib/fill_pool';
+  asPinnedQuery,
+  filterDownBy,
+  matchesClauses,
+  mustBeAllOf,
+  shouldBeOneOf,
+} from './query_clauses';
 
 export interface TaskClaimingOpts {
   logger: Logger;

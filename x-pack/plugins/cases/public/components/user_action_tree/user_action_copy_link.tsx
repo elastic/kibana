@@ -4,11 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { memo, useCallback } from 'react';
-import { EuiToolTip, EuiButtonIcon } from '@elastic/eui';
+import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import copy from 'copy-to-clipboard';
-
+import React, { memo, useCallback } from 'react';
 import * as i18n from './translations';
 
 interface UserActionCopyLinkProps {

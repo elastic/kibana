@@ -4,17 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { FC } from 'react';
-
-import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
-import { parseInterval } from '../../common/util/parse_interval';
-import { CombinedJobWithStats } from '../../common/types/anomaly_detection_jobs';
-import { DATAFEED_STATE } from '../../common/constants/states';
-import { MlAnomalyDetectionAlertParams } from '../../common/types/alerts';
-import { MlAnomalyAlertTriggerProps } from './ml_anomaly_alert_trigger';
+import { FormattedMessage } from '@kbn/i18n/react';
+import type { FC } from 'react';
+import React from 'react';
 import { TOP_N_BUCKETS_COUNT } from '../../common/constants/alerts';
+import { DATAFEED_STATE } from '../../common/constants/states';
+import type { MlAnomalyDetectionAlertParams } from '../../common/types/alerts';
+import type { CombinedJobWithStats } from '../../common/types/anomaly_detection_jobs/combined_job';
+import { parseInterval } from '../../common/util/parse_interval';
+import type { MlAnomalyAlertTriggerProps } from './ml_anomaly_alert_trigger';
 
 interface ConfigValidatorProps {
   alertInterval: string;

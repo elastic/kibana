@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { FC, ReactNode } from 'react';
 import { EuiFlexGroup } from '@elastic/eui';
+import type { FC, ReactNode } from 'react';
+import React from 'react';
 
 interface Props {
   children: ReactNode;

@@ -5,15 +5,24 @@
  * 2.0.
  */
 
-import './field_item.scss';
-
-import React, { useCallback, useState, useMemo } from 'react';
+import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
+import {
+  Axis,
+  BarSeries,
+  Chart,
+  niceTimeFormatter,
+  Position,
+  ScaleType,
+  Settings,
+  TooltipType,
+} from '@elastic/charts';
 import DateMath from '@elastic/datemath';
 import {
   EuiButtonGroup,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHighlight,
   EuiIconTip,
   EuiLoadingSpinner,
   EuiPopover,
@@ -25,39 +34,26 @@ import {
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
-import {
-  Axis,
-  BarSeries,
-  Chart,
-  niceTimeFormatter,
-  Position,
-  ScaleType,
-  Settings,
-  TooltipType,
-} from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
-import type { FieldFormatsStart } from 'src/plugins/field_formats/public';
-import { EuiHighlight } from '@elastic/eui';
-import {
-  Query,
-  KBN_FIELD_TYPES,
-  ES_FIELD_TYPES,
-  Filter,
-  esQuery,
-} from '../../../../../src/plugins/data/public';
-import { FieldButton } from '../../../../../src/plugins/kibana_react/public';
-import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
-import { DragDrop, DragDropIdentifier } from '../drag_drop';
-import { DatasourceDataPanelProps, DataType } from '../types';
-import { BucketedAggregation, FieldStatsResponse } from '../../common';
-import { IndexPattern, IndexPatternField, DraggedField } from './types';
-import { LensFieldIcon } from './lens_field_icon';
-import { trackUiEvent } from '../lens_ui_telemetry';
-import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
-import { VisualizeGeoFieldButton } from './visualize_geo_field_button';
+import React, { useCallback, useMemo, useState } from 'react';
+import type { ChartsPluginSetup } from '../../../../../src/plugins/charts/public/types';
+import type { Filter } from '../../../../../src/plugins/data/common/es_query';
+import type { Query } from '../../../../../src/plugins/data/public';
+import { esQuery } from '../../../../../src/plugins/data/public/deprecated';
+import type { FieldFormatsStart } from '../../../../../src/plugins/field_formats/public/plugin';
+import { FieldButton } from '../../../../../src/plugins/kibana_react/public/field_button/field_button';
+import type { UiActionsStart } from '../../../../../src/plugins/ui_actions/public/plugin';
+import type { BucketedAggregation, FieldStatsResponse } from '../../common/api';
+import { debouncedComponent } from '../debounced_component/debounced_component';
+import { DragDrop } from '../drag_drop/drag_drop';
+import type { DragDropIdentifier } from '../drag_drop/providers/types';
+import { trackUiEvent } from '../lens_ui_telemetry/factory';
+import type { DatasourceDataPanelProps, DataType } from '../types';
 import { getVisualizeGeoFieldMessage } from '../utils';
-
-import { debouncedComponent } from '../debounced_component';
+import './field_item.scss';
+import { LensFieldIcon } from './lens_field_icon';
+import type { DraggedField, IndexPattern, IndexPatternField } from './types';
+import { VisualizeGeoFieldButton } from './visualize_geo_field_button';
 
 export interface FieldItemProps {
   core: DatasourceDataPanelProps['core'];

@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiFieldSearch, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import React from 'react';
 import styled from 'styled-components';
-import type { BrowserFields } from '../../../../../common';
-
+import type { BrowserFields } from '../../../../../common/search_strategy/index_fields';
 import { getFieldBrowserSearchInputClassName, getFieldCount } from './helpers';
-
 import * as i18n from './translations';
 
 const CountsFlexGroup = styled(EuiFlexGroup)`

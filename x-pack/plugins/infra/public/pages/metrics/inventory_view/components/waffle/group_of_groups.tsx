@@ -6,16 +6,15 @@
  */
 
 import React from 'react';
-
-import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
-import {
+import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
+import type { InventoryItemType } from '../../../../../../common/inventory_models/types';
+import type {
   InfraWaffleMapBounds,
   InfraWaffleMapGroupOfGroups,
   InfraWaffleMapOptions,
 } from '../../../../../lib/lib';
 import { GroupName } from './group_name';
 import { GroupOfNodes } from './group_of_nodes';
-import { InventoryItemType } from '../../../../../../common/inventory_models/types';
 
 interface Props {
   onDrilldown: (filter: string) => void;

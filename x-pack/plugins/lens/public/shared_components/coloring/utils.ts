@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import chroma from 'chroma-js';
-import { PaletteOutput, PaletteRegistry } from 'src/plugins/charts/public';
-import { euiLightVars, euiDarkVars } from '@kbn/ui-shared-deps/theme';
 import { isColorDark } from '@elastic/eui';
-import type { Datatable } from 'src/plugins/expressions/public';
+import { euiDarkVars, euiLightVars } from '@kbn/ui-shared-deps/theme';
+import chroma from 'chroma-js';
+import type { PaletteOutput } from '../../../../../../src/plugins/charts/common/palette';
+import type { PaletteRegistry } from '../../../../../../src/plugins/charts/public/services/palettes/types';
+import type { Datatable } from '../../../../../../src/plugins/expressions/common/expression_types/specs/datatable';
+import type { ColorStop, CustomPaletteParams } from '../../../common/types';
 import {
   CUSTOM_PALETTE,
   defaultPaletteParams,
@@ -17,7 +19,6 @@ import {
   DEFAULT_MAX_STOP,
   DEFAULT_MIN_STOP,
 } from './constants';
-import type { CustomPaletteParams, ColorStop } from '../../../common';
 
 /**
  * Some name conventions here:

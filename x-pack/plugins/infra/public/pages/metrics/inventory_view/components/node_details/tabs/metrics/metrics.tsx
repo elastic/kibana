@@ -4,49 +4,48 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { first, last } from 'lodash';
+import type { PointerEvent } from '@elastic/charts';
+import { Chart, niceTimeFormatter } from '@elastic/charts';
+import { EuiFlexGrid, EuiFlexItem, EuiLoadingChart, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Chart, niceTimeFormatter, PointerEvent } from '@elastic/charts';
-import { EuiLoadingChart, EuiSpacer, EuiFlexGrid, EuiFlexItem } from '@elastic/eui';
-import { TabContent, TabProps } from '../shared';
-import { useSnapshot } from '../../../../hooks/use_snaphot';
-import { useWaffleOptionsContext } from '../../../../hooks/use_waffle_options';
-import { useSourceContext } from '../../../../../../../containers/metrics_source';
-import { findInventoryFields } from '../../../../../../../../common/inventory_models';
-import { convertKueryToElasticSearchQuery } from '../../../../../../../utils/kuery';
-import { SnapshotMetricType } from '../../../../../../../../common/inventory_models/types';
-import {
-  MetricsExplorerChartType,
-  MetricsExplorerOptionsMetric,
-} from '../../../../../metrics_explorer/hooks/use_metrics_explorer_options';
+import { first, last } from 'lodash';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { euiStyled } from '../../../../../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
 import { Color } from '../../../../../../../../common/color_palette';
-import {
+import { getCustomMetricLabel } from '../../../../../../../../common/formatters/get_custom_metric_label';
+import type {
   MetricsExplorerAggregation,
   MetricsExplorerSeries,
-} from '../../../../../../../../common/http_api';
-import { createInventoryMetricFormatter } from '../../../../lib/create_inventory_metric_formatter';
+} from '../../../../../../../../common/http_api/metrics_explorer';
+import { findInventoryFields } from '../../../../../../../../common/inventory_models';
+import type { SnapshotMetricType } from '../../../../../../../../common/inventory_models/types';
+import { useSourceContext } from '../../../../../../../containers/metrics_source/source';
+import { convertKueryToElasticSearchQuery } from '../../../../../../../utils/kuery';
 import { calculateDomain } from '../../../../../metrics_explorer/components/helpers/calculate_domain';
-import { euiStyled } from '../../../../../../../../../../../src/plugins/kibana_react/common';
+import { createFormatterForMetric } from '../../../../../metrics_explorer/components/helpers/create_formatter_for_metric';
+import type { MetricsExplorerOptionsMetric } from '../../../../../metrics_explorer/hooks/use_metrics_explorer_options';
+import { MetricsExplorerChartType } from '../../../../../metrics_explorer/hooks/use_metrics_explorer_options';
+import { useSnapshot } from '../../../../hooks/use_snaphot';
+import { useWaffleOptionsContext } from '../../../../hooks/use_waffle_options';
+import { createInventoryMetricFormatter } from '../../../../lib/create_inventory_metric_formatter';
+import type { TabProps } from '../shared';
+import { TabContent } from '../shared';
 import { ChartSection } from './chart_section';
+import { TimeDropdown } from './time_dropdown';
 import {
-  SYSTEM_METRIC_NAME,
-  USER_METRIC_NAME,
-  INBOUND_METRIC_NAME,
-  OUTBOUND_METRIC_NAME,
-  USED_MEMORY_METRIC_NAME,
-  FREE_MEMORY_METRIC_NAME,
   CPU_CHART_TITLE,
+  FREE_MEMORY_METRIC_NAME,
+  INBOUND_METRIC_NAME,
   LOAD_CHART_TITLE,
+  LOG_RATE_CHART_TITLE,
+  LOG_RATE_METRIC_NAME,
   MEMORY_CHART_TITLE,
   NETWORK_CHART_TITLE,
-  LOG_RATE_METRIC_NAME,
-  LOG_RATE_CHART_TITLE,
+  OUTBOUND_METRIC_NAME,
+  SYSTEM_METRIC_NAME,
+  USED_MEMORY_METRIC_NAME,
+  USER_METRIC_NAME,
 } from './translations';
-import { TimeDropdown } from './time_dropdown';
-import { getCustomMetricLabel } from '../../../../../../../../common/formatters/get_custom_metric_label';
-import { createFormatterForMetric } from '../../../../../metrics_explorer/components/helpers/create_formatter_for_metric';
 
 const ONE_HOUR = 60 * 60 * 1000;
 

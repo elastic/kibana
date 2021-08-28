@@ -4,14 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import fetch, { FetchError } from 'node-fetch';
 import type { RequestInit, Response } from 'node-fetch';
+import fetch, { FetchError } from 'node-fetch';
 import pRetry from 'p-retry';
 
-import { streamToString } from '../streams';
+import { RegistryConnectionError, RegistryError, RegistryResponseError } from '../../../errors';
 import { appContextService } from '../../app_context';
-import { RegistryError, RegistryConnectionError, RegistryResponseError } from '../../../errors';
+import { streamToString } from '../streams';
 
 import { getProxyAgent, getRegistryProxyUrl } from './proxy';
 

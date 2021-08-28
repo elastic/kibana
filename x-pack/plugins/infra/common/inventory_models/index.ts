@@ -4,16 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { i18n } from '@kbn/i18n';
-import { host } from './host';
-import { pod } from './pod';
 import { awsEC2 } from './aws_ec2';
-import { awsS3 } from './aws_s3';
 import { awsRDS } from './aws_rds';
+import { awsS3 } from './aws_s3';
 import { awsSQS } from './aws_sqs';
 import { container } from './container';
-import { InventoryItemType } from './types';
+import { host } from './host';
+import { pod } from './pod';
+import type { InventoryItemType } from './types';
+
 export { metrics } from './metrics';
 
 export const inventoryModels = [host, pod, container, awsEC2, awsS3, awsRDS, awsSQS];

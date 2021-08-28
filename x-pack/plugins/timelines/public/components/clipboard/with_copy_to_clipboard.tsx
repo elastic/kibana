@@ -4,13 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { EuiToolTip } from '@elastic/eui';
-
-import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { TooltipWithKeyboardShortcut } from '../tooltip_with_keyboard_shortcut';
+import React from 'react';
 import { Clipboard } from '.';
+import { TooltipWithKeyboardShortcut } from '../tooltip_with_keyboard_shortcut';
 
 export const COPY_TO_CLIPBOARD = i18n.translate('xpack.timelines.copyToClipboardTooltip', {
   defaultMessage: 'Copy to Clipboard',

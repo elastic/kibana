@@ -4,26 +4,27 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { useCallback } from 'react';
-import { EuiFlexItem, EuiFlexGroup, EuiButtonEmpty, EuiAccordion, EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiAccordion, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { IFieldType } from 'src/plugins/data/public';
-import { Criterion } from './criterion';
-import {
+import { FormattedMessage } from '@kbn/i18n/react';
+import React, { useCallback } from 'react';
+import type { IFieldType } from '../../../../../../../../src/plugins/data/common/index_patterns/fields/types';
+import type {
   PartialAlertParams,
   PartialCountCriteria as PartialCountCriteriaType,
   PartialCriteria as PartialCriteriaType,
   PartialCriterion as PartialCriterionType,
   PartialRatioCriteria as PartialRatioCriteriaType,
-  isRatioAlert,
-  getNumerator,
-  getDenominator,
 } from '../../../../../common/alerting/logs/log_threshold/types';
-import { Errors, CriterionErrors } from '../../validation';
-import { ExpressionLike } from './editor';
+import {
+  getDenominator,
+  getNumerator,
+  isRatioAlert,
+} from '../../../../../common/alerting/logs/log_threshold/types';
+import type { CriterionErrors, Errors } from '../../validation';
+import { Criterion } from './criterion';
 import { CriterionPreview } from './criterion_preview_chart';
+import { ExpressionLike } from './editor';
 
 const QueryAText = i18n.translate('xpack.infra.logs.alerting.threshold.ratioCriteriaQueryAText', {
   defaultMessage: 'Query A',

@@ -4,8 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import type { UsageCollectionSetup } from '../../../../../src/plugins/usage_collection/server/plugin';
 
 interface Config {
   isCloudEnabled: boolean;

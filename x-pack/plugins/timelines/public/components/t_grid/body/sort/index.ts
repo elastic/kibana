@@ -4,9 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { SortDirection } from '../../../../../common/types/timeline';
-import type { SortColumnTimeline } from '../../../../../common/types/timeline';
+import type { SortColumnTimeline, SortDirection } from '../../../../../common/types/timeline/store';
 
 // TODO: Cleanup this type to match SortColumnTimeline
 export { SortDirection };

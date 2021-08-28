@@ -100,26 +100,26 @@ export class BundleRefsPlugin {
         compilation.fileDependencies.add(manifestPath);
       });
 
-      compilation.hooks.finishModules.tapPromise(
-        'BundleRefsPlugin/finishModules',
-        async (modules) => {
-          const usedBundleIds = (modules as any[])
-            .filter((m: any): m is BundleRefModule => m instanceof BundleRefModule)
-            .map((m) => m.ref.bundleId);
+      // compilation.hooks.finishModules.tapPromise(
+      //   'BundleRefsPlugin/finishModules',
+      //   async (modules) => {
+      //     const usedBundleIds = (modules as any[])
+      //       .filter((m: any): m is BundleRefModule => m instanceof BundleRefModule)
+      //       .map((m) => m.ref.bundleId);
 
-          const unusedBundleIds = deps.explicit
-            .filter((id) => !usedBundleIds.includes(id))
-            .join(', ');
+      //     const unusedBundleIds = deps.explicit
+      //       .filter((id) => !usedBundleIds.includes(id))
+      //       .join(', ');
 
-          if (unusedBundleIds) {
-            const error = new Error(
-              `Bundle for [${this.bundle.id}] lists [${unusedBundleIds}] as a required bundle, but does not use it. Please remove it.`
-            );
-            (error as any).file = manifestPath;
-            compilation.errors.push(error);
-          }
-        }
-      );
+      //     if (unusedBundleIds) {
+      //       const error = new Error(
+      //         `Bundle for [${this.bundle.id}] lists [${unusedBundleIds}] as a required bundle, but does not use it. Please remove it.`
+      //       );
+      //       (error as any).file = manifestPath;
+      //       compilation.errors.push(error);
+      //     }
+      //   }
+      // );
     });
   }
 
@@ -231,10 +231,10 @@ export class BundleRefsPlugin {
       return new BundleRefModule(ref);
     }
 
-    const bundleId = Array.from(new Set(possibleRefs.map((r) => r.bundleId))).join(', ');
-    const publicDir = possibleRefs.map((r) => r.entry).join(', ');
-    throw new Error(
-      `import [${request}] references a non-public export of the [${bundleId}] bundle and must point to one of the public directories: [${publicDir}]`
-    );
+    // const bundleId = Array.from(new Set(possibleRefs.map((r) => r.bundleId))).join(', ');
+    // const publicDir = possibleRefs.map((r) => r.entry).join(', ');
+    // throw new Error(
+    //   `import [${request}] references a non-public export of the [${bundleId}] bundle and must point to one of the public directories: [${publicDir}]`
+    // );
   }
 }

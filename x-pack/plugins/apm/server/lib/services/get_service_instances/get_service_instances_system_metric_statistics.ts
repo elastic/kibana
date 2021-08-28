@@ -4,8 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { AggregationOptionsByType } from 'src/core/types/elasticsearch';
+import type { AggregationOptionsByType } from '../../../../../../../src/core/types/elasticsearch';
+import {
+  kqlQuery,
+  rangeQuery,
+} from '../../../../../observability/server/utils/queries';
 import {
   METRIC_CGROUP_MEMORY_USAGE_BYTES,
   METRIC_PROCESS_CPU_PERCENT,
@@ -16,11 +19,10 @@ import {
 } from '../../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../../common/processor_event';
 import { SERVICE_NODE_NAME_MISSING } from '../../../../common/service_nodes';
-import { Coordinate } from '../../../../typings/timeseries';
-import { kqlQuery, rangeQuery } from '../../../../../observability/server';
 import { environmentQuery } from '../../../../common/utils/environment_query';
+import type { Coordinate } from '../../../../typings/timeseries';
 import { getBucketSize } from '../../helpers/get_bucket_size';
-import { Setup } from '../../helpers/setup_request';
+import type { Setup } from '../../helpers/setup_request';
 import {
   percentCgroupMemoryUsedScript,
   percentSystemMemoryUsedScript,

@@ -4,14 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { i18n } from '@kbn/i18n';
-import {
+import { TutorialsCategory } from '../../../../../src/plugins/home/server/services/tutorials/lib/tutorials_registry_types';
+import type {
   ArtifactsSchema,
-  TutorialsCategory,
   TutorialSchema,
-} from '../../../../../src/plugins/home/server';
-import { CloudSetup } from '../../../cloud/server';
+} from '../../../../../src/plugins/home/server/services/tutorials/lib/tutorial_schema';
+import type { CloudSetup } from '../../../cloud/server/plugin';
 import { APM_STATIC_INDEX_PATTERN_ID } from '../../common/index_pattern_constants';
 import { createElasticCloudInstructions } from './envs/elastic_cloud';
 import { onPremInstructions } from './envs/on_prem';

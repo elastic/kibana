@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { FC, useMemo } from 'react';
-import { EuiTitle, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { ITagsCache } from '../../../services/tags';
-import { TagList } from '../../base';
+import type { FC } from 'react';
+import React, { useMemo } from 'react';
+import type { ITagsCache } from '../../../../../../../src/plugins/saved_objects_tagging_oss/public/api';
+import { TagList } from '../../base/tag_list';
 
 export interface AssignFlyoutHeaderProps {
   tagIds: string[];

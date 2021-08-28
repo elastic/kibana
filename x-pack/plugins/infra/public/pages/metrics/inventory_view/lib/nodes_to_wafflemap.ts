@@ -4,17 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { i18n } from '@kbn/i18n';
 import { first, last } from 'lodash';
-import {
+import type { SnapshotNode, SnapshotNodePath } from '../../../../../common/http_api/snapshot_api';
+import type {
   InfraWaffleMapGroup,
   InfraWaffleMapGroupOfGroups,
   InfraWaffleMapGroupOfNodes,
   InfraWaffleMapNode,
 } from '../../../../lib/lib';
 import { isWaffleMapGroupWithGroups, isWaffleMapGroupWithNodes } from './type_guards';
-import { SnapshotNodePath, SnapshotNode } from '../../../../../common/http_api/snapshot_api';
 
 export function createId(path: SnapshotNodePath[]) {
   return path.map((p) => p.value).join('/');

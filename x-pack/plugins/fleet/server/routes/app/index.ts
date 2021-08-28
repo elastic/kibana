@@ -4,13 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { IRouter, RequestHandler } from 'src/core/server';
-
-import { PLUGIN_ID, APP_API_ROUTES } from '../../constants';
-import { appContextService } from '../../services';
-import type { CheckPermissionsResponse, GenerateServiceTokenResponse } from '../../../common';
-import { defaultIngestErrorHandler, GenerateServiceTokenError } from '../../errors';
+import type { IRouter, RequestHandler } from '../../../../../../src/core/server/http/router/router';
+import { PLUGIN_ID } from '../../../common/constants/plugin';
+import { APP_API_ROUTES } from '../../../common/constants/routes';
+import type {
+  CheckPermissionsResponse,
+  GenerateServiceTokenResponse,
+} from '../../../common/types/rest_spec/app';
+import { GenerateServiceTokenError } from '../../errors';
+import { defaultIngestErrorHandler } from '../../errors/handlers';
+import { appContextService } from '../../services/app_context';
 
 export const getCheckPermissionsHandler: RequestHandler = async (context, request, response) => {
   const body: CheckPermissionsResponse = { success: true };

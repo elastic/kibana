@@ -4,14 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { memo, Suspense } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
-
-import { CaseActionConnector } from '../types';
-import { ConnectorFieldsProps } from './types';
+import React, { memo, Suspense } from 'react';
 import { getCaseConnectors } from '.';
-import { ConnectorTypeFields } from '../../../common';
+import type { ConnectorTypeFields } from '../../../common/api/connectors';
+import type { CaseActionConnector } from '../types';
+import type { ConnectorFieldsProps } from './types';
 
 interface Props extends Omit<ConnectorFieldsProps<ConnectorTypeFields['fields']>, 'connector'> {
   connector: CaseActionConnector | null;

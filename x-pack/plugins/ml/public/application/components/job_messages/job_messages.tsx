@@ -4,24 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { FC } from 'react';
-
-import {
-  EuiBasicTableColumn,
-  EuiSpacer,
-  EuiInMemoryTable,
-  EuiButtonIcon,
-  EuiToolTip,
-} from '@elastic/eui';
-
+import type { EuiBasicTableColumn } from '@elastic/eui';
+import { EuiButtonIcon, EuiInMemoryTable, EuiSpacer, EuiToolTip } from '@elastic/eui';
+import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import theme from '@elastic/eui/dist/eui_theme_light.json';
-
-import { JobMessage } from '../../../../common/types/audit_message';
-import { JobIcon } from '../job_message_icon';
+import type { FC } from 'react';
+import React from 'react';
+import type { JobMessage } from '../../../../common/types/audit_message';
 import { timeFormatter } from '../../../../common/util/date_utils';
+import { JobIcon } from '../job_message_icon/job_message_icon';
 
 interface JobMessagesProps {
   messages: JobMessage[];

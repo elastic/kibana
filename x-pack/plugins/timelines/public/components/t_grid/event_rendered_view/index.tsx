@@ -4,31 +4,26 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
+import type {
   CriteriaWithPagination,
-  EuiBasicTable,
   EuiBasicTableProps,
   EuiDataGridCellValueElementProps,
   EuiDataGridControlColumn,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
 } from '@elastic/eui';
+import { EuiBasicTable, EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import {
-  /* ALERT_REASON, ALERT_RULE_ID, */ ALERT_RULE_NAME,
-  TIMESTAMP,
-} from '@kbn/rule-data-utils';
+import { ALERT_RULE_NAME, TIMESTAMP } from '@kbn/rule-data-utils';
 import { get } from 'lodash';
 import moment from 'moment';
-import React, { ComponentType, useCallback, useMemo } from 'react';
+import type { ComponentType } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
-
-import { useUiSetting } from '../../../../../../../src/plugins/kibana_react/public';
-
-import type { BrowserFields, RowRenderer, TimelineItem } from '../../../../common';
-import { tGridActions } from '../../../store/t_grid';
+import { useUiSetting } from '../../../../../../../src/plugins/kibana_react/public/ui_settings/use_ui_setting';
+import type { BrowserFields } from '../../../../common/search_strategy/index_fields';
+import type { TimelineItem } from '../../../../common/search_strategy/timeline/events/all';
+import type { RowRenderer } from '../../../../common/types/timeline/rows';
+import * as tGridActions from '../../../store/t_grid/actions';
 import { RuleName } from '../../rule_name';
 import { isEventBuildingBlockType } from '../body/helpers';
 

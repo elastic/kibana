@@ -4,13 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { i18n } from '@kbn/i18n';
-import { createAction } from '../../../../../src/plugins/ui_actions/public';
-import { MlCoreSetup } from '../plugin';
+import { FilterStateStore } from '../../../../../src/plugins/data/common';
+import type { Filter } from '../../../../../src/plugins/data/common/es_query';
+import { createAction } from '../../../../../src/plugins/ui_actions/public/actions/create_action';
 import { SWIMLANE_TYPE, VIEW_BY_JOB_LABEL } from '../application/explorer/explorer_constants';
-import { Filter, FilterStateStore } from '../../../../../src/plugins/data/common';
-import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE, SwimLaneDrilldownContext } from '../embeddables';
+import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '../embeddables/constants';
+import type { SwimLaneDrilldownContext } from '../embeddables/types';
+import type { MlCoreSetup } from '../plugin';
 import { CONTROLLED_BY_SWIM_LANE_FILTER } from './constants';
 
 export const APPLY_INFLUENCER_FILTERS_ACTION = 'applyInfluencerFiltersAction';

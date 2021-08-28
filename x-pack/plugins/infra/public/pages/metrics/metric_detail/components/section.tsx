@@ -4,18 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { EuiTitle } from '@elastic/eui';
-import React, {
-  Children,
-  cloneElement,
-  FunctionComponent,
-  isValidElement,
-  useContext,
-} from 'react';
-
-import { SideNavContext, SubNavItem } from '../lib/side_nav_context';
-import { LayoutProps } from '../types';
+import type { FunctionComponent } from 'react';
+import React, { Children, cloneElement, isValidElement, useContext } from 'react';
+import type { SubNavItem } from '../lib/side_nav_context';
+import { SideNavContext } from '../lib/side_nav_context';
+import type { LayoutProps } from '../types';
 
 type SectionProps = LayoutProps & {
   navLabel: string;

@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { Aggregation, METRIC_AGG_TYPE } from '../types/fields';
+import type { Aggregation } from '../types/fields';
+import { METRIC_AGG_TYPE } from '../types/fields';
 
 export enum ML_JOB_AGGREGATION {
   // count

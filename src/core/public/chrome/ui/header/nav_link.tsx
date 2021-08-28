@@ -8,7 +8,7 @@
 import { EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import type { CoreStart } from '../../..';
+import type { CoreStart } from '../../../types';
 import type { InternalApplicationStart } from '../../../application/types';
 import type { HttpStart } from '../../../http/types';
 import type { ChromeNavLink } from '../../nav_links/nav_link';

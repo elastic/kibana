@@ -11,7 +11,7 @@ import { get } from 'lodash';
 import { parse } from 'query-string';
 import React, { useEffect, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
-import type { CoreStart } from '../../../../core/public';
+import type { CoreStart } from '../../../../core/public/types';
 import type { ChromeBreadcrumb } from '../../../../core/public/chrome/types';
 import type { DataPublicPluginStart } from '../../../data/public/types';
 import type { SavedObjectsTaggingApi } from '../../../saved_objects_tagging_oss/public/api';

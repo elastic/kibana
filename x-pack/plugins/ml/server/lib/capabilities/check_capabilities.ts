@@ -4,24 +4,23 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { KibanaRequest } from 'kibana/server';
-import type { MlClient } from '../../lib/ml_client';
-import { mlLog } from '../../lib/log';
-import {
+import { KibanaRequest } from '../../../../../../src/core/server/http/router/request';
+import { MlLicense } from '../../../common/license/ml_license';
+import type {
   MlCapabilities,
-  adminMlCapabilities,
+  MlCapabilitiesKey,
   MlCapabilitiesResponse,
   ResolveMlCapabilities,
-  MlCapabilitiesKey,
 } from '../../../common/types/capabilities';
-import { upgradeCheckProvider } from './upgrade';
-import { MlLicense } from '../../../common/license';
+import { adminMlCapabilities } from '../../../common/types/capabilities';
+import { mlLog } from '../log';
+import type { MlClient } from '../ml_client/types';
 import {
   InsufficientMLCapabilities,
-  UnknownMLCapabilitiesError,
   MLPrivilegesUninitialized,
+  UnknownMLCapabilitiesError,
 } from './errors';
+import { upgradeCheckProvider } from './upgrade';
 
 export function capabilitiesProvider(
   mlClient: MlClient,

@@ -4,9 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { Rule } from '../../model';
-import { FieldRule } from '../../model';
+import { FieldRule } from '../../model/field_rule';
+import type { Rule } from '../../model/rule';
 
 export function isRuleGroup(rule: Rule) {
   return !(rule instanceof FieldRule);

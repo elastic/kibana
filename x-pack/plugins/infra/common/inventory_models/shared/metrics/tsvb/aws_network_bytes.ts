@@ -4,8 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { TSVBMetricModelCreator, TSVBMetricModel } from '../../../types';
+import type { TSVBMetricModel, TSVBMetricModelCreator } from '../../../types';
 
 // see discussion in: https://github.com/elastic/kibana/issues/42687
 

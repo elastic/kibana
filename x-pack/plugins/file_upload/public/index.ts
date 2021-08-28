@@ -4,16 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { FileUploadPlugin } from './plugin';
 
 export function plugin() {
   return new FileUploadPlugin();
 }
 
-export * from './importer/types';
-
 export { Props as IndexNameFormProps } from './components/geojson_upload_form/index_name_form';
-
-export { FileUploadPluginStart } from './plugin';
+export * from './importer/types';
 export { FileUploadComponentProps, FileUploadGeoResults } from './lazy_load_bundle';
+export { FileUploadPluginStart } from './plugin';

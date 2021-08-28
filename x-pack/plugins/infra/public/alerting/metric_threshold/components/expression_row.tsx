@@ -4,35 +4,33 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { omit } from 'lodash';
-import React, { useCallback, useState, useMemo } from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 import {
+  EuiButtonEmpty,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButtonIcon,
+  EuiHealth,
+  EuiLink,
   EuiSpacer,
   EuiText,
-  EuiLink,
-  EuiHealth,
-  EuiButtonEmpty,
 } from '@elastic/eui';
-import { IFieldType } from 'src/plugins/data/public';
-import { pctToDecimal, decimalToPct } from '../../../../common/utils/corrected_percent_convert';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { omit } from 'lodash';
+import React, { useCallback, useMemo, useState } from 'react';
+import type { IFieldType } from '../../../../../../../src/plugins/data/common/index_patterns/fields/types';
+import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
+import { builtInComparators } from '../../../../../triggers_actions_ui/public/common/constants/comparators';
 import {
-  WhenExpression,
   OfExpression,
   ThresholdExpression,
-} from '../../../../../triggers_actions_ui/public';
-import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
-import { IErrorObject } from '../../../../../triggers_actions_ui/public';
-import { MetricExpression, AGGREGATION_TYPES } from '../types';
-import {
-  Comparator,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../server/lib/alerting/metric_threshold/types';
-import { builtInComparators } from '../../../../../triggers_actions_ui/public';
+  WhenExpression,
+} from '../../../../../triggers_actions_ui/public/common/expression_items';
+import type { IErrorObject } from '../../../../../triggers_actions_ui/public/types';
+import { decimalToPct, pctToDecimal } from '../../../../common/utils/corrected_percent_convert';
+import { Comparator } from '../../../../server/lib/alerting/common/types';
+import type { MetricExpression } from '../types';
+import { AGGREGATION_TYPES } from '../types';
 
 const customComparators = {
   ...builtInComparators,

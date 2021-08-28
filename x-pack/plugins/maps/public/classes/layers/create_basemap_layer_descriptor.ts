@@ -6,15 +6,16 @@
  */
 
 import _ from 'lodash';
-import { LayerDescriptor } from '../../../common/descriptor_types';
-import { getKibanaTileMap } from '../../util';
+import type { LayerDescriptor } from '../../../common/descriptor_types/layer_descriptor_types';
 import { getEMSSettings } from '../../kibana_services';
+import { getKibanaTileMap } from '../../util';
+// @ts-expect-error
+import { EMSTMSSource } from '../sources/ems_tms_source';
 // @ts-expect-error
 import { KibanaTilemapSource } from '../sources/kibana_tilemap_source';
 import { TileLayer } from './tile_layer/tile_layer';
 import { VectorTileLayer } from './vector_tile_layer/vector_tile_layer';
-// @ts-expect-error
-import { EMSTMSSource } from '../sources/ems_tms_source';
+
 
 export function createBasemapLayerDescriptor(): LayerDescriptor | null {
   const tilemapSourceFromKibana = getKibanaTileMap();

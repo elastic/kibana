@@ -5,54 +5,54 @@
  * 2.0.
  */
 
-import React from 'react';
-import _ from 'lodash';
-import { finalize, switchMap, tap } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
-import { AppLeaveAction, AppMountParameters } from 'kibana/public';
-import { Adapters } from 'src/plugins/embeddable/public';
+import _ from 'lodash';
+import React from 'react';
 import { Subscription } from 'rxjs';
+import { finalize, switchMap, tap } from 'rxjs/operators';
+import type {
+  AppLeaveAction,
+  AppMountParameters,
+} from '../../../../../../../src/core/public/application/types';
+import type { Filter } from '../../../../../../../src/plugins/data/common/es_query';
+import { IndexPattern } from '../../../../../../../src/plugins/data/common/index_patterns/index_patterns/index_pattern';
+import type { TimeRange } from '../../../../../../../src/plugins/data/common/query/timefilter/types';
+import type { Query } from '../../../../../../../src/plugins/data/public';
+import { esFilters } from '../../../../../../../src/plugins/data/public/deprecated';
+import type { SavedQuery } from '../../../../../../../src/plugins/data/public/query/saved_query/types';
+import type {
+  QueryState,
+  QueryStateChange,
+} from '../../../../../../../src/plugins/data/public/query/state_sync/types';
+import type { Adapters } from '../../../../../../../src/plugins/inspector/common/adapters/types';
+import { APP_ID, getFullPath } from '../../../../common/constants';
+import type { MapQuery } from '../../../../common/descriptor_types/map_descriptor';
+import type { MapSavedObjectAttributes } from '../../../../common/map_saved_object_type';
+import { MapContainer } from '../../../connected_components/map_container';
+import { getIndexPatternsFromIds } from '../../../index_pattern_util';
 import {
-  getData,
   getCoreChrome,
+  getData,
   getMapsCapabilities,
   getNavigation,
   getTimeFilter,
   getToasts,
 } from '../../../kibana_services';
-import {
-  AppStateManager,
-  startAppStateSyncing,
-  getGlobalState,
-  updateGlobalState,
-  startGlobalStateSyncing,
-  MapsGlobalState,
-} from '../url_state';
-import {
-  esFilters,
-  Filter,
-  Query,
-  TimeRange,
-  IndexPattern,
-  SavedQuery,
-  QueryStateChange,
-  QueryState,
-} from '../../../../../../../src/plugins/data/public';
-import { MapContainer } from '../../../connected_components/map_container';
-import { getIndexPatternsFromIds } from '../../../index_pattern_util';
-import { getTopNavConfig } from '../top_nav_config';
-import { MapQuery } from '../../../../common/descriptor_types';
 import { goToSpecifiedPath } from '../../../render_app';
-import { MapSavedObjectAttributes } from '../../../../common/map_saved_object_type';
-import { getFullPath, APP_ID } from '../../../../common/constants';
+import { unsavedChangesTitle, unsavedChangesWarning } from '../saved_map/get_breadcrumbs';
+import { getInitialQuery } from '../saved_map/get_initial_query';
+import { getInitialRefreshConfig } from '../saved_map/get_initial_refresh_config';
+import { getInitialTimeFilters } from '../saved_map/get_initial_time_filters';
+import { SavedMap } from '../saved_map/saved_map';
+import { getTopNavConfig } from '../top_nav_config';
+import { AppStateManager } from '../url_state/app_state_manager';
+import { startAppStateSyncing } from '../url_state/app_sync';
+import type { MapsGlobalState } from '../url_state/global_sync';
 import {
-  getInitialQuery,
-  getInitialRefreshConfig,
-  getInitialTimeFilters,
-  SavedMap,
-  unsavedChangesTitle,
-  unsavedChangesWarning,
-} from '../saved_map';
+  getGlobalState,
+  startGlobalStateSyncing,
+  updateGlobalState,
+} from '../url_state/global_sync';
 import { waitUntilTimeLayersLoad$ } from './wait_until_time_layers_load';
 
 interface MapRefreshConfig {

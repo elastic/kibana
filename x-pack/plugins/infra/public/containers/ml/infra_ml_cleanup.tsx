@@ -4,9 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { HttpHandler } from 'src/core/public';
-import { getJobId } from '../../../common/infra_ml';
+import type { HttpHandler } from '../../../../../../src/core/public/http/types';
+import { getJobId } from '../../../common/infra_ml/job_parameters';
 import { callDeleteJobs, callGetJobDeletionTasks, callStopDatafeeds } from './api/ml_cleanup';
 
 export const cleanUpJobsAndDatafeeds = async <JobType extends string>(

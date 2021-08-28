@@ -4,39 +4,45 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { ISavedObjectTypeRegistry } from '../../../../../src/core/server/saved_objects/saved_objects_type_registry';
 import type {
-  ISavedObjectTypeRegistry,
-  SavedObject,
-  SavedObjectsBaseOptions,
+  SavedObjectsCollectMultiNamespaceReferencesObject,
+  SavedObjectsCollectMultiNamespaceReferencesOptions,
+  SavedObjectsCollectMultiNamespaceReferencesResponse,
+} from '../../../../../src/core/server/saved_objects/service/lib/collect_multi_namespace_references';
+import type {
+  SavedObjectsCreatePointInTimeFinderDependencies,
+  SavedObjectsCreatePointInTimeFinderOptions,
+} from '../../../../../src/core/server/saved_objects/service/lib/point_in_time_finder';
+import type {
+  SavedObjectsUpdateObjectsSpacesObject,
+  SavedObjectsUpdateObjectsSpacesOptions,
+} from '../../../../../src/core/server/saved_objects/service/lib/update_objects_spaces';
+import { SavedObjectsUtils } from '../../../../../src/core/server/saved_objects/service/lib/utils';
+import type {
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkGetObject,
   SavedObjectsBulkResponse,
   SavedObjectsBulkUpdateObject,
   SavedObjectsBulkUpdateResponse,
   SavedObjectsCheckConflictsObject,
-  SavedObjectsClientContract,
   SavedObjectsClosePointInTimeOptions,
-  SavedObjectsCollectMultiNamespaceReferencesObject,
-  SavedObjectsCollectMultiNamespaceReferencesOptions,
-  SavedObjectsCollectMultiNamespaceReferencesResponse,
   SavedObjectsCreateOptions,
-  SavedObjectsCreatePointInTimeFinderDependencies,
-  SavedObjectsCreatePointInTimeFinderOptions,
-  SavedObjectsFindOptions,
   SavedObjectsFindResponse,
   SavedObjectsOpenPointInTimeOptions,
   SavedObjectsRemoveReferencesToOptions,
   SavedObjectsRemoveReferencesToResponse,
-  SavedObjectsUpdateObjectsSpacesObject,
-  SavedObjectsUpdateObjectsSpacesOptions,
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
-} from 'src/core/server';
-
-import { SavedObjectsUtils } from '../../../../../src/core/server';
-import type { AuthenticatedUser } from '../../../security/common/model';
-import type { EncryptedSavedObjectsService } from '../crypto';
+} from '../../../../../src/core/server/saved_objects/service/saved_objects_client';
+import type {
+  SavedObjectsBaseOptions,
+  SavedObjectsClientContract,
+  SavedObjectsFindOptions,
+} from '../../../../../src/core/server/saved_objects/types';
+import type { SavedObject } from '../../../../../src/core/types/saved_objects';
+import type { AuthenticatedUser } from '../../../security/common/model/authenticated_user';
+import type { EncryptedSavedObjectsService } from '../crypto/encrypted_saved_objects_service';
 import { getDescriptorNamespace } from './get_descriptor_namespace';
 
 interface EncryptedSavedObjectsClientOptions {

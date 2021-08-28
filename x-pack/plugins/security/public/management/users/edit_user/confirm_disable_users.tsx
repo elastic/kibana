@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { EuiConfirmModal, EuiText } from '@elastic/eui';
 import type { FunctionComponent } from 'react';
 import React from 'react';
@@ -13,8 +12,8 @@ import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { UserAPIClient } from '..';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { useKibana } from '../../../../../../../src/plugins/kibana_react/public/context/context';
+import { UserAPIClient } from '../user_api_client';
 
 export interface ConfirmDisableUsersProps {
   usernames: string[];

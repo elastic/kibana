@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { EuiCallOut, EuiConfirmModal, EuiSpacer, EuiText } from '@elastic/eui';
 import type { FunctionComponent } from 'react';
 import React from 'react';
@@ -13,10 +12,10 @@ import useAsyncFn from 'react-use/lib/useAsyncFn';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import type { Space } from 'src/plugins/spaces_oss/common';
 
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
-import type { SpacesManager } from '../../../spaces_manager';
+import { useKibana } from '../../../../../../../src/plugins/kibana_react/public/context/context';
+import type { Space } from '../../../../../../../src/plugins/spaces_oss/common/types';
+import type { SpacesManager } from '../../../spaces_manager/spaces_manager';
 
 interface Props {
   space: Space;

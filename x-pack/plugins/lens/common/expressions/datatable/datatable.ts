@@ -4,14 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { i18n } from '@kbn/i18n';
 import { cloneDeep } from 'lodash';
-import type {
-  ExecutionContext,
-  DatatableColumnMeta,
-  ExpressionFunctionDefinition,
-} from '../../../../../../src/plugins/expressions/common';
+import type { ExecutionContext } from '../../../../../../src/plugins/expressions/common/execution/types';
+import type { ExpressionFunctionDefinition } from '../../../../../../src/plugins/expressions/common/expression_functions/types';
+import type { DatatableColumnMeta } from '../../../../../../src/plugins/expressions/common/expression_types/specs/datatable';
 import type { FormatFactory, LensMultiTable } from '../../types';
 import type { ColumnConfigArg } from './datatable_column';
 import { getSortingCriteria } from './sorting';

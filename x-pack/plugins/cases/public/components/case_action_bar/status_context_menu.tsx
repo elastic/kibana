@@ -4,12 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import React, { memo, useCallback, useMemo, useState } from 'react';
-import { EuiPopover, EuiContextMenuPanel, EuiContextMenuItem } from '@elastic/eui';
-import { caseStatuses, CaseStatuses } from '../../../common';
-import { Status } from '../status';
+import { caseStatuses, CaseStatuses } from '../../../common/api/cases/status';
 import { CHANGE_STATUS } from '../all_cases/translations';
+import { Status } from '../status/status';
 
 interface Props {
   currentStatus: CaseStatuses;

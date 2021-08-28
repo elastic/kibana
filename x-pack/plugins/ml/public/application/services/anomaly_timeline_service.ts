@@ -4,30 +4,23 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { IUiSettingsClient } from 'kibana/public';
-import {
-  TimefilterContract,
-  TimeRange,
-  UI_SETTINGS,
-} from '../../../../../../src/plugins/data/public';
-import {
-  getBoundsRoundedToInterval,
-  TimeBuckets,
-  TimeBucketsInterval,
-  TimeRangeBounds,
-} from '../util/time_buckets';
-import {
+import type { IUiSettingsClient } from '../../../../../../src/core/public/ui_settings/types';
+import { UI_SETTINGS } from '../../../../../../src/plugins/data/common/constants';
+import type { TimeRange } from '../../../../../../src/plugins/data/common/query/timefilter/types';
+import type { TimefilterContract } from '../../../../../../src/plugins/data/public/query/timefilter/timefilter';
+import type { InfluencersFilterQuery } from '../../../common/types/es_client';
+import type { EntityField } from '../../../common/util/anomaly_utils';
+import { isPopulatedObject } from '../../../common/util/object_utils';
+import { OVERALL_LABEL, VIEW_BY_JOB_LABEL } from '../explorer/explorer_constants';
+import type {
   ExplorerJob,
   OverallSwimlaneData,
   SwimlaneData,
   ViewBySwimLaneData,
 } from '../explorer/explorer_utils';
-import { OVERALL_LABEL, VIEW_BY_JOB_LABEL } from '../explorer/explorer_constants';
-import { MlResultsService } from './results_service';
-import { EntityField } from '../../../common/util/anomaly_utils';
-import { InfluencersFilterQuery } from '../../../common/types/es_client';
-import { isPopulatedObject } from '../../../common';
+import type { TimeBucketsInterval, TimeRangeBounds } from '../util/time_buckets';
+import { getBoundsRoundedToInterval, TimeBuckets } from '../util/time_buckets';
+import type { MlResultsService } from './results_service';
 
 /**
  * Service for retrieving anomaly swim lanes data.

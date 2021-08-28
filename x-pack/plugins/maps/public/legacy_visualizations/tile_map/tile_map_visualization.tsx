@@ -6,10 +6,12 @@
  */
 
 import React from 'react';
-import type { Filter, Query, TimeRange } from '../../../../../../src/plugins/data/common';
-import { TileMapVisConfig } from './types';
-import type { LazyLoadedMapModules } from '../../lazy_load_bundle';
+import type { Query } from '../../../../../../src/plugins/data/common';
+import type { Filter } from '../../../../../../src/plugins/data/common/es_query';
+import type { TimeRange } from '../../../../../../src/plugins/data/common/query/timefilter/types';
 import { MapComponent } from '../../embeddable/map_component';
+import type { LazyLoadedMapModules } from '../../lazy_load_bundle';
+import type { TileMapVisConfig } from './types';
 
 interface Props {
   filters?: Filter[];

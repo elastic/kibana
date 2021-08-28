@@ -4,81 +4,67 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
 import React from 'react';
-import { Provider } from 'react-redux';
 import { render, unmountComponentAtNode } from 'react-dom';
+import { Provider } from 'react-redux';
+import type { Unsubscribe } from 'redux';
 import { Subscription } from 'rxjs';
-import { Unsubscribe } from 'redux';
+import type { Filter } from '../../../../../src/plugins/data/common/es_query';
+import type { TimeRange } from '../../../../../src/plugins/data/common/query/timefilter/types';
+import type { Query } from '../../../../../src/plugins/data/public';
+import { ACTION_GLOBAL_APPLY_FILTER } from '../../../../../src/plugins/data/public/actions/apply_filter_action';
+import { esFilters } from '../../../../../src/plugins/data/public/deprecated';
+import { APPLY_FILTER_TRIGGER } from '../../../../../src/plugins/data/public/triggers/apply_filter_trigger';
+import type { IContainer } from '../../../../../src/plugins/embeddable/public/lib/containers/i_container';
+import { Embeddable } from '../../../../../src/plugins/embeddable/public/lib/embeddables/embeddable';
+import type { ReferenceOrValueEmbeddable } from '../../../../../src/plugins/embeddable/public/lib/reference_or_value_embeddable/types';
+import { VALUE_CLICK_TRIGGER } from '../../../../../src/plugins/embeddable/public/lib/triggers/triggers';
+import type { ActionExecutionContext } from '../../../../../src/plugins/ui_actions/public/actions/action';
+import type { RawValue } from '../../common/constants';
+import { APP_ID, getEditPath, getFullPath, MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
+import type { LayerDescriptor } from '../../common/descriptor_types/layer_descriptor_types';
+import type { MapExtent } from '../../common/descriptor_types/map_descriptor';
+import { createExtentFilter } from '../../common/elasticsearch_util/spatial_filter_utils';
+import { replaceLayerList } from '../actions/layer_actions';
+import { disableScrollZoom, setMapSettings, setQuery } from '../actions/map_actions';
+import { setReadOnly } from '../actions/ui_actions';
+import type { RenderToolTipContent } from '../classes/tooltips/tooltip_property';
+import { MapContainer } from '../connected_components/map_container';
+import { getIndexPatternsFromIds } from '../index_pattern_util';
 import {
-  Embeddable,
-  IContainer,
-  ReferenceOrValueEmbeddable,
-  VALUE_CLICK_TRIGGER,
-} from '../../../../../src/plugins/embeddable/public';
-import { ActionExecutionContext } from '../../../../../src/plugins/ui_actions/public';
-import {
-  ACTION_GLOBAL_APPLY_FILTER,
-  APPLY_FILTER_TRIGGER,
-  esFilters,
-  TimeRange,
-  Filter,
-  Query,
-} from '../../../../../src/plugins/data/public';
-import { createExtentFilter } from '../../common/elasticsearch_util';
-import {
-  replaceLayerList,
-  setMapSettings,
-  setQuery,
-  disableScrollZoom,
-  setReadOnly,
-} from '../actions';
-import { getIsLayerTOCOpen, getOpenTOCDetails } from '../selectors/ui_selectors';
+  getChartsPaletteServiceGetColor,
+  getCoreI18n,
+  getHttp,
+  getSearchService,
+  getUiActions,
+} from '../kibana_services';
+import { getMapAttributeService } from '../map_attribute_service';
+import type { EventHandlers } from '../reducers/non_serializable_instances';
 import {
   getInspectorAdapters,
   setChartsPaletteServiceGetColor,
   setEventHandlers,
-  EventHandlers,
 } from '../reducers/non_serializable_instances';
+import { waitUntilTimeLayersLoad$ } from '../routes/map_page/map_app/wait_until_time_layers_load';
+import { SavedMap } from '../routes/map_page/saved_map/saved_map';
 import {
   areLayersLoaded,
   getGeoFieldNames,
-  getMapCenter,
+  getHiddenLayerIds,
   getMapBuffer,
+  getMapCenter,
   getMapExtent,
   getMapReady,
   getMapZoom,
-  getHiddenLayerIds,
   getQueryableUniqueIndexPatternIds,
 } from '../selectors/map_selectors';
-import {
-  APP_ID,
-  getEditPath,
-  getFullPath,
-  MAP_SAVED_OBJECT_TYPE,
-  RawValue,
-} from '../../common/constants';
-import { RenderToolTipContent } from '../classes/tooltips/tooltip_property';
-import {
-  getUiActions,
-  getCoreI18n,
-  getHttp,
-  getChartsPaletteServiceGetColor,
-  getSearchService,
-} from '../kibana_services';
-import { LayerDescriptor, MapExtent } from '../../common/descriptor_types';
-import { MapContainer } from '../connected_components/map_container';
-import { SavedMap } from '../routes/map_page';
-import { getIndexPatternsFromIds } from '../index_pattern_util';
-import { getMapAttributeService } from '../map_attribute_service';
+import { getIsLayerTOCOpen, getOpenTOCDetails } from '../selectors/ui_selectors';
 import { isUrlDrilldown, toValueClickDataFormat } from '../trigger_actions/trigger_utils';
-import { waitUntilTimeLayersLoad$ } from '../routes/map_page/map_app/wait_until_time_layers_load';
-
-import {
-  MapByValueInput,
+import type {
   MapByReferenceInput,
+  MapByValueInput,
   MapEmbeddableConfig,
   MapEmbeddableInput,
   MapEmbeddableOutput,

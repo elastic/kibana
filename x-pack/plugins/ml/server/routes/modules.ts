@@ -4,22 +4,22 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { TypeOf } from '@kbn/config-schema';
-
-import { IScopedClusterClient, KibanaRequest, SavedObjectsClientContract } from 'kibana/server';
-import { DatafeedOverride, JobOverride } from '../../common/types/modules';
+import type { TypeOf } from '@kbn/config-schema';
+import type { IScopedClusterClient } from '../../../../../src/core/server/elasticsearch/client/scoped_cluster_client';
+import { KibanaRequest } from '../../../../../src/core/server/http/router/request';
+import type { SavedObjectsClientContract } from '../../../../../src/core/server/saved_objects/types';
+import type { DatafeedOverride, JobOverride } from '../../common/types/modules';
 import { wrapError } from '../client/error_wrapper';
-import { DataRecognizer } from '../models/data_recognizer';
+import type { MlClient } from '../lib/ml_client/types';
+import { DataRecognizer } from '../models/data_recognizer/data_recognizer';
+import type { JobSavedObjectService } from '../saved_objects/service';
+import type { RouteInitialization } from '../types';
 import {
   moduleIdParamSchema,
-  optionalModuleIdParamSchema,
   modulesIndexPatternTitleSchema,
+  optionalModuleIdParamSchema,
   setupModuleBodySchema,
 } from './schemas/modules';
-import { RouteInitialization } from '../types';
-import type { MlClient } from '../lib/ml_client';
-import type { JobSavedObjectService } from '../saved_objects';
 
 function recognize(
   client: IScopedClusterClient,

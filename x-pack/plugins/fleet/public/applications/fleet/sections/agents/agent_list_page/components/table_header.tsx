@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import React from 'react';
 
-import type { Agent, SimplifiedAgentStatus } from '../../../../types';
+import type { Agent, SimplifiedAgentStatus } from '../../../../../../../common/types/models/agent';
 
-import { AgentStatusBar } from './status_bar';
 import { AgentBulkActions } from './bulk_actions';
-import {} from '@elastic/eui';
 import { AgentStatusBadges } from './status_badges';
+import { AgentStatusBar } from './status_bar';
 
 export type SelectionMode = 'manual' | 'query';
 

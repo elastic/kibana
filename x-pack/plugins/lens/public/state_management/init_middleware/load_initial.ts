@@ -4,20 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { MiddlewareAPI } from '@reduxjs/toolkit';
+import type { MiddlewareAPI } from '@reduxjs/toolkit';
 import { isEqual } from 'lodash';
-import { setState } from '..';
-import { updateLayer, updateVisualizationState, LensStoreDeps } from '..';
-import { LensEmbeddableInput, LensByReferenceInput } from '../../embeddable/embeddable';
-import { getInitialDatasourceId } from '../../utils';
-import { initializeDatasources } from '../../editor_frame_service/editor_frame';
-import { generateId } from '../../id_generator';
+import { setState, updateLayer, updateVisualizationState } from '..';
+import { getPersistedDoc } from '../../app_plugin/save_modal_container';
+import { initializeDatasources } from '../../editor_frame_service/editor_frame/state_helpers';
 import {
   getVisualizeFieldSuggestions,
   switchToSuggestion,
 } from '../../editor_frame_service/editor_frame/suggestion_helpers';
-import { getPersistedDoc } from '../../app_plugin/save_modal_container';
+import type { LensByReferenceInput, LensEmbeddableInput } from '../../embeddable/embeddable';
+import { generateId } from '../../id_generator/id_generator';
+import { getInitialDatasourceId } from '../../utils';
+import type { LensStoreDeps } from '../types';
 
 export function loadInitial(
   store: MiddlewareAPI,

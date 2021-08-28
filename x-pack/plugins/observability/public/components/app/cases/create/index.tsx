@@ -4,14 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { useCallback } from 'react';
 import { EuiPanel } from '@elastic/eui';
-
-import { useKibana } from '../../../../utils/kibana_react';
-import { getCaseDetailsUrl } from '../../../../pages/cases/links';
-import { CASES_OWNER } from '../constants';
+import React, { useCallback } from 'react';
 import { observabilityAppId } from '../../../../../common';
+import { getCaseDetailsUrl } from '../../../../pages/cases/links';
+import { useKibana } from '../../../../utils/kibana_react';
+import { CASES_OWNER } from '../constants';
 
 export const Create = React.memo(() => {
   const {

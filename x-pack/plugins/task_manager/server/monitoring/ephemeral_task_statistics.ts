@@ -4,21 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { map, filter, startWith, buffer, share } from 'rxjs/operators';
-import { JsonObject } from '@kbn/utility-types';
+import type { JsonObject } from '@kbn/utility-types';
 import { combineLatest, Observable, zip } from 'rxjs';
-import { isOk, Ok } from '../lib/result_type';
-import { AggregatedStat, AggregatedStatProvider } from './runtime_statistics_aggregator';
+import { buffer, filter, map, share, startWith } from 'rxjs/operators';
 import { EphemeralTaskLifecycle } from '../ephemeral_task_lifecycle';
-import { TaskLifecycleEvent } from '../polling_lifecycle';
-import { isTaskRunEvent, isTaskManagerStatEvent } from '../task_events';
-import {
-  AveragedStat,
-  calculateRunningAverage,
-  createRunningAveragedStat,
-} from './task_run_calcultors';
+import type { Ok } from '../lib/result_type';
+import { isOk } from '../lib/result_type';
+import type { TaskLifecycleEvent } from '../polling_lifecycle';
+import { isTaskManagerStatEvent, isTaskRunEvent } from '../task_events';
 import { HealthStatus } from './monitoring_stats_stream';
+import type { AggregatedStat, AggregatedStatProvider } from './runtime_statistics_aggregator';
+import type { AveragedStat } from './task_run_calcultors';
+import { calculateRunningAverage, createRunningAveragedStat } from './task_run_calcultors';
 
 export interface EphemeralTaskStat extends JsonObject {
   queuedTasks: number[];

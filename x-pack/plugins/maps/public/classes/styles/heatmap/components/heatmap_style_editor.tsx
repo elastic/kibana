@@ -5,9 +5,8 @@
  * 2.0.
  */
 
+import { EuiColorPalettePicker, EuiFormRow } from '@elastic/eui';
 import React from 'react';
-
-import { EuiFormRow, EuiColorPalettePicker } from '@elastic/eui';
 import { NUMERICAL_COLOR_PALETTES } from '../../color_palettes';
 import { HEATMAP_COLOR_RAMP_LABEL } from './heatmap_constants';
 

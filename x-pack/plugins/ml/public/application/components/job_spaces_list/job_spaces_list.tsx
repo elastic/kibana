@@ -4,20 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { FC, useCallback, useState } from 'react';
-
 import { EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { ShareToSpaceFlyoutProps } from 'src/plugins/spaces_oss/public';
-import {
-  JobType,
-  ML_SAVED_OBJECT_TYPE,
-  SavedObjectResult,
-} from '../../../../common/types/saved_objects';
-import type { SpacesPluginStart } from '../../../../../spaces/public';
+import type { FC } from 'react';
+import React, { useCallback, useState } from 'react';
+import type { ShareToSpaceFlyoutProps } from '../../../../../../../src/plugins/spaces_oss/public/api';
+import type { SpacesPluginStart } from '../../../../../spaces/public/plugin';
+import type { JobType, SavedObjectResult } from '../../../../common/types/saved_objects';
+import { ML_SAVED_OBJECT_TYPE } from '../../../../common/types/saved_objects';
 import { ml } from '../../services/ml_api_service';
-import { useToastNotificationService } from '../../services/toast_notification_service';
+import { useToastNotificationService } from '../../services/toast_notification_service/toast_notification_service';
 
 interface Props {
   spacesApi: SpacesPluginStart;

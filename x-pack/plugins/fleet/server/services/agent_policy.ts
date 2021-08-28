@@ -4,63 +4,54 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { uniq, omit } from 'lodash';
 import { safeLoad } from 'js-yaml';
+import { omit, uniq } from 'lodash';
 import uuid from 'uuid/v4';
-import type {
-  ElasticsearchClient,
-  SavedObjectsClientContract,
-  SavedObjectsBulkUpdateResponse,
-} from 'src/core/server';
 
-import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
-
-import type { AuthenticatedUser } from '../../../security/server';
-import {
-  AGENT_POLICY_SAVED_OBJECT_TYPE,
-  AGENT_SAVED_OBJECT_TYPE,
-  PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
-} from '../constants';
-import type {
-  PackagePolicy,
-  NewAgentPolicy,
-  PreconfiguredAgentPolicy,
-  AgentPolicy,
-  AgentPolicySOAttributes,
-  FullAgentPolicy,
-  ListWithKuery,
-  NewPackagePolicy,
-} from '../types';
+import type { ElasticsearchClient } from '../../../../../src/core/server/elasticsearch/client/types';
+import { SavedObjectsErrorHelpers } from '../../../../../src/core/server/saved_objects/service/lib/errors';
+import type { SavedObjectsBulkUpdateResponse } from '../../../../../src/core/server/saved_objects/service/saved_objects_client';
+import type { SavedObjectsClientContract } from '../../../../../src/core/server/saved_objects/types';
+import type { AuthenticatedUser } from '../../../security/common/model/authenticated_user';
+import { AGENT_SAVED_OBJECT_TYPE } from '../../common/constants/agent';
 import {
   agentPolicyStatuses,
-  storedPackagePoliciesToAgentInputs,
-  dataTypes,
-  packageToPackagePolicy,
   AGENT_POLICY_INDEX,
-} from '../../common';
+  AGENT_POLICY_SAVED_OBJECT_TYPE,
+} from '../../common/constants/agent_policy';
+import { dataTypes } from '../../common/constants/epm';
+import { PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE } from '../../common/constants/preconfiguration';
+import { storedPackagePoliciesToAgentInputs } from '../../common/services/package_policies_to_agent_inputs';
+import { packageToPackagePolicy } from '../../common/services/package_to_package_policy';
 import type {
-  DeleteAgentPolicyResponse,
-  Settings,
+  AgentPolicy,
+  AgentPolicySOAttributes,
   FleetServerPolicy,
-  Installation,
-  Output,
-  DeletePackagePoliciesResponse,
-} from '../../common';
+  FullAgentPolicy,
+  NewAgentPolicy,
+} from '../../common/types/models/agent_policy';
+import type { Installation } from '../../common/types/models/epm';
+import type { Output } from '../../common/types/models/output';
+import type { NewPackagePolicy, PackagePolicy } from '../../common/types/models/package_policy';
+import type { PreconfiguredAgentPolicy } from '../../common/types/models/preconfiguration';
+import type { Settings } from '../../common/types/models/settings';
+import type { DeleteAgentPolicyResponse } from '../../common/types/rest_spec/agent_policy';
+import type { DeletePackagePoliciesResponse } from '../../common/types/rest_spec/package_policy';
 import { AgentPolicyNameExistsError, HostedAgentPolicyRestrictionRelatedError } from '../errors';
-import {
-  storedPackagePoliciesToAgentPermissions,
-  DEFAULT_PERMISSIONS,
-} from '../services/package_policies_to_agent_permissions';
+import type { ListWithKuery } from '../types/rest_spec/common';
 
-import { getPackageInfo } from './epm/packages';
-import { getAgentsByKuery } from './agents';
-import { packagePolicyService } from './package_policy';
-import { outputService } from './output';
+import { getAgentsByKuery } from './agents/crud';
 import { agentPolicyUpdateEventHandler } from './agent_policy_update';
-import { getSettings } from './settings';
-import { normalizeKuery, escapeSearchQueryPhrase } from './saved_object';
 import { appContextService } from './app_context';
+import { getPackageInfo } from './epm/packages/get';
+import { outputService } from './output';
+import {
+  DEFAULT_PERMISSIONS,
+  storedPackagePoliciesToAgentPermissions,
+} from './package_policies_to_agent_permissions';
+import { packagePolicyService } from './package_policy';
+import { escapeSearchQueryPhrase, normalizeKuery } from './saved_object';
+import { getSettings } from './settings';
 
 const SAVED_OBJECT_TYPE = AGENT_POLICY_SAVED_OBJECT_TYPE;
 

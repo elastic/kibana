@@ -4,10 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { Datum, LayerValue } from '@elastic/charts';
-import { Datatable, DatatableColumn } from 'src/plugins/expressions/public';
-import { LensFilterEvent } from '../types';
+import type { Datum, LayerValue } from '@elastic/charts';
+import type {
+  Datatable,
+  DatatableColumn,
+} from '../../../../../src/plugins/expressions/common/expression_types/specs/datatable';
+import type { LensFilterEvent } from '../types';
 
 export function getSliceValue(d: Datum, metricColumn: DatatableColumn) {
   if (typeof d[metricColumn.id] === 'number' && d[metricColumn.id] !== 0) {

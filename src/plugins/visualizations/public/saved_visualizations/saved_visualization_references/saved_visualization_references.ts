@@ -10,8 +10,8 @@ import type {
   SavedObjectAttributes,
   SavedObjectReference,
 } from '../../../../../core/types/saved_objects';
-import { extractSearchSourceReferences } from '../../../../data/common/search/search_source/extract_references';
-import { injectSearchSourceReferences } from '../../../../data/common/search/search_source/inject_references';
+import { extractReferences as extractSearchSourceReferences } from '../../../../data/common/search/search_source/extract_references';
+import { injectReferences as injectSearchSourceReferences } from '../../../../data/common/search/search_source/inject_references';
 import type { SearchSourceFields } from '../../../../data/common/search/search_source/types';
 import type { SavedVisState, VisSavedObject } from '../../types';
 import { extractControlsReferences, injectControlsReferences } from './controls_references';

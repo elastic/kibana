@@ -4,12 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { EuiPopover, EuiButtonEmpty, EuiContextMenuPanel } from '@elastic/eui';
+import { EuiButtonEmpty, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import numeral from '@elastic/numeral';
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
-import { useUiSetting$ } from '../../../../../../../../src/plugins/kibana_react/public';
+import { useUiSetting$ } from '../../../../../../../../src/plugins/kibana_react/public/ui_settings/use_ui_setting';
 import { DEFAULT_NUMBER_FORMAT } from '../../../../../common/constants';
 import * as i18n from './translations';
 

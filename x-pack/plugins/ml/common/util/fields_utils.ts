@@ -4,17 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import {
-  Field,
-  Aggregation,
-  NewJobCaps,
-  METRIC_AGG_TYPE,
-  RollupFields,
-  EVENT_RATE_FIELD_ID,
-} from '../types/fields';
 import { ES_FIELD_TYPES } from '../../../../../src/plugins/data/common';
 import { ML_JOB_AGGREGATION } from '../constants/aggregation_types';
+import type { Aggregation, Field, NewJobCaps, RollupFields } from '../types/fields';
+import { EVENT_RATE_FIELD_ID, METRIC_AGG_TYPE } from '../types/fields';
 
 // cross reference fields and aggs.
 // fields contain a list of aggs that are compatible, and vice versa.

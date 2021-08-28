@@ -4,61 +4,60 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { assign, omit } from 'lodash';
-
-import {
-  CASE_REPORTERS_URL,
-  CASE_STATUS_URL,
-  CASE_TAGS_URL,
+import type {
   CasePatchRequest,
   CasePostRequest,
   CaseResponse,
-  CASES_URL,
   CasesFindResponse,
   CasesResponse,
-  CasesStatusResponse,
-  CaseType,
-  CaseUserActionsResponse,
-  CommentRequest,
-  CommentType,
+} from '../../common/api/cases/case';
+import { CaseType } from '../../common/api/cases/case';
+import type { CommentRequest } from '../../common/api/cases/comment';
+import { CommentType } from '../../common/api/cases/comment';
+import type { CasesStatusResponse } from '../../common/api/cases/status';
+import type {
+  SubCasePatchRequest,
+  SubCaseResponse,
+  SubCasesResponse,
+} from '../../common/api/cases/sub_case';
+import type { CaseUserActionsResponse } from '../../common/api/cases/user_actions';
+import {
   getCaseCommentsUrl,
   getCaseDetailsUrl,
   getCasePushUrl,
   getCaseUserActionUrl,
   getSubCaseDetailsUrl,
   getSubCaseUserActionUrl,
-  StatusAll,
-  SUB_CASE_DETAILS_URL,
-  SUB_CASES_PATCH_DEL_URL,
-  SubCasePatchRequest,
-  SubCaseResponse,
-  SubCasesResponse,
-  User,
-} from '../../common';
-
-import { getAllConnectorTypesUrl } from '../../common/utils/connectors_api';
-
-import { KibanaServices } from '../common/lib/kibana';
-
+} from '../../common/api/helpers';
+import type { User } from '../../common/api/user';
 import {
+  CASES_URL,
+  CASE_REPORTERS_URL,
+  CASE_STATUS_URL,
+  CASE_TAGS_URL,
+  SUB_CASES_PATCH_DEL_URL,
+  SUB_CASE_DETAILS_URL,
+} from '../../common/constants';
+import type {
   ActionLicense,
   AllCases,
   BulkUpdateStatus,
   Case,
   CasesStatus,
-  FetchCasesProps,
-  SortFieldCase,
   CaseUserActions,
-} from './types';
-
+  FetchCasesProps,
+} from '../../common/ui/types';
+import { SortFieldCase, StatusAll } from '../../common/ui/types';
+import { getAllConnectorTypesUrl } from '../../common/utils/connectors_api';
+import { KibanaServices } from '../common/lib/kibana/services';
 import {
-  convertToCamelCase,
   convertAllCasesToCamel,
   convertArrayToCamelCase,
+  convertToCamelCase,
   decodeCaseResponse,
-  decodeCasesResponse,
   decodeCasesFindResponse,
+  decodeCasesResponse,
   decodeCasesStatusResponse,
   decodeCaseUserActionsResponse,
 } from './utils';

@@ -11,7 +11,7 @@ import type {
   SavedObjectAttributes,
   SavedObjectReference,
 } from '../../../../core/types/saved_objects';
-import { extractSearchSourceReferences } from '../../../data/common/search/search_source/extract_references';
+import { extractReferences as extractSearchSourceReferences } from '../../../data/common/search/search_source/extract_references';
 import type { EmbeddableStateWithType } from '../../../embeddable/common/types';
 import { AttributeService } from '../../../embeddable/public/lib/attribute_service/attribute_service';
 import type { IContainer } from '../../../embeddable/public/lib/containers/i_container';

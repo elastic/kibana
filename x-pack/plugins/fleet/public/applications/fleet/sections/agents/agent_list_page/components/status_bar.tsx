@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import styled from 'styled-components';
 import { EuiColorPaletteDisplay } from '@elastic/eui';
 import React, { useMemo } from 'react';
+import styled from 'styled-components';
 
+import type { SimplifiedAgentStatus } from '../../../../../../../common/types/models/agent';
 import { AGENT_STATUSES, getColorForAgentStatus } from '../../services/agent_status';
-import type { SimplifiedAgentStatus } from '../../../../types';
 
 const StyledEuiColorPaletteDisplay = styled(EuiColorPaletteDisplay)`
   &.ingest-agent-status-bar {

@@ -5,24 +5,23 @@
  * 2.0.
  */
 
-import uuid from 'uuid/v4';
 import { i18n } from '@kbn/i18n';
 import type { SerializableRecord } from '@kbn/utility-types';
+import uuid from 'uuid/v4';
+import { createAction } from '../../../../../src/plugins/ui_actions/public/actions/create_action';
+import type { VisualizeFieldContext } from '../../../../../src/plugins/ui_actions/public/types';
+import { ACTION_VISUALIZE_GEO_FIELD } from '../../../../../src/plugins/ui_actions/public/types';
+import { LAYER_TYPE, SCALING_TYPES, SOURCE_TYPES } from '../../common/constants';
+import type { LayerDescriptor } from '../../common/descriptor_types/layer_descriptor_types';
 import {
-  createAction,
-  ACTION_VISUALIZE_GEO_FIELD,
-  VisualizeFieldContext,
-} from '../../../../../src/plugins/ui_actions/public';
-import {
-  getVisualizeCapabilities,
-  getIndexPatternService,
-  getData,
-  getShareService,
   getCore,
+  getData,
+  getIndexPatternService,
+  getShareService,
+  getVisualizeCapabilities,
 } from '../kibana_services';
-import { MapsAppLocator, MAPS_APP_LOCATOR } from '../locators';
-import { LAYER_TYPE, SOURCE_TYPES, SCALING_TYPES } from '../../common/constants';
-import { LayerDescriptor } from '../../common/descriptor_types';
+import type { MapsAppLocator } from '../locators';
+import { MAPS_APP_LOCATOR } from '../locators';
 
 export const visualizeGeoFieldAction = createAction<VisualizeFieldContext>({
   id: ACTION_VISUALIZE_GEO_FIELD,

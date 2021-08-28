@@ -4,13 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { FC, Fragment } from 'react';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiFormRow, EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
-import { Aggregation, Field } from '../../../../../../../../../common/types/fields';
-import { AdvancedDetectorModal, ModalPayload } from '../advanced_detector_modal';
-import { RichDetector } from '../../../../../common/job_creator/advanced_job_creator';
+import type { FC } from 'react';
+import React, { Fragment } from 'react';
+import type { Aggregation, Field } from '../../../../../../../../../common/types/fields';
+import type { RichDetector } from '../../../../../common/job_creator/advanced_job_creator';
+import type { ModalPayload } from '../advanced_detector_modal/advanced_detector_modal';
+import { AdvancedDetectorModal } from '../advanced_detector_modal/advanced_detector_modal';
 
 interface Props {
   payload: ModalPayload | null;

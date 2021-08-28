@@ -4,16 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { HttpHandler } from 'src/core/public';
-import { decodeOrThrow } from '../../../../../common/runtime_types';
-
+import type { HttpHandler } from '../../../../../../../../src/core/public/http/types';
+import type { LogEntriesSummaryHighlightsRequest } from '../../../../../common/http_api/log_entries/summary_highlights';
 import {
-  LOG_ENTRIES_SUMMARY_HIGHLIGHTS_PATH,
-  LogEntriesSummaryHighlightsRequest,
   logEntriesSummaryHighlightsRequestRT,
   logEntriesSummaryHighlightsResponseRT,
-} from '../../../../../common/http_api';
+  LOG_ENTRIES_SUMMARY_HIGHLIGHTS_PATH,
+} from '../../../../../common/http_api/log_entries/summary_highlights';
+import { decodeOrThrow } from '../../../../../common/runtime_types';
 
 export const fetchLogSummaryHighlights = async (
   requestArgs: LogEntriesSummaryHighlightsRequest,

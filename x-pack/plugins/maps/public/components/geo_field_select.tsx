@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiFormRow } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import React from 'react';
+import type { IFieldType } from '../../../../../src/plugins/data/common/index_patterns/fields/types';
 import { SingleFieldSelect } from './single_field_select';
-import { IFieldType } from '../../../../../src/plugins/data/common';
 
 interface Props {
   value: string;

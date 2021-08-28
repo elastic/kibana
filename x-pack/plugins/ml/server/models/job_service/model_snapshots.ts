@@ -7,11 +7,12 @@
 
 import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
-import { IScopedClusterClient } from 'kibana/server';
-import { ModelSnapshot } from '../../../common/types/anomaly_detection_jobs';
+import type { IScopedClusterClient } from '../../../../../../src/core/server/elasticsearch/client/scoped_cluster_client';
+import type { ModelSnapshot } from '../../../common/types/anomaly_detection_jobs/model_snapshot';
+import type { MlClient } from '../../lib/ml_client/types';
+import type { FormCalendar } from '../calendar/calendar_manager';
+import { CalendarManager } from '../calendar/calendar_manager';
 import { datafeedsProvider } from './datafeeds';
-import { FormCalendar, CalendarManager } from '../calendar';
-import type { MlClient } from '../../lib/ml_client';
 
 export interface ModelSnapshotsResponse {
   count: number;

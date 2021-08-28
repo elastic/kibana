@@ -4,13 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { useState } from 'react';
+import {
+  EuiButtonIcon,
+  EuiExpression,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPopover,
+  EuiPopoverTitle,
+  EuiSelect,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiExpression, EuiPopover, EuiFlexGroup, EuiFlexItem, EuiSelect } from '@elastic/eui';
-import { EuiPopoverTitle, EuiButtonIcon } from '@elastic/eui';
-import { InventoryItemType } from '../../../../common/inventory_models/types';
+import React, { useState } from 'react';
+import type { InventoryItemType } from '../../../../common/inventory_models/types';
 
 interface WhenExpressionProps {
   value: InventoryItemType;

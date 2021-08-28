@@ -4,21 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { EuiButtonEmpty, EuiFieldSearch, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useCallback, useMemo, useState } from 'react';
 import useThrottle from 'react-use/lib/useThrottle';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { i18n } from '@kbn/i18n';
-import { EuiFieldSearch } from '@elastic/eui';
-import { EuiFlexGroup } from '@elastic/eui';
-import { EuiFlexItem } from '@elastic/eui';
-import { EuiButtonEmpty } from '@elastic/eui';
-import { TabContent, TabProps } from './shared';
-import { LogStream } from '../../../../../../components/log_stream';
-import { useWaffleOptionsContext } from '../../../hooks/use_waffle_options';
 import { findInventoryFields } from '../../../../../../../common/inventory_models';
+import { LogStream } from '../../../../../../components/log_stream/log_stream';
 import { useLinkProps } from '../../../../../../hooks/use_link_props';
-import { getNodeLogsUrl } from '../../../../../link_to';
+import { getNodeLogsUrl } from '../../../../../link_to/redirect_to_node_logs';
+import { useWaffleOptionsContext } from '../../../hooks/use_waffle_options';
+import type { TabProps } from './shared';
+import { TabContent } from './shared';
 
 const TabComponent = (props: TabProps) => {
   const [textQuery, setTextQuery] = useState('');

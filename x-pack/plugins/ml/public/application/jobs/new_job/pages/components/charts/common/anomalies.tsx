@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { Fragment, FC } from 'react';
 import { AnnotationDomainType, LineAnnotation } from '@elastic/charts';
-import { Anomaly } from '../../../../common/results_loader';
-import { getSeverityColor } from '../../../../../../../../common/util/anomaly_utils';
+import type { FC } from 'react';
+import React, { Fragment } from 'react';
 import { ANOMALY_THRESHOLD } from '../../../../../../../../common/constants/anomalies';
+import { getSeverityColor } from '../../../../../../../../common/util/anomaly_utils';
+import type { Anomaly } from '../../../../common/results_loader/results_loader';
 
 interface Props {
   anomalyData?: Anomaly[];

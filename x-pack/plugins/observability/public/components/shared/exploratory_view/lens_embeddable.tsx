@@ -4,14 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { i18n } from '@kbn/i18n';
-import React, { Dispatch, SetStateAction, useCallback } from 'react';
+import type { Dispatch, SetStateAction } from 'react';
+import React, { useCallback } from 'react';
+import { useKibana } from '../../../../../../../src/plugins/kibana_react/public/context/context';
+import type { TypedLensByValueInput } from '../../../../../lens/public/embeddable/embeddable_component';
+import type { ObservabilityPublicPluginsStart } from '../../../plugin';
 import { combineTimeRanges } from './exploratory_view';
-import { TypedLensByValueInput } from '../../../../../lens/public';
 import { useSeriesStorage } from './hooks/use_series_storage';
-import { ObservabilityPublicPluginsStart } from '../../../plugin';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 
 interface Props {
   lensAttributes: TypedLensByValueInput['attributes'];

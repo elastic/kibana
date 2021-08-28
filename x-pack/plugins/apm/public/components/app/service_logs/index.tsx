@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import moment from 'moment';
 import React, { useMemo } from 'react';
-import { LogStream } from '../../../../../infra/public/components/log_stream/lazy_log_stream_wrapper';
+import { LazyLogStreamWrapper as LogStream } from '../../../../../infra/public/components/log_stream/lazy_log_stream_wrapper';
 import {
   CONTAINER_ID,
   HOSTNAME,

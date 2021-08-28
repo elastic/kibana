@@ -4,21 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { ConnectableObservable, Observable, Subject, from, merge } from 'rxjs';
-
+import { ConnectableObservable, from, merge, Observable, Subject } from 'rxjs';
 import {
+  exhaustMap,
   filter,
   map,
   pairwise,
-  exhaustMap,
   publishReplay,
   share,
   take,
   takeUntil,
 } from 'rxjs/operators';
 import { hasLicenseInfoChanged } from './has_license_info_changed';
-import { ILicense } from './types';
+import type { ILicense } from './types';
 
 export function createLicenseUpdate(
   triggerRefresh$: Observable<unknown>,

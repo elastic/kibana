@@ -4,19 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { Fragment, FC } from 'react';
 import { EuiFlexGrid, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-
-import { AggFieldPair, SplitField } from '../../../../../../../../../common/types/fields';
-import { ChartSettings } from '../../../charts/common/settings';
-import { LineChartData } from '../../../../../common/chart_loader';
-import { ModelItem, Anomaly } from '../../../../../common/results_loader';
+import type { FC } from 'react';
+import React, { Fragment } from 'react';
 import { JOB_TYPE } from '../../../../../../../../../common/constants/new_job';
-import { SplitCards, useAnimateSplit } from '../split_cards';
-import { DetectorTitle } from '../detector_title';
-import { ByFieldSelector } from '../by_field';
-import { AnomalyChart, CHART_TYPE } from '../../../charts/anomaly_chart';
+import type { AggFieldPair, SplitField } from '../../../../../../../../../common/types/fields';
+import type { LineChartData } from '../../../../../common/chart_loader/chart_loader';
+import type { Anomaly, ModelItem } from '../../../../../common/results_loader/results_loader';
+import { AnomalyChart, CHART_TYPE } from '../../../charts/anomaly_chart/anomaly_chart';
+import type { ChartSettings } from '../../../charts/common/settings';
+import { ByFieldSelector } from '../by_field/by_field';
+import { DetectorTitle } from '../detector_title/detector_title';
+import { useAnimateSplit } from '../split_cards/animate_split_hook';
+import { SplitCards } from '../split_cards/split_cards';
 
 type DetectorFieldValues = Record<number, string[]>;
 

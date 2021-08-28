@@ -7,7 +7,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import { BehaviorSubject } from 'rxjs';
-import type { CoreSetup, CoreStart } from '../../../core/public';
+import type { CoreSetup, CoreStart } from '../../../core/public/types';
 import type {
   AppDeepLink,
   AppMountParameters,

@@ -4,18 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { useCallback, useEffect, useMemo } from 'react';
-import { EuiContextMenuItem, EuiButtonEmpty, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import { EuiButtonEmpty, EuiButtonIcon, EuiContextMenuItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-
-import { stopPropagationAndPreventDefault } from '../../../../common';
+import React, { useCallback, useEffect, useMemo } from 'react';
+import type { ColumnHeaderOptions } from '../../../../common/types/timeline/columns';
+import { stopPropagationAndPreventDefault } from '../../../../common/utils/accessibility/helpers';
 import { TooltipWithKeyboardShortcut } from '../../tooltip_with_keyboard_shortcut';
-import { getAdditionalScreenReaderOnlyContext } from '../utils';
 import { defaultColumnHeaderType } from '../../t_grid/body/column_headers/default_headers';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../../t_grid/body/constants';
-import { ColumnHeaderOptions } from '../../../../common/types/timeline';
-import { HoverActionComponentProps } from './types';
+import { getAdditionalScreenReaderOnlyContext } from '../utils';
+import type { HoverActionComponentProps } from './types';
 
 export const COLUMN_TOGGLE = (field: string) =>
   i18n.translate('xpack.timelines.hoverActions.columnToggleLabel', {

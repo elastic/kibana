@@ -4,11 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { EuiLink, EuiText } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiText, EuiLink } from '@elastic/eui';
 
 import { AlphaFlyout } from './alpha_flyout';
 

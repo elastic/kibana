@@ -4,12 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { LayerDescriptor } from '../../common/descriptor_types';
-import type { SourceRegistryEntry } from '../classes/sources/source_registry';
+import type { LayerDescriptor } from '../../common/descriptor_types/layer_descriptor_types';
 import type { LayerWizard } from '../classes/layers/layer_wizard_registry';
-import type { CreateLayerDescriptorParams } from '../classes/sources/es_search_source';
-import type { SampleValuesConfig, EMSTermJoinConfig } from '../ems_autosuggest';
+import type { CreateLayerDescriptorParams } from '../classes/sources/es_search_source/create_layer_descriptor';
+import type { SourceRegistryEntry } from '../classes/sources/source_registry';
+import type { EMSTermJoinConfig, SampleValuesConfig } from '../ems_autosuggest/ems_autosuggest';
 
 export interface MapsStartApi {
   createLayerDescriptors: {

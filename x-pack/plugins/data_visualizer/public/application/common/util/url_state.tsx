@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { parse } from 'query-string';
 import { createContext, useCallback, useContext, useMemo } from 'react';
-// @ts-ignore
 import { decode } from 'rison-node';
+
+// @ts-ignore
 
 export interface Dictionary<TValue> {
   [id: string]: TValue;

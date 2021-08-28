@@ -4,39 +4,39 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { useCallback, useEffect, useMemo, useReducer, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
 import {
-  EuiModal,
   EuiButton,
   EuiButtonEmpty,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
-  EuiModalBody,
-  EuiModalFooter,
-  EuiTitle,
+  EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiFlexGroup,
+  EuiModal,
+  EuiModalBody,
+  EuiModalFooter,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
   EuiSpacer,
+  EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ActionConnectorForm, getConnectorErrors } from './action_connector_form';
-import { createConnectorReducer, InitialConnector, ConnectorReducer } from './connector_reducer';
-import { createActionConnector } from '../../lib/action_connector_api';
-import './connector_add_modal.scss';
-import { hasSaveActionsCapability } from '../../lib/capabilities';
-import {
-  ActionType,
+import { FormattedMessage } from '@kbn/i18n/react';
+import React, { useCallback, useEffect, useMemo, useReducer, useState } from 'react';
+import type { ActionType } from '../../../../../actions/common/types';
+import { useKibana } from '../../../common/lib/kibana/kibana_react';
+import type {
   ActionConnector,
   ActionTypeRegistryContract,
-  UserConfiguredActionConnector,
   IErrorObject,
+  UserConfiguredActionConnector,
 } from '../../../types';
-import { useKibana } from '../../../common/lib/kibana';
-import { getConnectorWithInvalidatedFields } from '../../lib/value_validators';
 import { CenterJustifiedSpinner } from '../../components/center_justified_spinner';
+import { createActionConnector } from '../../lib/action_connector_api/create';
+import { hasSaveActionsCapability } from '../../lib/capabilities';
+import { getConnectorWithInvalidatedFields } from '../../lib/value_validators';
+import { ActionConnectorForm, getConnectorErrors } from './action_connector_form';
+import './connector_add_modal.scss';
+import type { ConnectorReducer, InitialConnector } from './connector_reducer';
+import { createConnectorReducer } from './connector_reducer';
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 type ConnectorAddModalProps = {

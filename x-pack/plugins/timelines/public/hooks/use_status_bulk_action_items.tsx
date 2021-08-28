@@ -4,12 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { useMemo, useCallback } from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
-import { FILTER_CLOSED, FILTER_ACKNOWLEDGED, FILTER_OPEN } from '../../common/constants';
+import React, { useCallback, useMemo } from 'react';
+import { FILTER_ACKNOWLEDGED, FILTER_CLOSED, FILTER_OPEN } from '../../common/constants';
+import type { AlertStatus, StatusBulkActionsProps } from '../../common/types/timeline/actions';
 import * as i18n from '../components/t_grid/translations';
-import type { AlertStatus, StatusBulkActionsProps } from '../../common/types/timeline';
 import { useUpdateAlertsStatus } from '../container/use_update_alerts';
 import { useAppToasts } from './use_app_toasts';
 

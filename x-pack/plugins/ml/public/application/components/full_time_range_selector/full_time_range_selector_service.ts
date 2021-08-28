@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import moment from 'moment';
-
-import { i18n } from '@kbn/i18n';
-import { Query } from 'src/plugins/data/public';
 import dateMath from '@elastic/datemath';
-import { getTimefilter, getToastNotifications } from '../../util/dependency_cache';
-import { ml, GetTimeFieldRangeResponse } from '../../services/ml_api_service';
-import { IndexPattern } from '../../../../../../../src/plugins/data/public';
+import { i18n } from '@kbn/i18n';
+import moment from 'moment';
+import type { Query } from 'src/plugins/data/public';
+import { IndexPattern } from '../../../../../../../src/plugins/data/common/index_patterns/index_patterns/index_pattern';
+import type { RuntimeMappings } from '../../../../common/types/fields';
 import { isPopulatedObject } from '../../../../common/util/object_utils';
-import { RuntimeMappings } from '../../../../common/types/fields';
+import type { GetTimeFieldRangeResponse } from '../../services/ml_api_service';
+import { ml } from '../../services/ml_api_service';
+import { getTimefilter, getToastNotifications } from '../../util/dependency_cache';
 
 export interface TimeRange {
   from: number;

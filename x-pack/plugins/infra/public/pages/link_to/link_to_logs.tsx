@@ -6,11 +6,11 @@
  */
 
 import React from 'react';
-import { match as RouteMatch, Redirect, Route, Switch } from 'react-router-dom';
-
+import type { match as RouteMatch } from 'react-router-dom';
+import { Redirect, Route, Switch } from 'react-router-dom';
+import { inventoryModels } from '../../../common/inventory_models';
 import { RedirectToLogs } from './redirect_to_logs';
 import { RedirectToNodeLogs } from './redirect_to_node_logs';
-import { inventoryModels } from '../../../common/inventory_models';
 
 interface LinkToPageProps {
   match: RouteMatch<{}>;

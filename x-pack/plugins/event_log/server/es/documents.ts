@@ -4,9 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { EsNames } from './names';
 import mappings from '../../generated/mappings.json';
+import type { EsNames } from './names';
 
 // returns the body of an index template used in an ES indices.putTemplate call
 export function getIndexTemplate(esNames: EsNames) {

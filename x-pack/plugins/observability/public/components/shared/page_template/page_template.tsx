@@ -4,20 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { EuiSideNavItemType } from '@elastic/eui';
+import type { EuiSideNavItemType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import { matchPath, useLocation } from 'react-router-dom';
 import useObservable from 'react-use/lib/useObservable';
-import type { Observable } from 'rxjs';
-import type { ApplicationStart } from '../../../../../../../src/core/public';
-import {
-  KibanaPageTemplate,
-  KibanaPageTemplateProps,
-} from '../../../../../../../src/plugins/kibana_react/public';
+import { Observable } from 'rxjs';
+import type { ApplicationStart } from '../../../../../../../src/core/public/application/types';
+import type { KibanaPageTemplateProps } from '../../../../../../../src/plugins/kibana_react/public/page_template/page_template';
+import { KibanaPageTemplate } from '../../../../../../../src/plugins/kibana_react/public/page_template/page_template';
 import type { NavigationSection } from '../../../services/navigation_registry';
-import { NavNameWithBadge, hideBadge } from './nav_name_with_badge';
+import { hideBadge, NavNameWithBadge } from './nav_name_with_badge';
 
 export type WrappedPageTemplateProps = Pick<
   KibanaPageTemplateProps,

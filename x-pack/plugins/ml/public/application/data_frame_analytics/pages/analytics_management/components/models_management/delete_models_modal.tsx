@@ -4,20 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { FC } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
 import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiCallOut,
   EuiModal,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
   EuiModalBody,
   EuiModalFooter,
-  EuiButtonEmpty,
-  EuiButton,
-  EuiCallOut,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
 } from '@elastic/eui';
-import { ModelItemFull } from './models_list';
+import { FormattedMessage } from '@kbn/i18n/react';
+import type { FC } from 'react';
+import React from 'react';
+import type { ModelItemFull } from './models_list';
 
 interface DeleteModelsModalProps {
   models: ModelItemFull[];

@@ -5,13 +5,14 @@
  * 2.0.
  */
 
+import createContainer from 'constate';
 import * as t from 'io-ts';
 import { values } from 'lodash';
-import createContainer from 'constate';
-import { useState, useEffect, useMemo, Dispatch, SetStateAction } from 'react';
-import { useAlertPrefillContext } from '../../../../alerting/use_alert_prefill';
+import type { Dispatch, SetStateAction } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Color } from '../../../../../common/color_palette';
 import { metricsExplorerMetricRT } from '../../../../../common/http_api/metrics_explorer';
+import { useAlertPrefillContext } from '../../../../alerting/use_alert_prefill';
 import {
   useKibanaTimefilterTime,
   useSyncKibanaTimeFilterTime,

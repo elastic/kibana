@@ -4,15 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
-import {
+import { lazy } from 'react';
+import type {
   ActionTypeModel,
   ConnectorValidationResult,
   GenericValidationResult,
 } from '../../../../types';
-import { EmailActionParams, EmailConfig, EmailSecrets, EmailActionConnector } from '../types';
+import type { EmailActionConnector, EmailActionParams, EmailConfig, EmailSecrets } from '../types';
 
 export function getActionType(): ActionTypeModel<EmailConfig, EmailSecrets, EmailActionParams> {
   const mailformat = /^[^@\s]+@[^@\s]+$/;

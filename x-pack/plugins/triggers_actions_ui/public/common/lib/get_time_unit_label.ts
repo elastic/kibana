@@ -4,9 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { i18n } from '@kbn/i18n';
-import { TIME_UNITS } from '../../application/constants';
+import { TIME_UNITS } from '../../application/constants/time_units';
 
 export function getTimeUnitLabel(timeUnit = TIME_UNITS.SECOND, timeValue = '0') {
   switch (timeUnit) {

@@ -7,9 +7,8 @@
 
 import React from 'react';
 
-import type { CoreStart } from 'src/core/public';
-
-import { UserAPIClient } from '../../management/users';
+import type { CoreStart } from '../../../../../../src/core/public/types';
+import { UserAPIClient } from '../../management/users/user_api_client';
 import type { ChangePasswordProps } from './change_password';
 
 export const getChangePasswordComponent = async (

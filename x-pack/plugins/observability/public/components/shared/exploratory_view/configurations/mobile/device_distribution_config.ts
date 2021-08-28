@@ -4,12 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { ConfigProps, SeriesConfig } from '../../types';
-import { FieldLabels, REPORT_METRIC_FIELD, USE_BREAK_DOWN_COLUMN } from '../constants';
-import { buildPhraseFilter } from '../utils';
+import type { ConfigProps, SeriesConfig } from '../../types';
+import { FieldLabels, REPORT_METRIC_FIELD, USE_BREAK_DOWN_COLUMN } from '../constants/constants';
 import { SERVICE_NAME } from '../constants/elasticsearch_fieldnames';
 import { MOBILE_APP, NUMBER_OF_DEVICES } from '../constants/labels';
+import { buildPhraseFilter } from '../utils';
 import { MobileFields } from './mobile_fields';
 
 export function getMobileDeviceDistributionConfig({ indexPattern }: ConfigProps): SeriesConfig {

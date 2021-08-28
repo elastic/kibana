@@ -4,11 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 import { PLUGIN_ID } from '../../../../common/constants/app';
-
 import { useMlKibana } from './kibana_context';
 
 export type NavigateToPath = ReturnType<typeof useNavigateToPath>;

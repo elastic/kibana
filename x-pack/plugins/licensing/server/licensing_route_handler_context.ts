@@ -4,11 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { IContextProvider, StartServicesAccessor } from 'src/core/server';
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
-
+import type { StartServicesAccessor } from '../../../../src/core/server';
+import type { IContextProvider } from '../../../../src/core/server/context/container/context';
 import type { ILicense } from '../common/types';
 import type { LicensingPluginStart, LicensingRequestHandlerContext } from './types';
 

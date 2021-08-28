@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { EuiMarkdownAstNodePosition, EuiMarkdownEditorUiPlugin } from '@elastic/eui';
 import React, { useState } from 'react';
-import { EuiMarkdownEditorUiPlugin, EuiMarkdownAstNodePosition } from '@elastic/eui';
-import { Plugin } from 'unified';
+import type { Plugin } from 'unified';
+
 /**
  * @description - manage the plugins, hooks, and ui components needed to enable timeline functionality within the cases plugin
  * @TODO - To better encapsulate the timeline logic needed by cases, we are managing it in this top level context.

@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import {
   EuiButtonGroup,
   EuiColorPicker,
@@ -17,9 +16,9 @@ import React, { Component } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import { MAX_SPACE_INITIALS } from '../../../../common';
+import { MAX_SPACE_INITIALS } from '../../../../common/constants';
 import { encode, imageTypes } from '../../../../common/lib/dataurl';
-import type { SpaceValidator } from '../../lib';
+import type { SpaceValidator } from '../../lib/validate_space';
 import type { FormValues } from '../manage_space_page';
 
 interface Props {

@@ -5,14 +5,12 @@
  * 2.0.
  */
 
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
-import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import styled from 'styled-components';
-
+import type { CaseConnectorMapping } from '../../containers/configure/types';
 import { FieldMappingRowStatic } from './field_mapping_row_static';
 import * as i18n from './translations';
-
-import { CaseConnectorMapping } from '../../containers/configure/types';
 
 const FieldRowWrapper = styled.div`
   margin: 10px 0;

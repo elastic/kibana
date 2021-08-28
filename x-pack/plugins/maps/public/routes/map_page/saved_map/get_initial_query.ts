@@ -4,9 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { getData } from '../../../kibana_services';
-import { MapsAppState } from '../url_state';
+import type { MapsAppState } from '../url_state/app_state_manager';
 
 export function getInitialQuery({
   mapStateJSON,

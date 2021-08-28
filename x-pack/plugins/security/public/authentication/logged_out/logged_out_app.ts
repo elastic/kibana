@@ -4,14 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { i18n } from '@kbn/i18n';
+
+import type { StartServicesAccessor } from '../../../../../../src/core/public/types';
 import type {
   ApplicationSetup,
   AppMountParameters,
-  HttpSetup,
-  StartServicesAccessor,
-} from 'src/core/public';
+} from '../../../../../../src/core/public/application/types';
+import type { HttpSetup } from '../../../../../../src/core/public/http/types';
 
 interface CreateDeps {
   application: ApplicationSetup;

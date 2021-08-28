@@ -4,8 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { ProcessorEvent } from '../../../common/processor_event';
+import { rangeQuery } from '../../../../observability/server/utils/queries';
 import {
   AGENT,
   CLOUD,
@@ -19,11 +18,11 @@ import {
   SERVICE_NODE_NAME,
   SERVICE_VERSION,
 } from '../../../common/elasticsearch_fieldnames';
-import { ContainerType } from '../../../common/service_metadata';
-import { rangeQuery } from '../../../../observability/server';
-import { TransactionRaw } from '../../../typings/es_schemas/raw/transaction_raw';
+import { ProcessorEvent } from '../../../common/processor_event';
+import type { ContainerType } from '../../../common/service_metadata';
+import type { TransactionRaw } from '../../../typings/es_schemas/raw/transaction_raw';
 import { getProcessorEventForAggregatedTransactions } from '../helpers/aggregated_transactions';
-import { Setup, SetupTimeRange } from '../helpers/setup_request';
+import type { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { should } from './get_service_metadata_icons';
 
 type ServiceMetadataDetailsRaw = Pick<

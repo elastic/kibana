@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import React, { memo } from 'react';
-import { Field, getUseField } from '../../common/shared_imports';
+import { Field } from '../../../../../../src/plugins/es_ui_shared/static/forms/components/field';
+import { getUseField } from '../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/components/use_field';
 
 const CommonUseField = getUseField({ component: Field });
 

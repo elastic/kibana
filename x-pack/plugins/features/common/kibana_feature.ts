@@ -4,13 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { RecursiveReadonly } from '@kbn/utility-types';
-import { AppCategory } from 'src/core/types';
-import { LicenseType } from '../../licensing/common/types';
-import { FeatureKibanaPrivileges } from './feature_kibana_privileges';
-import { SubFeatureConfig, SubFeature as KibanaSubFeature } from './sub_feature';
-import { ReservedKibanaPrivilege } from './reserved_kibana_privilege';
+import type { RecursiveReadonly } from '@kbn/utility-types';
+import type { AppCategory } from '../../../../src/core/types/app_category';
+import type { LicenseType } from '../../licensing/common/types';
+import type { FeatureKibanaPrivileges } from './feature_kibana_privileges';
+import type { ReservedKibanaPrivilege } from './reserved_kibana_privilege';
+import type { SubFeatureConfig } from './sub_feature';
+import { SubFeature as KibanaSubFeature } from './sub_feature';
 
 /**
  * Interface for registering a feature.

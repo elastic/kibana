@@ -4,22 +4,22 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { each, find, get, filter } from 'lodash';
-
+import { each, filter, find, get } from 'lodash';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { ml } from '../services/ml_api_service';
+import type { Job } from '../../../common/types/anomaly_detection_jobs/job';
+import type { EntityField } from '../../../common/util/anomaly_utils';
 import {
   isModelPlotChartableForDetector,
   isModelPlotEnabled,
 } from '../../../common/util/job_utils';
-// @ts-ignore
-import { buildConfigFromDetector } from '../util/chart_config_builder';
+import { ml } from '../services/ml_api_service';
 import { mlResultsService } from '../services/results_service';
-import { ModelPlotOutput } from '../services/results_service/result_service_rx';
-import { Job } from '../../../common/types/anomaly_detection_jobs';
-import { EntityField } from '../../../common/util/anomaly_utils';
+import type { ModelPlotOutput } from '../services/results_service/result_service_rx';
+// @ts-expect-error
+import { buildConfigFromDetector } from '../util/chart_config_builder';
+
+
 
 function getMetricData(
   job: Job,

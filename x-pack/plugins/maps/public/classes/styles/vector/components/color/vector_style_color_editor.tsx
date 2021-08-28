@@ -5,15 +5,18 @@
  * 2.0.
  */
 
-import React from 'react';
-
 import { i18n } from '@kbn/i18n';
-import { Props, StylePropEditor } from '../style_prop_editor';
+import React from 'react';
+import type {
+  ColorDynamicOptions,
+  ColorStaticOptions,
+} from '../../../../../../common/descriptor_types/style_property_descriptor_types';
+import type { Props } from '../style_prop_editor';
+import { StylePropEditor } from '../style_prop_editor';
 // @ts-expect-error
 import { DynamicColorForm } from './dynamic_color_form';
 // @ts-expect-error
 import { StaticColorForm } from './static_color_form';
-import { ColorDynamicOptions, ColorStaticOptions } from '../../../../../../common/descriptor_types';
 
 type ColorEditorProps = Omit<Props<ColorStaticOptions, ColorDynamicOptions>, 'children'> & {
   swatches: string[];

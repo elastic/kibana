@@ -4,16 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import {
   KibanaContextProvider,
-  KibanaReactContextValue,
   useKibana,
+  withKibana,
+} from '../../../../../../../src/plugins/kibana_react/public/context/context';
+import type { KibanaReactContextValue } from '../../../../../../../src/plugins/kibana_react/public/context/types';
+import {
   useUiSetting,
   useUiSetting$,
-  withKibana,
-} from '../../../../../../../src/plugins/kibana_react/public';
-import { TriggersAndActionsUiServices } from '../../../application/app';
+} from '../../../../../../../src/plugins/kibana_react/public/ui_settings/use_ui_setting';
+import type { TriggersAndActionsUiServices } from '../../../application/app';
 
 export type KibanaContext = KibanaReactContextValue<TriggersAndActionsUiServices>;
 export interface WithKibanaProps {

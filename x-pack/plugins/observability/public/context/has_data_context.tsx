@@ -4,18 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { uniqueId } from 'lodash';
 import React, { createContext, useEffect, useState } from 'react';
 import { useRouteMatch } from 'react-router-dom';
-import { Alert } from '../../../alerting/common';
+import type { Alert } from '../../../alerting/common/alert';
+import type { ApmIndicesConfig } from '../../common/typings';
 import { getDataHandler } from '../data_handler';
 import { FETCH_STATUS } from '../hooks/use_fetcher';
 import { usePluginContext } from '../hooks/use_plugin_context';
 import { useTimeRange } from '../hooks/use_time_range';
 import { getObservabilityAlerts } from '../services/get_observability_alerts';
-import { ObservabilityFetchDataPlugins } from '../typings/fetch_overview_data';
-import { ApmIndicesConfig } from '../../common/typings';
+import type { ObservabilityFetchDataPlugins } from '../typings/fetch_overview_data';
 
 type DataContextApps = ObservabilityFetchDataPlugins | 'alert';
 

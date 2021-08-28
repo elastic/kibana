@@ -7,19 +7,17 @@
 
 import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
-
-import { SecurityPluginSetup } from '../../../security/server';
+import type { SecurityPluginSetup } from '../../../security/server/plugin';
+import { ANNOTATION_USER_UNKNOWN } from '../../common/constants/annotations';
+import { wrapError } from '../client/error_wrapper';
 import { isAnnotationsFeatureAvailable } from '../lib/check_annotations';
 import { annotationServiceProvider } from '../models/annotation_service';
-import { wrapError } from '../client/error_wrapper';
-import { RouteInitialization } from '../types';
+import type { RouteInitialization } from '../types';
 import {
   deleteAnnotationSchema,
   getAnnotationsSchema,
   indexAnnotationSchema,
 } from './schemas/annotations_schema';
-
-import { ANNOTATION_USER_UNKNOWN } from '../../common/constants/annotations';
 
 function getAnnotationsFeatureUnavailableErrorMessage() {
   return Boom.badRequest(

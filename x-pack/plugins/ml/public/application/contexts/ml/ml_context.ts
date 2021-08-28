@@ -6,9 +6,10 @@
  */
 
 import React from 'react';
-import { IndexPattern, IndexPatternsContract } from '../../../../../../../src/plugins/data/public';
-import { SavedSearchSavedObject } from '../../../../common/types/kibana';
-import { MlServicesContext } from '../../app';
+import { IndexPattern } from '../../../../../../../src/plugins/data/common/index_patterns/index_patterns/index_pattern';
+import type { IndexPatternsContract } from '../../../../../../../src/plugins/data/common/index_patterns/index_patterns/index_patterns';
+import type { SavedSearchSavedObject } from '../../../../common/types/kibana';
+import type { MlServicesContext } from '../../app';
 
 export interface MlContextValue {
   combinedQuery: any;

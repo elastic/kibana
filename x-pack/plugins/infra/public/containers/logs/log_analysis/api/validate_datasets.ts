@@ -4,14 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { estypes } from '@elastic/elasticsearch';
-import type { HttpHandler } from 'src/core/public';
+import { estypes } from '@elastic/elasticsearch';
+import type { HttpHandler } from '../../../../../../../../src/core/public/http/types';
 import {
   LOG_ANALYSIS_VALIDATE_DATASETS_PATH,
   validateLogEntryDatasetsRequestPayloadRT,
   validateLogEntryDatasetsResponsePayloadRT,
-} from '../../../../../common/http_api';
+} from '../../../../../common/http_api/log_analysis/validation/datasets';
 import { decodeOrThrow } from '../../../../../common/runtime_types';
 
 interface RequestArgs {

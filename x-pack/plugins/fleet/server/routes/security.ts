@@ -4,10 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { IRouter, RequestHandler } from 'src/core/server';
-
-import { appContextService } from '../services';
+import type { IRouter, RequestHandler } from '../../../../../src/core/server/http/router/router';
+import { appContextService } from '../services/app_context';
 
 export function enforceSuperUser<T1, T2, T3>(
   handler: RequestHandler<T1, T2, T3>

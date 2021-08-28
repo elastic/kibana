@@ -4,18 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { i18n } from '@kbn/i18n';
 import { groupBy } from 'lodash';
-import { ValuesType } from 'utility-types';
+import type { ValuesType } from 'utility-types';
 import {
-  SPAN_TYPE,
   SPAN_SUBTYPE,
+  SPAN_TYPE,
 } from '../../../common/elasticsearch_fieldnames';
-import {
-  ConnectionElement,
-  isSpanGroupingSupported,
-} from '../../../common/service_map';
+import type { ConnectionElement } from '../../../common/service_map';
+import { isSpanGroupingSupported } from '../../../common/service_map';
 
 const MINIMUM_GROUP_SIZE = 4;
 

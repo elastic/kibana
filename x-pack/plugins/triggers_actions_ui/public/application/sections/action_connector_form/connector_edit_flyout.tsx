@@ -4,49 +4,49 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { useCallback, useReducer, useState, useEffect } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
 import {
-  EuiTitle,
-  EuiFlyoutHeader,
-  EuiFlyout,
+  EuiBetaBadge,
+  EuiButton,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
+  EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutFooter,
-  EuiButtonEmpty,
-  EuiButton,
-  EuiBetaBadge,
-  EuiText,
+  EuiFlyoutHeader,
+  EuiIcon,
   EuiLink,
-  EuiTabs,
-  EuiTab,
   EuiSpacer,
+  EuiTab,
+  EuiTabs,
+  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Option, none, some } from 'fp-ts/lib/Option';
-import { ActionConnectorForm, getConnectorErrors } from './action_connector_form';
-import { TestConnectorForm } from './test_connector_form';
-import {
+import { FormattedMessage } from '@kbn/i18n/react';
+import type { Option } from 'fp-ts/lib/Option';
+import { none, some } from 'fp-ts/lib/Option';
+import React, { useCallback, useEffect, useReducer, useState } from 'react';
+import type { ActionTypeExecutorResult } from '../../../../../actions/common/types';
+import { isActionTypeExecutorResult } from '../../../../../actions/common/types';
+import { useKibana } from '../../../common/lib/kibana/kibana_react';
+import type {
   ActionConnector,
   ConnectorEditFlyoutProps,
   IErrorObject,
-  EditConectorTabs,
   UserConfiguredActionConnector,
 } from '../../../types';
-import { ConnectorReducer, createConnectorReducer } from './connector_reducer';
-import { updateActionConnector, executeAction } from '../../lib/action_connector_api';
-import { hasSaveActionsCapability } from '../../lib/capabilities';
-import {
-  ActionTypeExecutorResult,
-  isActionTypeExecutorResult,
-} from '../../../../../actions/common';
-import './connector_edit_flyout.scss';
-import { useKibana } from '../../../common/lib/kibana';
-import { getConnectorWithInvalidatedFields } from '../../lib/value_validators';
+import { EditConectorTabs } from '../../../types';
 import { CenterJustifiedSpinner } from '../../components/center_justified_spinner';
+import { executeAction } from '../../lib/action_connector_api/execute';
+import { updateActionConnector } from '../../lib/action_connector_api/update';
+import { hasSaveActionsCapability } from '../../lib/capabilities';
+import { getConnectorWithInvalidatedFields } from '../../lib/value_validators';
+import { ActionConnectorForm, getConnectorErrors } from './action_connector_form';
+import './connector_edit_flyout.scss';
+import type { ConnectorReducer } from './connector_reducer';
+import { createConnectorReducer } from './connector_reducer';
+import { TestConnectorForm } from './test_connector_form';
 
 const ConnectorEditFlyout = ({
   initialConnector,

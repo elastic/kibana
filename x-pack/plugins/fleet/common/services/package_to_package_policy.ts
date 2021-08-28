@@ -4,20 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import type {
   PackageInfo,
-  RegistryVarsEntry,
   RegistryInput,
   RegistryStream,
-  PackagePolicyConfigRecord,
+  RegistryVarsEntry,
+} from '../types/models/epm';
+import type {
+  NewPackagePolicy,
   NewPackagePolicyInput,
   NewPackagePolicyInputStream,
-  NewPackagePolicy,
+  PackagePolicyConfigRecord,
   PackagePolicyConfigRecordEntry,
-} from '../types';
+} from '../types/models/package_policy';
 
-import { doesPackageHaveIntegrations } from './';
+import { doesPackageHaveIntegrations } from './packages_with_integrations';
 
 export const getStreamsForInputType = (
   inputType: string,

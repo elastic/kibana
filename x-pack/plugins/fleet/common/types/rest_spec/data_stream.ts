@@ -4,8 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { DataStream } from '../models';
+import type { DataStream } from '../models/data_stream';
 
 export interface GetDataStreamsResponse {
   data_streams: DataStream[];

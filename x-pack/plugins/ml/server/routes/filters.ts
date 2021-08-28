@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { wrapError } from '../client/error_wrapper';
-import { RouteInitialization } from '../types';
+import type { MlClient } from '../lib/ml_client/types';
+import type { FormFilter, UpdateFilter } from '../models/filter/filter_manager';
+import { FilterManager } from '../models/filter/filter_manager';
+import type { RouteInitialization } from '../types';
 import { createFilterSchema, filterIdSchema, updateFilterSchema } from './schemas/filters_schema';
-import { FilterManager, FormFilter, UpdateFilter } from '../models/filter';
-import type { MlClient } from '../lib/ml_client';
 
 // TODO - add function for returning a list of just the filter IDs.
 // TODO - add function for returning a list of filter IDs plus item count.

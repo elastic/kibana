@@ -4,8 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { isESClientError } from '../../errors';
+import { isESClientError } from '../../errors/utils';
 
 export const isElasticsearchItemNotFoundError = (error: Error): boolean => {
   return isESClientError(error) && error.meta.statusCode === 404 && error.meta.body.found === false;

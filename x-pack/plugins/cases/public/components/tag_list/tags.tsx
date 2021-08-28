@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { EuiBadgeGroupProps } from '@elastic/eui';
+import { EuiBadge, EuiBadgeGroup } from '@elastic/eui';
 import React, { memo } from 'react';
-import { EuiBadgeGroup, EuiBadge, EuiBadgeGroupProps } from '@elastic/eui';
 import styled from 'styled-components';
 
 interface TagsProps {

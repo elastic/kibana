@@ -4,13 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { IndicesOptions } from '../../../../common/types/anomaly_detection_jobs';
-import { MlApiServices } from '../ml_api_service';
 import type { AnomalyRecordDoc } from '../../../../common/types/anomalies';
-import { InfluencersFilterQuery } from '../../../../common/types/es_client';
-import { EntityField } from '../../../../common/util/anomaly_utils';
-import { RuntimeMappings } from '../../../../common/types/fields';
+import type { IndicesOptions } from '../../../../common/types/anomaly_detection_jobs/datafeed';
+import type { InfluencersFilterQuery } from '../../../../common/types/es_client';
+import type { RuntimeMappings } from '../../../../common/types/fields';
+import type { EntityField } from '../../../../common/util/anomaly_utils';
+import type { MlApiServices } from '../ml_api_service';
 
 type RecordForInfluencer = AnomalyRecordDoc;
 export function resultsServiceProvider(

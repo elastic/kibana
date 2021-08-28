@@ -4,18 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { euiPaletteColorBlind, euiPaletteGray } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 // There is still an issue with Vega Lite's typings with the strict mode Kibana is using.
 // @ts-ignore
-import type { TopLevelSpec } from 'vega-lite/build/vega-lite';
-
-import { euiPaletteColorBlind, euiPaletteGray } from '@elastic/eui';
-
-import { i18n } from '@kbn/i18n';
-
+import { TopLevelSpec } from 'vega-lite/build/vega-lite';
 import { LEGEND_TYPES } from '../../../../../components/vega_chart/common';
-
-import { RocCurveItem } from '../../../../common/analytics';
+import type { RocCurveItem } from '../../../../common/analytics';
 
 const GRAY = euiPaletteGray(1)[0];
 const BASELINE = 'baseline';

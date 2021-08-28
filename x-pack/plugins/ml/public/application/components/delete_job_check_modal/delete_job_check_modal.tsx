@@ -4,26 +4,26 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { FC, useState, useEffect } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { i18n } from '@kbn/i18n';
 import {
+  EuiButton,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLoadingSpinner,
   EuiModal,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
   EuiModalBody,
   EuiModalFooter,
-  EuiButton,
-  EuiLoadingSpinner,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
   EuiText,
 } from '@elastic/eui';
-import { JobType, CanDeleteJobResponse } from '../../../../common/types/saved_objects';
-import { useMlApiContext } from '../../contexts/kibana';
-import { useToastNotificationService } from '../../services/toast_notification_service';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+import type { FC } from 'react';
+import React, { useEffect, useState } from 'react';
+import type { CanDeleteJobResponse, JobType } from '../../../../common/types/saved_objects';
+import { useMlApiContext } from '../../contexts/kibana/use_ml_api_context';
+import { useToastNotificationService } from '../../services/toast_notification_service/toast_notification_service';
 
 const shouldUnTagLabel = i18n.translate('xpack.ml.deleteJobCheckModal.shouldUnTagLabel', {
   defaultMessage: 'Remove job from current space',

@@ -4,22 +4,22 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { memo, useState, useMemo } from 'react';
-import { EuiPortal, EuiContextMenuItem } from '@elastic/eui';
+import { EuiContextMenuItem, EuiPortal } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import React, { memo, useMemo, useState } from 'react';
 
-import type { Agent, AgentPolicy, PackagePolicy } from '../../../../types';
-import { useCapabilities, useKibanaVersion } from '../../../../hooks';
-import { ContextMenuActions } from '../../../../components';
-import {
-  AgentUnenrollAgentModal,
-  AgentReassignAgentPolicyModal,
-  AgentUpgradeAgentModal,
-} from '../../components';
-import { useAgentRefresh } from '../hooks';
-import { isAgentUpgradeable } from '../../../../services';
-import { FLEET_SERVER_PACKAGE } from '../../../../constants';
+import { FLEET_SERVER_PACKAGE } from '../../../../../../../common/constants/epm';
+import { isAgentUpgradeable } from '../../../../../../../common/services/is_agent_upgradeable';
+import type { Agent } from '../../../../../../../common/types/models/agent';
+import type { AgentPolicy } from '../../../../../../../common/types/models/agent_policy';
+import type { PackagePolicy } from '../../../../../../../common/types/models/package_policy';
+import { ContextMenuActions } from '../../../../../../components/context_menu_actions';
+import { useCapabilities } from '../../../../../../hooks/use_capabilities';
+import { useKibanaVersion } from '../../../../../../hooks/use_kibana_version';
+import { AgentReassignAgentPolicyModal } from '../../components/agent_reassign_policy_modal';
+import { AgentUnenrollAgentModal } from '../../components/agent_unenroll_modal';
+import { AgentUpgradeAgentModal } from '../../components/agent_upgrade_modal';
+import { useAgentRefresh } from '../hooks/use_agent';
 
 export const AgentDetailsActionMenu: React.FunctionComponent<{
   agent: Agent;

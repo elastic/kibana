@@ -4,13 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { useReducer, useCallback, useRef, useEffect } from 'react';
-import { CasePostRequest } from '../../common';
+import { useCallback, useEffect, useReducer, useRef } from 'react';
+import type { CasePostRequest } from '../../common/api/cases/case';
+import type { Case } from '../../common/ui/types';
+import { useToasts } from '../common/lib/kibana/hooks';
 import { postCase } from './api';
 import * as i18n from './translations';
-import { Case } from './types';
-import { useToasts } from '../common/lib/kibana';
+
 interface NewCaseState {
   isLoading: boolean;
   isError: boolean;

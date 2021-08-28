@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
-import { CaseStatuses, StatusAllType } from '../../../common';
+import type { EuiIconType } from '@elastic/eui/src/components/icon/icon';
+import { CaseStatuses } from '../../../common/api/cases/status';
+import type { StatusAllType } from '../../../common/ui/types';
 
 export type AllCaseStatus = Record<StatusAllType, { color: string; label: string }>;
 

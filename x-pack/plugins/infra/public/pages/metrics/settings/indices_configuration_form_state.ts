@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { ReactNode, useCallback, useMemo, useState } from 'react';
+import type { ReactNode } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import {
   createInputFieldProps,
   createInputRangeFieldProps,

@@ -6,11 +6,14 @@
  * Side Public License, v 1.
  */
 
-export {
-  AppMountParameters,
+// export type {
+//   AppMountParameters,
+//   PluginInitializerContext,
+//   ScopedHistory,
+//   NotificationsStart,
+//   ApplicationStart,
+// } from '../../../../core/public';
+
+export type {
   CoreSetup,
-  PluginInitializerContext,
-  ScopedHistory,
-  NotificationsStart,
-  ApplicationStart,
-} from '../../../../core/public';
+} from '../../../../core/public/types';

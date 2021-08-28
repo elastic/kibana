@@ -4,21 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { useState, useCallback } from 'react';
 import { EuiModal, EuiModalBody, EuiModalHeader, EuiModalHeaderTitle } from '@elastic/eui';
+import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
-import {
-  Case,
-  CaseStatusWithAllStatus,
-  CommentRequestAlertType,
-  SubCase,
-} from '../../../../common';
-import { CasesNavigation } from '../../links';
+import type { CommentRequestAlertType } from '../../../../common/api/cases/comment';
+import type { Case, CaseStatusWithAllStatus, SubCase } from '../../../../common/ui/types';
 import * as i18n from '../../../common/translations';
-import { AllCasesGeneric } from '../all_cases_generic';
-import { Owner } from '../../../types';
+import type { Owner } from '../../../types';
+import type { CasesNavigation } from '../../links';
 import { OwnerProvider } from '../../owner_context';
+import { AllCasesGeneric } from '../all_cases_generic';
 
 export interface AllCasesSelectorModalProps extends Owner {
   alertData?: Omit<CommentRequestAlertType, 'type'>;

@@ -4,19 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { EuiDataGridColumn, EuiDataGridSorting } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-
-import { EuiDataGridSorting, EuiDataGridColumn } from '@elastic/eui';
-
 import { ES_CLIENT_TOTAL_HITS_RELATION } from '../../../../common/types/es_client';
-import { ChartData } from '../../../../common/types/field_histograms';
-
-import { INDEX_STATUS } from '../../data_frame_analytics/common';
-
+import type { ChartData } from '../../../../common/types/field_histograms';
+import { INDEX_STATUS } from '../../data_frame_analytics/common/analytics';
 import { ColumnChart } from './column_chart';
 import { COLUMN_CHART_DEFAULT_VISIBILITY_ROWS_THRESHOLED, INIT_MAX_COLUMNS } from './common';
-import {
+import type {
   ChartsVisible,
   ColumnId,
   DataGridItem,

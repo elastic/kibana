@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
-import { I18nProvider } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { DatasourceLayerPanelProps } from '../types';
-import { IndexPatternPrivateState } from './types';
+import { I18nProvider } from '@kbn/i18n/react';
+import React from 'react';
+import type { DatasourceLayerPanelProps } from '../types';
 import { ChangeIndexPattern } from './change_indexpattern';
+import type { IndexPatternPrivateState } from './types';
 
 export interface IndexPatternLayerPanelProps
   extends DatasourceLayerPanelProps<IndexPatternPrivateState> {

@@ -6,8 +6,7 @@
  */
 
 import * as React from 'react';
-
-import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
+import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
 
 interface HighlightedIntervalProps {
   className?: string;

@@ -7,9 +7,9 @@
 
 import React from 'react';
 import styled from 'styled-components';
+import { useSeriesStorage } from '../../hooks/use_series_storage';
 import { SeriesDatePicker } from '../../series_date_picker';
 import { DateRangePicker } from '../../series_date_picker/date_range_picker';
-import { useSeriesStorage } from '../../hooks/use_series_storage';
 
 interface Props {
   seriesId: string;

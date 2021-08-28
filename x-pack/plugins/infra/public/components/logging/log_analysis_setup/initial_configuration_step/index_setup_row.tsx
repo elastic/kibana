@@ -4,13 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { EuiCheckbox, EuiCode, EuiIconTip, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useCallback, useMemo } from 'react';
-import { DatasetFilter, QualityWarning } from '../../../../../common/log_analysis';
+import type { DatasetFilter } from '../../../../../common/log_analysis/job_parameters';
+import type { QualityWarning } from '../../../../../common/log_analysis/log_analysis_quality';
 import { IndexSetupDatasetFilter } from './index_setup_dataset_filter';
-import { AvailableIndex, ValidationUIError } from './validation';
+import type { AvailableIndex, ValidationUIError } from './validation';
 
 export const IndexSetupRow: React.FC<{
   index: AvailableIndex;

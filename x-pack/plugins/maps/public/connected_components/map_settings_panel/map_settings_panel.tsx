@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import React from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -18,11 +17,12 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { MapSettings } from '../../reducers/map';
+import React from 'react';
+import type { MapCenter } from '../../../common/descriptor_types/map_descriptor';
+import type { MapSettings } from '../../reducers/map/types';
+import { DisplayPanel } from './display_panel';
 import { NavigationPanel } from './navigation_panel';
 import { SpatialFiltersPanel } from './spatial_filters_panel';
-import { DisplayPanel } from './display_panel';
-import { MapCenter } from '../../../common/descriptor_types';
 
 export interface Props {
   cancelChanges: () => void;

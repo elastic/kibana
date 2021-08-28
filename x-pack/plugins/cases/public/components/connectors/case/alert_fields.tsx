@@ -6,19 +6,16 @@
  */
 
 /* eslint-disable @kbn/eslint/no-restricted-paths */
-
+import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import React, { useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
-import { EuiCallOut, EuiSpacer } from '@elastic/eui';
-
-import { ActionParamsProps } from '../../../../../triggers_actions_ui/public/types';
-import { CommentType, SECURITY_SOLUTION_OWNER } from '../../../../common';
-
-import { CaseActionParams } from './types';
-import { ExistingCase } from './existing_case';
-
-import * as i18n from './translations';
+import type { ActionParamsProps } from '../../../../../triggers_actions_ui/public/types';
+import { CommentType } from '../../../../common/api/cases/comment';
+import { SECURITY_SOLUTION_OWNER } from '../../../../common/constants';
 import { OwnerProvider } from '../../owner_context';
+import { ExistingCase } from './existing_case';
+import * as i18n from './translations';
+import type { CaseActionParams } from './types';
 
 const Container = styled.div`
   ${({ theme }) => `

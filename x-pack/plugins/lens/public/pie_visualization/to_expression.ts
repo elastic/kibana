@@ -4,12 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { Ast } from '@kbn/interpreter/common';
-import { PaletteRegistry } from 'src/plugins/charts/public';
-import { Operation, DatasourcePublicAPI } from '../types';
+import type { Ast } from '@kbn/interpreter/common';
+import type { PaletteRegistry } from '../../../../../src/plugins/charts/public/services/palettes/types';
+import type { PieVisualizationState } from '../../common/expressions/pie_chart/types';
+import type { DatasourcePublicAPI, Operation } from '../types';
 import { DEFAULT_PERCENT_DECIMALS } from './constants';
-import type { PieVisualizationState } from '../../common/expressions';
 
 export function toExpression(
   state: PieVisualizationState,

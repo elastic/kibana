@@ -4,17 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { i18n } from '@kbn/i18n';
 import type { ExpressionFunctionAST } from '@kbn/interpreter/common';
 import memoizeOne from 'memoize-one';
-import { LayerType, layerTypes } from '../../../../../common';
-import type { TimeScaleUnit } from '../../../../../common/expressions';
+import { operationDefinitionMap } from '..';
+import { layerTypes } from '../../../../../common/constants';
+import type { TimeScaleUnit } from '../../../../../common/expressions/time_scale/types';
+import type { LayerType } from '../../../../../common/types';
 import type { IndexPattern, IndexPatternLayer } from '../../../types';
+import { getManagedColumnsFrom, isColumnValidAsReference } from '../../layer_helpers';
 import { adjustTimeScaleLabelSuffix } from '../../time_scale_utils';
 import type { ReferenceBasedIndexPatternColumn } from '../column_types';
-import { getManagedColumnsFrom, isColumnValidAsReference } from '../../layer_helpers';
-import { operationDefinitionMap } from '..';
 
 export const buildLabelFunction = (ofName: (name?: string) => string) => (
   name?: string,

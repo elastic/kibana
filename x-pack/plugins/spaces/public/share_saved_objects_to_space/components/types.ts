@@ -4,8 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { LegacyUrlAliasTarget } from '../../../common';
+import type { LegacyUrlAliasTarget } from '../../../common/types';
 
 export interface InternalLegacyUrlAliasTarget extends LegacyUrlAliasTarget {
   /**

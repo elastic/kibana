@@ -4,22 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { FC, useContext, useEffect, useState, useMemo } from 'react';
-
-import { SplitFieldSelect } from '../split_field_select';
-import { JobCreatorContext } from '../../../job_creator_context';
-import { Field } from '../../../../../../../../../common/types/fields';
+import type { FC } from 'react';
+import React, { useContext, useEffect, useMemo, useState } from 'react';
+import type { Field } from '../../../../../../../../../common/types/fields';
 import {
-  newJobCapsService,
   filterCategoryFields,
+  newJobCapsService,
 } from '../../../../../../../services/new_job_capabilities/new_job_capabilities_service';
+import { PopulationJobCreator } from '../../../../../common/job_creator/population_job_creator';
+import { RareJobCreator } from '../../../../../common/job_creator/rare_job_creator';
+import { isPopulationJobCreator } from '../../../../../common/job_creator/type_guards';
+import { JobCreatorContext } from '../../../job_creator_context';
+import { SplitFieldSelect } from '../split_field_select/split_field_select';
 import { Description } from './description';
-import {
-  PopulationJobCreator,
-  RareJobCreator,
-  isPopulationJobCreator,
-} from '../../../../../common/job_creator';
 
 export const PopulationFieldSelector: FC = () => {
   const { jobCreator: jc, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);

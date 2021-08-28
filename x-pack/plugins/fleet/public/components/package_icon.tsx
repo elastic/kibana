@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
 import type { EuiIconProps } from '@elastic/eui';
 import { EuiIcon } from '@elastic/eui';
+import React from 'react';
 
-import type { UsePackageIconType } from '../hooks';
-import { usePackageIconType } from '../hooks';
+import type { UsePackageIconType } from '../hooks/use_package_icon_type';
+import { usePackageIconType } from '../hooks/use_package_icon_type';
 
 export const PackageIcon: React.FunctionComponent<
   UsePackageIconType & Omit<EuiIconProps, 'type'>

@@ -4,13 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { i18n } from '@kbn/i18n';
+import type { ChromeRecentlyAccessed } from '../../../../../../src/core/public/chrome/recently_accessed/recently_accessed_service';
+import { getRecentlyAccessed } from './dependency_cache';
 
 // utility functions for managing which links get added to kibana's recently accessed list
-
-import { i18n } from '@kbn/i18n';
-
-import type { ChromeRecentlyAccessed } from 'kibana/public';
-import { getRecentlyAccessed } from './dependency_cache';
 
 export function addItemToRecentlyAccessed(
   page: string,

@@ -5,29 +5,29 @@
  * 2.0.
  */
 
-import tinycolor from 'tinycolor2';
+import type { EuiColorPalettePickerPaletteProps } from '@elastic/eui';
 import {
-  // @ts-ignore
+  // @ts-expect-error
   colorPalette as colorPaletteGenerator,
-  // @ts-ignore
-  euiPaletteForStatus,
-  // @ts-ignore
-  euiPaletteForTemperature,
-  // @ts-ignore
-  euiPaletteCool,
-  // @ts-ignore
-  euiPaletteWarm,
-  // @ts-ignore
-  euiPaletteNegative,
-  // @ts-ignore
-  euiPalettePositive,
-  // @ts-ignore
-  euiPaletteGray,
-  // @ts-ignore
+  // @ts-expect-error
   euiPaletteColorBlind,
+  // @ts-expect-error
+  euiPaletteCool,
+  // @ts-expect-error
+  euiPaletteForStatus,
+  // @ts-expect-error
+  euiPaletteForTemperature,
+  // @ts-expect-error
+  euiPaletteGray,
+  // @ts-expect-error
+  euiPaletteNegative,
+  // @ts-expect-error
+  euiPalettePositive,
+  // @ts-expect-error
+  euiPaletteWarm,
 } from '@elastic/eui/lib/services';
-import { EuiColorPalettePickerPaletteProps } from '@elastic/eui';
-import { PercentilesFieldMeta } from '../../../common/descriptor_types';
+import tinycolor from 'tinycolor2';
+import type { PercentilesFieldMeta } from '../../../common/descriptor_types/style_property_descriptor_types';
 
 export const DEFAULT_HEATMAP_COLOR_RAMP_NAME = 'theclassic';
 

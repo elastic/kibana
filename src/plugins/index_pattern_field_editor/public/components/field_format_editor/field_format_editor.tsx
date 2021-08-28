@@ -8,15 +8,15 @@
 import { EuiCode, EuiFormRow, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import React, { PureComponent } from 'react';
-import type { CoreStart } from '../../../../../core/public';
+import type { CoreStart } from '../../../../../core/public/types';
 import { IndexPattern } from '../../../../data/common/index_patterns/index_patterns/index_pattern';
 import { castEsToKbnFieldTypeName } from '../../../../data/common/kbn_field_types';
 import type { DataPublicPluginStart } from '../../../../data/public/types';
 import type { FieldFormatInstanceType } from '../../../../field_formats/common/types';
 import type { FormatEditorServiceStart } from '../../service/format_editor_service';
 import type { FieldFormatConfig } from '../../types';
-import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '../common';
 import { FormatEditor } from './format_editor';
 
 export interface FormatSelectEditorProps {

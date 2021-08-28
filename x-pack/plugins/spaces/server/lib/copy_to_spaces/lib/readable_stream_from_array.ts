@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { Readable } from 'stream';
 
 // TODO: Remove in favor of Readable.from once we upgrade to Node 12.x

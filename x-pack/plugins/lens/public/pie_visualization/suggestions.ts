@@ -4,12 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { partition } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { partition } from 'lodash';
+import { layerTypes } from '../../common/constants';
+import type { PieVisualizationState } from '../../common/expressions/pie_chart/types';
 import type { SuggestionRequest, VisualizationSuggestion } from '../types';
-import { layerTypes } from '../../common';
-import type { PieVisualizationState } from '../../common/expressions';
 import { CHART_NAMES, MAX_PIE_BUCKETS, MAX_TREEMAP_BUCKETS } from './constants';
 
 function shouldReject({ table, keptLayerIds }: SuggestionRequest<PieVisualizationState>) {

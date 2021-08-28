@@ -4,25 +4,26 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState, useCallback, useMemo } from 'react';
-import type { FocusEvent } from 'react';
-import { i18n } from '@kbn/i18n';
 import {
-  EuiFieldNumber,
-  EuiColorPicker,
-  EuiButtonIcon,
-  EuiFlexItem,
-  EuiFlexGroup,
   EuiButtonEmpty,
-  EuiSpacer,
+  EuiButtonIcon,
+  EuiColorPicker,
+  EuiFieldNumber,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiScreenReaderOnly,
+  EuiSpacer,
   htmlIdGenerator,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import type { FocusEvent } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import useUnmount from 'react-use/lib/useUnmount';
+import type { ColorStop, CustomPaletteParams } from '../../../common/types';
+import { useDebouncedValue } from '../debounced_value';
+import { TooltipWrapper } from '../tooltip_wrapper';
 import { DEFAULT_COLOR } from './constants';
 import { getDataMinMax, getStepValue, isValidColor } from './utils';
-import { TooltipWrapper, useDebouncedValue } from '../index';
-import type { ColorStop, CustomPaletteParams } from '../../../common';
 
 const idGeneratorFn = htmlIdGenerator();
 

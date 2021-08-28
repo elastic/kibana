@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { FunctionComponent, useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { CaseStatuses } from '../../../common';
-import { Stats } from '../status';
+import type { FunctionComponent } from 'react';
+import React, { useEffect } from 'react';
+import { CaseStatuses } from '../../../common/api/cases/status';
 import { useGetCasesStatus } from '../../containers/use_get_cases_status';
+import { Stats } from '../status/stats';
 
 interface CountProps {
   refresh?: number;

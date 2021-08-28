@@ -4,13 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { Dispatch, SetStateAction, useContext, useEffect, useState, useMemo } from 'react';
 import { EuiFormRow } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { JobCreatorContext } from '../../../job_creator_context';
-import { CategorizationJobCreator } from '../../../../../common/job_creator';
+import type { Dispatch, SetStateAction } from 'react';
+import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { newJobCapsService } from '../../../../../../../services/new_job_capabilities/new_job_capabilities_service';
+import { CategorizationJobCreator } from '../../../../../common/job_creator/categorization_job_creator';
+import { JobCreatorContext } from '../../../job_creator_context';
 import { CategorizationPerPartitionFieldSelect } from './categorization_per_partition_input';
 
 export const CategorizationPerPartitionFieldDropdown = ({

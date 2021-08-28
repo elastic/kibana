@@ -4,18 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { memoize } from 'lodash';
-import { OperationMetadata } from '../../types';
+import type { OperationMetadata } from '../../types';
+import { documentField } from '../document_field';
+import type { IndexPattern, IndexPatternField } from '../types';
+import type { GenericOperationDefinition, OperationType } from './definitions';
 import {
   operationDefinitionMap,
   operationDefinitions,
-  GenericOperationDefinition,
-  OperationType,
   renameOperationsMapping,
 } from './definitions';
-import { IndexPattern, IndexPatternField } from '../types';
-import { documentField } from '../document_field';
 
 export { operationDefinitionMap } from './definitions';
 /**

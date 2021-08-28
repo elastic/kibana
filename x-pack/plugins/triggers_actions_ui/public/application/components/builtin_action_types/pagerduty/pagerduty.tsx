@@ -4,23 +4,22 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
-import {
+import { lazy } from 'react';
+import type {
   ActionTypeModel,
-  GenericValidationResult,
   ConnectorValidationResult,
+  GenericValidationResult,
 } from '../../../../types';
-import {
+import { hasMustacheTokens } from '../../../lib/has_mustache_tokens';
+import type {
   PagerDutyActionConnector,
+  PagerDutyActionParams,
   PagerDutyConfig,
   PagerDutySecrets,
-  PagerDutyActionParams,
-  EventActionOptions,
-} from '.././types';
-import { hasMustacheTokens } from '../../../lib/has_mustache_tokens';
+} from '../types';
+import { EventActionOptions } from '../types';
 
 export function getActionType(): ActionTypeModel<
   PagerDutyConfig,

@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { Route, Redirect, RouteProps, RedirectProps } from 'react-router-dom';
+import type { RedirectProps, RouteProps } from 'react-router-dom';
+import { Redirect, Route } from 'react-router-dom';
 
 interface RedirectWithQueryParamsProps extends Omit<RedirectProps, 'to'> {
   from: string;

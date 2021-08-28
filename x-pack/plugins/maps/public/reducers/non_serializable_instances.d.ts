@@ -6,10 +6,9 @@
  */
 
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
-
-import { Adapters } from 'src/plugins/inspector/public';
-import { AnyAction } from 'redux';
-import { MapStoreState } from './store';
+import type { AnyAction } from 'redux';
+import type { Adapters } from '../../../../../src/plugins/inspector/common/adapters/types';
+import type { MapStoreState } from './store';
 
 export type NonSerializableState = {
   inspectorAdapters: Adapters;

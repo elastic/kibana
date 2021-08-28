@@ -4,21 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { FC } from 'react';
-
-import { IndexPattern } from '../../../../../../../../../../src/plugins/data/public';
-
+import type { FC } from 'react';
+import React from 'react';
+import { IndexPattern } from '../../../../../../../../../../src/plugins/data/common/index_patterns/index_patterns/index_pattern';
+import type {
+  DataFrameAnalyticsConfig,
+  DataFrameTaskStateType,
+} from '../../../../../../../common/types/data_frame_analytics';
+import { useMlKibana } from '../../../../../contexts/kibana/kibana_context';
 import { getToastNotifications } from '../../../../../util/dependency_cache';
-import { useMlKibana } from '../../../../../contexts/kibana';
-
-import { DataFrameAnalyticsConfig } from '../../../../common';
-import { ResultsSearchQuery } from '../../../../common/analytics';
-
-import { DataFrameTaskStateType } from '../../../analytics_management/components/analytics_list/common';
-
-import { ExpandableSectionResults } from '../expandable_section';
-
+import type { ResultsSearchQuery } from '../../../../common/analytics';
+import { ExpandableSectionResults } from '../expandable_section/expandable_section_results';
 import { useExplorationResults } from './use_exploration_results';
 
 interface Props {

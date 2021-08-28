@@ -4,12 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-/**
- * Actions and connectors API endpoint helpers
- */
-
-import { ACTION_URL, ACTION_TYPES_URL, CONNECTORS_URL } from '../../common';
+import { ACTION_TYPES_URL, ACTION_URL, CONNECTORS_URL } from '../constants';
 
 /**
  *

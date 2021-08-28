@@ -4,19 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { i18n } from '@kbn/i18n';
 import { EMSClient, FileLayer, TMSService } from '@elastic/ems-client';
-import _ from 'lodash';
+import { i18n } from '@kbn/i18n';
 import {
-  GIS_API_PATH,
-  EMS_FILES_CATALOGUE_PATH,
-  EMS_TILES_CATALOGUE_PATH,
-  EMS_GLYPHS_PATH,
   EMS_APP_NAME,
+  EMS_FILES_CATALOGUE_PATH,
+  EMS_GLYPHS_PATH,
+  EMS_TILES_CATALOGUE_PATH,
   FONTS_API_PATH,
+  GIS_API_PATH,
 } from '../common/constants';
-import { getHttp, getTilemap, getKibanaVersion, getEMSSettings } from './kibana_services';
+import { getEMSSettings, getHttp, getKibanaVersion, getTilemap } from './kibana_services';
 import { getLicenseId } from './licensed_features';
 
 export function getKibanaTileMap(): unknown {

@@ -4,13 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { CoreSetup } from 'src/core/server';
-
-import type { SpacesServiceStart } from '../spaces_service';
-import { SPACES_USAGE_STATS_TYPE } from '../usage_stats';
+import type { CoreSetup } from '../../../../../src/core/server';
+import type { SpacesServiceStart } from '../spaces_service/spaces_service';
+import { SPACES_USAGE_STATS_TYPE } from '../usage_stats/constants';
 import { SpacesSavedObjectMappings, UsageStatsMappings } from './mappings';
-import { spaceMigrations, usageStatsMigrations } from './migrations';
+import * as spaceMigrations from './migrations/space_migrations';
+import * as usageStatsMigrations from './migrations/usage_stats_migrations';
 import { spacesSavedObjectsClientWrapperFactory } from './saved_objects_client_wrapper_factory';
 
 interface SetupDeps {

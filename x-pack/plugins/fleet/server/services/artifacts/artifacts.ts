@@ -4,23 +4,22 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { deflate } from 'zlib';
-import { promisify } from 'util';
-
 import type { BinaryLike } from 'crypto';
 import { createHash } from 'crypto';
+import { promisify } from 'util';
+import { deflate } from 'zlib';
 
-import type { ElasticsearchClient } from 'kibana/server';
-
-import type { ListResult } from '../../../common';
-import { FLEET_SERVER_ARTIFACTS_INDEX } from '../../../common';
-
+import type { ElasticsearchClient } from '../../../../../../src/core/server/elasticsearch/client/types';
+import { FLEET_SERVER_ARTIFACTS_INDEX } from '../../../common/constants';
+import type { ListResult } from '../../../common/types/rest_spec/common';
 import { ArtifactsElasticsearchError } from '../../errors';
-
 import { isElasticsearchVersionConflictError } from '../../errors/utils';
 
-import { isElasticsearchItemNotFoundError } from './utils';
+import {
+  esSearchHitToArtifact,
+  newArtifactToElasticsearchProperties,
+  uniqueIdFromArtifact,
+} from './mappings';
 import type {
   Artifact,
   ArtifactElasticsearchProperties,
@@ -29,11 +28,7 @@ import type {
   ListArtifactsProps,
   NewArtifact,
 } from './types';
-import {
-  esSearchHitToArtifact,
-  newArtifactToElasticsearchProperties,
-  uniqueIdFromArtifact,
-} from './mappings';
+import { isElasticsearchItemNotFoundError } from './utils';
 
 const deflateAsync = promisify(deflate);
 

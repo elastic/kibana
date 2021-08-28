@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { useEffect, useMemo, useState } from 'react';
 import { combineLatest, from, Observable, of, Subject } from 'rxjs';
 import {
@@ -19,27 +18,27 @@ import {
   switchMap,
   tap,
 } from 'rxjs/operators';
-import { CoreStart } from 'kibana/public';
-import { TimeBuckets } from '../../application/util/time_buckets';
-import { MlStartDependencies } from '../../plugin';
+import type { CoreStart } from '../../../../../../src/core/public/types';
+import { UI_SETTINGS } from '../../../../../../src/plugins/data/common/constants';
+import { ViewMode } from '../../../../../../src/plugins/embeddable/common/types';
+import type { SwimlaneType } from '../../application/explorer/explorer_constants';
 import {
   ANOMALY_SWIM_LANE_HARD_LIMIT,
-  SWIM_LANE_DEFAULT_PAGE_SIZE,
   SWIMLANE_TYPE,
-  SwimlaneType,
+  SWIM_LANE_DEFAULT_PAGE_SIZE,
 } from '../../application/explorer/explorer_constants';
-import { UI_SETTINGS } from '../../../../../../src/plugins/data/public';
-import { OverallSwimlaneData } from '../../application/explorer/explorer_utils';
+import type { OverallSwimlaneData } from '../../application/explorer/explorer_utils';
 import { isViewBySwimLaneData } from '../../application/explorer/swimlane_container';
-import { ViewMode } from '../../../../../../src/plugins/embeddable/public';
-import {
+import { TimeBuckets } from '../../application/util/time_buckets';
+import type { MlStartDependencies } from '../../plugin';
+import { CONTROLLED_BY_SWIM_LANE_FILTER } from '../../ui_actions/constants';
+import { getJobsObservable } from '../common/get_jobs_observable';
+import { processFilters } from '../common/process_filters';
+import type {
   AnomalySwimlaneEmbeddableInput,
   AnomalySwimlaneEmbeddableOutput,
   AnomalySwimlaneServices,
-} from '..';
-import { processFilters } from '../common/process_filters';
-import { CONTROLLED_BY_SWIM_LANE_FILTER } from '../..';
-import { getJobsObservable } from '../common/get_jobs_observable';
+} from '../types';
 
 const FETCH_RESULTS_DEBOUNCE_MS = 500;
 

@@ -6,13 +6,13 @@
  */
 
 import numeral from '@elastic/numeral';
-import { IScopedClusterClient } from 'kibana/server';
-import { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
-import { validateJobObject } from './validate_job_object';
-import { calculateModelMemoryLimitProvider } from '../calculate_model_memory_limit';
+import type { IScopedClusterClient } from '../../../../../../src/core/server/elasticsearch/client/scoped_cluster_client';
 import { ALLOWED_DATA_UNITS } from '../../../common/constants/validation';
-import { MlInfoResponse } from '../../../common/types/ml_server_info';
-import type { MlClient } from '../../lib/ml_client';
+import type { CombinedJob } from '../../../common/types/anomaly_detection_jobs/combined_job';
+import type { MlInfoResponse } from '../../../common/types/ml_server_info';
+import type { MlClient } from '../../lib/ml_client/types';
+import { calculateModelMemoryLimitProvider } from '../calculate_model_memory_limit/calculate_model_memory_limit';
+import { validateJobObject } from './validate_job_object';
 
 // The minimum value the backend expects is 1MByte
 const MODEL_MEMORY_LIMIT_MINIMUM_BYTES = 1048576;

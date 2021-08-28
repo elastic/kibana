@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 import { BehaviorSubject } from 'rxjs';
-import type { CoreSetup, CoreStart, StartServicesAccessor } from '../../../../core/public';
+import type { CoreSetup, CoreStart, StartServicesAccessor } from '../../../../core/public/types';
 import type { Plugin } from '../../../../core/public/plugins/plugin';
 import type { PluginInitializerContext } from '../../../../core/public/plugins/plugin_context';
-import type { BfetchPublicSetup } from '../../../bfetch/public/plugin';
+import type { BfetchPublicSetup } from '../../../bfetch/public/plugin/types';
 import type { ExpressionsSetup } from '../../../expressions/public/plugin';
 import type { UsageCollectionSetup } from '../../../usage_collection/public/plugin';
 import type { IndexPatternsContract } from '../../common/index_patterns/index_patterns/index_patterns';

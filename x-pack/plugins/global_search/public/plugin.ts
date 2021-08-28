@@ -4,13 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/public';
-import { LicensingPluginStart } from '../../licensing/public';
-import { LicenseChecker, ILicenseChecker } from '../common/license_checker';
-import { GlobalSearchPluginSetup, GlobalSearchPluginStart } from './types';
-import { GlobalSearchClientConfigType } from './config';
-import { SearchService } from './services';
+import type { CoreSetup, CoreStart } from '../../../../src/core/public/types';
+import type { Plugin } from '../../../../src/core/public/plugins/plugin';
+import type { PluginInitializerContext } from '../../../../src/core/public/plugins/plugin_context';
+import type { LicensingPluginStart } from '../../licensing/public/types';
+import type { ILicenseChecker } from '../common/license_checker';
+import { LicenseChecker } from '../common/license_checker';
+import type { GlobalSearchClientConfigType } from './config';
+import { SearchService } from './services/search_service';
+import type { GlobalSearchPluginSetup, GlobalSearchPluginStart } from './types';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface GlobalSearchPluginSetupDeps {}

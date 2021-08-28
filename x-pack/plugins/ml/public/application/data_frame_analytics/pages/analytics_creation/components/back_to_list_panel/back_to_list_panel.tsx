@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { FC, Fragment } from 'react';
 import { EuiCard, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useMlLink } from '../../../../../contexts/kibana';
+import type { FC } from 'react';
+import React, { Fragment } from 'react';
 import { ML_PAGES } from '../../../../../../../common/constants/locator';
+import { useMlLink } from '../../../../../contexts/kibana/use_create_url';
 
 export const BackToListPanel: FC = () => {
   const analyticsManagementPageLink = useMlLink({

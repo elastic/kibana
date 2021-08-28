@@ -9,50 +9,55 @@ import path from 'path';
 
 import type { TypeOf } from '@kbn/config-schema';
 import mime from 'mime-types';
-import type { RequestHandler, ResponseHeaders, KnownHeaders } from 'src/core/server';
 
 import type {
-  GetInfoResponse,
-  InstallPackageResponse,
-  DeletePackageResponse,
-  GetCategoriesResponse,
-  GetPackagesResponse,
-  GetLimitedPackagesResponse,
+  KnownHeaders,
+  ResponseHeaders,
+} from '../../../../../../src/core/server/http/router/headers';
+import type { RequestHandler } from '../../../../../../src/core/server/http/router/router';
+import type {
   BulkInstallPackageInfo,
   BulkInstallPackagesResponse,
-  IBulkInstallPackageHTTPError,
+  DeletePackageResponse,
+  GetCategoriesResponse,
+  GetInfoResponse,
+  GetLimitedPackagesResponse,
+  GetPackagesResponse,
   GetStatsResponse,
-} from '../../../common';
-import type {
-  GetCategoriesRequestSchema,
-  GetPackagesRequestSchema,
-  GetFileRequestSchema,
-  GetInfoRequestSchema,
-  InstallPackageFromRegistryRequestSchema,
-  InstallPackageByUploadRequestSchema,
-  DeletePackageRequestSchema,
-  BulkUpgradePackagesFromRegistryRequestSchema,
-  GetStatsRequestSchema,
-} from '../../types';
-import {
-  bulkInstallPackages,
-  getCategories,
-  getPackages,
-  getFile,
-  getPackageInfo,
-  isBulkInstallError,
-  installPackage,
-  removeInstallation,
-  getLimitedPackages,
-  getInstallation,
-} from '../../services/epm/packages';
-import type { BulkInstallResponse } from '../../services/epm/packages';
-import { defaultIngestErrorHandler, ingestErrorToResponseOptions } from '../../errors';
-import { splitPkgKey } from '../../services/epm/registry';
-import { licenseService } from '../../services';
+  IBulkInstallPackageHTTPError,
+  InstallPackageResponse,
+} from '../../../common/types/rest_spec/epm';
+import { defaultIngestErrorHandler, ingestErrorToResponseOptions } from '../../errors/handlers';
 import { getArchiveEntry } from '../../services/epm/archive/cache';
 import { getAsset } from '../../services/epm/archive/storage';
-import { getPackageUsageStats } from '../../services/epm/packages/get';
+import {
+  bulkInstallPackages,
+  isBulkInstallError,
+} from '../../services/epm/packages/bulk_install_packages';
+import {
+  getCategories,
+  getInstallation,
+  getLimitedPackages,
+  getPackageInfo,
+  getPackages,
+  getPackageUsageStats,
+} from '../../services/epm/packages/get';
+import type { BulkInstallResponse } from '../../services/epm/packages/install';
+import { installPackage } from '../../services/epm/packages/install';
+import { removeInstallation } from '../../services/epm/packages/remove';
+import { getFile, splitPkgKey } from '../../services/epm/registry';
+import { licenseService } from '../../services/license';
+import type {
+  BulkUpgradePackagesFromRegistryRequestSchema,
+  DeletePackageRequestSchema,
+  GetCategoriesRequestSchema,
+  GetFileRequestSchema,
+  GetInfoRequestSchema,
+  GetPackagesRequestSchema,
+  GetStatsRequestSchema,
+  InstallPackageByUploadRequestSchema,
+  InstallPackageFromRegistryRequestSchema,
+} from '../../types/rest_spec/epm';
 
 export const getCategoriesHandler: RequestHandler<
   undefined,

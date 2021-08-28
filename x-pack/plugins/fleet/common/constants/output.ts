@@ -4,8 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { NewOutput } from '../types';
+import type { NewOutput } from '../types/models/output';
 
 export const OUTPUT_SAVED_OBJECT_TYPE = 'ingest-outputs';
 

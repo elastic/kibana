@@ -4,9 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { uniq, intersection } from 'lodash';
-import { SavedObjectReference } from '../../../../src/core/types';
+import { intersection, uniq } from 'lodash';
+import type { SavedObjectReference } from '../../../../src/core/types/saved_objects';
 import { tagSavedObjectTypeName } from './constants';
 
 /**

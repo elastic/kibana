@@ -4,15 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { EuiFlyout, EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
 import React, { memo, useMemo } from 'react';
 import styled from 'styled-components';
-import { EuiFlyout, EuiFlyoutHeader, EuiTitle, EuiFlyoutBody } from '@elastic/eui';
-
-import * as i18n from '../translations';
-import { useKibana } from '../../../../../../../../../src/plugins/kibana_react/public';
-import { Case } from '../../../../../../../cases/common';
+import { useKibana } from '../../../../../../../../../src/plugins/kibana_react/public/context/context';
+import type { Case } from '../../../../../../../cases/common/ui/types';
 import type { TimelinesStartServices } from '../../../../../types';
+import * as i18n from '../translations';
 
 export interface CreateCaseModalProps {
   afterCaseCreated?: (theCase: Case) => Promise<void>;

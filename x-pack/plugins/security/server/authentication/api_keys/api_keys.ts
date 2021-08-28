@@ -4,14 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { Logger } from '@kbn/logging';
 
-import type { IClusterClient, KibanaRequest, Logger } from 'src/core/server';
-
-import type { SecurityLicense } from '../../../common/licensing';
-import {
-  BasicHTTPAuthorizationHeaderCredentials,
-  HTTPAuthorizationHeader,
-} from '../http_authentication';
+import type { IClusterClient } from '../../../../../../src/core/server/elasticsearch/client/cluster_client';
+import type { KibanaRequest } from '../../../../../../src/core/server/http/router/request';
+import type { SecurityLicense } from '../../../common/licensing/license_service';
+import { BasicHTTPAuthorizationHeaderCredentials } from '../http_authentication/basic_http_authorization_header_credentials';
+import { HTTPAuthorizationHeader } from '../http_authentication/http_authorization_header';
 
 /**
  * Represents the options to create an APIKey class instance that will be

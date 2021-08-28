@@ -4,12 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { FC } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-
-import { Field, Aggregation, SplitField } from '../../../../../../../../../common/types/fields';
+import type { FC } from 'react';
+import React from 'react';
+import type {
+  Aggregation,
+  Field,
+  SplitField,
+} from '../../../../../../../../../common/types/fields';
 
 interface DetectorTitleProps {
   index: number;

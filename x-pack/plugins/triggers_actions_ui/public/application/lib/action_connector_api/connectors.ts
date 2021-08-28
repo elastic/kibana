@@ -4,9 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { HttpSetup } from 'kibana/public';
-import { AsApiContract, RewriteRequestCase } from '../../../../../actions/common';
-import { BASE_ACTION_API_PATH } from '../../constants';
+import type { HttpSetup } from '../../../../../../../src/core/public/http/types';
+import { BASE_ACTION_API_PATH } from '../../../../../actions/common';
+import type {
+  AsApiContract,
+  RewriteRequestCase,
+} from '../../../../../actions/common/rewrite_request_case';
 import type { ActionConnector, ActionConnectorProps } from '../../../types';
 
 const rewriteResponseRes = (

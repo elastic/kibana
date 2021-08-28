@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import type { EuiSwitchEvent } from '@elastic/eui';
+import { EuiFormRow, EuiSwitch } from '@elastic/eui';
 import React from 'react';
-import { EuiFormRow, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
 
 interface Props {
   applyGlobalTime: boolean;

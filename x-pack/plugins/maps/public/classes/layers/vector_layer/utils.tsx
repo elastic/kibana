@@ -4,28 +4,25 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { FeatureCollection } from 'geojson';
-import type { Map as MbMap } from '@kbn/mapbox-gl';
+import { Map as MbMap } from '@kbn/mapbox-gl';
+import type { FeatureCollection } from 'geojson';
 import {
   EMPTY_FEATURE_COLLECTION,
   SOURCE_BOUNDS_DATA_REQUEST_ID,
   SOURCE_DATA_REQUEST_ID,
   VECTOR_SHAPE_TYPE,
 } from '../../../../common/constants';
-import {
+import type {
   DataMeta,
-  MapExtent,
-  MapQuery,
   Timeslice,
   VectorSourceRequestMeta,
-} from '../../../../common/descriptor_types';
-import { DataRequestContext } from '../../../actions';
-import { IVectorSource } from '../../sources/vector_source';
-import { DataRequestAbortError } from '../../util/data_request';
-import { DataRequest } from '../../util/data_request';
+} from '../../../../common/descriptor_types/data_request_descriptor_types';
+import type { MapExtent, MapQuery } from '../../../../common/descriptor_types/map_descriptor';
 import { getCentroidFeatures } from '../../../../common/get_centroid_features';
+import type { DataRequestContext } from '../../../actions/data_request_actions';
+import type { IVectorSource } from '../../sources/vector_source/vector_source';
 import { canSkipSourceUpdate } from '../../util/can_skip_fetch';
+import { DataRequest, DataRequestAbortError } from '../../util/data_request';
 import { assignFeatureIds } from './assign_feature_ids';
 
 export function addGeoJsonMbSource(mbSourceId: string, mbLayerIds: string[], mbMap: MbMap) {

@@ -5,11 +5,10 @@
  * 2.0.
  */
 
+import { EuiBasicTable, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
+import type { FC, ReactElement } from 'react';
+import React, { Fragment } from 'react';
 import './expanded_row_details_pane.scss';
-
-import React, { Fragment, FC, ReactElement } from 'react';
-
-import { EuiBasicTable, EuiFlexGroup, EuiFlexItem, EuiTitle, EuiSpacer } from '@elastic/eui';
 
 export interface SectionItem {
   title: string;

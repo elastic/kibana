@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { Component } from 'react';
+import { EuiButton, EuiExpression, EuiFormHelpText, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EuiButton, EuiPopover, EuiExpression, EuiFormHelpText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { IndexPattern, Query } from 'src/plugins/data/public';
+import React, { Component } from 'react';
+import type { Query } from 'src/plugins/data/public';
+import { IndexPattern } from '../../../../../../../../src/plugins/data/common/index_patterns/index_patterns/index_pattern';
 import { APP_ID } from '../../../../../common/constants';
 import { getData } from '../../../../kibana_services';
 

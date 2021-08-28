@@ -4,14 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { ThunkDispatch } from 'redux-thunk';
-import { AnyAction } from 'redux';
 import { connect } from 'react-redux';
-import { updateEditShape } from '../../../actions';
-import { MapStoreState } from '../../../reducers/store';
+import type { AnyAction } from 'redux';
+import type { ThunkDispatch } from 'redux-thunk';
+import { DRAW_SHAPE } from '../../../../common/constants';
+import { updateEditShape } from '../../../actions/map_actions';
+import type { MapStoreState } from '../../../reducers/store';
 import { DrawControl } from './draw_control';
-import { DRAW_SHAPE } from '../../../../common';
 
 function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) {
   return {

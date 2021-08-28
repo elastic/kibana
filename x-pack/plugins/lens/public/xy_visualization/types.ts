@@ -4,31 +4,28 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { i18n } from '@kbn/i18n';
-import { LensIconChartArea } from '../assets/chart_area';
-import { LensIconChartAreaStacked } from '../assets/chart_area_stacked';
-import { LensIconChartAreaPercentage } from '../assets/chart_area_percentage';
-import { LensIconChartBar } from '../assets/chart_bar';
-import { LensIconChartBarStacked } from '../assets/chart_bar_stacked';
-import { LensIconChartBarPercentage } from '../assets/chart_bar_percentage';
-import { LensIconChartBarHorizontal } from '../assets/chart_bar_horizontal';
-import { LensIconChartBarHorizontalStacked } from '../assets/chart_bar_horizontal_stacked';
-import { LensIconChartBarHorizontalPercentage } from '../assets/chart_bar_horizontal_percentage';
-import { LensIconChartLine } from '../assets/chart_line';
-
-import { VisualizationType } from '../types';
-import {
-  SeriesType,
-  ValueLabelConfig,
-  LegendConfig,
-  AxisExtentConfig,
-  XYLayerConfig,
-  XYCurveType,
+import type {
   AxesSettingsConfig,
-  FittingFunction,
-  LabelsOrientationConfig,
-} from '../../common/expressions';
+  AxisExtentConfig,
+} from '../../common/expressions/xy_chart/axis_config';
+import type { FittingFunction } from '../../common/expressions/xy_chart/fitting_function';
+import type { LabelsOrientationConfig } from '../../common/expressions/xy_chart/labels_orientation_config';
+import type { XYLayerConfig } from '../../common/expressions/xy_chart/layer_config';
+import type { LegendConfig } from '../../common/expressions/xy_chart/legend_config';
+import type { SeriesType } from '../../common/expressions/xy_chart/series_type';
+import type { ValueLabelConfig, XYCurveType } from '../../common/expressions/xy_chart/xy_args';
+import { LensIconChartArea } from '../assets/chart_area';
+import { LensIconChartAreaPercentage } from '../assets/chart_area_percentage';
+import { LensIconChartAreaStacked } from '../assets/chart_area_stacked';
+import { LensIconChartBar } from '../assets/chart_bar';
+import { LensIconChartBarHorizontal } from '../assets/chart_bar_horizontal';
+import { LensIconChartBarHorizontalPercentage } from '../assets/chart_bar_horizontal_percentage';
+import { LensIconChartBarHorizontalStacked } from '../assets/chart_bar_horizontal_stacked';
+import { LensIconChartBarPercentage } from '../assets/chart_bar_percentage';
+import { LensIconChartBarStacked } from '../assets/chart_bar_stacked';
+import { LensIconChartLine } from '../assets/chart_line';
+import type { VisualizationType } from '../types';
 
 // Persisted parts of the state
 export interface XYState {

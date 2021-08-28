@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import type { PartialTheme } from '@elastic/charts';
 import { useMemo } from 'react';
 import { useCurrentEuiTheme } from './use_color_range';
+
 export const useDataVizChartTheme = (): PartialTheme => {
   const { euiTheme } = useCurrentEuiTheme();
   const chartTheme = useMemo<PartialTheme>(() => {

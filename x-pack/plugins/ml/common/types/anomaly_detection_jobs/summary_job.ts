@@ -4,12 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { Moment } from 'moment';
-
-import type { CombinedJob, CombinedJobWithStats } from './combined_job';
+import type { Moment } from 'moment';
 import type { MlAnomalyDetectionAlertRule } from '../alerts';
+import type { CombinedJob, CombinedJobWithStats } from './combined_job';
 import type { MlJobBlocked } from './job';
+
 export type { Datafeed } from './datafeed';
 export type { DatafeedStats } from './datafeed_stats';
 

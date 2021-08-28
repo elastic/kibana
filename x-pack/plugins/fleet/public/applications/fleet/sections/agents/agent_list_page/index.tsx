@@ -4,55 +4,51 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import {
   EuiBasicTable,
   EuiButton,
+  EuiContextMenuItem,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiLink,
+  EuiPortal,
   EuiSpacer,
   EuiText,
-  EuiContextMenuItem,
-  EuiIcon,
-  EuiPortal,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n/react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import type { Agent, AgentPolicy, PackagePolicy, SimplifiedAgentStatus } from '../../../types';
-import {
-  usePagination,
-  useCapabilities,
-  useGetAgentPolicies,
-  sendGetAgents,
-  sendGetAgentStatus,
-  useUrlParams,
-  useLink,
-  useBreadcrumbs,
-  useLicense,
-  useKibanaVersion,
-  useStartServices,
-} from '../../../hooks';
-import {
-  AgentEnrollmentFlyout,
-  AgentPolicySummaryLine,
-  ContextMenuActions,
-} from '../../../components';
-import { AgentStatusKueryHelper, isAgentUpgradeable } from '../../../services';
-import { AGENT_SAVED_OBJECT_TYPE, FLEET_SERVER_PACKAGE } from '../../../constants';
-import {
-  AgentReassignAgentPolicyModal,
-  AgentHealth,
-  AgentUnenrollAgentModal,
-  AgentUpgradeAgentModal,
-} from '../components';
+import { AGENT_SAVED_OBJECT_TYPE } from '../../../../../../common/constants/agent';
+import { FLEET_SERVER_PACKAGE } from '../../../../../../common/constants/epm';
+import * as AgentStatusKueryHelper from '../../../../../../common/services/agent_status';
+import { isAgentUpgradeable } from '../../../../../../common/services/is_agent_upgradeable';
+import type { Agent, SimplifiedAgentStatus } from '../../../../../../common/types/models/agent';
+import type { AgentPolicy } from '../../../../../../common/types/models/agent_policy';
+import type { PackagePolicy } from '../../../../../../common/types/models/package_policy';
+import { AgentEnrollmentFlyout } from '../../../../../components/agent_enrollment_flyout';
+import { ContextMenuActions } from '../../../../../components/context_menu_actions';
+import { AgentPolicySummaryLine } from '../../../../../components/link_and_revision';
+import { useCapabilities } from '../../../../../hooks/use_capabilities';
+import { useStartServices } from '../../../../../hooks/use_core';
+import { useKibanaVersion } from '../../../../../hooks/use_kibana_version';
+import { useLicense } from '../../../../../hooks/use_license';
+import { useLink } from '../../../../../hooks/use_link';
+import { usePagination } from '../../../../../hooks/use_pagination';
+import { sendGetAgents, sendGetAgentStatus } from '../../../../../hooks/use_request/agents';
+import { useGetAgentPolicies } from '../../../../../hooks/use_request/agent_policy';
+import { useUrlParams } from '../../../../../hooks/use_url_params';
+import { useBreadcrumbs } from '../../../hooks/use_breadcrumbs';
+import { AgentHealth } from '../components/agent_health';
+import { AgentReassignAgentPolicyModal } from '../components/agent_reassign_policy_modal';
+import { AgentUnenrollAgentModal } from '../components/agent_unenroll_modal';
+import { AgentUpgradeAgentModal } from '../components/agent_upgrade_modal';
 
-import { AgentTableHeader } from './components/table_header';
 import type { SelectionMode } from './components/bulk_actions';
 import { SearchAndFilterBar } from './components/search_and_filter_bar';
+import { AgentTableHeader } from './components/table_header';
 
 const REFRESH_INTERVAL_MS = 30000;
 

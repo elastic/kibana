@@ -4,24 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-/**
- * Creates URL to the DataFrameAnalytics page
- */
 import { isEmpty } from 'lodash';
-import { formatGenericMlUrl } from './common';
-import {
+import { setStateToKbnUrl } from '../../../../../../src/plugins/kibana_utils/public/state_management/url/kbn_url_storage';
+import { ML_PAGES } from '../../../common/constants/locator';
+import type { AppPageState, ListingPageUrlState } from '../../../common/types/common';
+import type {
   DataFrameAnalyticsExplorationQueryState,
   DataFrameAnalyticsExplorationUrlState,
   DataFrameAnalyticsUrlState,
   ExplorationPageUrlState,
-  MlGenericUrlState,
   MlCommonGlobalState,
+  MlGenericUrlState,
 } from '../../../common/types/locator';
-import { ML_PAGES } from '../../../common/constants/locator';
-import { setStateToKbnUrl } from '../../../../../../src/plugins/kibana_utils/public';
 import { getGroupQueryText, getJobQueryText } from '../../../common/util/string_utils';
-import { AppPageState, ListingPageUrlState } from '../../../common/types/common';
+import { formatGenericMlUrl } from './common';
 
 export function formatDataFrameAnalyticsJobManagementUrl(
   appBasePath: string,

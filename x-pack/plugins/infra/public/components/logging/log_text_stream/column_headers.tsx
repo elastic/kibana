@@ -4,27 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { i18n } from '@kbn/i18n';
-import React, { useContext } from 'react';
 import { transparentize } from 'polished';
-
-import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
-import {
-  LogEntryColumn,
-  LogEntryColumnContent,
-  LogEntryColumnWidth,
-  LogEntryColumnWidths,
-} from './log_entry_column';
-import { ASSUMED_SCROLLBAR_WIDTH } from './vertical_scroll_panel';
-import { LogPositionState } from '../../../containers/logs/log_position';
+import React, { useContext } from 'react';
+import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
 import { localizedDate } from '../../../../common/formatters/datetime';
+import { LogPositionState } from '../../../containers/logs/log_position/log_position_state';
+import type { LogColumnRenderConfiguration } from '../../../utils/log_column_render_configuration';
 import {
-  LogColumnRenderConfiguration,
-  isTimestampColumnRenderConfiguration,
-  isMessageColumnRenderConfiguration,
   isFieldColumnRenderConfiguration,
+  isMessageColumnRenderConfiguration,
+  isTimestampColumnRenderConfiguration,
 } from '../../../utils/log_column_render_configuration';
+import type { LogEntryColumnWidth, LogEntryColumnWidths } from './log_entry_column';
+import { LogEntryColumn, LogEntryColumnContent } from './log_entry_column';
+import { ASSUMED_SCROLLBAR_WIDTH } from './vertical_scroll_panel';
 
 export const LogColumnHeaders: React.FunctionComponent<{
   columnConfigurations: LogColumnRenderConfiguration[];

@@ -8,7 +8,7 @@
 import { EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
-import type { CoreStart } from '../../../../../core/public';
+import type { CoreStart } from '../../../../../core/public/types';
 
 export const SearchSessionIncompleteWarning = (docLinks: CoreStart['docLinks']) => (
   <>

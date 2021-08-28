@@ -4,14 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { FC, useMemo } from 'react';
-
 import { EuiCallOut, EuiLink, EuiPanel, EuiSpacer } from '@elastic/eui';
-
 import { i18n } from '@kbn/i18n';
-
-import { useMlKibana } from '../../../../../contexts/kibana';
+import type { FC } from 'react';
+import React, { useMemo } from 'react';
+import { useMlKibana } from '../../../../../contexts/kibana/kibana_context';
 
 const jobConfigErrorTitle = i18n.translate('xpack.ml.dataframe.analytics.jobConfig.errorTitle', {
   defaultMessage: 'Unable to fetch results. An error occurred loading the job configuration data.',

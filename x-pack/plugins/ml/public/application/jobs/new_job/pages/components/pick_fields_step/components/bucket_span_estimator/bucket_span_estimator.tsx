@@ -4,15 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { FC, useState, useEffect, useContext } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiButton } from '@elastic/eui';
-import { isAdvancedJobCreator } from '../../../../../common/job_creator';
-import { JobCreatorContext } from '../../../job_creator_context';
+import { FormattedMessage } from '@kbn/i18n/react';
+import type { FC } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { MLCATEGORY } from '../../../../../../../../../common/constants/field_types';
-
-import { useEstimateBucketSpan, ESTIMATE_STATUS } from './estimate_bucket_span';
+import { isAdvancedJobCreator } from '../../../../../common/job_creator/type_guards';
+import { JobCreatorContext } from '../../../job_creator_context';
+import { ESTIMATE_STATUS, useEstimateBucketSpan } from './estimate_bucket_span';
 
 interface Props {
   setEstimating(estimating: boolean): void;

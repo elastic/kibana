@@ -4,18 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { EuiButtonIcon, EuiContextMenu, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { asyncScheduler } from 'rxjs';
 import React, { useEffect, useState } from 'react';
-import { EuiButtonIcon, EuiPopover, EuiContextMenu } from '@elastic/eui';
-
-import { useKibana } from '../../../../common/lib/kibana';
-import { AlertTableItem } from '../../../../types';
-import {
-  ComponentOpts as BulkOperationsComponentOpts,
-  withBulkAlertOperations,
-} from '../../common/components/with_bulk_alert_api_operations';
+import { asyncScheduler } from 'rxjs';
+import { useKibana } from '../../../../common/lib/kibana/kibana_react';
+import type { AlertTableItem } from '../../../../types';
+import type { ComponentOpts as BulkOperationsComponentOpts } from '../../common/components/with_bulk_alert_api_operations';
+import { withBulkAlertOperations } from '../../common/components/with_bulk_alert_api_operations';
 import './collapsed_item_actions.scss';
 
 export type ComponentOpts = {

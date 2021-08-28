@@ -4,16 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { isEqual } from 'lodash';
 import createContainer from 'constate';
+import { isEqual } from 'lodash';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
 import useSetState from 'react-use/lib/useSetState';
-import { esQuery } from '../../../../../../../src/plugins/data/public';
-import { LogEntry, LogEntryCursor } from '../../../../common/log_entry';
+import { esQuery } from '../../../../../../../src/plugins/data/public/deprecated';
+import type { LogEntry } from '../../../../common/log_entry/log_entry';
+import type { LogEntryCursor } from '../../../../common/log_entry/log_entry_cursor';
+import type { LogSourceConfigurationProperties } from '../../../../common/log_sources/log_source_configuration';
 import { useSubscription } from '../../../utils/use_observable';
-import { LogSourceConfigurationProperties } from '../log_source';
 import { useFetchLogEntriesAfter } from './use_fetch_log_entries_after';
 import { useFetchLogEntriesAround } from './use_fetch_log_entries_around';
 import { useFetchLogEntriesBefore } from './use_fetch_log_entries_before';

@@ -4,8 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { Space } from 'src/plugins/spaces_oss/common';
+import type { Space } from '../../../../src/plugins/spaces_oss/common/types';
 
 /**
  * Controls how spaces are retrieved.

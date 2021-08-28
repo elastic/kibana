@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import React, { useMemo, useState } from 'react';
-
-import { DataFrameAnalyticsListAction, DataFrameAnalyticsListRow } from '../analytics_list/common';
-
-import { editActionNameText, EditActionName } from './edit_action_name';
+import type {
+  DataFrameAnalyticsListAction,
+  DataFrameAnalyticsListRow,
+} from '../analytics_list/common';
+import { EditActionName, editActionNameText } from './edit_action_name';
 
 export const isEditActionFlyoutVisible = (editAction: any): editAction is Required<EditAction> => {
   return editAction.isFlyoutVisible === true && editAction.item !== undefined;

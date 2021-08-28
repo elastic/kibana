@@ -4,9 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { LicensingPluginSetup } from '../../../../licensing/public';
-import { MlLicense } from '../../../common/license';
+import type { LicensingPluginSetup } from '../../../../licensing/public/types';
+import { MlLicense } from '../../../common/license/ml_license';
 import { MlClientLicense } from './ml_client_license';
 
 let mlLicense: MlClientLicense | null = null;

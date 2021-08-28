@@ -7,6 +7,7 @@
 
 import Boom from '@hapi/boom';
 import * as t from 'io-ts';
+import { environmentRt } from '../../common/environment_rt';
 import { isActivePlatinumLicense } from '../../common/license_check';
 import { invalidLicenseMessage } from '../../common/service_map';
 import { notifyFeatureUsage } from '../feature';
@@ -17,7 +18,7 @@ import { getServiceMapBackendNodeInfo } from '../lib/service_map/get_service_map
 import { getServiceMapServiceNodeInfo } from '../lib/service_map/get_service_map_service_node_info';
 import { createApmServerRoute } from './create_apm_server_route';
 import { createApmServerRouteRepository } from './create_apm_server_route_repository';
-import { environmentRt, rangeRt } from './default_api_types';
+import { rangeRt } from './default_api_types';
 
 const serviceMapRoute = createApmServerRoute({
   endpoint: 'GET /api/apm/service-map',

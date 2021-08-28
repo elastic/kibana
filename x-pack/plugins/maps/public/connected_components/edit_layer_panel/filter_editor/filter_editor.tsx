@@ -4,29 +4,27 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { Component, Fragment } from 'react';
-
 import {
   EuiButton,
+  EuiButtonEmpty,
   EuiCodeBlock,
-  EuiTitle,
   EuiPopover,
   EuiSpacer,
   EuiText,
-  EuiTextColor,
   EuiTextAlign,
-  EuiButtonEmpty,
+  EuiTextColor,
+  EuiTitle,
 } from '@elastic/eui';
-
-import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import type { IndexPattern, Query } from 'src/plugins/data/public';
+import { FormattedMessage } from '@kbn/i18n/react';
+import React, { Component, Fragment } from 'react';
+import type { Query } from 'src/plugins/data/public';
+import { IndexPattern } from '../../../../../../../src/plugins/data/common/index_patterns/index_patterns/index_pattern';
 import { APP_ID } from '../../../../common/constants';
-import { getIndexPatternService, getData } from '../../../kibana_services';
+import type { ILayer } from '../../../classes/layers/layer';
 import { GlobalFilterCheckbox } from '../../../components/global_filter_checkbox';
 import { GlobalTimeCheckbox } from '../../../components/global_time_checkbox';
-import { ILayer } from '../../../classes/layers/layer';
+import { getData, getIndexPatternService } from '../../../kibana_services';
 
 export interface Props {
   layer: ILayer;

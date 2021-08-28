@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import { plugin as pluginInitializer } from '.';
-import type { CoreSetup, CoreStart } from '../../../core/public';
+import type { CoreSetup, CoreStart } from '../../../core/public/types';
 import { coreMock } from '../../../core/public/mocks';
 import type { UiActionsSetup, UiActionsStart } from './plugin';
 

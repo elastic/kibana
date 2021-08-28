@@ -4,19 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { useCallback } from 'react';
-import {
-  useWaffleOptionsContext,
-  DEFAULT_WAFFLE_OPTIONS_STATE,
-  WaffleOptionsState,
-} from './use_waffle_options';
-import { useWaffleTimeContext, DEFAULT_WAFFLE_TIME_STATE } from './use_waffle_time';
-import {
-  useWaffleFiltersContext,
-  DEFAULT_WAFFLE_FILTERS_STATE,
-  WaffleFiltersState,
-} from './use_waffle_filters';
+import type { WaffleFiltersState } from './use_waffle_filters';
+import { DEFAULT_WAFFLE_FILTERS_STATE, useWaffleFiltersContext } from './use_waffle_filters';
+import type { WaffleOptionsState } from './use_waffle_options';
+import { DEFAULT_WAFFLE_OPTIONS_STATE, useWaffleOptionsContext } from './use_waffle_options';
+import { DEFAULT_WAFFLE_TIME_STATE, useWaffleTimeContext } from './use_waffle_time';
 
 export const DEFAULT_WAFFLE_VIEW_STATE: WaffleViewState = {
   ...DEFAULT_WAFFLE_OPTIONS_STATE,

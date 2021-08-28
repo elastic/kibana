@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-import React from 'react';
 import { i18n } from '@kbn/i18n';
+import React from 'react';
+import type { NodeDetailsMetricData } from '../../../../../common/http_api/node_details_api';
 import { findLayout } from '../../../../../common/inventory_models/layouts';
-import { InventoryItemType } from '../../../../../common/inventory_models/types';
-
-import { MetricsTimeInput } from '../hooks/use_metrics_time';
+import type { InventoryItemType } from '../../../../../common/inventory_models/types';
+import { NoData } from '../../../../components/empty_states/no_data';
 import { InfraLoadingPanel } from '../../../../components/loading';
-import { NoData } from '../../../../components/empty_states';
-import { NodeDetailsMetricData } from '../../../../../common/http_api/node_details_api';
+import type { MetricsTimeInput } from '../hooks/use_metrics_time';
 
 interface Props {
   loading: boolean;

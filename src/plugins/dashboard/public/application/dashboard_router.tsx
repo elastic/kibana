@@ -16,7 +16,7 @@ import { Provider } from 'react-redux';
 import type { RouteComponentProps } from 'react-router-dom';
 import { HashRouter, Redirect, Route, Switch } from 'react-router-dom';
 import { first } from 'rxjs/operators';
-import type { CoreSetup } from '../../../../core/public';
+import type { CoreSetup } from '../../../../core/public/types';
 import { ScopedHistory } from '../../../../core/public/application/scoped_history';
 import type { AppMountParameters } from '../../../../core/public/application/types';
 import type { PluginInitializerContext } from '../../../../core/public/plugins/plugin_context';
@@ -32,9 +32,11 @@ import { dashboardReadonlyBadge, getDashboardPageTitle } from '../dashboard_stri
 import type {
   DashboardFeatureFlagConfig,
   DashboardSetupDependencies,
-  DashboardStart,
   DashboardStartDependencies,
 } from '../plugin';
+import type {
+  DashboardStart
+} from '../plugin_contract';
 import type { DashboardAppServices, DashboardEmbedSettings, RedirectToProps } from '../types';
 import { DashboardApp } from './dashboard_app';
 import './index.scss';

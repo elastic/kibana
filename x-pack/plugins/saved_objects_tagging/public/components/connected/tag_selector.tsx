@@ -4,14 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { TagSelectorComponentProps } from '../../../../../../src/plugins/saved_objects_tagging_oss/public';
-import { TagsCapabilities } from '../../../common';
-import { TagSelector } from '../base';
-import { ITagsCache } from '../../services';
-import { CreateModalOpener } from '../edition_modal';
+import type {
+  ITagsCache,
+  TagSelectorComponentProps,
+} from '../../../../../../src/plugins/saved_objects_tagging_oss/public/api';
+import type { TagsCapabilities } from '../../../common/capabilities';
+import { TagSelector } from '../base/tag_selector';
+import type { CreateModalOpener } from '../edition_modal/open_modal';
 
 interface GetConnectedTagSelectorOptions {
   cache: ITagsCache;

@@ -5,17 +5,11 @@
  * 2.0.
  */
 
+import type { AreaSeriesStyle, BarSeriesStyle, RecursivePartial } from '@elastic/charts';
+import { AreaSeries, BarSeries, ScaleType } from '@elastic/charts';
 import React from 'react';
-import {
-  AreaSeries,
-  BarSeries,
-  ScaleType,
-  RecursivePartial,
-  BarSeriesStyle,
-  AreaSeriesStyle,
-} from '@elastic/charts';
-import { NodeDetailsDataSeries } from '../../../../../common/http_api/node_details_api';
-import { InventoryVisType } from '../../../../../common/inventory_models/types';
+import type { NodeDetailsDataSeries } from '../../../../../common/http_api/node_details_api';
+import type { InventoryVisType } from '../../../../../common/inventory_models/types';
 
 interface Props {
   id: string;

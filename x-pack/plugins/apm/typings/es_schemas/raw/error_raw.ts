@@ -4,19 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { APMBaseDoc } from './apm_base_doc';
-import { Container } from './fields/container';
-import { Host } from './fields/host';
-import { Http } from './fields/http';
-import { Kubernetes } from './fields/kubernetes';
-import { Page } from './fields/page';
-import { Process } from './fields/process';
-import { Service } from './fields/service';
-import { Stackframe } from './fields/stackframe';
-import { TimestampUs } from './fields/timestamp_us';
-import { Url } from './fields/url';
-import { User } from './fields/user';
+import type { APMBaseDoc } from './apm_base_doc';
+import type { Container } from './fields/container';
+import type { Host } from './fields/host';
+import type { Http } from './fields/http';
+import type { Kubernetes } from './fields/kubernetes';
+import type { Page } from './fields/page';
+import type { Process } from './fields/process';
+import type { Service } from './fields/service';
+import type { Stackframe } from './fields/stackframe';
+import type { TimestampUs } from './fields/timestamp_us';
+import type { Url } from './fields/url';
+import type { User } from './fields/user';
 
 interface Processor {
   name: 'error';

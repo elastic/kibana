@@ -12,8 +12,8 @@ import { renderToStaticMarkup } from 'react-dom/server';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import type { IBasePath } from 'src/core/server';
 
+import type { IBasePath } from '../../../../../src/core/server/http/base_path_service';
 import { PromptPage } from '../prompt_page';
 
 interface Props {

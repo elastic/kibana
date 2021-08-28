@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { CoreStart } from '../../../../../core/public';
+import type { CoreStart } from '../../../../../core/public/types';
 import { coreMock } from '../../../../../core/public/mocks';
 import type { SavedObjectEmbeddableInput } from '../../../common/lib/saved_object_embeddable';
 import type { EmbeddableInput } from '../../../common/types';

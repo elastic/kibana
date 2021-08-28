@@ -4,17 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { i18n } from '@kbn/i18n';
-import {
-  IndexPattern,
+import { IndexPattern } from '../../../../../../src/plugins/data/common/index_patterns/index_patterns/index_pattern';
+import type { IndexPatternsContract } from '../../../../../../src/plugins/data/common/index_patterns/index_patterns/index_patterns';
+import type {
   IIndexPattern,
-  IndexPatternsContract,
-  Query,
   IndexPatternAttributes,
-} from '../../../../../../src/plugins/data/public';
-import { getToastNotifications, getSavedObjectsClient } from './dependency_cache';
-import { IndexPatternSavedObject, SavedSearchSavedObject } from '../../../common/types/kibana';
+} from '../../../../../../src/plugins/data/common/index_patterns/types';
+import type { Query } from '../../../../../../src/plugins/data/public';
+import type { IndexPatternSavedObject, SavedSearchSavedObject } from '../../../common/types/kibana';
+import { getSavedObjectsClient, getToastNotifications } from './dependency_cache';
 
 let indexPatternCache: IndexPatternSavedObject[] = [];
 let savedSearchesCache: SavedSearchSavedObject[] = [];

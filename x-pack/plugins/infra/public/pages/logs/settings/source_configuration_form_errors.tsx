@@ -4,12 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { EuiCallOut, EuiCode } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
-import { FormValidationError } from './validation_errors';
+import type { FormValidationError } from './validation_errors';
 
 export const LogSourceConfigurationFormErrors: React.FC<{ errors: FormValidationError[] }> = ({
   errors,

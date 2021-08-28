@@ -6,21 +6,21 @@
  */
 
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
-
-import { ReactElement } from 'react';
-import { Adapters } from 'src/plugins/inspector/public';
-import { GeoJsonProperties } from 'geojson';
-import { copyPersistentState } from '../../reducers/copy_persistent_state';
-import { IField } from '../fields/field';
-import { FieldFormatter, LAYER_TYPE, MAX_ZOOM, MIN_ZOOM } from '../../../common/constants';
-import {
-  AbstractSourceDescriptor,
-  Attribution,
+import type { GeoJsonProperties } from 'geojson';
+import type { ReactElement } from 'react';
+import type { Adapters } from '../../../../../../src/plugins/inspector/common/adapters/types';
+import type { FieldFormatter } from '../../../common/constants';
+import { LAYER_TYPE, MAX_ZOOM, MIN_ZOOM } from '../../../common/constants';
+import type {
   DataMeta,
   Timeslice,
-} from '../../../common/descriptor_types';
+} from '../../../common/descriptor_types/data_request_descriptor_types';
+import type { Attribution } from '../../../common/descriptor_types/layer_descriptor_types';
+import type { AbstractSourceDescriptor } from '../../../common/descriptor_types/source_descriptor_types';
+import type { PreIndexedShape } from '../../../common/elasticsearch_util/types';
 import { LICENSED_FEATURES } from '../../licensed_features';
-import { PreIndexedShape } from '../../../common/elasticsearch_util';
+import { copyPersistentState } from '../../reducers/copy_persistent_state';
+import type { IField } from '../fields/field';
 
 export type OnSourceChangeArgs = {
   propName: string;

@@ -4,50 +4,47 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { stringify, parse } from 'query-string';
-import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
-import { Redirect, useLocation, useHistory } from 'react-router-dom';
 import type {
   CriteriaWithPagination,
   EuiStepProps,
   EuiTableFieldDataColumnType,
 } from '@elastic/eui';
 import {
-  EuiButtonIcon,
   EuiBasicTable,
-  EuiLink,
+  EuiButton,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiToolTip,
-  EuiText,
-  EuiButton,
+  EuiLink,
   EuiSpacer,
+  EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedRelative, FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage, FormattedRelative } from '@kbn/i18n/react';
+import { parse, stringify } from 'query-string';
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import { Redirect, useHistory, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 
-import { InstallStatus } from '../../../../../types';
-import type { GetAgentPoliciesResponseItem, InMemoryPackagePolicy } from '../../../../../types';
-import {
-  useLink,
-  useUrlPagination,
-  useGetPackageInstallStatus,
-  AgentPolicyRefreshContext,
-  useUIExtension,
-  usePackageInstallations,
-} from '../../../../../hooks';
-import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../../constants';
-import {
-  AgentEnrollmentFlyout,
-  AgentPolicySummaryLine,
-  LinkedAgentCount,
-  PackagePolicyActionsMenu,
-} from '../../../../../components';
+import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../../../../../common/constants/package_policy';
+import { InstallStatus } from '../../../../../../../../common/types/models/epm';
+import type { GetAgentPoliciesResponseItem } from '../../../../../../../../common/types/rest_spec/agent_policy';
+import { AgentEnrollmentFlyout } from '../../../../../../../components/agent_enrollment_flyout';
+import { LinkedAgentCount } from '../../../../../../../components/linked_agent_count';
+import { AgentPolicySummaryLine } from '../../../../../../../components/link_and_revision';
+import { PackagePolicyActionsMenu } from '../../../../../../../components/package_policy_actions_menu';
+import { AgentPolicyRefreshContext } from '../../../../../../../hooks/use_agent_policy_refresh';
+import { useLink } from '../../../../../../../hooks/use_link';
+import { usePackageInstallations } from '../../../../../../../hooks/use_package_installations';
+import { useUIExtension } from '../../../../../../../hooks/use_ui_extension';
+import { useUrlPagination } from '../../../../../../../hooks/use_url_pagination';
+import type { InMemoryPackagePolicy } from '../../../../../../../types/in_memory_package_policy';
+import { useGetPackageInstallStatus } from '../../../../../hooks/use_package_install';
 
+import { Persona } from './persona';
 import type { PackagePolicyAndAgentPolicy } from './use_package_policies_with_agent_policy';
 import { usePackagePoliciesWithAgentPolicy } from './use_package_policies_with_agent_policy';
-import { Persona } from './persona';
 
 const AddAgentButton = styled(EuiButtonIcon)`
   margin-left: ${(props) => props.theme.eui.euiSizeS};

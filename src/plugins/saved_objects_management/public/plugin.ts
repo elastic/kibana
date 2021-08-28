@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 import { i18n } from '@kbn/i18n';
-import type { CoreSetup, CoreStart } from '../../../core/public';
+import type { CoreSetup, CoreStart } from '../../../core/public/types';
 import type { Plugin } from '../../../core/public/plugins/plugin';
-import type { DashboardStart } from '../../dashboard/public/plugin';
+import type { DashboardStart } from '../../dashboard/public/plugin_contract';
 import type { DataPublicPluginStart } from '../../data/public/types';
 import type { DiscoverStart } from '../../discover/public/plugin';
 import type { HomePublicPluginSetup } from '../../home/public/plugin';

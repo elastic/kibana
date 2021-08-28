@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiCallOut } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-
-import { toMountPoint } from '../../../../src/plugins/kibana_react/public';
+import React from 'react';
+import { toMountPoint } from '../../../../src/plugins/kibana_react/public/util/to_mount_point';
 
 interface Props {
   type: string;

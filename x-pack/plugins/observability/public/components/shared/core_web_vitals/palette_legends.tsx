@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import React from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -14,15 +13,17 @@ import {
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
-import styled from 'styled-components';
-import { FormattedMessage } from '@kbn/i18n/react';
-import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
-import { getCoreVitalTooltipMessage, Thresholds } from './core_vital_item';
-import { useUiSetting$ } from '../../../../../../../src/plugins/kibana_react/public';
+import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
+import { FormattedMessage } from '@kbn/i18n/react';
+import React from 'react';
+import styled from 'styled-components';
+import { useUiSetting$ } from '../../../../../../../src/plugins/kibana_react/public/ui_settings/use_ui_setting';
+import type { Thresholds } from './core_vital_item';
+import { getCoreVitalTooltipMessage } from './core_vital_item';
 import {
-  LEGEND_NEEDS_IMPROVEMENT_LABEL,
   LEGEND_GOOD_LABEL,
+  LEGEND_NEEDS_IMPROVEMENT_LABEL,
   LEGEND_POOR_LABEL,
 } from './translations';
 

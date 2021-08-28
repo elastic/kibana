@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { useLocation } from 'react-router-dom';
 
-import type { AnyIntraAppRouteState } from '../types';
+import type { AnyIntraAppRouteState } from '../types/intra_app_route_state';
 
 /**
  * Retrieve UI Route state from the React Router History for the current URL location.

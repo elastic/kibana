@@ -4,9 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { FC } from 'react';
-import { i18n } from '@kbn/i18n';
 import {
   EuiButtonEmpty,
   EuiDescriptionList,
@@ -16,9 +13,12 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import { State } from '../../../analytics_management/hooks/use_create_analytics_form/state';
+import { i18n } from '@kbn/i18n';
+import type { FC } from 'react';
+import React from 'react';
+import type { State } from '../../../analytics_management/hooks/use_create_analytics_form/state';
 import { ANALYTICS_STEPS } from '../../page';
-import { ValidationSummary } from './validation_step_wrapper';
+import type { ValidationSummary } from './validation_step_wrapper';
 
 export const ValidationStepDetails: FC<{
   setCurrentStep: React.Dispatch<React.SetStateAction<ANALYTICS_STEPS>>;

@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { FC } from 'react';
 import { EuiFlexItem } from '@elastic/eui';
+import type { FC } from 'react';
+import React from 'react';
+import { ExamplesList } from '../../../examples_list/examples_list';
 import type { FieldDataRowProps } from '../../types/field_data_row';
-import { ExamplesList } from '../../../examples_list';
 import { DocumentStatsTable } from './document_stats';
 import { ExpandedRowContent } from './expanded_row_content';
 

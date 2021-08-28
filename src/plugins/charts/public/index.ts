@@ -16,7 +16,9 @@ export {
   PaletteOutput,
   SystemPaletteArguments,
 } from '../common';
-export { ChartsPluginSetup, ChartsPluginStart } from './plugin';
+
+export type { ChartsPluginSetup, ChartsPluginStart } from './types';
+
 export { useActiveCursor } from './services/active_cursor';
 export { lightenColor } from './services/palettes/lighten_color';
 export * from './services/palettes/types';

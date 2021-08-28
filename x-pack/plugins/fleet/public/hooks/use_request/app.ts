@@ -4,9 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { appRoutesService } from '../../services';
-import type { CheckPermissionsResponse, GenerateServiceTokenResponse } from '../../types';
+import { appRoutesService } from '../../../common/services/routes';
+import type {
+  CheckPermissionsResponse,
+  GenerateServiceTokenResponse,
+} from '../../../common/types/rest_spec/app';
 
 import { sendRequest } from './use_request';
 

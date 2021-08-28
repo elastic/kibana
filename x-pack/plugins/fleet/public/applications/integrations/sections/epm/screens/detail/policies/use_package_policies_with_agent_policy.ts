@@ -4,19 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { useEffect, useMemo, useState } from 'react';
 
+import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../../../../../../../common/constants/agent_policy';
+import { agentPolicyRouteService } from '../../../../../../../../common/services/routes';
+import type { PackagePolicy } from '../../../../../../../../common/types/models/package_policy';
 import type {
-  PackagePolicy,
   GetAgentPoliciesResponse,
   GetAgentPoliciesResponseItem,
-  GetPackagePoliciesResponse,
-} from '../../../../../types';
-import { agentPolicyRouteService } from '../../../../../services';
-import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../../../../constants';
-import { useGetPackagePolicies, useConditionalRequest } from '../../../../../hooks';
-import type { SendConditionalRequestConfig } from '../../../../../hooks';
+} from '../../../../../../../../common/types/rest_spec/agent_policy';
+import type { GetPackagePoliciesResponse } from '../../../../../../../../common/types/rest_spec/package_policy';
+import { useGetPackagePolicies } from '../../../../../../../hooks/use_request/package_policy';
+import type { SendConditionalRequestConfig } from '../../../../../../../hooks/use_request/use_request';
+import { useConditionalRequest } from '../../../../../../../hooks/use_request/use_request';
 
 export interface PackagePolicyEnriched extends PackagePolicy {
   _agentPolicy: GetAgentPoliciesResponseItem | undefined;

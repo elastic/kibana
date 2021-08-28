@@ -4,17 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { i18n } from '@kbn/i18n';
 import { lazy } from 'react';
+import type { PluginSetupContract as AlertingSetup } from '../../../alerting/public/plugin';
+import type { TriggersAndActionsUIPublicPluginSetup } from '../../../triggers_actions_ui/public/plugin';
 import { ML_ALERT_TYPES } from '../../common/constants/alerts';
-import type { MlAnomalyDetectionAlertParams } from '../../common/types/alerts';
-import type { TriggersAndActionsUIPublicPluginSetup } from '../../../triggers_actions_ui/public';
-import type { PluginSetupContract as AlertingSetup } from '../../../alerting/public';
 import { PLUGIN_ID } from '../../common/constants/app';
+import type { MlAnomalyDetectionAlertParams } from '../../common/types/alerts';
 import { formatExplorerUrl } from '../locator/formatters/anomaly_detection';
+import { registerJobsHealthAlertingRule } from './jobs_health_rule/register_jobs_health_alerting_rule';
 import { validateLookbackInterval, validateTopNBucket } from './validators';
-import { registerJobsHealthAlertingRule } from './jobs_health_rule';
 
 export function registerMlAlerts(
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup,

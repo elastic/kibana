@@ -4,13 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { useState, useEffect } from 'react';
+import { EuiSelect, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiSelect, EuiSpacer, EuiText } from '@elastic/eui';
+import React, { useEffect, useState } from 'react';
 
-import type { AgentPolicy } from '../../types';
+import type { AgentPolicy } from '../../../common/types/models/agent_policy';
 import { AgentPolicyPackageBadges } from '../agent_policy_package_badges';
 
 import { AdvancedAgentAuthenticationSettings } from './advanced_agent_authentication_settings';

@@ -4,37 +4,40 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import type { TypeOf } from '@kbn/config-schema';
-import type { RequestHandler, ResponseHeaders } from 'src/core/server';
 import bluebird from 'bluebird';
 
-import { fullAgentPolicyToYaml } from '../../../common/services';
-import { appContextService, agentPolicyService, packagePolicyService } from '../../services';
-import { getAgentsByKuery } from '../../services/agents';
-import { AGENT_SAVED_OBJECT_TYPE } from '../../constants';
+import type { ResponseHeaders } from '../../../../../../src/core/server/http/router/headers';
+import type { RequestHandler } from '../../../../../../src/core/server/http/router/router';
+import { AGENT_SAVED_OBJECT_TYPE } from '../../../common/constants/agent';
+import { FLEET_SYSTEM_PACKAGE } from '../../../common/constants/epm';
+import { fullAgentPolicyToYaml } from '../../../common/services/full_agent_policy_to_yaml';
+import type { AgentPolicy } from '../../../common/types/models/agent_policy';
+import type { NewPackagePolicy } from '../../../common/types/models/package_policy';
 import type {
-  GetAgentPoliciesRequestSchema,
-  GetOneAgentPolicyRequestSchema,
-  CreateAgentPolicyRequestSchema,
-  UpdateAgentPolicyRequestSchema,
-  CopyAgentPolicyRequestSchema,
-  DeleteAgentPolicyRequestSchema,
-  GetFullAgentPolicyRequestSchema,
-} from '../../types';
-import type { AgentPolicy, NewPackagePolicy } from '../../types';
-import { FLEET_SYSTEM_PACKAGE } from '../../../common';
-import type {
+  CopyAgentPolicyResponse,
+  CreateAgentPolicyResponse,
+  DeleteAgentPolicyResponse,
   GetAgentPoliciesResponse,
   GetAgentPoliciesResponseItem,
-  GetOneAgentPolicyResponse,
-  CreateAgentPolicyResponse,
-  UpdateAgentPolicyResponse,
-  CopyAgentPolicyResponse,
-  DeleteAgentPolicyResponse,
   GetFullAgentPolicyResponse,
-} from '../../../common';
-import { defaultIngestErrorHandler } from '../../errors';
+  GetOneAgentPolicyResponse,
+  UpdateAgentPolicyResponse,
+} from '../../../common/types/rest_spec/agent_policy';
+import { defaultIngestErrorHandler } from '../../errors/handlers';
+import { getAgentsByKuery } from '../../services/agents/crud';
+import { agentPolicyService } from '../../services/agent_policy';
+import { appContextService } from '../../services/app_context';
+import { packagePolicyService } from '../../services/package_policy';
+import type {
+  CopyAgentPolicyRequestSchema,
+  CreateAgentPolicyRequestSchema,
+  DeleteAgentPolicyRequestSchema,
+  GetAgentPoliciesRequestSchema,
+  GetFullAgentPolicyRequestSchema,
+  GetOneAgentPolicyRequestSchema,
+  UpdateAgentPolicyRequestSchema,
+} from '../../types/rest_spec/agent_policy';
 
 export const getAgentPoliciesHandler: RequestHandler<
   undefined,

@@ -7,10 +7,11 @@
 
 import React from 'react';
 import { Provider } from 'react-redux';
-
-import { AppContextProvider, AppDependencies } from './app_context';
+import type { AppDependencies } from './app_context';
+import { AppContextProvider } from './app_context';
 // @ts-ignore
 import { licenseManagementStore } from './store';
+
 
 interface Props {
   appDependencies: AppDependencies;

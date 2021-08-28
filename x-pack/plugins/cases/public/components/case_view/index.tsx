@@ -4,42 +4,39 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { useCallback, useEffect, useMemo, useState, useRef, MutableRefObject } from 'react';
-import styled from 'styled-components';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingContent, EuiLoadingSpinner } from '@elastic/eui';
-
-import {
-  CaseStatuses,
-  CaseAttributes,
-  CaseType,
-  Case,
-  CaseConnector,
-  Ecs,
-  CaseViewRefreshPropInterface,
-} from '../../../common';
-import { HeaderPage } from '../header_page';
-import { EditableTitle } from '../header_page/editable_title';
-import { TagList } from '../tag_list';
-import { UseGetCase, useGetCase } from '../../containers/use_get_case';
-import { UserActionTree } from '../user_action_tree';
-import { UserList } from '../user_list';
+import type { MutableRefObject } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import styled from 'styled-components';
+import type { CaseAttributes } from '../../../common/api/cases/case';
+import { CaseType } from '../../../common/api/cases/case';
+import { CaseStatuses } from '../../../common/api/cases/status';
+import type { CaseConnector } from '../../../common/api/connectors';
+import type { Case, CaseViewRefreshPropInterface, Ecs } from '../../../common/ui/types';
+import { useConnectors } from '../../containers/configure/use_connectors';
+import type { UseGetCase } from '../../containers/use_get_case';
+import { useGetCase } from '../../containers/use_get_case';
+import { useGetCaseUserActions } from '../../containers/use_get_case_user_actions';
 import { useUpdateCase } from '../../containers/use_update_case';
 import { getTypedPayload } from '../../containers/utils';
-import { ContentWrapper, WhitePageWrapper, HeaderWrapper } from '../wrappers';
 import { CaseActionBar } from '../case_action_bar';
-import { useGetCaseUserActions } from '../../containers/use_get_case_user_actions';
+import { getNoneConnector, normalizeActionConnector } from '../configure_cases/utils';
 import { EditConnector } from '../edit_connector';
-import { useConnectors } from '../../containers/configure/use_connectors';
-import { normalizeActionConnector, getNoneConnector } from '../configure_cases/utils';
-import { StatusActionButton } from '../status/button';
-import * as i18n from './translations';
-import { CasesTimelineIntegration, CasesTimelineIntegrationProvider } from '../timeline_context';
-import { useTimelineContext } from '../timeline_context/use_timeline_context';
-import { CasesNavigation } from '../links';
+import { HeaderPage } from '../header_page';
+import { EditableTitle } from '../header_page/editable_title';
+import type { CasesNavigation } from '../links';
 import { OwnerProvider } from '../owner_context';
+import { StatusActionButton } from '../status/button';
+import { TagList } from '../tag_list';
+import type { CasesTimelineIntegration } from '../timeline_context';
+import { CasesTimelineIntegrationProvider } from '../timeline_context';
+import { useTimelineContext } from '../timeline_context/use_timeline_context';
+import { UserActionTree } from '../user_action_tree';
+import { UserList } from '../user_list';
 import { getConnectorById } from '../utils';
+import { ContentWrapper, HeaderWrapper, WhitePageWrapper } from '../wrappers';
 import { DoesNotExist } from './does_not_exist';
+import * as i18n from './translations';
 
 export interface CaseViewComponentProps {
   allCasesNavigation: CasesNavigation;

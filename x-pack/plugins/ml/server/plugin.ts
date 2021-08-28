@@ -4,64 +4,59 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { i18n } from '@kbn/i18n';
-import {
-  CoreSetup,
-  CoreStart,
+import type { Logger } from '@kbn/logging';
+import type { CoreSetup, CoreStart } from '../../../../src/core/server';
+import type { CapabilitiesStart } from '../../../../src/core/server/capabilities/capabilities_service';
+import type { IClusterClient } from '../../../../src/core/server/elasticsearch/client/cluster_client';
+import { KibanaRequest } from '../../../../src/core/server/http/router/request';
+import type {
   Plugin,
-  KibanaRequest,
-  Logger,
   PluginInitializerContext,
-  CapabilitiesStart,
-  IClusterClient,
-  SavedObjectsServiceStart,
   SharedGlobalConfig,
-  UiSettingsServiceStart,
-} from 'kibana/server';
-import type { SecurityPluginSetup } from '../../security/server';
-import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
-import { PluginsSetup, PluginsStart, RouteInitialization } from './types';
-import { SpacesPluginSetup } from '../../spaces/server';
+} from '../../../../src/core/server/plugins/types';
+import type { SavedObjectsServiceStart } from '../../../../src/core/server/saved_objects/saved_objects_service';
+import type { UiSettingsServiceStart } from '../../../../src/core/server/ui_settings/types';
+import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils/default_app_categories';
+import type { FieldFormatsStart } from '../../../../src/plugins/field_formats/server/types';
+import type { SecurityPluginSetup } from '../../security/server/plugin';
+import type { SpacesPluginSetup } from '../../spaces/server/plugin';
+import { ML_ALERT_TYPES } from '../common/constants/alerts';
 import { PLUGIN_ID } from '../common/constants/app';
-import { MlCapabilities } from '../common/types/capabilities';
-
+import { MlLicense } from '../common/license/ml_license';
+import type { MlCapabilities } from '../common/types/capabilities';
+import { getPluginPrivileges } from '../common/types/capabilities';
+import { registerMlAlerts } from './lib/alerts/register_ml_alerts';
+import { setupCapabilitiesSwitcher } from './lib/capabilities/capabilities_switcher';
 import { initMlServerLog } from './lib/log';
-import { initSampleDataSets } from './lib/sample_data_sets';
-
+import { registerKibanaSettings } from './lib/register_settings';
+import { RouteGuard } from './lib/route_guard';
+import { initSampleDataSets } from './lib/sample_data_sets/sample_data_sets';
+import { alertingRoutes } from './routes/alerting';
 import { annotationRoutes } from './routes/annotations';
+import { jobRoutes } from './routes/anomaly_detectors';
 import { calendars } from './routes/calendars';
 import { dataFeedRoutes } from './routes/datafeeds';
 import { dataFrameAnalyticsRoutes } from './routes/data_frame_analytics';
-import { dataRecognizer } from './routes/modules';
 import { dataVisualizerRoutes } from './routes/data_visualizer';
 import { fieldsService } from './routes/fields_service';
 import { filtersRoutes } from './routes/filters';
 import { indicesRoutes } from './routes/indices';
 import { jobAuditMessagesRoutes } from './routes/job_audit_messages';
-import { jobRoutes } from './routes/anomaly_detectors';
 import { jobServiceRoutes } from './routes/job_service';
-import { savedObjectsRoutes } from './routes/saved_objects';
 import { jobValidationRoutes } from './routes/job_validation';
+import { dataRecognizer } from './routes/modules';
 import { resultsServiceRoutes } from './routes/results_service';
+import { savedObjectsRoutes } from './routes/saved_objects';
 import { systemRoutes } from './routes/system';
-import { MlLicense } from '../common/license';
-import { createSharedServices, SharedServices } from './shared_services';
-import { getPluginPrivileges } from '../common/types/capabilities';
-import { setupCapabilitiesSwitcher } from './lib/capabilities';
-import { registerKibanaSettings } from './lib/register_settings';
 import { trainedModelsRoutes } from './routes/trained_models';
-import {
-  setupSavedObjects,
-  jobSavedObjectsInitializationFactory,
-  savedObjectClientsFactory,
-} from './saved_objects';
-import { RouteGuard } from './lib/route_guard';
-import { registerMlAlerts } from './lib/alerts/register_ml_alerts';
-import { ML_ALERT_TYPES } from '../common/constants/alerts';
-import { alertingRoutes } from './routes/alerting';
-import { registerCollector } from './usage';
-import { FieldFormatsStart } from '../../../../src/plugins/field_formats/server';
+import { jobSavedObjectsInitializationFactory } from './saved_objects/initialization/initialization';
+import { setupSavedObjects } from './saved_objects/saved_objects';
+import { savedObjectClientsFactory } from './saved_objects/util';
+import type { SharedServices } from './shared_services/shared_services';
+import { createSharedServices } from './shared_services/shared_services';
+import type { PluginsSetup, PluginsStart, RouteInitialization } from './types';
+import { registerCollector } from './usage/collector';
 
 export type MlPluginSetup = SharedServices;
 export type MlPluginStart = void;

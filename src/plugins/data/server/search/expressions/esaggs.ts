@@ -16,7 +16,7 @@ import type {
   EsaggsStartDependencies,
 } from '../../../common/search/expressions/esaggs/esaggs_fn';
 import { getEsaggsMeta } from '../../../common/search/expressions/esaggs/esaggs_fn';
-import { handleEsaggsRequest } from '../../../common/search/expressions/esaggs/request_handler';
+import { handleRequest as handleEsaggsRequest } from '../../../common/search/expressions/esaggs/request_handler';
 import type { DataPluginStart, DataPluginStartDependencies } from '../../plugin';
 
 /**

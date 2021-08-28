@@ -4,8 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { Settings } from '../models';
+import type { Settings } from '../models/settings';
 
 export interface GetSettingsResponse {
   item: Settings;

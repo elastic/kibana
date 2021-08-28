@@ -4,24 +4,23 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { useEffect, FC, useMemo } from 'react';
-import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
-
-import { NavigateToPath } from '../../contexts/kibana';
-
+import type { FC } from 'react';
+import React, { useEffect, useMemo } from 'react';
+import useObservable from 'react-use/lib/useObservable';
 import { DEFAULT_REFRESH_INTERVAL_MS } from '../../../../common/constants/jobs_list';
+import type { NavigateToPath } from '../../contexts/kibana/use_navigate_to_path';
+import { useTimefilter } from '../../contexts/kibana/use_timefilter';
+import { MlAnnotationUpdatesContext } from '../../contexts/ml/ml_annotation_updates_context';
+import { JobsPage } from '../../jobs/jobs_list/jobs';
+import { AnnotationUpdatesService } from '../../services/annotations_service';
 import { mlTimefilterRefresh$ } from '../../services/timefilter_refresh_service';
 import { useUrlState } from '../../util/url_state';
-import { MlRoute, PageLoader, PageProps } from '../router';
-import { useResolver } from '../use_resolver';
-import { basicResolvers } from '../resolvers';
-import { JobsPage } from '../../jobs/jobs_list';
-import { useTimefilter } from '../../contexts/kibana';
 import { getBreadcrumbWithUrlForApp } from '../breadcrumbs';
-import { AnnotationUpdatesService } from '../../services/annotations_service';
-import { MlAnnotationUpdatesContext } from '../../contexts/ml/ml_annotation_updates_context';
+import { basicResolvers } from '../resolvers';
+import type { MlRoute, PageProps } from '../router';
+import { PageLoader } from '../router';
+import { useResolver } from '../use_resolver';
 
 export const jobListRouteFactory = (navigateToPath: NavigateToPath, basePath: string): MlRoute => ({
   path: '/jobs',

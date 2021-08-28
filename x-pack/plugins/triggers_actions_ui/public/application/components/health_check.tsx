@@ -5,22 +5,20 @@
  * 2.0.
  */
 
-import React from 'react';
-import { Option, none, some, fold } from 'fp-ts/lib/Option';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { FormattedMessage } from '@kbn/i18n/react';
-
-import { EuiLink, EuiSpacer } from '@elastic/eui';
+import { EuiCode, EuiEmptyPrompt, EuiLink, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-
-import { EuiEmptyPrompt, EuiCode } from '@elastic/eui';
-import { DocLinksStart } from 'kibana/public';
-import './health_check.scss';
-import { useHealthContext } from '../context/health_context';
-import { useKibana } from '../../common/lib/kibana';
-import { CenterJustifiedSpinner } from './center_justified_spinner';
+import { FormattedMessage } from '@kbn/i18n/react';
+import type { Option } from 'fp-ts/lib/Option';
+import { fold, none, some } from 'fp-ts/lib/Option';
+import { pipe } from 'fp-ts/lib/pipeable';
+import React from 'react';
+import type { DocLinksStart } from '../../../../../../src/core/public/doc_links/doc_links_service';
 import { triggersActionsUiHealth } from '../../common/lib/health_api';
-import { alertingFrameworkHealth } from '../lib/alert_api';
+import { useKibana } from '../../common/lib/kibana/kibana_react';
+import { useHealthContext } from '../context/health_context';
+import { alertingFrameworkHealth } from '../lib/alert_api/health';
+import { CenterJustifiedSpinner } from './center_justified_spinner';
+import './health_check.scss';
 
 interface Props {
   inFlyout?: boolean;

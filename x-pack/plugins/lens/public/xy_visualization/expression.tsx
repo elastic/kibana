@@ -5,60 +5,68 @@
  * 2.0.
  */
 
-import './expression.scss';
-
-import React, { useState, useEffect, useRef } from 'react';
-import ReactDOM from 'react-dom';
-import {
-  Chart,
-  Settings,
-  Axis,
-  LineSeries,
-  AreaSeries,
-  BarSeries,
-  Position,
+import type {
+  BrushEndListener,
+  ElementClickListener,
   GeometryValue,
+  LegendPositionConfig,
   XYChartSeriesIdentifier,
+} from '@elastic/charts';
+import {
+  AreaSeries,
+  Axis,
+  BarSeries,
+  Chart,
+  CurveType,
+  HorizontalAlignment,
+  LabelOverflowConstraint,
+  LayoutDirection,
+  LineSeries,
+  Position,
+  Settings,
   StackMode,
   VerticalAlignment,
-  HorizontalAlignment,
-  LayoutDirection,
-  ElementClickListener,
-  BrushEndListener,
-  CurveType,
-  LegendPositionConfig,
-  LabelOverflowConstraint,
 } from '@elastic/charts';
-import { I18nProvider } from '@kbn/i18n/react';
-import type {
-  ExpressionRenderDefinition,
-  Datatable,
-  DatatableRow,
-} from 'src/plugins/expressions/public';
-import { IconType } from '@elastic/eui';
+import type { IconType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { RenderMode } from 'src/plugins/expressions';
-import type { ILensInterpreterRenderHandlers, LensFilterEvent, LensBrushEvent } from '../types';
-import type { LensMultiTable, FormatFactory } from '../../common';
-import { layerTypes } from '../../common';
-import type { LayerArgs, SeriesType, XYChartProps } from '../../common/expressions';
-import { visualizationTypes } from './types';
-import { VisualizationContainer } from '../visualization_container';
-import { isHorizontalChart, getSeriesColor } from './state_helpers';
-import { search } from '../../../../../src/plugins/data/public';
-import {
+import { I18nProvider } from '@kbn/i18n/react';
+import React, { useEffect, useRef, useState } from 'react';
+import ReactDOM from 'react-dom';
+import type {
   ChartsPluginSetup,
   ChartsPluginStart,
+} from '../../../../../src/plugins/charts/public/types';
+import { useActiveCursor } from '../../../../../src/plugins/charts/public/services/active_cursor/use_active_cursor';
+import type {
   PaletteRegistry,
   SeriesLayer,
-  useActiveCursor,
-} from '../../../../../src/plugins/charts/public';
-import { EmptyPlaceholder } from '../shared_components';
-import { getFitOptions } from './fitting_functions';
-import { getAxesConfiguration, GroupsConfiguration, validateExtent } from './axes_configuration';
+} from '../../../../../src/plugins/charts/public/services/palettes/types';
+import { search } from '../../../../../src/plugins/data/public';
+import type {
+  ExpressionRenderDefinition,
+  RenderMode,
+} from '../../../../../src/plugins/expressions/common/expression_renderers/types';
+import type {
+  Datatable,
+  DatatableRow,
+} from '../../../../../src/plugins/expressions/common/expression_types/specs/datatable';
+import { layerTypes } from '../../common/constants';
+import type { LayerArgs } from '../../common/expressions/xy_chart/layer_config';
+import type { SeriesType } from '../../common/expressions/xy_chart/series_type';
+import type { XYChartProps } from '../../common/expressions/xy_chart/xy_chart';
+import type { FormatFactory, LensMultiTable } from '../../common/types';
+import { EmptyPlaceholder } from '../shared_components/empty_placeholder';
+import type { ILensInterpreterRenderHandlers, LensBrushEvent, LensFilterEvent } from '../types';
+import { VisualizationContainer } from '../visualization_container';
+import type { GroupsConfiguration } from './axes_configuration';
+import { getAxesConfiguration, validateExtent } from './axes_configuration';
 import { getColorAssignments } from './color_assignment';
-import { getXDomain, XyEndzones } from './x_domain';
+import './expression.scss';
+import { getFitOptions } from './fitting_functions';
 import { getLegendAction } from './get_legend_action';
+import { getSeriesColor, isHorizontalChart } from './state_helpers';
+import { visualizationTypes } from './types';
+import { getXDomain, XyEndzones } from './x_domain';
 
 declare global {
   interface Window {
@@ -75,15 +83,15 @@ type SeriesSpec = InferPropType<typeof LineSeries> &
   InferPropType<typeof AreaSeries>;
 
 export {
-  legendConfig,
-  yAxisConfig,
-  tickLabelsConfig,
-  gridlinesConfig,
-  axisTitlesVisibilityConfig,
   axisExtentConfig,
-  layerConfig,
-  xyChart,
+  axisTitlesVisibilityConfig,
+  gridlinesConfig,
   labelsOrientationConfig,
+  layerConfig,
+  legendConfig,
+  tickLabelsConfig,
+  xyChart,
+  yAxisConfig,
 } from '../../common/expressions';
 
 export type XYChartRenderProps = XYChartProps & {

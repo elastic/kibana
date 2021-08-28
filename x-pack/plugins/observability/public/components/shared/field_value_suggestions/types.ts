@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { PopoverAnchorPosition } from '@elastic/eui';
-import { Dispatch, SetStateAction } from 'react';
-import { ESFilter } from 'src/core/types/elasticsearch';
+import type { PopoverAnchorPosition } from '@elastic/eui';
+import type { Dispatch, SetStateAction } from 'react';
+import type { ESFilter } from '../../../../../../../src/core/types/elasticsearch';
 
 interface CommonProps {
   selectedValue?: string[];

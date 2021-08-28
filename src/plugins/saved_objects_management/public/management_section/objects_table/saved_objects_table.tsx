@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 import { EuiSpacer, Query } from '@elastic/eui';
+// @ts-expect-error
 import { saveAs } from '@elastic/filesaver';
 import { i18n } from '@kbn/i18n';
 import { debounce } from 'lodash';
@@ -41,7 +42,7 @@ import { Header } from './components/header';
 import { Relationships } from './components/relationships';
 import { Table } from './components/table';
 
-// @ts-expect-error
+
 
 interface ExportAllOption {
   id: string;

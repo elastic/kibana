@@ -11,83 +11,22 @@ import { Subject } from 'rxjs';
 import type {
   CoreSetup,
   CoreStart,
-  RequestHandlerContext,
   StartServicesAccessor,
 } from '../../../core/server';
 import { KibanaRequest } from '../../../core/server/http/router/request';
-import type { RouteMethod } from '../../../core/server/http/router/route';
-import type { RequestHandler } from '../../../core/server/http/router/router';
 import type { Plugin, PluginInitializerContext } from '../../../core/server/plugins/types';
 import type { BatchRequestData, BatchResponseItem, ErrorLike } from '../common/batch';
-import type { StreamingResponseHandler } from '../common/streaming/types';
 import { normalizeError } from '../common/util/normalize_error';
 import { removeLeadingSlash } from '../common/util/remove_leading_slash';
 import { createStream } from './streaming/create_stream';
-import type { StreamingRequestHandler } from './types';
 import { getUiSettings } from './ui_settings';
-
-// eslint-disable-next-line
-export interface BfetchServerSetupDependencies {}
-
-// eslint-disable-next-line
-export interface BfetchServerStartDependencies {}
-
-export interface BatchProcessingRouteParams<BatchItemData, BatchItemResult> {
-  onBatchItem: (data: BatchItemData) => Promise<BatchItemResult>;
-}
-
-/** @public */
-export interface BfetchServerSetup {
-  addBatchProcessingRoute: <BatchItemData extends object, BatchItemResult extends object>(
-    path: string,
-    handler: (request: KibanaRequest) => BatchProcessingRouteParams<BatchItemData, BatchItemResult>
-  ) => void;
-  addStreamingResponseRoute: <Payload, Response>(
-    path: string,
-    params: (request: KibanaRequest) => StreamingResponseHandler<Payload, Response>
-  ) => void;
-  /**
-   * Create a streaming request handler to be able to use an Observable to return chunked content to the client.
-   * This is meant to be used with the `fetchStreaming` API of the `bfetch` client-side plugin.
-   *
-   * @example
-   * ```ts
-   * setup({ http }: CoreStart, { bfetch }: SetupDeps) {
-   *   const router = http.createRouter();
-   *   router.post(
-   *   {
-   *     path: '/api/my-plugin/stream-endpoint,
-   *     validate: {
-   *       body: schema.object({
-   *         term: schema.string(),
-   *       }),
-   *     }
-   *   },
-   *   bfetch.createStreamingResponseHandler(async (ctx, req) => {
-   *     const { term } = req.body;
-   *     const results$ = await myApi.getResults$(term);
-   *     return results$;
-   *   })
-   * )}
-   *
-   * ```
-   *
-   * @param streamHandler
-   */
-  createStreamingRequestHandler: <
-    Response,
-    P,
-    Q,
-    B,
-    Context extends RequestHandlerContext = RequestHandlerContext,
-    Method extends RouteMethod = any
-  >(
-    streamHandler: StreamingRequestHandler<Response, P, Q, B, Method>
-  ) => RequestHandler<P, Q, B, Context, Method>;
-}
-
-// eslint-disable-next-line
-export interface BfetchServerStart {}
+import type {
+  BfetchServerSetup,
+  BfetchServerStart,
+  BfetchServerStartDependencies,
+  BfetchServerSetupDependencies,
+  BatchProcessingRouteParams
+} from './types';
 
 const streamingHeaders = {
   'Content-Type': 'application/x-ndjson',

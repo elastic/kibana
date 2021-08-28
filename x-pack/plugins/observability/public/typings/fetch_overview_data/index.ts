@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { ObservabilityApp } from '../../../typings/common';
-import { UXMetrics } from '../../components/shared/core_web_vitals';
-import { ApmIndicesConfig } from '../../../common/typings';
+import type { ApmIndicesConfig } from '../../../common/typings';
+import type { ObservabilityApp } from '../../../typings/common';
+import type { UXMetrics } from '../../components/shared/core_web_vitals';
 
 export interface Stat {
   type: 'number' | 'percent' | 'bytesPerSecond';

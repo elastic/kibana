@@ -4,14 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { FC, useContext, useEffect, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-
-import { BucketSpanInput } from './bucket_span_input';
+import type { FC } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { JobCreatorContext } from '../../../job_creator_context';
+import { BucketSpanEstimator } from '../bucket_span_estimator/bucket_span_estimator';
+import { BucketSpanInput } from './bucket_span_input';
 import { Description } from './description';
-import { BucketSpanEstimator } from '../bucket_span_estimator';
 
 interface Props {
   setIsValid: (proceed: boolean) => void;

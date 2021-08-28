@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { i18n } from '@kbn/i18n';
-import { createAction } from '../../../../../src/plugins/ui_actions/public';
-import { ViewMode } from '../../../../../src/plugins/embeddable/public';
-import { MlCoreSetup } from '../plugin';
-import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE, EditSwimlanePanelContext } from '../embeddables';
+import { ViewMode } from '../../../../../src/plugins/embeddable/common/types';
+import { createAction } from '../../../../../src/plugins/ui_actions/public/actions/create_action';
+import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '../embeddables/constants';
+import type { EditSwimlanePanelContext } from '../embeddables/types';
+import type { MlCoreSetup } from '../plugin';
 
 export const EDIT_SWIMLANE_PANEL_ACTION = 'editSwimlanePanelAction';
 

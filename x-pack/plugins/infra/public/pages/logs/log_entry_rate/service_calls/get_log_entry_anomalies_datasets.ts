@@ -4,14 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { HttpHandler } from 'src/core/public';
-import { decodeOrThrow } from '../../../../../common/runtime_types';
+import type { HttpHandler } from '../../../../../../../../src/core/public/http/types';
 import {
   getLogEntryAnomaliesDatasetsRequestPayloadRT,
   getLogEntryAnomaliesDatasetsSuccessReponsePayloadRT,
   LOG_ANALYSIS_GET_LOG_ENTRY_ANOMALIES_DATASETS_PATH,
-} from '../../../../../common/http_api/log_analysis';
+} from '../../../../../common/http_api/log_analysis/results/log_entry_anomalies_datasets';
+import { decodeOrThrow } from '../../../../../common/runtime_types';
 
 interface RequestArgs {
   sourceId: string;

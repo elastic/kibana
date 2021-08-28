@@ -4,17 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import React, { Fragment, useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import type { Space } from 'src/plugins/spaces_oss/common';
-import type { SpacesApiUi } from 'src/plugins/spaces_oss/public';
 
-import type { RoleKibanaPrivilege } from '../../../../../../../common/model';
+import type { Space } from '../../../../../../../../../../src/plugins/spaces_oss/common/types';
+import type { SpacesApiUi } from '../../../../../../../../../../src/plugins/spaces_oss/public/api';
+import type { RoleKibanaPrivilege } from '../../../../../../../common/model/role';
 import { isGlobalPrivilegeDefinition } from '../../../privilege_utils';
-import { SpacesPopoverList } from '../../../spaces_popover_list';
+import { SpacesPopoverList } from '../../../spaces_popover_list/spaces_popover_list';
 
 export interface SpaceColumnHeaderProps {
   spaces: Space[];

@@ -4,18 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import type { FunctionComponent } from 'react';
 import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import type { Space } from 'src/plugins/spaces_oss/common';
 
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
-import type { KibanaFeatureConfig } from '../../../../../features/public';
-import { SectionPanel } from '../section_panel';
+import { useKibana } from '../../../../../../../src/plugins/kibana_react/public/context/context';
+import type { Space } from '../../../../../../../src/plugins/spaces_oss/common/types';
+import type { KibanaFeatureConfig } from '../../../../../features/common/kibana_feature';
+import { SectionPanel } from '../section_panel/section_panel';
 import { FeatureTable } from './feature_table';
 
 interface Props {

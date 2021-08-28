@@ -4,11 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { estypes } from '@elastic/elasticsearch';
-
-import { CategoryId, Category } from '../../../../../common/types/categories';
-import type { MlClient } from '../../../../lib/ml_client';
+import { estypes } from '@elastic/elasticsearch';
+import type { Category, CategoryId } from '../../../../../common/types/categories';
+import type { MlClient } from '../../../../lib/ml_client/types';
 
 export function topCategoriesProvider(mlClient: MlClient) {
   async function getTotalCategories(jobId: string): Promise<number> {

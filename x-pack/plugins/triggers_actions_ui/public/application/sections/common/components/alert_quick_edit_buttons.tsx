@@ -4,19 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiButtonEmpty, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
-
-import { AlertTableItem } from '../../../../types';
-import {
-  withBulkAlertOperations,
-  ComponentOpts as BulkOperationsComponentOpts,
-} from './with_bulk_alert_api_operations';
+import React, { useState } from 'react';
+import { useKibana } from '../../../../common/lib/kibana/kibana_react';
+import type { AlertTableItem } from '../../../../types';
 import './alert_quick_edit_buttons.scss';
-import { useKibana } from '../../../../common/lib/kibana';
+import type { ComponentOpts as BulkOperationsComponentOpts } from './with_bulk_alert_api_operations';
+import { withBulkAlertOperations } from './with_bulk_alert_api_operations';
 
 export type ComponentOpts = {
   selectedItems: AlertTableItem[];

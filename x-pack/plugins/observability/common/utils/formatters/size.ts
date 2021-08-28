@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { memoize } from 'lodash';
+import type { Maybe } from '../../typings';
 import { asDecimal } from './formatters';
-import { Maybe } from '../../typings';
 
 function asKilobytes(value: number) {
   return `${asDecimal(value / 1000)} KB`;

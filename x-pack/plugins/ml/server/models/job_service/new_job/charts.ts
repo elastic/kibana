@@ -4,8 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { IScopedClusterClient } from 'kibana/server';
+import type { IScopedClusterClient } from '../../../../../../../src/core/server/elasticsearch/client/scoped_cluster_client';
 import { newJobLineChartProvider } from './line_chart';
 import { newJobPopulationChartProvider } from './population_chart';
 

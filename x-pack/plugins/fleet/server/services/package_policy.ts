@@ -4,64 +4,61 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { omit } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { getFlattenedObject } from '@kbn/std';
-import type { KibanaRequest } from 'src/core/server';
-import type {
-  ElasticsearchClient,
-  RequestHandlerContext,
-  SavedObjectsClientContract,
-} from 'src/core/server';
+import { omit } from 'lodash';
 import uuid from 'uuid';
 
-import type { AuthenticatedUser } from '../../../security/server';
+import type { RequestHandlerContext } from '../../../../../src/core/server';
+import type { ElasticsearchClient } from '../../../../../src/core/server/elasticsearch/client/types';
+import type { KibanaRequest } from '../../../../../src/core/server/http/router/request';
+import type { SavedObjectsClientContract } from '../../../../../src/core/server/saved_objects/types';
+import type { AuthenticatedUser } from '../../../security/common/model/authenticated_user';
+import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../common/constants/package_policy';
+import {
+  doesAgentPolicyAlreadyIncludePackage,
+  isPackageLimited,
+} from '../../common/services/limited_package';
 import {
   packageToPackagePolicy,
   packageToPackagePolicyInputs,
-  isPackageLimited,
-  doesAgentPolicyAlreadyIncludePackage,
+} from '../../common/services/package_to_package_policy';
+import {
   validatePackagePolicy,
   validationHasErrors,
-} from '../../common';
+} from '../../common/services/validate_package_policy';
+import type { PackageInfo, RegistryPackage } from '../../common/types/models/epm';
+import type {
+  DryRunPackagePolicy,
+  NewPackagePolicy,
+  NewPackagePolicyInput,
+  PackagePolicy,
+  PackagePolicyConfigRecordEntry,
+  PackagePolicyInput,
+  PackagePolicyInputStream,
+  PackagePolicySOAttributes,
+  UpdatePackagePolicy,
+} from '../../common/types/models/package_policy';
+import type { ListResult, ListWithKuery } from '../../common/types/rest_spec/common';
 import type {
   DeletePackagePoliciesResponse,
-  UpgradePackagePolicyResponse,
-  PackagePolicyInput,
-  NewPackagePolicyInput,
-  PackagePolicyConfigRecordEntry,
-  PackagePolicyInputStream,
-  PackageInfo,
-  ListWithKuery,
-  ListResult,
   UpgradePackagePolicyDryRunResponseItem,
-} from '../../common';
-import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../constants';
-import {
-  HostedAgentPolicyRestrictionRelatedError,
-  IngestManagerError,
-  ingestErrorToResponseOptions,
-} from '../errors';
-import { NewPackagePolicySchema, UpdatePackagePolicySchema } from '../types';
-import type {
-  NewPackagePolicy,
-  UpdatePackagePolicy,
-  PackagePolicy,
-  PackagePolicySOAttributes,
-  RegistryPackage,
-  DryRunPackagePolicy,
-} from '../types';
-import type { ExternalCallback } from '..';
+  UpgradePackagePolicyResponse,
+} from '../../common/types/rest_spec/package_policy';
+import { HostedAgentPolicyRestrictionRelatedError, IngestManagerError } from '../errors';
+import { ingestErrorToResponseOptions } from '../errors/handlers';
+import type { ExternalCallback } from '../types/extensions';
+import { NewPackagePolicySchema, UpdatePackagePolicySchema } from '../types/models/package_policy';
 
 import { agentPolicyService } from './agent_policy';
-import { outputService } from './output';
-import * as Registry from './epm/registry';
-import { getPackageInfo, getInstallation, ensureInstalledPackage } from './epm/packages';
-import { getAssetsData } from './epm/packages/assets';
+import { appContextService } from './app_context';
 import { compileTemplate } from './epm/agent/agent';
+import { getAssetsData } from './epm/packages/assets';
+import { getInstallation, getPackageInfo } from './epm/packages/get';
+import { ensureInstalledPackage } from './epm/packages/install';
+import * as Registry from './epm/registry';
+import { outputService } from './output';
 import { normalizeKuery } from './saved_object';
-import { appContextService } from '.';
 
 export type InputsOverride = Partial<NewPackagePolicyInput> & {
   vars?: Array<NewPackagePolicyInput['vars'] & { name: string }>;

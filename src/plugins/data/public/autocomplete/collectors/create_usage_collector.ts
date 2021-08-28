@@ -7,7 +7,7 @@
  */
 import { METRIC_TYPE } from '@kbn/analytics';
 import { first } from 'rxjs/operators';
-import type { StartServicesAccessor } from '../../../../../core/public';
+import type { StartServicesAccessor } from '../../../../../core/public/types';
 import type { UsageCollectionSetup } from '../../../../usage_collection/public/plugin';
 import type { AutocompleteUsageCollector } from './types';
 import { AUTOCOMPLETE_EVENT_TYPE } from './types';

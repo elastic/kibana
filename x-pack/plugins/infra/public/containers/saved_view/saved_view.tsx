@@ -5,24 +5,25 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import createContainer from 'constate';
-import * as rt from 'io-ts';
-import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { constant, identity } from 'fp-ts/lib/function';
-import { useCallback, useMemo, useState, useEffect, useContext } from 'react';
-import { i18n } from '@kbn/i18n';
-import { SimpleSavedObject, SavedObjectAttributes } from 'kibana/public';
-import { useUrlState } from '../../utils/use_url_state';
-import { useFindSavedObject } from '../../hooks/use_find_saved_object';
+import { pipe } from 'fp-ts/lib/pipeable';
+import * as rt from 'io-ts';
+import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { SimpleSavedObject } from '../../../../../../src/core/public/saved_objects/simple_saved_object';
+import type { SavedObjectAttributes } from '../../../../../../src/core/types/saved_objects';
+import { inventoryViewSavedObjectName } from '../../../common/saved_objects/inventory_view';
+import { metricsExplorerViewSavedObjectName } from '../../../common/saved_objects/metrics_explorer_view';
 import { useCreateSavedObject } from '../../hooks/use_create_saved_object';
 import { useDeleteSavedObject } from '../../hooks/use_delete_saved_object';
-import { Source } from '../metrics_source';
-import { metricsExplorerViewSavedObjectName } from '../../../common/saved_objects/metrics_explorer_view';
-import { inventoryViewSavedObjectName } from '../../../common/saved_objects/inventory_view';
-import { useSourceConfigurationFormState } from '../../pages/metrics/settings/source_configuration_form_state';
+import { useFindSavedObject } from '../../hooks/use_find_saved_object';
 import { useGetSavedObject } from '../../hooks/use_get_saved_object';
 import { useUpdateSavedObject } from '../../hooks/use_update_saved_object';
+import { useSourceConfigurationFormState } from '../../pages/metrics/settings/source_configuration_form_state';
+import { useUrlState } from '../../utils/use_url_state';
+import { Source } from '../metrics_source/source';
 
 export type SavedView<ViewState> = ViewState & {
   name: string;

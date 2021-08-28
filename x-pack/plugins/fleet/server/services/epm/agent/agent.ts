@@ -6,9 +6,9 @@
  */
 
 import Handlebars from 'handlebars';
-import { safeLoad, safeDump } from 'js-yaml';
+import { safeDump, safeLoad } from 'js-yaml';
 
-import type { PackagePolicyConfigRecord } from '../../../../common';
+import type { PackagePolicyConfigRecord } from '../../../../common/types/models/package_policy';
 
 const handlebars = Handlebars.create();
 

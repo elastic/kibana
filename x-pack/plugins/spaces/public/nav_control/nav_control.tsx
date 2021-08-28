@@ -4,14 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { EuiLoadingSpinner } from '@elastic/eui';
 import React, { lazy, Suspense } from 'react';
 import ReactDOM from 'react-dom';
 
-import type { CoreStart } from 'src/core/public';
-
-import type { SpacesManager } from '../spaces_manager';
+import type { CoreStart } from '../../../../../src/core/public/types';
+import type { SpacesManager } from '../spaces_manager/spaces_manager';
 
 export function initSpacesNavControl(spacesManager: SpacesManager, core: CoreStart) {
   const I18nContext = core.i18n.Context;

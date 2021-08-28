@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { PaletteRegistry } from 'src/plugins/charts/public';
-import type { Datatable } from 'src/plugins/expressions';
-import { applyPaletteParams, findMinMaxByColumnId } from '../shared_components';
+import type { PaletteRegistry } from '../../../../../src/plugins/charts/public/services/palettes/types';
+import type { Datatable } from '../../../../../src/plugins/expressions/common/expression_types/specs/datatable';
+import { applyPaletteParams, findMinMaxByColumnId } from '../shared_components/coloring/utils';
 import { DEFAULT_PALETTE_NAME } from './constants';
 import type { HeatmapVisualizationState } from './types';
 

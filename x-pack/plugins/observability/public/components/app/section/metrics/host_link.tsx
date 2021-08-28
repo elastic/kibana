@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { StringOrNull } from '../../../..';
+import type { StringOrNull } from '../../../../typings/fetch_overview_data';
 
 interface Props {
   name: StringOrNull;

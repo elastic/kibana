@@ -4,45 +4,44 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { estypes } from '@elastic/elasticsearch';
 import { Observable } from 'rxjs';
-import type { HttpStart } from 'kibana/public';
-import { HttpService } from '../http_service';
-
-import { annotations } from './annotations';
-import { dataFrameAnalytics } from './data_frame_analytics';
-import { filters } from './filters';
-import { resultsApiProvider } from './results';
-import { jobsApiProvider } from './jobs';
-import { fileDatavisualizer } from './datavisualizer';
-import { savedObjectsApiProvider } from './saved_objects';
+import type { HttpStart } from '../../../../../../../src/core/public/http/types';
+import type { CombinedJob } from '../../../../common/types/anomaly_detection_jobs/combined_job';
 import type {
-  MlServerDefaults,
-  MlServerLimits,
-  MlNodeCount,
-} from '../../../../common/types/ml_server_info';
-
-import type { MlCapabilitiesResponse } from '../../../../common/types/capabilities';
+  Datafeed,
+  IndicesOptions,
+} from '../../../../common/types/anomaly_detection_jobs/datafeed';
+import type {
+  AnalysisConfig,
+  Detector,
+  Job,
+} from '../../../../common/types/anomaly_detection_jobs/job';
+import type { JobStats } from '../../../../common/types/anomaly_detection_jobs/job_stats';
+import type { ModelSnapshot } from '../../../../common/types/anomaly_detection_jobs/model_snapshot';
 import type { Calendar, CalendarId, UpdateCalendar } from '../../../../common/types/calendars';
+import type { MlCapabilitiesResponse } from '../../../../common/types/capabilities';
+import type { RuntimeMappings } from '../../../../common/types/fields';
 import type {
   BucketSpanEstimatorData,
   ResetJobsResponse,
 } from '../../../../common/types/job_service';
 import type {
-  Job,
-  JobStats,
-  Datafeed,
-  CombinedJob,
-  Detector,
-  AnalysisConfig,
-  ModelSnapshot,
-  IndicesOptions,
-} from '../../../../common/types/anomaly_detection_jobs';
-import type { FieldHistogramRequestConfig } from '../../datavisualizer/index_based/common/request';
+  MlNodeCount,
+  MlServerDefaults,
+  MlServerLimits,
+} from '../../../../common/types/ml_server_info';
 import type { DataRecognizerConfigResponse, Module } from '../../../../common/types/modules';
+import type { FieldHistogramRequestConfig } from '../../datavisualizer/index_based/common/request';
 import { getHttp } from '../../util/dependency_cache';
-import type { RuntimeMappings } from '../../../../common/types/fields';
+import { HttpService } from '../http_service';
+import { annotations } from './annotations';
+import { fileDatavisualizer } from './datavisualizer';
+import { dataFrameAnalytics } from './data_frame_analytics';
+import { filters } from './filters';
+import { jobsApiProvider } from './jobs';
+import { resultsApiProvider } from './results';
+import { savedObjectsApiProvider } from './saved_objects';
 
 export interface MlInfoResponse {
   defaults: MlServerDefaults;

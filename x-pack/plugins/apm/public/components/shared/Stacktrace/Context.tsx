@@ -7,7 +7,7 @@
 import { size } from 'lodash';
 import { tint } from 'polished';
 import React from 'react';
-import { default as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { Light as SyntaxHighlighter } from 'react-syntax-highlighter';
 import javascript from 'react-syntax-highlighter/dist/cjs/languages/hljs/javascript';
 import python from 'react-syntax-highlighter/dist/cjs/languages/hljs/python';
 import ruby from 'react-syntax-highlighter/dist/cjs/languages/hljs/ruby';

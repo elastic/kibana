@@ -4,15 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { rangeQuery } from '../../../../../observability/server/utils/queries';
 import {
   TRACE_ID,
   TRANSACTION_ID,
 } from '../../../../common/elasticsearch_fieldnames';
-import { rangeQuery } from '../../../../../observability/server';
-import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import { ProcessorEvent } from '../../../../common/processor_event';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
+import type { Setup, SetupTimeRange } from '../../helpers/setup_request';
 
 export async function getTransaction({
   transactionId,

@@ -4,25 +4,24 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { IRouter } from 'src/core/server';
-
-import { PLUGIN_ID, PACKAGE_POLICY_API_ROUTES } from '../../constants';
+import type { IRouter } from '../../../../../../src/core/server/http/router/router';
+import { PLUGIN_ID } from '../../../common/constants/plugin';
+import { PACKAGE_POLICY_API_ROUTES } from '../../../common/constants/routes';
 import {
-  GetPackagePoliciesRequestSchema,
-  GetOnePackagePolicyRequestSchema,
   CreatePackagePolicyRequestSchema,
-  UpdatePackagePolicyRequestSchema,
   DeletePackagePoliciesRequestSchema,
+  GetOnePackagePolicyRequestSchema,
+  GetPackagePoliciesRequestSchema,
+  UpdatePackagePolicyRequestSchema,
   UpgradePackagePoliciesRequestSchema,
-} from '../../types';
+} from '../../types/rest_spec/package_policy';
 
 import {
-  getPackagePoliciesHandler,
-  getOnePackagePolicyHandler,
   createPackagePolicyHandler,
-  updatePackagePolicyHandler,
   deletePackagePolicyHandler,
+  getOnePackagePolicyHandler,
+  getPackagePoliciesHandler,
+  updatePackagePolicyHandler,
   upgradePackagePolicyHandler,
 } from './handlers';
 

@@ -4,42 +4,33 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiLink,
-  EuiCommentProps,
-  EuiToken,
-} from '@elastic/eui';
-import React, { useContext } from 'react';
+import type { EuiCommentProps } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiToken } from '@elastic/eui';
 import classNames from 'classnames';
+import React, { useContext } from 'react';
 import { ThemeContext } from 'styled-components';
-import {
-  CaseFullExternalService,
-  ActionConnector,
-  CaseStatuses,
-  CommentType,
-  Comment,
-  CommentRequestActionsType,
-} from '../../../common';
-import { CaseUserActions } from '../../containers/types';
-import { CaseServices } from '../../containers/use_get_case_user_actions';
+import type { CaseFullExternalService } from '../../../common/api/cases/case';
+import type { CommentRequestActionsType } from '../../../common/api/cases/comment';
+import { CommentType } from '../../../common/api/cases/comment';
+import { CaseStatuses } from '../../../common/api/cases/status';
+import type { ActionConnector } from '../../../common/api/connectors';
+import type { CaseUserActions, Comment } from '../../../common/ui/types';
+import type { CaseServices } from '../../containers/use_get_case_user_actions';
 import { parseString } from '../../containers/utils';
+import type { CasesNavigation } from '../links';
+import { MarkdownRenderer } from '../markdown_editor/renderer';
+import { statuses } from '../status/config';
+import { Status } from '../status/status';
 import { Tags } from '../tag_list/tags';
-import { UserActionUsernameWithAvatar } from './user_action_username_with_avatar';
-import { UserActionTimestamp } from './user_action_timestamp';
-import { UserActionCopyLink } from './user_action_copy_link';
-import { ContentWrapper } from './user_action_markdown';
-import { UserActionMoveToReference } from './user_action_move_to_reference';
-import { Status, statuses } from '../status';
-import { UserActionShowAlert } from './user_action_show_alert';
 import * as i18n from './translations';
 import { AlertCommentEvent } from './user_action_alert_comment_event';
-import { CasesNavigation } from '../links';
+import { UserActionCopyLink } from './user_action_copy_link';
 import { HostIsolationCommentEvent } from './user_action_host_isolation_comment_event';
-import { MarkdownRenderer } from '../markdown_editor';
+import { ContentWrapper } from './user_action_markdown';
+import { UserActionMoveToReference } from './user_action_move_to_reference';
+import { UserActionShowAlert } from './user_action_show_alert';
+import { UserActionTimestamp } from './user_action_timestamp';
+import { UserActionUsernameWithAvatar } from './user_action_username_with_avatar';
 
 interface LabelTitle {
   action: CaseUserActions;

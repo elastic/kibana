@@ -4,27 +4,24 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { useState } from 'react';
-import moment, { Duration } from 'moment';
-import { i18n } from '@kbn/i18n';
-import { EuiBasicTable, EuiHealth, EuiSpacer, EuiToolTip } from '@elastic/eui';
 // @ts-ignore
-import { RIGHT_ALIGNMENT, CENTER_ALIGNMENT } from '@elastic/eui/lib/services';
-import { padStart, chunk } from 'lodash';
-import { ActionGroup, AlertInstanceStatusValues } from '../../../../../../alerting/common';
-import {
-  Alert,
-  AlertInstanceSummary,
+import { EuiBasicTable, EuiHealth, EuiSpacer, EuiToolTip } from '@elastic/eui';
+import { RIGHT_ALIGNMENT } from '@elastic/eui/lib/services';
+import { i18n } from '@kbn/i18n';
+import { chunk, padStart } from 'lodash';
+import type { Duration } from 'moment';
+import moment from 'moment';
+import React, { useState } from 'react';
+import type {
   AlertInstanceStatus,
-  AlertType,
-  Pagination,
-} from '../../../../types';
-import {
-  ComponentOpts as AlertApis,
-  withBulkAlertOperations,
-} from '../../common/components/with_bulk_alert_api_operations';
+  AlertInstanceStatusValues,
+  AlertInstanceSummary,
+} from '../../../../../../alerting/common/alert_instance_summary';
+import type { ActionGroup } from '../../../../../../alerting/common/alert_type';
+import type { Alert, AlertType, Pagination } from '../../../../types';
 import { DEFAULT_SEARCH_PAGE_SIZE } from '../../../constants';
+import type { ComponentOpts as AlertApis } from '../../common/components/with_bulk_alert_api_operations';
+import { withBulkAlertOperations } from '../../common/components/with_bulk_alert_api_operations';
 import './alert_instances.scss';
 import { RuleMutedSwitch } from './rule_muted_switch';
 

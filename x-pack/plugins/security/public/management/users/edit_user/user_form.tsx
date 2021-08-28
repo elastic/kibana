@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -26,15 +25,16 @@ import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { useKibana } from '../../../../../../../src/plugins/kibana_react/public/context/context';
 import { MAX_NAME_LENGTH, NAME_REGEX } from '../../../../common/constants';
-import type { Role, User } from '../../../../common/model';
-import { isRoleDeprecated } from '../../../../common/model';
+import type { Role } from '../../../../common/model/role';
+import { isRoleDeprecated } from '../../../../common/model/role';
+import type { User } from '../../../../common/model/user';
 import { DocLink } from '../../../components/doc_link';
 import type { ValidationErrors } from '../../../components/use_form';
 import { useForm } from '../../../components/use_form';
-import { RoleComboBox } from '../../role_combo_box';
-import { RolesAPIClient } from '../../roles';
+import { RoleComboBox } from '../../role_combo_box/role_combo_box';
+import { RolesAPIClient } from '../../roles/roles_api_client';
 import { UserAPIClient } from '../user_api_client';
 
 export const THROTTLE_USERS_WAIT = 10000;

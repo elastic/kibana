@@ -4,17 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { PluginInitializerContext } from 'kibana/public';
-import { DataEnhancedPlugin, DataEnhancedSetup, DataEnhancedStart } from './plugin';
-import { ConfigSchema } from '../config';
+import type { PluginInitializerContext } from '../../../../src/core/public/plugins/plugin_context';
+import type { ConfigSchema } from '../config';
+import type { DataEnhancedSetup, DataEnhancedStart } from './plugin';
+import { DataEnhancedPlugin } from './plugin';
 
 export const plugin = (initializerContext: PluginInitializerContext<ConfigSchema>) =>
   new DataEnhancedPlugin(initializerContext);
-
-export { DataEnhancedSetup, DataEnhancedStart };
 
 export {
   ENHANCED_ES_SEARCH_STRATEGY,
   EQL_SEARCH_STRATEGY,
 } from '../../../../src/plugins/data/common';
+export { DataEnhancedSetup, DataEnhancedStart };

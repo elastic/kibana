@@ -4,16 +4,26 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { schema, TypeOf } from '@kbn/config-schema';
-import { PluginInitializerContext } from 'src/core/server';
-import { ObservabilityPlugin, ObservabilityPluginSetup } from './plugin';
-import { createOrUpdateIndex, Mappings } from './utils/create_or_update_index';
-import { ScopedAnnotationsClient } from './lib/annotations/bootstrap_annotations';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
+import type { PluginInitializerContext } from '../../../../src/core/server/plugins/types';
+import type { ScopedAnnotationsClient } from './lib/annotations/bootstrap_annotations';
+import type { ObservabilityPluginSetup } from './plugin';
+import { ObservabilityPlugin } from './plugin';
+import type { Mappings } from './utils/create_or_update_index';
+import { createOrUpdateIndex } from './utils/create_or_update_index';
 import { unwrapEsResponse, WrappedElasticsearchClientError } from './utils/unwrap_es_response';
-export { rangeQuery, kqlQuery } from './utils/queries';
 
 export * from './types';
+export { kqlQuery, rangeQuery } from './utils/queries';
+export {
+  createOrUpdateIndex,
+  Mappings,
+  ObservabilityPluginSetup,
+  ScopedAnnotationsClient,
+  unwrapEsResponse,
+  WrappedElasticsearchClientError,
+};
 
 export const config = {
   exposeToBrowser: {
@@ -36,12 +46,3 @@ export type ObservabilityConfig = TypeOf<typeof config.schema>;
 
 export const plugin = (initContext: PluginInitializerContext) =>
   new ObservabilityPlugin(initContext);
-
-export {
-  createOrUpdateIndex,
-  Mappings,
-  ObservabilityPluginSetup,
-  ScopedAnnotationsClient,
-  unwrapEsResponse,
-  WrappedElasticsearchClientError,
-};

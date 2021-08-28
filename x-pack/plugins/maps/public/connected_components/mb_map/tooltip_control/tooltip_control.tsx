@@ -5,38 +5,32 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
+import type { MapboxGeoJSONFeature } from '@kbn/mapbox-gl';
+import { LngLat, Map as MbMap, MapMouseEvent, Point as MbPoint } from '@kbn/mapbox-gl';
+import type { Geometry } from 'geojson';
 import _ from 'lodash';
 import React, { Component } from 'react';
-import { i18n } from '@kbn/i18n';
-import {
-  LngLat,
-  Map as MbMap,
-  MapboxGeoJSONFeature,
-  MapMouseEvent,
-  Point as MbPoint,
-} from '@kbn/mapbox-gl';
 import uuid from 'uuid/v4';
-import { Geometry } from 'geojson';
-import { Filter } from 'src/plugins/data/public';
-import { ActionExecutionContext, Action } from 'src/plugins/ui_actions/public';
-import {
-  FEATURE_ID_PROPERTY_NAME,
-  GEO_JSON_TYPE,
-  LON_INDEX,
-  RawValue,
-} from '../../../../common/constants';
-import {
-  GEOMETRY_FILTER_ACTION,
+import type { Filter } from '../../../../../../../src/plugins/data/common/es_query';
+import type {
+  Action,
+  ActionExecutionContext,
+} from '../../../../../../../src/plugins/ui_actions/public/actions/action';
+import type { RawValue } from '../../../../common/constants';
+import { FEATURE_ID_PROPERTY_NAME, GEO_JSON_TYPE, LON_INDEX } from '../../../../common/constants';
+import type {
   TooltipFeature,
   TooltipFeatureAction,
   TooltipState,
-} from '../../../../common/descriptor_types';
-import { TooltipPopover } from './tooltip_popover';
-import { FeatureGeometryFilterForm } from './features_tooltip';
+} from '../../../../common/descriptor_types/map_descriptor';
+import { GEOMETRY_FILTER_ACTION } from '../../../../common/descriptor_types/map_descriptor';
+import type { ILayer } from '../../../classes/layers/layer';
+import type { IVectorLayer } from '../../../classes/layers/vector_layer/vector_layer';
+import type { RenderToolTipContent } from '../../../classes/tooltips/tooltip_property';
 import { EXCLUDE_TOO_MANY_FEATURES_BOX } from '../../../classes/util/mb_filter_expressions';
-import { ILayer } from '../../../classes/layers/layer';
-import { IVectorLayer } from '../../../classes/layers/vector_layer';
-import { RenderToolTipContent } from '../../../classes/tooltips/tooltip_property';
+import { FeatureGeometryFilterForm } from './features_tooltip/feature_geometry_filter_form';
+import { TooltipPopover } from './tooltip_popover';
 
 function justifyAnchorLocation(
   mbLngLat: LngLat,

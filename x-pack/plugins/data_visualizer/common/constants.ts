@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { KBN_FIELD_TYPES } from '../../../../src/plugins/data/common';
 
 export const UI_SETTING_MAX_FILE_SIZE = 'fileUpload:maxFileSize';

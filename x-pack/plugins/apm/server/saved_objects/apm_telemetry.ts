@@ -4,8 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { SavedObjectsType } from 'src/core/server';
+import type { SavedObjectsType } from '../../../../../src/core/server/saved_objects/types';
 import { APM_TELEMETRY_SAVED_OBJECT_ID } from '../../common/apm_saved_object_constants';
 
 export const apmTelemetry: SavedObjectsType = {

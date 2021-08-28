@@ -4,27 +4,37 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { debounce } from 'lodash';
-import React, { useState, useCallback, useMemo, useEffect } from 'react';
-import { EuiForm, EuiDescribedFormGroup, EuiFormRow } from '@elastic/eui';
-import { EuiText, EuiSpacer } from '@elastic/eui';
-import { EuiFlyoutHeader, EuiTitle, EuiFlyoutBody } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiFlyoutFooter } from '@elastic/eui';
-import { EuiButton } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
-import moment, { Moment } from 'moment';
-import { EuiComboBox } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiComboBox,
+  EuiDescribedFormGroup,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiFlyoutHeader,
+  EuiForm,
+  EuiFormRow,
+  EuiLoadingSpinner,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EuiLoadingSpinner } from '@elastic/eui';
-import { useSourceViaHttp } from '../../../../../../containers/metrics_source/use_source_via_http';
-import { useMetricK8sModuleContext } from '../../../../../../containers/ml/modules/metrics_k8s/module';
-import { useMetricHostsModuleContext } from '../../../../../../containers/ml/modules/metrics_hosts/module';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { debounce } from 'lodash';
+import type { Moment } from 'moment';
+import moment from 'moment';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useUiTracker } from '../../../../../../../../observability/public/hooks/use_track_metric';
 import { FixedDatePicker } from '../../../../../../components/fixed_datepicker';
+import { useSourceViaHttp } from '../../../../../../containers/metrics_source/use_source_via_http';
+import { useMetricHostsModuleContext } from '../../../../../../containers/ml/modules/metrics_hosts/module';
+import { useMetricK8sModuleContext } from '../../../../../../containers/ml/modules/metrics_k8s/module';
 import { DEFAULT_K8S_PARTITION_FIELD } from '../../../../../../containers/ml/modules/metrics_k8s/module_descriptor';
-import { MetricsExplorerKueryBar } from '../../../../metrics_explorer/components/kuery_bar';
 import { convertKueryToElasticSearchQuery } from '../../../../../../utils/kuery';
-import { useUiTracker } from '../../../../../../../../observability/public';
+import { MetricsExplorerKueryBar } from '../../../../metrics_explorer/components/kuery_bar';
 
 interface Props {
   jobType: 'hosts' | 'kubernetes';

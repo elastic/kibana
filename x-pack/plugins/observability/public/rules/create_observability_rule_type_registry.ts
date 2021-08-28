@@ -4,14 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import {
+import type { AlertTypeParams } from '../../../alerting/common/alert';
+import type { ParsedTechnicalFields } from '../../../rule_registry/common/parse_technical_fields';
+import type {
   AlertTypeModel,
-  AlertTypeParams,
   RuleTypeRegistryContract,
-} from '../../../triggers_actions_ui/public';
-import { ParsedTechnicalFields } from '../../../rule_registry/common/parse_technical_fields';
-import { AsDuration, AsPercent } from '../../common/utils/formatters';
+} from '../../../triggers_actions_ui/public/types';
+import type { AsDuration } from '../../common/utils/formatters/duration';
+import type { AsPercent } from '../../common/utils/formatters/formatters';
 
 export type ObservabilityRuleTypeFormatter = (options: {
   fields: ParsedTechnicalFields & Record<string, any>;

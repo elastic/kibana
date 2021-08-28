@@ -4,17 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { useMemo } from 'react';
+import { EuiBadge, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiSpacer, EuiText, EuiFlexGroup, EuiFlexItem, EuiBadge, EuiCallOut } from '@elastic/eui';
+import React, { useMemo } from 'react';
 
-import { FLEET_SERVER_PACKAGE } from '../../common/constants';
+import { FLEET_SERVER_PACKAGE } from '../../common/constants/epm';
+import type { PackagePolicy, PackagePolicyPackage } from '../../common/types/models/package_policy';
+import { useGetOneAgentPolicy } from '../hooks/use_request/agent_policy';
 
-import type { PackagePolicy, PackagePolicyPackage } from '../types';
-import { useGetOneAgentPolicy } from '../hooks';
-import { PackageIcon } from '../components';
+import { PackageIcon } from './package_icon';
 
 interface Props {
   agentPolicyId: string;

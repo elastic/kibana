@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import type { History } from 'history';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import type { CoreStart } from '../../../../../../../src/core/public';
+import type { CoreStart } from '../../../../../../../src/core/public/types';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { getAPMHref } from '../../shared/Links/apm/APMLink';
 import { ApmMainTemplate } from './apm_main_template';

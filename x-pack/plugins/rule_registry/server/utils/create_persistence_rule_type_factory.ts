@@ -4,9 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { ALERT_ID } from '@kbn/rule-data-utils';
-import { CreatePersistenceRuleTypeFactory } from './persistence_types';
+import type { CreatePersistenceRuleTypeFactory } from './persistence_types';
 
 export const createPersistenceRuleTypeFactory: CreatePersistenceRuleTypeFactory = ({
   logger,

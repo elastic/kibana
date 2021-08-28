@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { FIELD_ORIGIN } from '../../../common/constants';
-import { IField, AbstractField } from './field';
-import { IVectorSource } from '../sources/vector_source';
+import type { IVectorSource } from '../sources/vector_source/vector_source';
+import type { IField } from './field';
+import { AbstractField } from './field';
 
 export class InlineField<T extends IVectorSource> extends AbstractField implements IField {
   private readonly _source: T;

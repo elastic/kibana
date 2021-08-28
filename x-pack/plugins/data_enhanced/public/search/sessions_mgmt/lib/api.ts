@@ -4,25 +4,24 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { i18n } from '@kbn/i18n';
-import type { ApplicationStart, NotificationsStart, SavedObject } from 'kibana/public';
 import moment from 'moment';
 import { from, race, timer } from 'rxjs';
 import { mapTo, tap } from 'rxjs/operators';
-import type { SharePluginStart } from 'src/plugins/share/public';
-import {
-  ISessionsClient,
-  SearchUsageCollector,
-} from '../../../../../../../src/plugins/data/public';
-import { SearchSessionStatus } from '../../../../../../../src/plugins/data/common';
-import { ACTION } from '../components/actions';
-import {
+import type { SessionsConfigSchema } from '..';
+import type { ApplicationStart } from '../../../../../../../src/core/public/application/types';
+import type { NotificationsStart } from '../../../../../../../src/core/public/notifications/notifications_service';
+import type { SavedObject } from '../../../../../../../src/core/types/saved_objects';
+import { SearchSessionStatus } from '../../../../../../../src/plugins/data/common/search/session/status';
+import type { SearchUsageCollector } from '../../../../../../../src/plugins/data/public/search/collectors/types';
+import type { ISessionsClient } from '../../../../../../../src/plugins/data/public/search/session/sessions_client';
+import type { SharePluginStart } from '../../../../../../../src/plugins/share/public/plugin';
+import { ACTION } from '../components/actions/types';
+import type {
   PersistedSearchSessionSavedObjectAttributes,
   UISearchSessionState,
   UISession,
 } from '../types';
-import { SessionsConfigSchema } from '..';
 
 type UrlGeneratorsStart = SharePluginStart['urlGenerators'];
 

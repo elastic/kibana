@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import './selectable_spaces_control.scss';
-
 import type { EuiSelectableOption } from '@elastic/eui';
 import {
   EuiBadge,
@@ -24,14 +22,18 @@ import React, { lazy, Suspense } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { SPACE_SEARCH_COUNT_THRESHOLD } from '../../../common';
-import { ALL_SPACES_ID, UNKNOWN_SPACE } from '../../../common/constants';
-import { DocumentationLinksService } from '../../lib';
-import { getSpaceAvatarComponent } from '../../space_avatar';
-import { useSpaces } from '../../spaces_context';
+import {
+  ALL_SPACES_ID,
+  SPACE_SEARCH_COUNT_THRESHOLD,
+  UNKNOWN_SPACE,
+} from '../../../common/constants';
+import { DocumentationLinksService } from '../../lib/documentation_links';
+import { getSpaceAvatarComponent } from '../../space_avatar/space_avatar';
+import { useSpaces } from '../../spaces_context/context';
 import type { ShareToSpaceTarget } from '../../types';
 import type { ShareOptions } from '../types';
 import { NoSpacesAvailable } from './no_spaces_available';
+import './selectable_spaces_control.scss';
 
 // No need to wrap LazySpaceAvatar in an error boundary, because it is one of the first chunks loaded when opening Kibana.
 const LazySpaceAvatar = lazy(() =>

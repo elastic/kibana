@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { SavedObjectsTaggingApiUi } from '../../../../../src/plugins/saved_objects_tagging_oss/public';
-import { ITagsCache } from '../services';
+import type {
+  ITagsCache,
+  SavedObjectsTaggingApiUi,
+} from '../../../../../src/plugins/saved_objects_tagging_oss/public/api';
 import { convertTagNameToId } from '../utils';
 
 export interface BuildConvertNameToReferenceOptions {

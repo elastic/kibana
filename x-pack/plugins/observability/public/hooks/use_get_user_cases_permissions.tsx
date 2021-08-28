@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { useEffect, useState } from 'react';
-import { useKibana } from '../utils/kibana_react';
 import { casesFeatureId } from '../../common';
+import { useKibana } from '../utils/kibana_react';
 
 export interface UseGetUserCasesPermissions {
   crud: boolean;

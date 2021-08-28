@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { useState } from 'react';
 import createContainer from 'constate';
-import { LogEntry } from '../../../../common/log_entry';
+import { useState } from 'react';
+import type { LogEntry } from '../../../../common/log_entry/log_entry';
 
 interface ViewLogInContextProps {
   sourceId: string;

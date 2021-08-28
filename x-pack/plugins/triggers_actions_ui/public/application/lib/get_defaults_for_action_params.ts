@@ -4,8 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { AlertActionParam } from '../../../../alerting/common';
+import type { AlertActionParam } from '../../../../alerting/common/alert';
 import { EventActionOptions } from '../components/builtin_action_types/types';
 import { AlertProvidedActionVariables } from './action_variables';
 

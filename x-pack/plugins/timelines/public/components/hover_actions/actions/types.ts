@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { EuiButtonEmpty, EuiButtonIcon, EuiButtonIconPropsForButton } from '@elastic/eui';
-import { FilterManager } from '../../../../../../../src/plugins/data/public';
+import type { EuiButtonIconPropsForButton } from '@elastic/eui';
+import { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
+import { FilterManager } from '../../../../../../../src/plugins/data/public/query/filter_manager/filter_manager';
 
 export interface FilterValueFnArgs {
   /** `Component` is only used with `EuiDataGrid`; the grid keeps a reference to `Component` for show / hide functionality */

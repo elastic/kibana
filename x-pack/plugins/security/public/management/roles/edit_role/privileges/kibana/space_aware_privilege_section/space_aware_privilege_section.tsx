@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import {
   EuiButton,
   EuiCallOut,
@@ -19,16 +18,16 @@ import React, { Component, Fragment } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import type { Capabilities } from 'src/core/public';
-import type { SpacesApiUi } from 'src/plugins/spaces_oss/public';
 
-import type { Space } from '../../../../../../../../spaces/public';
-import type { Role } from '../../../../../../../common/model';
-import { isRoleReserved } from '../../../../../../../common/model';
-import type { KibanaPrivileges } from '../../../../model';
+import type { Capabilities } from '../../../../../../../../../../src/core/types/capabilities';
+import type { Space } from '../../../../../../../../../../src/plugins/spaces_oss/common/types';
+import type { SpacesApiUi } from '../../../../../../../../../../src/plugins/spaces_oss/public/api';
+import type { Role } from '../../../../../../../common/model/role';
+import { isRoleReserved } from '../../../../../../../common/model/role';
+import type { KibanaPrivileges } from '../../../../model/kibana_privileges';
 import type { RoleValidator } from '../../../validate_role';
-import { PrivilegeFormCalculator } from '../privilege_form_calculator';
-import { PrivilegeSummary } from '../privilege_summary';
+import { PrivilegeFormCalculator } from '../privilege_form_calculator/privilege_form_calculator';
+import { PrivilegeSummary } from '../privilege_summary/privilege_summary';
 import { PrivilegeSpaceForm } from './privilege_space_form';
 import { PrivilegeSpaceTable } from './privilege_space_table';
 

@@ -4,43 +4,43 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { useCallback, useState } from 'react';
-import { i18n } from '@kbn/i18n';
 import {
+  EuiButtonEmpty,
+  EuiButtonGroup,
+  EuiColorPaletteDisplay,
+  EuiComboBox,
+  EuiFieldText,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiFormRow,
   EuiSwitch,
-  EuiButtonGroup,
   htmlIdGenerator,
-  EuiColorPaletteDisplay,
-  EuiFlexItem,
-  EuiFlexGroup,
-  EuiButtonEmpty,
-  EuiFieldText,
-  EuiComboBox,
 } from '@elastic/eui';
-import { PaletteRegistry } from 'src/plugins/charts/public';
-import { VisualizationDimensionEditorProps } from '../../types';
-import { DatatableVisualizationState } from '../visualization';
+import { i18n } from '@kbn/i18n';
+import React, { useCallback, useState } from 'react';
+import type { PaletteRegistry } from '../../../../../../src/plugins/charts/public/services/palettes/types';
+import type { ColumnState } from '../../../common/expressions/datatable/datatable_column';
 import {
-  CustomizablePalette,
-  applyPaletteParams,
-  defaultPaletteParams,
-  FIXED_PROGRESSION,
-  getStopsForFixedMode,
-  useDebouncedValue,
-  PalettePanelContainer,
-  findMinMaxByColumnId,
-} from '../../shared_components/';
-import type { ColumnState } from '../../../common/expressions';
-import {
-  isNumericFieldForDatatable,
   getDefaultSummaryLabel,
   getFinalSummaryConfiguration,
   getSummaryRowOptions,
-  getOriginalId,
-} from '../../../common/expressions';
-
+} from '../../../common/expressions/datatable/summary';
+import { getOriginalId } from '../../../common/expressions/datatable/transpose_helpers';
+import { isNumericFieldForDatatable } from '../../../common/expressions/datatable/utils';
+import {
+  defaultPaletteParams,
+  FIXED_PROGRESSION,
+} from '../../shared_components/coloring/constants';
+import { CustomizablePalette } from '../../shared_components/coloring/palette_configuration';
+import { PalettePanelContainer } from '../../shared_components/coloring/palette_panel_container';
+import {
+  applyPaletteParams,
+  findMinMaxByColumnId,
+  getStopsForFixedMode,
+} from '../../shared_components/coloring/utils';
+import { useDebouncedValue } from '../../shared_components/debounced_value';
+import type { VisualizationDimensionEditorProps } from '../../types';
+import type { DatatableVisualizationState } from '../visualization';
 import './dimension_editor.scss';
 
 const idPrefix = htmlIdGenerator()();

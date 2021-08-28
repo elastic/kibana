@@ -4,20 +4,22 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import React, { useCallback } from 'react';
-import { useUiTracker } from '../../../../../observability/public';
+import { useUiTracker } from '../../../../../observability/public/hooks/use_track_metric';
+import type {
+  LogIndexPatternReference,
+  LogIndexReference,
+} from '../../../../common/log_sources/log_source_configuration';
 import {
   logIndexNameReferenceRT,
-  LogIndexPatternReference,
   logIndexPatternReferenceRT,
-  LogIndexReference,
-} from '../../../../common/log_sources';
+} from '../../../../common/log_sources/log_source_configuration';
 import { FieldsConfigurationPanel } from './fields_configuration_panel';
-import { FormElement, isFormElementForType } from './form_elements';
+import type { FormElement } from './form_elements';
+import { isFormElementForType } from './form_elements';
 import { IndexNamesConfigurationPanel } from './index_names_configuration_panel';
 import { IndexPatternConfigurationPanel } from './index_pattern_configuration_panel';
-import { FormValidationError } from './validation_errors';
+import type { FormValidationError } from './validation_errors';
 
 export const IndicesConfigurationPanel = React.memo<{
   isLoading: boolean;

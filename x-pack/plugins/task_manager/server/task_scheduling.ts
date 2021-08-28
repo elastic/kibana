@@ -4,45 +4,39 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { filter, take } from 'rxjs/operators';
-
+import type { Logger } from '@kbn/logging';
+import agent from 'elastic-apm-node';
+import type { Option } from 'fp-ts/lib/Option';
+import { getOrElse, isSome, map as mapOptional } from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { Option, map as mapOptional, getOrElse, isSome } from 'fp-ts/lib/Option';
-
-import uuid from 'uuid';
 import { pick } from 'lodash';
 import { merge, Subject } from 'rxjs';
-import agent from 'elastic-apm-node';
-import { Logger } from '../../../../src/core/server';
-import { asOk, either, map, mapErr, promiseResult, isErr } from './lib/result_type';
+import { filter, take } from 'rxjs/operators';
+import uuid from 'uuid';
+import { EphemeralTaskLifecycle } from './ephemeral_task_lifecycle';
+import { ensureDeprecatedFieldsAreCorrected } from './lib/correct_deprecated_fields';
+import type { Middleware } from './lib/middleware';
+import { asOk, either, isErr, map, mapErr, promiseResult } from './lib/result_type';
+import type { TaskLifecycleEvent } from './polling_lifecycle';
+import { TaskPollingLifecycle } from './polling_lifecycle';
+import type {
+  ConcreteTaskInstance,
+  EphemeralTask,
+  TaskInstanceWithDeprecatedFields,
+  TaskInstanceWithId,
+  TaskLifecycle,
+} from './task';
+import { TaskLifecycleResult, TaskStatus } from './task';
+import type { ClaimTaskErr, ErroredTask, ErrResultOf, OkResultOf, RanTask } from './task_events';
 import {
-  isTaskRunEvent,
   isTaskClaimEvent,
+  isTaskRunEvent,
   isTaskRunRequestEvent,
-  RanTask,
-  ErroredTask,
-  OkResultOf,
-  ErrResultOf,
-  ClaimTaskErr,
   TaskClaimErrorType,
 } from './task_events';
-import { Middleware } from './lib/middleware';
-import {
-  ConcreteTaskInstance,
-  TaskInstanceWithId,
-  TaskInstanceWithDeprecatedFields,
-  TaskLifecycle,
-  TaskLifecycleResult,
-  TaskStatus,
-  EphemeralTask,
-} from './task';
+import { EphemeralTaskRejectedDueToCapacityError } from './task_running/errors';
 import { TaskStore } from './task_store';
-import { ensureDeprecatedFieldsAreCorrected } from './lib/correct_deprecated_fields';
-import { TaskLifecycleEvent, TaskPollingLifecycle } from './polling_lifecycle';
 import { TaskTypeDictionary } from './task_type_dictionary';
-import { EphemeralTaskLifecycle } from './ephemeral_task_lifecycle';
-import { EphemeralTaskRejectedDueToCapacityError } from './task_running';
 
 const VERSION_CONFLICT_STATUS = 409;
 

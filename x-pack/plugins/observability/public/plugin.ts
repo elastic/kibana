@@ -4,43 +4,42 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { i18n } from '@kbn/i18n';
 import { BehaviorSubject, from } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { ConfigSchema } from '.';
-import {
+import type { ConfigSchema } from '.';
+import type { CoreSetup, CoreStart } from '../../../../src/core/public/types';
+import type {
   AppDeepLink,
   AppMountParameters,
-  AppNavLinkStatus,
   AppUpdater,
-  CoreSetup,
-  CoreStart,
-  DEFAULT_APP_CATEGORIES,
-  Plugin as PluginClass,
-  PluginInitializerContext,
-} from '../../../../src/core/public';
+} from '../../../../src/core/public/application/types';
+import { AppNavLinkStatus } from '../../../../src/core/public/application/types';
+import type { Plugin as PluginClass } from '../../../../src/core/public/plugins/plugin';
+import type { PluginInitializerContext } from '../../../../src/core/public/plugins/plugin_context';
+import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils/default_app_categories';
 import type {
   DataPublicPluginSetup,
   DataPublicPluginStart,
-} from '../../../../src/plugins/data/public';
-import type { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
+} from '../../../../src/plugins/data/public/types';
+import type { EmbeddableStart } from '../../../../src/plugins/embeddable/public/plugin';
 import type {
   HomePublicPluginSetup,
   HomePublicPluginStart,
-} from '../../../../src/plugins/home/public';
-import { CasesUiStart } from '../../cases/public';
-import type { LensPublicStart } from '../../lens/public';
-import {
+} from '../../../../src/plugins/home/public/plugin';
+import type { CasesUiStart } from '../../cases/public/types';
+import type { LensPublicStart } from '../../lens/public/plugin';
+import type {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
-} from '../../triggers_actions_ui/public';
+} from '../../triggers_actions_ui/public/plugin';
 import { observabilityAppId, observabilityFeatureId } from '../common';
-import { createLazyObservabilityPageTemplate } from './components/shared';
+import { createLazyObservabilityPageTemplate } from './components/shared/page_template/lazy_page_template';
 import { registerDataHandler } from './data_handler';
 import { createObservabilityRuleTypeRegistry } from './rules/create_observability_rule_type_registry';
 import { createCallObservabilityApi } from './services/call_observability_api';
-import { createNavigationRegistry, NavigationEntry } from './services/navigation_registry';
+import type { NavigationEntry } from './services/navigation_registry';
+import { createNavigationRegistry } from './services/navigation_registry';
 import { updateGlobalNavigation } from './update_global_navigation';
 
 export type ObservabilityPublicSetup = ReturnType<Plugin['setup']>;

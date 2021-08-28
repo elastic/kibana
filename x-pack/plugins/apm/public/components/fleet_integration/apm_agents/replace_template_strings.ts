@@ -5,7 +5,7 @@
  * 2.0.
  */
 import Mustache from 'mustache';
-import type { CoreStart } from '../../../../../../../src/core/public';
+import type { CoreStart } from '../../../../../../../src/core/public/types';
 
 const TEMPLATE_TAGS = ['{', '}'];
 

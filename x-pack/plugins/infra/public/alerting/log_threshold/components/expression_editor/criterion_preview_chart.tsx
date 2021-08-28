@@ -4,49 +4,46 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { useMemo } from 'react';
-import useDebounce from 'react-use/lib/useDebounce';
 import {
-  ScaleType,
   AnnotationDomainType,
-  Position,
   Axis,
   BarSeries,
   Chart,
-  Settings,
-  RectAnnotation,
   LineAnnotation,
+  Position,
+  RectAnnotation,
+  ScaleType,
+  Settings,
 } from '@elastic/charts';
 import { EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
-import {
-  ChartContainer,
-  LoadingState,
-  NoDataState,
-  ErrorState,
-  TIME_LABELS,
-  getDomain,
-  tooltipProps,
-  useDateFormatter,
-  getChartTheme,
-  yAxisFormatter,
-  NUM_BUCKETS,
-} from '../../../common/criterion_preview_chart/criterion_preview_chart';
-import {
+import React, { useMemo } from 'react';
+import useDebounce from 'react-use/lib/useDebounce';
+import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public/context/context';
+import type {
+  Criterion,
   PartialAlertParams,
   Threshold,
-  Criterion,
-  Comparator,
 } from '../../../../../common/alerting/logs/log_threshold/types';
+import { Comparator } from '../../../../../common/alerting/logs/log_threshold/types';
 import { Color, colorTransformer } from '../../../../../common/color_palette';
-import {
-  GetLogAlertsChartPreviewDataAlertParamsSubset,
-  getLogAlertsChartPreviewDataAlertParamsSubsetRT,
-} from '../../../../../common/http_api/log_alerts/';
-import { useChartPreviewData } from './hooks/use_chart_preview_data';
+import type { GetLogAlertsChartPreviewDataAlertParamsSubset } from '../../../../../common/http_api/log_alerts/chart_preview_data';
+import { getLogAlertsChartPreviewDataAlertParamsSubsetRT } from '../../../../../common/http_api/log_alerts/chart_preview_data';
 import { decodeOrThrow } from '../../../../../common/runtime_types';
+import {
+  ChartContainer,
+  ErrorState,
+  getChartTheme,
+  getDomain,
+  LoadingState,
+  NoDataState,
+  NUM_BUCKETS,
+  TIME_LABELS,
+  tooltipProps,
+  useDateFormatter,
+  yAxisFormatter,
+} from '../../../common/criterion_preview_chart/criterion_preview_chart';
+import { useChartPreviewData } from './hooks/use_chart_preview_data';
 
 const GROUP_LIMIT = 5;
 

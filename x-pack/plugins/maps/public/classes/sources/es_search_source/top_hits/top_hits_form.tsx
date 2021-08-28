@@ -4,18 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { ChangeEvent, Component, Fragment } from 'react';
 import { EuiFormRow, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { ChangeEvent } from 'react';
+import React, { Component, Fragment } from 'react';
+import type { IFieldType } from '../../../../../../../../src/plugins/data/common/index_patterns/fields/types';
+import { SortDirection } from '../../../../../../../../src/plugins/data/common/search/search_source/types';
+import { DEFAULT_MAX_INNER_RESULT_WINDOW } from '../../../../../common/constants';
 import { SingleFieldSelect } from '../../../../components/single_field_select';
-import { getIndexPatternService } from '../../../../kibana_services';
 // @ts-expect-error
 import { ValidatedRange } from '../../../../components/validated_range';
-import { DEFAULT_MAX_INNER_RESULT_WINDOW } from '../../../../../common/constants';
+import { getIndexPatternService } from '../../../../kibana_services';
+import type { OnSourceChangeArgs } from '../../source';
 import { loadIndexSettings } from '../util/load_index_settings';
-import { OnSourceChangeArgs } from '../../source';
-import { IFieldType, SortDirection } from '../../../../../../../../src/plugins/data/public';
 
 interface Props {
   indexPatternId: string;

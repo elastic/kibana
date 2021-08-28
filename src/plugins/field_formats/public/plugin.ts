@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { CoreSetup } from '../../../core/public';
+import type { CoreSetup } from '../../../core/public/types';
 import type { Plugin } from '../../../core/public/plugins/plugin';
 import { FORMATS_UI_SETTINGS } from '../common/constants/ui_settings';
 import { FieldFormatsRegistry } from '../common/field_formats_registry';

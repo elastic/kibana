@@ -6,16 +6,10 @@
  */
 
 import Boom from '@hapi/boom';
+import type { Duration } from 'moment/moment';
 import rison from 'rison-node';
-import { Duration } from 'moment/moment';
-import { MlClient } from '../ml_client';
-import {
-  MlAnomalyDetectionAlertParams,
-  MlAnomalyDetectionAlertPreviewRequest,
-} from '../../routes/schemas/alerting_schema';
 import { ANOMALY_RESULT_TYPE } from '../../../common/constants/anomalies';
-import { AnomalyRecordDoc, AnomalyResultType } from '../../../common/types/anomalies';
-import {
+import type {
   AlertExecutionResult,
   InfluencerAnomalyAlertDoc,
   PreviewResponse,
@@ -23,13 +17,19 @@ import {
   RecordAnomalyAlertDoc,
   TopHitsResultsKeys,
 } from '../../../common/types/alerts';
-import { AnomalyDetectionAlertContext } from './register_anomaly_detection_alert_type';
-import { MlJobsResponse } from '../../../common/types/job_service';
-import { resolveMaxTimeInterval } from '../../../common/util/job_utils';
+import type { AnomalyRecordDoc, AnomalyResultType } from '../../../common/types/anomalies';
 import { isDefined } from '../../../common/types/guards';
+import type { MlJobsResponse } from '../../../common/types/job_service';
 import { getTopNBuckets, resolveLookbackInterval } from '../../../common/util/alerts';
-import type { DatafeedsService } from '../../models/job_service/datafeeds';
 import { getEntityFieldName, getEntityFieldValue } from '../../../common/util/anomaly_utils';
+import { resolveMaxTimeInterval } from '../../../common/util/job_utils';
+import type { DatafeedsService } from '../../models/job_service/datafeeds';
+import type {
+  MlAnomalyDetectionAlertParams,
+  MlAnomalyDetectionAlertPreviewRequest,
+} from '../../routes/schemas/alerting_schema';
+import type { MlClient } from '../ml_client/types';
+import type { AnomalyDetectionAlertContext } from './register_anomaly_detection_alert_type';
 
 type AggResultsResponse = { key?: number } & {
   [key in PreviewResultsKeys]: {

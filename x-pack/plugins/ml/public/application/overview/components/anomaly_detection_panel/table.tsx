@@ -4,10 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { FC, Fragment, useState } from 'react';
-import {
+import type {
   Direction,
+  EuiTableComputedColumnType,
+  EuiTableFieldDataColumnType,
+} from '@elastic/eui';
+import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHealth,
@@ -15,26 +17,27 @@ import {
   EuiInMemoryTable,
   EuiLoadingSpinner,
   EuiSpacer,
-  EuiTableComputedColumnType,
-  EuiTableFieldDataColumnType,
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { formatHumanReadableDateTimeSeconds } from '../../../../../common/util/date_utils';
-import { ExplorerLink } from './actions';
-import { getJobsFromGroup } from './utils';
-import { GroupsDictionary, Group } from './anomaly_detection_panel';
-import { MlSummaryJobs } from '../../../../../common/types/anomaly_detection_jobs';
-import { StatsBar, JobStatsBarStats } from '../../../components/stats_bar';
-// @ts-ignore
-import { JobSelectorBadge } from '../../../components/job_selector/job_selector_badge/index';
-import { toLocaleString } from '../../../util/string_utils';
+import type { FC } from 'react';
+import React, { Fragment, useState } from 'react';
+import type { MlSummaryJobs } from '../../../../../common/types/anomaly_detection_jobs/summary_job';
 import {
   getFormattedSeverityScore,
   getSeverityColor,
 } from '../../../../../common/util/anomaly_utils';
+import { formatHumanReadableDateTimeSeconds } from '../../../../../common/util/date_utils';
+import { JobSelectorBadge } from '../../../components/job_selector/job_selector_badge/job_selector_badge';
+import type { JobStatsBarStats } from '../../../components/stats_bar/stats_bar';
+import { StatsBar } from '../../../components/stats_bar/stats_bar';
+import { toLocaleString } from '../../../util/string_utils';
+import { ExplorerLink } from './actions';
+import type { Group, GroupsDictionary } from './anomaly_detection_panel';
+import { getJobsFromGroup } from './utils';
 
+// @ts-ignore
 // Used to pass on attribute names to table columns
 export enum AnomalyDetectionListColumns {
   id = 'id',

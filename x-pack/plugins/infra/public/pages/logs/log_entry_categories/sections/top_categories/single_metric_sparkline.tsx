@@ -4,17 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { useMemo } from 'react';
-import { Chart, Settings, AreaSeries } from '@elastic/charts';
+import { AreaSeries, Chart, Settings } from '@elastic/charts';
 import {
+  EUI_CHARTS_THEME_DARK,
   EUI_CHARTS_THEME_LIGHT,
   EUI_SPARKLINE_THEME_PARTIAL,
-  EUI_CHARTS_THEME_DARK,
 } from '@elastic/eui/dist/eui_charts_theme';
-
+import React, { useMemo } from 'react';
+import type { TimeRange } from '../../../../../../common/time/time_range';
 import { useKibanaUiSetting } from '../../../../../utils/use_kibana_ui_setting';
-import { TimeRange } from '../../../../../../common/time';
 
 interface TimeSeriesPoint {
   timestamp: number;

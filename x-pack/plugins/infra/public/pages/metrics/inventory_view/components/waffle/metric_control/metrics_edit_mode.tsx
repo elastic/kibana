@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiFlexItem, EuiFlexGroup, EuiButtonIcon } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React from 'react';
+import type { EuiTheme } from '../../../../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
+import { withTheme } from '../../../../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
 import { getCustomMetricLabel } from '../../../../../../../common/formatters/get_custom_metric_label';
-import { SnapshotCustomMetricInput } from '../../../../../../../common/http_api/snapshot_api';
-import { EuiTheme, withTheme } from '../../../../../../../../../../src/plugins/kibana_react/common';
+import type { SnapshotCustomMetricInput } from '../../../../../../../common/http_api/snapshot_api';
 
 interface Props {
   theme: EuiTheme | undefined;

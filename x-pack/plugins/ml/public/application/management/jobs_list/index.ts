@@ -4,20 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import ReactDOM, { unmountComponentAtNode } from 'react-dom';
 import React from 'react';
-import type { CoreSetup, CoreStart } from 'kibana/public';
-import type { DataPublicPluginStart } from 'src/plugins/data/public';
-import type { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
-import type { ManagementAppMountParams } from '../../../../../../../src/plugins/management/public/';
+import ReactDOM, { unmountComponentAtNode } from 'react-dom';
+import type { CoreSetup, CoreStart } from '../../../../../../../src/core/public/types';
+import type { DataPublicPluginStart } from '../../../../../../../src/plugins/data/public/types';
+import type { ManagementAppMountParams } from '../../../../../../../src/plugins/management/public/types';
+import type { SharePluginStart } from '../../../../../../../src/plugins/share/public/plugin';
+import type { UsageCollectionSetup } from '../../../../../../../src/plugins/usage_collection/public/plugin';
+import type { SpacesPluginStart } from '../../../../../spaces/public/plugin';
 import type { MlStartDependencies } from '../../../plugin';
-import { JobsListPage } from './components';
+import { clearCache, setDependencyCache } from '../../util/dependency_cache';
 import { getJobsListBreadcrumbs } from '../breadcrumbs';
-import { setDependencyCache, clearCache } from '../../util/dependency_cache';
+import { JobsListPage } from './components/jobs_list_page/jobs_list_page';
 import './_index.scss';
-import type { SharePluginStart } from '../../../../../../../src/plugins/share/public';
-import type { SpacesPluginStart } from '../../../../../spaces/public';
 
 const renderApp = (
   element: HTMLElement,

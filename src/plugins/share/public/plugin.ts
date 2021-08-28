@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { CoreSetup, CoreStart } from '../../../core/public';
+import type { CoreSetup, CoreStart } from '../../../core/public/types';
 import type { Plugin } from '../../../core/public/plugins/plugin';
 import type {
   SecurityOssPluginSetup,

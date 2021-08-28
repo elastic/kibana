@@ -4,8 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { FC } from 'react';
 import {
   EuiCallOut,
   EuiFlexGroup,
@@ -15,7 +13,9 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { AnalyticsProgressStats } from './create_step_footer';
+import type { FC } from 'react';
+import React from 'react';
+import type { AnalyticsProgressStats } from './create_step_footer';
 
 interface Props {
   currentProgress?: AnalyticsProgressStats;

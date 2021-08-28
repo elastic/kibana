@@ -4,8 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { ConnectionElement } from '../../../common/service_map';
+import type { ConnectionElement } from '../../../common/service_map';
 import { groupResourceNodes } from './group_resource_nodes';
 import expectedGroupedData from './mock_responses/group_resource_nodes_grouped.json';
 import preGroupedData from './mock_responses/group_resource_nodes_pregrouped.json';

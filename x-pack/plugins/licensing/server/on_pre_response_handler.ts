@@ -4,11 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
-import { OnPreResponseHandler } from '../../../../src/core/server';
-import { ILicense } from '../common/types';
+import type { OnPreResponseHandler } from '../../../../src/core/server/http/lifecycle/on_pre_response';
+import type { ILicense } from '../common/types';
 
 export function createOnPreResponseHandler(
   refresh: () => Promise<ILicense>,

@@ -4,15 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { FC, useContext, useEffect, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFlexGroup, EuiSpacer, EuiTitle } from '@elastic/eui';
-
+import { FormattedMessage } from '@kbn/i18n/react';
+import type { FC } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
+import { RareJobCreator } from '../../../../../common/job_creator/rare_job_creator';
 import { JobCreatorContext } from '../../../job_creator_context';
-import { RareJobCreator } from '../../../../../common/job_creator';
-import { RareCard, RareInPopulationCard, FrequentlyRareInPopulationCard } from './detector_cards';
-import { RARE_DETECTOR_TYPE } from '../rare_view';
+import { RARE_DETECTOR_TYPE } from '../rare_view/rare_view';
+import { FrequentlyRareInPopulationCard, RareCard, RareInPopulationCard } from './detector_cards';
 
 interface Props {
   onChange(d: RARE_DETECTOR_TYPE): void;

@@ -4,9 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { Observable } from 'rxjs';
-import { Job } from '../../../common/types/anomaly_detection_jobs';
+import type { Job } from '../../../common/types/anomaly_detection_jobs/job';
 
 export interface ForecastData {
   success: boolean;

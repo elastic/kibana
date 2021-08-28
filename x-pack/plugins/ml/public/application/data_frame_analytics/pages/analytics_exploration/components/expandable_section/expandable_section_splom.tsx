@@ -5,20 +5,14 @@
  * 2.0.
  */
 
-import './expandable_section.scss';
-
-import React, { FC } from 'react';
-
-import { FormattedMessage } from '@kbn/i18n/react';
-
 import { EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
-
-import {
-  ScatterplotMatrix,
-  ScatterplotMatrixProps,
-} from '../../../../../components/scatterplot_matrix';
-
+import { FormattedMessage } from '@kbn/i18n/react';
+import type { FC } from 'react';
+import React from 'react';
+import type { ScatterplotMatrixProps } from '../../../../../components/scatterplot_matrix/scatterplot_matrix';
+import { ScatterplotMatrix } from '../../../../../components/scatterplot_matrix/scatterplot_matrix';
 import { ExpandableSection } from './expandable_section';
+import './expandable_section.scss';
 
 export const ExpandableSectionSplom: FC<ScatterplotMatrixProps> = (props) => {
   const splomSectionHeaderItems = undefined;

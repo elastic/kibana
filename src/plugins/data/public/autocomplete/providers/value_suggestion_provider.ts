@@ -9,7 +9,7 @@
 import dateMath from '@elastic/datemath';
 import { buildQueryFromFilters } from '@kbn/es-query';
 import { memoize } from 'lodash';
-import type { CoreSetup } from '../../../../../core/public';
+import type { CoreSetup } from '../../../../../core/public/types';
 import type { ValueSuggestionsMethod } from '../../../common/constants';
 import { UI_SETTINGS } from '../../../common/constants';
 import type { IFieldType } from '../../../common/index_patterns/fields/types';

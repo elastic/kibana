@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import _ from 'lodash';
-import React, { ChangeEvent, Component } from 'react';
-import { EuiFormRow, EuiFieldText, EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { EuiCallOut, EuiFieldText, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import _ from 'lodash';
+import type { ChangeEvent } from 'react';
+import React, { Component } from 'react';
 import { validateIndexName } from '../../validate_index_name';
 
 export interface Props {

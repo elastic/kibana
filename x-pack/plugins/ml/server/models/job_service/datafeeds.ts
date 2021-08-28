@@ -4,14 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { estypes } from '@elastic/elasticsearch';
 import { i18n } from '@kbn/i18n';
-import { IScopedClusterClient } from 'kibana/server';
-import { JOB_STATE, DATAFEED_STATE } from '../../../common/constants/states';
+import type { IScopedClusterClient } from '../../../../../../src/core/server/elasticsearch/client/scoped_cluster_client';
+import { DATAFEED_STATE, JOB_STATE } from '../../../common/constants/states';
+import type { Datafeed } from '../../../common/types/anomaly_detection_jobs/datafeed';
+import type { DatafeedStats } from '../../../common/types/anomaly_detection_jobs/datafeed_stats';
+import type { MlClient } from '../../lib/ml_client/types';
 import { fillResultsWithTimeouts, isRequestTimeout } from './error_utils';
-import { Datafeed, DatafeedStats } from '../../../common/types/anomaly_detection_jobs';
-import type { MlClient } from '../../lib/ml_client';
 
 export interface MlDatafeedsResponse {
   datafeeds: Datafeed[];

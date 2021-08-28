@@ -7,10 +7,10 @@
 
 import Boom from '@hapi/boom';
 import { PARTITION_FIELDS } from '../../../common/constants/anomalies';
-import { PartitionFieldsType } from '../../../common/types/anomalies';
-import { CriteriaField } from './results_service';
-import { FieldConfig, FieldsConfig } from '../../routes/schemas/results_service_schema';
-import type { MlClient } from '../../lib/ml_client';
+import type { PartitionFieldsType } from '../../../common/types/anomalies';
+import type { MlClient } from '../../lib/ml_client/types';
+import type { FieldConfig, FieldsConfig } from '../../routes/schemas/results_service_schema';
+import type { CriteriaField } from './results_service';
 
 type SearchTerm =
   | {

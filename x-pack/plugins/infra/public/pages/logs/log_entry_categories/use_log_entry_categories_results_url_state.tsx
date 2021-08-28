@@ -4,16 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { fold } from 'fp-ts/lib/Either';
 import { constant, identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 import * as rt from 'io-ts';
-import { useUrlState } from '../../../utils/use_url_state';
 import {
   useKibanaTimefilterTime,
   useSyncKibanaTimeFilterTime,
 } from '../../../hooks/use_kibana_timefilter_time';
+import { useUrlState } from '../../../utils/use_url_state';
 
 const autoRefreshRT = rt.union([
   rt.type({

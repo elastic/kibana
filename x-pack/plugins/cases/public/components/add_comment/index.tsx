@@ -4,21 +4,22 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { EuiButton, EuiFlexItem, EuiFlexGroup, EuiLoadingSpinner } from '@elastic/eui';
-import React, { useCallback, useRef, forwardRef, useImperativeHandle } from 'react';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
+import React, { forwardRef, useCallback, useImperativeHandle, useRef } from 'react';
 import styled from 'styled-components';
-
-import { CommentType } from '../../../common';
+import { Form } from '../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/components/form';
+import { UseField } from '../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/components/use_field';
+import { useForm } from '../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/hooks/use_form';
+import { useFormData } from '../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/hooks/use_form_data';
+import { CommentType } from '../../../common/api/cases/comment';
+import type { Case } from '../../../common/ui/types';
 import { usePostComment } from '../../containers/use_post_comment';
-import { Case } from '../../containers/types';
-import { MarkdownEditorForm } from '../markdown_editor';
-import { Form, useForm, UseField, useFormData } from '../../common/shared_imports';
-
-import * as i18n from './translations';
-import { schema, AddCommentFormSchema } from './schema';
 import { InsertTimeline } from '../insert_timeline';
+import { MarkdownEditorForm } from '../markdown_editor/eui_form';
 import { useOwnerContext } from '../owner_context/use_owner_context';
+import type { AddCommentFormSchema } from './schema';
+import { schema } from './schema';
+import * as i18n from './translations';
 
 const MySpinner = styled(EuiLoadingSpinner)`
   position: absolute;

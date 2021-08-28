@@ -4,13 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { ElasticsearchClient } from 'kibana/server';
 import { first } from 'rxjs/operators';
 
+import type { ElasticsearchClient } from '../../../../../../src/core/server/elasticsearch/client/types';
+import { FLEET_SERVER_SERVERS_INDEX } from '../../../common/constants';
 import { appContextService } from '../app_context';
 import { licenseService } from '../license';
-import { FLEET_SERVER_SERVERS_INDEX } from '../../constants';
 
 import { runFleetServerMigration } from './saved_object_migrations';
 

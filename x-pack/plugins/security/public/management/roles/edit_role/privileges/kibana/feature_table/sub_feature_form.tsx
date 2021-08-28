@@ -4,19 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { EuiButtonGroup, EuiCheckbox, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import type {
-  SecuredSubFeature,
-  SubFeaturePrivilege,
-  SubFeaturePrivilegeGroup,
-} from '../../../../model';
+import type { SecuredSubFeature } from '../../../../model/secured_sub_feature';
+import type { SubFeaturePrivilege } from '../../../../model/sub_feature_privilege';
+import type { SubFeaturePrivilegeGroup } from '../../../../model/sub_feature_privilege_group';
 import { NO_PRIVILEGE_VALUE } from '../constants';
-import type { PrivilegeFormCalculator } from '../privilege_form_calculator';
+import type { PrivilegeFormCalculator } from '../privilege_form_calculator/privilege_form_calculator';
 
 interface Props {
   featureId: string;

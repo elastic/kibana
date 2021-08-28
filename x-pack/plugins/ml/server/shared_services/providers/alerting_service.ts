@@ -4,11 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { KibanaRequest, SavedObjectsClientContract } from 'kibana/server';
-import { GetGuards } from '../shared_services';
-import { alertingServiceProvider, MlAlertingService } from '../../lib/alerts/alerting_service';
+import { KibanaRequest } from '../../../../../../src/core/server/http/router/request';
+import type { SavedObjectsClientContract } from '../../../../../../src/core/server/saved_objects/types';
+import type { MlAlertingService } from '../../lib/alerts/alerting_service';
+import { alertingServiceProvider } from '../../lib/alerts/alerting_service';
 import { datafeedsProvider } from '../../models/job_service/datafeeds';
+import type { GetGuards } from '../shared_services';
 
 export function getAlertingServiceProvider(getGuards: GetGuards) {
   return {

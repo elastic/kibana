@@ -4,11 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { SearchHit } from '../../../../../../src/core/types/elasticsearch/search';
 
-import type { SearchHit } from '../../../../../../src/core/types/elasticsearch';
-
-import type { Artifact, ArtifactElasticsearchProperties, NewArtifact } from './types';
 import { ARTIFACT_DOWNLOAD_RELATIVE_PATH } from './constants';
+import type { Artifact, ArtifactElasticsearchProperties, NewArtifact } from './types';
 
 export const esSearchHitToArtifact = <
   T extends Pick<SearchHit<ArtifactElasticsearchProperties>, '_id' | '_source'>

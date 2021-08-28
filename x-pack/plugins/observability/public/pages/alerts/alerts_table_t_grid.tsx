@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-/**
- * We need to produce types and code transpilation at different folders during the build of the package.
- * We have types and code at different imports because we don't want to import the whole package in the resulting webpack bundle for the plugin.
- * This way plugins can do targeted imports to reduce the final code bundle
- */
+import type { EuiDataGridColumn } from '@elastic/eui';
+import { EuiButtonIcon, EuiContextMenu, EuiFlexGroup, EuiFlexItem, EuiPopover } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import {
   ALERT_DURATION as ALERT_DURATION_TYPED,
   ALERT_REASON as ALERT_REASON_TYPED,
@@ -17,8 +15,6 @@ import {
   ALERT_STATUS as ALERT_STATUS_TYPED,
   ALERT_WORKFLOW_STATUS as ALERT_WORKFLOW_STATUS_TYPED,
 } from '@kbn/rule-data-utils';
-// @ts-expect-error importing from a place other than root because we want to limit what we import from this package
-import { AlertConsumers as AlertConsumersNonTyped } from '@kbn/rule-data-utils/target_node/alerts_as_data_rbac';
 import {
   ALERT_DURATION as ALERT_DURATION_NON_TYPED,
   ALERT_REASON as ALERT_REASON_NON_TYPED,
@@ -27,39 +23,29 @@ import {
   TIMESTAMP,
   // @ts-expect-error importing from a place other than root because we want to limit what we import from this package
 } from '@kbn/rule-data-utils/target_node/technical_field_names';
-
-import {
-  EuiButtonIcon,
-  EuiDataGridColumn,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiContextMenu,
-  EuiPopover,
-} from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import styled from 'styled-components';
-import React, { Suspense, useMemo, useState, useCallback } from 'react';
 import { get } from 'lodash';
-import { useGetUserAlertsPermissions } from '../../hooks/use_alert_permission';
-import type { TimelinesUIStart, TGridType, SortDirection } from '../../../../timelines/public';
-import { useStatusBulkActionItems } from '../../../../timelines/public';
-import type { TopAlert } from './';
-import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
+import React, { Suspense, useCallback, useMemo, useState } from 'react';
+import styled from 'styled-components';
+import type { TopAlert } from '.';
+import { LazyAlertsFlyout } from '../..';
+import type { CoreStart } from '../../../../../../src/core/public/types';
+import { useKibana } from '../../../../../../src/plugins/kibana_react/public/context/context';
 import type {
   ActionProps,
   AlertWorkflowStatus,
-  ColumnHeaderOptions,
-  RowRenderer,
-} from '../../../../timelines/common';
-
-import { getRenderCellValue } from './render_cell_value';
+} from '../../../../timelines/common/types/timeline/actions';
+import type { ColumnHeaderOptions } from '../../../../timelines/common/types/timeline/columns';
+import type { RowRenderer } from '../../../../timelines/common/types/timeline/rows';
+import type { SortDirection } from '../../../../timelines/common/types/timeline/store';
+import { useStatusBulkActionItems } from '../../../../timelines/public/hooks/use_status_bulk_action_items';
+import type { TGridType, TimelinesUIStart } from '../../../../timelines/public/types';
 import { observabilityFeatureId } from '../../../common';
+import { useGetUserAlertsPermissions } from '../../hooks/use_alert_permission';
 import { useGetUserCasesPermissions } from '../../hooks/use_get_user_cases_permissions';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { getDefaultCellActions } from './default_cell_actions';
-import { LazyAlertsFlyout } from '../..';
 import { parseAlert } from './parse_alert';
-import { CoreStart } from '../../../../../../src/core/public';
+import { getRenderCellValue } from './render_cell_value';
 
 const ALERT_DURATION: typeof ALERT_DURATION_TYPED = ALERT_DURATION_NON_TYPED;
 const ALERT_REASON: typeof ALERT_REASON_TYPED = ALERT_REASON_NON_TYPED;

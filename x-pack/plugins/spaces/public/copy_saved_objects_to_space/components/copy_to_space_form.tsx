@@ -4,13 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { EuiFormRow, EuiSpacer, EuiTitle } from '@elastic/eui';
 import React from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
-import type { Space } from 'src/plugins/spaces_oss/common';
 
+import type { Space } from '../../../../../../src/plugins/spaces_oss/common/types';
 import type { CopyOptions, SavedObjectTarget } from '../types';
 import type { CopyMode } from './copy_mode_control';
 import { CopyModeControl } from './copy_mode_control';

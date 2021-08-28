@@ -4,13 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { Dispatch, MiddlewareAPI, PayloadAction } from '@reduxjs/toolkit';
+import type { Dispatch, MiddlewareAPI, PayloadAction } from '@reduxjs/toolkit';
 import moment from 'moment';
-import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
-import { setState, LensDispatch } from '.';
-import { LensAppState } from './types';
-import { getResolvedDateRange, containsDynamicMath } from '../utils';
+import type { LensDispatch } from '.';
+import { setState } from '.';
+import type { DataPublicPluginStart } from '../../../../../src/plugins/data/public/types';
+import { containsDynamicMath, getResolvedDateRange } from '../utils';
+import type { LensAppState } from './types';
 
 const TIME_LAG_PERCENTAGE_LIMIT = 0.02;
 const TIME_LAG_MIN_LIMIT = 10000; // for a small timerange to avoid infinite data refresh timelag minimum is TIME_LAG_ABSOLUTE ms

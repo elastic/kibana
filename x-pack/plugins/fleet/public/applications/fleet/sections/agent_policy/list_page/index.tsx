@@ -4,40 +4,39 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { useCallback, useMemo, useState } from 'react';
 import type { EuiTableActionsColumnType, EuiTableFieldDataColumnType } from '@elastic/eui';
 import {
-  EuiSpacer,
-  EuiFlexGroup,
-  EuiFlexItem,
+  EuiBasicTable,
   EuiButton,
   EuiEmptyPrompt,
-  EuiBasicTable,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiLink,
+  EuiSpacer,
   EuiTextColor,
 } from '@elastic/eui';
 import type { CriteriaWithPagination } from '@elastic/eui/src/components/basic_table/basic_table';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage, FormattedDate } from '@kbn/i18n/react';
+import { FormattedDate, FormattedMessage } from '@kbn/i18n/react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 
-import type { AgentPolicy } from '../../../types';
-import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../../constants';
-import {
-  useCapabilities,
-  useGetAgentPolicies,
-  usePagination,
-  useSorting,
-  useLink,
-  useConfig,
-  useUrlParams,
-  useBreadcrumbs,
-} from '../../../hooks';
-import { AgentPolicySummaryLine, SearchBar } from '../../../components';
-import { LinkedAgentCount, AgentPolicyActionMenu } from '../components';
+import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../../../../../common/constants/agent_policy';
+import type { AgentPolicy } from '../../../../../../common/types/models/agent_policy';
+import { LinkedAgentCount } from '../../../../../components/linked_agent_count';
+import { AgentPolicySummaryLine } from '../../../../../components/link_and_revision';
+import { useCapabilities } from '../../../../../hooks/use_capabilities';
+import { useConfig } from '../../../../../hooks/use_config';
+import { useLink } from '../../../../../hooks/use_link';
+import { usePagination } from '../../../../../hooks/use_pagination';
+import { useGetAgentPolicies } from '../../../../../hooks/use_request/agent_policy';
+import { useSorting } from '../../../../../hooks/use_sorting';
+import { useUrlParams } from '../../../../../hooks/use_url_params';
+import { SearchBar } from '../../../components/search_bar';
+import { useBreadcrumbs } from '../../../hooks/use_breadcrumbs';
+import { AgentPolicyActionMenu } from '../components/actions_menu';
 
-import { CreateAgentPolicyFlyout } from './components';
+import { CreateAgentPolicyFlyout } from './components/create_agent_policy';
 
 export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
   useBreadcrumbs('policies_list');

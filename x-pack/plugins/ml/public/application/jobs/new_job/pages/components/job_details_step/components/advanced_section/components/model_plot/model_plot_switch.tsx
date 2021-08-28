@@ -4,15 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { FC, useState, useContext, useEffect } from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiSwitch } from '@elastic/eui';
-import { JobCreatorContext } from '../../../../../job_creator_context';
-import { Description } from './description';
-import { MMLCallout } from '../mml_callout';
+import { i18n } from '@kbn/i18n';
+import type { FC } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { ML_JOB_AGGREGATION } from '../../../../../../../../../../../common/constants/aggregation_types';
-import { isCategorizationJobCreator } from '../../../../../../../common/job_creator';
+import { isCategorizationJobCreator } from '../../../../../../../common/job_creator/type_guards';
+import { JobCreatorContext } from '../../../../../job_creator_context';
+import { MMLCallout } from '../mml_callout';
+import { Description } from './description';
 
 export const ModelPlotSwitch: FC = () => {
   const { jobCreator, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);

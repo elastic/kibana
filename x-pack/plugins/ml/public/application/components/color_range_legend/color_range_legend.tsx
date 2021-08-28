@@ -4,11 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { useEffect, useRef, FC } from 'react';
-import d3 from 'd3';
-
 import { EuiText } from '@elastic/eui';
+import d3 from 'd3';
+import type { FC } from 'react';
+import React, { useEffect, useRef } from 'react';
 
 const COLOR_RANGE_RESOLUTION = 10;
 

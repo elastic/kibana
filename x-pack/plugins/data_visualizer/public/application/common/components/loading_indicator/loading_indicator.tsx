@@ -4,12 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { FC, Fragment } from 'react';
-
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSpacer, EuiText } from '@elastic/eui';
-
 import { FormattedMessage } from '@kbn/i18n/react';
+import type { FC } from 'react';
+import React, { Fragment } from 'react';
+
 export const LoadingIndicator: FC = () => (
   <Fragment>
     <EuiSpacer size="xxl" />

@@ -8,9 +8,8 @@
 import { IndexPatternField } from '../../../../../../../../data/common/index_patterns/fields/index_pattern_field';
 import { IndexPattern } from '../../../../../../../../data/common/index_patterns/index_patterns/index_pattern';
 import type { ElasticSearchHit } from '../../../../../doc_views/doc_views_types';
-import { fieldCalculator } from './field_calculator';
-
 // @ts-expect-error
+import { fieldCalculator } from './field_calculator';
 
 export function getDetails(
   field: IndexPatternField,

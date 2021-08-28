@@ -6,13 +6,13 @@
  */
 
 import React from 'react';
-import type { VisEditorOptionsProps } from 'src/plugins/visualizations/public';
-import { Vis } from '../../../../../../src/plugins/visualizations/public';
+import type { VisEditorOptionsProps } from '../../../../../../src/plugins/visualizations/public/types';
+import { Vis } from '../../../../../../src/plugins/visualizations/public/vis';
 import { getData, getShareService } from '../../kibana_services';
 import { ViewInMaps } from '../view_in_maps';
-import { extractLayerDescriptorParams } from './utils';
-import { TileMapVisParams } from './types';
 import { title } from './tile_map_vis_type';
+import type { TileMapVisParams } from './types';
+import { extractLayerDescriptorParams } from './utils';
 
 export function TileMapEditor(props: VisEditorOptionsProps) {
   const onClick = (e: React.MouseEvent<HTMLButtonElement>) => {

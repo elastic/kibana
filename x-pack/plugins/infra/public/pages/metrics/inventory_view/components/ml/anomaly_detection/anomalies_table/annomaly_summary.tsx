@@ -4,12 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { MetricsHostsAnomaly } from '../../../../../../../../common/http_api/infra_ml/results';
-import { formatOneDecimalPlace } from '../../../../../../../../common/log_analysis';
+import type { MetricsHostsAnomaly } from '../../../../../../../../common/http_api/infra_ml/results/metrics_hosts_anomalies';
+import { formatOneDecimalPlace } from '../../../../../../../../common/log_analysis/log_analysis_results';
 
 export const AnomalySummary = ({ anomaly }: { anomaly: MetricsHostsAnomaly }) => {
   const { actual, typical } = anomaly;

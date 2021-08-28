@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { PropsWithChildren } from 'react';
+import { EuiButtonIcon, EuiFormRow, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EuiFormRow, EuiButtonIcon, EuiTitle } from '@elastic/eui';
-import { AlertConditionsProps, ActionGroupWithCondition } from './alert_conditions';
+import type { PropsWithChildren } from 'react';
+import React from 'react';
+import type { ActionGroupWithCondition, AlertConditionsProps } from './alert_conditions';
 
 export type AlertConditionsGroupProps<ConditionProps> = {
   actionGroup?: ActionGroupWithCondition<ConditionProps, string>;

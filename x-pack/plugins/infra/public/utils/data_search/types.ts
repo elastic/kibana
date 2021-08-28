@@ -4,14 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { Observable } from 'rxjs';
-import {
+import type {
   IKibanaSearchRequest,
   IKibanaSearchResponse,
   ISearchOptions,
-} from '../../../../../../src/plugins/data/public';
-import { SearchStrategyError } from '../../../common/search_strategies/common/errors';
+} from '../../../../../../src/plugins/data/common/search/types';
+import type { SearchStrategyError } from '../../../common/search_strategies/common/errors';
 
 export interface DataSearchRequestDescriptor<Request extends IKibanaSearchRequest, RawResponse> {
   request: Request;

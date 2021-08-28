@@ -4,15 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { Subject } from 'rxjs';
-import { ConfigSchema } from '.';
-import {
-  AppNavLinkStatus,
-  AppUpdater,
-  ApplicationStart,
+import type { ConfigSchema } from '.';
+import type {
   AppDeepLink,
-} from '../../../../src/core/public';
+  ApplicationStart,
+  AppUpdater,
+} from '../../../../src/core/public/application/types';
+import { AppNavLinkStatus } from '../../../../src/core/public/application/types';
 import { casesFeatureId } from '../common';
 
 export function updateGlobalNavigation({

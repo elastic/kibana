@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import type { EuiLoadingSpinnerSize } from '@elastic/eui/src/components/loading/loading_spinner';
+import React from 'react';
 
 export const Loading: React.FunctionComponent<{ size?: EuiLoadingSpinnerSize }> = ({ size }) => (
   <EuiFlexGroup justifyContent="spaceAround">

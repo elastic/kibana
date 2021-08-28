@@ -4,35 +4,39 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { useEffect, useState, useMemo } from 'react';
-import styled from 'styled-components';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
+  EuiComboBox,
+  EuiDescribedFormGroup,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiComboBox,
-  EuiPortal,
   EuiFormRow,
-  EuiDescribedFormGroup,
-  EuiTitle,
-  EuiText,
   EuiLink,
+  EuiPortal,
+  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+import React, { useEffect, useMemo, useState } from 'react';
+import styled from 'styled-components';
 
-import { Error } from '../../../components';
-import type { AgentPolicy, PackageInfo, GetAgentPoliciesResponseItem } from '../../../types';
-import { isPackageLimited, doesAgentPolicyAlreadyIncludePackage } from '../../../services';
 import {
-  useGetPackageInfoByKey,
-  useGetAgentPolicies,
+  doesAgentPolicyAlreadyIncludePackage,
+  isPackageLimited,
+} from '../../../../../../common/services/limited_package';
+import type { AgentPolicy } from '../../../../../../common/types/models/agent_policy';
+import type { PackageInfo } from '../../../../../../common/types/models/epm';
+import type { GetAgentPoliciesResponseItem } from '../../../../../../common/types/rest_spec/agent_policy';
+import { Error } from '../../../../../components/error';
+import { useCapabilities } from '../../../../../hooks/use_capabilities';
+import { useFleetStatus } from '../../../../../hooks/use_fleet_status';
+import {
   sendGetOneAgentPolicy,
-  useCapabilities,
-  useFleetStatus,
-} from '../../../hooks';
-import { CreateAgentPolicyFlyout } from '../list_page/components';
+  useGetAgentPolicies,
+} from '../../../../../hooks/use_request/agent_policy';
+import { useGetPackageInfoByKey } from '../../../../../hooks/use_request/epm';
+import { CreateAgentPolicyFlyout } from '../list_page/components/create_agent_policy';
 
 const AgentPolicyFormRow = styled(EuiFormRow)`
   .euiFormRow__label {

@@ -4,11 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { useMemo } from 'react';
 import equal from 'fast-deep-equal';
-import { JobSummary } from './api/ml_get_jobs_summary_api';
-import { ModuleDescriptor, ModuleSourceConfiguration } from './log_analysis_module_types';
+import { useMemo } from 'react';
+import type { JobSummary } from './api/ml_get_jobs_summary_api';
+import type { ModuleDescriptor, ModuleSourceConfiguration } from './log_analysis_module_types';
 
 export const useLogAnalysisModuleConfiguration = <JobType extends string>({
   moduleDescriptor,

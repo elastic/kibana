@@ -4,20 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { ElasticsearchClient, Logger } from 'kibana/server';
-import * as t from 'io-ts';
 import Boom from '@hapi/boom';
-import { ILicense } from '../../../../licensing/server';
+import type { Logger } from '@kbn/logging';
+import * as t from 'io-ts';
+import type { ElasticsearchClient } from '../../../../../../src/core/server/elasticsearch/client/types';
+import type { ILicense } from '../../../../licensing/common/types';
+import type { Annotation } from '../../../common/annotations';
 import {
   createAnnotationRt,
   deleteAnnotationRt,
-  Annotation,
   getAnnotationByIdRt,
 } from '../../../common/annotations';
 import { createOrUpdateIndex } from '../../utils/create_or_update_index';
-import { mappings } from './mappings';
 import { unwrapEsResponse } from '../../utils/unwrap_es_response';
+import { mappings } from './mappings';
 
 type CreateParams = t.TypeOf<typeof createAnnotationRt>;
 type DeleteParams = t.TypeOf<typeof deleteAnnotationRt>;

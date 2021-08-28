@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isUndefined } from 'lodash';
-import { ActionParamsProps } from '../../../../types';
-import { PagerDutyActionParams } from '.././types';
+import React from 'react';
+import type { ActionParamsProps } from '../../../../types';
 import { TextFieldWithMessageVariables } from '../../text_field_with_message_variables';
+import type { PagerDutyActionParams } from '../types';
 
 const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDutyActionParams>> = ({
   actionParams,

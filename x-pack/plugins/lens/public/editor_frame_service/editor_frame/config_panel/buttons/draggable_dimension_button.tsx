@@ -4,20 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { useMemo, useCallback, useContext, ReactElement } from 'react';
-import { DragDrop, DragDropIdentifier, DragContext } from '../../../../drag_drop';
+import type { ReactElement } from 'react';
+import React, { useCallback, useContext, useMemo } from 'react';
+import { DragDrop } from '../../../../drag_drop/drag_drop';
+import { DragContext } from '../../../../drag_drop/providers/providers';
+import type { DragDropIdentifier } from '../../../../drag_drop/providers/types';
+import type { Datasource, DropType, VisualizationDimensionGroupConfig } from '../../../../types';
+import { isDraggedOperation } from '../../../../types';
+import type { LayerDatasourceDropProps } from '../types';
 import {
-  Datasource,
-  VisualizationDimensionGroupConfig,
-  isDraggedOperation,
-  DropType,
-} from '../../../../types';
-import { LayerDatasourceDropProps } from '../types';
-import {
-  getCustomDropTarget,
   getAdditionalClassesOnDroppable,
   getAdditionalClassesOnEnter,
+  getCustomDropTarget,
 } from './drop_targets_utils';
 
 export function DraggableDimensionButton({

@@ -4,18 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { FC, useState, useEffect } from 'react';
-import moment from 'moment';
+import { EuiCard, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiFlexGroup, EuiFlexItem, EuiCard, EuiIcon } from '@elastic/eui';
-import {
-  DISCOVER_APP_URL_GENERATOR,
-  DiscoverUrlGeneratorState,
-} from '../../../../../../../../src/plugins/discover/public';
-import { TimeRange, RefreshInterval } from '../../../../../../../../src/plugins/data/public';
-import { FindFileStructureResponse } from '../../../../../../file_upload/common';
-import type { FileUploadPluginStart } from '../../../../../../file_upload/public';
+import moment from 'moment';
+import type { FC } from 'react';
+import React, { useEffect, useState } from 'react';
+import type {
+  RefreshInterval,
+  TimeRange,
+} from '../../../../../../../../src/plugins/data/common/query/timefilter/types';
+import type { DiscoverUrlGeneratorState } from '../../../../../../../../src/plugins/discover/public/url_generator';
+import { DISCOVER_APP_URL_GENERATOR } from '../../../../../../../../src/plugins/discover/public/url_generator';
+import type { FindFileStructureResponse } from '../../../../../../file_upload/common/types';
+import type { FileUploadPluginStart } from '../../../../../../file_upload/public/plugin';
 import { useDataVisualizerKibana } from '../../../kibana_context';
 
 type LinkType = 'file' | 'index';

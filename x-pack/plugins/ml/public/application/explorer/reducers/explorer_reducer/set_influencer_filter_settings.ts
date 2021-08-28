@@ -4,11 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { VIEW_BY_JOB_LABEL } from '../../explorer_constants';
-import { ActionPayload } from '../../explorer_dashboard_service';
-
-import { ExplorerState } from './state';
+import type { ActionPayload } from '../../explorer_dashboard_service';
+import type { ExplorerState } from './state';
 
 export function setInfluencerFilterSettings(
   state: ExplorerState,

@@ -4,20 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { cloneDeep } from 'lodash';
+import type { IndexPatternBase, Query } from '@kbn/es-query';
 import {
-  Query,
-  fromKueryExpression,
-  toElasticsearchQuery,
   buildEsQuery,
   buildQueryFromFilters,
-  IndexPatternBase,
+  fromKueryExpression,
+  toElasticsearchQuery,
 } from '@kbn/es-query';
-import { IUiSettingsClient } from 'kibana/public';
-import { getEsQueryConfig } from '../../../../../../../../src/plugins/data/public';
+import { cloneDeep } from 'lodash';
+import type { IUiSettingsClient } from '../../../../../../../../src/core/public/ui_settings/types';
+import { getEsQueryConfig } from '../../../../../../../../src/plugins/data/common/es_query/get_es_query_config';
 import { SEARCH_QUERY_LANGUAGE } from '../../../../../common/constants/search';
-import { SavedSearchSavedObject } from '../../../../../common/types/kibana';
+import type { SavedSearchSavedObject } from '../../../../../common/types/kibana';
 import { getQueryFromSavedSearch } from '../../../util/index_utils';
 
 // Provider for creating the items used for searching and job creation.

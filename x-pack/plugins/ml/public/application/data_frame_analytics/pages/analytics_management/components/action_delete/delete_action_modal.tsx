@@ -4,18 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { FC } from 'react';
-import { i18n } from '@kbn/i18n';
 import {
   EuiConfirmModal,
-  EuiSwitch,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiSwitch,
   EUI_MODAL_CONFIRM_BUTTON,
 } from '@elastic/eui';
-
-import { DeleteAction } from './use_delete_action';
+import { i18n } from '@kbn/i18n';
+import type { FC } from 'react';
+import React from 'react';
+import type { DeleteAction } from './use_delete_action';
 
 export const DeleteActionModal: FC<DeleteAction> = ({
   closeModal,

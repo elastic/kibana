@@ -4,18 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { ElasticUser } from '../types';
-import {
+import type { CasesConfigure, ClosureType } from '../../../common/api/cases/configure';
+import type {
   ActionConnector,
   ActionTypeConnector,
-  ActionType,
   CaseConnector,
+} from '../../../common/api/connectors';
+import type {
+  ActionType,
   CaseField,
-  CasesConfigure,
-  ClosureType,
   ThirdPartyField,
-} from '../../../common';
+} from '../../../common/api/connectors/mappings';
+import type { ElasticUser } from '../../../common/ui/types';
 
 export {
   ActionConnector,

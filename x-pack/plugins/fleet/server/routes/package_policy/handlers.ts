@@ -4,28 +4,28 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { TypeOf } from '@kbn/config-schema';
 import Boom from '@hapi/boom';
+import type { TypeOf } from '@kbn/config-schema';
 
-import { SavedObjectsErrorHelpers } from '../../../../../../src/core/server';
-import type { RequestHandler } from '../../../../../../src/core/server';
-import { appContextService, packagePolicyService } from '../../services';
-import type {
-  GetPackagePoliciesRequestSchema,
-  GetOnePackagePolicyRequestSchema,
-  CreatePackagePolicyRequestSchema,
-  UpdatePackagePolicyRequestSchema,
-  DeletePackagePoliciesRequestSchema,
-  UpgradePackagePoliciesRequestSchema,
-} from '../../types';
+import type { RequestHandler } from '../../../../../../src/core/server/http/router/router';
+import { SavedObjectsErrorHelpers } from '../../../../../../src/core/server/saved_objects/service/lib/errors';
 import type {
   CreatePackagePolicyResponse,
   DeletePackagePoliciesResponse,
   UpgradePackagePolicyDryRunResponse,
   UpgradePackagePolicyResponse,
-} from '../../../common';
-import { defaultIngestErrorHandler } from '../../errors';
+} from '../../../common/types/rest_spec/package_policy';
+import { defaultIngestErrorHandler } from '../../errors/handlers';
+import { appContextService } from '../../services/app_context';
+import { packagePolicyService } from '../../services/package_policy';
+import type {
+  CreatePackagePolicyRequestSchema,
+  DeletePackagePoliciesRequestSchema,
+  GetOnePackagePolicyRequestSchema,
+  GetPackagePoliciesRequestSchema,
+  UpdatePackagePolicyRequestSchema,
+  UpgradePackagePoliciesRequestSchema,
+} from '../../types/rest_spec/package_policy';
 
 export const getPackagePoliciesHandler: RequestHandler<
   undefined,

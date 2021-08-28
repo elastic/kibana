@@ -4,20 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { InventoryMetrics } from '../../types';
-
+import type { InventoryMetrics } from '../../types';
 import { cpu } from './snapshot/cpu';
-import { rdsLatency } from './snapshot/rds_latency';
-import { rdsConnections } from './snapshot/rds_connections';
-import { rdsQueriesExecuted } from './snapshot/rds_queries_executed';
 import { rdsActiveTransactions } from './snapshot/rds_active_transactions';
-
-import { awsRDSLatency } from './tsvb/aws_rds_latency';
+import { rdsConnections } from './snapshot/rds_connections';
+import { rdsLatency } from './snapshot/rds_latency';
+import { rdsQueriesExecuted } from './snapshot/rds_queries_executed';
+import { awsRDSActiveTransactions } from './tsvb/aws_rds_active_transactions';
 import { awsRDSConnections } from './tsvb/aws_rds_connections';
 import { awsRDSCpuTotal } from './tsvb/aws_rds_cpu_total';
+import { awsRDSLatency } from './tsvb/aws_rds_latency';
 import { awsRDSQueriesExecuted } from './tsvb/aws_rds_queries_executed';
-import { awsRDSActiveTransactions } from './tsvb/aws_rds_active_transactions';
 
 export const metrics: InventoryMetrics = {
   tsvb: {

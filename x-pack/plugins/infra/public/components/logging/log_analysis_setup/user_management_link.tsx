@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { EuiButton, EuiButtonProps } from '@elastic/eui';
+import type { EuiButtonProps } from '@elastic/eui';
+import { EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
-import { useLinkProps } from '../../../hooks/use_link_props';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
+import { useLinkProps } from '../../../hooks/use_link_props';
 
 export const UserManagementLink: React.FunctionComponent<EuiButtonProps> = (props) => {
   const {

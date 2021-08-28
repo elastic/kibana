@@ -4,12 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import React, { useMemo } from 'react';
-
-import { EmptyPage } from './empty_page';
 import * as i18n from '../../components/app/cases/translations';
 import { useKibana } from '../../utils/kibana_react';
+import { EmptyPage } from './empty_page';
 
 export const CaseFeatureNoPermissions = React.memo(() => {
   const docLinks = useKibana().services.docLinks;

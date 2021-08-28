@@ -4,43 +4,39 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { first } from 'rxjs/operators';
+import type { EuiMarkdownAstNodePosition, EuiMarkdownEditorUiPlugin } from '@elastic/eui';
 import {
+  EuiBetaBadge,
+  EuiButton,
+  EuiButtonEmpty,
+  EuiCodeBlock,
   EuiFieldText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiMarkdownContext,
   EuiModalBody,
+  EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
-  EuiMarkdownEditorUiPlugin,
-  EuiMarkdownContext,
-  EuiCodeBlock,
   EuiSpacer,
-  EuiModalFooter,
-  EuiButtonEmpty,
-  EuiButton,
-  EuiFlexItem,
-  EuiFlexGroup,
-  EuiFormRow,
-  EuiMarkdownAstNodePosition,
-  EuiBetaBadge,
 } from '@elastic/eui';
-import React, { ReactNode, useCallback, useContext, useMemo, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import type { ReactNode } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
+import { first } from 'rxjs/operators';
 import styled from 'styled-components';
-
-import type { TypedLensByValueInput } from '../../../../../../lens/public';
-import { useKibana } from '../../../../common/lib/kibana';
-import { LensMarkDownRenderer } from './processor';
-import { DRAFT_COMMENT_STORAGE_ID, ID } from './constants';
+import type { EmbeddablePackageState } from '../../../../../../../../src/plugins/embeddable/public/lib/state_transfer/types';
+import type { SavedObjectFinderUiProps } from '../../../../../../../../src/plugins/saved_objects/public/finder/saved_object_finder';
+import { SavedObjectFinderUi } from '../../../../../../../../src/plugins/saved_objects/public/finder/saved_object_finder';
+import type { TypedLensByValueInput } from '../../../../../../lens/public/embeddable/embeddable_component';
+import { useKibana } from '../../../../common/lib/kibana/kibana_react';
 import { CommentEditorContext } from '../../context';
+import { DRAFT_COMMENT_STORAGE_ID, ID } from './constants';
 import { ModalContainer } from './modal_container';
-import type { EmbeddablePackageState } from '../../../../../../../../src/plugins/embeddable/public';
-import {
-  SavedObjectFinderUi,
-  SavedObjectFinderUiProps,
-} from '../../../../../../../../src/plugins/saved_objects/public';
+import { LensMarkDownRenderer } from './processor';
 import { useLensDraftComment } from './use_lens_draft_comment';
 
 const BetaBadgeWrapper = styled.span`

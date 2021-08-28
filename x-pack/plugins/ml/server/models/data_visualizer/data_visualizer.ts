@@ -4,22 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { IScopedClusterClient } from 'kibana/server';
-import { get, each, last, find } from 'lodash';
-import { KBN_FIELD_TYPES } from '../../../../../../src/plugins/data/server';
+import { each, find, get, last } from 'lodash';
+import { KBN_FIELD_TYPES } from '@kbn/field-types';
+import type { IScopedClusterClient } from '../../../../../../src/core/server/elasticsearch/client/scoped_cluster_client';
 import { ML_JOB_FIELD_TYPES } from '../../../common/constants/field_types';
+import type { Datafeed } from '../../../common/types/anomaly_detection_jobs/datafeed';
+import type { AggCardinality, RuntimeMappings } from '../../../common/types/fields';
+import { getDatafeedAggregations } from '../../../common/util/datafeed_utils';
 import { getSafeAggregationName } from '../../../common/util/job_utils';
+import { isPopulatedObject } from '../../../common/util/object_utils';
 import { stringHash } from '../../../common/util/string_utils';
 import {
   buildBaseFilterCriteria,
   buildSamplerAggregation,
   getSamplerAggregationsResponsePath,
 } from '../../lib/query_utils';
-import { AggCardinality, RuntimeMappings } from '../../../common/types/fields';
-import { getDatafeedAggregations } from '../../../common/util/datafeed_utils';
-import { Datafeed } from '../../../common/types/anomaly_detection_jobs';
-import { isPopulatedObject } from '../../../common/util/object_utils';
 
 const SAMPLER_TOP_TERMS_THRESHOLD = 100000;
 const SAMPLER_TOP_TERMS_SHARD_SIZE = 5000;

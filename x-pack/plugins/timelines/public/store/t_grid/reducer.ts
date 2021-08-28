@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
-
 import {
   addProviderToTimeline,
   applyDeltaToColumnWidth,
@@ -17,10 +16,10 @@ import {
   removeColumn,
   setEventsDeleted,
   setEventsLoading,
-  setTGridSelectAll,
   setOpenAddToExistingCase,
   setOpenAddToNewCase,
   setSelected,
+  setTGridSelectAll,
   setTimelineUpdatedAt,
   toggleDetailPanel,
   updateColumns,
@@ -30,25 +29,24 @@ import {
   updateSort,
   upsertColumn,
 } from './actions';
-
 import {
   addProviderToTimelineHelper,
   applyDeltaToTimelineColumnWidth,
   createInitTGrid,
-  setInitializeTgridSettings,
   removeTimelineColumn,
   setDeletedTimelineEvents,
+  setInitializeTgridSettings,
   setLoadingTimelineEvents,
   setSelectedTimelineEvents,
   updateTimelineColumns,
+  updateTimelineDetailsPanel,
   updateTimelineItemsPerPage,
   updateTimelinePerPageOptions,
   updateTimelineSort,
   upsertTimelineColumn,
-  updateTimelineDetailsPanel,
 } from './helpers';
-
-import { TimelineState, EMPTY_TIMELINE_BY_ID } from './types';
+import type { TimelineState } from './types';
+import { EMPTY_TIMELINE_BY_ID } from './types';
 
 export const initialTGridState: TimelineState = {
   timelineById: EMPTY_TIMELINE_BY_ID,

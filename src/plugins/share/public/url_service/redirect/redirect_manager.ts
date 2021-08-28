@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import type { SerializableRecord } from '@kbn/utility-types';
 import { BehaviorSubject } from 'rxjs';
-import type { CoreSetup } from '../../../../../core/public';
+import type { CoreSetup } from '../../../../../core/public/types';
 import { migrateToLatest } from '../../../../kibana_utils/common/persistable_state/migrate_to_latest';
 import { UrlService } from '../../../common/url_service/url_service';
 import { render } from './render';

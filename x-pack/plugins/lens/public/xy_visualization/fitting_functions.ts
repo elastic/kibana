@@ -4,9 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { Fit } from '@elastic/charts';
-import { FittingFunction } from '../../common/expressions';
+import type { FittingFunction } from '../../common/expressions/xy_chart/fitting_function';
 
 export function getFitEnum(fittingFunction?: FittingFunction) {
   if (fittingFunction) {

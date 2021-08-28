@@ -4,17 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { useMemo } from 'react';
-import { HttpFetchQuery } from 'kibana/public';
-import { HttpService } from '../http_service';
-import { basePath } from './index';
-import { useMlKibana } from '../../contexts/kibana';
-import {
-  TrainedModelConfigResponse,
+import { basePath } from '.';
+import type { HttpFetchQuery } from '../../../../../../../src/core/public/http/types';
+import type {
   ModelPipelines,
+  TrainedModelConfigResponse,
   TrainedModelStat,
 } from '../../../../common/types/trained_models';
+import { useMlKibana } from '../../contexts/kibana/kibana_context';
+import { HttpService } from '../http_service';
 
 export interface InferenceQueryParams {
   decompress_definition?: boolean;

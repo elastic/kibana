@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import {
   EuiCallOut,
   EuiFieldNumber,
@@ -27,18 +26,19 @@ import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { CodeEditorField, useKibana } from '../../../../../../../src/plugins/kibana_react/public';
-import type { ApiKeyRoleDescriptors } from '../../../../common/model';
+import { CodeEditorField } from '../../../../../../../src/plugins/kibana_react/public/code_editor';
+import { useKibana } from '../../../../../../../src/plugins/kibana_react/public/context/context';
+import type { ApiKeyRoleDescriptors } from '../../../../common/model/api_key';
 import { DocLink } from '../../../components/doc_link';
 import type { FormFlyoutProps } from '../../../components/form_flyout';
 import { FormFlyout } from '../../../components/form_flyout';
 import { useCurrentUser } from '../../../components/use_current_user';
-import { useForm } from '../../../components/use_form';
 import type { ValidationErrors } from '../../../components/use_form';
+import { useForm } from '../../../components/use_form';
 import { useInitialFocus } from '../../../components/use_initial_focus';
 import { RolesAPIClient } from '../../roles/roles_api_client';
-import { APIKeysAPIClient } from '../api_keys_api_client';
 import type { CreateApiKeyRequest, CreateApiKeyResponse } from '../api_keys_api_client';
+import { APIKeysAPIClient } from '../api_keys_api_client';
 
 export interface ApiKeyFormValues {
   name: string;

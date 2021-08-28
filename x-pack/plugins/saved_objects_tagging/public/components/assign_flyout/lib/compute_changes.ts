@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { AssignableObject } from '../../../../common/assignments';
-import { AssignmentStatusMap, AssignmentOverrideMap } from '../types';
-import { getAssignmentAction, getKey } from '../utils';
+import type { AssignableObject } from '../../../../common/assignments';
+import { getKey } from '../../../../common/assignments';
+import type { AssignmentOverrideMap, AssignmentStatusMap } from '../types';
+import { getAssignmentAction } from '../utils';
 
 /**
  * Compute the list of objects that need to be added or removed from the

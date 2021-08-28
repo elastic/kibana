@@ -4,20 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import {
-  IS_DRAGGING_CLASS_NAME,
   draggableIsField,
   fieldWasDroppedOnTimelineColumns,
+  IS_DRAGGING_CLASS_NAME,
   IS_TIMELINE_FIELD_DRAGGING_CLASS_NAME,
 } from '@kbn/securitysolution-t-grid';
-import { noop } from 'lodash/fp';
 import deepEqual from 'fast-deep-equal';
+import { noop } from 'lodash/fp';
 import React, { useCallback } from 'react';
-import { DropResult, DragDropContext, BeforeCapture } from 'react-beautiful-dnd';
+import type { BeforeCapture, DropResult } from 'react-beautiful-dnd';
+import { DragDropContext } from 'react-beautiful-dnd';
 import { useDispatch } from 'react-redux';
-
-import type { ColumnHeaderOptions, BrowserFields } from '../../../common';
+import type { BrowserFields } from '../../../common/search_strategy/index_fields';
+import type { ColumnHeaderOptions } from '../../../common/types/timeline/columns';
 import { useAddToTimelineSensor } from '../../hooks/use_add_to_timeline';
 import { addFieldToTimelineColumns, getTimelineIdFromColumnDroppableId } from './helpers';
 

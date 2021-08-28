@@ -15,7 +15,7 @@ import { Route as ReactRouterRoute } from 'react-router-dom';
 import type { DefaultTheme } from 'styled-components';
 import { ThemeProvider } from 'styled-components';
 import type { ConfigSchema } from '..';
-import type { CoreStart } from '../../../../../src/core/public';
+import type { CoreStart } from '../../../../../src/core/public/types';
 import type { AppMountParameters } from '../../../../../src/core/public/application/types';
 import { RedirectAppLinks } from '../../../../../src/plugins/kibana_react/public/app_links/redirect_app_link';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public/context/context';

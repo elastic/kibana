@@ -4,30 +4,34 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { Fragment, FC, useState, useContext, useEffect, useMemo } from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 import {
-  EuiFlyout,
-  EuiFlyoutFooter,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiButton,
   EuiButtonEmpty,
-  EuiTitle,
-  EuiFlyoutBody,
-  EuiSpacer,
   EuiCallOut,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiSpacer,
+  EuiTitle,
 } from '@elastic/eui';
-import { collapseLiteralStrings } from '../../../../../../../../shared_imports';
-import { CombinedJob, Datafeed } from '../../../../../../../../common/types/anomaly_detection_jobs';
-import { ML_EDITOR_MODE, MLJobEditor } from '../../../../../jobs_list/components/ml_job_editor';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+import type { FC } from 'react';
+import React, { Fragment, useContext, useEffect, useMemo, useState } from 'react';
+import type { CombinedJob } from '../../../../../../../../common/types/anomaly_detection_jobs/combined_job';
+import type { Datafeed } from '../../../../../../../../common/types/anomaly_detection_jobs/datafeed';
 import { isValidJson } from '../../../../../../../../common/util/validation_utils';
+import { collapseLiteralStrings } from '../../../../../../../../shared_imports';
+import { useToastNotificationService } from '../../../../../../services/toast_notification_service/toast_notification_service';
+import {
+  MLJobEditor,
+  ML_EDITOR_MODE,
+} from '../../../../../jobs_list/components/ml_job_editor/ml_job_editor';
+import { isAdvancedJobCreator } from '../../../../common/job_creator/type_guards';
 import { JobCreatorContext } from '../../job_creator_context';
-import { isAdvancedJobCreator } from '../../../../common/job_creator';
-import { DatafeedPreview } from '../datafeed_preview_flyout';
-import { useToastNotificationService } from '../../../../../../services/toast_notification_service';
+import { DatafeedPreview } from '../datafeed_preview_flyout/datafeed_preview';
 
 export enum EDITOR_MODE {
   HIDDEN,

@@ -4,25 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import {
-  EuiButtonIcon,
-  EuiContextMenu,
-  EuiContextMenuPanelDescriptor,
-  EuiPopover,
-  EuiToolTip,
-} from '@elastic/eui';
-import {
+import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
+import { EuiButtonIcon, EuiContextMenu, EuiPopover, EuiToolTip } from '@elastic/eui';
+import type {
   EuiContextMenuPanelItemDescriptorEntry,
   EuiContextMenuPanelItemSeparator,
 } from '@elastic/eui/src/components/context_menu/context_menu';
 import { i18n } from '@kbn/i18n';
-import { CoreStart } from 'kibana/public';
 import React, { useState } from 'react';
+import type { CoreStart } from '../../../../../../../../src/core/public/types';
 import { SearchSessionsMgmtAPI } from '../../lib/api';
-import { UISession } from '../../types';
+import type { UISession } from '../../types';
 import { getAction } from './get_action';
-import { ACTION, OnActionComplete } from './types';
+import type { OnActionComplete } from './types';
+import { ACTION } from './types';
 
 interface PopoverActionItemsProps {
   session: UISession;

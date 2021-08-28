@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import './visualization_container.scss';
-
-import React, { useRef } from 'react';
 import classNames from 'classnames';
+import React, { useRef } from 'react';
+import './visualization_container.scss';
 
 interface Props extends React.HTMLAttributes<HTMLDivElement> {
   isReady?: boolean;

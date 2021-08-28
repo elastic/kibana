@@ -4,11 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { SavedObjectsClient } from '../../../../../src/core/server';
-import type { SpacesPluginSetup } from '../../../spaces/server';
-import type { AuditServiceSetup } from '../audit';
-import type { AuthorizationServiceSetup } from '../authorization';
+import { SavedObjectsClient } from '../../../../../src/core/server/saved_objects/service/saved_objects_client';
+import type { SpacesPluginSetup } from '../../../spaces/server/plugin';
+import type { AuditServiceSetup } from '../audit/audit_service';
+import type { AuthorizationServiceSetup } from '../authorization/authorization_service';
 import { LegacySpacesAuditLogger } from './legacy_audit_logger';
 import { SecureSpacesClientWrapper } from './secure_spaces_client_wrapper';
 

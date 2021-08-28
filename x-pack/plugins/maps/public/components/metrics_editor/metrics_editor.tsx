@@ -4,15 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { Component, Fragment } from 'react';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiButtonEmpty, EuiSpacer, EuiTextAlign } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiButtonEmpty, EuiComboBoxOptionOption, EuiSpacer, EuiTextAlign } from '@elastic/eui';
-import { MetricEditor } from './metric_editor';
-import { DEFAULT_METRIC } from '../../classes/sources/es_agg_source';
-import { IFieldType } from '../../../../../../src/plugins/data/public';
-import { AggDescriptor, FieldedAggDescriptor } from '../../../common/descriptor_types';
+import React, { Component, Fragment } from 'react';
+import type { IFieldType } from '../../../../../../src/plugins/data/common/index_patterns/fields/types';
 import { AGG_TYPE } from '../../../common/constants';
+import type {
+  AggDescriptor,
+  FieldedAggDescriptor,
+} from '../../../common/descriptor_types/source_descriptor_types';
+import { DEFAULT_METRIC } from '../../classes/sources/es_agg_source/es_agg_source';
+import { MetricEditor } from './metric_editor';
 
 export function isMetricValid(aggDescriptor: AggDescriptor) {
   return aggDescriptor.type === AGG_TYPE.COUNT

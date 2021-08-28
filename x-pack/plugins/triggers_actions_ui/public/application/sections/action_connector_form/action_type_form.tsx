@@ -4,45 +4,47 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { Suspense, useEffect, useState } from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 import {
+  EuiAccordion,
+  EuiBadge,
+  EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiComboBox,
+  EuiErrorBoundary,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
-  EuiSpacer,
-  EuiFormRow,
-  EuiComboBox,
-  EuiAccordion,
-  EuiButtonIcon,
-  EuiButtonEmpty,
-  EuiIconTip,
-  EuiText,
-  EuiFormLabel,
   EuiFormControlLayout,
+  EuiFormLabel,
+  EuiFormRow,
+  EuiIcon,
+  EuiIconTip,
+  EuiSpacer,
   EuiSuperSelect,
-  EuiBadge,
-  EuiErrorBoundary,
+  EuiText,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { partition, pick } from 'lodash';
-import { ActionVariable, AlertActionParam } from '../../../../../alerting/common';
-import {
-  IErrorObject,
+import React, { Suspense, useEffect, useState } from 'react';
+import type {
+  ActionVariable,
   AlertAction,
-  ActionTypeIndex,
+  AlertActionParam,
+} from '../../../../../alerting/common/alert';
+import { useKibana } from '../../../common/lib/kibana/kibana_react';
+import type {
   ActionConnector,
-  ActionVariables,
+  ActionTypeIndex,
   ActionTypeRegistryContract,
-  REQUIRED_ACTION_VARIABLES,
+  ActionVariables,
+  IErrorObject,
 } from '../../../types';
-import { checkActionFormActionTypeEnabled } from '../../lib/check_action_type_enabled';
-import { hasSaveActionsCapability } from '../../lib/capabilities';
-import { ActionAccordionFormProps, ActionGroupWithMessageVariables } from './action_form';
+import { REQUIRED_ACTION_VARIABLES } from '../../../types';
 import { transformActionVariables } from '../../lib/action_variables';
-import { useKibana } from '../../../common/lib/kibana';
-import { DefaultActionParams } from '../../lib/get_defaults_for_action_params';
+import { hasSaveActionsCapability } from '../../lib/capabilities';
+import { checkActionFormActionTypeEnabled } from '../../lib/check_action_type_enabled';
+import type { DefaultActionParams } from '../../lib/get_defaults_for_action_params';
+import type { ActionAccordionFormProps, ActionGroupWithMessageVariables } from './action_form';
 
 export type ActionTypeFormProps = {
   actionItem: AlertAction;

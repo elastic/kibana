@@ -4,27 +4,23 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { ML_RESULTS_INDEX_PATTERN } from '../../../../../common/constants/index_patterns';
-import { Dictionary } from '../../../../../common/types/common';
-
-import {
-  getDefaultChartsData,
-  ExplorerChartsData,
-} from '../../explorer_charts/explorer_charts_container_service';
-import {
-  getDefaultSwimlaneData,
+import type { AnnotationsTable } from '../../../../../common/types/annotations';
+import type { Dictionary } from '../../../../../common/types/common';
+import type { InfluencersFilterQuery } from '../../../../../common/types/es_client';
+import type { TimeBucketsInterval } from '../../../util/time_buckets';
+import type { ExplorerChartsData } from '../../explorer_charts/explorer_charts_container_service';
+import { getDefaultChartsData } from '../../explorer_charts/explorer_charts_container_service';
+import { SWIM_LANE_DEFAULT_PAGE_SIZE } from '../../explorer_constants';
+import type {
   AnomaliesTableData,
-  ExplorerJob,
   AppStateSelectedCells,
+  ExplorerJob,
   OverallSwimlaneData,
   SwimlaneData,
   ViewBySwimLaneData,
 } from '../../explorer_utils';
-import { AnnotationsTable } from '../../../../../common/types/annotations';
-import { SWIM_LANE_DEFAULT_PAGE_SIZE } from '../../explorer_constants';
-import { InfluencersFilterQuery } from '../../../../../common/types/es_client';
-import { TimeBucketsInterval } from '../../../util/time_buckets';
+import { getDefaultSwimlaneData } from '../../explorer_utils';
 
 export interface ExplorerState {
   overallAnnotations: AnnotationsTable;

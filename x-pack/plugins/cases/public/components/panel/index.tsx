@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import styled from 'styled-components';
-import React from 'react';
 import { EuiPanel } from '@elastic/eui';
+import React from 'react';
+import styled from 'styled-components';
 
 /**
  * The reason for the type of syntax below of:

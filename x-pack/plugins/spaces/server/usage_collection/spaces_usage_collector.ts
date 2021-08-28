@@ -4,18 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import type { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
 
-import type { ElasticsearchClient } from 'src/core/server';
-import type {
-  CollectorFetchContext,
-  UsageCollectionSetup,
-} from 'src/plugins/usage_collection/server';
-
+import type { ElasticsearchClient } from '../../../../../src/core/server/elasticsearch/client/types';
+import type { CollectorFetchContext } from '../../../../../src/plugins/usage_collection/server/collector/types';
+import type { UsageCollectionSetup } from '../../../../../src/plugins/usage_collection/server/plugin';
 import type { PluginsSetup } from '../plugin';
-import type { UsageStats, UsageStatsServiceSetup } from '../usage_stats';
+import type { UsageStats } from '../usage_stats/types';
+import type { UsageStatsServiceSetup } from '../usage_stats/usage_stats_service';
 
 interface SpacesAggregationResponse {
   hits: {

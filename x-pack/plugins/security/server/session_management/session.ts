@@ -4,16 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import type { Crypto } from '@elastic/node-crypto';
 import nodeCrypto from '@elastic/node-crypto';
 import { createHash, randomBytes } from 'crypto';
 import { promisify } from 'util';
 
+import type { Logger } from '@kbn/logging';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { KibanaRequest, Logger } from 'src/core/server';
 
-import type { AuthenticationProvider } from '../../common/model';
+import type { KibanaRequest } from '../../../../../src/core/server/http/router/request';
+import type { AuthenticationProvider } from '../../common/model/authentication_provider';
 import type { ConfigType } from '../config';
 import type { SessionCookie } from './session_cookie';
 import type { SessionIndex, SessionIndexValue } from './session_index';

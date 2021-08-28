@@ -4,11 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { useMemo } from 'react';
-
-import type { IndexPattern } from '../../../../../../../src/plugins/data/public';
-
+import { IndexPattern } from '../../../../../../../src/plugins/data/common/index_patterns/index_patterns/index_pattern';
 import { ML__INCREMENTAL_ID } from '../../data_frame_analytics/common/fields';
 
 export const useScatterplotFieldOptions = (

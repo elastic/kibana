@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
-import { isEmpty } from 'lodash';
 import { EuiFlexGroup, EuiFlexItem, EuiProgress, EuiSpacer, EuiText } from '@elastic/eui';
-import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
+import { isEmpty } from 'lodash';
+import React from 'react';
+import styled from 'styled-components';
 import { LOADING_VIEW } from '../series_builder/series_builder';
-import { SeriesUrl } from '../types';
+import type { SeriesUrl } from '../types';
 
 export function EmptyView({
   loading,

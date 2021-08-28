@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { FC, Fragment } from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiAccordion, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { CalendarsSelection } from './components/calendars';
-import { CustomUrlsSelection } from './components/custom_urls';
+import { i18n } from '@kbn/i18n';
+import type { FC } from 'react';
+import React, { Fragment } from 'react';
+import { CalendarsSelection } from './components/calendars/calendars_selection';
+import { CustomUrlsSelection } from './components/custom_urls/custom_urls_selection';
 
 const buttonContent = i18n.translate(
   'xpack.ml.newJob.wizard.jobDetailsStep.additionalSectionButton',

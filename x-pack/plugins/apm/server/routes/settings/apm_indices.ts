@@ -6,13 +6,13 @@
  */
 
 import * as t from 'io-ts';
-import { createApmServerRouteRepository } from '../create_apm_server_route_repository';
-import { createApmServerRoute } from '../create_apm_server_route';
 import {
-  getApmIndices,
   getApmIndexSettings,
+  getApmIndices,
 } from '../../lib/settings/apm_indices/get_apm_indices';
 import { saveApmIndices } from '../../lib/settings/apm_indices/save_apm_indices';
+import { createApmServerRoute } from '../create_apm_server_route';
+import { createApmServerRouteRepository } from '../create_apm_server_route_repository';
 
 // get list of apm indices and values
 const apmIndexSettingsRoute = createApmServerRoute({

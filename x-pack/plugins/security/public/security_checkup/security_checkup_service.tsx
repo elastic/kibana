@@ -4,14 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { DocLinksStart } from 'src/core/public';
+import type { DocLinksStart } from '../../../../../src/core/public/doc_links/doc_links_service';
 import type {
   SecurityOssPluginSetup,
   SecurityOssPluginStart,
-} from 'src/plugins/security_oss/public';
-
-import { insecureClusterAlertText, insecureClusterAlertTitle } from './components';
+} from '../../../../../src/plugins/security_oss/public/plugin';
+import {
+  insecureClusterAlertText,
+  insecureClusterAlertTitle,
+} from './components/insecure_cluster_alert';
 
 interface SetupDeps {
   securityOssSetup: SecurityOssPluginSetup;

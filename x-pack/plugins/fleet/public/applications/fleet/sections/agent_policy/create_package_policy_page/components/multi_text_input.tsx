@@ -4,19 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useState, useEffect } from 'react';
-import type { FunctionComponent, ChangeEvent } from 'react';
-
 import {
+  EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButtonEmpty,
-  EuiFieldText,
-  EuiButtonIcon,
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import type { ChangeEvent, FunctionComponent } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
 interface Props {
   value: string[];

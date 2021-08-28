@@ -4,11 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { Feature, Point } from 'geojson';
 import { euiPaletteColorBlind } from '@elastic/eui';
-import { DEFAULT_GEO_REGEX } from './geo_point_content';
+import type { Feature, Point } from 'geojson';
 import { SOURCE_TYPES } from '../../../../../../../maps/common/constants';
+import { DEFAULT_GEO_REGEX } from './geo_point_content';
 
 export const convertWKTGeoToLonLat = (
   value: string | number

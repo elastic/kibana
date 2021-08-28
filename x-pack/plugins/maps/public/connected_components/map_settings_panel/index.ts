@@ -4,19 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { AnyAction, Dispatch } from 'redux';
 import { connect } from 'react-redux';
+import type { AnyAction, Dispatch } from 'redux';
+import { rollbackMapSettings, updateMapSetting } from '../../actions/map_actions';
+import { updateFlyout } from '../../actions/ui_actions';
+import type { MapStoreState } from '../../reducers/store';
 import { FLYOUT_STATE } from '../../reducers/ui';
-import { MapStoreState } from '../../reducers/store';
-import { MapSettingsPanel } from './map_settings_panel';
-import { rollbackMapSettings, updateMapSetting, updateFlyout } from '../../actions';
 import {
   getMapCenter,
   getMapSettings,
   getMapZoom,
   hasMapSettingsChanges,
 } from '../../selectors/map_selectors';
+import { MapSettingsPanel } from './map_settings_panel';
 
 function mapStateToProps(state: MapStoreState) {
   return {

@@ -6,13 +6,13 @@
  */
 
 import React from 'react';
-import { Switch, Route } from 'react-router-dom';
+import { Route, Switch } from 'react-router-dom';
 
-import { INTEGRATIONS_ROUTING_PATHS } from '../../constants';
-import { useBreadcrumbs } from '../../hooks';
+import { INTEGRATIONS_ROUTING_PATHS } from '../../../../constants/page_paths';
+import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 
-import { EPMHomePage } from './screens/home';
 import { Detail } from './screens/detail';
+import { EPMHomePage } from './screens/home';
 import { Policy } from './screens/policy';
 
 export const EPMApp: React.FunctionComponent = () => {

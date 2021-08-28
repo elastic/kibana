@@ -6,10 +6,9 @@
  */
 
 import React from 'react';
-
-import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
-import { LogEntryCategoryDataset } from '../../../../../../common/log_analysis';
-import { getFriendlyNameForPartitionId } from '../../../../../../common/log_analysis';
+import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
+import { getFriendlyNameForPartitionId } from '../../../../../../common/log_analysis/log_analysis_results';
+import type { LogEntryCategoryDataset } from '../../../../../../common/log_analysis/log_entry_categories_analysis';
 
 export const DatasetsList: React.FunctionComponent<{
   datasets: LogEntryCategoryDataset[];

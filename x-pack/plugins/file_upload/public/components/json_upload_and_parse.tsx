@@ -4,19 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { Component, Fragment } from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiProgress, EuiText } from '@elastic/eui';
-import { getIndexPatternService } from '../kibana_services';
-import { GeoJsonUploadForm, OnFileSelectParameters } from './geojson_upload_form';
-import { ImportCompleteView } from './import_complete_view';
-import { ES_FIELD_TYPES } from '../../../../../src/plugins/data/public';
-import type { FileUploadComponentProps, FileUploadGeoResults } from '../lazy_load_bundle';
-import { ImportResults } from '../importer';
-import { GeoJsonImporter } from '../importer/geojson_importer';
-import { Settings } from '../../common';
+import { i18n } from '@kbn/i18n';
+import React, { Component, Fragment } from 'react';
+import type { Settings } from '../../common/types';
 import { hasImportPermission } from '../api';
+import { ES_FIELD_TYPES } from '@kbn/field-types';
+import { GeoJsonImporter } from '../importer/geojson_importer/geojson_importer';
+import type { ImportResults } from '../importer/types';
+import { getIndexPatternService } from '../kibana_services';
+import type { FileUploadComponentProps, FileUploadGeoResults } from '../lazy_load_bundle';
+import type { OnFileSelectParameters } from './geojson_upload_form/geojson_file_picker';
+import { GeoJsonUploadForm } from './geojson_upload_form/geojson_upload_form';
+import { ImportCompleteView } from './import_complete_view';
 
 enum PHASE {
   CONFIGURE = 'CONFIGURE',

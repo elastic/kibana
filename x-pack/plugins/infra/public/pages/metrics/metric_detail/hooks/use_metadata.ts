@@ -4,17 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { useEffect } from 'react';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { InfraMetadata, InfraMetadataRT } from '../../../../../common/http_api/metadata_api';
+import { useEffect } from 'react';
+import type { InfraMetadata } from '../../../../../common/http_api/metadata_api';
+import { InfraMetadataRT } from '../../../../../common/http_api/metadata_api';
+import type {
+  InventoryItemType,
+  InventoryMetric,
+} from '../../../../../common/inventory_models/types';
+import { createPlainError, throwErrors } from '../../../../../common/runtime_types';
 import { useHTTPRequest } from '../../../../hooks/use_http_request';
-import { throwErrors, createPlainError } from '../../../../../common/runtime_types';
-import { InventoryMetric, InventoryItemType } from '../../../../../common/inventory_models/types';
 import { getFilteredMetrics } from '../lib/get_filtered_metrics';
-import { MetricsTimeInput } from './use_metrics_time';
+import type { MetricsTimeInput } from './use_metrics_time';
 
 export function useMetadata(
   nodeId: string,

@@ -7,7 +7,7 @@
 
 import { IRouter, Logger } from 'src/core/server';
 import { ExpressionsServerSetup } from 'src/plugins/expressions/server';
-import { BfetchServerSetup } from 'src/plugins/bfetch/server';
+import type { BfetchServerSetup } from 'src/plugins/bfetch/server/types';
 import { initCustomElementsRoutes } from './custom_elements';
 import { initESFieldsRoutes } from './es_fields';
 import { initShareablesRoutes } from './shareables';

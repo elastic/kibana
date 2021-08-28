@@ -4,14 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { LayerWizard, RenderWizardArguments } from '../../layers/layer_wizard_registry';
-import { NewVectorLayerEditor } from './wizard';
-import { DrawLayerIcon } from '../../layers/icons/draw_layer_icon';
+import { LAYER_WIZARD_CATEGORY } from '../../../../common/constants';
 import { getFileUpload } from '../../../kibana_services';
-import { LAYER_WIZARD_CATEGORY } from '../../../../common';
+import { DrawLayerIcon } from '../icons/draw_layer_icon';
+import type { LayerWizard, RenderWizardArguments } from '../layer_wizard_registry';
+import { NewVectorLayerEditor } from './wizard';
 
 const ADD_VECTOR_DRAWING_LAYER = 'ADD_VECTOR_DRAWING_LAYER';
 

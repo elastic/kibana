@@ -4,18 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { i18n } from '@kbn/i18n';
-import { AggFunctionsMapping } from '../../../../../../../src/plugins/data/public';
-import { buildExpressionFunction } from '../../../../../../../src/plugins/expressions/public';
-import { OperationDefinition } from './index';
-import { FormattedIndexPatternColumn, FieldBasedIndexPatternColumn } from './column_types';
-import { IndexPatternField } from '../../types';
-import { getInvalidFieldMessage, getFilter } from './helpers';
+import type { OperationDefinition } from '.';
+import type { AggFunctionsMapping } from '../../../../../../../src/plugins/data/common/search/aggs/types';
+import { buildExpressionFunction } from '../../../../../../../src/plugins/expressions/common/ast/build_function';
+import type { IndexPatternField } from '../../types';
 import {
   adjustTimeScaleLabelSuffix,
   adjustTimeScaleOnOtherColumnChange,
 } from '../time_scale_utils';
+import type { FieldBasedIndexPatternColumn, FormattedIndexPatternColumn } from './column_types';
+import { getFilter, getInvalidFieldMessage } from './helpers';
 
 const countLabel = i18n.translate('xpack.lens.indexPattern.countOf', {
   defaultMessage: 'Count of records',

@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import {
   EuiErrorBoundary,
   EuiFlexGroup,
@@ -18,7 +17,7 @@ import { i18n } from '@kbn/i18n';
 import { truncate } from 'lodash';
 import React, { useContext } from 'react';
 import { ThemeContext } from 'styled-components';
-import { NewsItem as INewsItem } from '../../../services/get_news_feed';
+import type { NewsItem as INewsItem } from '../../../services/get_news_feed';
 import './index.scss';
 
 interface Props {

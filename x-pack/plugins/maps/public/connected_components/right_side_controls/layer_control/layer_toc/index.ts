@@ -4,15 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { AnyAction } from 'redux';
-import { ThunkDispatch } from 'redux-thunk';
 import { connect } from 'react-redux';
-import { LayerTOC } from './layer_toc';
-import { updateLayerOrder } from '../../../../actions';
+import type { AnyAction } from 'redux';
+import type { ThunkDispatch } from 'redux-thunk';
+import { updateLayerOrder } from '../../../../actions/layer_actions';
+import type { MapStoreState } from '../../../../reducers/store';
 import { getLayerList } from '../../../../selectors/map_selectors';
 import { getIsReadOnly } from '../../../../selectors/ui_selectors';
-import { MapStoreState } from '../../../../reducers/store';
+import { LayerTOC } from './layer_toc';
 
 function mapStateToProps(state: MapStoreState) {
   return {

@@ -4,17 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { Map as MbMap } from '@kbn/mapbox-gl';
-import { StaticStyleProperty } from './static_style_property';
+import { Map as MbMap } from '@kbn/mapbox-gl';
 import { VECTOR_STYLES } from '../../../../../common/constants';
+import type { SizeStaticOptions } from '../../../../../common/descriptor_types/style_property_descriptor_types';
 import {
   HALF_LARGE_MAKI_ICON_SIZE,
   LARGE_MAKI_ICON_SIZE,
   SMALL_MAKI_ICON_SIZE,
-  // @ts-expect-error
+  //@ts-expect-error
 } from '../symbol_utils';
-import { SizeStaticOptions } from '../../../../../common/descriptor_types';
+import { StaticStyleProperty } from './static_style_property';
 
 export class StaticSizeProperty extends StaticStyleProperty<SizeStaticOptions> {
   constructor(options: SizeStaticOptions, styleName: VECTOR_STYLES) {

@@ -10,12 +10,14 @@ import semver from 'semver';
 import type {
   SavedObjectMigrationContext,
   SavedObjectMigrationFn,
-  SavedObjectUnsanitizedDoc,
-} from 'src/core/server';
-
-import { EncryptionError } from './crypto';
-import type { EncryptedSavedObjectsService, EncryptedSavedObjectTypeRegistration } from './crypto';
-import { normalizeNamespace } from './saved_objects';
+} from '../../../../src/core/server/saved_objects/migrations/types';
+import type { SavedObjectUnsanitizedDoc } from '../../../../src/core/server/saved_objects/serialization/types';
+import type {
+  EncryptedSavedObjectsService,
+  EncryptedSavedObjectTypeRegistration,
+} from './crypto/encrypted_saved_objects_service';
+import { EncryptionError } from './crypto/encryption_error';
+import { normalizeNamespace } from './saved_objects/get_descriptor_namespace';
 
 type SavedObjectOptionalMigrationFn<InputAttributes, MigratedAttributes> = (
   doc: SavedObjectUnsanitizedDoc<InputAttributes> | SavedObjectUnsanitizedDoc<MigratedAttributes>,

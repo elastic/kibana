@@ -4,26 +4,26 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { useState, useMemo } from 'react';
-import { EuiSteps, EuiLink, EuiText, EuiSpacer } from '@elastic/eui';
+import { EuiLink, EuiSpacer, EuiSteps, EuiText } from '@elastic/eui';
 import type { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import React, { useMemo, useState } from 'react';
 
-import { useGetOneEnrollmentAPIKey, useLink, useFleetStatus } from '../../hooks';
-
-import { ManualInstructions } from '../../components/enrollment_instructions';
 import {
-  deploymentModeStep,
-  ServiceTokenStep,
-  FleetServerCommandStep,
-  useFleetServerInstructions,
   addFleetServerHostStep,
-} from '../../applications/fleet/sections/agents/agent_requirements_page/components';
-import { FleetServerRequirementPage } from '../../applications/fleet/sections/agents/agent_requirements_page';
+  deploymentModeStep,
+  FleetServerCommandStep,
+  ServiceTokenStep,
+  useFleetServerInstructions,
+} from '../../applications/fleet/sections/agents/agent_requirements_page/components/fleet_server_on_prem_instructions';
+import { FleetServerRequirementPage } from '../../applications/fleet/sections/agents/agent_requirements_page/fleet_server_requirement_page';
+import { useFleetStatus } from '../../hooks/use_fleet_status';
+import { useLink } from '../../hooks/use_link';
+import { useGetOneEnrollmentAPIKey } from '../../hooks/use_request/enrollment_api_keys';
+import { ManualInstructions } from '../enrollment_instructions/manual';
 
-import { DownloadStep, AgentPolicySelectionStep, AgentEnrollmentKeySelectionStep } from './steps';
+import { AgentEnrollmentKeySelectionStep, AgentPolicySelectionStep, DownloadStep } from './steps';
 import type { BaseProps } from './types';
 
 type Props = BaseProps;

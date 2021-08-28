@@ -4,12 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { ChangeEvent, FC } from 'react';
-
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiComboBox,
-  EuiComboBoxOptionOption,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -21,15 +18,15 @@ import {
   EuiTextArea,
   EuiTitle,
 } from '@elastic/eui';
-
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { isValidCustomUrlSettingsTimeRange } from './utils';
+import type { ChangeEvent, FC } from 'react';
+import React from 'react';
+import type { IIndexPattern } from '../../../../../../../../src/plugins/data/common/index_patterns/types';
+import type { UrlConfig } from '../../../../../common/types/custom_urls';
 import { isValidLabel } from '../../../util/custom_url_utils';
-
 import { TIME_RANGE_TYPE, URL_TYPE } from './constants';
-import { UrlConfig } from '../../../../../common/types/custom_urls';
-import { IIndexPattern } from '../../../../../../../../src/plugins/data/common/index_patterns';
+import { isValidCustomUrlSettingsTimeRange } from './utils';
 
 function getLinkToOptions() {
   return [

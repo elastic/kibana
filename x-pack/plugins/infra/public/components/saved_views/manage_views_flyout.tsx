@@ -4,23 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { useCallback, useState } from 'react';
-
 import {
-  EuiButtonEmpty,
-  EuiModalFooter,
-  EuiFlyout,
-  EuiFlyoutHeader,
-  EuiTitle,
-  EuiFlyoutBody,
-  EuiInMemoryTable,
-  EuiFlexGroup,
   EuiButton,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutHeader,
+  EuiInMemoryTable,
+  EuiModalFooter,
   EuiPortal,
+  EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import React, { useCallback, useState } from 'react';
 import { SavedView } from '../../containers/saved_view/saved_view';
 
 interface Props<ViewState> {

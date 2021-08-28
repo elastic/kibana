@@ -4,13 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { EuiPopover, EuiContextMenu, EuiContextMenuPanelDescriptor } from '@elastic/eui';
-
-import React, { useCallback, useState, useMemo } from 'react';
+import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
+import { EuiContextMenu, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React, { useCallback, useMemo, useState } from 'react';
 import { findInventoryModel } from '../../../../../../common/inventory_models';
-import { InventoryItemType } from '../../../../../../common/inventory_models/types';
+import type { InventoryItemType } from '../../../../../../common/inventory_models/types';
 import { useWaffleOptionsContext } from '../../hooks/use_waffle_options';
 import { DropdownButton } from '../dropdown_button';
 

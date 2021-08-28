@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { useEffect, useState } from 'react';
 import { EuiIcon, EuiText } from '@elastic/eui';
 import moment from 'moment';
+import React, { useEffect, useState } from 'react';
 
 interface Props {
   lastUpdated?: number;

@@ -4,20 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import React, { useMemo, useState } from 'react';
-
+import { useToastNotificationService } from '../../../../../services/toast_notification_service/toast_notification_service';
+import { startAnalytics } from '../../services/analytics_service/start_analytics';
+import type {
+  DataFrameAnalyticsListAction,
+  DataFrameAnalyticsListRow,
+} from '../analytics_list/common';
 import {
   isCompletedAnalyticsJob,
   isDataFrameAnalyticsFailed,
   isDataFrameAnalyticsRunning,
-  DataFrameAnalyticsListAction,
-  DataFrameAnalyticsListRow,
 } from '../analytics_list/common';
-import { startAnalytics } from '../../services/analytics_service';
-import { useToastNotificationService } from '../../../../../services/toast_notification_service';
-
-import { startActionNameText, StartActionName } from './start_action_name';
+import { StartActionName, startActionNameText } from './start_action_name';
 
 export type StartAction = ReturnType<typeof useStartAction>;
 export const useStartAction = (canStartStopDataFrameAnalytics: boolean) => {

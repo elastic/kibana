@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { FIELD_PREFIX_TO_ADD_AS_CANDIDATE } from '../constants';
 
 export const hasPrefixToInclude = (fieldName: string) => {

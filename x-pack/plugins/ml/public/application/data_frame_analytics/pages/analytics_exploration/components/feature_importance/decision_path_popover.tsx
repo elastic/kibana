@@ -4,23 +4,25 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { FC, useState } from 'react';
 import { EuiLink, EuiTab, EuiTabs, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { RegressionDecisionPath } from './decision_path_regression';
-import { DecisionPathJSONViewer } from './decision_path_json_viewer';
-import {
+import type { FC } from 'react';
+import React, { useState } from 'react';
+import { ANALYSIS_CONFIG_TYPE } from '../../../../../../../common/constants/data_frame_analytics';
+import type { DataFrameAnalysisConfigType } from '../../../../../../../common/types/data_frame_analytics';
+import type {
   FeatureImportance,
   FeatureImportanceBaseline,
-  isClassificationFeatureImportanceBaseline,
-  isRegressionFeatureImportanceBaseline,
   TopClasses,
 } from '../../../../../../../common/types/feature_importance';
-import { ANALYSIS_CONFIG_TYPE } from '../../../../common';
+import {
+  isClassificationFeatureImportanceBaseline,
+  isRegressionFeatureImportanceBaseline,
+} from '../../../../../../../common/types/feature_importance';
+import { useMlKibana } from '../../../../../contexts/kibana/kibana_context';
 import { ClassificationDecisionPath } from './decision_path_classification';
-import { useMlKibana } from '../../../../../contexts/kibana';
-import type { DataFrameAnalysisConfigType } from '../../../../../../../common/types/data_frame_analytics';
+import { DecisionPathJSONViewer } from './decision_path_json_viewer';
+import { RegressionDecisionPath } from './decision_path_regression';
 import { getStringBasedClassName } from './use_classification_path_data';
 
 interface DecisionPathPopoverProps {

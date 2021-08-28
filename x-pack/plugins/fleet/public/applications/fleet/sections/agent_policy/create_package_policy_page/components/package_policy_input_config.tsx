@@ -4,22 +4,23 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { useState, Fragment, memo, useMemo } from 'react';
-import styled from 'styled-components';
-import { FormattedMessage } from '@kbn/i18n/react';
 import {
+  EuiButtonEmpty,
   EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiText,
   EuiSpacer,
-  EuiButtonEmpty,
+  EuiText,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
+import React, { Fragment, memo, useMemo, useState } from 'react';
+import styled from 'styled-components';
 
-import type { NewPackagePolicyInput, RegistryVarsEntry } from '../../../../types';
-import type { PackagePolicyConfigValidationResults } from '../services';
-import { isAdvancedVar, validationHasErrors } from '../services';
+import type { PackagePolicyConfigValidationResults } from '../../../../../../../common/services/validate_package_policy';
+import { validationHasErrors } from '../../../../../../../common/services/validate_package_policy';
+import type { RegistryVarsEntry } from '../../../../../../../common/types/models/epm';
+import type { NewPackagePolicyInput } from '../../../../../../../common/types/models/package_policy';
+import { isAdvancedVar } from '../services/is_advanced_var';
 
 import { PackagePolicyInputVarField } from './package_policy_input_var_field';
 

@@ -4,11 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { ElasticsearchClient, KibanaRequest, Logger } from 'src/core/server';
-import { PublicMethodsOf } from '@kbn/utility-types';
-import { SecurityPluginSetup } from '../../../security/server';
-import { AlertingAuthorization } from '../../../alerting/server';
+import type { Logger } from '@kbn/logging';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { ElasticsearchClient } from '../../../../../src/core/server/elasticsearch/client/types';
+import { KibanaRequest } from '../../../../../src/core/server/http/router/request';
+import { AlertingAuthorization } from '../../../alerting/server/authorization/alerting_authorization';
+import type { SecurityPluginSetup } from '../../../security/server/plugin';
 import { AlertsClient } from './alerts_client';
 
 export interface AlertsClientFactoryProps {

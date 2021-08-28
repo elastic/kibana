@@ -6,10 +6,10 @@
  */
 
 import Boom from '@hapi/boom';
-import type { KibanaRequest } from 'src/core/server';
-import type { ElasticsearchClient } from 'src/core/server';
 
-import type { Agent } from '../../types';
+import type { ElasticsearchClient } from '../../../../../../src/core/server/elasticsearch/client/types';
+import type { KibanaRequest } from '../../../../../../src/core/server/http/router/request';
+import type { Agent } from '../../../common/types/models/agent';
 import * as APIKeyService from '../api_keys';
 
 import { getAgentByAccessAPIKeyId } from './crud';

@@ -8,7 +8,7 @@
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { BehaviorSubject } from 'rxjs';
 import { skip } from 'rxjs/operators';
-import type { CoreStart } from '../../../../../core/public';
+import type { CoreStart } from '../../../../../core/public/types';
 import type { IStorageWrapper } from '../../../../kibana_utils/public/storage/types';
 import type { Query } from '../../../common';
 import { KIBANA_USER_QUERY_LANGUAGE_KEY, UI_SETTINGS } from '../../../common/constants';

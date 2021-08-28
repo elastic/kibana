@@ -4,8 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { SavedObjectsTypeMappingDefinition } from 'kibana/server';
+import type { SavedObjectsTypeMappingDefinition } from '../../../../../src/core/server/saved_objects/mappings/types';
 
 export const mlJob: SavedObjectsTypeMappingDefinition = {
   properties: {

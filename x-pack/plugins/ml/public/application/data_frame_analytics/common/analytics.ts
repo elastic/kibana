@@ -4,32 +4,40 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { cloneDeep } from 'lodash';
 import { useEffect } from 'react';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { distinctUntilChanged, filter } from 'rxjs/operators';
-import { cloneDeep } from 'lodash';
-import { ml } from '../../services/ml_api_service';
-import { Dictionary } from '../../../../common/types/common';
-import { extractErrorMessage } from '../../../../common/util/errors';
-import { SavedSearchQuery } from '../../contexts/ml';
-import {
+import { ANALYSIS_CONFIG_TYPE } from '../../../../common/constants/data_frame_analytics';
+import type { Dictionary } from '../../../../common/types/common';
+import type {
   AnalysisConfig,
   ClassificationAnalysis,
   DataFrameAnalysisConfigType,
   RegressionAnalysis,
 } from '../../../../common/types/data_frame_analytics';
 import {
+  getDependentVar,
+  getPredictedFieldName,
+  getPredictionFieldName,
+  isClassificationAnalysis,
+  isOutlierAnalysis,
+  isRegressionAnalysis,
+} from '../../../../common/util/analytics_utils';
+import { extractErrorMessage } from '../../../../common/util/errors/process_errors';
+import type { SavedSearchQuery } from '../../contexts/ml/ml_context';
+import { ml } from '../../services/ml_api_service';
+
+export { getAnalysisType } from '../../../../common/util/analytics_utils';
+export {
   isOutlierAnalysis,
   isRegressionAnalysis,
   isClassificationAnalysis,
   getPredictionFieldName,
   getDependentVar,
   getPredictedFieldName,
-} from '../../../../common/util/analytics_utils';
-import { ANALYSIS_CONFIG_TYPE } from '../../../../common/constants/data_frame_analytics';
-
-export { getAnalysisType } from '../../../../common/util/analytics_utils';
+  ANALYSIS_CONFIG_TYPE,
+};
 export type IndexPattern = string;
 
 export enum ANALYSIS_ADVANCED_FIELDS {
@@ -600,14 +608,4 @@ export const loadDocsCount = async ({
       success: false,
     };
   }
-};
-
-export {
-  isOutlierAnalysis,
-  isRegressionAnalysis,
-  isClassificationAnalysis,
-  getPredictionFieldName,
-  getDependentVar,
-  getPredictedFieldName,
-  ANALYSIS_CONFIG_TYPE,
 };

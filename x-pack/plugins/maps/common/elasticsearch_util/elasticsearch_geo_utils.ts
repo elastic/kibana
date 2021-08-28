@@ -5,24 +5,22 @@
  * 2.0.
  */
 
-import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
+import type { BBox } from '@turf/helpers';
+import type { Feature, FeatureCollection, Geometry, Point, Polygon, Position } from 'geojson';
+import _ from 'lodash';
 // @ts-expect-error
 import { parse } from 'wellknown';
-// @ts-expect-error
-import turfCircle from '@turf/circle';
-import { Feature, FeatureCollection, Geometry, Polygon, Point, Position } from 'geojson';
-import { BBox } from '@turf/helpers';
 import {
   DECIMAL_DEGREES_PRECISION,
   ES_GEO_FIELD_TYPE,
   GEO_JSON_TYPE,
-  POLYGON_COORDINATES_EXTERIOR_INDEX,
-  LON_INDEX,
   LAT_INDEX,
+  LON_INDEX,
+  POLYGON_COORDINATES_EXTERIOR_INDEX,
 } from '../constants';
-import { MapExtent } from '../descriptor_types';
-import { Coordinates, ESBBox, ESGeometry } from './types';
+import type { MapExtent } from '../descriptor_types/map_descriptor';
+import type { Coordinates, ESBBox, ESGeometry } from './types';
 
 function ensureGeoField(type: string) {
   const expectedTypes = [ES_GEO_FIELD_TYPE.GEO_POINT, ES_GEO_FIELD_TYPE.GEO_SHAPE];

@@ -4,15 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { get } from 'lodash';
-import { IScopedClusterClient } from 'kibana/server';
-import {
-  AggFieldNamePair,
-  EVENT_RATE_FIELD_ID,
-  RuntimeMappings,
-} from '../../../../common/types/fields';
-import { IndicesOptions } from '../../../../common/types/anomaly_detection_jobs';
+import type { IScopedClusterClient } from '../../../../../../../src/core/server/elasticsearch/client/scoped_cluster_client';
+import type { IndicesOptions } from '../../../../common/types/anomaly_detection_jobs/datafeed';
+import type { AggFieldNamePair, RuntimeMappings } from '../../../../common/types/fields';
+import { EVENT_RATE_FIELD_ID } from '../../../../common/types/fields';
 import { ML_MEDIAN_PERCENTS } from '../../../../common/util/job_utils';
 
 const OVER_FIELD_EXAMPLES_COUNT = 40;

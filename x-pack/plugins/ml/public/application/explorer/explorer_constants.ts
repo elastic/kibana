@@ -8,7 +8,6 @@
 /*
  * Contains values for ML anomaly explorer.
  */
-
 import { i18n } from '@kbn/i18n';
 
 export const DRAG_SELECT_ACTION = {

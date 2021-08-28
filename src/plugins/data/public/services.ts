@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { CoreStart } from '../../../core/public';
+import type { CoreStart } from '../../../core/public/types';
 import type { NotificationsStart } from '../../../core/public/notifications/notifications_service';
 import { createGetterSetter } from '../../kibana_utils/common/create_getter_setter';
 import type { IndexPatternsContract } from '../common/index_patterns/index_patterns/index_patterns';

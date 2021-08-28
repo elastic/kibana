@@ -6,35 +6,24 @@
  */
 
 import React from 'react';
-
-import {
-  Alert,
-  AlertType,
-  AlertTaskState,
-  AlertInstanceSummary,
-  AlertingFrameworkHealth,
-  ResolvedRule,
-} from '../../../../types';
-import {
-  deleteAlerts,
-  disableAlerts,
-  enableAlerts,
-  muteAlerts,
-  unmuteAlerts,
-  disableAlert,
-  enableAlert,
-  muteAlert,
-  unmuteAlert,
-  muteAlertInstance,
-  unmuteAlertInstance,
-  loadAlert,
-  loadAlertState,
-  loadAlertInstanceSummary,
-  loadAlertTypes,
-  alertingFrameworkHealth,
-  resolveRule,
-} from '../../../lib/alert_api';
-import { useKibana } from '../../../../common/lib/kibana';
+import type { AlertingFrameworkHealth } from '../../../../../../alerting/common';
+import type { AlertInstanceSummary } from '../../../../../../alerting/common/alert_instance_summary';
+import type { AlertTaskState } from '../../../../../../alerting/common/alert_task_instance';
+import { useKibana } from '../../../../common/lib/kibana/kibana_react';
+import type { Alert, AlertType, ResolvedRule } from '../../../../types';
+import { loadAlertInstanceSummary } from '../../../lib/alert_api/alert_summary';
+import { deleteAlerts } from '../../../lib/alert_api/delete';
+import { disableAlert, disableAlerts } from '../../../lib/alert_api/disable';
+import { enableAlert, enableAlerts } from '../../../lib/alert_api/enable';
+import { loadAlert } from '../../../lib/alert_api/get_rule';
+import { alertingFrameworkHealth } from '../../../lib/alert_api/health';
+import { muteAlert, muteAlerts } from '../../../lib/alert_api/mute';
+import { muteAlertInstance } from '../../../lib/alert_api/mute_alert';
+import { resolveRule } from '../../../lib/alert_api/resolve_rule';
+import { loadAlertTypes } from '../../../lib/alert_api/rule_types';
+import { loadAlertState } from '../../../lib/alert_api/state';
+import { unmuteAlert, unmuteAlerts } from '../../../lib/alert_api/unmute';
+import { unmuteAlertInstance } from '../../../lib/alert_api/unmute_alert';
 
 export interface ComponentOpts {
   muteAlerts: (alerts: Alert[]) => Promise<void>;

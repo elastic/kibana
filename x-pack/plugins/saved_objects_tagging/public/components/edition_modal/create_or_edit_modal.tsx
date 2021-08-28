@@ -4,37 +4,37 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { FC, useState, useCallback, useMemo } from 'react';
 import {
-  EuiButtonEmpty,
   EuiButton,
+  EuiButtonEmpty,
+  EuiColorPicker,
+  EuiFieldText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiForm,
+  EuiFormRow,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
-  EuiFlexItem,
-  EuiFlexGroup,
-  EuiForm,
-  EuiFormRow,
-  EuiFieldText,
-  EuiColorPicker,
-  EuiTextArea,
   EuiSpacer,
   EuiText,
+  EuiTextArea,
   htmlIdGenerator,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import type { FC } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
+import type { TagAttributes } from '../../../../../../src/plugins/saved_objects_tagging_oss/common/types';
+import type { TagValidation } from '../../../common/validation';
 import {
-  TagAttributes,
-  TagValidation,
-  validateTagColor,
-  tagNameMaxLength,
   tagDescriptionMaxLength,
-} from '../../../common';
-import { TagBadge } from '../../components';
+  tagNameMaxLength,
+  validateTagColor,
+} from '../../../common/validation';
+import { TagBadge } from '../base/tag_badge';
 import { getRandomColor, useIfMounted } from './utils';
 
 interface CreateOrEditModalProps {

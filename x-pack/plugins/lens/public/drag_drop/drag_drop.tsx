@@ -5,26 +5,25 @@
  * 2.0.
  */
 
-import './drag_drop.scss';
-import React, { useContext, useCallback, useEffect, memo, useMemo, useState, useRef } from 'react';
-import type { KeyboardEvent, ReactElement } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiScreenReaderOnly, keys } from '@elastic/eui';
 import classNames from 'classnames';
-import { keys, EuiScreenReaderOnly, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
+import type { KeyboardEvent, ReactElement } from 'react';
+import React, { memo, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import useShallowCompareEffect from 'react-use/lib/useShallowCompareEffect';
-import {
-  DragDropIdentifier,
-  DropIdentifier,
-  DragContext,
+import { trackUiEvent } from '../lens_ui_telemetry/factory';
+import type { DropType } from '../types';
+import './drag_drop.scss';
+import { announce } from './providers/announcements';
+import { DragContext, nextValidDropTarget } from './providers/providers';
+import type { ReorderState } from './providers/reorder_provider';
+import { ReorderContext } from './providers/reorder_provider';
+import type {
   DragContextState,
-  nextValidDropTarget,
-  ReorderContext,
-  ReorderState,
+  DragDropIdentifier,
   DropHandler,
-  announce,
+  DropIdentifier,
   Ghost,
-} from './providers';
-import { trackUiEvent } from '../lens_ui_telemetry';
-import { DropType } from '../types';
+} from './providers/types';
 
 export type DroppableEvent = React.DragEvent<HTMLElement>;
 

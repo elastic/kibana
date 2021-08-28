@@ -4,13 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { createStaticIndexPattern } from '../lib/index_pattern/create_static_index_pattern';
-import { createApmServerRouteRepository } from './create_apm_server_route_repository';
 import { setupRequest } from '../lib/helpers/setup_request';
+import { createStaticIndexPattern } from '../lib/index_pattern/create_static_index_pattern';
 import { getApmIndexPatternTitle } from '../lib/index_pattern/get_apm_index_pattern_title';
 import { getDynamicIndexPattern } from '../lib/index_pattern/get_dynamic_index_pattern';
 import { createApmServerRoute } from './create_apm_server_route';
+import { createApmServerRouteRepository } from './create_apm_server_route_repository';
 
 const staticIndexPatternRoute = createApmServerRoute({
   endpoint: 'POST /api/apm/index_pattern/static',

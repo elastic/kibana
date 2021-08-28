@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import {
   EuiButton,
   EuiCodeBlock,
@@ -12,16 +11,16 @@ import {
   EuiIconTip,
   EuiModal,
   EuiModalBody,
+  EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
-  EuiModalFooter,
   EuiSpacer,
   EuiTabbedContent,
 } from '@elastic/eui';
 import numeral from '@elastic/numeral';
-import React, { Fragment, ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React, { Fragment } from 'react';
 import styled from 'styled-components';
-
 import * as i18n from './translations';
 
 export const NO_ALERT_INDEX = 'no-alert-index-049FC71A-4C2C-446F-9901-37XMC5024C51';

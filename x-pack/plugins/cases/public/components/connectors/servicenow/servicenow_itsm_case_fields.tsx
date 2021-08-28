@@ -4,18 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
-import { EuiFormRow, EuiSelect, EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import * as i18n from './translations';
-
-import { ConnectorFieldsProps } from '../types';
-import { ConnectorTypes, ServiceNowITSMFieldsType } from '../../../../common';
-import { useKibana } from '../../../common/lib/kibana';
+import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect, EuiSpacer } from '@elastic/eui';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { ConnectorTypes } from '../../../../common/api/connectors';
+import type { ServiceNowITSMFieldsType } from '../../../../common/api/connectors/servicenow_itsm';
+import { useKibana } from '../../../common/lib/kibana/kibana_react';
 import { ConnectorCard } from '../card';
-import { useGetChoices } from './use_get_choices';
-import { Fields, Choice } from './types';
+import type { ConnectorFieldsProps } from '../types';
 import { choicesToEuiOptions } from './helpers';
+import * as i18n from './translations';
+import type { Choice, Fields } from './types';
+import { useGetChoices } from './use_get_choices';
 
 const useGetChoicesFields = ['urgency', 'severity', 'impact', 'category', 'subcategory'];
 const defaultFields: Fields = {

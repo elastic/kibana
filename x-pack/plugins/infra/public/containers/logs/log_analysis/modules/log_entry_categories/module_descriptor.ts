@@ -4,26 +4,25 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { estypes } from '@elastic/elasticsearch';
+import { estypes } from '@elastic/elasticsearch';
 import { i18n } from '@kbn/i18n';
-import type { HttpHandler } from 'src/core/public';
+import type { HttpHandler } from '../../../../../../../../../src/core/public/http/types';
+import type { DatasetFilter } from '../../../../../../common/log_analysis/job_parameters';
 import {
   bucketSpan,
   categoriesMessageField,
-  DatasetFilter,
   getJobId,
-  LogEntryCategoriesJobType,
-  logEntryCategoriesJobTypes,
   partitionField,
-} from '../../../../../../common/log_analysis';
+} from '../../../../../../common/log_analysis/job_parameters';
+import type { LogEntryCategoriesJobType } from '../../../../../../common/log_analysis/log_entry_categories_analysis';
+import { logEntryCategoriesJobTypes } from '../../../../../../common/log_analysis/log_entry_categories_analysis';
 import { callJobsSummaryAPI } from '../../api/ml_get_jobs_summary_api';
 import { callGetMlModuleAPI } from '../../api/ml_get_module';
 import { callSetupMlModuleAPI } from '../../api/ml_setup_module_api';
 import { callValidateDatasetsAPI } from '../../api/validate_datasets';
 import { callValidateIndicesAPI } from '../../api/validate_indices';
 import { cleanUpJobsAndDatafeeds } from '../../log_analysis_cleanup';
-import { ModuleDescriptor, ModuleSourceConfiguration } from '../../log_analysis_module_types';
+import type { ModuleDescriptor, ModuleSourceConfiguration } from '../../log_analysis_module_types';
 
 const moduleId = 'logs_ui_categories';
 const moduleName = i18n.translate('xpack.infra.logs.analysis.logEntryCategoriesModuleName', {

@@ -4,8 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { SavedObjectTypeRegistry } from 'src/core/server';
+import type { SavedObjectTypeRegistry } from '../../../../../../../src/core/server/saved_objects/saved_objects_type_registry';
 
 /**
  * This function returns any importable/exportable saved object types that are namespace-agnostic. Even if these are eligible for

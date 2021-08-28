@@ -4,11 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { get } from 'lodash';
-
-import { escapeForElasticsearchQuery } from '../../../../util/string_utils';
 import { ml } from '../../../../services/ml_api_service';
+import { escapeForElasticsearchQuery } from '../../../../util/string_utils';
 
 interface SplitFieldWithValue {
   name: string;

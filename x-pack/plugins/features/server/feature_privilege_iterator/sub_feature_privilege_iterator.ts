@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { KibanaFeature, SubFeaturePrivilegeConfig } from '../../common';
-import type { LicenseType } from '../../../licensing/server';
+import type { LicenseType } from '../../../licensing/common/types';
+import { KibanaFeature } from '../../common/kibana_feature';
+import type { SubFeaturePrivilegeConfig } from '../../common/sub_feature';
 
 /**
  * Utility for iterating through all sub-feature privileges belonging to a specific feature.

@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { i18n } from '@kbn/i18n';
-import { getIndexPatternService } from './kibana_services';
 import { checkIndexExists } from './api';
+import { getIndexPatternService } from './kibana_services';
 
 export function checkIndexPatternValid(name: string) {
   const byteLength = encodeURI(name).split(/%(?:u[0-9A-F]{2})?[0-9A-F]{2}|./).length - 1;

@@ -6,15 +6,16 @@
  */
 
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
-
-import React, { Fragment, Component, ChangeEvent } from 'react';
-import { EuiFieldText, EuiFormRow, EuiToolTip, EuiIcon } from '@elastic/eui';
+import { EuiFieldText, EuiFormRow, EuiIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
+import type { ChangeEvent } from 'react';
+import React, { Component, Fragment } from 'react';
+import type { Value } from '../../../../../../../src/plugins/kibana_react/public/validated_range/validated_dual_range';
+import { ValidatedDualRange } from '../../../../../../../src/plugins/kibana_react/public/validated_range/validated_dual_range';
 import { MAX_ZOOM, MIN_ZOOM } from '../../../../common/constants';
-import { ValidatedDualRange, Value } from '../../../../../../../src/plugins/kibana_react/public';
+import type { MVTFieldDescriptor } from '../../../../common/descriptor_types/source_descriptor_types';
 import { MVTFieldConfigEditor } from './mvt_field_config_editor';
-import { MVTFieldDescriptor } from '../../../../common/descriptor_types';
 
 export type MVTSettings = {
   layerName: string;

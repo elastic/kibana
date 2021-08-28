@@ -4,16 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { uniq } from 'lodash';
 
-import type {
-  PluginSetupContract as FeaturesPluginSetup,
-  KibanaFeature,
-} from '../../../../features/server';
-import type { SecurityLicense } from '../../../common/licensing';
-import type { RawKibanaPrivileges } from '../../../common/model';
-import type { Actions } from '../actions';
+import type { KibanaFeature } from '../../../../features/common/kibana_feature';
+import type { PluginSetupContract as FeaturesPluginSetup } from '../../../../features/server/plugin';
+import type { SecurityLicense } from '../../../common/licensing/license_service';
+import type { RawKibanaPrivileges } from '../../../common/model/raw_kibana_privileges';
+import type { Actions } from '../actions/actions';
 import { featurePrivilegeBuilderFactory } from './feature_privilege_builder';
 
 export interface PrivilegesService {

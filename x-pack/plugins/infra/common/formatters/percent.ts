@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { formatNumber } from './number';
+
 export const formatPercent = (val: number) => {
   return `${formatNumber(val * 100)}%`;
 };

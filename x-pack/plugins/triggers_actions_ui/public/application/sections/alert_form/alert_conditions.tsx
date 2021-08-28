@@ -4,12 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { PropsWithChildren } from 'react';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiFlexItem, EuiText, EuiFlexGroup, EuiTitle, EuiButtonEmpty } from '@elastic/eui';
 import { partition } from 'lodash';
-import { ActionGroup, getBuiltinActionGroups } from '../../../../../alerting/common';
+import type { PropsWithChildren } from 'react';
+import React from 'react';
+import type { ActionGroup } from '../../../../../alerting/common/alert_type';
+import { getBuiltinActionGroups } from '../../../../../alerting/common/builtin_action_groups';
 
 const BUILT_IN_ACTION_GROUPS: Set<string> = new Set(getBuiltinActionGroups().map(({ id }) => id));
 

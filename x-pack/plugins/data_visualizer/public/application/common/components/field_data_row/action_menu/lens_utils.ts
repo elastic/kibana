@@ -4,17 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { i18n } from '@kbn/i18n';
-import type { IndexPattern } from '../../../../../../../../../src/plugins/data/common/index_patterns/index_patterns';
+import { IndexPattern } from '../../../../../../../../../src/plugins/data/common/index_patterns/index_patterns/index_pattern';
+import type { XYLayerConfig } from '../../../../../../../lens/common/expressions/xy_chart/layer_config';
+import type { TypedLensByValueInput } from '../../../../../../../lens/public/embeddable/embeddable_component';
+import type { IndexPatternColumn } from '../../../../../../../lens/public/indexpattern_datasource/operations/definitions';
+import { JOB_FIELD_TYPES } from '../../../../../../common/constants';
 import type { CombinedQuery } from '../../../../index_data_visualizer/types/combined_query';
-import type {
-  IndexPatternColumn,
-  TypedLensByValueInput,
-  XYLayerConfig,
-} from '../../../../../../../lens/public';
-import { FieldVisConfig } from '../../stats_table/types';
-import { JOB_FIELD_TYPES } from '../../../../../../common';
+import type { FieldVisConfig } from '../../stats_table/types/field_vis_config';
+
 interface ColumnsAndLayer {
   columns: Record<string, IndexPatternColumn>;
   layer: XYLayerConfig;

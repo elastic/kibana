@@ -7,7 +7,7 @@
  */
 import { EuiHorizontalRule } from '@elastic/eui';
 import { METRIC_TYPE } from '@kbn/analytics';
-import type { AugmentedRequired as Required } from '@kbn/utility-types';
+import type { Required } from '@kbn/utility-types';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import UseUnmount from 'react-use/lib/useUnmount';
 import type { OverlayRef } from '../../../../../core/public/overlays/types';

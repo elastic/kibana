@@ -4,47 +4,44 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { useState, useEffect } from 'react';
+import type { Criteria } from '@elastic/eui';
 import {
-  EuiInMemoryTable,
-  EuiSpacer,
-  EuiButton,
-  EuiLink,
-  EuiIconTip,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiBetaBadge,
-  EuiToolTip,
+  EuiButton,
+  EuiButtonEmpty,
   EuiButtonIcon,
   EuiEmptyPrompt,
-  Criteria,
-  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIconTip,
+  EuiInMemoryTable,
+  EuiLink,
+  EuiSpacer,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { omit } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { loadAllActions, loadActionTypes, deleteActions } from '../../../lib/action_connector_api';
+import { omit } from 'lodash';
+import React, { useEffect, useState } from 'react';
+import { DEFAULT_HIDDEN_ACTION_TYPES } from '../../../../common/constants';
+import { useKibana } from '../../../../common/lib/kibana/kibana_react';
+import type { ActionConnector, ActionConnectorTableItem, ActionTypeIndex } from '../../../../types';
+import { EditConectorTabs } from '../../../../types';
+import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
+import { DeleteModalConfirmation } from '../../../components/delete_modal_confirmation';
+import { EmptyConnectorsPrompt } from '../../../components/prompts/empty_connectors_prompt';
+import { loadAllActions } from '../../../lib/action_connector_api/connectors';
+import { loadActionTypes } from '../../../lib/action_connector_api/connector_types';
+import { deleteActions } from '../../../lib/action_connector_api/delete';
 import {
   hasDeleteActionsCapability,
-  hasSaveActionsCapability,
   hasExecuteActionsCapability,
+  hasSaveActionsCapability,
 } from '../../../lib/capabilities';
-import { DeleteModalConfirmation } from '../../../components/delete_modal_confirmation';
 import { checkActionTypeEnabled } from '../../../lib/check_action_type_enabled';
-import './actions_connectors_list.scss';
-import {
-  ActionConnector,
-  ActionConnectorTableItem,
-  ActionTypeIndex,
-  EditConectorTabs,
-} from '../../../../types';
-import { EmptyConnectorsPrompt } from '../../../components/prompts/empty_connectors_prompt';
-import { useKibana } from '../../../../common/lib/kibana';
-import { DEFAULT_HIDDEN_ACTION_TYPES } from '../../../../';
-import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
-import ConnectorEditFlyout from '../../action_connector_form/connector_edit_flyout';
 import ConnectorAddFlyout from '../../action_connector_form/connector_add_flyout';
+import ConnectorEditFlyout from '../../action_connector_form/connector_edit_flyout';
+import './actions_connectors_list.scss';
 
 const ActionsConnectorsList: React.FunctionComponent = () => {
   const {

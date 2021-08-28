@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import {
   EuiButtonGroup,
   EuiCallOut,
@@ -22,8 +21,8 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { ALL_SPACES_ID } from '../../../common/constants';
-import { DocumentationLinksService } from '../../lib';
-import { useSpaces } from '../../spaces_context';
+import { DocumentationLinksService } from '../../lib/documentation_links';
+import { useSpaces } from '../../spaces_context/context';
 import type { ShareToSpaceTarget } from '../../types';
 import type { ShareOptions } from '../types';
 import { SelectableSpacesControl } from './selectable_spaces_control';

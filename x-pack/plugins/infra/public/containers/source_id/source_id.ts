@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import * as runtimeTypes from 'io-ts';
-
-import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { constant, identity } from 'fp-ts/lib/function';
-import { useUrlState, replaceStateKeyInQueryString } from '../../utils/use_url_state';
+import { pipe } from 'fp-ts/lib/pipeable';
+import * as runtimeTypes from 'io-ts';
+import { replaceStateKeyInQueryString, useUrlState } from '../../utils/use_url_state';
 
 const SOURCE_ID_URL_STATE_KEY = 'sourceId';
 

@@ -6,9 +6,8 @@
  */
 
 import moment from 'moment';
-import { calculateAuto } from './calculate_auto';
-
 // @ts-expect-error
+import { calculateAuto } from './calculate_auto';
 
 export function getBucketSize({
   start,

@@ -4,12 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { JsonObject } from '@kbn/utility-types';
-
-import { IEsSearchResponse } from '../../../../../../../../src/plugins/data/common';
-import { Inspect, Maybe } from '../../../common';
-import { TimelineRequestOptionsPaginated } from '../..';
+import type { JsonObject } from '@kbn/utility-types';
+import type { TimelineRequestOptionsPaginated } from '../..';
+import type { IEsSearchResponse } from '../../../../../../../../src/plugins/data/common/search/strategies/es_search/types';
+import type { Inspect, Maybe } from '../../../common';
 
 export interface TimelineEventsDetailsItem {
   ariaRowindex?: Maybe<number>;

@@ -4,19 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import type { ExistsFilter } from '@kbn/es-query';
 import { isEmpty } from 'lodash';
-import { ExistsFilter } from '@kbn/es-query';
+import React, { useMemo } from 'react';
+import type { ESFilter } from '../../../../../../../../../src/core/types/elasticsearch';
+import type { PersistableFilter } from '../../../../../../../lens/common/types';
 import FieldValueSuggestions from '../../../field_value_suggestions';
-import { useSeriesStorage } from '../../hooks/use_series_storage';
-import { useAppIndexPatternContext } from '../../hooks/use_app_index_pattern';
-import { ESFilter } from '../../../../../../../../../src/core/types/elasticsearch';
-import { PersistableFilter } from '../../../../../../../lens/common';
-import { buildPhrasesFilter } from '../../configurations/utils';
-import { SeriesConfig } from '../../types';
 import { ALL_VALUES_SELECTED } from '../../../field_value_suggestions/field_value_combobox';
+import { buildPhrasesFilter } from '../../configurations/utils';
+import { useAppIndexPatternContext } from '../../hooks/use_app_index_pattern';
+import { useSeriesStorage } from '../../hooks/use_series_storage';
+import type { SeriesConfig } from '../../types';
 
 interface Props {
   seriesId: string;

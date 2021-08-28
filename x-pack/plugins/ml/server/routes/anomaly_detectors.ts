@@ -4,26 +4,25 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { estypes } from '@elastic/elasticsearch';
 import { schema } from '@kbn/config-schema';
 import { wrapError } from '../client/error_wrapper';
-import { RouteInitialization } from '../types';
+import type { RouteInitialization } from '../types';
 import {
   anomalyDetectionJobSchema,
   anomalyDetectionUpdateJobSchema,
-  jobIdSchema,
-  getRecordsSchema,
-  getBucketsSchema,
-  getOverallBucketsSchema,
-  getCategoriesSchema,
+  forceQuerySchema,
   forecastAnomalyDetector,
   getBucketParamsSchema,
+  getBucketsSchema,
+  getCategoriesSchema,
   getModelSnapshotsSchema,
-  updateModelSnapshotsSchema,
-  updateModelSnapshotBodySchema,
-  forceQuerySchema,
+  getOverallBucketsSchema,
+  getRecordsSchema,
+  jobIdSchema,
   jobResetQuerySchema,
+  updateModelSnapshotBodySchema,
+  updateModelSnapshotsSchema,
 } from './schemas/anomaly_detectors_schema';
 
 /**

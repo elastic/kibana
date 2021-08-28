@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import type { CoreStart } from '../../../core/public';
+import type { CoreStart } from '../../../core/public/types';
 import { coreMock } from '../../../core/public/mocks';
 import { inspectorPluginMock } from '../../inspector/public/mocks';
 import type { Start as InspectorStart } from '../../inspector/public/plugin';

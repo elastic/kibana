@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { appContextService, licenseService } from '../../';
+import { appContextService } from '../../app_context';
+import { licenseService } from '../../license';
 
 // from https://github.com/elastic/package-registry#docker (maybe from OpenAPI one day)
 // the unused variables cause a TS warning about unused values

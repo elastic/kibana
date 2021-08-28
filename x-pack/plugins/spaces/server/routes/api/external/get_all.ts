@@ -4,13 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { schema } from '@kbn/config-schema';
-import type { Space } from 'src/plugins/spaces_oss/common';
 
+import type { ExternalRouteDeps } from '.';
+import type { Space } from '../../../../../../../src/plugins/spaces_oss/common/types';
 import { wrapError } from '../../../lib/errors';
-import { createLicensedRouteHandler } from '../../lib';
-import type { ExternalRouteDeps } from './';
+import { createLicensedRouteHandler } from '../../lib/licensed_route_handler';
 
 export function initGetAllSpacesApi(deps: ExternalRouteDeps) {
   const { externalRouter, log, getSpacesService } = deps;

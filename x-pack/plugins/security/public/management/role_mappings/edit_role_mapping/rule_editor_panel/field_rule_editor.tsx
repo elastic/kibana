@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import {
   EuiButtonIcon,
   EuiComboBox,
@@ -22,8 +21,8 @@ import React, { Component } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import type { FieldRuleValue } from '../../model';
-import { FieldRule } from '../../model';
+import type { FieldRuleValue } from '../../model/field_rule';
+import { FieldRule } from '../../model/field_rule';
 
 interface Props {
   rule: FieldRule;

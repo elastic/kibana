@@ -5,16 +5,15 @@
  * 2.0.
  */
 
-import moment from 'moment-timezone';
-
-import { useCallback, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-
-import { DEFAULT_DATE_FORMAT, DEFAULT_DATE_FORMAT_TZ } from '../../../../common';
-import { AuthenticatedUser } from '../../../../../security/common/model';
+import moment from 'moment-timezone';
+import { useCallback, useEffect, useState } from 'react';
+import { useUiSetting } from '../../../../../../../src/plugins/kibana_react/public/ui_settings/use_ui_setting';
+import type { AuthenticatedUser } from '../../../../../security/common/model/authenticated_user';
+import { DEFAULT_DATE_FORMAT, DEFAULT_DATE_FORMAT_TZ } from '../../../../common/constants';
 import { convertToCamelCase } from '../../../containers/utils';
-import { StartServices } from '../../../types';
-import { useUiSetting, useKibana } from './kibana_react';
+import type { StartServices } from '../../../types';
+import { useKibana } from './kibana_react';
 
 export const useDateFormat = (): string => useUiSetting<string>(DEFAULT_DATE_FORMAT);
 

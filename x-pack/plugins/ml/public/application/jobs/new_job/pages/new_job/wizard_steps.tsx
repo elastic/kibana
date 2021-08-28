@@ -4,23 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { Fragment, FC, useState } from 'react';
-
+import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-
-import { EuiSpacer, EuiTitle } from '@elastic/eui';
+import type { FC } from 'react';
+import React, { Fragment, useState } from 'react';
+import { useMlContext } from '../../../../contexts/ml/use_ml_context';
+import { DatafeedStep } from '../components/datafeed_step/datafeed';
+import { JobDetailsStep } from '../components/job_details_step/job_details';
+import { PickFieldsStep } from '../components/pick_fields_step/pick_fields';
 import { WIZARD_STEPS } from '../components/step_types';
-
-import { TimeRangeStep } from '../components/time_range_step';
-
-import { PickFieldsStep } from '../components/pick_fields_step';
-import { JobDetailsStep } from '../components/job_details_step';
-import { ValidationStep } from '../components/validation_step';
-import { SummaryStep } from '../components/summary_step';
-import { DatafeedStep } from '../components/datafeed_step';
-import { useMlContext } from '../../../../contexts/ml';
+import { SummaryStep } from '../components/summary_step/summary';
+import { TimeRangeStep } from '../components/time_range_step/time_range';
+import { ValidationStep } from '../components/validation_step/validation';
 
 interface Props {
   currentStep: WIZARD_STEPS;

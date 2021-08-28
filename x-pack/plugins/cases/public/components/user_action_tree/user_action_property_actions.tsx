@@ -4,10 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { memo, useMemo, useCallback } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
-
+import React, { memo, useCallback, useMemo } from 'react';
 import { PropertyActions } from '../property_actions';
 
 interface UserActionPropertyActionsProps {

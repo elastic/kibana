@@ -7,7 +7,7 @@
  */
 
 import * as React from 'react';
-import type { CoreStart } from '../../../../core/public';
+import type { CoreStart } from '../../../../core/public/types';
 import type { KibanaReactNotifications } from '../notifications/types';
 import type { KibanaReactOverlays } from '../overlays/types';
 

@@ -4,23 +4,26 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { memo, useMemo } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
 import {
+  EuiButtonEmpty,
+  EuiDescriptionList,
+  EuiDescriptionListDescription,
+  EuiDescriptionListTitle,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiText,
-  EuiDescriptionList,
-  EuiDescriptionListTitle,
-  EuiDescriptionListDescription,
-  EuiButtonEmpty,
   EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
+import React, { memo, useMemo } from 'react';
 
-import { WithHeaderLayout } from '../../../../layouts';
-import type { AgentPolicy, PackageInfo, RegistryPolicyTemplate } from '../../../../types';
-import { PackageIcon } from '../../../../components';
+import type { AgentPolicy } from '../../../../../../../common/types/models/agent_policy';
+import type {
+  PackageInfo,
+  RegistryPolicyTemplate,
+} from '../../../../../../../common/types/models/epm';
+import { PackageIcon } from '../../../../../../components/package_icon';
+import { WithHeaderLayout } from '../../../../../../layouts/with_header';
 import type { EditPackagePolicyFrom } from '../types';
 
 export const CreatePackagePolicyPageLayout: React.FunctionComponent<{

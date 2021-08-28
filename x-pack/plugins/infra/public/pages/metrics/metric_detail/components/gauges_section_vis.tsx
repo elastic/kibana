@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import {
   EuiFlexItem,
   EuiPageContentBody,
@@ -15,12 +14,12 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { get, last, max } from 'lodash';
-import React, { ReactText } from 'react';
-
-import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
+import type { ReactText } from 'react';
+import React from 'react';
+import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
 import { createFormatter } from '../../../../../common/formatters';
-import { InventoryFormatterType } from '../../../../../common/inventory_models/types';
-import { SeriesOverrides, VisSectionProps } from '../types';
+import type { InventoryFormatterType } from '../../../../../common/inventory_models/types';
+import type { SeriesOverrides, VisSectionProps } from '../types';
 import { getChartName } from './helpers';
 
 const getFormatter = (

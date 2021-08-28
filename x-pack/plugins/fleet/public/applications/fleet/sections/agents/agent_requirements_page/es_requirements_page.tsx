@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-import React from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 import {
-  EuiPageBody,
-  EuiPageContent,
-  EuiText,
-  EuiSpacer,
-  EuiIcon,
   EuiCallOut,
-  EuiFlexItem,
-  EuiFlexGroup,
   EuiCode,
   EuiCodeBlock,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
   EuiLink,
+  EuiPageBody,
+  EuiPageContent,
+  EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+import React from 'react';
 
-import { WithoutHeaderLayout } from '../../../layouts';
-import type { GetFleetStatusResponse } from '../../../types';
-import { useStartServices } from '../../../hooks';
+import type { GetFleetStatusResponse } from '../../../../../../common/types/rest_spec/fleet_setup';
+import { useStartServices } from '../../../../../hooks/use_core';
+import { WithoutHeaderLayout } from '../../../../../layouts/without_header';
 
 export const RequirementItem: React.FunctionComponent<{ isMissing: boolean }> = ({
   isMissing,

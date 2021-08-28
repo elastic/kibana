@@ -8,14 +8,13 @@
 import type Boom from '@hapi/boom';
 import { isBoom } from '@hapi/boom';
 
+import type { RequestHandlerContext } from '../../../../../src/core/server';
+import type { KibanaRequest } from '../../../../../src/core/server/http/router/request';
 import type {
   IKibanaResponse,
   KibanaResponseFactory,
-  RequestHandlerContext,
-} from 'src/core/server';
-import type { KibanaRequest } from 'src/core/server';
-
-import { appContextService } from '../services';
+} from '../../../../../src/core/server/http/router/response';
+import { appContextService } from '../services/app_context';
 
 import {
   AgentNotFoundError,
@@ -25,7 +24,7 @@ import {
   PackageNotFoundError,
   PackageUnsupportedMediaTypeError,
   RegistryError,
-} from './index';
+} from '.';
 
 type IngestErrorHandler = (
   params: IngestErrorHandlerParams

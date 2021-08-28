@@ -4,10 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { FC, useEffect, useState } from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiButtonEmpty,
   EuiFlexGroup,
@@ -16,28 +12,32 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { useMlKibana } from '../../../../../contexts/kibana';
-import { SavedSearchQuery } from '../../../../../contexts/ml';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+import type { FC } from 'react';
+import React, { useEffect, useState } from 'react';
+import { ANALYSIS_CONFIG_TYPE } from '../../../../../../../common/constants/data_frame_analytics';
+import type {
+  DataFrameAnalyticsConfig,
+  DataFrameTaskStateType,
+} from '../../../../../../../common/types/data_frame_analytics';
 import {
-  getValuesFromResponse,
   getDependentVar,
   getPredictionFieldName,
-  loadEvalData,
-  loadDocsCount,
-  Eval,
-  DataFrameAnalyticsConfig,
-} from '../../../../common';
-import { DataFrameTaskStateType } from '../../../analytics_management/components/analytics_list/common';
+} from '../../../../../../../common/util/analytics_utils';
+import { useMlKibana } from '../../../../../contexts/kibana/kibana_context';
+import type { SavedSearchQuery } from '../../../../../contexts/ml/ml_context';
+import type { Eval } from '../../../../common/analytics';
 import {
-  isResultsSearchBoolQuery,
-  isRegressionEvaluateResponse,
-  ANALYSIS_CONFIG_TYPE,
-  REGRESSION_STATS,
   EMPTY_STAT,
+  getValuesFromResponse,
+  isRegressionEvaluateResponse,
+  isResultsSearchBoolQuery,
+  loadDocsCount,
+  loadEvalData,
+  REGRESSION_STATS,
 } from '../../../../common/analytics';
-
-import { ExpandableSection } from '../expandable_section';
-
+import { ExpandableSection } from '../expandable_section/expandable_section';
 import { EvaluateStat } from './evaluate_stat';
 
 interface Props {

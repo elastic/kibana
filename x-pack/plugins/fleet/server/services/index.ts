@@ -4,21 +4,31 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { ElasticsearchClient } from '../../../../../src/core/server/elasticsearch/client/types';
+import type { KibanaRequest } from '../../../../../src/core/server/http/router/request';
+import type { SavedObjectsClientContract } from '../../../../../src/core/server/saved_objects/types';
+import type { Agent, AgentStatus } from '../../common/types/models/agent';
+import type { GetAgentStatusResponse } from '../../common/types/rest_spec/agent';
 
-import type { KibanaRequest } from 'kibana/server';
-import type { ElasticsearchClient, SavedObjectsClientContract } from 'kibana/server';
-
-import type { AgentStatus, Agent } from '../types';
-
-import type { GetAgentStatusResponse } from '../../common';
-
-import type { getAgentById, getAgentsByKuery } from './agents';
+import type { getAgentById, getAgentsByKuery } from './agents/crud';
 import type { agentPolicyService } from './agent_policy';
+import type { getInstallation } from './epm/packages/get';
 import * as settingsService from './settings';
-import type { getInstallation } from './epm/packages';
 
-export { ESIndexPatternSavedObjectService } from './es_index_pattern';
+// Saved object services
+export { agentPolicyService } from './agent_policy';
+// Plugin services
+export { appContextService } from './app_context';
+// Artifacts services
+export * from './artifacts';
 export { getRegistryUrl } from './epm/registry/registry_url';
+export { ESIndexPatternSavedObjectService } from './es_index_pattern';
+export { licenseService } from './license';
+export { outputService } from './output';
+export { packagePolicyService } from './package_policy';
+// Policy preconfiguration functions
+export { ensurePreconfiguredPackagesAndPolicies } from './preconfiguration';
+export { settingsService };
 
 /**
  * Service to return the index pattern of EPM packages
@@ -79,19 +89,3 @@ export interface AgentPolicyServiceInterface {
   getFullAgentPolicy: typeof agentPolicyService['getFullAgentPolicy'];
   getByIds: typeof agentPolicyService['getByIDs'];
 }
-
-// Saved object services
-export { agentPolicyService } from './agent_policy';
-export { packagePolicyService } from './package_policy';
-export { outputService } from './output';
-export { settingsService };
-
-// Plugin services
-export { appContextService } from './app_context';
-export { licenseService } from './license';
-
-// Artifacts services
-export * from './artifacts';
-
-// Policy preconfiguration functions
-export { ensurePreconfiguredPackagesAndPolicies } from './preconfiguration';

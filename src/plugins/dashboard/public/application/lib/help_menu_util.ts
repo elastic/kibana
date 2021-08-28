@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import { i18n } from '@kbn/i18n';
-import type { CoreStart } from '../../../../../core/public';
+import type { CoreStart } from '../../../../../core/public/types';
 
 export function addHelpMenuToAppChrome(
   chrome: CoreStart['chrome'],

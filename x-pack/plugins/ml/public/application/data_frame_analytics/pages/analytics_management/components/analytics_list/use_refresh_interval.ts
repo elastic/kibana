@@ -4,17 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import React, { useEffect } from 'react';
-
-import { useMlKibana } from '../../../../../contexts/kibana';
-
 import {
   DEFAULT_REFRESH_INTERVAL_MS,
   MINIMUM_REFRESH_INTERVAL_MS,
 } from '../../../../../../../common/constants/jobs_list';
-
-import { useRefreshAnalyticsList } from '../../../../common';
+import { useMlKibana } from '../../../../../contexts/kibana/kibana_context';
+import { useRefreshAnalyticsList } from '../../../../common/analytics';
 
 export const useRefreshInterval = (
   setBlockRefresh: React.Dispatch<React.SetStateAction<boolean>>

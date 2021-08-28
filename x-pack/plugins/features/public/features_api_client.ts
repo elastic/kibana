@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { HttpSetup } from 'src/core/public';
-import { KibanaFeatureConfig, KibanaFeature } from '.';
+import type { HttpSetup } from '../../../../src/core/public/http/types';
+import type { KibanaFeatureConfig } from '../common/kibana_feature';
+import { KibanaFeature } from '../common/kibana_feature';
 
 export class FeaturesAPIClient {
   constructor(private readonly http: HttpSetup) {}

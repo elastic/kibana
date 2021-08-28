@@ -4,18 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { Logger } from '@kbn/logging';
 import { deepFreeze } from '@kbn/std';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type {
-  Headers,
-  HttpServiceSetup,
-  IClusterClient,
-  KibanaRequest,
-  Logger,
-} from 'src/core/server';
 
-import type { AuthenticatedUser } from '../../../common/model';
+import type { IClusterClient } from '../../../../../../src/core/server/elasticsearch/client/cluster_client';
+import type { Headers } from '../../../../../../src/core/server/http/router/headers';
+import type { KibanaRequest } from '../../../../../../src/core/server/http/router/request';
+import type { HttpServiceSetup } from '../../../../../../src/core/server/http/types';
+import type { AuthenticatedUser } from '../../../common/model/authenticated_user';
 import type { AuthenticationInfo } from '../../elasticsearch';
 import { AuthenticationResult } from '../authentication_result';
 import type { DeauthenticationResult } from '../deauthentication_result';

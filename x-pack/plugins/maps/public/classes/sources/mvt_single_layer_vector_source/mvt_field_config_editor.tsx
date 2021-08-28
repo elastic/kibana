@@ -4,22 +4,22 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { ChangeEvent, Component, Fragment } from 'react';
 import {
+  EuiButtonEmpty,
   EuiButtonIcon,
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButtonEmpty,
-  EuiSuperSelect,
-  EuiFieldText,
   EuiSpacer,
+  EuiSuperSelect,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
-import { MVTFieldDescriptor } from '../../../../common/descriptor_types';
-import { FieldIcon } from '../../../../../../../src/plugins/kibana_react/public';
+import type { ChangeEvent } from 'react';
+import React, { Component, Fragment } from 'react';
+import { FieldIcon } from '../../../../../../../src/plugins/kibana_react/public/field_icon/field_icon';
 import { MVT_FIELD_TYPE } from '../../../../common/constants';
+import type { MVTFieldDescriptor } from '../../../../common/descriptor_types/source_descriptor_types';
 
 function makeOption({
   value,

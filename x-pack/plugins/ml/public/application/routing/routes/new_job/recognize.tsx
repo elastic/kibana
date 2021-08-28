@@ -4,22 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { parse } from 'query-string';
-import React, { FC } from 'react';
-
 import { i18n } from '@kbn/i18n';
-
-import { NavigateToPath, useNavigateToPath } from '../../../contexts/kibana';
-
-import { MlRoute, PageLoader, PageProps } from '../../router';
-import { useResolver } from '../../use_resolver';
-import { basicResolvers } from '../../resolvers';
-import { Page } from '../../../jobs/new_job/recognize';
+import { parse } from 'query-string';
+import type { FC } from 'react';
+import React from 'react';
+import { useCreateADLinks } from '../../../components/custom_hooks/use_create_ad_links';
+import type { NavigateToPath } from '../../../contexts/kibana/use_navigate_to_path';
+import { useNavigateToPath } from '../../../contexts/kibana/use_navigate_to_path';
+import { Page } from '../../../jobs/new_job/recognize/page';
 import { checkViewOrCreateJobs } from '../../../jobs/new_job/recognize/resolvers';
 import { mlJobService } from '../../../services/job_service';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
-import { useCreateADLinks } from '../../../components/custom_hooks/use_create_ad_links';
+import { basicResolvers } from '../../resolvers';
+import type { MlRoute, PageProps } from '../../router';
+import { PageLoader } from '../../router';
+import { useResolver } from '../../use_resolver';
 
 export const recognizeRouteFactory = (
   navigateToPath: NavigateToPath,

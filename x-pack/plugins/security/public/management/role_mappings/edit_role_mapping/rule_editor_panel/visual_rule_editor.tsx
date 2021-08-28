@@ -4,14 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { EuiButton, EuiCallOut, EuiEmptyPrompt, EuiSpacer } from '@elastic/eui';
 import React, { Component, Fragment } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import type { Rule, RuleGroup } from '../../model';
-import { AllRule, FieldRule } from '../../model';
+import { AllRule } from '../../model/all_rule';
+import { FieldRule } from '../../model/field_rule';
+import type { Rule } from '../../model/rule';
+import type { RuleGroup } from '../../model/rule_group';
 import { isRuleGroup } from '../services/is_rule_group';
 import { VISUAL_MAX_RULE_DEPTH } from '../services/role_mapping_constants';
 import { FieldRuleEditor } from './field_rule_editor';

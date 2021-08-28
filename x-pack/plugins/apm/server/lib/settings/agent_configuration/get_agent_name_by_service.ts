@@ -4,11 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import {
+  AGENT_NAME,
+  SERVICE_NAME,
+} from '../../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../../common/processor_event';
-import { Setup } from '../../helpers/setup_request';
-import { SERVICE_NAME } from '../../../../common/elasticsearch_fieldnames';
-import { AGENT_NAME } from '../../../../common/elasticsearch_fieldnames';
+import type { Setup } from '../../helpers/setup_request';
 
 export async function getAgentNameByService({
   serviceName,

@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
-
-import { SO_SEARCH_LIMIT } from '../../constants';
+import type { ElasticsearchClient } from '../../../../../../src/core/server/elasticsearch/client/types';
+import type { SavedObjectsClientContract } from '../../../../../../src/core/server/saved_objects/types';
+import { SO_SEARCH_LIMIT } from '../../../common/constants';
 import { agentPolicyService } from '../agent_policy';
 
 /**

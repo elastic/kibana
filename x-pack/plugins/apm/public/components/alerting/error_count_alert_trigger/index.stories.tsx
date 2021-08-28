@@ -7,7 +7,7 @@
 import React, { useState } from 'react';
 import type { AlertParams } from '.';
 import { ErrorCountAlertTrigger } from '.';
-import type { CoreStart } from '../../../../../../../src/core/public';
+import type { CoreStart } from '../../../../../../../src/core/public/types';
 import { createKibanaReactContext } from '../../../../../../../src/plugins/kibana_react/public/context/context';
 
 const KibanaReactContext = createKibanaReactContext(({

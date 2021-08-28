@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { SavedObjectsClientContract } from 'src/core/server';
-
-import type { Actions, CheckSavedObjectsPrivileges } from '../authorization';
+import type { SavedObjectsClientContract } from '../../../../../src/core/server/saved_objects/types';
+import type { Actions } from '../authorization/actions/actions';
+import type { CheckSavedObjectsPrivileges } from '../authorization/check_saved_objects_privileges';
 import type { CheckPrivilegesResponse } from '../authorization/types';
 
 export interface EnsureAuthorizedDependencies {

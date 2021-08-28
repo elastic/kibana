@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { memo, useMemo } from 'react';
+import type { EuiLinkAnchorProps } from '@elastic/eui';
+import { EuiMarkdownFormat } from '@elastic/eui';
 import { cloneDeep } from 'lodash/fp';
-import { EuiMarkdownFormat, EuiLinkAnchorProps } from '@elastic/eui';
+import React, { memo, useMemo } from 'react';
 import { MarkdownLink } from './markdown_link';
 import { usePlugins } from './use_plugins';
 

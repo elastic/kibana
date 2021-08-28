@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import type { CoreStart } from '../../../../../core/public';
+import type { CoreStart } from '../../../../../core/public/types';
 import type { EmbeddableInput } from '../../../../embeddable/common/types';
 import type { IContainer } from '../../../../embeddable/public/lib/containers/i_container';
 import type {

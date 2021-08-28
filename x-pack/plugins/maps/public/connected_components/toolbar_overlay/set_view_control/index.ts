@@ -4,14 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { AnyAction } from 'redux';
-import { ThunkDispatch } from 'redux-thunk';
 import { connect } from 'react-redux';
+import type { AnyAction } from 'redux';
+import type { ThunkDispatch } from 'redux-thunk';
+import { setGotoWithCenter } from '../../../actions/map_actions';
+import type { MapStoreState } from '../../../reducers/store';
+import { getMapCenter, getMapSettings, getMapZoom } from '../../../selectors/map_selectors';
 import { SetViewControl } from './set_view_control';
-import { setGotoWithCenter } from '../../../actions';
-import { getMapZoom, getMapCenter, getMapSettings } from '../../../selectors/map_selectors';
-import { MapStoreState } from '../../../reducers/store';
 
 function mapStateToProps(state: MapStoreState) {
   return {

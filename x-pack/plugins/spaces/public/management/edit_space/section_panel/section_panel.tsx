@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import type { IconType } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import type { ReactNode } from 'react';

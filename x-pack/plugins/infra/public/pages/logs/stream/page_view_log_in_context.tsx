@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -16,11 +15,11 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { isEmpty } from 'lodash';
 import React, { useCallback, useContext, useMemo } from 'react';
-import { LogEntry } from '../../../../common/log_entry';
-import { ViewLogInContext } from '../../../containers/logs/view_log_in_context';
+import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
+import type { LogEntry } from '../../../../common/log_entry/log_entry';
+import { LogStream } from '../../../components/log_stream/log_stream';
+import { ViewLogInContext } from '../../../containers/logs/view_log_in_context/view_log_in_context';
 import { useViewportDimensions } from '../../../utils/use_viewport_dimensions';
-import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
-import { LogStream } from '../../../components/log_stream';
 
 const MODAL_MARGIN = 25;
 

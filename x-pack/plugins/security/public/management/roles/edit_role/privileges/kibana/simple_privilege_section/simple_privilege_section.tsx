@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import {
   EuiComboBox,
   EuiFlexGroup,
@@ -17,13 +16,13 @@ import React, { Component, Fragment } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import type { Role, RoleKibanaPrivilege } from '../../../../../../../common/model';
-import { copyRole } from '../../../../../../../common/model';
-import type { KibanaPrivileges } from '../../../../model';
+import type { Role, RoleKibanaPrivilege } from '../../../../../../../common/model/role';
+import { copyRole } from '../../../../../../../common/model/role';
+import type { KibanaPrivileges } from '../../../../model/kibana_privileges';
 import { isGlobalPrivilegeDefinition } from '../../../privilege_utils';
 import { CUSTOM_PRIVILEGE_VALUE, NO_PRIVILEGE_VALUE } from '../constants';
-import { FeatureTable } from '../feature_table';
-import { PrivilegeFormCalculator } from '../privilege_form_calculator';
+import { FeatureTable } from '../feature_table/feature_table';
+import { PrivilegeFormCalculator } from '../privilege_form_calculator/privilege_form_calculator';
 import { UnsupportedSpacePrivilegesWarning } from './unsupported_space_privileges_warning';
 
 interface Props {

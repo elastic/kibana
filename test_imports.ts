@@ -17,6 +17,8 @@
 // import { ReexportedAgentName as DoublyReexportedAgentName } from './test_imports_2';
 // import { UiSettingsConfigType } from 'src/core/server/ui_settings/ui_settings_config';
 // import type { AgentConfigOptions } from '@elastic/apm-rum';
+// import type { Required } from '@kbn/utility-types';
+// import { YamlLang } from './src/plugins/kibana-react/public';
 
 // should result in
 
@@ -32,3 +34,5 @@
 // import { DEFAULT_APP_CATEGORIES } from './src/core/utils/default_app_categories';
 // import type { AgentName as DoublyReexportedAgentName } from './test_imports_3';
 // import type { UiSettingsConfigType } from './src/core/server/ui_settings/ui_settings_config';
+// import type { Required } from '@kbn/utility-types';
+// import { Lang as YamlLang } from './src/plugins/kibana-react/public/code_editor/register_languages';

@@ -4,11 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { FC, Fragment } from 'react';
 import { EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
-
 import { FormattedMessage } from '@kbn/i18n/react';
+import type { FC } from 'react';
+import React, { Fragment } from 'react';
 
 export const NotInDocsContent: FC = () => (
   <Fragment>

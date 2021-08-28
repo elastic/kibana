@@ -4,9 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { useEffect, useReducer, useRef, useCallback } from 'react';
-import { useToasts } from '../common/lib/kibana';
+import { useCallback, useEffect, useReducer, useRef } from 'react';
+import { useToasts } from '../common/lib/kibana/hooks';
 import { useOwnerContext } from '../components/owner_context/use_owner_context';
 import { getTags } from './api';
 import * as i18n from './translations';

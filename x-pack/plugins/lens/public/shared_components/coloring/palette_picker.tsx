@@ -5,16 +5,18 @@
  * 2.0.
  */
 
+import type { EuiColorPalettePickerPaletteProps } from '@elastic/eui';
+import { EuiColorPalettePicker } from '@elastic/eui';
 import React from 'react';
-import { EuiColorPalettePicker, EuiColorPalettePickerPaletteProps } from '@elastic/eui';
-import { PaletteOutput, PaletteRegistry } from 'src/plugins/charts/public';
+import type { PaletteOutput } from '../../../../../../src/plugins/charts/common/palette';
+import type { PaletteRegistry } from '../../../../../../src/plugins/charts/public/services/palettes/types';
+import type { CustomPaletteParams } from '../../../common/types';
 import {
   CUSTOM_PALETTE,
+  defaultPaletteParams,
   DEFAULT_COLOR_STEPS,
   FIXED_PROGRESSION,
-  defaultPaletteParams,
 } from './constants';
-import type { CustomPaletteParams } from '../../../common';
 import { getStopsForFixedMode } from './utils';
 
 function getCustomPaletteConfig(

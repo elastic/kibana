@@ -4,10 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { RefObject, useEffect, useState } from 'react';
-import { isEmpty } from 'lodash';
-import { i18n } from '@kbn/i18n';
 import {
   EuiBasicTable,
   EuiButton,
@@ -16,26 +12,30 @@ import {
   EuiSpacer,
   EuiSwitch,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { isEmpty } from 'lodash';
 import { rgba } from 'polished';
-import { AppDataType, SeriesConfig, ReportViewType, SeriesUrl } from '../types';
-import { DataTypesCol } from './columns/data_types_col';
-import { ReportTypesCol } from './columns/report_types_col';
-import { ReportDefinitionCol } from './columns/report_definition_col';
-import { ReportFilters } from './columns/report_filters';
-import { ReportBreakdowns } from './columns/report_breakdowns';
-import { NEW_SERIES_KEY, useSeriesStorage } from '../hooks/use_series_storage';
-import { useAppIndexPatternContext } from '../hooks/use_app_index_pattern';
-import { getDefaultConfigs } from '../configurations/default_configs';
-import { SeriesEditor } from '../series_editor/series_editor';
-import { SeriesActions } from '../series_editor/columns/series_actions';
-import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
-import { LastUpdated } from './last_updated';
+import type { RefObject } from 'react';
+import React, { useEffect, useState } from 'react';
+import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
 import {
   CORE_WEB_VITALS_LABEL,
   DEVICE_DISTRIBUTION_LABEL,
   KPI_OVER_TIME_LABEL,
   PERF_DIST_LABEL,
 } from '../configurations/constants/labels';
+import { getDefaultConfigs } from '../configurations/default_configs';
+import { useAppIndexPatternContext } from '../hooks/use_app_index_pattern';
+import { NEW_SERIES_KEY, useSeriesStorage } from '../hooks/use_series_storage';
+import { SeriesActions } from '../series_editor/columns/series_actions';
+import { SeriesEditor } from '../series_editor/series_editor';
+import type { AppDataType, ReportViewType, SeriesConfig, SeriesUrl } from '../types';
+import { DataTypesCol } from './columns/data_types_col';
+import { ReportBreakdowns } from './columns/report_breakdowns';
+import { ReportDefinitionCol } from './columns/report_definition_col';
+import { ReportFilters } from './columns/report_filters';
+import { ReportTypesCol } from './columns/report_types_col';
+import { LastUpdated } from './last_updated';
 
 export interface ReportTypeItem {
   id: string;

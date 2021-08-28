@@ -7,8 +7,8 @@
  */
 
 import React from 'react';
-import type { CoreStart } from '../../../core/public';
-import type { BfetchPublicSetup } from '../../bfetch/public/plugin';
+import type { CoreStart } from '../../../core/public/types';
+import type { BfetchPublicSetup } from '../../bfetch/public/plugin/types';
 import type { ExpressionsSetup } from '../../expressions/public/plugin';
 import type { FieldFormatsSetup, FieldFormatsStart } from '../../field_formats/public/plugin';
 import type { Setup as InspectorSetup } from '../../inspector/public/plugin';

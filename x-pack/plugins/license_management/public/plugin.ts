@@ -4,17 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { first } from 'rxjs/operators';
-import { CoreSetup, Plugin, PluginInitializerContext } from 'src/core/public';
-
-import { TelemetryPluginStart } from '../../../../src/plugins/telemetry/public';
-import { ManagementSetup } from '../../../../src/plugins/management/public';
-import { LicensingPluginSetup } from '../../../plugins/licensing/public';
-import { PLUGIN } from '../common/constants';
-import { ClientConfigType } from './types';
-import { AppDependencies } from './application';
+import type { CoreSetup } from '../../../../src/core/public/types';
+import type { Plugin } from '../../../../src/core/public/plugins/plugin';
+import type { PluginInitializerContext } from '../../../../src/core/public/plugins/plugin_context';
+import type { ManagementSetup } from '../../../../src/plugins/management/public/types';
+import type { TelemetryPluginStart } from '../../../../src/plugins/telemetry/public/plugin';
+import type { LicensingPluginSetup } from '../../licensing/public/types';
+import { PLUGIN } from '../common/constants/plugin';
+import type { AppDependencies } from './application/app_context';
 import { BreadcrumbService } from './application/breadcrumbs';
+import type { ClientConfigType } from './types';
 
 interface PluginsDependenciesSetup {
   management: ManagementSetup;

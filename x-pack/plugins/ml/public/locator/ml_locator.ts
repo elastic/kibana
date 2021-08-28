@@ -4,30 +4,33 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { LocatorDefinition, KibanaLocation } from '../../../../../src/plugins/share/public';
-import {
-  DataFrameAnalyticsExplorationUrlState,
-  MlLocatorParams,
-  MlLocator,
-} from '../../common/types/locator';
+import type {
+  KibanaLocation,
+  LocatorDefinition,
+} from '../../../../../src/plugins/share/common/url_service/locators/types';
 import { ML_APP_LOCATOR, ML_PAGES } from '../../common/constants/locator';
+import type {
+  DataFrameAnalyticsExplorationUrlState,
+  MlLocator,
+  MlLocatorParams,
+} from '../../common/types/locator';
 import {
   formatAnomalyDetectionCreateJobSelectIndex,
   formatAnomalyDetectionCreateJobSelectType,
   formatAnomalyDetectionJobManagementUrl,
   formatExplorerUrl,
   formatSingleMetricViewerUrl,
+} from './formatters/anomaly_detection';
+import { formatGenericMlUrl } from './formatters/common';
+import {
   formatDataFrameAnalyticsCreateJobUrl,
   formatDataFrameAnalyticsExplorationUrl,
   formatDataFrameAnalyticsJobManagementUrl,
   formatDataFrameAnalyticsMapUrl,
-  formatGenericMlUrl,
-  formatEditCalendarUrl,
-  formatEditFilterUrl,
-} from './formatters';
+} from './formatters/data_frame_analytics';
+import { formatEditCalendarUrl, formatEditFilterUrl } from './formatters/settings';
 
-export { MlLocatorParams, MlLocator };
+export type { MlLocatorParams, MlLocator };
 
 export class MlLocatorDefinition implements LocatorDefinition<MlLocatorParams> {
   public readonly id = ML_APP_LOCATOR;

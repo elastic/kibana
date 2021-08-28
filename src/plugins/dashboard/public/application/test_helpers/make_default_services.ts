@@ -16,7 +16,7 @@ import { embeddablePluginMock } from '../../../../embeddable/public/mocks';
 import { IndexPatternsContract, SavedQueryService } from '../../services/data';
 import { savedObjectsPluginMock } from '../../../../saved_objects/public/mocks';
 import { visualizationsPluginMock } from '../../../../visualizations/public/mocks';
-import { PluginInitializerContext, ScopedHistory } from '../../../../../core/public';
+// import { PluginInitializerContext, ScopedHistory } from '../../../../../core/public';
 import { SavedObjectLoader, SavedObjectLoaderFindOptions } from '../../services/saved_objects';
 import {
   chromeServiceMock,

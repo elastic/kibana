@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
-import { useLocation, useParams } from 'react-router-dom';
 import { isLeft } from 'fp-ts/lib/Either';
+import * as t from 'io-ts';
 import { PathReporter } from 'io-ts/lib/PathReporter';
-import { Params, RouteParams, routes } from '../routes';
+import { useLocation, useParams } from 'react-router-dom';
+import type { Params, RouteParams } from '../routes';
+import { routes } from '../routes';
 
 function getQueryParams(location: ReturnType<typeof useLocation>) {
   const urlSearchParms = new URLSearchParams(location.search);

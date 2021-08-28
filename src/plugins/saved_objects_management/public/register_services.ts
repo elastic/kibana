@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { StartServicesAccessor } from '../../../core/public';
+import type { StartServicesAccessor } from '../../../core/public/types';
 import type { SavedObjectsManagementPluginStart, StartDependencies } from './plugin';
 import type { ISavedObjectsManagementServiceRegistry } from './services/service_registry';
 

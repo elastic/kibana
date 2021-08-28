@@ -4,10 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { FC, useEffect, useState } from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiAccordion,
   EuiButton,
@@ -19,17 +15,23 @@ import {
   EuiSwitch,
   EuiTextAlign,
 } from '@elastic/eui';
-import { ModuleJobUI, SAVE_STATE } from '../page';
-import { getTimeFilterRange } from '../../../../components/full_time_range_selector';
-import { useMlContext } from '../../../../contexts/ml';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+import type { FC } from 'react';
+import React, { useEffect, useState } from 'react';
+import { JOB_ID_MAX_LENGTH } from '../../../../../../common/constants/validation';
 import {
   composeValidators,
   maxLengthValidator,
   patternValidator,
 } from '../../../../../../common/util/validators';
-import { JOB_ID_MAX_LENGTH } from '../../../../../../common/constants/validation';
-import { usePartialState } from '../../../../components/custom_hooks';
-import { TimeRange, TimeRangePicker } from '../../common/components';
+import { usePartialState } from '../../../../components/custom_hooks/use_partial_state';
+import { getTimeFilterRange } from '../../../../components/full_time_range_selector/full_time_range_selector_service';
+import { useMlContext } from '../../../../contexts/ml/use_ml_context';
+import type { TimeRange } from '../../common/components/time_range_picker';
+import { TimeRangePicker } from '../../common/components/time_range_picker';
+import type { ModuleJobUI } from '../page';
+import { SAVE_STATE } from '../page';
 
 export interface JobSettingsFormValues {
   jobPrefix: string;

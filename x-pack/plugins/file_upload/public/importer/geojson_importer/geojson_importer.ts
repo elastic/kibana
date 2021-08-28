@@ -4,17 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { Feature, Point } from 'geojson';
 import { i18n } from '@kbn/i18n';
-// @ts-expect-error
-import { JSONLoader, loadInBatches } from './loaders';
-import { CreateDocsResponse, ImportResults } from '../types';
+import type { Feature, Point } from 'geojson';
+import { MB } from '../../../common/constants';
+import type { ImportDoc, ImportFailure, ImportResponse } from '../../../common/types';
+import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { callImportRoute, Importer, IMPORT_RETRIES, MAX_CHUNK_CHAR_COUNT } from '../importer';
-import { ES_FIELD_TYPES } from '../../../../../../src/plugins/data/public';
+import type { CreateDocsResponse, ImportResults } from '../types';
 // @ts-expect-error
 import { geoJsonCleanAndValidate } from './geojson_clean_and_validate';
-import { ImportDoc, ImportFailure, ImportResponse, MB } from '../../../common';
+// @ts-expect-error
+import { JSONLoader, loadInBatches } from './loaders';
+
+
 
 const BLOCK_SIZE_MB = 5 * MB;
 export const GEOJSON_FILE_TYPES = ['.json', '.geojson'];

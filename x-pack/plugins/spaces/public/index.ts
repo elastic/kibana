@@ -4,17 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { SpacesPlugin } from './plugin';
-
-export { getSpaceColor, getSpaceImageUrl, getSpaceInitials } from './space_avatar';
-
-export { SpacesPluginSetup, SpacesPluginStart } from './plugin';
-
-export type { GetAllSpacesPurpose, GetSpaceResult } from '../common';
 
 // re-export types from oss definition
 export type { Space } from 'src/plugins/spaces_oss/common';
+export type { GetAllSpacesPurpose, GetSpaceResult } from '../common';
+export { SpacesPluginSetup, SpacesPluginStart } from './plugin';
+export { getSpaceColor, getSpaceImageUrl, getSpaceInitials } from './space_avatar';
 
 export const plugin = () => {
   return new SpacesPlugin();

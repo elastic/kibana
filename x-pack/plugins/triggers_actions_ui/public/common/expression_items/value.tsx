@@ -4,18 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { useState } from 'react';
 import {
   EuiExpression,
-  EuiPopover,
   EuiFieldNumber,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
+  EuiPopover,
 } from '@elastic/eui';
-import { ClosablePopoverTitle } from './components';
-import { IErrorObject } from '../../types';
+import React, { useState } from 'react';
+import type { IErrorObject } from '../../types';
+import { ClosablePopoverTitle } from './components/closable_popover_title';
 
 export interface ValueExpressionProps {
   description: string;

@@ -4,11 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { MetricDistributionChartData } from './metric_distribution_chart';
 
 const METRIC_DISTRIBUTION_CHART_MIN_BAR_WIDTH = 3; // Minimum bar width, in pixels.
 const METRIC_DISTRIBUTION_CHART_MAX_BAR_HEIGHT_FACTOR = 20; // Max bar height relative to median bar height.
-
-import { MetricDistributionChartData } from './metric_distribution_chart';
 
 interface DistributionPercentile {
   minValue: number;

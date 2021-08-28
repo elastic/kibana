@@ -4,22 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { i18n } from '@kbn/i18n';
-import React, { useState, Fragment } from 'react';
 import {
   EuiButton,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiPopover,
   EuiSpacer,
-  EuiButtonEmpty,
-  EuiFlexItem,
-  EuiFlexGroup,
 } from '@elastic/eui';
-import { FilterExpanded } from './filter_expanded';
-import { SeriesConfig } from '../../types';
+import { i18n } from '@kbn/i18n';
+import React, { Fragment, useState } from 'react';
 import { FieldLabels } from '../../configurations/constants/constants';
-import { SelectedFilters } from '../selected_filters';
 import { useSeriesStorage } from '../../hooks/use_series_storage';
+import type { SeriesConfig } from '../../types';
+import { SelectedFilters } from '../selected_filters';
+import { FilterExpanded } from './filter_expanded';
 
 interface Props {
   seriesId: string;

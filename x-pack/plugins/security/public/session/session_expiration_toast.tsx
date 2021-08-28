@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import type { FunctionComponent } from 'react';
 import React from 'react';
@@ -14,9 +13,9 @@ import type { Observable } from 'rxjs';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n/react';
-import type { ToastInput } from 'src/core/public';
 
-import { toMountPoint } from '../../../../../src/plugins/kibana_react/public';
+import type { ToastInput } from '../../../../../src/core/public/notifications/toasts/toasts_api';
+import { toMountPoint } from '../../../../../src/plugins/kibana_react/public/util/to_mount_point';
 import { SESSION_GRACE_PERIOD_MS } from '../../common/constants';
 import type { SessionState } from './session_timeout';
 

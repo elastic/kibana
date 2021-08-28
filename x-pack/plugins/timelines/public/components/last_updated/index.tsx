@@ -4,11 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { EuiText, EuiToolTip } from '@elastic/eui';
 import { FormattedRelative } from '@kbn/i18n/react';
 import React, { useEffect, useMemo, useState } from 'react';
-
 import * as i18n from './translations';
 
 export interface LastUpdatedAtProps {

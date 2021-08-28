@@ -4,11 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { SavedObjectReference } from 'kibana/public';
-import { Ast } from '@kbn/interpreter/common';
+import type { Ast } from '@kbn/interpreter/common';
 import memoizeOne from 'memoize-one';
-import {
+import type { SavedObjectReference } from '../../../../../../src/core/types/saved_objects';
+import type { VisualizeFieldContext } from '../../../../../../src/plugins/ui_actions/public/types';
+import type { Document } from '../../persistence/saved_object_store';
+import type { DatasourceStates } from '../../state_management/types';
+import type {
   Datasource,
   DatasourceMap,
   DatasourcePublicAPI,
@@ -18,17 +20,14 @@ import {
   VisualizationDimensionGroupConfig,
   VisualizationMap,
 } from '../../types';
-import { buildExpression } from './expression_helpers';
-import { Document } from '../../persistence/saved_object_store';
-import { VisualizeFieldContext } from '../../../../../../src/plugins/ui_actions/public';
 import { getActiveDatasourceIdFromDoc } from '../../utils';
-import { ErrorMessage } from '../types';
 import {
   getMissingCurrentDatasource,
   getMissingIndexPatterns,
   getMissingVisualizationTypeError,
 } from '../error_helper';
-import { DatasourceStates } from '../../state_management';
+import type { ErrorMessage } from '../types';
+import { buildExpression } from './expression_helpers';
 
 export async function initializeDatasources(
   datasourceMap: DatasourceMap,

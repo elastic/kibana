@@ -9,7 +9,6 @@
 import { isESClientError } from './utils';
 
 export { defaultIngestErrorHandler, ingestErrorToResponseOptions } from './handlers';
-
 export { isESClientError } from './utils';
 
 export class IngestManagerError extends Error {

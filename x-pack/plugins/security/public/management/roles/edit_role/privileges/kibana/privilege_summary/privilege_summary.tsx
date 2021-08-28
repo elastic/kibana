@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -17,11 +16,11 @@ import {
 import React, { Fragment, useState } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
-import type { SpacesApiUi } from 'src/plugins/spaces_oss/public';
 
-import type { Space } from '../../../../../../../../spaces/public';
-import type { Role } from '../../../../../../../common/model';
-import type { KibanaPrivileges } from '../../../../model';
+import type { Space } from '../../../../../../../../../../src/plugins/spaces_oss/common/types';
+import type { SpacesApiUi } from '../../../../../../../../../../src/plugins/spaces_oss/public/api';
+import type { Role } from '../../../../../../../common/model/role';
+import type { KibanaPrivileges } from '../../../../model/kibana_privileges';
 import { PrivilegeSummaryTable } from './privilege_summary_table';
 
 interface Props {

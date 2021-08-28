@@ -4,10 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { ConfigProps, SeriesConfig } from '../../types';
-import { FieldLabels, REPORT_METRIC_FIELD, RECORDS_PERCENTAGE_FIELD } from '../constants';
-import { buildPhraseFilter } from '../utils';
+import type { ConfigProps, SeriesConfig } from '../../types';
+import { FieldLabels, RECORDS_PERCENTAGE_FIELD, REPORT_METRIC_FIELD } from '../constants/constants';
 import {
   CLIENT_GEO_COUNTRY_NAME,
   CLS_FIELD,
@@ -33,11 +31,12 @@ import {
   FCP_LABEL,
   FID_LABEL,
   LCP_LABEL,
-  PAGE_LOAD_TIME_LABEL,
   PAGES_LOADED_LABEL,
+  PAGE_LOAD_TIME_LABEL,
   TBT_LABEL,
   WEB_APPLICATION_LABEL,
 } from '../constants/labels';
+import { buildPhraseFilter } from '../utils';
 
 export function getRumDistributionConfig({ indexPattern }: ConfigProps): SeriesConfig {
   return {

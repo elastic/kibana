@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { AnomalyResultType } from './anomalies';
+import type { Alert, AlertTypeParams } from '../../../alerting/common/alert';
 import { ANOMALY_RESULT_TYPE } from '../constants/anomalies';
-import type { AlertTypeParams, Alert } from '../../../alerting/common';
+import type { AnomalyResultType } from './anomalies';
 
 export type PreviewResultsKeys = 'record_results' | 'bucket_results' | 'influencer_results';
 export type TopHitsResultsKeys = 'top_record_hits' | 'top_bucket_hits' | 'top_influencer_hits';

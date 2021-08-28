@@ -4,11 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { i18n } from '@kbn/i18n';
-import { JOB_STATE, DATAFEED_STATE } from '../../../../../common/constants/states';
-import { Group, GroupsDictionary } from './anomaly_detection_panel';
-import { MlSummaryJobs, MlSummaryJob } from '../../../../../common/types/anomaly_detection_jobs';
+import { DATAFEED_STATE, JOB_STATE } from '../../../../../common/constants/states';
+import type {
+  MlSummaryJob,
+  MlSummaryJobs,
+} from '../../../../../common/types/anomaly_detection_jobs/summary_job';
+import type { Group, GroupsDictionary } from './anomaly_detection_panel';
 
 export function getGroupsFromJobs(
   jobs: MlSummaryJobs

@@ -4,8 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { CategorizationAnalyzer } from './categories';
+import type { CategorizationAnalyzer } from './categories';
 
 export interface MlServerDefaults {
   anomaly_detectors: {

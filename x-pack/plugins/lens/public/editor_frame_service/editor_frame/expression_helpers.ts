@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { Ast, fromExpression, ExpressionFunctionAST } from '@kbn/interpreter/common';
-import { DatasourceStates } from '../../state_management';
-import { Visualization, DatasourcePublicAPI, DatasourceMap } from '../../types';
+import type { Ast, ExpressionFunctionAST } from '@kbn/interpreter/common';
+import { fromExpression } from '@kbn/interpreter/common';
+import type { DatasourceStates } from '../../state_management/types';
+import type { DatasourceMap, DatasourcePublicAPI, Visualization } from '../../types';
 
 export function prependDatasourceExpression(
   visualizationExpression: Ast | string | null,

@@ -4,14 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import type { PropsWithChildren } from 'react';
 import React, { useEffect, useMemo, useState } from 'react';
 
-import type { ApplicationStart, DocLinksStart, NotificationsStart } from 'src/core/public';
-import type { SpacesContextProps } from 'src/plugins/spaces_oss/public';
-
-import type { SpacesManager } from '../spaces_manager';
+import type { ApplicationStart } from '../../../../../src/core/public/application/types';
+import type { DocLinksStart } from '../../../../../src/core/public/doc_links/doc_links_service';
+import type { NotificationsStart } from '../../../../../src/core/public/notifications/notifications_service';
+import type { SpacesContextProps } from '../../../../../src/plugins/spaces_oss/public/api';
+import type { SpacesManager } from '../spaces_manager/spaces_manager';
 import type { ShareToSpacesData, ShareToSpaceTarget } from '../types';
 import { createSpacesReactContext } from './context';
 import type { InternalProps, SpacesReactContext } from './types';

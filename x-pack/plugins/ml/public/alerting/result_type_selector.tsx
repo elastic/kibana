@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { EuiCard, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { FC, useMemo } from 'react';
+import type { FC } from 'react';
+import React, { useMemo } from 'react';
 import { ANOMALY_RESULT_TYPE } from '../../common/constants/anomalies';
-import { AnomalyResultType } from '../../common/types/anomalies';
+import type { AnomalyResultType } from '../../common/types/anomalies';
 
 export interface ResultTypeSelectorProps {
   value: AnomalyResultType | undefined;

@@ -4,47 +4,44 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { isEqual } from 'lodash';
-import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
-import usePrevious from 'react-use/lib/usePrevious';
-import moment from 'moment';
-
 import { i18n } from '@kbn/i18n';
-
-import { NavigateToPath, useNotifications } from '../../contexts/kibana';
-
-import { MlJobWithTimeRange } from '../../../../common/types/anomaly_detection_jobs';
-
-import { TimeSeriesExplorer } from '../../timeseriesexplorer';
+import { isEqual } from 'lodash';
+import moment from 'moment';
+import type { FC } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import usePrevious from 'react-use/lib/usePrevious';
+import type { MlJobWithTimeRange } from '../../../../common/types/anomaly_detection_jobs/summary_job';
+import type { TimeSeriesExplorerAppState } from '../../../../common/types/locator';
+import { useTableInterval } from '../../components/controls/select_interval/select_interval';
+import { useTableSeverity } from '../../components/controls/select_severity/select_severity';
+import type { NavigateToPath } from '../../contexts/kibana/use_navigate_to_path';
+import { useNotifications } from '../../contexts/kibana/use_notifications_context';
+import { useTimefilter } from '../../contexts/kibana/use_timefilter';
+import { MlAnnotationUpdatesContext } from '../../contexts/ml/ml_annotation_updates_context';
 import { getDateFormatTz } from '../../explorer/explorer_utils';
-import { ml } from '../../services/ml_api_service';
-import { mlJobService } from '../../services/job_service';
+import { AnnotationUpdatesService } from '../../services/annotations_service';
 import { mlForecastService } from '../../services/forecast_service';
+import { mlJobService } from '../../services/job_service';
+import { ml } from '../../services/ml_api_service';
+import { useToastNotificationService } from '../../services/toast_notification_service/toast_notification_service';
+import { TimeseriesexplorerNoJobsFound } from '../../timeseriesexplorer/components/timeseriesexplorer_no_jobs_found/timeseriesexplorer_no_jobs_found';
+import { useTimeSeriesExplorerUrlState } from '../../timeseriesexplorer/hooks/use_timeseriesexplorer_url_state';
 import { APP_STATE_ACTION } from '../../timeseriesexplorer/timeseriesexplorer_constants';
+import { TimeSeriesExplorerPage } from '../../timeseriesexplorer/timeseriesexplorer_page';
 import {
   createTimeSeriesJobData,
   getAutoZoomDuration,
-  validateJobSelection,
 } from '../../timeseriesexplorer/timeseriesexplorer_utils';
-import { TimeSeriesExplorerPage } from '../../timeseriesexplorer/timeseriesexplorer_page';
-import { TimeseriesexplorerNoJobsFound } from '../../timeseriesexplorer/components/timeseriesexplorer_no_jobs_found';
+import { validateJobSelection } from '../../timeseriesexplorer/timeseriesexplorer_utils/validate_job_selection';
+import type { TimeRangeBounds } from '../../util/time_buckets';
 import { useUrlState } from '../../util/url_state';
-import { useTableInterval } from '../../components/controls/select_interval';
-import { useTableSeverity } from '../../components/controls/select_severity';
-
-import { MlRoute, PageLoader, PageProps } from '../router';
+import { getBreadcrumbWithUrlForApp } from '../breadcrumbs';
+import { basicResolvers } from '../resolvers';
+import type { MlRoute, PageProps } from '../router';
+import { PageLoader } from '../router';
 import { useRefresh } from '../use_refresh';
 import { useResolver } from '../use_resolver';
-import { basicResolvers } from '../resolvers';
-import { getBreadcrumbWithUrlForApp } from '../breadcrumbs';
-import { useTimefilter } from '../../contexts/kibana';
-import { useToastNotificationService } from '../../services/toast_notification_service';
-import { AnnotationUpdatesService } from '../../services/annotations_service';
-import { MlAnnotationUpdatesContext } from '../../contexts/ml/ml_annotation_updates_context';
-import { useTimeSeriesExplorerUrlState } from '../../timeseriesexplorer/hooks/use_timeseriesexplorer_url_state';
-import type { TimeSeriesExplorerAppState } from '../../../../common/types/locator';
-import type { TimeRangeBounds } from '../../util/time_buckets';
+import { TimeSeriesExplorer } from '../../timeseriesexplorer';
 
 export const timeSeriesExplorerRouteFactory = (
   navigateToPath: NavigateToPath,

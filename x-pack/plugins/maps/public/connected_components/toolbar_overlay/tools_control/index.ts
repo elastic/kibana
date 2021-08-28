@@ -4,16 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { AnyAction } from 'redux';
-import { ThunkDispatch } from 'redux-thunk';
 import { connect } from 'react-redux';
-import { ToolsControl } from './tools_control';
-import { setDrawMode, updateDrawState } from '../../../actions';
-import { MapStoreState } from '../../../reducers/store';
-import { DrawState } from '../../../../common/descriptor_types';
-import { DRAW_MODE } from '../../../../common';
+import type { AnyAction } from 'redux';
+import type { ThunkDispatch } from 'redux-thunk';
+import { DRAW_MODE } from '../../../../common/constants';
+import type { DrawState } from '../../../../common/descriptor_types/map_descriptor';
+import { updateDrawState } from '../../../actions/map_actions';
+import { setDrawMode } from '../../../actions/ui_actions';
+import type { MapStoreState } from '../../../reducers/store';
 import { getDrawMode } from '../../../selectors/ui_selectors';
+import { ToolsControl } from './tools_control';
 
 function mapStateToProps(state: MapStoreState) {
   const drawMode = getDrawMode(state);

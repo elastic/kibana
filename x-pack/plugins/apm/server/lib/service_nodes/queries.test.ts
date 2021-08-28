@@ -4,15 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { getServiceNodes } from './';
-import {
-  SearchParamsMock,
-  inspectSearchParams,
-} from '../../utils/test_helpers';
-import { getServiceNodeMetadata } from '../services/get_service_node_metadata';
-import { SERVICE_NODE_NAME_MISSING } from '../../../common/service_nodes';
+import { getServiceNodes } from '.';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
+import { SERVICE_NODE_NAME_MISSING } from '../../../common/service_nodes';
+import type { SearchParamsMock } from '../../utils/test_helpers';
+import { inspectSearchParams } from '../../utils/test_helpers';
+import { getServiceNodeMetadata } from '../services/get_service_node_metadata';
 
 describe('service node queries', () => {
   let mock: SearchParamsMock;

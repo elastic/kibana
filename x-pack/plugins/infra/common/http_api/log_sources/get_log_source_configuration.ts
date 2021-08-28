@@ -6,8 +6,9 @@
  */
 
 import * as rt from 'io-ts';
-import { badRequestErrorRT, forbiddenErrorRT, routeTimingMetadataRT } from '../shared';
 import { logSourceConfigurationRT } from '../../log_sources/log_source_configuration';
+import { badRequestErrorRT, forbiddenErrorRT } from '../shared/errors';
+import { routeTimingMetadataRT } from '../shared/timing';
 
 /**
  * request

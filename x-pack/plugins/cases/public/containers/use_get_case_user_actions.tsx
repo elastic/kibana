@@ -4,22 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { isEmpty, uniqBy } from 'lodash/fp';
-import { useCallback, useEffect, useState, useRef } from 'react';
 import deepEqual from 'fast-deep-equal';
-
-import {
-  CaseFullExternalService,
-  CaseConnector,
-  CaseExternalService,
-  CaseUserActions,
-  ElasticUser,
-} from '../../common';
+import { isEmpty, uniqBy } from 'lodash/fp';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import type { CaseFullExternalService } from '../../common/api/cases/case';
+import type { CaseConnector } from '../../common/api/connectors';
+import type { CaseExternalService, CaseUserActions, ElasticUser } from '../../common/ui/types';
+import { useToasts } from '../common/lib/kibana/hooks';
 import { getCaseUserActions, getSubCaseUserActions } from './api';
 import * as i18n from './translations';
 import { convertToCamelCase, parseString } from './utils';
-import { useToasts } from '../common/lib/kibana';
 
 export interface CaseService extends CaseExternalService {
   firstPushIndex: number;

@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import { EuiCard } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
-import { EuiCard } from '@elastic/eui';
 
-import type { PackageListItem } from '../../../types';
-import { useLink } from '../../../hooks';
-import { PackageIcon } from '../../../components';
+import type { PackageListItem } from '../../../../../../common/types/models/epm';
+import { PackageIcon } from '../../../../../components/package_icon';
+import { useLink } from '../../../../../hooks/use_link';
 
-import { RELEASE_BADGE_LABEL, RELEASE_BADGE_DESCRIPTION } from './release_badge';
+import { RELEASE_BADGE_DESCRIPTION, RELEASE_BADGE_LABEL } from './release_badge';
 
 type PackageCardProps = PackageListItem;
 

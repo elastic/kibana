@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import { flatten } from 'lodash';
-import type { CoreSetup } from '../../../../../../core/public';
+import type { CoreSetup } from '../../../../../../core/public/types';
 import type { IFieldType } from '../../../../common/index_patterns/fields/types';
 import type { IIndexPattern } from '../../../../common/index_patterns/types';
 import type { DataPublicPluginStart } from '../../../types';

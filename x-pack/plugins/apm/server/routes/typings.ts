@@ -4,21 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import {
+import type { Logger } from '@kbn/logging';
+import type { APMConfig } from '..';
+import type {
   CoreSetup,
-  RequestHandlerContext,
-  Logger,
-  KibanaRequest,
   CoreStart,
-} from 'src/core/server';
-import { IRuleDataClient } from '../../../rule_registry/server';
-import { AlertingApiRequestHandlerContext } from '../../../alerting/server';
-import type { RacApiRequestHandlerContext } from '../../../rule_registry/server';
-import { LicensingApiRequestHandlerContext } from '../../../licensing/server';
-import { APMConfig } from '..';
-import { APMPluginDependencies } from '../types';
-import { UsageCollectionSetup } from '../../../../../src/plugins/usage_collection/server';
+  RequestHandlerContext,
+} from '../../../../../src/core/server';
+import { KibanaRequest } from '../../../../../src/core/server/http/router/request';
+import type { UsageCollectionSetup } from '../../../../../src/plugins/usage_collection/server/plugin';
+import type { AlertingApiRequestHandlerContext } from '../../../alerting/server/types';
+import type { LicensingApiRequestHandlerContext } from '../../../licensing/server/types';
+import type { IRuleDataClient } from '../../../rule_registry/server/rule_data_client/types';
+import type { RacApiRequestHandlerContext } from '../../../rule_registry/server/types';
+import type { APMPluginDependencies } from '../types';
 
 export interface ApmPluginRequestHandlerContext extends RequestHandlerContext {
   licensing: LicensingApiRequestHandlerContext;

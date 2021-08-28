@@ -4,41 +4,41 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { FC, useCallback, useState, useEffect } from 'react';
-import { i18n } from '@kbn/i18n';
+import type { EuiSearchBarProps } from '@elastic/eui';
 import {
-  EuiInMemoryTable,
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiInMemoryTable,
   EuiSearchBar,
-  EuiSearchBarProps,
   EuiSpacer,
 } from '@elastic/eui';
-import { ANALYSIS_CONFIG_TYPE } from '../../../../../../../common/constants/data_frame_analytics';
-import { DataFrameAnalyticsId, useRefreshAnalyticsList } from '../../../../common';
-import { checkPermission } from '../../../../../capabilities/check_capabilities';
-
+import { i18n } from '@kbn/i18n';
+import type { FC } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
+import type { SpacesPluginStart } from '../../../../../../../../spaces/public/plugin';
 import {
-  DataFrameAnalyticsListColumn,
-  DataFrameAnalyticsListRow,
-  ItemIdToExpandedRowMap,
+  ANALYSIS_CONFIG_TYPE,
   DATA_FRAME_TASK_STATE,
-} from './common';
-import { getAnalyticsFactory } from '../../services/analytics_service';
-import { getTaskStateBadge, getJobTypeBadge, useColumns } from './use_columns';
-import { ExpandedRow } from './expanded_row';
-import type { SpacesPluginStart } from '../../../../../../../../spaces/public';
-import { AnalyticStatsBarStats, StatsBar } from '../../../../../components/stats_bar';
-import { CreateAnalyticsButton } from '../create_analytics_button';
-import { SourceSelection } from '../source_selection';
+} from '../../../../../../../common/constants/data_frame_analytics';
+import type { ListingPageUrlState } from '../../../../../../../common/types/common';
+import type { DataFrameAnalyticsId } from '../../../../../../../common/types/data_frame_analytics';
+import { checkPermission } from '../../../../../capabilities/check_capabilities';
+import { JobsAwaitingNodeWarning } from '../../../../../components/jobs_awaiting_node_warning/jobs_awaiting_node_warning';
+import type { AnalyticStatsBarStats } from '../../../../../components/stats_bar/stats_bar';
+import { StatsBar } from '../../../../../components/stats_bar/stats_bar';
+import { useRefreshAnalyticsList } from '../../../../common/analytics';
 import { filterAnalytics } from '../../../../common/search_bar_filters';
+import { getAnalyticsFactory } from '../../services/analytics_service/get_analytics';
+import { CreateAnalyticsButton } from '../create_analytics_button/create_analytics_button';
+import { RefreshAnalyticsListButton } from '../refresh_analytics_list_button/refresh_analytics_list_button';
+import { SourceSelection } from '../source_selection/source_selection';
+import type { DataFrameAnalyticsListRow, ItemIdToExpandedRowMap } from './common';
+import { DataFrameAnalyticsListColumn } from './common';
 import { AnalyticsEmptyPrompt } from './empty_prompt';
+import { ExpandedRow } from './expanded_row';
+import { getJobTypeBadge, getTaskStateBadge, useColumns } from './use_columns';
 import { useTableSettings } from './use_table_settings';
-import { RefreshAnalyticsListButton } from '../refresh_analytics_list_button';
-import { ListingPageUrlState } from '../../../../../../../common/types/common';
-import { JobsAwaitingNodeWarning } from '../../../../../components/jobs_awaiting_node_warning';
 
 const filters: EuiSearchBarProps['filters'] = [
   {

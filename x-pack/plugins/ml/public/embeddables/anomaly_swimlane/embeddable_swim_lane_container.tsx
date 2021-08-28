@@ -4,28 +4,27 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { FC, useCallback, useState, useEffect } from 'react';
 import { EuiCallOut } from '@elastic/eui';
-import { Observable } from 'rxjs';
-
-import { CoreStart } from 'kibana/public';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { IAnomalySwimlaneEmbeddable } from './anomaly_swimlane_embeddable';
-import { useSwimlaneInputResolver } from './swimlane_input_resolver';
-import { SwimlaneType } from '../../application/explorer/explorer_constants';
+import type { FC } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
+import { Observable } from 'rxjs';
+import type { CoreStart } from '../../../../../../src/core/public/types';
+import type { MlDependencies } from '../../application/app';
+import type { SwimlaneType } from '../../application/explorer/explorer_constants';
+import type { AppStateSelectedCells } from '../../application/explorer/explorer_utils';
 import {
   isViewBySwimLaneData,
   SwimlaneContainer,
 } from '../../application/explorer/swimlane_container';
-import { AppStateSelectedCells } from '../../application/explorer/explorer_utils';
-import { MlDependencies } from '../../application/app';
-import { SWIM_LANE_SELECTION_TRIGGER } from '../../ui_actions';
-import {
+import { SWIM_LANE_SELECTION_TRIGGER } from '../../ui_actions/triggers';
+import type {
   AnomalySwimlaneEmbeddableInput,
   AnomalySwimlaneEmbeddableOutput,
   AnomalySwimlaneServices,
-} from '..';
+} from '../types';
+import type { IAnomalySwimlaneEmbeddable } from './anomaly_swimlane_embeddable';
+import { useSwimlaneInputResolver } from './swimlane_input_resolver';
 
 export interface ExplorerSwimlaneContainerProps {
   id: string;

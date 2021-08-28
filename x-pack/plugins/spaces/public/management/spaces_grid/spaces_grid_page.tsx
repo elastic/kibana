@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import {
   EuiButton,
   EuiButtonIcon,
@@ -20,22 +19,22 @@ import React, { Component, lazy, Suspense } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import type {
-  ApplicationStart,
-  Capabilities,
-  NotificationsStart,
-  ScopedHistory,
-} from 'src/core/public';
-import type { Space } from 'src/plugins/spaces_oss/common';
 
-import { reactRouterNavigate } from '../../../../../../src/plugins/kibana_react/public';
-import type { FeaturesPluginStart, KibanaFeature } from '../../../../features/public';
-import { isReservedSpace } from '../../../common';
+import type { ScopedHistory } from '../../../../../../src/core/public/application/scoped_history';
+import type { ApplicationStart } from '../../../../../../src/core/public/application/types';
+import type { NotificationsStart } from '../../../../../../src/core/public/notifications/notifications_service';
+import type { Capabilities } from '../../../../../../src/core/types/capabilities';
+import { reactRouterNavigate } from '../../../../../../src/plugins/kibana_react/public/react_router_navigate/react_router_navigate';
+import type { Space } from '../../../../../../src/plugins/spaces_oss/common/types';
+import type { KibanaFeature } from '../../../../features/common/kibana_feature';
+import type { FeaturesPluginStart } from '../../../../features/public/plugin';
 import { DEFAULT_SPACE_ID } from '../../../common/constants';
+import { isReservedSpace } from '../../../common/is_reserved_space';
 import { getSpacesFeatureDescription } from '../../constants';
-import { getSpaceAvatarComponent } from '../../space_avatar';
-import type { SpacesManager } from '../../spaces_manager';
-import { ConfirmDeleteModal, UnauthorizedPrompt } from '../components';
+import { getSpaceAvatarComponent } from '../../space_avatar/space_avatar';
+import type { SpacesManager } from '../../spaces_manager/spaces_manager';
+import { ConfirmDeleteModal } from '../components/confirm_delete_modal/confirm_delete_modal';
+import { UnauthorizedPrompt } from '../components/unauthorized_prompt/unauthorized_prompt';
 import { getEnabledFeatures } from '../lib/feature_utils';
 
 // No need to wrap LazySpaceAvatar in an error boundary, because it is one of the first chunks loaded when opening Kibana.

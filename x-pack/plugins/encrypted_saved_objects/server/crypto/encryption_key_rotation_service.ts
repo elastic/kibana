@@ -4,18 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { Logger } from '@kbn/logging';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type {
-  ISavedObjectTypeRegistry,
-  KibanaRequest,
-  Logger,
-  SavedObject,
-  SavedObjectsBulkUpdateObject,
-  StartServicesAccessor,
-} from 'src/core/server';
 
-import type { AuthenticatedUser, SecurityPluginSetup } from '../../../security/server';
+import type { StartServicesAccessor } from '../../../../../src/core/server';
+import type { KibanaRequest } from '../../../../../src/core/server/http/router/request';
+import type { ISavedObjectTypeRegistry } from '../../../../../src/core/server/saved_objects/saved_objects_type_registry';
+import type { SavedObjectsBulkUpdateObject } from '../../../../../src/core/server/saved_objects/service/saved_objects_client';
+import type { SavedObject } from '../../../../../src/core/types/saved_objects';
+import type { AuthenticatedUser } from '../../../security/common/model/authenticated_user';
+import type { SecurityPluginSetup } from '../../../security/server/plugin';
 import { getDescriptorNamespace } from '../saved_objects/get_descriptor_namespace';
 import type { EncryptedSavedObjectsService } from './encrypted_saved_objects_service';
 import { EncryptionError } from './encryption_error';

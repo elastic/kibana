@@ -9,7 +9,7 @@ import type { ComponentType } from 'react';
 import React, { useState } from 'react';
 import type { AlertParams } from '.';
 import { TransactionDurationAlertTrigger } from '.';
-import type { CoreStart } from '../../../../../../../src/core/public';
+import type { CoreStart } from '../../../../../../../src/core/public/types';
 import { createKibanaReactContext } from '../../../../../../../src/plugins/kibana_react/public/context/context';
 
 const KibanaReactContext = createKibanaReactContext(({

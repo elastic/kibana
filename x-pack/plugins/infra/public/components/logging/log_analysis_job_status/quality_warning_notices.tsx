@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import {
   EuiAccordion,
   EuiDescriptionList,
@@ -17,12 +16,12 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { groupBy } from 'lodash';
 import React, { Fragment, useState } from 'react';
-import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
-import {
+import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
+import type {
   CategoryQualityWarning,
   CategoryQualityWarningReason,
-  getFriendlyNameForPartitionId,
-} from '../../../../common/log_analysis';
+} from '../../../../common/log_analysis/log_analysis_quality';
+import { getFriendlyNameForPartitionId } from '../../../../common/log_analysis/log_analysis_results';
 import { RecreateJobCallout } from './recreate_job_callout';
 
 export const CategoryQualityWarnings: React.FC<{

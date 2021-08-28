@@ -4,12 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
-
 import React from 'react';
+import { roundToDecimalPlace } from '../../../utils/round_to_decimal_place';
 import type { FieldDataRowProps } from '../../types/field_data_row';
-import { roundToDecimalPlace } from '../../../utils';
 
 export const DocumentStat = ({ config }: FieldDataRowProps) => {
   const { stats } = config;

@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { CoreSetup } from '../../../../core/public';
+import type { CoreSetup } from '../../../../core/public/types';
 import type { App, AppMountParameters } from '../../../../core/public/application/types';
 import { AppNavLinkStatus } from '../../../../core/public/application/types';
 import type { ForwardDefinition, UrlForwardingStart } from '../plugin';

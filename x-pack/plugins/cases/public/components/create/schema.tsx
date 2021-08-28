@@ -4,17 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { CasePostRequest, ConnectorTypeFields, MAX_TITLE_LENGTH } from '../../../common';
+import { fieldValidators } from '../../../../../../src/plugins/es_ui_shared/static/forms/helpers';
 import {
   FIELD_TYPES,
-  fieldValidators,
-  FormSchema,
   VALIDATION_TYPES,
-} from '../../common/shared_imports';
+} from '../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/constants';
+import type { FormSchema } from '../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/types';
+import type { CasePostRequest } from '../../../common/api/cases/case';
+import type { ConnectorTypeFields } from '../../../common/api/connectors';
+import { MAX_TITLE_LENGTH } from '../../../common/constants';
+import { OptionalFieldLabel } from './optional_field_label';
 import * as i18n from './translations';
 
-import { OptionalFieldLabel } from './optional_field_label';
 const { emptyField, maxLengthField } = fieldValidators;
 
 export const schemaTags = {

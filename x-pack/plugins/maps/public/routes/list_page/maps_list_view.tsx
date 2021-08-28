@@ -4,26 +4,26 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { MouseEvent } from 'react';
-import { SavedObjectReference } from 'src/core/types';
-import { i18n } from '@kbn/i18n';
 import { EuiLink } from '@elastic/eui';
-import { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
-import { TableListView } from '../../../../../../src/plugins/kibana_react/public';
-import { goToSpecifiedPath } from '../../render_app';
+import type { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
+import { i18n } from '@kbn/i18n';
+import type { MouseEvent } from 'react';
+import React from 'react';
+import type { SavedObjectReference } from '../../../../../../src/core/types/saved_objects';
+import { TableListView } from '../../../../../../src/plugins/kibana_react/public/table_list_view/table_list_view';
 import { APP_ID, getEditPath, MAP_PATH, MAP_SAVED_OBJECT_TYPE } from '../../../common/constants';
+import { getAppTitle } from '../../../common/i18n_getters';
+import type { MapSavedObjectAttributes } from '../../../common/map_saved_object_type';
 import {
-  getMapsCapabilities,
-  getToasts,
   getCoreChrome,
+  getMapsCapabilities,
   getNavigateToApp,
+  getSavedObjects,
   getSavedObjectsClient,
   getSavedObjectsTagging,
-  getSavedObjects,
+  getToasts,
 } from '../../kibana_services';
-import { getAppTitle } from '../../../common/i18n_getters';
-import { MapSavedObjectAttributes } from '../../../common/map_saved_object_type';
+import { goToSpecifiedPath } from '../../render_app';
 
 interface MapItem {
   id: string;

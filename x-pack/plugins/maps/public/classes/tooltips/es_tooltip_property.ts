@@ -6,14 +6,12 @@
  */
 
 import _ from 'lodash';
-import { ITooltipProperty } from './tooltip_property';
-import { IField } from '../fields/field';
-import {
-  esFilters,
-  Filter,
-  IndexPattern,
-  IndexPatternField,
-} from '../../../../../../src/plugins/data/public';
+import type { Filter } from '../../../../../../src/plugins/data/common/es_query';
+import { IndexPatternField } from '../../../../../../src/plugins/data/common/index_patterns/fields/index_pattern_field';
+import { IndexPattern } from '../../../../../../src/plugins/data/common/index_patterns/index_patterns/index_pattern';
+import { esFilters } from '../../../../../../src/plugins/data/public/deprecated';
+import type { IField } from '../fields/field';
+import type { ITooltipProperty } from './tooltip_property';
 
 export class ESTooltipProperty implements ITooltipProperty {
   private readonly _tooltipProperty: ITooltipProperty;

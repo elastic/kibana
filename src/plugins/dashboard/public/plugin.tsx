@@ -36,10 +36,8 @@ import type { NavigationPublicPluginStart as NavigationStart } from '../../navig
 import type { PresentationUtilPluginStart } from '../../presentation_util/public/types';
 import { getSavedObjectFinder } from '../../saved_objects/public/finder/saved_object_finder';
 import type { SavedObjectsStart } from '../../saved_objects/public/plugin';
-import { SavedObjectLoader } from '../../saved_objects/public/saved_object/saved_object_loader';
 import type { SavedObjectTaggingOssPluginStart } from '../../saved_objects_tagging_oss/public/types';
 import type { SharePluginSetup, SharePluginStart } from '../../share/public/plugin';
-import type { UrlGeneratorContract } from '../../share/public/url_generators/url_generator_contract';
 import type { UrlGeneratorState } from '../../share/public/url_generators/url_generator_definition';
 import type { SpacesOssPluginStart } from '../../spaces_oss/public/types';
 import type { UiActionsSetup, UiActionsStart } from '../../ui_actions/public/plugin';
@@ -67,17 +65,15 @@ import { DashboardAppLocatorDefinition } from './locator';
 import { createSavedDashboardLoader } from './saved_dashboards/saved_dashboards';
 import type { DashboardUrlGeneratorState } from './url_generator';
 import { createDashboardUrlGenerator, DASHBOARD_APP_URL_GENERATOR } from './url_generator';
+import {
+  DashboardSetup,
+  DashboardStart
+} from './plugin_contract';
 
 declare module '../../share/public' {
   export interface UrlGeneratorStateMapping {
     [DASHBOARD_APP_URL_GENERATOR]: UrlGeneratorState<DashboardUrlGeneratorState>;
   }
-}
-
-export type DashboardUrlGenerator = UrlGeneratorContract<typeof DASHBOARD_APP_URL_GENERATOR>;
-
-export interface DashboardFeatureFlagConfig {
-  allowByValueEmbeddables: boolean;
 }
 
 export interface DashboardSetupDependencies {
@@ -106,28 +102,6 @@ export interface DashboardStartDependencies {
   savedObjectsTaggingOss?: SavedObjectTaggingOssPluginStart;
   spacesOss?: SpacesOssPluginStart;
   visualizations: VisualizationsStart;
-}
-
-export interface DashboardSetup {
-  locator?: DashboardAppLocator;
-}
-
-export interface DashboardStart {
-  getSavedDashboardLoader: () => SavedObjectLoader;
-  getDashboardContainerByValueRenderer: () => ReturnType<
-    typeof createDashboardContainerByValueRenderer
-  >;
-  /**
-   * @deprecated Use dashboard locator instead. Dashboard locator is available
-   * under `.locator` key. This dashboard URL generator will be removed soon.
-   *
-   * ```ts
-   * plugins.dashboard.locator.getLocation({ ... });
-   * ```
-   */
-  dashboardUrlGenerator?: DashboardUrlGenerator;
-  locator?: DashboardAppLocator;
-  dashboardFeatureFlagConfig: DashboardFeatureFlagConfig;
 }
 
 export class DashboardPlugin

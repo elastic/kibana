@@ -8,15 +8,15 @@
 /*
  * React component for rendering a select element with threshold levels.
  */
-import React, { Fragment, FC, useMemo } from 'react';
+import type { EuiSuperSelectProps } from '@elastic/eui';
+import { EuiHealth, EuiSpacer, EuiSuperSelect, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-
-import { EuiHealth, EuiSpacer, EuiSuperSelect, EuiText, EuiSuperSelectProps } from '@elastic/eui';
-
+import type { FC } from 'react';
+import React, { Fragment, useMemo } from 'react';
+import { ANOMALY_THRESHOLD } from '../../../../../common/constants/anomalies';
 import { getSeverityColor } from '../../../../../common/util/anomaly_utils';
 import { usePageUrlState } from '../../../util/url_state';
-import { ANOMALY_THRESHOLD } from '../../../../../common';
 
 const warningLabel = i18n.translate('xpack.ml.controls.selectSeverity.warningLabel', {
   defaultMessage: 'warning',

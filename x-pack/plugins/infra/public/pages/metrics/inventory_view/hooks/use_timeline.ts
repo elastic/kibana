@@ -4,27 +4,26 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { first } from 'lodash';
-import { useEffect, useMemo, useCallback } from 'react';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { getIntervalInSeconds } from '../../../../../server/utils/get_interval_in_seconds';
-import { throwErrors, createPlainError } from '../../../../../common/runtime_types';
-import { useHTTPRequest } from '../../../../hooks/use_http_request';
-import {
-  SnapshotNodeResponseRT,
+import { useCallback, useEffect, useMemo } from 'react';
+import type {
+  InfraTimerangeInput,
   SnapshotNodeResponse,
   SnapshotRequest,
-  InfraTimerangeInput,
 } from '../../../../../common/http_api/snapshot_api';
-import {
+import { SnapshotNodeResponseRT } from '../../../../../common/http_api/snapshot_api';
+import type {
   InventoryItemType,
   SnapshotMetricType,
 } from '../../../../../common/inventory_models/types';
+import { createPlainError, throwErrors } from '../../../../../common/runtime_types';
+import { getIntervalInSeconds } from '../../../../../server/utils/get_interval_in_seconds';
+import { useHTTPRequest } from '../../../../hooks/use_http_request';
 
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 const ONE_MINUTE = 60;
 const ONE_HOUR = ONE_MINUTE * 60;
 const ONE_DAY = ONE_HOUR * 24;

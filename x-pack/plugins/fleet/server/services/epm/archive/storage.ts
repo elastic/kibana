@@ -4,27 +4,27 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { extname } from 'path';
 
-import { uniq } from 'lodash';
 import { safeLoad } from 'js-yaml';
-import { isBinaryFile } from 'isbinaryfile';
+import { uniq } from 'lodash';
 import mime from 'mime-types';
+import { isBinaryFile } from 'isbinaryfile';
 import uuidv5 from 'uuid/v5';
-import type { SavedObjectsClientContract, SavedObjectsBulkCreateObject } from 'src/core/server';
 
-import { ASSETS_SAVED_OBJECT_TYPE } from '../../../../common';
+import type { SavedObjectsBulkCreateObject } from '../../../../../../../src/core/server/saved_objects/service/saved_objects_client';
+import type { SavedObjectsClientContract } from '../../../../../../../src/core/server/saved_objects/types';
+import { ASSETS_SAVED_OBJECT_TYPE } from '../../../../common/constants/epm';
 import type {
   InstallablePackage,
   InstallSource,
   PackageAssetReference,
   RegistryDataStream,
-} from '../../../../common';
+} from '../../../../common/types/models/epm';
 import { pkgToPkgKey } from '../registry';
 
-import { getArchiveEntry, setArchiveEntry, setArchiveFilelist, setPackageInfo } from './index';
-import type { ArchiveEntry } from './index';
+import type { ArchiveEntry } from '.';
+import { getArchiveEntry, setArchiveEntry, setArchiveFilelist, setPackageInfo } from './cache';
 import { parseAndVerifyPolicyTemplates, parseAndVerifyStreams } from './validation';
 
 // could be anything, picked this from https://github.com/elastic/elastic-agent-client/issues/17

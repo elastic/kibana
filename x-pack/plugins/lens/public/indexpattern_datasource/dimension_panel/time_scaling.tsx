@@ -4,20 +4,23 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { EuiToolTip } from '@elastic/eui';
-import { EuiIcon } from '@elastic/eui';
-import { EuiFormRow, EuiSelect, EuiFlexItem, EuiFlexGroup, EuiButtonIcon } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiIcon,
+  EuiSelect,
+  EuiToolTip,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import {
-  adjustTimeScaleLabelSuffix,
-  IndexPatternColumn,
-  operationDefinitionMap,
-} from '../operations';
-import type { TimeScaleUnit } from '../../../common/expressions';
+import type { TimeScaleUnit } from '../../../common/expressions/time_scale/types';
 import { unitSuffixesLong } from '../../../common/suffix_formatter';
-import { IndexPatternLayer } from '../types';
+import type { IndexPatternColumn } from '../operations/definitions';
+import { operationDefinitionMap } from '../operations/definitions';
+import { adjustTimeScaleLabelSuffix } from '../operations/time_scale_utils';
+import type { IndexPatternLayer } from '../types';
 
 export function setTimeScaling(
   columnId: string,

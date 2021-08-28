@@ -4,19 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { Fragment, FC, useContext } from 'react';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
-
-import { useNavigateToPath } from '../../../../../../../contexts/kibana';
-
+import type { FC } from 'react';
+import React, { Fragment, useContext } from 'react';
+import { useNavigateToPath } from '../../../../../../../contexts/kibana/use_navigate_to_path';
 import { convertToMultiMetricJob } from '../../../../../common/job_creator/util/general';
-
 import { JobCreatorContext } from '../../../job_creator_context';
-
-import { BucketSpan } from '../bucket_span';
-import { SparseDataSwitch } from '../sparse_data';
+import { BucketSpan } from '../bucket_span/bucket_span';
+import { SparseDataSwitch } from '../sparse_data/sparse_data_switch';
 
 interface Props {
   setIsValid: (proceed: boolean) => void;

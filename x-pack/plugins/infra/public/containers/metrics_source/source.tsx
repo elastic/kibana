@@ -7,15 +7,13 @@
 
 import createContainer from 'constate';
 import { useEffect, useMemo, useState } from 'react';
-
-import {
-  MetricsSourceConfigurationResponse,
+import { useKibana } from '../../../../../../src/plugins/kibana_react/public/context/context';
+import type {
   MetricsSourceConfiguration,
+  MetricsSourceConfigurationResponse,
   PartialMetricsSourceConfigurationProperties,
 } from '../../../common/metrics_sources';
-
 import { useTrackedPromise } from '../../utils/use_tracked_promise';
-import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 
 export const pickIndexPattern = (
   source: MetricsSourceConfiguration | undefined,

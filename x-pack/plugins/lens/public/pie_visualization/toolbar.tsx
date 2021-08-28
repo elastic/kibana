@@ -5,23 +5,28 @@
  * 2.0.
  */
 
-import './toolbar.scss';
-import React from 'react';
-import { i18n } from '@kbn/i18n';
+import { Position } from '@elastic/charts';
 import {
   EuiFlexGroup,
   EuiFormRow,
-  EuiSuperSelect,
-  EuiRange,
   EuiHorizontalRule,
+  EuiRange,
+  EuiSuperSelect,
 } from '@elastic/eui';
-import type { Position } from '@elastic/charts';
-import type { PaletteRegistry } from 'src/plugins/charts/public';
+import { i18n } from '@kbn/i18n';
+import React from 'react';
+import type { PaletteRegistry } from '../../../../../src/plugins/charts/public/services/palettes/types';
+import type {
+  PieVisualizationState,
+  SharedPieLayerState,
+} from '../../common/expressions/pie_chart/types';
+import { useDebouncedValue } from '../shared_components/debounced_value';
+import { LegendSettingsPopover } from '../shared_components/legend_settings_popover';
+import { PalettePicker } from '../shared_components/palette_picker';
+import { ToolbarPopover } from '../shared_components/toolbar_popover';
+import type { VisualizationDimensionEditorProps, VisualizationToolbarProps } from '../types';
 import { DEFAULT_PERCENT_DECIMALS } from './constants';
-import type { PieVisualizationState, SharedPieLayerState } from '../../common/expressions';
-import { VisualizationDimensionEditorProps, VisualizationToolbarProps } from '../types';
-import { ToolbarPopover, LegendSettingsPopover, useDebouncedValue } from '../shared_components';
-import { PalettePicker } from '../shared_components';
+import './toolbar.scss';
 
 const numberOptions: Array<{
   value: SharedPieLayerState['numberDisplay'];

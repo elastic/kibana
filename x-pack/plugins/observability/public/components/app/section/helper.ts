@@ -4,9 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { XYBrushArea } from '@elastic/charts';
-import { History } from 'history';
+import type { XYBrushArea } from '@elastic/charts';
+import type { History } from 'history';
 import { fromQuery, toQuery } from '../../../utils/url';
 
 export const onBrushEnd = ({ x, history }: { x: XYBrushArea['x']; history: History }) => {

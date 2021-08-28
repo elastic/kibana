@@ -4,15 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import type { EuiAvatarProps } from '@elastic/eui';
 import { EuiAvatar, isValidHex } from '@elastic/eui';
 import type { FC } from 'react';
 import React from 'react';
 
-import type { Space } from 'src/plugins/spaces_oss/common';
-
-import { MAX_SPACE_INITIALS } from '../../common';
+import type { Space } from '../../../../../src/plugins/spaces_oss/common/types';
+import { MAX_SPACE_INITIALS } from '../../common/constants';
 import { getSpaceColor, getSpaceImageUrl, getSpaceInitials } from './space_attributes';
 
 interface Props {

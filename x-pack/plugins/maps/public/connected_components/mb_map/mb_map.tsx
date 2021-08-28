@@ -5,54 +5,55 @@
  * 2.0.
  */
 
-import _ from 'lodash';
-import React, { Component } from 'react';
 // @ts-expect-error
 import { spritesheet } from '@elastic/maki';
 import sprites1 from '@elastic/maki/dist/sprite@1.png';
 import sprites2 from '@elastic/maki/dist/sprite@2.png';
-import { Adapters } from 'src/plugins/inspector/public';
-import { Filter } from 'src/plugins/data/public';
-import { Action, ActionExecutionContext } from 'src/plugins/ui_actions/public';
-
-import { mapboxgl } from '@kbn/mapbox-gl';
-import type { Map as MapboxMap, MapboxOptions, MapMouseEvent } from '@kbn/mapbox-gl';
-import { DrawFilterControl } from './draw_control/draw_filter_control';
-import { ScaleControl } from './scale_control';
-import { TooltipControl } from './tooltip_control';
-import { clampToLatBounds, clampToLonBounds } from '../../../common/elasticsearch_util';
-import { getInitialView } from './get_initial_view';
-import { getPreserveDrawingBuffer } from '../../kibana_services';
-import { ILayer } from '../../classes/layers/layer';
-import { MapSettings } from '../../reducers/map';
-import {
-  Goto,
-  MapCenterAndZoom,
-  TileMetaFeature,
-  Timeslice,
-} from '../../../common/descriptor_types';
+import type { MapboxOptions } from '@kbn/mapbox-gl';
+import { Map as MapboxMap, mapboxgl, MapMouseEvent } from '@kbn/mapbox-gl';
+import _ from 'lodash';
+import React, { Component } from 'react';
+import type { Filter } from '../../../../../../src/plugins/data/common/es_query';
+import type { Adapters } from '../../../../../../src/plugins/inspector/common/adapters/types';
+import { ResizeChecker } from '../../../../../../src/plugins/kibana_utils/public/resize_checker/resize_checker';
+import type {
+  Action,
+  ActionExecutionContext,
+} from '../../../../../../src/plugins/ui_actions/public/actions/action';
+import type { RawValue } from '../../../common/constants';
 import {
   DECIMAL_DEGREES_PRECISION,
   KBN_TOO_MANY_FEATURES_IMAGE_ID,
   LAYER_TYPE,
-  RawValue,
   ZOOM_PRECISION,
 } from '../../../common/constants';
+import type { Timeslice } from '../../../common/descriptor_types/data_request_descriptor_types';
+import type { TileMetaFeature } from '../../../common/descriptor_types/layer_descriptor_types';
+import type { Goto, MapCenterAndZoom } from '../../../common/descriptor_types/map_descriptor';
+import {
+  clampToLatBounds,
+  clampToLonBounds,
+} from '../../../common/elasticsearch_util/elasticsearch_geo_utils';
+import type { MapExtentState } from '../../actions/map_actions';
+import type { ILayer } from '../../classes/layers/layer';
+import { TiledVectorLayer } from '../../classes/layers/tiled_vector_layer/tiled_vector_layer';
+import type { RenderToolTipContent } from '../../classes/tooltips/tooltip_property';
+import { getPreserveDrawingBuffer } from '../../kibana_services';
+import type { MapSettings } from '../../reducers/map/types';
 import { getGlyphUrl, isRetina } from '../../util';
+import { DrawFeatureControl } from './draw_control/draw_feature_control';
+import { DrawFilterControl } from './draw_control/draw_filter_control';
+import { getInitialView } from './get_initial_view';
+import { ScaleControl } from './scale_control/scale_control';
 import { syncLayerOrder } from './sort_layers';
-
+import { TileStatusTracker } from './tile_status_tracker';
+import { TooltipControl } from './tooltip_control';
 import {
   addSpriteSheetToMapFromImageData,
   loadSpriteSheetImageData,
   removeOrphanedSourcesAndLayers,
   // @ts-expect-error
 } from './utils';
-import { ResizeChecker } from '../../../../../../src/plugins/kibana_utils/public';
-import { RenderToolTipContent } from '../../classes/tooltips/tooltip_property';
-import { MapExtentState } from '../../actions';
-import { TileStatusTracker } from './tile_status_tracker';
-import { DrawFeatureControl } from './draw_control/draw_feature_control';
-import { TiledVectorLayer } from '../../classes/layers/tiled_vector_layer/tiled_vector_layer';
 
 export interface Props {
   isMapReady: boolean;

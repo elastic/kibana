@@ -4,12 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { RouteDefinitionParams } from '../';
+import type { RouteDefinitionParams } from '..';
 import { definePrivilegesRoutes } from './privileges';
 import { resetSessionPageRoutes } from './reset_session_page';
 import { defineRolesRoutes } from './roles';
-import { defineShareSavedObjectPermissionRoutes } from './spaces';
+import { defineShareSavedObjectPermissionRoutes } from './spaces/share_saved_object_permissions';
 
 export function defineAuthorizationRoutes(params: RouteDefinitionParams) {
   defineRolesRoutes(params);

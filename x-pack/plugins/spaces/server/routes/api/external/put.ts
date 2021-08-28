@@ -4,15 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { schema } from '@kbn/config-schema';
-import type { Space } from 'src/plugins/spaces_oss/common';
 
-import { SavedObjectsErrorHelpers } from '../../../../../../../src/core/server';
+import type { ExternalRouteDeps } from '.';
+import { SavedObjectsErrorHelpers } from '../../../../../../../src/core/server/saved_objects/service/lib/errors';
+import type { Space } from '../../../../../../../src/plugins/spaces_oss/common/types';
 import { wrapError } from '../../../lib/errors';
 import { spaceSchema } from '../../../lib/space_schema';
-import { createLicensedRouteHandler } from '../../lib';
-import type { ExternalRouteDeps } from './';
+import { createLicensedRouteHandler } from '../../lib/licensed_route_handler';
 
 export function initPutSpacesApi(deps: ExternalRouteDeps) {
   const { externalRouter, getSpacesService } = deps;

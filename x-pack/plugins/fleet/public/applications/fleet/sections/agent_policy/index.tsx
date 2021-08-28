@@ -6,17 +6,16 @@
  */
 
 import React from 'react';
-import { Router, Switch, Route, useHistory } from 'react-router-dom';
+import { Route, Router, Switch, useHistory } from 'react-router-dom';
 
-import { FLEET_ROUTING_PATHS } from '../../constants';
-import { useBreadcrumbs } from '../../hooks';
+import { FLEET_ROUTING_PATHS } from '../../../../constants/page_paths';
+import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
+import { DefaultLayout } from '../../layouts/default/default';
 
-import { DefaultLayout } from '../../layouts';
-
-import { AgentPolicyListPage } from './list_page';
-import { AgentPolicyDetailsPage } from './details_page';
 import { CreatePackagePolicyPage } from './create_package_policy_page';
+import { AgentPolicyDetailsPage } from './details_page';
 import { EditPackagePolicyPage } from './edit_package_policy_page';
+import { AgentPolicyListPage } from './list_page';
 import { UpgradePackagePolicyPage } from './upgrade_package_policy_page';
 
 export const AgentPolicyApp: React.FunctionComponent = () => {

@@ -8,8 +8,7 @@
 import type { PluginInitializerContext } from '../../../core/server/plugins/types';
 import { BfetchServerPlugin } from './plugin';
 
-export { BatchProcessingRouteParams, BfetchServerSetup, BfetchServerStart } from './plugin';
-export { StreamingRequestHandler } from './types';
+export type { BatchProcessingRouteParams, BfetchServerSetup, BfetchServerStart, StreamingRequestHandler } from './types';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new BfetchServerPlugin(initializerContext);

@@ -4,21 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { Sort, TimelineExpandedDetail, TimelineTypeLiteral } from '.';
+import { RowRendererId } from '.';
+import type { Filter } from '../../../../../../src/plugins/data/common/es_query';
+import { Direction } from '../../search_strategy/common';
+import type { ColumnHeaderOptions, ColumnId } from './columns';
+import type { DataProvider } from './data_provider';
 
-import {
-  ColumnHeaderOptions,
-  ColumnId,
-  RowRendererId,
-  Sort,
-  TimelineExpandedDetail,
-  TimelineTypeLiteral,
-} from '.';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { Filter } from '../../../../../../src/plugins/data/public';
-
-import { Direction } from '../../search_strategy';
-import { DataProvider } from './data_provider';
-
 export type KueryFilterQueryKind = 'kuery' | 'lucene' | 'eql';
 
 export interface KueryFilterQuery {

@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { FileDataVisualizerSpec } from '../application/file_data_visualizer/file_data_visualizer';
+import type { IndexDataVisualizerSpec } from '../application/index_data_visualizer/index_data_visualizer';
 import { lazyLoadModules } from '../lazy_load_bundle';
-import type { FileDataVisualizerSpec, IndexDataVisualizerSpec } from '../application';
 
 export async function getFileDataVisualizerComponent(): Promise<() => FileDataVisualizerSpec> {
   const modules = await lazyLoadModules();

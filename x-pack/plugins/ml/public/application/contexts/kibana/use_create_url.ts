@@ -4,13 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { useCallback, useEffect, useState } from 'react';
-import { useMlKibana } from './kibana_context';
+import type { LocatorGetUrlParams } from '../../../../../../../src/plugins/share/common/url_service/locators/types';
 import { ML_APP_LOCATOR } from '../../../../common/constants/locator';
-import { MlLocatorParams } from '../../../../common/types/locator';
+import type { MlLocatorParams } from '../../../../common/types/locator';
 import { useUrlState } from '../../util/url_state';
-import { LocatorGetUrlParams } from '../../../../../../../src/plugins/share/common/url_service';
+import { useMlKibana } from './kibana_context';
 
 export const useMlLocator = () => {
   const {

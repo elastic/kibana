@@ -4,22 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { getNumTopClasses, getNumTopFeatureImportanceValues } from './analytics';
-import { Field } from '../../../../common/types/fields';
+import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
+import type { DataFrameAnalyticsConfig } from '../../../../common/types/data_frame_analytics';
+import type { Field } from '../../../../common/types/fields';
 import {
-  getPredictedFieldName,
   getDependentVar,
+  getPredictedFieldName,
   getPredictionFieldName,
   isClassificationAnalysis,
   isOutlierAnalysis,
   isRegressionAnalysis,
 } from '../../../../common/util/analytics_utils';
-import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '../../../../../../../src/plugins/data/public';
 import { newJobCapsServiceAnalytics } from '../../services/new_job_capabilities/new_job_capabilities_service_analytics';
-
+import { getNumTopClasses, getNumTopFeatureImportanceValues } from './analytics';
 import { FEATURE_IMPORTANCE, FEATURE_INFLUENCE, OUTLIER_SCORE, TOP_CLASSES } from './constants';
-import { DataFrameAnalyticsConfig } from '../../../../common/types/data_frame_analytics';
 
 export type EsId = string;
 export type EsDocSource = Record<string, any>;

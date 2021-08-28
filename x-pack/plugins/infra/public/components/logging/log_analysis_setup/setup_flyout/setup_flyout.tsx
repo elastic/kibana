@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import {
   EuiButtonEmpty,
   EuiFlexGroup,
@@ -19,7 +18,8 @@ import React from 'react';
 import { LogEntryCategoriesSetupView } from './log_entry_categories_setup_view';
 import { LogEntryRateSetupView } from './log_entry_rate_setup_view';
 import { LogAnalysisModuleList } from './module_list';
-import { ModuleId, moduleIds, useLogAnalysisSetupFlyoutStateContext } from './setup_flyout_state';
+import type { ModuleId } from './setup_flyout_state';
+import { moduleIds, useLogAnalysisSetupFlyoutStateContext } from './setup_flyout_state';
 
 const FLYOUT_HEADING_ID = 'logAnalysisSetupFlyoutHeading';
 

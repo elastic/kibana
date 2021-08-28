@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { i18n } from '@kbn/i18n';
-import { NotificationsStart, OverlayStart } from 'kibana/public';
-import { TagWithRelations } from '../../../common';
-import { ITagInternalClient } from '../../services/tags';
-import { TagAction } from './types';
+import type { NotificationsStart } from '../../../../../../src/core/public/notifications/notifications_service';
+import type { OverlayStart } from '../../../../../../src/core/public/overlays/overlay_service';
+import type { TagWithRelations } from '../../../common/types';
+import type { ITagInternalClient } from '../../services/tags/tags_client';
+import type { TagAction } from './types';
 
 interface GetDeleteActionOptions {
   overlays: OverlayStart;

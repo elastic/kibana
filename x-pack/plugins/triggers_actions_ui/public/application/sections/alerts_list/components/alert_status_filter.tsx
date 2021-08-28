@@ -4,20 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { useEffect, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
 import {
-  EuiFilterGroup,
-  EuiPopover,
   EuiFilterButton,
+  EuiFilterGroup,
   EuiFilterSelectItem,
   EuiHealth,
+  EuiPopover,
 } from '@elastic/eui';
-import {
-  AlertExecutionStatuses,
-  AlertExecutionStatusValues,
-} from '../../../../../../alerting/common';
+import { FormattedMessage } from '@kbn/i18n/react';
+import React, { useEffect, useState } from 'react';
+import type { AlertExecutionStatuses } from '../../../../../../alerting/common/alert';
+import { AlertExecutionStatusValues } from '../../../../../../alerting/common/alert';
 import { alertsStatusesTranslationsMapping } from '../translations';
 
 interface AlertStatusFilterProps {

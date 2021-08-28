@@ -4,10 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { Component, Fragment } from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiButtonIcon,
   EuiCallOut,
@@ -19,9 +15,13 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { CodeEditor, KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+import React, { Component, Fragment } from 'react';
+import { CodeEditor } from '../../../../../src/plugins/kibana_react/public/code_editor';
+import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public/context/context';
+import type { ImportResults } from '../importer/types';
 import { getDocLinks, getHttp, getUiSettings } from '../kibana_services';
-import { ImportResults } from '../importer';
 
 const services = {
   uiSettings: getUiSettings(),

@@ -4,16 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { ConnectorTypeFields, ConnectorTypes } from '../../../common';
-import {
-  CaseField,
+import type { CaseConnector, ConnectorTypeFields } from '../../../common/api/connectors';
+import { ConnectorTypes } from '../../../common/api/connectors';
+import type {
   ActionType,
+  CaseField,
   ThirdPartyField,
-  CaseConnector,
-  CaseConnectorMapping,
-} from '../../containers/configure/types';
-import { CaseActionConnector } from '../types';
+} from '../../../common/api/connectors/mappings';
+import type { CaseConnectorMapping } from '../../containers/configure/types';
+import type { CaseActionConnector } from '../types';
 
 export const setActionTypeToMapping = (
   caseField: CaseField,

@@ -9,7 +9,7 @@ import type { ComponentType } from 'react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { Schema } from '.';
-import type { CoreStart } from '../../../../../../../../src/core/public';
+import type { CoreStart } from '../../../../../../../../src/core/public/types';
 import { MockApmPluginContextWrapper } from '../../../../context/apm_plugin/mock_apm_plugin_context';
 import { createCallApmApi } from '../../../../services/rest/createCallApmApi';
 import { ConfirmSwitchModal } from './confirm_switch_modal';

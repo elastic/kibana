@@ -10,7 +10,7 @@ import type { ReactNode } from 'react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { ServiceInventory } from '.';
-import type { CoreStart } from '../../../../../../../src/core/public';
+import type { CoreStart } from '../../../../../../../src/core/public/types';
 import { EuiThemeProvider } from '../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
 import { createKibanaReactContext } from '../../../../../../../src/plugins/kibana_react/public/context/context';
 import { ServiceHealthStatus } from '../../../../common/service_health_status';

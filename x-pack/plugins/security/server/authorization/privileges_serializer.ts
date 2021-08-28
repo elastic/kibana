@@ -4,8 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { RawKibanaPrivileges } from '../../common/model';
+import type { RawKibanaPrivileges } from '../../common/model/raw_kibana_privileges';
 import { PrivilegeSerializer } from './privilege_serializer';
 
 interface SerializedPrivilege {

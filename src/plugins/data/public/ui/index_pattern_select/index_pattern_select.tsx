@@ -8,7 +8,7 @@
 
 import type { EuiComboBoxProps } from '@elastic/eui';
 import { EuiComboBox } from '@elastic/eui';
-import type { AugmentedRequired as Required } from '@kbn/utility-types';
+import type { Required } from '@kbn/utility-types';
 import _ from 'lodash';
 import React, { Component } from 'react';
 import type { IndexPatternsContract } from '../../../common/index_patterns/index_patterns/index_patterns';

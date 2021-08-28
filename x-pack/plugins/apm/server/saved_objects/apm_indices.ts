@@ -4,9 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { SavedObjectsType } from 'src/core/server';
 import { i18n } from '@kbn/i18n';
+import type { SavedObjectsType } from '../../../../../src/core/server/saved_objects/types';
 
 export const apmIndices: SavedObjectsType = {
   name: 'apm-indices',

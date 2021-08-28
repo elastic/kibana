@@ -4,18 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 import { skipWhile } from 'rxjs/operators';
 
-import type {
-  HttpSetup,
-  SavedObjectsCollectMultiNamespaceReferencesResponse,
-} from 'src/core/public';
-import type { Space } from 'src/plugins/spaces_oss/common';
-
-import type { GetAllSpacesOptions, GetSpaceResult, LegacyUrlAliasTarget } from '../../common';
+import type { HttpSetup } from '../../../../../src/core/public/http/types';
+import type { SavedObjectsCollectMultiNamespaceReferencesResponse } from '../../../../../src/core/server/saved_objects/service/lib/collect_multi_namespace_references';
+import type { Space } from '../../../../../src/plugins/spaces_oss/common/types';
+import type { GetAllSpacesOptions, GetSpaceResult, LegacyUrlAliasTarget } from '../../common/types';
 import type { CopySavedObjectsToSpaceResponse } from '../copy_saved_objects_to_space/types';
 
 interface SavedObjectTarget {

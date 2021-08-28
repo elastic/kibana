@@ -4,18 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { CoreStart } from '../../../../src/core/public';
-import { LensPluginStartDependencies } from './plugin';
-import { AttributeService } from '../../../../src/plugins/embeddable/public';
-import {
-  LensSavedObjectAttributes,
-  LensByValueInput,
+import type { CoreStart } from '../../../../src/core/public/types';
+import { AttributeService } from '../../../../src/plugins/embeddable/public/lib/attribute_service/attribute_service';
+import { checkForDuplicateTitle } from '../../../../src/plugins/saved_objects/public/saved_object/helpers/check_for_duplicate_title';
+import type { OnSaveProps } from '../../../../src/plugins/saved_objects/public/save_modal/saved_object_save_modal';
+import { DOC_TYPE } from '../common/constants';
+import type {
   LensByReferenceInput,
+  LensByValueInput,
+  LensSavedObjectAttributes,
 } from './embeddable/embeddable';
-import { SavedObjectIndexStore, Document } from './persistence';
-import { checkForDuplicateTitle, OnSaveProps } from '../../../../src/plugins/saved_objects/public';
-import { DOC_TYPE } from '../common';
+import type { Document } from './persistence/saved_object_store';
+import { SavedObjectIndexStore } from './persistence/saved_object_store';
+import type { LensPluginStartDependencies } from './plugin';
 
 export type LensAttributeService = AttributeService<
   LensSavedObjectAttributes,

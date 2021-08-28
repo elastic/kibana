@@ -4,15 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { FIELD_ORIGIN } from '../../../common/constants';
-import { ESTooltipProperty } from '../tooltips/es_tooltip_property';
-import { ITooltipProperty, TooltipProperty } from '../tooltips/tooltip_property';
+import type { IFieldType } from '../../../../../../src/plugins/data/common/index_patterns/fields/types';
 import { indexPatterns } from '../../../../../../src/plugins/data/public';
-import { IFieldType } from '../../../../../../src/plugins/data/public';
-import { IField, AbstractField } from './field';
-import { IESSource } from '../sources/es_source';
-import { IVectorSource } from '../sources/vector_source';
+import { FIELD_ORIGIN } from '../../../common/constants';
+import type { IESSource } from '../sources/es_source/es_source';
+import type { IVectorSource } from '../sources/vector_source/vector_source';
+import { ESTooltipProperty } from '../tooltips/es_tooltip_property';
+import type { ITooltipProperty } from '../tooltips/tooltip_property';
+import { TooltipProperty } from '../tooltips/tooltip_property';
+import type { IField } from './field';
+import { AbstractField } from './field';
 
 export class ESDocField extends AbstractField implements IField {
   private readonly _source: IESSource;

@@ -4,17 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { isEmpty, isString, flow } from 'lodash/fp';
-import {
-  buildEsQuery,
-  EsQueryConfig,
-  Filter,
-  fromKueryExpression,
-  IndexPatternBase,
-  Query,
-  toElasticsearchQuery,
-} from '@kbn/es-query';
+import type { EsQueryConfig, Filter, IndexPatternBase, Query } from '@kbn/es-query';
+import { buildEsQuery, fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import { flow, isEmpty, isString } from 'lodash/fp';
 
 export const convertKueryToElasticSearchQuery = (
   kueryExpression: string,

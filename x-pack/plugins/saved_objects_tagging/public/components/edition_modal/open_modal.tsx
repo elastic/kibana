@@ -5,12 +5,16 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiDelayRender, EuiLoadingSpinner } from '@elastic/eui';
-import { OverlayStart, OverlayRef } from 'src/core/public';
-import { toMountPoint } from '../../../../../../src/plugins/kibana_react/public';
-import { Tag, TagAttributes } from '../../../common/types';
-import { ITagInternalClient } from '../../services';
+import React from 'react';
+import type { OverlayStart } from '../../../../../../src/core/public/overlays/overlay_service';
+import type { OverlayRef } from '../../../../../../src/core/public/overlays/types';
+import { toMountPoint } from '../../../../../../src/plugins/kibana_react/public/util/to_mount_point';
+import type {
+  Tag,
+  TagAttributes,
+} from '../../../../../../src/plugins/saved_objects_tagging_oss/common/types';
+import type { ITagInternalClient } from '../../services/tags/tags_client';
 
 interface GetModalOpenerOptions {
   overlays: OverlayStart;

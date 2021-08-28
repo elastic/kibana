@@ -4,15 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type {
-  CoreSetup,
-  KibanaRequest,
-  LifecycleResponseFactory,
-  OnPreRoutingToolkit,
-} from 'src/core/server';
-
-import { getSpaceIdFromPath } from '../../../common';
+import type { CoreSetup } from '../../../../../../src/core/server';
+import type { OnPreRoutingToolkit } from '../../../../../../src/core/server/http/lifecycle/on_pre_routing';
+import type { KibanaRequest } from '../../../../../../src/core/server/http/router/request';
+import type { LifecycleResponseFactory } from '../../../../../../src/core/server/http/router/response';
+import { getSpaceIdFromPath } from '../../../common/lib/spaces_url_parser';
 
 export interface OnRequestInterceptorDeps {
   http: CoreSetup['http'];

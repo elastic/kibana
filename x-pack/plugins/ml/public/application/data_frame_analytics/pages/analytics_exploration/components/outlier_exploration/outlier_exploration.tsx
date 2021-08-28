@@ -4,35 +4,29 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { useCallback, useState, FC } from 'react';
-
 import { EuiCallOut, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
-
 import { i18n } from '@kbn/i18n';
-
+import type { FC } from 'react';
+import React, { useCallback, useState } from 'react';
+import { isOutlierAnalysis } from '../../../../../../../common/util/analytics_utils';
 import {
-  useColorRange,
   COLOR_RANGE,
   COLOR_RANGE_SCALE,
-} from '../../../../../components/color_range_legend';
-import { useScatterplotFieldOptions } from '../../../../../components/scatterplot_matrix';
-import { SavedSearchQuery } from '../../../../../contexts/ml';
-
-import { defaultSearchQuery, isOutlierAnalysis, useResultsViewConfig } from '../../../../common';
+  useColorRange,
+} from '../../../../../components/color_range_legend/use_color_range';
+import { useScatterplotFieldOptions } from '../../../../../components/scatterplot_matrix/use_scatterplot_field_options';
+import type { SavedSearchQuery } from '../../../../../contexts/ml/ml_context';
+import { defaultSearchQuery } from '../../../../common/analytics';
 import { FEATURE_INFLUENCE } from '../../../../common/constants';
-
-import {
-  ExpandableSectionSplom,
-  ExpandableSectionAnalytics,
-  ExpandableSectionResults,
-} from '../expandable_section';
-import { ExplorationQueryBar } from '../exploration_query_bar';
-
+import { useResultsViewConfig } from '../../../../common/use_results_view_config';
+import { useExplorationUrlState } from '../../hooks/use_exploration_url_state';
+import { ExpandableSectionAnalytics } from '../expandable_section/expandable_section_analytics';
+import { ExpandableSectionResults } from '../expandable_section/expandable_section_results';
+import { ExpandableSectionSplom } from '../expandable_section/expandable_section_splom';
+import type { ExplorationQueryBarProps } from '../exploration_query_bar/exploration_query_bar';
+import { ExplorationQueryBar } from '../exploration_query_bar/exploration_query_bar';
 import { getFeatureCount } from './common';
 import { useOutlierData } from './use_outlier_data';
-import { useExplorationUrlState } from '../../hooks/use_exploration_url_state';
-import { ExplorationQueryBarProps } from '../exploration_query_bar/exploration_query_bar';
 
 export type TableItem = Record<string, any>;
 

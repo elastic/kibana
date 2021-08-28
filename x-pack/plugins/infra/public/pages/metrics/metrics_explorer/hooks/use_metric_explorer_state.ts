@@ -4,21 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { useState, useCallback, useContext } from 'react';
-import { IIndexPattern } from 'src/plugins/data/public';
-import { MetricsSourceConfigurationProperties } from '../../../../../common/metrics_sources';
-import {
-  MetricsExplorerMetric,
+import { useCallback, useContext, useState } from 'react';
+import type { IIndexPattern } from '../../../../../../../../src/plugins/data/common/index_patterns/types';
+import type {
   MetricsExplorerAggregation,
+  MetricsExplorerMetric,
 } from '../../../../../common/http_api/metrics_explorer';
+import type { MetricsSourceConfigurationProperties } from '../../../../../common/metrics_sources';
 import { useMetricsExplorerData } from './use_metrics_explorer_data';
-import {
-  MetricsExplorerOptionsContainer,
+import type {
   MetricsExplorerChartOptions,
-  MetricsExplorerTimeOptions,
   MetricsExplorerOptions,
+  MetricsExplorerTimeOptions,
 } from './use_metrics_explorer_options';
+import { MetricsExplorerOptionsContainer } from './use_metrics_explorer_options';
 
 export interface MetricExplorerViewState {
   chartOptions: MetricsExplorerChartOptions;

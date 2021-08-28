@@ -4,9 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { ProcessorEvent } from '../../../../common/processor_event';
-import { Setup } from '../../helpers/setup_request';
+import type { Setup } from '../../helpers/setup_request';
 
 // Note: this logic is duplicated in tutorials/apm/envs/on_prem
 export async function hasHistoricalAgentData(setup: Setup) {

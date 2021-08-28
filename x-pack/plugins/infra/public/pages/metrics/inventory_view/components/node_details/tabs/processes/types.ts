@@ -4,8 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { MetricsExplorerSeries } from '../../../../../../../../common/http_api';
+import type { MetricsExplorerSeries } from '../../../../../../../../common/http_api/metrics_explorer';
 import { STATE_NAMES } from './states';
 
 export interface Process {

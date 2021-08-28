@@ -4,13 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { FC, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { JOB_FIELD_TYPES_OPTIONS, JobFieldType } from '../../../../../common';
-import { FieldTypeIcon } from '../../../common/components/field_type_icon';
-import { MultiSelectPicker, Option } from '../../../common/components/multi_select_picker';
+import type { FC } from 'react';
+import React, { useMemo } from 'react';
+import { JOB_FIELD_TYPES_OPTIONS } from '../../../../../common/constants';
+import type { JobFieldType } from '../../../../../common/types/job_field_type';
+import { FieldTypeIcon } from '../../../common/components/field_type_icon/field_type_icon';
+import type { Option } from '../../../common/components/multi_select_picker/multi_select_picker';
+import { MultiSelectPicker } from '../../../common/components/multi_select_picker/multi_select_picker';
 
 export const DatavisualizerFieldTypeFilter: FC<{
   indexedFieldTypes: JobFieldType[];

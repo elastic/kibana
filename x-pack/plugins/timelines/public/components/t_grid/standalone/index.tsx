@@ -7,41 +7,44 @@
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React, { useEffect, useMemo, useState } from 'react';
-import styled from 'styled-components';
 import { useDispatch, useSelector } from 'react-redux';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
-import { Direction, EntityType } from '../../../../common/search_strategy';
-import type { CoreStart } from '../../../../../../../src/core/public';
-import { TGridCellAction, TimelineTabs } from '../../../../common/types/timeline';
+import styled from 'styled-components';
+import type { CoreStart } from '../../../../../../../src/core/public/types';
+import type { Filter } from '../../../../../../../src/plugins/data/common/es_query';
+import type { Query } from '../../../../../../../src/plugins/data/public';
+import { esQuery } from '../../../../../../../src/plugins/data/public/deprecated';
+import type { DataPublicPluginStart } from '../../../../../../../src/plugins/data/public/types';
+import { useKibana } from '../../../../../../../src/plugins/kibana_react/public/context/context';
+import { Direction } from '../../../../common/search_strategy/common';
+import { EntityType } from '../../../../common/search_strategy/timeline/events';
+import { TimelineTabs } from '../../../../common/types/timeline';
 import type {
-  CellValueElementProps,
-  ColumnHeaderOptions,
-  ControlColumnProps,
-  DataProvider,
-  RowRenderer,
-  SortColumnTimeline,
-  BulkActionsProp,
   AlertStatus,
-} from '../../../../common/types/timeline';
-import {
-  esQuery,
-  Filter,
-  Query,
-  DataPublicPluginStart,
-} from '../../../../../../../src/plugins/data/public';
-import { useDeepEqualSelector } from '../../../hooks/use_selector';
-import { defaultHeaders } from '../body/column_headers/default_headers';
-import { calculateTotalPages, combineQueries, getCombinedFilterQuery } from '../helpers';
-import { tGridActions, tGridSelectors } from '../../../store/t_grid';
-import type { State } from '../../../store/t_grid';
+  BulkActionsProp,
+  ControlColumnProps,
+} from '../../../../common/types/timeline/actions';
+import type { CellValueElementProps } from '../../../../common/types/timeline/cells';
+import type {
+  ColumnHeaderOptions,
+  TGridCellAction,
+} from '../../../../common/types/timeline/columns';
+import type { DataProvider } from '../../../../common/types/timeline/data_provider';
+import type { RowRenderer } from '../../../../common/types/timeline/rows';
+import type { SortColumnTimeline } from '../../../../common/types/timeline/store';
 import { useTimelineEvents } from '../../../container';
-import { StatefulBody } from '../body';
-import { Footer, footerHeight } from '../footer';
-import { LastUpdatedAt } from '../..';
-import { SELECTOR_TIMELINE_GLOBAL_CONTAINER, UpdatedFlexItem, UpdatedFlexGroup } from '../styles';
-import { InspectButton, InspectButtonContainer } from '../../inspect';
 import { useFetchIndex } from '../../../container/source';
+import { useDeepEqualSelector } from '../../../hooks/use_selector';
+import type { State } from '../../../store/t_grid';
+import * as tGridActions from '../../../store/t_grid/actions';
+import * as tGridSelectors from '../../../store/t_grid/selectors';
 import { AddToCaseAction } from '../../actions/timeline/cases/add_to_case_action';
+import { InspectButton, InspectButtonContainer } from '../../inspect';
+import { LastUpdatedAt } from '../../last_updated';
+import { StatefulBody } from '../body';
+import { defaultHeaders } from '../body/column_headers/default_headers';
+import { Footer, footerHeight } from '../footer';
+import { calculateTotalPages, combineQueries, getCombinedFilterQuery } from '../helpers';
+import { SELECTOR_TIMELINE_GLOBAL_CONTAINER, UpdatedFlexGroup, UpdatedFlexItem } from '../styles';
 
 export const EVENTS_VIEWER_HEADER_HEIGHT = 90; // px
 const STANDALONE_ID = 'standalone-t-grid';

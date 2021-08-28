@@ -4,11 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { SuggestionRequest, VisualizationSuggestion, TableSuggestion } from '../types';
-import { MetricState } from '../../common/expressions';
-import { layerTypes } from '../../common';
+import { layerTypes } from '../../common/constants';
+import type { MetricState } from '../../common/expressions/metric_chart/types';
 import { LensIconChartMetric } from '../assets/chart_metric';
+import type { SuggestionRequest, TableSuggestion, VisualizationSuggestion } from '../types';
 
 /**
  * Generate suggestions for the metric chart.

@@ -4,26 +4,27 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { memo } from 'react';
-import styled from 'styled-components';
 import {
   EuiDescriptionList,
-  EuiDescriptionListTitle,
   EuiDescriptionListDescription,
+  EuiDescriptionListTitle,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPanel,
   EuiIcon,
+  EuiPanel,
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import React, { memo } from 'react';
+import styled from 'styled-components';
 
-import type { Agent, AgentPolicy } from '../../../../../types';
-import { useKibanaVersion } from '../../../../../hooks';
-import { isAgentUpgradeable } from '../../../../../services';
-import { AgentPolicyPackageBadges, AgentPolicySummaryLine } from '../../../../../components';
+import { isAgentUpgradeable } from '../../../../../../../../common/services/is_agent_upgradeable';
+import type { Agent } from '../../../../../../../../common/types/models/agent';
+import type { AgentPolicy } from '../../../../../../../../common/types/models/agent_policy';
+import { AgentPolicyPackageBadges } from '../../../../../../../components/agent_policy_package_badges';
+import { AgentPolicySummaryLine } from '../../../../../../../components/link_and_revision';
+import { useKibanaVersion } from '../../../../../../../hooks/use_kibana_version';
 
 // Allows child text to be truncated
 const FlexItemWithMinWidth = styled(EuiFlexItem)`

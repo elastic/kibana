@@ -9,7 +9,6 @@
  * Produces a concise textual description of how the
  * actual value compares to the typical value for an anomaly.
  */
-
 import { i18n } from '@kbn/i18n';
 
 // Returns an Object containing a text message and EuiIcon type to

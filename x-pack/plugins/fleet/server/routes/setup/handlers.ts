@@ -4,14 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { RequestHandler } from 'src/core/server';
-
-import { appContextService } from '../../services';
-import type { GetFleetStatusResponse, PostFleetSetupResponse } from '../../../common';
-import { setupIngestManager } from '../../services/setup';
+import type { RequestHandler } from '../../../../../../src/core/server/http/router/router';
+import type {
+  GetFleetStatusResponse,
+  PostFleetSetupResponse,
+} from '../../../common/types/rest_spec/fleet_setup';
+import { defaultIngestErrorHandler } from '../../errors/handlers';
+import { appContextService } from '../../services/app_context';
 import { hasFleetServers } from '../../services/fleet_server';
-import { defaultIngestErrorHandler } from '../../errors';
+import { setupIngestManager } from '../../services/setup';
 
 export const getFleetStatusHandler: RequestHandler = async (context, request, response) => {
   try {

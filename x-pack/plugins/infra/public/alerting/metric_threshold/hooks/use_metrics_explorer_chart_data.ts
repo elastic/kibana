@@ -4,13 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { IIndexPattern } from 'src/plugins/data/public';
 import { useMemo } from 'react';
-import { MetricsSourceConfiguration } from '../../../../common/metrics_sources';
-import { MetricExpression } from '../types';
-import { MetricsExplorerOptions } from '../../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
+import type { IIndexPattern } from '../../../../../../../src/plugins/data/common/index_patterns/types';
+import type { MetricsSourceConfiguration } from '../../../../common/metrics_sources';
 import { useMetricsExplorerData } from '../../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_data';
+import type { MetricsExplorerOptions } from '../../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
+import type { MetricExpression } from '../types';
 
 export const useMetricsExplorerChartData = (
   expression: MetricExpression,

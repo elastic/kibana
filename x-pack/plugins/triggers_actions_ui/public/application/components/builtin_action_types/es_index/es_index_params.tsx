@@ -4,29 +4,28 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { useEffect, useState } from 'react';
 import {
-  EuiIcon,
-  EuiText,
   EuiCodeBlock,
   EuiFieldText,
   EuiFormRow,
+  EuiIcon,
   EuiLink,
   EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import React, { useEffect, useState } from 'react';
 import {
-  ActionParamsProps,
-  AlertHistoryEsIndexConnectorId,
-  AlertHistoryDocumentTemplate,
   AlertHistoryDefaultIndexName,
+  AlertHistoryDocumentTemplate,
+  AlertHistoryEsIndexConnectorId,
   ALERT_HISTORY_PREFIX,
-} from '../../../../types';
-import { IndexActionParams } from '.././types';
+} from '../../../../../../actions/common/alert_history_schema';
+import { useKibana } from '../../../../common/lib/kibana/kibana_react';
+import type { ActionParamsProps } from '../../../../types';
 import { JsonEditorWithMessageVariables } from '../../json_editor_with_message_variables';
-import { useKibana } from '../../../../common/lib/kibana';
+import type { IndexActionParams } from '../types';
 
 export const IndexParamsFields = ({
   actionParams,

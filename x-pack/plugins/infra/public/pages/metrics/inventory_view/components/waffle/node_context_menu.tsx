@@ -4,30 +4,30 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { EuiCode } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-
 import React, { useMemo, useState } from 'react';
-import { AlertFlyout } from '../../../../../alerting/inventory/components/alert_flyout';
-import { InfraWaffleMapNode, InfraWaffleMapOptions } from '../../../../../lib/lib';
-import { getNodeDetailUrl, getNodeLogsUrl } from '../../../../link_to';
-import { createUptimeLink } from '../../lib/create_uptime_link';
-import { findInventoryModel, findInventoryFields } from '../../../../../../common/inventory_models';
-import { useKibana } from '../../../../../../../../../src/plugins/kibana_react/public';
-import { InventoryItemType } from '../../../../../../common/inventory_models/types';
-import { withTheme, EuiTheme } from '../../../../../../../../../src/plugins/kibana_react/common';
+import type { EuiTheme } from '../../../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
+import { withTheme } from '../../../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
+import { useKibana } from '../../../../../../../../../src/plugins/kibana_react/public/context/context';
+import type { SectionLinkProps } from '../../../../../../../observability/public/components/shared/action_menu';
 import {
-  Section,
-  SectionLinkProps,
-  SectionTitle,
-  SectionSubtitle,
-  SectionLinks,
-  SectionLink,
   ActionMenuDivider,
-} from '../../../../../../../observability/public';
+  Section,
+  SectionLink,
+  SectionLinks,
+  SectionSubtitle,
+  SectionTitle,
+} from '../../../../../../../observability/public/components/shared/action_menu';
+import { findInventoryFields, findInventoryModel } from '../../../../../../common/inventory_models';
+import type { InventoryItemType } from '../../../../../../common/inventory_models/types';
+import { AlertFlyout } from '../../../../../alerting/inventory/components/alert_flyout';
 import { useLinkProps } from '../../../../../hooks/use_link_props';
+import type { InfraWaffleMapNode, InfraWaffleMapOptions } from '../../../../../lib/lib';
+import { getNodeDetailUrl } from '../../../../link_to/redirect_to_node_detail';
+import { getNodeLogsUrl } from '../../../../link_to/redirect_to_node_logs';
+import { createUptimeLink } from '../../lib/create_uptime_link';
 
 interface Props {
   options: InfraWaffleMapOptions;

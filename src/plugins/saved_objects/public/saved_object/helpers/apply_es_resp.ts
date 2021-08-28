@@ -7,7 +7,7 @@
  */
 import { assign, cloneDeep, defaults, forOwn } from 'lodash';
 import { IndexPattern } from '../../../../data/common/index_patterns/index_patterns/index_pattern';
-import { injectSearchSourceReferences } from '../../../../data/common/search/search_source/inject_references';
+import { injectReferences as injectSearchSourceReferences } from '../../../../data/common/search/search_source/inject_references';
 import { parseSearchSourceJSON } from '../../../../data/common/search/search_source/parse_json';
 import { SavedObjectNotFound } from '../../../../kibana_utils/common/errors/errors';
 import type {

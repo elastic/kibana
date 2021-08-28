@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import React, { useContext } from 'react';
 
-import type { FleetConfigType } from '../plugin';
+import type { FleetConfigType } from '../../common/types';
 
 export const ConfigContext = React.createContext<FleetConfigType | null>(null);
 

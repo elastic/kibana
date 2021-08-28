@@ -11,7 +11,7 @@ import classNames from 'classnames';
 import deepEqual from 'fast-deep-equal';
 import React from 'react';
 import { Subscription } from 'rxjs';
-import type { CoreStart } from '../../../../../core/public';
+import type { CoreStart } from '../../../../../core/public/types';
 import type { OverlayStart } from '../../../../../core/public/overlays/overlay_service';
 import type { Start as InspectorStartContract } from '../../../../inspector/public/plugin';
 import { toMountPoint } from '../../../../kibana_react/public/util/to_mount_point';

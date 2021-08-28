@@ -4,8 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { FormSchema } from '../../common/shared_imports';
+import type { FormSchema } from '../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/types';
 import { schemaTags } from '../create/schema';
 
 export const schema: FormSchema = {

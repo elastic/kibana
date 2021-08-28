@@ -4,9 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
-import type { ColumnHeaderOptions } from '../../../common';
+import { Storage } from '../../../../../../src/plugins/kibana_utils/public/storage/storage';
+import type { ColumnHeaderOptions } from '../../../common/types/timeline/columns';
 import type { TGridModel, TGridModelSettings } from './model';
 
 export interface AutoSavedWarningMsg {

@@ -4,15 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { basePath } from '.';
+import type { Filter, FilterStats } from '../../../../common/types/filters';
+import { http } from '../http_service';
 
 // Service for querying filters, which hold lists of entities,
 // for example a list of known safe URL domains.
-
-import { http } from '../http_service';
-
-import { basePath } from './index';
-import type { Filter, FilterStats } from '../../../../common/types/filters';
-
 export const filters = {
   filters(obj?: { filterId?: string }) {
     const filterId = obj && obj.filterId ? `/${obj.filterId}` : '';

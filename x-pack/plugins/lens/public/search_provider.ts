@@ -4,13 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { ApplicationStart } from 'kibana/public';
-import { from, of } from 'rxjs';
 import { i18n } from '@kbn/i18n';
-import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
-import { GlobalSearchResultProvider } from '../../global_search/public';
-import { getFullPath } from '../common';
+import { from, of } from 'rxjs';
+import type { ApplicationStart } from '../../../../src/core/public/application/types';
+import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils/default_app_categories';
+import type { GlobalSearchResultProvider } from '../../global_search/public/types';
+import { getFullPath } from '../common/constants';
 
 /**
  * Global search provider adding a Lens entry.

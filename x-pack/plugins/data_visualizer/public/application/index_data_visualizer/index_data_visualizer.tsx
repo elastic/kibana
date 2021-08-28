@@ -4,34 +4,31 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import '../_index.scss';
-import React, { FC, useCallback, useEffect, useState } from 'react';
-import { useHistory, useLocation } from 'react-router-dom';
-import { parse, stringify } from 'query-string';
-import { isEqual } from 'lodash';
-// @ts-ignore
-import { encode } from 'rison-node';
-import { SimpleSavedObject } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
-import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
+import { isEqual } from 'lodash';
+import { parse, stringify } from 'query-string';
+import type { FC } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
+import { useHistory, useLocation } from 'react-router-dom';
+import { encode } from 'rison-node';
+import { SimpleSavedObject } from '../../../../../../src/core/public/saved_objects/simple_saved_object';
+import { IndexPattern } from '../../../../../../src/plugins/data/common/index_patterns/index_patterns/index_pattern';
+import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public/context/context';
 import { getCoreStart, getPluginsStart } from '../../kibana_services';
+import type { ResultLink } from '../common/components/results_links/results_links';
+import type { Accessor, Dictionary, SetUrlState } from '../common/util/url_state';
 import {
-  IndexDataVisualizerViewProps,
-  IndexDataVisualizerView,
-} from './components/index_data_visualizer_view';
-import {
-  Accessor,
-  Provider as UrlStateContextProvider,
-  Dictionary,
-  parseUrlState,
-  SetUrlState,
   getNestedProperty,
   isRisonSerializationRequired,
+  parseUrlState,
+  Provider as UrlStateContextProvider,
 } from '../common/util/url_state';
 import { useDataVisualizerKibana } from '../kibana_context';
-import { IndexPattern } from '../../../../../../src/plugins/data/common/index_patterns/index_patterns';
-import { ResultLink } from '../common/components/results_links';
+import '../_index.scss';
+import type { IndexDataVisualizerViewProps } from './components/index_data_visualizer_view/index_data_visualizer_view';
+import { IndexDataVisualizerView } from './components/index_data_visualizer_view/index_data_visualizer_view';
 
+// @ts-ignore
 export type IndexDataVisualizerSpec = typeof IndexDataVisualizer;
 
 export interface DataVisualizerUrlStateContextProviderProps {

@@ -4,26 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { EuiButtonIcon } from '@elastic/eui';
-import { EuiFormRow, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
-import { EuiComboBox } from '@elastic/eui';
+import { EuiButtonIcon, EuiComboBox, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useRef, useState } from 'react';
-import { Query } from 'src/plugins/data/public';
-import { parseTimeShift } from '../../../../../../src/plugins/data/common';
-import {
-  adjustTimeScaleLabelSuffix,
-  IndexPatternColumn,
-  operationDefinitionMap,
-} from '../operations';
-import { IndexPattern, IndexPatternLayer } from '../types';
-import { IndexPatternDimensionEditorProps } from './dimension_panel';
+import type { Query } from 'src/plugins/data/public';
+import { parseTimeShift } from '../../../../../../src/plugins/data/common/search/aggs/utils/parse_time_shift';
+import type { IndexPatternColumn } from '../operations/definitions';
+import { operationDefinitionMap } from '../operations/definitions';
+import { adjustTimeScaleLabelSuffix } from '../operations/time_scale_utils';
 import {
   getDateHistogramInterval,
   getLayerTimeShiftChecks,
   timeShiftOptions,
 } from '../time_shift_utils';
+import type { IndexPattern, IndexPatternLayer } from '../types';
+import type { IndexPatternDimensionEditorProps } from './dimension_panel';
 
 // to do: get the language from uiSettings
 export const defaultFilter: Query = {

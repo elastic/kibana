@@ -4,26 +4,27 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { ReactElement } from 'react';
-import { i18n } from '@kbn/i18n';
-import { Feature } from 'geojson';
-import { Adapters } from 'src/plugins/inspector/public';
 import { FileLayer } from '@elastic/ems-client';
-import { ImmutableSourceProperty, SourceEditorArgs } from '../source';
-import { AbstractVectorSource, GeoJsonWithMeta, IVectorSource } from '../vector_source';
-import { SOURCE_TYPES, FIELD_ORIGIN, VECTOR_SHAPE_TYPE } from '../../../../common/constants';
-import { getEmsFileLayers } from '../../../util';
+import { i18n } from '@kbn/i18n';
+import type { Feature } from 'geojson';
+import type { ReactElement } from 'react';
+import React from 'react';
+import type { Adapters } from '../../../../../../../src/plugins/inspector/common/adapters/types';
+import { FIELD_ORIGIN, SOURCE_TYPES, VECTOR_SHAPE_TYPE } from '../../../../common/constants';
+import type { EMSFileSourceDescriptor } from '../../../../common/descriptor_types/source_descriptor_types';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
-import { UpdateSourceEditor } from './update_source_editor';
-import { EMSFileField } from '../../fields/ems_file_field';
-import { registerSource } from '../source_registry';
-import { IField } from '../../fields/field';
-import { EMSFileSourceDescriptor } from '../../../../common/descriptor_types';
-import { ITooltipProperty } from '../../tooltips/tooltip_property';
-import { getEMSSettings } from '../../../kibana_services';
 import { getEmsUnavailableMessage } from '../../../components/ems_unavailable_message';
+import { getEMSSettings } from '../../../kibana_services';
 import { LICENSED_FEATURES } from '../../../licensed_features';
+import { getEmsFileLayers } from '../../../util';
+import { EMSFileField } from '../../fields/ems_file_field';
+import type { IField } from '../../fields/field';
+import type { ITooltipProperty } from '../../tooltips/tooltip_property';
+import type { ImmutableSourceProperty, SourceEditorArgs } from '../source';
+import { registerSource } from '../source_registry';
+import type { GeoJsonWithMeta, IVectorSource } from '../vector_source/vector_source';
+import { AbstractVectorSource } from '../vector_source/vector_source';
+import { UpdateSourceEditor } from './update_source_editor';
 
 function getErrorInfo(fileId: string) {
   return i18n.translate('xpack.maps.source.emsFile.unableToFindFileIdErrorMessage', {

@@ -4,14 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { estypes } from '@elastic/elasticsearch';
-
-import type { ElasticsearchClient } from 'src/core/server';
-
+import { estypes } from '@elastic/elasticsearch';
+import type { ElasticsearchClient } from '../../../../../../../../src/core/server/elasticsearch/client/types';
 import { TRANSACTION_DURATION } from '../../../../../common/elasticsearch_fieldnames';
 import type { SearchServiceFetchParams } from '../../../../../common/search_strategies/correlations/types';
-
 import { getQueryWithParams } from './get_query_with_params';
 import { getRequestBase } from './get_request_base';
 

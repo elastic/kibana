@@ -4,9 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { SavedObjectUnsanitizedDoc } from 'src/core/server';
-import type { Space } from 'src/plugins/spaces_oss/common';
+import type { SavedObjectUnsanitizedDoc } from '../../../../../../src/core/server/saved_objects/serialization/types';
+import type { Space } from '../../../../../../src/plugins/spaces_oss/common/types';
 
 export const migrateTo660 = (doc: SavedObjectUnsanitizedDoc<Space>) => {
   if (!doc.attributes.hasOwnProperty('disabledFeatures')) {

@@ -4,17 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { i18n } from '@kbn/i18n';
-import { CoreSetup, CoreStart, PluginInitializerContext, Plugin } from 'src/core/public';
-import { ManagementSetup } from '../../../../src/plugins/management/public';
-import { SavedObjectTaggingOssPluginSetup } from '../../../../src/plugins/saved_objects_tagging_oss/public';
-import { tagManagementSectionId } from '../common/constants';
+import type { CoreSetup, CoreStart } from '../../../../src/core/public/types';
+import type { Plugin } from '../../../../src/core/public/plugins/plugin';
+import type { PluginInitializerContext } from '../../../../src/core/public/plugins/plugin_context';
+import type { ManagementSetup } from '../../../../src/plugins/management/public/types';
+import type { SavedObjectTaggingOssPluginSetup } from '../../../../src/plugins/saved_objects_tagging_oss/public/types';
 import { getTagsCapabilities } from '../common/capabilities';
-import { SavedObjectTaggingPluginStart } from './types';
-import { TagsClient, TagsCache, TagAssignmentService } from './services';
+import { tagManagementSectionId } from '../common/constants';
+import type { SavedObjectsTaggingClientConfigRawType } from './config';
+import { SavedObjectsTaggingClientConfig } from './config';
+import { TagAssignmentService } from './services/assignments/assignment_service';
+import { TagsCache } from './services/tags/tags_cache';
+import { TagsClient } from './services/tags/tags_client';
+import type { SavedObjectTaggingPluginStart } from './types';
 import { getUiApi } from './ui_api';
-import { SavedObjectsTaggingClientConfig, SavedObjectsTaggingClientConfigRawType } from './config';
 
 interface SetupDeps {
   management: ManagementSetup;

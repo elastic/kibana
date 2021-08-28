@@ -4,8 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { UrlFilter } from '../types';
+import type { UrlFilter } from '../types';
 
 /**
  * Extract a map's keys to an array, then map those keys to a string per key.

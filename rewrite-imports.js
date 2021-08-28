@@ -55,13 +55,46 @@ const allFilesToProcess = allFilesInProject.filter((file) => {
   return dirsAlreadyProcessed.every((dir) => !file.startsWith(dir));
 });
 
-console.log(allFilesToProcess);
+// console.log(allFilesToProcess);
 
 const filesToProcessNow = allFilesInProject.filter((file) => {
   return allFilesToProcess.includes(file) && dirsToProcess.some((dir) => file.startsWith(dir));
 });
 
-console.log(filesToProcessNow);
+const modified = [
+  'src/plugins/advanced_settings',
+  'src/plugins/apm_oss',
+  'src/plugins/bfetch',
+].map(dir => Path.resolve(dir));
+
+console.log(allFilesInProject.filter(file => {
+  return !modified.some(dir => file.startsWith(dir));
+}));
+
+console.log(
+  Array.from(new Set([...allFilesInProject.map(file => {
+    const rel = Path.relative(__dirname, file);
+
+    if (rel.startsWith('src/core')) {
+      return 'src/core';
+    }
+
+    if (rel.startsWith('typings')
+      || rel.startsWith('packages')
+    ) {
+      return undefined;
+    }
+
+    if (rel.startsWith('src/plugins')
+      || rel.startsWith('x-pack/plugins')
+    ) {
+      return rel.split('/').slice(0, 3).join('/');
+    }
+    return rel;
+  })])).filter(Boolean).join(',')
+);
+
+return;
 
 timer.measure('start processing');
 

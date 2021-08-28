@@ -6,14 +6,16 @@
  */
 
 import Boom from '@hapi/boom';
-import type { SavedObjectsClientContract } from 'kibana/server';
 
-import {
-  decodeCloudId,
-  GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
-  normalizeHostsForAgents,
-} from '../../common';
-import type { SettingsSOAttributes, Settings, BaseSettings } from '../../common';
+import type { SavedObjectsClientContract } from '../../../../../src/core/server/saved_objects/types';
+import { GLOBAL_SETTINGS_SAVED_OBJECT_TYPE } from '../../common/constants/settings';
+import { decodeCloudId } from '../../common/services/decode_cloud_id';
+import { normalizeHostsForAgents } from '../../common/services/hosts_utils';
+import type {
+  BaseSettings,
+  Settings,
+  SettingsSOAttributes,
+} from '../../common/types/models/settings';
 
 import { appContextService } from './app_context';
 

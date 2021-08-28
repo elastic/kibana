@@ -4,20 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { ChangeEvent, Fragment } from 'react';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFieldText, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-
-import { EuiButtonEmpty, EuiComboBoxOptionOption, EuiFieldText, EuiFormRow } from '@elastic/eui';
-
 import { FormattedMessage } from '@kbn/i18n/react';
-import { MetricSelect } from './metric_select';
-import { SingleFieldSelect } from '../single_field_select';
-import { AggDescriptor } from '../../../common/descriptor_types';
+import type { ChangeEvent } from 'react';
+import React, { Fragment } from 'react';
+import type { IFieldType } from '../../../../../../src/plugins/data/common/index_patterns/fields/types';
 import { AGG_TYPE, DEFAULT_PERCENTILE } from '../../../common/constants';
+import type { AggDescriptor } from '../../../common/descriptor_types/source_descriptor_types';
 import { getTermsFields } from '../../index_pattern_util';
-import { IFieldType } from '../../../../../../src/plugins/data/public';
+import { SingleFieldSelect } from '../single_field_select';
 import { ValidatedNumberInput } from '../validated_number_input';
+import { MetricSelect } from './metric_select';
 
 function filterFieldsForAgg(fields: IFieldType[], aggType: AGG_TYPE) {
   if (!fields) {

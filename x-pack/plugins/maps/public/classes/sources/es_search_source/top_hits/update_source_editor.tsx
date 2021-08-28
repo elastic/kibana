@@ -4,22 +4,22 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { Component, Fragment } from 'react';
-import { EuiFormRow, EuiTitle, EuiPanel, EuiSpacer, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
+import type { EuiSwitchEvent } from '@elastic/eui';
+import { EuiFormRow, EuiPanel, EuiSpacer, EuiSwitch, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import React, { Component, Fragment } from 'react';
+import type { IFieldType } from '../../../../../../../../src/plugins/data/common/index_patterns/fields/types';
+import { SortDirection } from '../../../../../../../../src/plugins/data/common/search/search_source/types';
 import { FIELD_ORIGIN } from '../../../../../common/constants';
-import { TooltipSelector } from '../../../../components/tooltip_selector';
-
+import { TooltipSelector } from '../../../../components/tooltip_selector/tooltip_selector';
+import { getSortFields, getSourceFields, getTermsFields } from '../../../../index_pattern_util';
 import { getIndexPatternService } from '../../../../kibana_services';
-import { getTermsFields, getSortFields, getSourceFields } from '../../../../index_pattern_util';
-import { SortDirection, IFieldType } from '../../../../../../../../src/plugins/data/public';
 import { ESDocField } from '../../../fields/es_doc_field';
-import { OnSourceChangeArgs } from '../../source';
-import { TopHitsForm } from './top_hits_form';
+import type { IField } from '../../../fields/field';
+import type { OnSourceChangeArgs } from '../../source';
 import { ESSearchSource } from '../es_search_source';
-import { IField } from '../../../fields/field';
+import { TopHitsForm } from './top_hits_form';
 
 interface Props {
   filterByMapBounds: boolean;

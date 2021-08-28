@@ -4,23 +4,23 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useContext } from 'react';
-import { Query, QueryStringInput } from '../../../../../../../src/plugins/data/public';
+import type { Query } from '../../../../../../../src/plugins/data/public';
+import { QueryStringInput } from '../../../../../../../src/plugins/data/public/ui/query_string_input';
+import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
 import { LogCustomizationMenu } from '../../../components/logging/log_customization_menu';
 import { LogDatepicker } from '../../../components/logging/log_datepicker';
 import { LogHighlightsMenu } from '../../../components/logging/log_highlights_menu';
 import { LogTextScaleControls } from '../../../components/logging/log_text_scale_controls';
 import { LogTextWrapControls } from '../../../components/logging/log_text_wrap_controls';
-import { LogFilterState } from '../../../containers/logs/log_filter';
+import { LogFilterState } from '../../../containers/logs/log_filter/log_filter_state';
 import { LogFlyout } from '../../../containers/logs/log_flyout';
 import { LogHighlightsState } from '../../../containers/logs/log_highlights/log_highlights';
-import { LogPositionState } from '../../../containers/logs/log_position';
-import { useLogSourceContext } from '../../../containers/logs/log_source';
+import { LogPositionState } from '../../../containers/logs/log_position/log_position_state';
+import { useLogSourceContext } from '../../../containers/logs/log_source/log_source';
 import { LogViewConfiguration } from '../../../containers/logs/log_view_configuration';
-import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 
 export const LogsToolbar = () => {
   const { derivedIndexPattern } = useLogSourceContext();

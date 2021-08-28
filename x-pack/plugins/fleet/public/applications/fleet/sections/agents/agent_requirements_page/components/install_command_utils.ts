@@ -4,8 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { PLATFORM_TYPE } from '../../../../hooks';
+import type { PLATFORM_TYPE } from '../../../../../../hooks/use_platform';
 
 export function getInstallCommandForPlatform(
   platform: PLATFORM_TYPE,

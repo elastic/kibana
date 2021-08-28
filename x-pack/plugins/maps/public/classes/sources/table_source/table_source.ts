@@ -6,29 +6,31 @@
  */
 
 import uuid from 'uuid';
+import type { Query } from '../../../../../../../src/plugins/data/common/query';
+import type { Adapters } from '../../../../../../../src/plugins/inspector/common/adapters/types';
 import { FIELD_ORIGIN, SOURCE_TYPES, VECTOR_SHAPE_TYPE } from '../../../../common/constants';
-import {
-  MapExtent,
+import type {
   MapFilters,
-  MapQuery,
-  TableSourceDescriptor,
   VectorJoinSourceRequestMeta,
   VectorSourceSyncMeta,
-} from '../../../../common/descriptor_types';
-import { Adapters } from '../../../../../../../src/plugins/inspector/common/adapters';
-import { ITermJoinSource } from '../term_join_source';
-import { BucketProperties, PropertiesMap } from '../../../../common/elasticsearch_util';
-import { IField } from '../../fields/field';
-import { Query } from '../../../../../../../src/plugins/data/common/query';
-import {
-  AbstractVectorSource,
+} from '../../../../common/descriptor_types/data_request_descriptor_types';
+import type { MapExtent, MapQuery } from '../../../../common/descriptor_types/map_descriptor';
+import type { TableSourceDescriptor } from '../../../../common/descriptor_types/source_descriptor_types';
+import type {
+  BucketProperties,
+  PropertiesMap,
+} from '../../../../common/elasticsearch_util/es_agg_utils';
+import type { IField } from '../../fields/field';
+import { InlineField } from '../../fields/inline_field';
+import { DataRequest } from '../../util/data_request';
+import type { ITermJoinSource } from '../term_join_source/term_join_source';
+import type {
   BoundsFilters,
   GeoJsonWithMeta,
   IVectorSource,
   SourceTooltipConfig,
-} from '../vector_source';
-import { DataRequest } from '../../util/data_request';
-import { InlineField } from '../../fields/inline_field';
+} from '../vector_source/vector_source';
+import { AbstractVectorSource } from '../vector_source/vector_source';
 
 export class TableSource extends AbstractVectorSource implements ITermJoinSource, IVectorSource {
   static type = SOURCE_TYPES.TABLE_SOURCE;

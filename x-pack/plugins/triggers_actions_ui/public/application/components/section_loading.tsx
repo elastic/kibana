@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
-
 import { EuiEmptyPrompt, EuiLoadingSpinner, EuiText } from '@elastic/eui';
+import React from 'react';
 
 interface Props {
   children: React.ReactNode;

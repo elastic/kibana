@@ -4,16 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { CoreStart } from 'kibana/public';
-import { IClickActionDescriptor } from '../';
+import type { IClickActionDescriptor } from '..';
+import type { CoreStart } from '../../../../../../../../src/core/public/types';
 import { SearchSessionsMgmtAPI } from '../../lib/api';
-import { UISession } from '../../types';
+import type { UISession } from '../../types';
 import { createDeleteActionDescriptor } from './delete_button';
 import { createExtendActionDescriptor } from './extend_button';
 import { createInspectActionDescriptor } from './inspect_button';
-import { ACTION } from './types';
 import { createRenameActionDescriptor } from './rename_button';
+import { ACTION } from './types';
 
 export const getAction = (
   api: SearchSessionsMgmtAPI,

@@ -5,23 +5,25 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
+import { Map as MbMap } from '@kbn/mapbox-gl';
+import type { Feature, Polygon } from 'geojson';
 import _ from 'lodash';
 import React, { Component } from 'react';
-import type { Map as MbMap } from '@kbn/mapbox-gl';
-import { i18n } from '@kbn/i18n';
-import { Filter } from 'src/plugins/data/public';
-import { Feature, Polygon } from 'geojson';
+import { DrawControl } from '..';
+import type { Filter } from '../../../../../../../../src/plugins/data/common/es_query';
 import { DRAW_SHAPE, ES_SPATIAL_RELATIONS } from '../../../../../common/constants';
-import { DrawState } from '../../../../../common/descriptor_types';
+import type { DrawState } from '../../../../../common/descriptor_types/map_descriptor';
+import {
+  getBoundingBoxGeometry,
+  roundCoordinates,
+} from '../../../../../common/elasticsearch_util/elasticsearch_geo_utils';
 import {
   createDistanceFilterWithMeta,
   createSpatialFilterWithGeometry,
-  getBoundingBoxGeometry,
-  roundCoordinates,
-} from '../../../../../common/elasticsearch_util';
+} from '../../../../../common/elasticsearch_util/spatial_filter_utils';
 import { getToasts } from '../../../../kibana_services';
-import { DrawControl } from '../';
-import { DrawCircleProperties } from '../draw_circle';
+import type { DrawCircleProperties } from '../draw_circle';
 
 export interface Props {
   addFilters: (filters: Filter[], actionId: string) => Promise<void>;

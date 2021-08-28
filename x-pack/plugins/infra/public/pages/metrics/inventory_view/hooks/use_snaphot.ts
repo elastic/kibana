@@ -4,24 +4,23 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { useEffect } from 'react';
-import { throwErrors, createPlainError } from '../../../../../common/runtime_types';
-import { useHTTPRequest } from '../../../../hooks/use_http_request';
-import {
-  SnapshotNodeResponseRT,
-  SnapshotNodeResponse,
-  SnapshotGroupBy,
-  SnapshotRequest,
+import type {
   InfraTimerangeInput,
+  SnapshotGroupBy,
+  SnapshotNodeResponse,
+  SnapshotRequest,
 } from '../../../../../common/http_api/snapshot_api';
-import {
+import { SnapshotNodeResponseRT } from '../../../../../common/http_api/snapshot_api';
+import type {
   InventoryItemType,
   SnapshotMetricType,
 } from '../../../../../common/inventory_models/types';
+import { createPlainError, throwErrors } from '../../../../../common/runtime_types';
+import { useHTTPRequest } from '../../../../hooks/use_http_request';
 
 export function useSnapshot(
   filterQuery: string | null | undefined,

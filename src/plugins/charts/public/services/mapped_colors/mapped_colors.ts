@@ -8,7 +8,7 @@
 
 import Color from 'color';
 import _ from 'lodash';
-import type { CoreSetup } from '../../../../../core/public';
+import type { CoreSetup } from '../../../../../core/public/types';
 import { COLOR_MAPPING_SETTING } from '../../../common';
 import { createColorPalette } from '../../static/colors/color_palette';
 

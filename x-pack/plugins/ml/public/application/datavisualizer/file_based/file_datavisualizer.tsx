@@ -4,19 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { FC, Fragment, useState, useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { useTimefilter } from '../../contexts/kibana';
-import { NavigationMenu } from '../../components/navigation_menu';
-import { HelpMenu } from '../../components/help_menu';
-import { useMlKibana, useMlLocator } from '../../contexts/kibana';
-
+import type { FC } from 'react';
+import React, { Fragment, useEffect, useMemo, useState } from 'react';
+import type { ResultLink } from '../../../../../data_visualizer/public/application/common/components/results_links/results_links';
+import type { FileDataVisualizerSpec } from '../../../../../data_visualizer/public/application/file_data_visualizer/file_data_visualizer';
 import { ML_PAGES } from '../../../../common/constants/locator';
-import { isFullLicense } from '../../license';
-import { mlNodesAvailable, getMlNodeCount } from '../../ml_nodes_check/check_ml_nodes';
 import { checkPermission } from '../../capabilities/check_capabilities';
-import type { ResultLink, FileDataVisualizerSpec } from '../../../../../data_visualizer/public';
+import { HelpMenu } from '../../components/help_menu/help_menu';
+import { NavigationMenu } from '../../components/navigation_menu/navigation_menu';
+import { useMlKibana } from '../../contexts/kibana/kibana_context';
+import { useMlLocator } from '../../contexts/kibana/use_create_url';
+import { useTimefilter } from '../../contexts/kibana/use_timefilter';
+import { isFullLicense } from '../../license/check_license';
+import { getMlNodeCount, mlNodesAvailable } from '../../ml_nodes_check/check_ml_nodes';
 
 interface GetUrlParams {
   indexPatternId: string;

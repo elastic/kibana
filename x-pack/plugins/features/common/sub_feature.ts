@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { RecursiveReadonly } from '@kbn/utility-types';
-import { LicenseType } from '../../licensing/common/types';
-import { FeatureKibanaPrivileges } from './feature_kibana_privileges';
+import type { RecursiveReadonly } from '@kbn/utility-types';
+import type { LicenseType } from '../../licensing/common/types';
+import type { FeatureKibanaPrivileges } from './feature_kibana_privileges';
 
 /**
  * Configuration for a sub-feature.

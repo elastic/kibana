@@ -4,13 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState, useMemo, memo } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiImage, EuiPagination, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiFlexGroup, EuiFlexItem, EuiImage, EuiText, EuiPagination } from '@elastic/eui';
+import React, { memo, useMemo, useState } from 'react';
 
-import type { ScreenshotItem } from '../../../../../types';
-import { useLinks } from '../../../../../hooks';
+import type { ScreenshotItem } from '../../../../../../../../common/types/models/epm';
+import { useLinks } from '../../../../../hooks/use_links';
 
 interface ScreenshotProps {
   images: ScreenshotItem[];

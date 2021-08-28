@@ -4,22 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { IScopedClusterClient } from 'kibana/server';
-import { JobSavedObjectService } from '../../saved_objects';
-import { JobType } from '../../../common/types/saved_objects';
-
-import { Job, Datafeed } from '../../../common/types/anomaly_detection_jobs';
-import { searchProvider } from './search';
-
-import { DataFrameAnalyticsConfig } from '../../../common/types/data_frame_analytics';
+import type { IScopedClusterClient } from '../../../../../../src/core/server/elasticsearch/client/scoped_cluster_client';
+import type { Datafeed } from '../../../common/types/anomaly_detection_jobs/datafeed';
+import type { Job } from '../../../common/types/anomaly_detection_jobs/job';
+import type { DataFrameAnalyticsConfig } from '../../../common/types/data_frame_analytics';
+import type { JobType } from '../../../common/types/saved_objects';
+import type { JobSavedObjectService } from '../../saved_objects/service';
 import { MLJobNotFound } from './errors';
-import {
+import { searchProvider } from './search';
+import type {
   MlClient,
   MlClientParams,
   MlGetADParams,
-  MlGetDFAParams,
   MlGetDatafeedParams,
+  MlGetDFAParams,
 } from './types';
 
 export function getMlClient(

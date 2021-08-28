@@ -4,27 +4,26 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { AnyAction } from 'redux';
-import { ThunkDispatch } from 'redux-thunk';
 import { connect } from 'react-redux';
-import { TooltipState } from '../../../../common/descriptor_types';
-import { TooltipControl } from './tooltip_control';
+import type { AnyAction } from 'redux';
+import type { ThunkDispatch } from 'redux-thunk';
+import { DRAW_MODE } from '../../../../common/constants';
+import type { TooltipState } from '../../../../common/descriptor_types/map_descriptor';
 import {
   closeOnClickTooltip,
-  openOnClickTooltip,
   closeOnHoverTooltip,
+  openOnClickTooltip,
   openOnHoverTooltip,
-} from '../../../actions';
+} from '../../../actions/tooltip_actions';
+import type { MapStoreState } from '../../../reducers/store';
 import {
+  getGeoFieldNames,
+  getHasLockedTooltips,
   getLayerList,
   getOpenTooltips,
-  getHasLockedTooltips,
-  getGeoFieldNames,
 } from '../../../selectors/map_selectors';
 import { getDrawMode } from '../../../selectors/ui_selectors';
-import { DRAW_MODE } from '../../../../common';
-import { MapStoreState } from '../../../reducers/store';
+import { TooltipControl } from './tooltip_control';
 
 function mapStateToProps(state: MapStoreState) {
   return {

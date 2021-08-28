@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { useAnalysisSetupState } from '../../log_analysis_setup_state';
 import { useLogEntryCategoriesModuleContext } from './use_log_entry_categories_module';
 

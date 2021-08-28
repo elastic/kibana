@@ -4,13 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { useState } from 'react';
 import { EuiFieldText } from '@elastic/eui';
-import './add_message_variables.scss';
+import React, { useState } from 'react';
+import type { ActionVariable } from '../../../../alerting/common/alert';
+import { templateActionVariable } from '../lib/template_action_variable';
 import { AddMessageVariables } from './add_message_variables';
-import { ActionVariable } from '../../../../alerting/common';
-import { templateActionVariable } from '../lib';
+import './add_message_variables.scss';
 
 interface Props {
   messageVariables?: ActionVariable[];

@@ -4,14 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { estypes } from '@elastic/elasticsearch';
+import { estypes } from '@elastic/elasticsearch';
 import numeral from '@elastic/numeral';
-import { IScopedClusterClient } from 'kibana/server';
+import type { IScopedClusterClient } from '../../../../../../src/core/server/elasticsearch/client/scoped_cluster_client';
 import { MLCATEGORY } from '../../../common/constants/field_types';
-import { AnalysisConfig, Datafeed } from '../../../common/types/anomaly_detection_jobs';
-import { fieldsServiceProvider } from '../fields_service';
-import { MlInfoResponse } from '../../../common/types/ml_server_info';
-import type { MlClient } from '../../lib/ml_client';
+import type { Datafeed } from '../../../common/types/anomaly_detection_jobs/datafeed';
+import type { AnalysisConfig } from '../../../common/types/anomaly_detection_jobs/job';
+import type { MlInfoResponse } from '../../../common/types/ml_server_info';
+import type { MlClient } from '../../lib/ml_client/types';
+import { fieldsServiceProvider } from '../fields_service/fields_service';
 
 export interface ModelMemoryEstimationResult {
   /**

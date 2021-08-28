@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { FC, Fragment } from 'react';
-import { Axis, Position, timeFormatter, niceTimeFormatByDay } from '@elastic/charts';
+import { Axis, niceTimeFormatByDay, Position, timeFormatter } from '@elastic/charts';
+import type { FC } from 'react';
+import React, { Fragment } from 'react';
+import type { LineChartPoint } from '../../../../common/chart_loader/chart_loader';
 import { getYRange } from './utils';
-import { LineChartPoint } from '../../../../common/chart_loader';
 
 const dateFormatter = timeFormatter(niceTimeFormatByDay(3));
 

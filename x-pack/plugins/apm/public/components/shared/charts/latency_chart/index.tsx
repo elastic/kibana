@@ -7,6 +7,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiSelect, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ALERT_RULE_TYPE_ID as ALERT_RULE_TYPE_ID_TYPED } from '@kbn/rule-data-utils';
+// @ts-expect-error
 import { ALERT_RULE_TYPE_ID as ALERT_RULE_TYPE_ID_NON_TYPED } from '@kbn/rule-data-utils/target_node/technical_field_names';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
@@ -18,7 +19,6 @@ import { useLicenseContext } from '../../../../context/license/use_license_conte
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { useTheme } from '../../../../hooks/use_theme';
 import { useTransactionLatencyChartsFetcher } from '../../../../hooks/use_transaction_latency_chart_fetcher';
-// @ts-expect-error
 import * as urlHelpers from '../../../shared/Links/url_helpers';
 import { getComparisonChartTheme } from '../../time_comparison/get_time_range_comparison';
 import { TimeseriesChart } from '../timeseries_chart';

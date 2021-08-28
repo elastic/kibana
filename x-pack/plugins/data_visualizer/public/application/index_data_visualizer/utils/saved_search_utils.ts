@@ -4,9 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { cloneDeep } from 'lodash';
-import { IUiSettingsClient } from 'kibana/public';
+import { estypes } from '@elastic/elasticsearch';
 import {
   buildEsQuery,
   buildQueryFromFilters,
@@ -15,11 +13,14 @@ import {
   luceneStringToDsl,
   toElasticsearchQuery,
 } from '@kbn/es-query';
-import { estypes } from '@elastic/elasticsearch';
-import { SavedSearchSavedObject } from '../../../../common/types';
-import { IndexPattern } from '../../../../../../../src/plugins/data/common/index_patterns/index_patterns';
-import { SEARCH_QUERY_LANGUAGE, SearchQueryLanguage } from '../types/combined_query';
-import { getEsQueryConfig, Query } from '../../../../../../../src/plugins/data/public';
+import { cloneDeep } from 'lodash';
+import type { IUiSettingsClient } from '../../../../../../../src/core/public/ui_settings/types';
+import { getEsQueryConfig } from '../../../../../../../src/plugins/data/common/es_query/get_es_query_config';
+import { IndexPattern } from '../../../../../../../src/plugins/data/common/index_patterns/index_patterns/index_pattern';
+import type { Query } from '../../../../../../../src/plugins/data/public';
+import type { SavedSearchSavedObject } from '../../../../common/types';
+import type { SearchQueryLanguage } from '../types/combined_query';
+import { SEARCH_QUERY_LANGUAGE } from '../types/combined_query';
 
 export function getQueryFromSavedSearch(savedSearch: SavedSearchSavedObject) {
   const search = savedSearch.attributes.kibanaSavedObjectMeta as { searchSourceJSON: string };

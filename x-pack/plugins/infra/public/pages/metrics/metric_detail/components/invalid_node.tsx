@@ -4,11 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { EuiButton, EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
-import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
+import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
 import { ViewSourceConfigurationButton } from '../../../../components/source_configuration/view_source_configuration_button';
 import { useLinkProps } from '../../../../hooks/use_link_props';
 

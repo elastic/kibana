@@ -4,28 +4,23 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { combineLatest, Observable, ReplaySubject, Subject } from 'rxjs';
 import { map, startWith, tap } from 'rxjs/operators';
-import {
-  basicJobValidation,
-  basicDatafeedValidation,
-  basicJobAndDatafeedValidation,
-} from '../../../../../../common/util/job_utils';
-import { getNewJobLimits } from '../../../../services/ml_server_info';
-import { JobCreator, JobCreatorType, isCategorizationJobCreator } from '../job_creator';
-import { populateValidationMessages } from './util';
-import {
-  cardinalityValidator,
-  CardinalityValidatorResult,
-  jobIdValidator,
-  groupIdsValidator,
-  JobExistsResult,
-  GroupsExistResult,
-} from './validators';
 import { CATEGORY_EXAMPLES_VALIDATION_STATUS } from '../../../../../../common/constants/categorization_job';
 import { JOB_TYPE } from '../../../../../../common/constants/new_job';
+import {
+  basicDatafeedValidation,
+  basicJobAndDatafeedValidation,
+  basicJobValidation,
+} from '../../../../../../common/util/job_utils';
+import { getNewJobLimits } from '../../../../services/ml_server_info';
+import { JobCreator } from '../job_creator/job_creator';
+import type { JobCreatorType } from '../job_creator/type_guards';
+import { isCategorizationJobCreator } from '../job_creator/type_guards';
+import { populateValidationMessages } from './util';
+import type { CardinalityValidatorResult, GroupsExistResult, JobExistsResult } from './validators';
+import { cardinalityValidator, groupIdsValidator, jobIdValidator } from './validators';
 
 // delay start of validation to allow the user to make changes
 // e.g. if they are typing in a new value, try not to validate

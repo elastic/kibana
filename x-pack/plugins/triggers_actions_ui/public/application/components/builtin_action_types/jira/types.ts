@@ -4,11 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { ExecutorSubActionPushParams } from '../../../../../../actions/server/builtin_action_types/jira/types';
+import type { UserConfiguredActionConnector } from '../../../../types';
 
-import { UserConfiguredActionConnector } from '../../../../types';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ExecutorSubActionPushParams } from '../../../../../../actions/server/builtin_action_types/jira/types';
-
 export type JiraActionConnector = UserConfiguredActionConnector<JiraConfig, JiraSecrets>;
 export interface JiraActionParams {
   subAction: string;

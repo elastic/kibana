@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import {
   EuiButton,
   EuiComboBox,
@@ -21,12 +20,13 @@ import React, { Component, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { DocLinksStart } from 'src/core/public';
 
-import type { SecurityLicense } from '../../../../../../common/licensing';
-import type { BuiltinESPrivileges, Role } from '../../../../../../common/model';
+import type { DocLinksStart } from '../../../../../../../../../src/core/public/doc_links/doc_links_service';
+import type { SecurityLicense } from '../../../../../../common/licensing/license_service';
+import type { BuiltinESPrivileges } from '../../../../../../common/model/builtin_es_privileges';
+import type { Role } from '../../../../../../common/model/role';
 import type { IndicesAPIClient } from '../../../indices_api_client';
-import { CollapsiblePanel } from '../../collapsible_panel';
+import { CollapsiblePanel } from '../../collapsible_panel/collapsible_panel';
 import type { RoleValidator } from '../../validate_role';
 import { ClusterPrivileges } from './cluster_privileges';
 import { IndexPrivileges } from './index_privileges';

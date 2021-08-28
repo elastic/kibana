@@ -4,13 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { APMBaseDoc } from './apm_base_doc';
-import { Cloud } from './fields/cloud';
-import { Container } from './fields/container';
-import { Host } from './fields/host';
-import { Kubernetes } from './fields/kubernetes';
-import { Service } from './fields/service';
+import type { APMBaseDoc } from './apm_base_doc';
+import type { Cloud } from './fields/cloud';
+import type { Container } from './fields/container';
+import type { Host } from './fields/host';
+import type { Kubernetes } from './fields/kubernetes';
+import type { Service } from './fields/service';
 
 type BaseMetric = APMBaseDoc & {
   processor: {

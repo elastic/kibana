@@ -5,14 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
-
-import { FormattedMessage } from '@kbn/i18n/react';
-
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiPageContent, EuiSpacer } from '@elastic/eui';
-import { NavigationMenu } from '../components/navigation_menu';
-import { HelpMenu } from '../components/help_menu';
-import { useMlKibana } from '../contexts/kibana';
+import { FormattedMessage } from '@kbn/i18n/react';
+import React from 'react';
+import { HelpMenu } from '../components/help_menu/help_menu';
+import { NavigationMenu } from '../components/navigation_menu/navigation_menu';
+import { useMlKibana } from '../contexts/kibana/kibana_context';
 
 export const Page = () => {
   const {

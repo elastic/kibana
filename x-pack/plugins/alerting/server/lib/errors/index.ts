@@ -14,4 +14,5 @@ export function isErrorThatHandlesItsOwnResponse(
 }
 
 export { AlertTypeDisabledError, AlertTypeDisabledReason } from './alert_type_disabled';
-export { ErrorThatHandlesItsOwnResponse, ElasticsearchError, getEsErrorMessage };
+export type { ErrorThatHandlesItsOwnResponse, ElasticsearchError };
+export { getEsErrorMessage };

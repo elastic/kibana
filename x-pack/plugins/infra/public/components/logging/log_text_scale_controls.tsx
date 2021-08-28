@@ -4,12 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { EuiFormRow, EuiRadioGroup } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import * as React from 'react';
-
-import { isTextScale, TextScale } from '../../../common/log_text_scale';
+import type { TextScale } from '../../../common/log_text_scale/log_text_scale';
+import { isTextScale } from '../../../common/log_text_scale/log_text_scale';
 
 interface LogTextScaleControlsProps {
   availableTextScales: TextScale[];

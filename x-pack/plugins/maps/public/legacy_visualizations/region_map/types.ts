@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import type { CreateRegionMapLayerDescriptorParams } from '../../classes/layers/create_region_map_layer_descriptor';
 
 export const REGION_MAP_RENDER = 'region_map_vis';

@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { SavedObjectsTaggingApi } from '../../../../src/plugins/saved_objects_tagging_oss/public';
+import type { SavedObjectsTaggingApi } from '../../../../src/plugins/saved_objects_tagging_oss/public/api';
 
 export type SavedObjectTaggingPluginStart = SavedObjectsTaggingApi;

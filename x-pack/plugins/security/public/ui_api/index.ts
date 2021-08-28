@@ -4,12 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import type { ReactElement } from 'react';
 
-import type { CoreStart } from 'src/core/public';
-
-import type { ChangePasswordProps, PersonalInfoProps } from '../account_management';
+import type { CoreStart } from '../../../../../src/core/public/types';
+import type { ChangePasswordProps } from '../account_management/change_password/change_password';
+import type { PersonalInfoProps } from '../account_management/personal_info/personal_info';
 import { getComponents } from './components';
 
 interface GetUiApiOptions {

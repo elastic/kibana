@@ -4,24 +4,23 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { FunctionComponent } from 'react';
 import { EuiFlexItem } from '@elastic/eui';
-import { useSourceContext } from '../../../../../containers/metrics_source';
-import {
-  SnapshotMetricInput,
-  SnapshotGroupBy,
+import type { FunctionComponent } from 'react';
+import React from 'react';
+import type { IIndexPattern } from '../../../../../../../../../src/plugins/data/common/index_patterns/types';
+import type { InventoryCloudAccount } from '../../../../../../common/http_api/inventory_meta_api';
+import type {
   SnapshotCustomMetricInput,
+  SnapshotGroupBy,
+  SnapshotMetricInput,
 } from '../../../../../../common/http_api/snapshot_api';
-import { InventoryCloudAccount } from '../../../../../../common/http_api/inventory_meta_api';
 import { findToolbar } from '../../../../../../common/inventory_models/toolbars';
-import { ToolbarWrapper } from './toolbar_wrapper';
-
-import { InfraGroupByOptions } from '../../../../../lib/lib';
-import { IIndexPattern } from '../../../../../../../../../src/plugins/data/public';
-import { InventoryItemType } from '../../../../../../common/inventory_models/types';
-import { WaffleOptionsState, WaffleSortOption } from '../../hooks/use_waffle_options';
+import type { InventoryItemType } from '../../../../../../common/inventory_models/types';
+import { useSourceContext } from '../../../../../containers/metrics_source/source';
+import type { InfraGroupByOptions } from '../../../../../lib/lib';
 import { useInventoryMeta } from '../../hooks/use_inventory_meta';
+import type { WaffleOptionsState, WaffleSortOption } from '../../hooks/use_waffle_options';
+import { ToolbarWrapper } from './toolbar_wrapper';
 
 export interface ToolbarProps extends Omit<WaffleOptionsState, 'boundsOverride' | 'autoBounds'> {
   createDerivedIndexPattern: (type: 'metrics') => IIndexPattern;

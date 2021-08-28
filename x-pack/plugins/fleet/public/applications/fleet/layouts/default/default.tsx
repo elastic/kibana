@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
+import React from 'react';
 
+import { useConfig } from '../../../../hooks/use_config';
+import { useLink } from '../../../../hooks/use_link';
+import { WithHeaderLayout } from '../../../../layouts/with_header';
 import type { Section } from '../../sections';
-import { useLink, useConfig } from '../../hooks';
-import { WithHeaderLayout } from '../../../../layouts';
 
 import { DefaultPageTitle } from './default_page_title';
 

@@ -4,8 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { EntityFieldType } from './anomalies';
+import type { EntityFieldType } from './anomalies';
 
 export const ML_ENTITY_FIELDS_CONFIG = 'ml.singleMetricViewer.partitionFields';
 

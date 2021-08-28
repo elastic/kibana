@@ -4,12 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { isEqual } from 'lodash';
-import React, { memo, useEffect, useMemo, useRef, FC } from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
-
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -24,30 +18,35 @@ import {
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
-
-import { CoreSetup } from 'src/core/public';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { isEqual } from 'lodash';
+import type { FC } from 'react';
+import React, { memo, useEffect, useMemo, useRef } from 'react';
+import type { CoreSetup } from '../../../../../../../src/core/public/types';
+import {
+  ANALYSIS_CONFIG_TYPE,
+  DEFAULT_RESULTS_FIELD,
+} from '../../../../common/constants/data_frame_analytics';
 import { DEFAULT_SAMPLER_SHARD_SIZE } from '../../../../common/constants/field_histograms';
-
-import { ANALYSIS_CONFIG_TYPE, INDEX_STATUS } from '../../data_frame_analytics/common';
-
+import type { DataFrameAnalysisConfigType } from '../../../../common/types/data_frame_analytics';
+import type {
+  FeatureImportance,
+  FeatureImportanceBaseline,
+  TopClasses,
+} from '../../../../common/types/feature_importance';
+import { isPopulatedObject } from '../../../../common/util/object_utils';
+import { INDEX_STATUS } from '../../data_frame_analytics/common/analytics';
+import { DecisionPathPopover } from '../../data_frame_analytics/pages/analytics_exploration/components/feature_importance/decision_path_popover';
 import {
   euiDataGridStyle,
   euiDataGridToolbarSettings,
   getFeatureImportance,
   getTopClasses,
 } from './common';
-import { UseIndexDataReturnType } from './types';
-import { DecisionPathPopover } from '../../data_frame_analytics/pages/analytics_exploration/components/feature_importance/decision_path_popover';
-import {
-  FeatureImportanceBaseline,
-  FeatureImportance,
-  TopClasses,
-} from '../../../../common/types/feature_importance';
-import { isPopulatedObject } from '../../../../common/util/object_utils';
-import { DEFAULT_RESULTS_FIELD } from '../../../../common/constants/data_frame_analytics';
-import { DataFrameAnalysisConfigType } from '../../../../common/types/data_frame_analytics';
-
 import './data_grid.scss';
+import type { UseIndexDataReturnType } from './types';
+
 // TODO Fix row hovering + bar highlighting
 // import { hoveredRow$ } from './column_chart';
 

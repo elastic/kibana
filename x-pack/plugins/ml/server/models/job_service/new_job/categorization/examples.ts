@@ -4,19 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { estypes } from '@elastic/elasticsearch';
-
-import { IScopedClusterClient } from 'kibana/server';
+import { estypes } from '@elastic/elasticsearch';
 import { chunk } from 'lodash';
+import type { IScopedClusterClient } from '../../../../../../../../src/core/server/elasticsearch/client/scoped_cluster_client';
 import { CATEGORY_EXAMPLES_SAMPLE_SIZE } from '../../../../../common/constants/categorization_job';
-import {
-  Token,
+import type { IndicesOptions } from '../../../../../common/types/anomaly_detection_jobs/datafeed';
+import type {
   CategorizationAnalyzer,
   CategoryFieldExample,
+  Token,
 } from '../../../../../common/types/categories';
-import { RuntimeMappings } from '../../../../../common/types/fields';
-import { IndicesOptions } from '../../../../../common/types/anomaly_detection_jobs';
+import type { RuntimeMappings } from '../../../../../common/types/fields';
 import { ValidationResults } from './validation_results';
 
 const CHUNK_SIZE = 100;

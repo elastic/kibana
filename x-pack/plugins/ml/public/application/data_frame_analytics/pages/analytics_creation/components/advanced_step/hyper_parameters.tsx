@@ -4,13 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { FC, Fragment } from 'react';
 import { EuiFieldNumber, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { CreateAnalyticsFormProps } from '../../../analytics_management/hooks/use_create_analytics_form';
-import { AdvancedParamErrors, getNumberValue } from './advanced_step_form';
+import type { FC } from 'react';
+import React, { Fragment } from 'react';
 import { ANALYSIS_ADVANCED_FIELDS } from '../../../../common/analytics';
+import type { CreateAnalyticsFormProps } from '../../../analytics_management/hooks/use_create_analytics_form/use_create_analytics_form';
+import type { AdvancedParamErrors } from './advanced_step_form';
+import { getNumberValue } from './advanced_step_form';
 
 const MAX_TREES_LIMIT = 2000;
 

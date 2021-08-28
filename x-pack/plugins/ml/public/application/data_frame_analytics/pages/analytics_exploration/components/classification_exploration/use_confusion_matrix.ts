@@ -4,27 +4,25 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { useState, useEffect } from 'react';
-
-import {
-  isClassificationEvaluateResponse,
-  ClassificationEvaluateResponse,
-  ConfusionMatrix,
-  ResultsSearchQuery,
-  ANALYSIS_CONFIG_TYPE,
-  ClassificationMetricItem,
-} from '../../../../common/analytics';
-import { isKeywordAndTextType } from '../../../../common/fields';
-
+import { useEffect, useState } from 'react';
+import { ANALYSIS_CONFIG_TYPE } from '../../../../../../../common/constants/data_frame_analytics';
+import type { DataFrameAnalyticsConfig } from '../../../../../../../common/types/data_frame_analytics';
 import {
   getDependentVar,
   getPredictionFieldName,
-  loadEvalData,
+} from '../../../../../../../common/util/analytics_utils';
+import type {
+  ClassificationEvaluateResponse,
+  ClassificationMetricItem,
+  ConfusionMatrix,
+  ResultsSearchQuery,
+} from '../../../../common/analytics';
+import {
+  isClassificationEvaluateResponse,
   loadDocsCount,
-  DataFrameAnalyticsConfig,
-} from '../../../../common';
-
+  loadEvalData,
+} from '../../../../common/analytics';
+import { isKeywordAndTextType } from '../../../../common/fields';
 import { isTrainingFilter } from './is_training_filter';
 
 function getEvalutionMetricsItems(evalMetrics?: ClassificationEvaluateResponse['classification']) {

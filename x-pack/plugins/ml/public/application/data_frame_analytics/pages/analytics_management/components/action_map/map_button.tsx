@@ -4,18 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { FC } from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiToolTip } from '@elastic/eui';
-
+import { i18n } from '@kbn/i18n';
+import type { FC } from 'react';
+import React from 'react';
 import {
-  isRegressionAnalysis,
-  isOutlierAnalysis,
   isClassificationAnalysis,
-} from '../../../../common/analytics';
-
-import { DataFrameAnalyticsListRow } from '../analytics_list/common';
+  isOutlierAnalysis,
+  isRegressionAnalysis,
+} from '../../../../../../../common/util/analytics_utils';
+import type { DataFrameAnalyticsListRow } from '../analytics_list/common';
 
 export const mapActionButtonText = i18n.translate(
   'xpack.ml.dataframe.analyticsList.mapActionName',

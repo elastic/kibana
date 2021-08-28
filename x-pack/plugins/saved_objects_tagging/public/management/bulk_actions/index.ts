@@ -4,13 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { CoreStart } from 'src/core/public';
-import { TagsCapabilities } from '../../../common';
-import { ITagInternalClient, ITagAssignmentService, ITagsCache } from '../../services';
-import { TagBulkAction } from '../types';
-import { getBulkDeleteAction } from './bulk_delete';
+import type { CoreStart } from '../../../../../../src/core/public/types';
+import type { ITagsCache } from '../../../../../../src/plugins/saved_objects_tagging_oss/public/api';
+import type { TagsCapabilities } from '../../../common/capabilities';
+import type { ITagAssignmentService } from '../../services/assignments/assignment_service';
+import type { ITagInternalClient } from '../../services/tags/tags_client';
+import type { TagBulkAction } from '../types';
 import { getBulkAssignAction } from './bulk_assign';
+import { getBulkDeleteAction } from './bulk_delete';
 import { getClearSelectionAction } from './clear_selection';
 
 interface GetBulkActionOptions {

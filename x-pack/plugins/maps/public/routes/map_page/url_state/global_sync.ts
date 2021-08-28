@@ -4,9 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { TimeRange, RefreshInterval, Filter } from 'src/plugins/data/public';
-import { syncQueryStateWithUrl } from '../../../../../../../src/plugins/data/public';
+import type { Filter } from '../../../../../../../src/plugins/data/common/es_query';
+import type {
+  RefreshInterval,
+  TimeRange,
+} from '../../../../../../../src/plugins/data/common/query/timefilter/types';
+import { syncQueryStateWithUrl } from '../../../../../../../src/plugins/data/public/query/state_sync/sync_state_with_url';
 import { getData } from '../../../kibana_services';
 import { kbnUrlStateStorage } from '../../../render_app';
 

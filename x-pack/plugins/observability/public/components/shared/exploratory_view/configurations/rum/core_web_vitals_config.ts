@@ -4,34 +4,33 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { euiPaletteForStatus } from '@elastic/eui';
-import { ConfigProps, SeriesConfig } from '../../types';
+import type { ConfigProps, SeriesConfig } from '../../types';
 import {
   FieldLabels,
   FILTER_RECORDS,
   REPORT_METRIC_FIELD,
   USE_BREAK_DOWN_COLUMN,
-} from '../constants';
-import { buildPhraseFilter } from '../utils';
+} from '../constants/constants';
 import {
   CLIENT_GEO_COUNTRY_NAME,
   CLS_FIELD,
   FID_FIELD,
   LCP_FIELD,
   PROCESSOR_EVENT,
+  SERVICE_ENVIRONMENT,
   SERVICE_NAME,
   TRANSACTION_TYPE,
+  TRANSACTION_URL,
+  URL_FULL,
   USER_AGENT_DEVICE,
   USER_AGENT_NAME,
   USER_AGENT_OS,
-  USER_AGENT_VERSION,
-  TRANSACTION_URL,
   USER_AGENT_OS_VERSION,
-  URL_FULL,
-  SERVICE_ENVIRONMENT,
+  USER_AGENT_VERSION,
 } from '../constants/elasticsearch_fieldnames';
 import { CLS_LABEL, FID_LABEL, LCP_LABEL } from '../constants/labels';
+import { buildPhraseFilter } from '../utils';
 
 export function getCoreWebVitalsConfig({ indexPattern }: ConfigProps): SeriesConfig {
   const statusPallete = euiPaletteForStatus(3);

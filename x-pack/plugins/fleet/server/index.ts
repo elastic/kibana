@@ -4,34 +4,40 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { schema } from '@kbn/config-schema';
 import type { TypeOf } from '@kbn/config-schema';
-import type { PluginConfigDescriptor, PluginInitializerContext } from 'src/core/server';
+import { schema } from '@kbn/config-schema';
 
-import { PreconfiguredPackagesSchema, PreconfiguredAgentPoliciesSchema } from './types';
+import type {
+  PluginConfigDescriptor,
+  PluginInitializerContext,
+} from '../../../../src/core/server/plugins/types';
 
 import { FleetPlugin } from './plugin';
+import {
+  PreconfiguredAgentPoliciesSchema,
+  PreconfiguredPackagesSchema,
+} from './types/models/preconfiguration';
 
 export { default as apm } from 'elastic-apm-node';
+export { AgentNotFoundError } from './errors';
+export { FleetSetupContract, FleetSetupDeps, FleetStartContract } from './plugin';
 export {
+  AgentPolicyServiceInterface,
   AgentService,
+  Artifact,
+  ArtifactsClientInterface,
   ESIndexPatternService,
   getRegistryUrl,
   PackageService,
-  AgentPolicyServiceInterface,
-  ArtifactsClientInterface,
-  Artifact,
 } from './services';
-
-export { FleetSetupContract, FleetSetupDeps, FleetStartContract } from './plugin';
+export { relativeDownloadUrlFromArtifact } from './services/artifacts/mappings';
+export { PackagePolicyServiceInterface } from './services/package_policy';
 export type {
   ExternalCallback,
-  PutPackagePolicyUpdateCallback,
-  PostPackagePolicyDeleteCallback,
   PostPackagePolicyCreateCallback,
+  PostPackagePolicyDeleteCallback,
+  PutPackagePolicyUpdateCallback,
 } from './types';
-export { AgentNotFoundError } from './errors';
 
 export const config: PluginConfigDescriptor = {
   exposeToBrowser: {
@@ -89,10 +95,6 @@ export const config: PluginConfigDescriptor = {
 };
 
 export type FleetConfigType = TypeOf<typeof config.schema>;
-
-export { PackagePolicyServiceInterface } from './services/package_policy';
-
-export { relativeDownloadUrlFromArtifact } from './services/artifacts/mappings';
 
 export const plugin = (initializerContext: PluginInitializerContext) => {
   return new FleetPlugin(initializerContext);

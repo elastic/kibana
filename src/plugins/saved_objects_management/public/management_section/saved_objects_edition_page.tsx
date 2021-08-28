@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { parse } from 'query-string';
 import React, { useEffect } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
-import type { CoreStart } from '../../../../core/public';
+import type { CoreStart } from '../../../../core/public/types';
 import { ScopedHistory } from '../../../../core/public/application/scoped_history';
 import type { ChromeBreadcrumb } from '../../../../core/public/chrome/types';
 import { RedirectAppLinks } from '../../../kibana_react/public/app_links/redirect_app_link';

@@ -4,35 +4,34 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { AnyAction } from 'redux';
-import { ThunkDispatch } from 'redux-thunk';
 import { connect } from 'react-redux';
-import { TOCEntry, OwnProps, ReduxDispatchProps, ReduxStateProps } from './toc_entry';
-import { MapStoreState } from '../../../../../reducers/store';
+import type { AnyAction } from 'redux';
+import type { ThunkDispatch } from 'redux-thunk';
+import { DRAW_MODE } from '../../../../../../common/constants';
+import { fitToLayerExtent } from '../../../../../actions/data_request_actions';
+import { setSelectedLayer, toggleLayerVisible } from '../../../../../actions/layer_actions';
+import { updateDrawState } from '../../../../../actions/map_actions';
+import {
+  hideTOCDetails,
+  setDrawMode,
+  showTOCDetails,
+  updateFlyout,
+} from '../../../../../actions/ui_actions';
+import type { MapStoreState } from '../../../../../reducers/store';
 import { FLYOUT_STATE } from '../../../../../reducers/ui';
 import {
-  getMapZoom,
-  hasDirtyState,
-  getSelectedLayer,
   getEditState,
+  getMapZoom,
+  getSelectedLayer,
+  hasDirtyState,
 } from '../../../../../selectors/map_selectors';
 import {
+  getFlyoutDisplay,
   getIsReadOnly,
   getOpenTOCDetails,
-  getFlyoutDisplay,
 } from '../../../../../selectors/ui_selectors';
-import {
-  fitToLayerExtent,
-  setSelectedLayer,
-  updateFlyout,
-  hideTOCDetails,
-  showTOCDetails,
-  toggleLayerVisible,
-  setDrawMode,
-  updateDrawState,
-} from '../../../../../actions';
-import { DRAW_MODE } from '../../../../../../common';
+import type { OwnProps, ReduxDispatchProps, ReduxStateProps } from './toc_entry';
+import { TOCEntry } from './toc_entry';
 
 function mapStateToProps(state: MapStoreState, ownProps: OwnProps): ReduxStateProps {
   const flyoutDisplay = getFlyoutDisplay(state);

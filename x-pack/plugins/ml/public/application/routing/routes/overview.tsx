@@ -4,23 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { FC, Suspense } from 'react';
 import { i18n } from '@kbn/i18n';
-
+import type { FC } from 'react';
+import React, { Suspense } from 'react';
 import { Redirect } from 'react-router-dom';
-
-import type { NavigateToPath } from '../../contexts/kibana';
-
-import { MlRoute, PageLoader, PageProps } from '../router';
-import { useResolver } from '../use_resolver';
-
-import { checkFullLicense } from '../../license';
 import { checkGetJobsCapabilitiesResolver } from '../../capabilities/check_capabilities';
-import { getMlNodeCount } from '../../ml_nodes_check';
+import type { NavigateToPath } from '../../contexts/kibana/use_navigate_to_path';
+import { useTimefilter } from '../../contexts/kibana/use_timefilter';
+import { checkFullLicense } from '../../license/check_license';
+import { getMlNodeCount } from '../../ml_nodes_check/check_ml_nodes';
 import { loadMlServerInfo } from '../../services/ml_server_info';
-import { useTimefilter } from '../../contexts/kibana';
 import { breadcrumbOnClickFactory, getBreadcrumbWithUrlForApp } from '../breadcrumbs';
+import type { MlRoute, PageProps } from '../router';
+import { PageLoader } from '../router';
+import { useResolver } from '../use_resolver';
 
 const OverviewPage = React.lazy(() => import('../../overview/overview_page'));
 

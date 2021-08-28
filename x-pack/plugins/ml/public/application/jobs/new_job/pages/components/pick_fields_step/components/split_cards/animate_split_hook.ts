@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { useEffect, useState } from 'react';
 
 export const ANIMATION_SWITCH_DELAY_MS = 1000;

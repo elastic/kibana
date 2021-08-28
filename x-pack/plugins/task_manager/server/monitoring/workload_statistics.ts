@@ -4,18 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { combineLatest, Observable, timer } from 'rxjs';
-import { mergeMap, map, filter, switchMap, catchError } from 'rxjs/operators';
-import { Logger } from 'src/core/server';
-import { JsonObject } from '@kbn/utility-types';
-import { keyBy, mapValues } from 'lodash';
 import { estypes } from '@elastic/elasticsearch';
-import { AggregatedStatProvider } from './runtime_statistics_aggregator';
-import { parseIntervalAsSecond, asInterval, parseIntervalAsMillisecond } from '../lib/intervals';
-import { AggregationResultOf } from '../../../../../src/core/types/elasticsearch';
-import { HealthStatus } from './monitoring_stats_stream';
+import type { Logger } from '@kbn/logging';
+import type { JsonObject } from '@kbn/utility-types';
+import { keyBy, mapValues } from 'lodash';
+import { combineLatest, Observable, timer } from 'rxjs';
+import { catchError, filter, map, mergeMap, switchMap } from 'rxjs/operators';
+import type { AggregateOf as AggregationResultOf } from '../../../../../src/core/types/elasticsearch/search';
+import { asInterval, parseIntervalAsMillisecond, parseIntervalAsSecond } from '../lib/intervals';
 import { TaskStore } from '../task_store';
+import { HealthStatus } from './monitoring_stats_stream';
+import type { AggregatedStatProvider } from './runtime_statistics_aggregator';
 import { createRunningAveragedStat } from './task_run_calcultors';
 
 interface StatusStat extends JsonObject {

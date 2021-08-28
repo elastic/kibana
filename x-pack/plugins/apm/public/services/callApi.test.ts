@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { CoreStart } from '../../../../../src/core/public';
+import type { CoreStart } from '../../../../../src/core/public/types';
 import type { HttpSetup } from '../../../../../src/core/public/http/types';
 import { mockNow } from '../utils/testHelpers';
 import { callApi, clearCache } from './rest/callApi';

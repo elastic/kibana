@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import './nav_control_component.scss';
-
 import type { EuiContextMenuPanelItemDescriptor, IconType } from '@elastic/eui';
 import {
   EuiAvatar,
@@ -22,7 +20,8 @@ import type { Observable, Subscription } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import type { AuthenticatedUser } from '../../common/model';
+import type { AuthenticatedUser } from '../../common/model/authenticated_user';
+import './nav_control_component.scss';
 
 export interface UserMenuLink {
   label: string;

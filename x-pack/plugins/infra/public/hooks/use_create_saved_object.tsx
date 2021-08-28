@@ -4,14 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { useState, useCallback } from 'react';
-import {
-  SavedObjectAttributes,
-  SavedObjectsCreateOptions,
-  SimpleSavedObject,
-} from 'src/core/public';
-import { useKibana } from '../../../../../src/plugins/kibana_react/public';
+import { useCallback, useState } from 'react';
+import type { SavedObjectsCreateOptions } from '../../../../../src/core/public/saved_objects/saved_objects_client';
+import { SimpleSavedObject } from '../../../../../src/core/public/saved_objects/simple_saved_object';
+import type { SavedObjectAttributes } from '../../../../../src/core/types/saved_objects';
+import { useKibana } from '../../../../../src/plugins/kibana_react/public/context/context';
 
 export const useCreateSavedObject = (type: string) => {
   const kibana = useKibana();

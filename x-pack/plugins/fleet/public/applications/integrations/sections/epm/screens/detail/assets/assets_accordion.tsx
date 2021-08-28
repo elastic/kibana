@@ -5,26 +5,24 @@
  * 2.0.
  */
 
-import React from 'react';
-import type { FunctionComponent } from 'react';
-
 import {
   EuiAccordion,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSplitPanel,
-  EuiSpacer,
-  EuiText,
-  EuiLink,
   EuiHorizontalRule,
+  EuiLink,
   EuiNotificationBadge,
+  EuiSpacer,
+  EuiSplitPanel,
+  EuiText,
 } from '@elastic/eui';
+import type { FunctionComponent } from 'react';
+import React from 'react';
 
+import { KibanaAssetType } from '../../../../../../../../common/types/models/epm';
+import { useStartServices } from '../../../../../../../hooks/use_core';
+import { getHrefToObjectInKibanaApp } from '../../../../../../../hooks/use_kibana_link';
 import { AssetTitleMap } from '../../../constants';
-
-import { getHrefToObjectInKibanaApp, useStartServices } from '../../../../../hooks';
-
-import { KibanaAssetType } from '../../../../../types';
 
 import type { AllowedAssetType, AssetSavedObject } from './types';
 

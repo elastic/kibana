@@ -4,9 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { ConfigProps, SeriesConfig } from '../../types';
-import { FieldLabels, OPERATION_COLUMN, REPORT_METRIC_FIELD } from '../constants';
+import type { ConfigProps, SeriesConfig } from '../../types';
+import { FieldLabels, OPERATION_COLUMN, REPORT_METRIC_FIELD } from '../constants/constants';
+import {
+  MONITOR_DURATION_US,
+  SYNTHETICS_CLS,
+  SYNTHETICS_DCL,
+  SYNTHETICS_DOCUMENT_ONLOAD,
+  SYNTHETICS_FCP,
+  SYNTHETICS_LCP,
+} from '../constants/field_names/synthetics';
 import {
   CLS_LABEL,
   DCL_LABEL,
@@ -17,14 +24,7 @@ import {
   MONITORS_DURATION_LABEL,
   UP_LABEL,
 } from '../constants/labels';
-import {
-  MONITOR_DURATION_US,
-  SYNTHETICS_CLS,
-  SYNTHETICS_DCL,
-  SYNTHETICS_DOCUMENT_ONLOAD,
-  SYNTHETICS_FCP,
-  SYNTHETICS_LCP,
-} from '../constants/field_names/synthetics';
+
 const SUMMARY_UP = 'summary.up';
 const SUMMARY_DOWN = 'summary.down';
 

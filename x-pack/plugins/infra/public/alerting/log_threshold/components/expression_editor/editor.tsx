@@ -4,35 +4,34 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { EuiButton, EuiCallOut, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo, useState } from 'react';
 import useMount from 'react-use/lib/useMount';
-import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
-import {
-  AlertTypeParamsExpressionProps,
-  ForLastExpression,
-} from '../../../../../../triggers_actions_ui/public';
-import {
-  Comparator,
-  isRatioAlert,
+import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public/context/context';
+import { ForLastExpression } from '../../../../../../triggers_actions_ui/public/common/expression_items';
+import type { AlertTypeParamsExpressionProps } from '../../../../../../triggers_actions_ui/public/types';
+import type {
   PartialAlertParams,
   PartialCountAlertParams,
   PartialCriteria as PartialCriteriaType,
   PartialRatioAlertParams,
   ThresholdType,
-  timeUnitRT,
-  isOptimizableGroupedThreshold,
 } from '../../../../../common/alerting/logs/log_threshold/types';
-import { decodeOrThrow } from '../../../../../common/runtime_types';
-import { ObjectEntries } from '../../../../../common/utility_types';
 import {
-  LogIndexField,
+  Comparator,
+  isOptimizableGroupedThreshold,
+  isRatioAlert,
+  timeUnitRT,
+} from '../../../../../common/alerting/logs/log_threshold/types';
+import type { LogIndexField } from '../../../../../common/http_api/log_sources/get_log_source_status';
+import { decodeOrThrow } from '../../../../../common/runtime_types';
+import type { ObjectEntries } from '../../../../../common/utility_types';
+import {
   LogSourceProvider,
   useLogSourceContext,
-} from '../../../../containers/logs/log_source';
-import { useSourceId } from '../../../../containers/source_id';
+} from '../../../../containers/logs/log_source/log_source';
+import { useSourceId } from '../../../../containers/source_id/source_id';
 import { GroupByExpression } from '../../../common/group_by_expression/group_by_expression';
 import { errorsRT } from '../../validation';
 import { Criteria } from './criteria';

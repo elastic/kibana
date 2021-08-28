@@ -4,31 +4,31 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { useEffect, useState } from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
+  EuiAccordion,
   EuiButton,
+  EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiCallOut,
+  EuiComboBox,
+  EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
-  EuiSpacer,
-  EuiAccordion,
-  EuiButtonIcon,
-  EuiEmptyPrompt,
-  EuiCallOut,
-  EuiText,
   EuiFormRow,
-  EuiButtonEmpty,
-  EuiComboBox,
-  EuiComboBoxOptionOption,
+  EuiIcon,
   EuiIconTip,
+  EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
-import { AlertAction, ActionTypeIndex, ActionConnector } from '../../../types';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+import React, { useEffect, useState } from 'react';
+import type { AlertAction } from '../../../../../alerting/common/alert';
+import { useKibana } from '../../../common/lib/kibana/kibana_react';
+import type { ActionConnector, ActionTypeIndex } from '../../../types';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
-import { ActionAccordionFormProps } from './action_form';
-import { useKibana } from '../../../common/lib/kibana';
+import type { ActionAccordionFormProps } from './action_form';
 
 type AddConnectorInFormProps = {
   actionTypesIndex: ActionTypeIndex;

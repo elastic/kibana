@@ -4,10 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { EuiPage } from '@elastic/eui';
-
-import { euiStyled } from '../../../../../src/plugins/kibana_react/common';
+import { euiStyled } from '../../../../../src/plugins/kibana_react/common/eui_styled_components';
 
 export const ColumnarPage = euiStyled.div`
   display: flex;

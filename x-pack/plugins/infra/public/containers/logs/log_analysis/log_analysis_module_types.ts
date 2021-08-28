@@ -4,18 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { HttpHandler } from 'src/core/public';
 import { estypes } from '@elastic/elasticsearch';
-import {
-  ValidateLogEntryDatasetsResponsePayload,
-  ValidationIndicesResponsePayload,
-} from '../../../../common/http_api/log_analysis';
-import { DatasetFilter } from '../../../../common/log_analysis';
-import { DeleteJobsResponsePayload } from './api/ml_cleanup';
-import { FetchJobStatusResponsePayload } from './api/ml_get_jobs_summary_api';
-import { GetMlModuleResponsePayload } from './api/ml_get_module';
-import { SetupMlModuleResponsePayload } from './api/ml_setup_module_api';
+import type { HttpHandler } from '../../../../../../../src/core/public/http/types';
+import type { ValidateLogEntryDatasetsResponsePayload } from '../../../../common/http_api/log_analysis/validation/datasets';
+import type { ValidationIndicesResponsePayload } from '../../../../common/http_api/log_analysis/validation/log_entry_rate_indices';
+import type { DatasetFilter } from '../../../../common/log_analysis/job_parameters';
+import type { DeleteJobsResponsePayload } from './api/ml_cleanup';
+import type { FetchJobStatusResponsePayload } from './api/ml_get_jobs_summary_api';
+import type { GetMlModuleResponsePayload } from './api/ml_get_module';
+import type { SetupMlModuleResponsePayload } from './api/ml_setup_module_api';
 
 export { JobModelSizeStats, JobSummary } from './api/ml_get_jobs_summary_api';
 

@@ -4,16 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { MonoTypeOperatorFunction, Operator, TeardownLogic } from 'rxjs';
+import { EMPTY, Observable, Subscriber } from 'rxjs';
 
 // eslint-disable-next-line max-classes-per-file
-import {
-  EMPTY,
-  MonoTypeOperatorFunction,
-  Observable,
-  Operator,
-  Subscriber,
-  TeardownLogic,
-} from 'rxjs';
 
 /**
  * Emits only the first `count` items from the arrays emitted by the source Observable. The limit

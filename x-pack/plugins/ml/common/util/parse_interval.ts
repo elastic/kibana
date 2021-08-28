@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { duration, Duration, unitOfTime } from 'moment';
 import dateMath from '@elastic/datemath';
+import type { Duration } from 'moment';
+import { duration, unitOfTime } from 'moment';
 
 type SupportedUnits = unitOfTime.Base;
 

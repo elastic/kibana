@@ -4,15 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { useCallback, useEffect, useRef } from 'react';
+import type { TagAttributes } from '../../../../../../src/plugins/saved_objects_tagging_oss/common/types';
+import type { TagValidation } from '../../../common/validation';
 import {
-  TagAttributes,
-  TagValidation,
   validateTagColor,
-  validateTagName,
   validateTagDescription,
-} from '../../../common';
+  validateTagName,
+} from '../../../common/validation';
 
 /**
  * Returns the hex representation of a random color (e.g `#F1B7E2`)

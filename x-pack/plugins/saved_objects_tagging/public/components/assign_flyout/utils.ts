@@ -4,13 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { sortBy } from 'lodash';
-import { AssignableObject, getKey } from '../../../common/assignments';
-import {
+import type { AssignableObject } from '../../../common/assignments';
+import { getKey } from '../../../common/assignments';
+import type {
+  AssignmentAction,
   AssignmentOverride,
   AssignmentStatus,
-  AssignmentAction,
   AssignmentStatusMap,
 } from './types';
 

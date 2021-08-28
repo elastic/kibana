@@ -4,27 +4,27 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { Fragment, FC, useContext, useEffect, useState } from 'react';
-
-import { JobCreatorContext } from '../job_creator_context';
-import { WizardNav } from '../wizard_nav';
-import { WIZARD_STEPS, StepProps } from '../step_types';
-import { SingleMetricView } from './components/single_metric_view';
-import { MultiMetricView } from './components/multi_metric_view';
-import { PopulationView } from './components/population_view';
-import { AdvancedView } from './components/advanced_view';
-import { CategorizationView } from './components/categorization_view';
-import { RareView } from './components/rare_view';
-import { JsonEditorFlyout, EDITOR_MODE } from '../common/json_editor_flyout';
+import type { FC } from 'react';
+import React, { Fragment, useContext, useEffect, useState } from 'react';
 import {
-  isSingleMetricJobCreator,
+  isAdvancedJobCreator,
+  isCategorizationJobCreator,
   isMultiMetricJobCreator,
   isPopulationJobCreator,
-  isCategorizationJobCreator,
-  isAdvancedJobCreator,
   isRareJobCreator,
-} from '../../../common/job_creator';
+  isSingleMetricJobCreator,
+} from '../../../common/job_creator/type_guards';
+import { EDITOR_MODE, JsonEditorFlyout } from '../common/json_editor_flyout/json_editor_flyout';
+import { JobCreatorContext } from '../job_creator_context';
+import type { StepProps } from '../step_types';
+import { WIZARD_STEPS } from '../step_types';
+import { WizardNav } from '../wizard_nav/wizard_nav';
+import { AdvancedView } from './components/advanced_view/advanced_view';
+import { CategorizationView } from './components/categorization_view/categorization_view';
+import { MultiMetricView } from './components/multi_metric_view/multi_metric_view';
+import { PopulationView } from './components/population_view/population_view';
+import { RareView } from './components/rare_view/rare_view';
+import { SingleMetricView } from './components/single_metric_view/single_metric_view';
 
 export const PickFieldsStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) => {
   const { jobCreator, jobValidator, jobValidatorUpdated } = useContext(JobCreatorContext);

@@ -6,14 +6,14 @@
  */
 
 import React from 'react';
-import { CoreStart } from 'kibana/public';
+import type { CoreStart } from '../../../../../../src/core/public/types';
+import { toMountPoint } from '../../../../../../src/plugins/kibana_react/public/util/to_mount_point';
 import { VIEW_BY_JOB_LABEL } from '../../application/explorer/explorer_constants';
-import { toMountPoint } from '../../../../../../src/plugins/kibana_react/public';
 import { AnomalyDetectorService } from '../../application/services/anomaly_detector_service';
-import { getDefaultExplorerChartsPanelTitle } from './anomaly_charts_embeddable';
 import { HttpService } from '../../application/services/http_service';
-import { AnomalyChartsEmbeddableInput } from '..';
 import { resolveJobSelection } from '../common/resolve_job_selection';
+import type { AnomalyChartsEmbeddableInput } from '../types';
+import { getDefaultExplorerChartsPanelTitle } from './anomaly_charts_embeddable';
 import { AnomalyChartsInitializer } from './anomaly_charts_initializer';
 
 export async function resolveEmbeddableAnomalyChartsUserInput(

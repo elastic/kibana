@@ -4,14 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { HttpHandler } from 'src/core/public';
-import { ToastInput } from 'src/core/public';
-import { useTrackedPromise, CanceledPromiseError } from '../utils/use_tracked_promise';
-import { useKibana } from '../../../../../src/plugins/kibana_react/public';
-import { InfraHttpError } from '../types';
+import React, { useMemo, useState } from 'react';
+import type { HttpHandler } from '../../../../../src/core/public/http/types';
+import type { ToastInput } from '../../../../../src/core/public/notifications/toasts/toasts_api';
+import { useKibana } from '../../../../../src/plugins/kibana_react/public/context/context';
+import type { InfraHttpError } from '../types';
+import { CanceledPromiseError, useTrackedPromise } from '../utils/use_tracked_promise';
 
 export function useHTTPRequest<Response>(
   pathname: string,

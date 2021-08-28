@@ -4,23 +4,22 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { Fragment } from 'react';
 import {
+  EuiButton,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPanel,
-  EuiButton,
-  EuiTitle,
-  EuiSpacer,
-  EuiButtonIcon,
-  EuiToolTip,
   EuiLoadingSpinner,
+  EuiPanel,
+  EuiSpacer,
+  EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+import React, { Fragment } from 'react';
+import type { ILayer } from '../../../classes/layers/layer';
 import { LayerTOC } from './layer_toc';
-import { ILayer } from '../../../classes/layers/layer';
 
 export interface Props {
   isReadOnly: boolean;

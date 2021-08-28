@@ -8,30 +8,24 @@
 /*
  * This module contains helpers for managing the task manager storage layer.
  */
+import { estypes } from '@elastic/elasticsearch';
+import { defaults, omit } from 'lodash';
 import { Subject } from 'rxjs';
-import { omit, defaults } from 'lodash';
-
-import type { estypes } from '@elastic/elasticsearch';
-
-import {
-  SavedObject,
-  SavedObjectsSerializer,
-  SavedObjectsRawDoc,
-  ISavedObjectsRepository,
-  SavedObjectsUpdateResponse,
-  ElasticsearchClient,
-} from '../../../../src/core/server';
-
-import { asOk, asErr, Result } from './lib/result_type';
-
-import {
+import type { ElasticsearchClient } from '../../../../src/core/server/elasticsearch/client/types';
+import { SavedObjectsSerializer } from '../../../../src/core/server/saved_objects/serialization/serializer';
+import type { SavedObjectsRawDoc } from '../../../../src/core/server/saved_objects/serialization/types';
+import type { ISavedObjectsRepository } from '../../../../src/core/server/saved_objects/service/lib/repository';
+import type { SavedObjectsUpdateResponse } from '../../../../src/core/server/saved_objects/service/saved_objects_client';
+import type { SavedObject } from '../../../../src/core/types/saved_objects';
+import type { Result } from './lib/result_type';
+import { asErr, asOk } from './lib/result_type';
+import type {
   ConcreteTaskInstance,
+  SerializedConcreteTaskInstance,
   TaskInstance,
   TaskLifecycle,
-  TaskLifecycleResult,
-  SerializedConcreteTaskInstance,
 } from './task';
-
+import { TaskLifecycleResult } from './task';
 import { TaskTypeDictionary } from './task_type_dictionary';
 
 export interface StoreOpts {

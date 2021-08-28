@@ -4,14 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { extractErrorProperties } from '../../../../../../../common/util/errors/process_errors';
 import { ml } from '../../../../../services/ml_api_service';
-import { extractErrorProperties } from '../../../../../../../common/util/errors';
-import { DfAnalyticsExplainResponse, FieldSelectionItem } from '../../../../common/analytics';
-import {
-  getJobConfigFromFormState,
-  State,
-} from '../../../analytics_management/hooks/use_create_analytics_form/state';
+import type { DfAnalyticsExplainResponse, FieldSelectionItem } from '../../../../common/analytics';
+import type { State } from '../../../analytics_management/hooks/use_create_analytics_form/state';
+import { getJobConfigFromFormState } from '../../../analytics_management/hooks/use_create_analytics_form/state';
 
 export interface FetchExplainDataReturnType {
   success: boolean;

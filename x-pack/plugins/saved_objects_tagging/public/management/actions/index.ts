@@ -4,15 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { Observable } from 'rxjs';
-import { CoreStart } from 'kibana/public';
-import { TagsCapabilities } from '../../../common';
-import { ITagInternalClient, ITagAssignmentService, ITagsCache } from '../../services';
-import { TagAction } from './types';
+import type { CoreStart } from '../../../../../../src/core/public/types';
+import type { ITagsCache } from '../../../../../../src/plugins/saved_objects_tagging_oss/public/api';
+import type { TagsCapabilities } from '../../../common/capabilities';
+import type { ITagAssignmentService } from '../../services/assignments/assignment_service';
+import type { ITagInternalClient } from '../../services/tags/tags_client';
+import { getAssignAction } from './assign';
 import { getDeleteAction } from './delete';
 import { getEditAction } from './edit';
-import { getAssignAction } from './assign';
+import type { TagAction } from './types';
 
 export { TagAction } from './types';
 

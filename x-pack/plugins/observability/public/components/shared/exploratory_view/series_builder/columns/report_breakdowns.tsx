@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { Breakdowns } from '../../series_editor/columns/breakdowns';
-import { SeriesConfig } from '../../types';
+import type { SeriesConfig } from '../../types';
 
 export function ReportBreakdowns({
   seriesId,

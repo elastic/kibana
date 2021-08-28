@@ -7,12 +7,15 @@
 
 import _ from 'lodash';
 
-import type { Capabilities, CapabilitiesSwitcher, CoreSetup, Logger } from 'src/core/server';
-import type { Space } from 'src/plugins/spaces_oss/common';
+import type { Logger } from '@kbn/logging';
 
-import type { KibanaFeature } from '../../../features/server';
+import type { CoreSetup } from '../../../../../src/core/server';
+import type { CapabilitiesSwitcher } from '../../../../../src/core/server/capabilities/types';
+import type { Capabilities } from '../../../../../src/core/types/capabilities';
+import type { Space } from '../../../../../src/plugins/spaces_oss/common/types';
+import type { KibanaFeature } from '../../../features/common/kibana_feature';
 import type { PluginsStart } from '../plugin';
-import type { SpacesServiceStart } from '../spaces_service';
+import type { SpacesServiceStart } from '../spaces_service/spaces_service';
 
 export function setupCapabilitiesSwitcher(
   core: CoreSetup<PluginsStart>,

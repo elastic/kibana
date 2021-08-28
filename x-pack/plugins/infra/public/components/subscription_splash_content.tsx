@@ -4,17 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { useEffect } from 'react';
+import { EuiButton, EuiEmptyPrompt, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EuiText, EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { useKibana } from '../../../../../src/plugins/kibana_react/public';
-import { HttpStart } from '../../../../../src/core/public';
+import React, { useEffect } from 'react';
+import type { HttpStart } from '../../../../../src/core/public/http/types';
+import { useKibana } from '../../../../../src/plugins/kibana_react/public/context/context';
+import type { LazyObservabilityPageTemplateProps } from '../../../observability/public/components/shared/page_template/lazy_page_template';
 import { useTrialStatus } from '../hooks/use_trial_status';
-import { LoadingPrompt } from '../components/loading_page';
+import { LoadingPrompt } from './loading_page';
 import { PageTemplate } from './page_template';
-import type { LazyObservabilityPageTemplateProps } from '../../../observability/public';
 
 const loadingMessage = i18n.translate('xpack.infra.ml.splash.loadingMessage', {
   defaultMessage: 'Checking license...',

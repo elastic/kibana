@@ -4,11 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { IIndexPattern } from 'src/plugins/data/common';
-import { UrlConfig } from '../../../../../common/types/custom_urls';
-import { Job } from '../../../../../common/types/anomaly_detection_jobs';
-import { TimeRangeType } from './constants';
+import type { IIndexPattern } from '../../../../../../../../src/plugins/data/common/index_patterns/types';
+import type { Job } from '../../../../../common/types/anomaly_detection_jobs/job';
+import type { UrlConfig } from '../../../../../common/types/custom_urls';
+import type { TimeRangeType } from './constants';
 
 export interface TimeRange {
   type: TimeRangeType;

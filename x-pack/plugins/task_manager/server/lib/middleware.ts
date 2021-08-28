@@ -4,8 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { RunContext, TaskInstance } from '../task';
+import type { RunContext, TaskInstance } from '../task';
 
 type Mapper<T> = (params: T) => Promise<T>;
 interface BeforeSaveContext {

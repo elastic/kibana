@@ -4,11 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { ChangeEvent, Component } from 'react';
-import { EuiFormRow, EuiSelect, EuiSelectOption } from '@elastic/eui';
+import type { EuiSelectOption } from '@elastic/eui';
+import { EuiFormRow, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { getSecurityIndexPatterns, IndexPatternMeta } from './security_index_pattern_utils';
+import type { ChangeEvent } from 'react';
+import React, { Component } from 'react';
+import type { IndexPatternMeta } from './security_index_pattern_utils';
+import { getSecurityIndexPatterns } from './security_index_pattern_utils';
 
 interface Props {
   value: string;

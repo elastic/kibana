@@ -4,11 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { useMemo } from 'react';
-import { useUiSettings } from '../../contexts/kibana';
+import { UI_SETTINGS } from '../../../../../../../src/plugins/data/common/constants';
+import { useUiSettings } from '../../contexts/kibana/use_ui_settings_context';
 import { TimeBuckets } from '../../util/time_buckets';
-import { UI_SETTINGS } from '../../../../../../../src/plugins/data/common';
 
 export const useTimeBuckets = () => {
   const uiSettings = useUiSettings();

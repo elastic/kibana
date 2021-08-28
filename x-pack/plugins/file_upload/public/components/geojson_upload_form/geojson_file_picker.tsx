@@ -4,18 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { Component } from 'react';
 import { EuiFilePicker, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { MB } from '../../../common';
-import { getMaxBytesFormatted } from '../../importer/get_max_bytes';
-import { validateFile } from '../../importer';
+import React, { Component } from 'react';
+import { MB } from '../../../common/constants';
+import type { GeoJsonPreview } from '../../importer/geojson_importer/geojson_importer';
 import {
   GeoJsonImporter,
-  GeoJsonPreview,
   GEOJSON_FILE_TYPES,
-} from '../../importer/geojson_importer';
+} from '../../importer/geojson_importer/geojson_importer';
+import { getMaxBytesFormatted } from '../../importer/get_max_bytes';
+import { validateFile } from '../../importer/validate_file';
 
 export type OnFileSelectParameters = GeoJsonPreview & {
   indexName: string;

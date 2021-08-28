@@ -4,18 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { IndexPattern } from '../../../../../src/plugins/data/common/index_patterns';
-import {
-  Embeddable,
-  EmbeddableInput,
-  EmbeddableOutput,
-  SavedObjectEmbeddableInput,
-} from '../../../../../src/plugins/embeddable/public';
-import { Query, Filter, TimeRange } from '../../../../../src/plugins/data/common';
-import { MapCenterAndZoom, MapExtent } from '../../common/descriptor_types';
-import { MapSavedObjectAttributes } from '../../common/map_saved_object_type';
-import { MapSettings } from '../reducers/map';
+import type { Query } from '../../../../../src/plugins/data/common';
+import type { Filter } from '../../../../../src/plugins/data/common/es_query';
+import { IndexPattern } from '../../../../../src/plugins/data/common/index_patterns/index_patterns/index_pattern';
+import type { TimeRange } from '../../../../../src/plugins/data/common/query/timefilter/types';
+import type { SavedObjectEmbeddableInput } from '../../../../../src/plugins/embeddable/common/lib/saved_object_embeddable';
+import type { EmbeddableInput } from '../../../../../src/plugins/embeddable/common/types';
+import { Embeddable } from '../../../../../src/plugins/embeddable/public/lib/embeddables/embeddable';
+import type { EmbeddableOutput } from '../../../../../src/plugins/embeddable/public/lib/embeddables/i_embeddable';
+import type { MapCenterAndZoom, MapExtent } from '../../common/descriptor_types/map_descriptor';
+import type { MapSavedObjectAttributes } from '../../common/map_saved_object_type';
+import type { MapSettings } from '../reducers/map/types';
 
 export interface MapEmbeddableConfig {
   editable: boolean;

@@ -4,13 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import type { FC, PropsWithChildren, PropsWithRef, ReactElement } from 'react';
 import React, { lazy, useMemo } from 'react';
 
-import type { CoreStart } from 'src/core/public';
-
-import { SuspenseErrorBoundary } from '../suspense_error_boundary';
+import type { CoreStart } from '../../../../../src/core/public/types';
+import { SuspenseErrorBoundary } from '../suspense_error_boundary/suspense_error_boundary';
 
 interface InternalProps<T> {
   fn: () => Promise<FC<T>>;

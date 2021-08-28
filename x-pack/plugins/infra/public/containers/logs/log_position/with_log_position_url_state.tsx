@@ -4,13 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import React, { useContext, useMemo } from 'react';
-
-import { pickTimeKey } from '../../../../common/time';
+import { pickTimeKey } from '../../../../common/time/time_key';
+import { datemathToEpochMillis, isValidDatemath } from '../../../utils/datemath';
 import { replaceStateKeyInQueryString, UrlStateContainer } from '../../../utils/url_state';
-import { LogPositionState, LogPositionStateParams } from './log_position_state';
-import { isValidDatemath, datemathToEpochMillis } from '../../../utils/datemath';
+import type { LogPositionStateParams } from './log_position_state';
+import { LogPositionState } from './log_position_state';
 
 /**
  * Url State

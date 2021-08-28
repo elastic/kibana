@@ -4,9 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { FC, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -15,10 +12,14 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { JobOverrides, ModuleJobUI, SAVE_STATE } from '../page';
-import { JobItem } from './job_item';
+import { FormattedMessage } from '@kbn/i18n/react';
+import type { FC } from 'react';
+import React, { useState } from 'react';
+import type { JobOverride } from '../../../../../../common/types/modules';
+import type { JobOverrides, ModuleJobUI } from '../page';
+import { SAVE_STATE } from '../page';
 import { EditJob } from './edit_job';
-import { JobOverride } from '../../../../../../common/types/modules';
+import { JobItem } from './job_item';
 
 interface ModuleJobsProps {
   jobs: ModuleJobUI[];

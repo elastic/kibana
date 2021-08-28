@@ -4,21 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { useCallback, useEffect, useState } from 'react';
-import { debounce, distinctUntilChanged, mapTo, switchMap, tap } from 'rxjs/operators';
-import { merge, of, timer } from 'rxjs';
-import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
-import { SearchSessionIndicator, SearchSessionIndicatorRef } from '../search_session_indicator';
-import {
-  ISessionService,
-  SearchSessionState,
-  SearchUsageCollector,
-} from '../../../../../../../src/plugins/data/public';
-import { RedirectAppLinks } from '../../../../../../../src/plugins/kibana_react/public';
-import { ApplicationStart, IBasePath } from '../../../../../../../src/core/public';
-import { IStorageWrapper } from '../../../../../../../src/plugins/kibana_utils/public';
+import React, { useCallback, useEffect, useState } from 'react';
+import useObservable from 'react-use/lib/useObservable';
+import { merge, of, timer } from 'rxjs';
+import { debounce, distinctUntilChanged, mapTo, switchMap, tap } from 'rxjs/operators';
+import type { ApplicationStart } from '../../../../../../../src/core/public/application/types';
+import type { IBasePath } from '../../../../../../../src/core/public/http/types';
+import type { SearchUsageCollector } from '../../../../../../../src/plugins/data/public/search/collectors/types';
+import { SearchSessionState } from '../../../../../../../src/plugins/data/public/search/session/search_session_state';
+import type { ISessionService } from '../../../../../../../src/plugins/data/public/search/session/session_service';
+import { RedirectAppLinks } from '../../../../../../../src/plugins/kibana_react/public/app_links/redirect_app_link';
+import type { IStorageWrapper } from '../../../../../../../src/plugins/kibana_utils/public/storage/types';
+import { SearchSessionIndicator } from '../search_session_indicator';
+import type { SearchSessionIndicatorRef } from '../search_session_indicator/search_session_indicator';
 import { useSearchSessionTour } from './search_session_tour';
 
 export interface SearchSessionIndicatorDeps {

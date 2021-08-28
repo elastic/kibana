@@ -4,11 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { cloneDeep, isPlainObject, mergeWith } from 'lodash';
-import { DeepPartial } from 'utility-types';
-import { APMEventESSearchRequest } from '../../../lib/helpers/create_es_client/create_apm_event_client';
-import { Projection } from '../../typings';
+import type { DeepPartial } from 'utility-types';
+import type { APMEventESSearchRequest } from '../../../lib/helpers/create_es_client/create_apm_event_client';
+import type { Projection } from '../../typings';
 
 type PlainObject = Record<string | number | symbol, any>;
 

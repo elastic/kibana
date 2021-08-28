@@ -8,7 +8,7 @@
 import type { History } from 'history';
 import type { AnyAction, Dispatch } from 'redux';
 import { BehaviorSubject, Subject } from 'rxjs';
-import type { CoreStart } from '../../../core/public';
+import type { CoreStart } from '../../../core/public/types';
 import { ScopedHistory } from '../../../core/public/application/scoped_history';
 import type { AppMountParameters } from '../../../core/public/application/types';
 import type { ChromeStart } from '../../../core/public/chrome/types';

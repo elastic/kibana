@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import { i18n } from '@kbn/i18n';
-import type { CoreSetup, CoreStart } from '../../../../core/public';
+import type { CoreSetup, CoreStart } from '../../../../core/public/types';
 import type { Plugin } from '../../../../core/public/plugins/plugin';
 import type { UrlGeneratorContract } from './url_generator_contract';
 import type { UrlGeneratorId, UrlGeneratorsDefinition } from './url_generator_definition';

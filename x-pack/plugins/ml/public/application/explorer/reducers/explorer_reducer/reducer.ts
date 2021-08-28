@@ -4,26 +4,24 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { formatHumanReadableDateTime } from '../../../../../common/util/date_utils';
-
 import { getDefaultChartsData } from '../../explorer_charts/explorer_charts_container_service';
 import { EXPLORER_ACTION, VIEW_BY_JOB_LABEL } from '../../explorer_constants';
-import { Action } from '../../explorer_dashboard_service';
+import type { Action } from '../../explorer_dashboard_service';
 import {
   getClearedSelectedAnomaliesState,
   getDefaultSwimlaneData,
   getSwimlaneBucketInterval,
   getViewBySwimlaneOptions,
 } from '../../explorer_utils';
-
+import { getTimeBoundsFromSelection } from '../../hooks/use_selected_cells';
 import { checkSelectedCells } from './check_selected_cells';
 import { clearInfluencerFilterSettings } from './clear_influencer_filter_settings';
 import { jobSelectionChange } from './job_selection_change';
-import { ExplorerState, getExplorerDefaultState } from './state';
 import { setInfluencerFilterSettings } from './set_influencer_filter_settings';
 import { setKqlQueryBarPlaceholder } from './set_kql_query_bar_placeholder';
-import { getTimeBoundsFromSelection } from '../../hooks/use_selected_cells';
+import type { ExplorerState } from './state';
+import { getExplorerDefaultState } from './state';
 
 export const explorerReducer = (state: ExplorerState, nextAction: Action): ExplorerState => {
   const { type, payload } = nextAction;

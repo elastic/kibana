@@ -4,25 +4,24 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { i18n } from '@kbn/i18n';
-import { buildExpressionFunction } from '../../../../../../../src/plugins/expressions/public';
-import { OperationDefinition } from './index';
-import {
-  getFormatFromPreviousColumn,
-  getInvalidFieldMessage,
-  getSafeName,
-  getFilter,
-} from './helpers';
-import {
-  FormattedIndexPatternColumn,
-  FieldBasedIndexPatternColumn,
-  BaseIndexPatternColumn,
-} from './column_types';
+import type { OperationDefinition } from '.';
+import { buildExpressionFunction } from '../../../../../../../src/plugins/expressions/common/ast/build_function';
 import {
   adjustTimeScaleLabelSuffix,
   adjustTimeScaleOnOtherColumnChange,
 } from '../time_scale_utils';
+import type {
+  BaseIndexPatternColumn,
+  FieldBasedIndexPatternColumn,
+  FormattedIndexPatternColumn,
+} from './column_types';
+import {
+  getFilter,
+  getFormatFromPreviousColumn,
+  getInvalidFieldMessage,
+  getSafeName,
+} from './helpers';
 
 type MetricColumn<T> = FormattedIndexPatternColumn &
   FieldBasedIndexPatternColumn & {

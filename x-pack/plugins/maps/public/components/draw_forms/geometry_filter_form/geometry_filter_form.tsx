@@ -4,24 +4,27 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { ChangeEvent, Component } from 'react';
 import {
-  EuiForm,
-  EuiFormRow,
-  EuiFieldText,
   EuiButton,
+  EuiFieldText,
+  EuiForm,
+  EuiFormErrorText,
+  EuiFormRow,
   EuiSelect,
   EuiSpacer,
   EuiTextAlign,
-  EuiFormErrorText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { ChangeEvent } from 'react';
+import React, { Component } from 'react';
+import { ACTION_GLOBAL_APPLY_FILTER } from '../../../../../../../src/plugins/data/public/actions/apply_filter_action';
+import type {
+  Action,
+  ActionExecutionContext,
+} from '../../../../../../../src/plugins/ui_actions/public/actions/action';
 import { ES_SPATIAL_RELATIONS } from '../../../../common/constants';
 import { getEsSpatialRelationLabel } from '../../../../common/i18n_getters';
 import { ActionSelect } from '../../action_select';
-import { ACTION_GLOBAL_APPLY_FILTER } from '../../../../../../../src/plugins/data/public';
-import { Action, ActionExecutionContext } from '../../../../../../../src/plugins/ui_actions/public';
 
 interface Props {
   buttonLabel: string;

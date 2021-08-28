@@ -4,32 +4,29 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { PluginInitializerContext } from 'src/core/server';
+import type { PluginInitializerContext } from '../../../../src/core/server/plugins/types';
 import { RuleRegistryPlugin } from './plugin';
 
-export type { RuleRegistryPluginSetupContract, RuleRegistryPluginStartContract } from './plugin';
-export type {
-  RacRequestHandlerContext,
-  RacApiRequestHandlerContext,
-  AlertTypeWithExecutor,
-} from './types';
-
+export type { AlertsClient } from './alert_data_client/alerts_client';
 export * from './config';
-export * from './rule_data_plugin_service';
+export type { RuleRegistryPluginSetupContract, RuleRegistryPluginStartContract } from './plugin';
 export * from './rule_data_client';
-
-export { getRuleData, RuleExecutorData } from './utils/get_rule_executor_data';
-export { createLifecycleRuleTypeFactory } from './utils/create_lifecycle_rule_type_factory';
+export * from './rule_data_plugin_service';
+export type {
+  AlertTypeWithExecutor,
+  RacApiRequestHandlerContext,
+  RacRequestHandlerContext,
+} from './types';
 export {
-  LifecycleRuleExecutor,
+  createLifecycleExecutor,
   LifecycleAlertService,
   LifecycleAlertServices,
-  createLifecycleExecutor,
+  LifecycleRuleExecutor,
 } from './utils/create_lifecycle_executor';
+export { createLifecycleRuleTypeFactory } from './utils/create_lifecycle_rule_type_factory';
 export { createPersistenceRuleTypeFactory } from './utils/create_persistence_rule_type_factory';
+export { getRuleData, RuleExecutorData } from './utils/get_rule_executor_data';
 export * from './utils/persistence_types';
-export type { AlertsClient } from './alert_data_client/alerts_client';
 
 export const plugin = (initContext: PluginInitializerContext) =>
   new RuleRegistryPlugin(initContext);

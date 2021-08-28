@@ -4,16 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-
+import { observabilityAppId } from '../../../common';
 import { CaseView } from '../../components/app/cases/case_view';
 import { useGetUserCasesPermissions } from '../../hooks/use_get_user_cases_permissions';
-import { useKibana } from '../../utils/kibana_react';
-import { useReadonlyHeader } from '../../hooks/use_readonly_header';
 import { usePluginContext } from '../../hooks/use_plugin_context';
-import { observabilityAppId } from '../../../common';
+import { useReadonlyHeader } from '../../hooks/use_readonly_header';
+import { useKibana } from '../../utils/kibana_react';
 
 export const CaseDetailsPage = React.memo(() => {
   const {

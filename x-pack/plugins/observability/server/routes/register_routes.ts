@@ -4,18 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
+import { RequestAbortedError } from '@elastic/elasticsearch/lib/errors';
+import Boom from '@hapi/boom';
+import type { Logger } from '@kbn/logging';
 import {
   decodeRequestParams,
   parseEndpoint,
   routeValidationObject,
 } from '@kbn/server-route-repository';
-import { CoreSetup, CoreStart, Logger, RouteRegistrar } from 'kibana/server';
-import Boom from '@hapi/boom';
-import { RequestAbortedError } from '@elastic/elasticsearch/lib/errors';
-import { RuleDataPluginService } from '../../../rule_registry/server';
-import { ObservabilityRequestHandlerContext } from '../types';
-import { AbstractObservabilityServerRouteRepository } from './types';
+import * as t from 'io-ts';
+import type { CoreSetup, CoreStart } from '../../../../../src/core/server';
+import type { RouteRegistrar } from '../../../../../src/core/server/http/router/router';
+import { RuleDataPluginService } from '../../../rule_registry/server/rule_data_plugin_service/rule_data_plugin_service';
+import type { ObservabilityRequestHandlerContext } from '../types';
+import type { AbstractObservabilityServerRouteRepository } from './types';
 
 export function registerRoutes({
   repository,

@@ -4,16 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { FC, Fragment, useEffect, useState } from 'react';
 import { EuiCallOut, EuiFormRow, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 // @ts-ignore no declaration
-import { LEFT_ALIGNMENT, CENTER_ALIGNMENT, SortableProperties } from '@elastic/eui/lib/services';
+import { LEFT_ALIGNMENT, SortableProperties } from '@elastic/eui/lib/services';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { FieldSelectionItem } from '../../../../common/analytics';
+import type { FC } from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
 // @ts-ignore could not find declaration file
 import { CustomSelectionTable } from '../../../../../components/custom_selection_table';
+import type { FieldSelectionItem } from '../../../../common/analytics';
+
+
 
 const minimumFieldsMessage = i18n.translate(
   'xpack.ml.dataframe.analytics.create.analysisFieldsTable.minimumFieldsMessage',

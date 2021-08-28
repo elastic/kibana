@@ -4,13 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { useCallback, useImperativeHandle } from 'react';
+import type { EuiButtonEmptyProps, EuiButtonIconProps } from '@elastic/eui';
 import {
   EuiButtonEmpty,
-  EuiButtonEmptyProps,
   EuiButtonIcon,
-  EuiButtonIconProps,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
@@ -19,13 +16,14 @@ import {
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
-import moment from 'moment';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+import moment from 'moment';
+import React, { useCallback, useImperativeHandle } from 'react';
+import { SearchSessionState } from '../../../../../../../src/plugins/data/public/search/session/search_session_state';
+import { SearchSessionName } from './components/search_session_name/search_session_name';
 import { CheckInEmptyCircle, PartialClock } from './custom_icons';
 import './search_session_indicator.scss';
-import { SearchSessionState } from '../../../../../../../src/plugins/data/public';
-import { SearchSessionName } from './components';
 
 export interface SearchSessionIndicatorProps {
   state: SearchSessionState;

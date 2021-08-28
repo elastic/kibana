@@ -4,33 +4,35 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { useMemo, useState } from 'react';
 import {
   EuiAccordion,
-  EuiFieldText,
+  EuiButton,
+  EuiCheckbox,
+  EuiCheckboxGroup,
+  EuiComboBox,
   EuiDescribedFormGroup,
+  EuiFieldNumber,
+  EuiFieldText,
   EuiForm,
   EuiFormRow,
   EuiHorizontalRule,
+  EuiIconTip,
+  EuiLink,
   EuiSpacer,
   EuiText,
-  EuiComboBox,
-  EuiIconTip,
-  EuiCheckbox,
-  EuiCheckboxGroup,
-  EuiButton,
-  EuiLink,
-  EuiFieldNumber,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+import React, { useMemo, useState } from 'react';
 import styled from 'styled-components';
 
-import { dataTypes } from '../../../../../../common';
-import type { NewAgentPolicy, AgentPolicy } from '../../../types';
-import { isValidNamespace } from '../../../services';
-import { useStartServices } from '../../../hooks';
+import { dataTypes } from '../../../../../../common/constants/epm';
+import { isValidNamespace } from '../../../../../../common/services/is_valid_namespace';
+import type {
+  AgentPolicy,
+  NewAgentPolicy,
+} from '../../../../../../common/types/models/agent_policy';
+import { useStartServices } from '../../../../../hooks/use_core';
 
 import { AgentPolicyDeleteProvider } from './agent_policy_delete_provider';
 

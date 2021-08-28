@@ -4,12 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { useCallback, useMemo } from 'react';
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 import { useTrackedPromise } from '../../utils/use_tracked_promise';
 import { useModuleStatus } from './infra_ml_module_status';
-import { ModuleDescriptor, ModuleSourceConfiguration } from './infra_ml_module_types';
+import type { ModuleDescriptor, ModuleSourceConfiguration } from './infra_ml_module_types';
 
 export const useInfraMLModule = <JobType extends string>({
   sourceConfiguration,

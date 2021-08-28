@@ -4,40 +4,36 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { useCallback, useEffect, useMemo, useState } from 'react';
-
-import { EuiDataGridColumn } from '@elastic/eui';
-
-import { CoreSetup } from 'src/core/public';
-
+import type { EuiDataGridColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { MlApiServices } from '../../../../../services/ml_api_service';
-import { IndexPattern } from '../../../../../../../../../../src/plugins/data/public';
-
-import { DataLoader } from '../../../../../datavisualizer/index_based/data_loader';
-
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import type { CoreSetup } from '../../../../../../../../../../src/core/public/types';
+import { IndexPattern } from '../../../../../../../../../../src/plugins/data/common/index_patterns/index_patterns/index_pattern';
+import { DEFAULT_RESULTS_FIELD } from '../../../../../../../common/constants/data_frame_analytics';
+import type { DataFrameAnalyticsConfig } from '../../../../../../../common/types/data_frame_analytics';
+import type { FeatureImportanceBaseline } from '../../../../../../../common/types/feature_importance';
+import {
+  getDefaultPredictionFieldName,
+  getPredictionFieldName,
+  isClassificationAnalysis,
+  isRegressionAnalysis,
+} from '../../../../../../../common/util/analytics_utils';
+import { extractErrorMessage } from '../../../../../../../common/util/errors/process_errors';
 import {
   getDataGridSchemasFromFieldTypes,
-  getFieldType,
   showDataGridColumnChartErrorMessageToast,
   useRenderCellValue,
-  UseIndexDataReturnType,
-} from '../../../../../components/data_grid';
-import { SavedSearchQuery } from '../../../../../contexts/ml';
-import { getIndexData, getIndexFields, DataFrameAnalyticsConfig } from '../../../../common';
-import {
-  getPredictionFieldName,
-  getDefaultPredictionFieldName,
-  isClassificationAnalysis,
-} from '../../../../../../../common/util/analytics_utils';
-import { FEATURE_IMPORTANCE, TOP_CLASSES } from '../../../../common/constants';
-import { DEFAULT_RESULTS_FIELD } from '../../../../../../../common/constants/data_frame_analytics';
-import { sortExplorationResultsFields, ML__ID_COPY } from '../../../../common/fields';
-import { isRegressionAnalysis } from '../../../../common/analytics';
-import { extractErrorMessage } from '../../../../../../../common/util/errors';
+} from '../../../../../components/data_grid/common';
+import type { UseIndexDataReturnType } from '../../../../../components/data_grid/types';
+import { getFieldType } from '../../../../../components/data_grid/use_column_chart';
+import type { SavedSearchQuery } from '../../../../../contexts/ml/ml_context';
+import { DataLoader } from '../../../../../datavisualizer/index_based/data_loader/data_loader';
+import type { MlApiServices } from '../../../../../services/ml_api_service';
 import { useTrainedModelsApiService } from '../../../../../services/ml_api_service/trained_models';
-import { FeatureImportanceBaseline } from '../../../../../../../common/types/feature_importance';
+import { FEATURE_IMPORTANCE, TOP_CLASSES } from '../../../../common/constants';
+import { ML__ID_COPY, sortExplorationResultsFields } from '../../../../common/fields';
+import { getIndexData } from '../../../../common/get_index_data';
+import { getIndexFields } from '../../../../common/get_index_fields';
 import { useExplorationDataGrid } from './use_exploration_data_grid';
 
 export const useExplorationResults = (

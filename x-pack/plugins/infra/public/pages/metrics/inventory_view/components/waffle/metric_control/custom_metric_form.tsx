@@ -4,32 +4,34 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { useState, useCallback } from 'react';
-import uuid from 'uuid';
 import {
-  EuiForm,
   EuiButton,
   EuiButtonEmpty,
-  EuiFormRow,
-  EuiFieldText,
   EuiComboBox,
-  EuiSelect,
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiText,
+  EuiForm,
+  EuiFormRow,
   EuiPopoverTitle,
+  EuiSelect,
+  EuiText,
 } from '@elastic/eui';
-import { IFieldType } from 'src/plugins/data/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import {
+import React, { useCallback, useState } from 'react';
+import uuid from 'uuid';
+import type { IFieldType } from '../../../../../../../../../../src/plugins/data/common/index_patterns/fields/types';
+import type { EuiTheme } from '../../../../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
+import { withTheme } from '../../../../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
+import type {
   SnapshotCustomAggregation,
   SnapshotCustomMetricInput,
-  SNAPSHOT_CUSTOM_AGGREGATIONS,
-  SnapshotCustomAggregationRT,
 } from '../../../../../../../common/http_api/snapshot_api';
-import { EuiTheme, withTheme } from '../../../../../../../../../../src/plugins/kibana_react/common';
+import {
+  SnapshotCustomAggregationRT,
+  SNAPSHOT_CUSTOM_AGGREGATIONS,
+} from '../../../../../../../common/http_api/snapshot_api';
 
 interface SelectedOption {
   label: string;

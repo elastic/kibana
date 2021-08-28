@@ -4,33 +4,31 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { agentRouteService } from '../../services';
-
+import type { UseRequestConfig } from '../../../../../../src/plugins/es_ui_shared/public/request/use_request';
+import { agentRouteService } from '../../../common/services/routes';
 import type {
-  GetOneAgentResponse,
-  PostAgentUnenrollRequest,
-  PostBulkAgentUnenrollRequest,
-  PostBulkAgentUnenrollResponse,
-  PostAgentUnenrollResponse,
-  PutAgentReassignRequest,
-  PutAgentReassignResponse,
-  PostBulkAgentReassignRequest,
-  PostBulkAgentReassignResponse,
   GetAgentsRequest,
   GetAgentsResponse,
   GetAgentStatusRequest,
   GetAgentStatusResponse,
+  GetOneAgentResponse,
+  PostAgentUnenrollRequest,
+  PostAgentUnenrollResponse,
   PostAgentUpgradeRequest,
-  PostBulkAgentUpgradeRequest,
   PostAgentUpgradeResponse,
+  PostBulkAgentReassignRequest,
+  PostBulkAgentReassignResponse,
+  PostBulkAgentUnenrollRequest,
+  PostBulkAgentUnenrollResponse,
+  PostBulkAgentUpgradeRequest,
   PostBulkAgentUpgradeResponse,
   PostNewAgentActionRequest,
   PostNewAgentActionResponse,
-} from '../../types';
+  PutAgentReassignRequest,
+  PutAgentReassignResponse,
+} from '../../../common/types/rest_spec/agent';
 
-import { useRequest, sendRequest } from './use_request';
-import type { UseRequestConfig } from './use_request';
+import { sendRequest, useRequest } from './use_request';
 
 type RequestOptions = Pick<Partial<UseRequestConfig>, 'pollIntervalMs'>;
 

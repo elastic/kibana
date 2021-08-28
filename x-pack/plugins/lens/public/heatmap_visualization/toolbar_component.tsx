@@ -4,13 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { memo } from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { Position } from '@elastic/charts';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React, { memo } from 'react';
+import { LegendSettingsPopover } from '../shared_components/legend_settings_popover';
 import type { VisualizationToolbarProps } from '../types';
-import { LegendSettingsPopover } from '../shared_components';
 import type { HeatmapVisualizationState } from './types';
 
 const legendOptions: Array<{ id: string; value: 'auto' | 'show' | 'hide'; label: string }> = [

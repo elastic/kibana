@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  SavedObjectsTaggingApiUi,
+import React from 'react';
+import type {
   GetSearchBarFilterOptions,
-} from '../../../../../src/plugins/saved_objects_tagging_oss/public';
-import { ITagsCache } from '../services';
-import { TagSearchBarOption } from '../components';
+  ITagsCache,
+  SavedObjectsTaggingApiUi,
+} from '../../../../../src/plugins/saved_objects_tagging_oss/public/api';
+import { TagSearchBarOption } from '../components/base/tag_searchbar_option';
 import { byNameTagSorter } from '../utils';
 
 export interface BuildGetSearchBarFilterOptions {

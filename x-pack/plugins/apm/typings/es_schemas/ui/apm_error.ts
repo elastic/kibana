@@ -4,9 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { ErrorRaw } from '../raw/error_raw';
-import { Agent } from './fields/agent';
+import type { ErrorRaw } from '../raw/error_raw';
+import type { Agent } from './fields/agent';
 
 export interface APMError extends ErrorRaw {
   agent: Agent;

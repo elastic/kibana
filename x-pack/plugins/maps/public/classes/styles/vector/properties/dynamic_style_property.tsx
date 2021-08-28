@@ -5,46 +5,45 @@
  * 2.0.
  */
 
+import type { FeatureIdentifier } from '@kbn/mapbox-gl';
+import { Map as MbMap } from '@kbn/mapbox-gl';
+import type { Feature, FeatureCollection } from 'geojson';
 import _ from 'lodash';
 import React from 'react';
-import { Feature, FeatureCollection } from 'geojson';
-import type { FeatureIdentifier, Map as MbMap } from '@kbn/mapbox-gl';
-import { AbstractStyleProperty, IStyleProperty } from './style_property';
-import { DEFAULT_SIGMA } from '../vector_style_defaults';
+import type { FieldFormatter, RawValue } from '../../../../../common/constants';
 import {
+  DATA_MAPPING_FUNCTION,
   DEFAULT_PERCENTILES,
   FIELD_ORIGIN,
   MB_LOOKUP_FUNCTION,
   SOURCE_META_DATA_REQUEST_ID,
-  DATA_MAPPING_FUNCTION,
   STYLE_TYPE,
   VECTOR_STYLES,
-  RawValue,
-  FieldFormatter,
 } from '../../../../../common/constants';
-import {
-  CategoricalDataMappingPopover,
-  OrdinalDataMappingPopover,
-} from '../components/data_mapping';
-import {
+import type { StyleMetaData } from '../../../../../common/descriptor_types/data_request_descriptor_types';
+import type { TileMetaFeature } from '../../../../../common/descriptor_types/layer_descriptor_types';
+import type {
   Category,
   CategoryFieldMeta,
   FieldMetaOptions,
   PercentilesFieldMeta,
   RangeFieldMeta,
-  StyleMetaData,
-  TileMetaFeature,
-} from '../../../../../common/descriptor_types';
-import { IField } from '../../../fields/field';
-import { IVectorLayer } from '../../../layers/vector_layer';
-import { InnerJoin } from '../../../joins/inner_join';
-import { IVectorStyle } from '../vector_style';
-import { getComputedFieldName } from '../style_util';
-import { pluckRangeFieldMeta } from '../../../../../common/pluck_range_field_meta';
+} from '../../../../../common/descriptor_types/style_property_descriptor_types';
 import {
   pluckCategoryFieldMeta,
   trimCategories,
 } from '../../../../../common/pluck_category_field_meta';
+import { pluckRangeFieldMeta } from '../../../../../common/pluck_range_field_meta';
+import type { IField } from '../../../fields/field';
+import { InnerJoin } from '../../../joins/inner_join';
+import type { IVectorLayer } from '../../../layers/vector_layer/vector_layer';
+import { CategoricalDataMappingPopover } from '../components/data_mapping/categorical_data_mapping_popover';
+import { OrdinalDataMappingPopover } from '../components/data_mapping/ordinal_data_mapping_popover';
+import { getComputedFieldName } from '../style_util';
+import type { IVectorStyle } from '../vector_style';
+import { DEFAULT_SIGMA } from '../vector_style_defaults';
+import type { IStyleProperty } from './style_property';
+import { AbstractStyleProperty } from './style_property';
 
 export interface IDynamicStyleProperty<T> extends IStyleProperty<T> {
   getFieldMetaOptions(): FieldMetaOptions;

@@ -7,7 +7,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import * as React from 'react';
-import type { CoreSetup, CoreStart } from '../../../core/public';
+import type { CoreSetup, CoreStart } from '../../../core/public/types';
 import type { Plugin } from '../../../core/public/plugins/plugin';
 import type { PluginInitializerContext } from '../../../core/public/plugins/plugin_context';
 import { toMountPoint } from '../../kibana_react/public/util/to_mount_point';

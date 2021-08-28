@@ -4,26 +4,22 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { i18n } from '@kbn/i18n';
-import {
-  PluginInitializerContext,
-  Plugin,
-  CoreSetup,
-  DEFAULT_APP_CATEGORIES,
-} from '../../../../src/core/server';
-import { ObservabilityConfig } from '.';
-import {
-  bootstrapAnnotations,
-  ScopedAnnotationsClientFactory,
-  AnnotationsAPI,
-} from './lib/annotations/bootstrap_annotations';
-import { RuleRegistryPluginSetupContract } from '../../rule_registry/server';
-import { PluginSetupContract as FeaturesSetup } from '../../features/server';
-import { uiSettings } from './ui_settings';
-import { registerRoutes } from './routes/register_routes';
-import { getGlobalObservabilityServerRouteRepository } from './routes/get_global_observability_server_route_repository';
+import type { ObservabilityConfig } from '.';
+import type { CoreSetup } from '../../../../src/core/server';
+import type { Plugin, PluginInitializerContext } from '../../../../src/core/server/plugins/types';
+import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils/default_app_categories';
+import type { PluginSetupContract as FeaturesSetup } from '../../features/server/plugin';
+import type { RuleRegistryPluginSetupContract } from '../../rule_registry/server/plugin';
 import { casesFeatureId, observabilityFeatureId } from '../common';
+import type {
+  AnnotationsAPI,
+  ScopedAnnotationsClientFactory,
+} from './lib/annotations/bootstrap_annotations';
+import { bootstrapAnnotations } from './lib/annotations/bootstrap_annotations';
+import { getGlobalObservabilityServerRouteRepository } from './routes/get_global_observability_server_route_repository';
+import { registerRoutes } from './routes/register_routes';
+import { uiSettings } from './ui_settings';
 
 export type ObservabilityPluginSetup = ReturnType<ObservabilityPlugin['setup']>;
 

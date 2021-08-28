@@ -4,22 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiImage, EuiSpacer, EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
-
 import { i18n } from '@kbn/i18n';
-
+import { FormattedMessage } from '@kbn/i18n/react';
+import React, { memo } from 'react';
 import styled, { useTheme } from 'styled-components';
 
-import type { EuiTheme } from 'src/plugins/kibana_react/common';
-
-import { useLink } from '../../../hooks';
+import type { EuiTheme } from '../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
+import { useLink } from '../../../hooks/use_link';
+import { WithHeaderLayout } from '../../../layouts/with_header';
+import { useLinks } from '../hooks/use_links';
 import type { Section } from '../sections';
-
-import { useLinks } from '../hooks';
-
-import { WithHeaderLayout } from './';
 
 interface Props {
   section?: Section;

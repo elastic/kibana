@@ -5,20 +5,12 @@
  * 2.0.
  */
 
+import type { EuiComboBoxOptionOption, EuiComboBoxProps } from '@elastic/eui';
+import { EuiComboBox, EuiFlexGroup, EuiFlexItem, EuiHighlight, EuiToolTip } from '@elastic/eui';
 import _ from 'lodash';
 import React from 'react';
-
-import {
-  EuiComboBox,
-  EuiComboBoxProps,
-  EuiComboBoxOptionOption,
-  EuiHighlight,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiToolTip,
-} from '@elastic/eui';
-import { IFieldType } from 'src/plugins/data/public';
-import { FieldIcon } from '../../../../../src/plugins/kibana_react/public';
+import type { IFieldType } from '../../../../../src/plugins/data/common/index_patterns/fields/types';
+import { FieldIcon } from '../../../../../src/plugins/kibana_react/public/field_icon/field_icon';
 
 function fieldsToOptions(
   fields?: IFieldType[],

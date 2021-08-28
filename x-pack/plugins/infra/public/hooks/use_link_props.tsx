@@ -4,13 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { useMemo } from 'react';
 import { stringify } from 'query-string';
-import { url as urlUtils } from '../../../../../src/plugins/kibana_utils/public';
+import { useMemo } from 'react';
+import { useKibana } from '../../../../../src/plugins/kibana_react/public/context/context';
+import { url as urlUtils } from '../../../../../src/plugins/kibana_utils/common/url';
+import { useNavigationWarningPrompt } from '../utils/navigation_warning_prompt/context';
 import { usePrefixPathWithBasepath } from './use_prefix_path_with_basepath';
-import { useKibana } from '../../../../../src/plugins/kibana_react/public';
-import { useNavigationWarningPrompt } from '../utils/navigation_warning_prompt';
 
 type Search = Record<string, string | string[]>;
 

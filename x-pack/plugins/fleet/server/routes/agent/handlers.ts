@@ -4,29 +4,28 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { RequestHandler } from 'src/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 
+import type { RequestHandler } from '../../../../../../src/core/server/http/router/router';
 import type {
   GetAgentsResponse,
-  GetOneAgentResponse,
   GetAgentStatusResponse,
-  PutAgentReassignResponse,
+  GetOneAgentResponse,
   PostBulkAgentReassignResponse,
-} from '../../../common/types';
-import type {
-  GetAgentsRequestSchema,
-  GetOneAgentRequestSchema,
-  UpdateAgentRequestSchema,
-  DeleteAgentRequestSchema,
-  GetAgentStatusRequestSchema,
-  PutAgentReassignRequestSchema,
-  PostBulkAgentReassignRequestSchema,
-} from '../../types';
-import { defaultIngestErrorHandler } from '../../errors';
-import { licenseService } from '../../services';
+  PutAgentReassignResponse,
+} from '../../../common/types/rest_spec/agent';
+import { defaultIngestErrorHandler } from '../../errors/handlers';
 import * as AgentService from '../../services/agents';
+import { licenseService } from '../../services/license';
+import type {
+  DeleteAgentRequestSchema,
+  GetAgentsRequestSchema,
+  GetAgentStatusRequestSchema,
+  GetOneAgentRequestSchema,
+  PostBulkAgentReassignRequestSchema,
+  PutAgentReassignRequestSchema,
+  UpdateAgentRequestSchema,
+} from '../../types/rest_spec/agent';
 
 export const getAgentHandler: RequestHandler<
   TypeOf<typeof GetOneAgentRequestSchema.params>

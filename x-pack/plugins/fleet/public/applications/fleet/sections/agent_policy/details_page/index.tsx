@@ -4,44 +4,45 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { useMemo, useState } from 'react';
-import { Redirect, useRouteMatch, Switch, Route, useHistory, useLocation } from 'react-router-dom';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage, FormattedDate } from '@kbn/i18n/react';
 import {
+  EuiButtonEmpty,
+  EuiDescriptionList,
+  EuiDescriptionListDescription,
+  EuiDescriptionListTitle,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIconTip,
-  EuiTitle,
-  EuiText,
-  EuiSpacer,
-  EuiButtonEmpty,
   EuiI18nNumber,
-  EuiDescriptionList,
-  EuiDescriptionListTitle,
-  EuiDescriptionListDescription,
+  EuiIconTip,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 import type { Props as EuiTabProps } from '@elastic/eui/src/components/tabs/tab';
+import { i18n } from '@kbn/i18n';
+import { FormattedDate, FormattedMessage } from '@kbn/i18n/react';
+import React, { useMemo, useState } from 'react';
+import { Redirect, Route, Switch, useHistory, useLocation, useRouteMatch } from 'react-router-dom';
 import styled from 'styled-components';
 
-import type { AgentPolicy, AgentPolicyDetailsDeployAgentAction } from '../../../types';
-import { FLEET_ROUTING_PATHS } from '../../../constants';
-import {
-  AgentPolicyRefreshContext,
-  useGetOneAgentPolicy,
-  useLink,
-  useBreadcrumbs,
-  useStartServices,
-  useFleetStatus,
-  useIntraAppState,
-} from '../../../hooks';
-import { Loading, Error } from '../../../components';
-import { WithHeaderLayout } from '../../../layouts';
-import { LinkedAgentCount, AgentPolicyActionMenu } from '../components';
+import type { AgentPolicy } from '../../../../../../common/types/models/agent_policy';
+import { Error } from '../../../../../components/error';
+import { LinkedAgentCount } from '../../../../../components/linked_agent_count';
+import { Loading } from '../../../../../components/loading';
+import { FLEET_ROUTING_PATHS } from '../../../../../constants/page_paths';
+import { AgentPolicyRefreshContext } from '../../../../../hooks/use_agent_policy_refresh';
+import { useStartServices } from '../../../../../hooks/use_core';
+import { useFleetStatus } from '../../../../../hooks/use_fleet_status';
+import { useIntraAppState } from '../../../../../hooks/use_intra_app_state';
+import { useLink } from '../../../../../hooks/use_link';
+import { useGetOneAgentPolicy } from '../../../../../hooks/use_request/agent_policy';
+import { WithHeaderLayout } from '../../../../../layouts/with_header';
+import type { AgentPolicyDetailsDeployAgentAction } from '../../../../../types/intra_app_route_state';
+import { useBreadcrumbs } from '../../../hooks/use_breadcrumbs';
+import { AgentPolicyActionMenu } from '../components/actions_menu';
 
-import { useGetAgentStatus, AgentStatusRefreshContext } from './hooks';
-import { PackagePoliciesView, SettingsView } from './components';
+import { PackagePoliciesView } from './components/package_policies';
+import { SettingsView } from './components/settings';
+import { AgentStatusRefreshContext, useGetAgentStatus } from './hooks/use_agent_status';
 
 const Divider = styled.div`
   width: 0;

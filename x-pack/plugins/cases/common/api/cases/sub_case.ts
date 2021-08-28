@@ -6,11 +6,10 @@
  */
 
 import * as rt from 'io-ts';
-
 import { NumberFromString } from '../saved_object';
 import { UserRT } from '../user';
 import { CommentResponseRt } from './comment';
-import { CaseStatusRt, CasesStatusResponseRt } from './status';
+import { CasesStatusResponseRt, CaseStatusRt } from './status';
 
 const SubCaseBasicRt = rt.type({
   /**

@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { createTSVBModel } from '../../../create_tsvb_model';
+
 export const awsEC2NetworkTraffic = createTSVBModel(
   'awsEC2NetworkTraffic',
   ['aws.ec2'],

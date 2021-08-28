@@ -5,29 +5,28 @@
  * 2.0.
  */
 
-import './config_panel.scss';
-
-import React, { useMemo, memo } from 'react';
 import { EuiForm } from '@elastic/eui';
 import { mapValues } from 'lodash';
-import { Visualization } from '../../../types';
-import { LayerPanel } from './layer_panel';
-import { trackUiEvent } from '../../../lens_ui_telemetry';
-import { generateId } from '../../../id_generator';
-import { appendLayer } from './layer_actions';
-import { ConfigPanelWrapperProps } from './types';
-import { useFocusUpdate } from './use_focus_update';
+import React, { memo, useMemo } from 'react';
+import { generateId } from '../../../id_generator/id_generator';
+import { trackUiEvent } from '../../../lens_ui_telemetry/factory';
 import {
-  useLensDispatch,
-  updateState,
-  updateDatasourceState,
-  updateVisualizationState,
   setToggleFullscreen,
+  updateDatasourceState,
+  updateState,
+  updateVisualizationState,
+  useLensDispatch,
   useLensSelector,
-  selectVisualization,
-  VisualizationState,
 } from '../../../state_management';
+import { selectVisualization } from '../../../state_management/selectors';
+import type { VisualizationState } from '../../../state_management/types';
+import type { Visualization } from '../../../types';
 import { AddLayerButton } from './add_layer';
+import './config_panel.scss';
+import { appendLayer } from './layer_actions';
+import { LayerPanel } from './layer_panel';
+import type { ConfigPanelWrapperProps } from './types';
+import { useFocusUpdate } from './use_focus_update';
 
 export const ConfigPanelWrapper = memo(function ConfigPanelWrapper(props: ConfigPanelWrapperProps) {
   const visualization = useLensSelector(selectVisualization);

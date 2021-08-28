@@ -7,12 +7,6 @@
 
 import uuid from 'uuid/v4';
 import {
-  AggDescriptor,
-  ColorDynamicOptions,
-  ESTermSourceDescriptor,
-  LayerDescriptor,
-} from '../../../common/descriptor_types';
-import {
   AGG_TYPE,
   COLOR_MAP_TYPE,
   FIELD_ORIGIN,
@@ -20,12 +14,18 @@ import {
   STYLE_TYPE,
   VECTOR_STYLES,
 } from '../../../common/constants';
-import { VectorStyle } from '../styles/vector/vector_style';
-import { EMSFileSource } from '../sources/ems_file_source';
-import { VectorLayer } from './vector_layer';
-import { getDefaultDynamicProperties } from '../styles/vector/vector_style_defaults';
-import { NUMERICAL_COLOR_PALETTES } from '../styles/color_palettes';
+import type { LayerDescriptor } from '../../../common/descriptor_types/layer_descriptor_types';
+import type {
+  AggDescriptor,
+  ESTermSourceDescriptor,
+} from '../../../common/descriptor_types/source_descriptor_types';
+import type { ColorDynamicOptions } from '../../../common/descriptor_types/style_property_descriptor_types';
 import { getJoinAggKey } from '../../../common/get_agg_key';
+import { EMSFileSource } from '../sources/ems_file_source/ems_file_source';
+import { NUMERICAL_COLOR_PALETTES } from '../styles/color_palettes';
+import { VectorStyle } from '../styles/vector/vector_style';
+import { getDefaultDynamicProperties } from '../styles/vector/vector_style_defaults';
+import { VectorLayer } from './vector_layer/vector_layer';
 
 const defaultDynamicProperties = getDefaultDynamicProperties();
 

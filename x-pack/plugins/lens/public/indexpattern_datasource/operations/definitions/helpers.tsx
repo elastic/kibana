@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { i18n } from '@kbn/i18n';
-import { IndexPatternColumn, operationDefinitionMap } from '.';
-import { FieldBasedIndexPatternColumn } from './column_types';
-import { IndexPattern } from '../../types';
+import type { IndexPatternColumn } from '.';
+import { operationDefinitionMap } from '.';
+import type { IndexPattern } from '../../types';
+import type { FieldBasedIndexPatternColumn } from './column_types';
 
 export function getInvalidFieldMessage(
   column: FieldBasedIndexPatternColumn,

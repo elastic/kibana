@@ -4,21 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { FC, useMemo } from 'react';
 import { EuiFlexItem, EuiSpacer, EuiText, htmlIdGenerator } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import type { FC } from 'react';
+import React, { useMemo } from 'react';
 import {
+  COLOR_MAP_TYPE,
   FIELD_ORIGIN,
   SOURCE_TYPES,
   STYLE_TYPE,
-  COLOR_MAP_TYPE,
 } from '../../../../../../../../maps/common/constants';
-import { EMSTermJoinConfig } from '../../../../../../../../maps/public';
-import { VectorLayerDescriptor } from '../../../../../../../../maps/common/descriptor_types';
-import { EmbeddedMapComponent } from '../../../embedded_map';
-import { FieldVisStats } from '../../../../../../../common/types';
+import type { VectorLayerDescriptor } from '../../../../../../../../maps/common/descriptor_types/layer_descriptor_types';
+import type { EMSTermJoinConfig } from '../../../../../../../../maps/public/ems_autosuggest/ems_autosuggest';
+import type { FieldVisStats } from '../../../../../../../common/types/field_request_config';
+import { EmbeddedMapComponent } from '../../../embedded_map/embedded_map';
 
 export const getChoroplethTopValuesLayer = (
   fieldName: string,

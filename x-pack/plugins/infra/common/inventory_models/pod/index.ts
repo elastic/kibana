@@ -4,11 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { i18n } from '@kbn/i18n';
-import { metrics } from './metrics';
-import { InventoryModel } from '../types';
 import { nginx as nginxRequiredMetrics } from '../shared/metrics/required_metrics';
+import type { InventoryModel } from '../types';
+import { metrics } from './metrics';
 
 export const pod: InventoryModel = {
   id: 'pod',

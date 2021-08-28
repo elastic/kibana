@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { CoreSetup, CoreStart } from '../../../core/public';
+import type { CoreSetup, CoreStart } from '../../../core/public/types';
 import type { Plugin } from '../../../core/public/plugins/plugin';
 import type { PluginInitializerContext } from '../../../core/public/plugins/plugin_context';
 import { createStartServicesGetter } from '../../kibana_utils/public/core/create_start_service_getter';

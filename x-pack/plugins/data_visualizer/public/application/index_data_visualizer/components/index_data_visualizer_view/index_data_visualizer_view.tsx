@@ -4,9 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { FC, Fragment, useEffect, useMemo, useState, useCallback, useRef } from 'react';
-import { merge } from 'rxjs';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -19,56 +16,53 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import { EuiTableActionsColumnType } from '@elastic/eui/src/components/basic_table/table_types';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { Required } from 'utility-types';
+import type { EuiTableActionsColumnType } from '@elastic/eui/src/components/basic_table/table_types';
 import { i18n } from '@kbn/i18n';
-import {
-  IndexPatternField,
-  KBN_FIELD_TYPES,
-  UI_SETTINGS,
-  Query,
-  IndexPattern,
-} from '../../../../../../../../src/plugins/data/public';
-import { FullTimeRangeSelector } from '../full_time_range_selector';
-import { usePageUrlState, useUrlState } from '../../../common/util/url_state';
-import {
-  DataVisualizerTable,
-  ItemIdToExpandedRowMap,
-} from '../../../common/components/stats_table';
-import { FieldVisConfig } from '../../../common/components/stats_table/types';
-import type {
-  MetricFieldsStats,
-  TotalFieldsStats,
-} from '../../../common/components/stats_table/components/field_count_stats';
-import { OverallStats } from '../../types/overall_stats';
-import { getActions } from '../../../common/components/field_data_row/action_menu';
+import { FormattedMessage } from '@kbn/i18n/react';
+
+import { KBN_FIELD_TYPES } from '@kbn/field-types';
+import type { FC } from 'react';
+import React, { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { merge } from 'rxjs';
+import type { Required } from 'utility-types';
+import { UI_SETTINGS } from '../../../../../../../../src/plugins/data/common/constants';
+import { IndexPatternField } from '../../../../../../../../src/plugins/data/common/index_patterns/fields/index_pattern_field';
+import { IndexPattern } from '../../../../../../../../src/plugins/data/common/index_patterns/index_patterns/index_pattern';
+import type { Query } from '../../../../../../../../src/plugins/data/public';
+import { JOB_FIELD_TYPES, OMIT_FIELDS } from '../../../../../common/constants';
+import type { SavedSearchSavedObject } from '../../../../../common/types';
+import type { FieldRequestConfig } from '../../../../../common/types/field_request_config';
+import type { JobFieldType } from '../../../../../common/types/job_field_type';
+import { DatePickerWrapper } from '../../../common/components/date_picker_wrapper/date_picker_wrapper';
+import { DocumentCountContent } from '../../../common/components/document_count_content/document_count_content';
 import { IndexBasedDataVisualizerExpandedRow } from '../../../common/components/expanded_row/index_based_expanded_row';
-import { DATA_VISUALIZER_INDEX_VIEWER } from '../../constants/index_data_visualizer_viewer';
-import { DataVisualizerIndexBasedAppState } from '../../types/index_data_visualizer_state';
-import { SEARCH_QUERY_LANGUAGE, SearchQueryLanguage } from '../../types/combined_query';
-import {
-  FieldRequestConfig,
-  JobFieldType,
-  SavedSearchSavedObject,
-} from '../../../../../common/types';
-import { useDataVisualizerKibana } from '../../../kibana_context';
-import { FieldCountPanel } from '../../../common/components/field_count_panel';
-import { DocumentCountContent } from '../../../common/components/document_count_content';
-import { DataLoader } from '../../data_loader/data_loader';
-import { JOB_FIELD_TYPES, OMIT_FIELDS } from '../../../../../common';
-import { useTimefilter } from '../../hooks/use_time_filter';
+import { FieldCountPanel } from '../../../common/components/field_count_panel/field_count_panel';
+import { getActions } from '../../../common/components/field_data_row/action_menu/actions';
+import { HelpMenu } from '../../../common/components/help_menu/help_menu';
+import type { ResultLink } from '../../../common/components/results_links/results_links';
+import type { MetricFieldsStats } from '../../../common/components/stats_table/components/field_count_stats/metric_fields_count';
+import type { TotalFieldsStats } from '../../../common/components/stats_table/components/field_count_stats/total_fields_count';
+import type { ItemIdToExpandedRowMap } from '../../../common/components/stats_table/data_visualizer_stats_table';
+import { DataVisualizerTable } from '../../../common/components/stats_table/data_visualizer_stats_table';
+import type { FieldVisConfig } from '../../../common/components/stats_table/types/field_vis_config';
 import { kbnTypeToJobType } from '../../../common/util/field_types_utils';
-import { SearchPanel } from '../search_panel';
-import { ActionsPanel } from '../actions_panel';
-import { DatePickerWrapper } from '../../../common/components/date_picker_wrapper';
+import { usePageUrlState, useUrlState } from '../../../common/util/url_state';
+import { useDataVisualizerKibana } from '../../../kibana_context';
+import { DATA_VISUALIZER_INDEX_VIEWER } from '../../constants/index_data_visualizer_viewer';
+import { DataLoader } from '../../data_loader/data_loader';
+import { useTimefilter } from '../../hooks/use_time_filter';
 import { dataVisualizerRefresh$ } from '../../services/timefilter_refresh_service';
-import { HelpMenu } from '../../../common/components/help_menu';
 import { TimeBuckets } from '../../services/time_buckets';
-import { extractSearchData } from '../../utils/saved_search_utils';
-import { DataVisualizerIndexPatternManagement } from '../index_pattern_management';
-import { ResultLink } from '../../../common/components/results_links';
+import type { SearchQueryLanguage } from '../../types/combined_query';
+import { SEARCH_QUERY_LANGUAGE } from '../../types/combined_query';
+import type { DataVisualizerIndexBasedAppState } from '../../types/index_data_visualizer_state';
+import type { OverallStats } from '../../types/overall_stats';
 import { extractErrorProperties } from '../../utils/error_utils';
+import { extractSearchData } from '../../utils/saved_search_utils';
+import { ActionsPanel } from '../actions_panel/actions_panel';
+import { FullTimeRangeSelector } from '../full_time_range_selector/full_time_range_selector';
+import { DataVisualizerIndexPatternManagement } from '../index_pattern_management/index_pattern_management';
+import { SearchPanel } from '../search_panel/search_panel';
 
 interface DataVisualizerPageState {
   overallStats: OverallStats;

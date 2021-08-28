@@ -4,37 +4,39 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { Fragment } from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiBadge,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLink,
   EuiProgress,
   EuiScreenReaderOnly,
   EuiText,
   EuiToolTip,
-  EuiLink,
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
-import { getAnalysisType, DataFrameAnalyticsId } from '../../../../common';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+import React, { Fragment } from 'react';
+import type { SpacesPluginStart } from '../../../../../../../../spaces/public/plugin';
+import { ML_PAGES } from '../../../../../../../common/constants/locator';
+import type {
+  DataFrameAnalyticsId,
+  DataFrameAnalyticsStats,
+} from '../../../../../../../common/types/data_frame_analytics';
+import { getAnalysisType } from '../../../../../../../common/util/analytics_utils';
+import { JobSpacesList } from '../../../../../components/job_spaces_list/job_spaces_list';
+import { useMlLink } from '../../../../../contexts/kibana/use_create_url';
+import type { DataFrameAnalyticsListRow } from './common';
 import {
+  DataFrameAnalyticsListColumn,
   getDataFrameAnalyticsProgressPhase,
   isDataFrameAnalyticsFailed,
   isDataFrameAnalyticsRunning,
   isDataFrameAnalyticsStopped,
-  DataFrameAnalyticsListColumn,
-  DataFrameAnalyticsListRow,
-  DataFrameAnalyticsStats,
 } from './common';
 import { useActions } from './use_actions';
-import { useMlLink } from '../../../../../contexts/kibana';
-import { ML_PAGES } from '../../../../../../../common/constants/locator';
-import type { SpacesPluginStart } from '../../../../../../../../spaces/public';
-import { JobSpacesList } from '../../../../../components/job_spaces_list';
 
 enum TASK_STATE_COLOR {
   analyzing = 'primary',

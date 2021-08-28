@@ -8,17 +8,18 @@
 import DateMath from '@elastic/datemath';
 import { isEqual } from 'lodash';
 import { useEffect, useState } from 'react';
-import { IIndexPattern } from 'src/plugins/data/public';
-import { MetricsSourceConfigurationProperties } from '../../../../../common/metrics_sources';
-import {
-  MetricsExplorerResponse,
-  metricsExplorerResponseRT,
-} from '../../../../../common/http_api/metrics_explorer';
-import { convertKueryToElasticSearchQuery } from '../../../../utils/kuery';
-import { MetricsExplorerOptions, MetricsExplorerTimeOptions } from './use_metrics_explorer_options';
-import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
+import type { IIndexPattern } from '../../../../../../../../src/plugins/data/common/index_patterns/types';
+import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public/context/context';
+import type { MetricsExplorerResponse } from '../../../../../common/http_api/metrics_explorer';
+import { metricsExplorerResponseRT } from '../../../../../common/http_api/metrics_explorer';
+import type { MetricsSourceConfigurationProperties } from '../../../../../common/metrics_sources';
 import { decodeOrThrow } from '../../../../../common/runtime_types';
+import { convertKueryToElasticSearchQuery } from '../../../../utils/kuery';
 import { useTrackedPromise } from '../../../../utils/use_tracked_promise';
+import type {
+  MetricsExplorerOptions,
+  MetricsExplorerTimeOptions,
+} from './use_metrics_explorer_options';
 
 function isSameOptions(current: MetricsExplorerOptions, next: MetricsExplorerOptions) {
   return isEqual(current, next);

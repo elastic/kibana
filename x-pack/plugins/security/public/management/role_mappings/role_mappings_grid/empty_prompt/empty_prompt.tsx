@@ -4,14 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { EuiEmptyPrompt } from '@elastic/eui';
 import React, { Fragment } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
-import type { ScopedHistory } from 'src/core/public';
 
-import { CreateRoleMappingButton } from '../create_role_mapping_button';
+import type { ScopedHistory } from '../../../../../../../../src/core/public/application/scoped_history';
+import { CreateRoleMappingButton } from '../create_role_mapping_button/create_role_mapping_button';
 
 interface EmptyPromptProps {
   history: ScopedHistory;

@@ -4,13 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { SavedObjectsServiceSetup, SavedObjectsTypeMappingDefinition } from 'kibana/server';
 import { estypes } from '@elastic/elasticsearch';
+import type { SavedObjectsTypeMappingDefinition } from '../../../../../src/core/server/saved_objects/mappings/types';
+import type { SavedObjectsServiceSetup } from '../../../../../src/core/server/saved_objects/saved_objects_service';
+import type { TaskManagerConfig } from '../config';
+import { getOldestIdleActionTask } from '../queries/oldest_idle_action_task';
 import mappings from './mappings.json';
 import { migrations } from './migrations';
-import { TaskManagerConfig } from '../config.js';
-import { getOldestIdleActionTask } from '../queries/oldest_idle_action_task';
 
 export function setupSavedObjects(
   savedObjects: SavedObjectsServiceSetup,

@@ -5,54 +5,53 @@
  * 2.0.
  */
 
-import type { AlertConsumers as AlertConsumersTyped } from '@kbn/rule-data-utils';
+import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiProgress } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { AlertConsumers as AlertConsumersTyped } from '@kbn/rule-data-utils';
 // @ts-expect-error
 import { AlertConsumers as AlertConsumersNonTyped } from '@kbn/rule-data-utils/target_node/alerts_as_data_rbac';
-import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiProgress } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React, { useEffect, useMemo, useState } from 'react';
-import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
-
-import { FormattedMessage } from '@kbn/i18n/react';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
-import { Direction, EntityType } from '../../../../common/search_strategy';
-import type { DocValueFields } from '../../../../common/search_strategy';
-import type { CoreStart } from '../../../../../../../src/core/public';
+import styled from 'styled-components';
+import type { CoreStart } from '../../../../../../../src/core/public/types';
+import type { Filter } from '../../../../../../../src/plugins/data/common/es_query';
+import type { IIndexPattern } from '../../../../../../../src/plugins/data/common/index_patterns/types';
+import type { Query } from '../../../../../../../src/plugins/data/public';
+import { esQuery } from '../../../../../../../src/plugins/data/public/deprecated';
+import type { DataPublicPluginStart } from '../../../../../../../src/plugins/data/public/types';
+import { useKibana } from '../../../../../../../src/plugins/kibana_react/public/context/context';
+import type { DocValueFields } from '../../../../common/search_strategy/common';
+import { Direction } from '../../../../common/search_strategy/common';
 import type { BrowserFields } from '../../../../common/search_strategy/index_fields';
-import { TGridCellAction, TimelineId, TimelineTabs } from '../../../../common/types/timeline';
-
+import { EntityType } from '../../../../common/search_strategy/timeline/events';
+import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
+import type { AlertStatus, ControlColumnProps } from '../../../../common/types/timeline/actions';
+import type { CellValueElementProps } from '../../../../common/types/timeline/cells';
 import type {
-  CellValueElementProps,
   ColumnHeaderOptions,
-  ControlColumnProps,
-  DataProvider,
-  RowRenderer,
-  AlertStatus,
-} from '../../../../common/types/timeline';
-import {
-  esQuery,
-  Filter,
-  IIndexPattern,
-  Query,
-  DataPublicPluginStart,
-} from '../../../../../../../src/plugins/data/public';
+  TGridCellAction,
+} from '../../../../common/types/timeline/columns';
+import type { DataProvider } from '../../../../common/types/timeline/data_provider';
+import type { RowRenderer } from '../../../../common/types/timeline/rows';
+import { useTimelineEvents } from '../../../container';
 import { useDeepEqualSelector } from '../../../hooks/use_selector';
+import * as tGridActions from '../../../store/t_grid/actions';
+import * as tGridSelectors from '../../../store/t_grid/selectors';
+import { InspectButton, InspectButtonContainer } from '../../inspect';
+import { StatefulBody } from '../body';
 import { defaultHeaders } from '../body/column_headers/default_headers';
+import type { Sort } from '../body/sort';
+import type { ViewSelection } from '../event_rendered_view/selector';
+import { SummaryViewSelector } from '../event_rendered_view/selector';
+import { Footer, footerHeight } from '../footer';
 import {
-  calculateTotalPages,
   buildCombinedQuery,
+  calculateTotalPages,
   getCombinedFilterQuery,
   resolverIsShowing,
 } from '../helpers';
-import { tGridActions, tGridSelectors } from '../../../store/t_grid';
-import { useTimelineEvents } from '../../../container';
-import { StatefulBody } from '../body';
-import { Footer, footerHeight } from '../footer';
 import { SELECTOR_TIMELINE_GLOBAL_CONTAINER, UpdatedFlexGroup, UpdatedFlexItem } from '../styles';
-import { Sort } from '../body/sort';
-import { InspectButton, InspectButtonContainer } from '../../inspect';
-import { SummaryViewSelector, ViewSelection } from '../event_rendered_view/selector';
 
 const AlertConsumers: typeof AlertConsumersTyped = AlertConsumersNonTyped;
 

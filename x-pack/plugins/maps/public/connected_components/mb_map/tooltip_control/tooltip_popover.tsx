@@ -4,18 +4,22 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { Component, RefObject } from 'react';
 import { EuiPopover, EuiText } from '@elastic/eui';
-import type { Map as MbMap } from '@kbn/mapbox-gl';
-import { GeoJsonProperties, Geometry } from 'geojson';
-import { Filter } from 'src/plugins/data/public';
-import { ActionExecutionContext, Action } from 'src/plugins/ui_actions/public';
-import { FeaturesTooltip } from './features_tooltip';
-import { LAT_INDEX, LON_INDEX, RawValue } from '../../../../common/constants';
-import { IVectorLayer } from '../../../classes/layers/vector_layer';
-import { TooltipFeature } from '../../../../common/descriptor_types';
-import { RenderToolTipContent } from '../../../classes/tooltips/tooltip_property';
+import { Map as MbMap } from '@kbn/mapbox-gl';
+import type { GeoJsonProperties, Geometry } from 'geojson';
+import type { RefObject } from 'react';
+import React, { Component } from 'react';
+import type { Filter } from '../../../../../../../src/plugins/data/common/es_query';
+import type {
+  Action,
+  ActionExecutionContext,
+} from '../../../../../../../src/plugins/ui_actions/public/actions/action';
+import type { RawValue } from '../../../../common/constants';
+import { LAT_INDEX, LON_INDEX } from '../../../../common/constants';
+import type { TooltipFeature } from '../../../../common/descriptor_types/map_descriptor';
+import type { IVectorLayer } from '../../../classes/layers/vector_layer/vector_layer';
+import type { RenderToolTipContent } from '../../../classes/tooltips/tooltip_property';
+import { FeaturesTooltip } from './features_tooltip/features_tooltip';
 
 const noop = () => {};
 

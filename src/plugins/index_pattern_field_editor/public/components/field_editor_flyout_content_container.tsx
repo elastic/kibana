@@ -8,7 +8,7 @@
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo, useState } from 'react';
-import type { CoreStart } from '../../../../core/public';
+import type { CoreStart } from '../../../../core/public/types';
 import type { DocLinksStart } from '../../../../core/public/doc_links/doc_links_service';
 import type { NotificationsStart } from '../../../../core/public/notifications/notifications_service';
 import { IndexPatternField } from '../../../data/common/index_patterns/fields/index_pattern_field';

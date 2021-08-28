@@ -4,15 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { IndexPattern } from '../../../../../../../../../src/plugins/data/public';
-import { IndexPatternTitle } from '../../../../../../common/types/kibana';
-import { CategorizationJobCreator } from '../job_creator';
-import { ml } from '../../../../services/ml_api_service';
+import { IndexPattern } from '../../../../../../../../../src/plugins/data/common/index_patterns/index_patterns/index_pattern';
 import {
-  NUMBER_OF_CATEGORY_EXAMPLES,
   CATEGORY_EXAMPLES_VALIDATION_STATUS,
+  NUMBER_OF_CATEGORY_EXAMPLES,
 } from '../../../../../../common/constants/categorization_job';
+import type { IndexPatternTitle } from '../../../../../../common/types/kibana';
+import { ml } from '../../../../services/ml_api_service';
+import { CategorizationJobCreator } from '../job_creator/categorization_job_creator';
 
 export class CategorizationExamplesLoader {
   private _jobCreator: CategorizationJobCreator;

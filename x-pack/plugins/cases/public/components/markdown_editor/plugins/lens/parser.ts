@@ -4,9 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { Plugin } from 'unified';
-import { RemarkTokenizer } from '@elastic/eui';
+import type { RemarkTokenizer } from '@elastic/eui';
+import type { Plugin } from 'unified';
 import { ID } from './constants';
 
 export const LensParser: Plugin = function () {

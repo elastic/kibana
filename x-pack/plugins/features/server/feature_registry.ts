@@ -4,17 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { cloneDeep, uniq } from 'lodash';
-import { ILicense } from '../../licensing/server';
-import {
-  KibanaFeatureConfig,
-  KibanaFeature,
-  FeatureKibanaPrivileges,
-  ElasticsearchFeatureConfig,
-  ElasticsearchFeature,
-} from '../common';
-import { validateKibanaFeature, validateElasticsearchFeature } from './feature_schema';
+import type { ILicense } from '../../licensing/common/types';
+import type { ElasticsearchFeatureConfig } from '../common/elasticsearch_feature';
+import { ElasticsearchFeature } from '../common/elasticsearch_feature';
+import type { FeatureKibanaPrivileges } from '../common/feature_kibana_privileges';
+import type { KibanaFeatureConfig } from '../common/kibana_feature';
+import { KibanaFeature } from '../common/kibana_feature';
+import { validateElasticsearchFeature, validateKibanaFeature } from './feature_schema';
 
 export class FeatureRegistry {
   private locked = false;

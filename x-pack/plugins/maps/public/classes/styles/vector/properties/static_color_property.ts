@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { Map as MbMap } from '@kbn/mapbox-gl';
+import { Map as MbMap } from '@kbn/mapbox-gl';
+import type { ColorStaticOptions } from '../../../../../common/descriptor_types/style_property_descriptor_types';
 import { StaticStyleProperty } from './static_style_property';
-import { ColorStaticOptions } from '../../../../../common/descriptor_types';
 
 export class StaticColorProperty extends StaticStyleProperty<ColorStaticOptions> {
   syncCircleColorWithMb(mbLayerId: string, mbMap: MbMap, alpha: number) {

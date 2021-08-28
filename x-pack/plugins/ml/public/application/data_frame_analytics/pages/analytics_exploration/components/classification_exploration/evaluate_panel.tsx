@@ -5,53 +5,49 @@
  * 2.0.
  */
 
-import './_classification_exploration.scss';
-
-import React, { FC, useState, useEffect } from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import type { EuiDataGridCellValueElementProps, EuiDataGridPopoverContents } from '@elastic/eui';
 import {
   EuiButtonEmpty,
   EuiDataGrid,
-  EuiDataGridCellValueElementProps,
-  EuiDataGridPopoverContents,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { useMlKibana } from '../../../../../contexts/kibana';
-
-// Separate imports for lazy loadable VegaChart and related code
-import { VegaChart } from '../../../../../components/vega_chart';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+import type { FC } from 'react';
+import React, { useEffect, useState } from 'react';
+import type {
+  DataFrameAnalyticsConfig,
+  DataFrameTaskStateType,
+} from '../../../../../../../common/types/data_frame_analytics';
+import { getDependentVar } from '../../../../../../../common/util/analytics_utils';
+import { VegaChart } from '../../../../../components/vega_chart/vega_chart';
 import { VegaChartLoading } from '../../../../../components/vega_chart/vega_chart_loading';
-
-import { ErrorCallout } from '../error_callout';
-import { getDependentVar, DataFrameAnalyticsConfig } from '../../../../common';
-import { DataFrameTaskStateType } from '../../../analytics_management/components/analytics_list/common';
-import { ResultsSearchQuery } from '../../../../common/analytics';
-
-import { ExpandableSection, HEADER_ITEMS_LOADING } from '../expandable_section';
-import { EvaluateStat } from './evaluate_stat';
-import { EvaluationQualityMetricsTable } from './evaluation_quality_metrics_table';
-
-import { getRocCurveChartVegaLiteSpec } from './get_roc_curve_chart_vega_lite_spec';
-
+import { useMlKibana } from '../../../../../contexts/kibana/kibana_context';
+import type { ResultsSearchQuery } from '../../../../common/analytics';
+import { ErrorCallout } from '../error_callout/error_callout';
+import { ExpandableSection, HEADER_ITEMS_LOADING } from '../expandable_section/expandable_section';
+import type { ConfusionMatrixColumn, ConfusionMatrixColumnData } from './column_data';
 import {
+  ACTUAL_CLASS_ID,
   getColumnData,
   getTrailingControlColumns,
-  ConfusionMatrixColumn,
-  ConfusionMatrixColumnData,
-  ACTUAL_CLASS_ID,
   MAX_COLUMNS,
 } from './column_data';
-
-import { isTrainingFilter } from './is_training_filter';
-import { useRocCurve } from './use_roc_curve';
-import { useConfusionMatrix } from './use_confusion_matrix';
 import { MulticlassConfusionMatrixHelpPopover } from './confusion_matrix_help_popover';
+import { EvaluateStat } from './evaluate_stat';
+import { EvaluationQualityMetricsTable } from './evaluation_quality_metrics_table';
+import { getRocCurveChartVegaLiteSpec } from './get_roc_curve_chart_vega_lite_spec';
+import { isTrainingFilter } from './is_training_filter';
 import { RocCurveHelpPopover } from './roc_curve_help_popover';
+import { useConfusionMatrix } from './use_confusion_matrix';
+import { useRocCurve } from './use_roc_curve';
+import './_classification_exploration.scss';
+
+// Separate imports for lazy loadable VegaChart and related code
 
 export interface EvaluatePanelProps {
   jobConfig: DataFrameAnalyticsConfig;

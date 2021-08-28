@@ -4,20 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { scaleLinear } from 'd3-scale';
 import * as React from 'react';
-
-import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
-import { LogEntryTime } from '../../../../common/log_entry';
+import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
+import type { LogEntriesSummaryBucket } from '../../../../common/http_api/log_entries/summary';
+import type { LogEntriesSummaryHighlightsBucket } from '../../../../common/http_api/log_entries/summary_highlights';
+import type { LogEntryTime } from '../../../../common/log_entry/log_entry';
 import { DensityChart } from './density_chart';
 import { HighlightedInterval } from './highlighted_interval';
 import { SearchMarkers } from './search_markers';
 import { TimeRuler } from './time_ruler';
-import {
-  LogEntriesSummaryBucket,
-  LogEntriesSummaryHighlightsBucket,
-} from '../../../../common/http_api';
 
 interface Interval {
   end: number;

@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { i18n } from '@kbn/i18n';
-import { ChromeBreadcrumb } from 'kibana/public';
-import { MouseEvent, useEffect } from 'react';
+import type { MouseEvent } from 'react';
+import { useEffect } from 'react';
+import type { ChromeBreadcrumb } from '../../../../../src/core/public/chrome/types';
 import { useKibana } from '../utils/kibana_react';
 import { useQueryParams } from './use_query_params';
 

@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import type { EuiStepProps } from '@elastic/eui';
 import type { ComponentType, LazyExoticComponent } from 'react';
 
-import type { NewPackagePolicy, PackageInfo, PackagePolicy } from './index';
+import type { PackageInfo } from '../../common/types/models/epm';
+import type { NewPackagePolicy, PackagePolicy } from '../../common/types/models/package_policy';
 
 /** Register a Fleet UI extension */
 export type UIExtensionRegistrationCallback = (extensionPoint: UIExtensionPoint) => void;

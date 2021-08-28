@@ -5,43 +5,45 @@
  * 2.0.
  */
 
-import './chart_switch.scss';
-import React, { useState, useMemo, memo } from 'react';
+import type { EuiSelectableOption } from '@elastic/eui';
 import {
-  EuiIcon,
-  EuiPopover,
-  EuiPopoverTitle,
+  EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSelectable,
+  EuiIcon,
   EuiIconTip,
-  EuiSelectableOption,
-  EuiBadge,
+  EuiPopover,
+  EuiPopoverTitle,
+  EuiSelectable,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import {
-  Visualization,
-  FramePublicAPI,
-  VisualizationType,
-  VisualizationMap,
-  DatasourceMap,
-} from '../../../types';
-import { getSuggestions, switchToSuggestion, Suggestion } from '../suggestion_helpers';
-import { trackUiEvent } from '../../../lens_ui_telemetry';
-import { ToolbarButton } from '../../../../../../../src/plugins/kibana_react/public';
+import React, { memo, useMemo, useState } from 'react';
+import { ToolbarButton } from '../../../../../../../src/plugins/kibana_react/public/toolbar_button/toolbar_button';
+import { generateId } from '../../../id_generator/id_generator';
+import { trackUiEvent } from '../../../lens_ui_telemetry/factory';
 import {
   updateLayer,
   updateVisualizationState,
   useLensDispatch,
   useLensSelector,
-  VisualizationState,
-  DatasourceStates,
-  selectActiveDatasourceId,
-  selectVisualization,
-  selectDatasourceStates,
 } from '../../../state_management';
-import { generateId } from '../../../id_generator/id_generator';
+import {
+  selectActiveDatasourceId,
+  selectDatasourceStates,
+  selectVisualization,
+} from '../../../state_management/selectors';
+import type { DatasourceStates, VisualizationState } from '../../../state_management/types';
+import type {
+  DatasourceMap,
+  FramePublicAPI,
+  Visualization,
+  VisualizationMap,
+  VisualizationType,
+} from '../../../types';
+import type { Suggestion } from '../suggestion_helpers';
+import { getSuggestions, switchToSuggestion } from '../suggestion_helpers';
+import './chart_switch.scss';
 
 interface VisualizationSelection {
   visualizationId: string;

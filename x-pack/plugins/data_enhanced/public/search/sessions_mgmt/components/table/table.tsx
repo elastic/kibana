@@ -4,21 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { EuiButton, EuiInMemoryTable, EuiSearchBarProps } from '@elastic/eui';
+import type { EuiSearchBarProps } from '@elastic/eui';
+import { EuiButton, EuiInMemoryTable } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { CoreStart } from 'kibana/public';
 import moment from 'moment';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import useInterval from 'react-use/lib/useInterval';
-import { TableText } from '../';
-import { IManagementSectionsPluginsSetup, SessionsConfigSchema } from '../..';
-import { SEARCH_SESSIONS_TABLE_ID } from '../../../../../../../../src/plugins/data/common/';
+import { TableText } from '..';
+import type { IManagementSectionsPluginsSetup, SessionsConfigSchema } from '../..';
+import type { CoreStart } from '../../../../../../../../src/core/public/types';
+import { SEARCH_SESSIONS_TABLE_ID } from '../../../../../../../../src/plugins/data/common/search/session';
 import { SearchSessionsMgmtAPI } from '../../lib/api';
 import { getColumns } from '../../lib/get_columns';
-import { UISession } from '../../types';
-import { OnActionComplete } from '../actions';
+import type { UISession } from '../../types';
+import type { OnActionComplete } from '../actions/types';
 import { getAppFilter } from './app_filter';
 import { getStatusFilter } from './status_filter';
 

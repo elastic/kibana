@@ -4,16 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-// Maximum number of examples to obtain for text type fields.
-import { CoreSetup } from 'kibana/public';
 import { estypes } from '@elastic/elasticsearch';
 import { i18n } from '@kbn/i18n';
-import { IndexPattern } from '../../../../../../../src/plugins/data/common/index_patterns/index_patterns';
+import type { CoreSetup } from '../../../../../../../src/core/public/types';
+import { IndexPattern } from '../../../../../../../src/plugins/data/common/index_patterns/index_patterns/index_pattern';
 import { NON_AGGREGATABLE_FIELD_TYPES, OMIT_FIELDS } from '../../../../common/constants';
-import { FieldRequestConfig } from '../../../../common/types';
+import type { FieldRequestConfig } from '../../../../common/types/field_request_config';
 import { getVisualizerFieldStats, getVisualizerOverallStats } from '../services/visualizer_stats';
 
+// Maximum number of examples to obtain for text type fields.
 type IndexPatternTitle = string;
 type SavedSearchQuery = Record<string, any> | null | undefined;
 

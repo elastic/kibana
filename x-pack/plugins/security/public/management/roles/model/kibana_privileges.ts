@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { KibanaFeature } from '../../../../../features/common';
-import type { RawKibanaPrivileges, RoleKibanaPrivilege } from '../../../../common/model';
+import type { KibanaFeature } from '../../../../../features/common/kibana_feature';
+import type { RawKibanaPrivileges } from '../../../../common/model/raw_kibana_privileges';
+import type { RoleKibanaPrivilege } from '../../../../common/model/role';
 import { isGlobalPrivilegeDefinition } from '../edit_role/privilege_utils';
 import { KibanaPrivilege } from './kibana_privilege';
 import { PrivilegeCollection } from './privilege_collection';

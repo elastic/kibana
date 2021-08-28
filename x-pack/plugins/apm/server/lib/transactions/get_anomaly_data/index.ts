@@ -4,18 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { Logger } from '@kbn/logging';
 import { compact } from 'lodash';
-import { Logger } from 'src/core/server';
+import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
+import { ANOMALY_THRESHOLD } from '../../../../common/ml_constants';
 import { isFiniteNumber } from '../../../../common/utils/is_finite_number';
 import { maybe } from '../../../../common/utils/maybe';
-import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
-import { getBucketSize } from '../../helpers/get_bucket_size';
-import { Setup, SetupTimeRange } from '../../helpers/setup_request';
-import { anomalySeriesFetcher } from './fetcher';
-import { getMLJobIds } from '../../service_map/get_service_anomalies';
-import { ANOMALY_THRESHOLD } from '../../../../common/ml_constants';
 import { withApmSpan } from '../../../utils/with_apm_span';
+import { getBucketSize } from '../../helpers/get_bucket_size';
+import type { Setup, SetupTimeRange } from '../../helpers/setup_request';
+import { getMLJobIds } from '../../service_map/get_service_anomalies';
+import { anomalySeriesFetcher } from './fetcher';
 
 export async function getAnomalySeries({
   environment,

@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { IScopedClusterClient } from 'kibana/server';
+import type { IScopedClusterClient } from '../../../../../../src/core/server/elasticsearch/client/scoped_cluster_client';
 import { ML_NOTIFICATION_INDEX_PATTERN } from '../../../common/constants/index_patterns';
-import { JobMessage } from '../../../common/types/audit_message';
+import type { JobMessage } from '../../../common/types/audit_message';
 
 const SIZE = 50;
 

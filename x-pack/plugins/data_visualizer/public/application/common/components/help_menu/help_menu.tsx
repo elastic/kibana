@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { FC, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
+import type { FC } from 'react';
+import React, { useEffect } from 'react';
 import { useDataVisualizerKibana } from '../../../kibana_context';
 
 interface HelpMenuProps {

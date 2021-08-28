@@ -4,18 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { memo, useState, useMemo } from 'react';
-import { Switch, Route, useLocation, useHistory } from 'react-router-dom';
-import semverLt from 'semver/functions/lt';
 import { i18n } from '@kbn/i18n';
+import React, { memo, useMemo, useState } from 'react';
+import { Route, Switch, useHistory, useLocation } from 'react-router-dom';
+import semverLt from 'semver/functions/lt';
 
-import { installationStatuses } from '../../../../../../../common/constants';
-import { INTEGRATIONS_ROUTING_PATHS } from '../../../../constants';
-import { useGetCategories, useGetPackages, useBreadcrumbs } from '../../../../hooks';
-import { doesPackageHaveIntegrations } from '../../../../services';
-import { DefaultLayout } from '../../../../layouts';
-import type { CategorySummaryItem, PackageList } from '../../../../types';
+import { installationStatuses } from '../../../../../../../common/constants/epm';
+import { doesPackageHaveIntegrations } from '../../../../../../../common/services/packages_with_integrations';
+import type {
+  CategorySummaryItem,
+  PackageList,
+} from '../../../../../../../common/types/models/epm';
+import { INTEGRATIONS_ROUTING_PATHS } from '../../../../../../constants/page_paths';
+import { useGetCategories, useGetPackages } from '../../../../../../hooks/use_request/epm';
+import { useBreadcrumbs } from '../../../../hooks/use_breadcrumbs';
+import { DefaultLayout } from '../../../../layouts/default';
 import { PackageListGrid } from '../../components/package_list_grid';
 
 import { CategoryFacets } from './category_facets';

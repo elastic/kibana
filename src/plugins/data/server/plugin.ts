@@ -8,7 +8,7 @@
 import type { Logger } from '@kbn/logging';
 import type { CoreSetup, CoreStart } from '../../../core/server';
 import type { Plugin, PluginInitializerContext } from '../../../core/server/plugins/types';
-import type { BfetchServerSetup } from '../../bfetch/server/plugin';
+import type { BfetchServerSetup } from '../../bfetch/server/types';
 import type { ExpressionsServerSetup } from '../../expressions/server/plugin';
 import type { FieldFormatsSetup, FieldFormatsStart } from '../../field_formats/server/types';
 import type { UsageCollectionSetup } from '../../usage_collection/server/plugin';

@@ -4,28 +4,28 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { memo, useCallback, useMemo, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
 import {
+  EuiDescriptionList,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLink,
+  EuiNotificationBadge,
+  EuiPortal,
   EuiText,
   EuiTextColor,
-  EuiDescriptionList,
-  EuiNotificationBadge,
-  EuiLink,
-  EuiPortal,
 } from '@elastic/eui';
 import type { EuiDescriptionListProps } from '@elastic/eui/src/components/description_list/description_list';
+import { FormattedMessage } from '@kbn/i18n/react';
+import React, { memo, useCallback, useMemo, useState } from 'react';
 
+import { entries } from '../../../../../../../../common/types';
 import type {
-  PackageInfo,
-  PackageSpecCategory,
   AssetTypeToParts,
-  KibanaAssetType,
-} from '../../../../../types';
-import { entries } from '../../../../../types';
-import { useGetCategories } from '../../../../../hooks';
+  PackageInfo,
+} from '../../../../../../../../common/types/models/epm';
+import type { KibanaAssetType } from '../../../../../../../../common/types/models/epm';
+import type { PackageSpecCategory } from '../../../../../../../../common/types/models/package_spec';
+import { useGetCategories } from '../../../../../../../hooks/use_request/epm';
 import { AssetTitleMap, DisplayedAssets, ServiceTitleMap } from '../../../constants';
 
 import { NoticeModal } from './notice_modal';

@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { flatten, uniq } from 'lodash';
 
-import type { FeatureKibanaPrivileges } from '../../../../../features/server';
+import type { FeatureKibanaPrivileges } from '../../../../../features/common/feature_kibana_privileges';
 import { BaseFeaturePrivilegeBuilder } from './feature_privilege_builder';
 
 const readOperations: string[] = [

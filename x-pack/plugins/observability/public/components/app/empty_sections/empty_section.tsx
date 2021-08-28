@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { EuiButton, EuiEmptyPrompt, EuiText } from '@elastic/eui';
 import React from 'react';
-import { ISection } from '../../../typings/section';
+import type { ISection } from '../../../typings/section';
 
 interface Props {
   section: ISection;

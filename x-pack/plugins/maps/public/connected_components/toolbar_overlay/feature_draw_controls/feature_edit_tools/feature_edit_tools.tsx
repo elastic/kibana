@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiButtonIcon, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { TrackApplicationView } from '../../../../../../../../src/plugins/usage_collection/public';
+import React from 'react';
+import { TrackApplicationView } from '../../../../../../../../src/plugins/usage_collection/public/components/track_application_view/track_application_view';
 import { DRAW_SHAPE } from '../../../../../common/constants';
 import { VectorCircleIcon } from '../../icons/vector_circle_icon';
 import { VectorLineIcon } from '../../icons/vector_line_icon';

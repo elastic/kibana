@@ -4,14 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { i18n } from '@kbn/i18n';
-import uuid from 'uuid/v4';
+import type { GeoJsonProperties, Geometry, Position } from 'geojson';
 import React from 'react';
-import { GeoJsonProperties, Geometry, Position } from 'geojson';
-import { AbstractSource, ImmutableSourceProperty, SourceEditorArgs } from '../source';
-import { BoundsFilters, GeoJsonWithMeta } from '../vector_source';
-import { ITiledSingleLayerVectorSource } from '../tiled_single_layer_vector_source';
+import uuid from 'uuid/v4';
+import type { Adapters } from '../../../../../../../src/plugins/inspector/common/adapters/types';
 import {
   FIELD_ORIGIN,
   MAX_ZOOM,
@@ -19,19 +16,25 @@ import {
   SOURCE_TYPES,
   VECTOR_SHAPE_TYPE,
 } from '../../../../common/constants';
-import { registerSource } from '../source_registry';
-import { getDataSourceLabel, getUrlLabel } from '../../../../common/i18n_getters';
-import {
-  MapExtent,
+import type { VectorSourceSyncMeta } from '../../../../common/descriptor_types/data_request_descriptor_types';
+import type { MapExtent } from '../../../../common/descriptor_types/map_descriptor';
+import type {
   MVTFieldDescriptor,
   TiledSingleLayerVectorSourceDescriptor,
-  VectorSourceSyncMeta,
-} from '../../../../common/descriptor_types';
+} from '../../../../common/descriptor_types/source_descriptor_types';
+import { getDataSourceLabel, getUrlLabel } from '../../../../common/i18n_getters';
 import { MVTField } from '../../fields/mvt_field';
+import type { ITooltipProperty } from '../../tooltips/tooltip_property';
+import { TooltipProperty } from '../../tooltips/tooltip_property';
+import type { ImmutableSourceProperty, SourceEditorArgs } from '../source';
+import { AbstractSource } from '../source';
+import { registerSource } from '../source_registry';
+import type {
+  ITiledSingleLayerMvtParams,
+  ITiledSingleLayerVectorSource,
+} from '../tiled_single_layer_vector_source/tiled_single_layer_vector_source';
+import type { BoundsFilters, GeoJsonWithMeta } from '../vector_source/vector_source';
 import { UpdateSourceEditor } from './update_source_editor';
-import { ITooltipProperty, TooltipProperty } from '../../tooltips/tooltip_property';
-import { Adapters } from '../../../../../../../src/plugins/inspector/common/adapters';
-import { ITiledSingleLayerMvtParams } from '../tiled_single_layer_vector_source/tiled_single_layer_vector_source';
 
 export const sourceTitle = i18n.translate(
   'xpack.maps.source.MVTSingleLayerVectorSource.sourceTitle',

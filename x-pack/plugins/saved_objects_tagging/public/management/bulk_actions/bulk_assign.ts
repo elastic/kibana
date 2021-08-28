@@ -4,14 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { i18n } from '@kbn/i18n';
 import { from } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { OverlayStart, NotificationsStart } from 'src/core/public';
-import { i18n } from '@kbn/i18n';
-import { ITagsCache, ITagAssignmentService } from '../../services';
-import { TagBulkAction } from '../types';
-import { getAssignFlyoutOpener } from '../../components/assign_flyout';
+import type { NotificationsStart } from '../../../../../../src/core/public/notifications/notifications_service';
+import type { OverlayStart } from '../../../../../../src/core/public/overlays/overlay_service';
+import type { ITagsCache } from '../../../../../../src/plugins/saved_objects_tagging_oss/public/api';
+import { getAssignFlyoutOpener } from '../../components/assign_flyout/open_assign_flyout';
+import type { ITagAssignmentService } from '../../services/assignments/assignment_service';
+import type { TagBulkAction } from '../types';
 
 interface GetBulkAssignActionOptions {
   overlays: OverlayStart;

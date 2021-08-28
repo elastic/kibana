@@ -6,15 +6,16 @@
  */
 
 import * as t from 'io-ts';
+import { environmentRt } from '../../common/environment_rt';
+import { getSearchAggregatedTransactions } from '../lib/helpers/aggregated_transactions';
 import { setupRequest } from '../lib/helpers/setup_request';
 import { getTrace } from '../lib/traces/get_trace';
+import { getTransaction } from '../lib/transactions/get_transaction';
+import { getRootTransactionByTraceId } from '../lib/transactions/get_transaction_by_trace';
 import { getTopTransactionGroupList } from '../lib/transaction_groups';
 import { createApmServerRoute } from './create_apm_server_route';
-import { environmentRt, kueryRt, rangeRt } from './default_api_types';
-import { getSearchAggregatedTransactions } from '../lib/helpers/aggregated_transactions';
-import { getRootTransactionByTraceId } from '../lib/transactions/get_transaction_by_trace';
 import { createApmServerRouteRepository } from './create_apm_server_route_repository';
-import { getTransaction } from '../lib/transactions/get_transaction';
+import { kueryRt, rangeRt } from './default_api_types';
 
 const tracesRoute = createApmServerRoute({
   endpoint: 'GET /api/apm/traces',

@@ -4,40 +4,37 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { useCallback, useMemo, useRef, useState } from 'react';
-import { EuiProgress, EuiBasicTable, EuiTableSelectionType } from '@elastic/eui';
-import { difference, head, isEmpty, memoize } from 'lodash/fp';
-import styled, { css } from 'styled-components';
+import type { EuiTableSelectionType } from '@elastic/eui';
+import { EuiBasicTable, EuiProgress } from '@elastic/eui';
 import classnames from 'classnames';
-
-import {
+import { difference, head, isEmpty, memoize } from 'lodash/fp';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
+import styled, { css } from 'styled-components';
+import { CaseType } from '../../../common/api/cases/case';
+import type { CommentRequestAlertType } from '../../../common/api/cases/comment';
+import { CommentType } from '../../../common/api/cases/comment';
+import { CaseStatuses, caseStatuses } from '../../../common/api/cases/status';
+import type {
   Case,
-  CaseStatuses,
-  CaseType,
-  CommentRequestAlertType,
   CaseStatusWithAllStatus,
-  CommentType,
   FilterOptions,
-  SortFieldCase,
   SubCase,
-  caseStatuses,
-} from '../../../common';
+} from '../../../common/ui/types';
+import { SortFieldCase } from '../../../common/ui/types';
 import { SELECTABLE_MESSAGE_COLLECTIONS } from '../../common/translations';
+import { useConnectors } from '../../containers/configure/use_connectors';
 import { useGetActionLicense } from '../../containers/use_get_action_license';
 import { useGetCases } from '../../containers/use_get_cases';
 import { usePostComment } from '../../containers/use_post_comment';
-import { CaseDetailsHrefSchema, CasesNavigation } from '../links';
+import type { CaseDetailsHrefSchema, CasesNavigation } from '../links';
 import { Panel } from '../panel';
 import { getActionLicenseError } from '../use_push_to_service/helpers';
 import { useCasesColumns } from './columns';
 import { getExpandedRowMap } from './expanded_row';
 import { CasesTableHeader } from './header';
-import { CasesTableFilters } from './table_filters';
-import { EuiBasicTableOnChange } from './types';
-
 import { CasesTable } from './table';
-import { useConnectors } from '../../containers/configure/use_connectors';
+import { CasesTableFilters } from './table_filters';
+import type { EuiBasicTableOnChange } from './types';
 
 const ProgressLoader = styled(EuiProgress)`
   ${({ $isShow }: { $isShow: boolean }) =>

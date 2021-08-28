@@ -9,12 +9,12 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import type { CoreStart } from '../../../../core/public';
+import type { CoreStart } from '../../../../core/public/types';
 import { ScopedHistory } from '../../../../core/public/application/scoped_history';
 import { RedirectAppLinks } from '../../../kibana_react/public/app_links/redirect_app_link';
 import { KibanaContextProvider } from '../../../kibana_react/public/context/context';
-import { HomeApp } from './components/home_app';
 // @ts-ignore
+import { HomeApp } from './components/home_app';
 import './index.scss';
 import { getServices } from './kibana_services';
 

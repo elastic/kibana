@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
-import { throttle } from 'lodash';
 import { EuiResizeObserver } from '@elastic/eui';
+import { throttle } from 'lodash';
+import React from 'react';
 
 interface Props extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode | React.ReactNode[];

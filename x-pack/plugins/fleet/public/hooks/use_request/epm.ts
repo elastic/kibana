@@ -4,21 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { epmRouteService } from '../../services';
+import { epmRouteService } from '../../../common/services/routes';
 import type {
+  DeletePackageResponse,
   GetCategoriesRequest,
   GetCategoriesResponse,
+  GetInfoResponse,
+  GetLimitedPackagesResponse,
   GetPackagesRequest,
   GetPackagesResponse,
-  GetLimitedPackagesResponse,
-  GetInfoResponse,
+  GetStatsResponse,
   InstallPackageResponse,
-  DeletePackageResponse,
-} from '../../types';
-import type { GetStatsResponse } from '../../../common';
+} from '../../../common/types/rest_spec/epm';
 
-import { useRequest, sendRequest } from './use_request';
+import { sendRequest, useRequest } from './use_request';
 
 export const useGetCategories = (query: GetCategoriesRequest['query'] = {}) => {
   return useRequest<GetCategoriesResponse>({

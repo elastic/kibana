@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import type { ReactElement } from 'react';
 import React from 'react';
-import type { CoreSetup } from '../../../../../../../../core/public';
+import type { CoreSetup } from '../../../../../../../../core/public/types';
 import { SimpleSavedObject } from '../../../../../../../../core/public/saved_objects/simple_saved_object';
 import type { SavedObjectAttributes } from '../../../../../../../../core/types/saved_objects';
 import type { UsageCollectionStart } from '../../../../../../../usage_collection/public/plugin';

@@ -6,18 +6,17 @@
  */
 
 import Boom from '@hapi/boom';
-import { IScopedClusterClient } from 'kibana/server';
-import type { JobObject, JobSavedObjectService } from './service';
-import {
+import type { IScopedClusterClient } from '../../../../../src/core/server/elasticsearch/client/scoped_cluster_client';
+import type { Datafeed } from '../../common/types/anomaly_detection_jobs/datafeed';
+import type {
+  InitializeSavedObjectResponse,
   JobType,
   SyncSavedObjectResponse,
-  InitializeSavedObjectResponse,
 } from '../../common/types/saved_objects';
-import { checksFactory } from './checks';
 import type { JobStatus } from './checks';
+import { checksFactory } from './checks';
+import type { JobObject, JobSavedObjectService } from './service';
 import { getSavedObjectClientError } from './util';
-
-import { Datafeed } from '../../common/types/anomaly_detection_jobs';
 
 export interface JobSpaceOverrides {
   overrides: {

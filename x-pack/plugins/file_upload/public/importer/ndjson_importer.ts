@@ -4,9 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { Importer } from './importer';
-import { CreateDocsResponse } from './types';
+import type { CreateDocsResponse } from './types';
 
 export class NdjsonImporter extends Importer {
   constructor() {

@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import {
   EuiDescribedFormGroup,
   EuiFieldText,
@@ -20,11 +19,12 @@ import React, { Component, lazy, Suspense } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { getSpaceAvatarComponent, getSpaceColor, getSpaceInitials } from '../../../space_avatar';
-import type { SpaceValidator } from '../../lib';
-import { toSpaceIdentifier } from '../../lib';
+import { getSpaceColor, getSpaceInitials } from '../../../space_avatar/space_attributes';
+import { getSpaceAvatarComponent } from '../../../space_avatar/space_avatar';
+import { toSpaceIdentifier } from '../../lib/space_identifier_utils';
+import type { SpaceValidator } from '../../lib/validate_space';
 import type { FormValues } from '../manage_space_page';
-import { SectionPanel } from '../section_panel';
+import { SectionPanel } from '../section_panel/section_panel';
 import { CustomizeSpaceAvatar } from './customize_space_avatar';
 
 // No need to wrap LazySpaceAvatar in an error boundary, because it is one of the first chunks loaded when opening Kibana.

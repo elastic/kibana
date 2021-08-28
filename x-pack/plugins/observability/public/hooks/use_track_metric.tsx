@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { UiCounterMetricType } from '@kbn/analytics';
+import { METRIC_TYPE } from '@kbn/analytics';
 import { useEffect, useMemo } from 'react';
-import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
-import { useKibana } from '../../../../../src/plugins/kibana_react/public';
-import { ObservabilityApp } from '../../typings/common';
+import { useKibana } from '../../../../../src/plugins/kibana_react/public/context/context';
+import type { UsageCollectionSetup } from '../../../../../src/plugins/usage_collection/public/plugin';
+import type { ObservabilityApp } from '../../typings/common';
 
 /**
  * Note: The usage_collection plugin will take care of sending this data to the telemetry server.

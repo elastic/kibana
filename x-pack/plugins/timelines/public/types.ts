@@ -4,26 +4,26 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import type { SensorAPI } from 'react-beautiful-dnd';
-import { Store } from 'redux';
-import { CoreStart } from '../../../../src/core/public';
-import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
-import { CasesUiStart } from '../../cases/public';
+import type { Store } from 'redux';
+import type { CoreStart } from '../../../../src/core/public/types';
+import type { DataPublicPluginStart } from '../../../../src/plugins/data/public/types';
+import type { CasesUiStart } from '../../cases/public/types';
+import type { AddToCaseActionProps } from './components/actions/timeline/cases/add_to_case_action';
 import type {
-  LastUpdatedAtProps,
-  LoadingPanelProps,
-  FieldBrowserProps,
   UseDraggableKeyboardWrapper,
   UseDraggableKeyboardWrapperProps,
-} from './components';
-export type { SortDirection } from '../common';
+} from './components/drag_and_drop/draggable_keyboard_wrapper_hook';
+import type { HoverActionsConfig } from './components/hover_actions';
+import type { LastUpdatedAtProps } from './components/last_updated';
+import type { LoadingPanelProps } from './components/loading';
 import type { TGridIntegratedProps } from './components/t_grid/integrated';
 import type { TGridStandaloneProps } from './components/t_grid/standalone';
-import type { UseAddToTimelineProps, UseAddToTimeline } from './hooks/use_add_to_timeline';
-import { HoverActionsConfig } from './components/hover_actions/index';
-import type { AddToCaseActionProps } from './components/actions/timeline/cases/add_to_case_action';
+import type { FieldBrowserProps } from './components/t_grid/toolbar/fields_browser/types';
+import type { UseAddToTimeline, UseAddToTimelineProps } from './hooks/use_add_to_timeline';
+
+export type { SortDirection } from '../common';
 export * from './store/t_grid';
 export interface TimelinesUIStart {
   getHoverActions: () => HoverActionsConfig;

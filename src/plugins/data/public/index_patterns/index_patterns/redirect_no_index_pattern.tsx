@@ -8,7 +8,7 @@
 import { EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import type { CoreStart } from '../../../../../core/public';
+import type { CoreStart } from '../../../../../core/public/types';
 import { toMountPoint } from '../../../../kibana_react/public/util/to_mount_point';
 
 let bannerId: string;

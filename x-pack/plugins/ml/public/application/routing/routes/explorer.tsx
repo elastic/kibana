@@ -4,40 +4,37 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { FC, useEffect, useState, useCallback, useMemo } from 'react';
-import useObservable from 'react-use/lib/useObservable';
-
 import { i18n } from '@kbn/i18n';
-
-import { NavigateToPath } from '../../contexts/kibana';
-
-import { MlJobWithTimeRange } from '../../../../common/types/anomaly_detection_jobs';
-
-import { MlRoute, PageLoader, PageProps } from '../router';
-import { useRefresh } from '../use_refresh';
-import { useResolver } from '../use_resolver';
-import { basicResolvers } from '../resolvers';
-import { Explorer } from '../../explorer';
-import { useSelectedCells } from '../../explorer/hooks/use_selected_cells';
-import { mlJobService } from '../../services/job_service';
-import { ml } from '../../services/ml_api_service';
-import { useExplorerData } from '../../explorer/actions';
+import type { FC } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import useObservable from 'react-use/lib/useObservable';
+import { JOB_ID } from '../../../../common/constants/anomalies';
+import type { MlJobWithTimeRange } from '../../../../common/types/anomaly_detection_jobs/summary_job';
+import { useShowCharts } from '../../components/controls/checkbox_showcharts/checkbox_showcharts';
+import { useTableInterval } from '../../components/controls/select_interval/select_interval';
+import { useTableSeverity } from '../../components/controls/select_severity/select_severity';
+import { useTimeBuckets } from '../../components/custom_hooks/use_time_buckets';
+import { useJobSelection } from '../../components/job_selector/use_job_selection';
+import type { NavigateToPath } from '../../contexts/kibana/use_navigate_to_path';
+import { useTimefilter } from '../../contexts/kibana/use_timefilter';
+import { MlAnnotationUpdatesContext } from '../../contexts/ml/ml_annotation_updates_context';
+import { useExplorerData } from '../../explorer/actions/load_explorer_data';
 import { explorerService } from '../../explorer/explorer_dashboard_service';
 import { getDateFormatTz } from '../../explorer/explorer_utils';
-import { useJobSelection } from '../../components/job_selector/use_job_selection';
-import { useShowCharts } from '../../components/controls/checkbox_showcharts';
-import { useTableInterval } from '../../components/controls/select_interval';
-import { useTableSeverity } from '../../components/controls/select_severity';
+import { useExplorerUrlState } from '../../explorer/hooks/use_explorer_url_state';
+import { useSelectedCells } from '../../explorer/hooks/use_selected_cells';
+import { isViewBySwimLaneData } from '../../explorer/swimlane_container';
+import { AnnotationUpdatesService } from '../../services/annotations_service';
+import { mlJobService } from '../../services/job_service';
+import { ml } from '../../services/ml_api_service';
 import { useUrlState } from '../../util/url_state';
 import { getBreadcrumbWithUrlForApp } from '../breadcrumbs';
-import { useTimefilter } from '../../contexts/kibana';
-import { isViewBySwimLaneData } from '../../explorer/swimlane_container';
-import { JOB_ID } from '../../../../common/constants/anomalies';
-import { MlAnnotationUpdatesContext } from '../../contexts/ml/ml_annotation_updates_context';
-import { AnnotationUpdatesService } from '../../services/annotations_service';
-import { useExplorerUrlState } from '../../explorer/hooks/use_explorer_url_state';
-import { useTimeBuckets } from '../../components/custom_hooks/use_time_buckets';
+import { basicResolvers } from '../resolvers';
+import type { MlRoute, PageProps } from '../router';
+import { PageLoader } from '../router';
+import { useRefresh } from '../use_refresh';
+import { useResolver } from '../use_resolver';
+import { Explorer } from '../../explorer/explorer';
 
 export const explorerRouteFactory = (
   navigateToPath: NavigateToPath,

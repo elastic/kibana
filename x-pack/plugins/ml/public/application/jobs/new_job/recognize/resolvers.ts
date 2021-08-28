@@ -4,13 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { i18n } from '@kbn/i18n';
-import { getToastNotifications, getSavedObjectsClient } from '../../../util/dependency_cache';
+import type { CreateLinkWithUserDefaults } from '../../../components/custom_hooks/use_create_ad_links';
+import type { NavigateToPath } from '../../../contexts/kibana/use_navigate_to_path';
 import { ml } from '../../../services/ml_api_service';
-import { KibanaObjects } from './page';
-import { NavigateToPath } from '../../../contexts/kibana';
-import { CreateLinkWithUserDefaults } from '../../../components/custom_hooks/use_create_ad_links';
+import { getSavedObjectsClient, getToastNotifications } from '../../../util/dependency_cache';
+import type { KibanaObjects } from './page';
 
 /**
  * Checks whether the jobs in a data recognizer module have been created.

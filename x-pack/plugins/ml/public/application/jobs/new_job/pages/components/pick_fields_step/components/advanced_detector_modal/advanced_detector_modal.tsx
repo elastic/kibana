@@ -4,44 +4,39 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { estypes } from '@elastic/elasticsearch';
-import React, { FC, Fragment, useState, useContext, useEffect } from 'react';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiComboBox,
-  EuiFlexItem,
-  EuiFlexGroup,
   EuiFlexGrid,
-  EuiComboBoxOptionOption,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiHorizontalRule,
   EuiTextArea,
 } from '@elastic/eui';
-import { JobCreatorContext } from '../../../job_creator_context';
-import { AdvancedJobCreator } from '../../../../../common/job_creator';
+import type { FC } from 'react';
+import React, { Fragment, useContext, useEffect, useState } from 'react';
+import type { Aggregation, Field } from '../../../../../../../../../common/types/fields';
+import { EVENT_RATE_FIELD_ID, mlCategory } from '../../../../../../../../../common/types/fields';
+import { detectorToString } from '../../../../../../../util/string_utils';
+import type { RichDetector } from '../../../../../common/job_creator/advanced_job_creator';
+import { AdvancedJobCreator } from '../../../../../common/job_creator/advanced_job_creator';
+import { createBasicDetector } from '../../../../../common/job_creator/util/default_configs';
 import {
   createFieldOptions,
   createMlcategoryFieldOption,
 } from '../../../../../common/job_creator/util/general';
-import {
-  Field,
-  Aggregation,
-  EVENT_RATE_FIELD_ID,
-  mlCategory,
-} from '../../../../../../../../../common/types/fields';
-import { RichDetector } from '../../../../../common/job_creator/advanced_job_creator';
-import { ModalWrapper } from './modal_wrapper';
-import { detectorToString } from '../../../../../../../util/string_utils';
-import { createBasicDetector } from '../../../../../common/job_creator/util/default_configs';
-
+import { JobCreatorContext } from '../../../job_creator_context';
 import {
   AggDescription,
-  FieldDescription,
   ByFieldDescription,
+  DescriptionDescription,
+  ExcludeFrequentDescription,
+  FieldDescription,
   OverFieldDescription,
   PartitionFieldDescription,
-  ExcludeFrequentDescription,
-  DescriptionDescription,
 } from './descriptions';
+import { ModalWrapper } from './modal_wrapper';
 
 interface Props {
   payload: ModalPayload;

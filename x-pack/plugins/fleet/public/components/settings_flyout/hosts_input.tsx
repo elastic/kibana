@@ -4,30 +4,29 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useMemo, useCallback, useState } from 'react';
-import type { ReactNode, FunctionComponent, ChangeEvent } from 'react';
-import sytled, { useTheme } from 'styled-components';
-
 import {
+  EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiDragDropContext,
+  euiDragDropReorder,
+  EuiDraggable,
+  EuiDroppable,
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButtonEmpty,
-  EuiFormRow,
-  EuiFieldText,
-  EuiDragDropContext,
-  EuiDroppable,
-  EuiDraggable,
-  EuiIcon,
-  EuiButtonIcon,
-  EuiSpacer,
-  EuiFormHelpText,
-  euiDragDropReorder,
   EuiFormErrorText,
+  EuiFormHelpText,
+  EuiFormRow,
+  EuiIcon,
+  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import type { ChangeEvent, FunctionComponent, ReactNode } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
+import sytled, { useTheme } from 'styled-components';
 
-import type { EuiTheme } from '../../../../../../src/plugins/kibana_react/common';
+import type { EuiTheme } from '../../../../../../src/plugins/kibana_react/common/eui_styled_components';
 
 interface Props {
   id: string;

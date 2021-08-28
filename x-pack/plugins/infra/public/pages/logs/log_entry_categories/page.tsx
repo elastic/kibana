@@ -4,13 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { EuiErrorBoundary } from '@elastic/eui';
 import React from 'react';
 import { useLogsBreadcrumbs } from '../../../hooks/use_logs_breadcrumbs';
+import { logCategoriesTitle } from '../../../translations';
 import { LogEntryCategoriesPageContent } from './page_content';
 import { LogEntryCategoriesPageProviders } from './page_providers';
-import { logCategoriesTitle } from '../../../translations';
 
 export const LogEntryCategoriesPage = () => {
   useLogsBreadcrumbs([

@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import {
   EuiHorizontalRule,
   EuiListGroup,
@@ -15,10 +14,10 @@ import {
 import React, { Fragment } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
-import type { ProcessedImportResponse } from 'src/plugins/saved_objects_management/public';
-import type { Space } from 'src/plugins/spaces_oss/common';
 
-import { summarizeCopyResult } from '../lib';
+import type { ProcessedImportResponse } from '../../../../../../src/plugins/saved_objects_management/public/lib/process_import_response';
+import type { Space } from '../../../../../../src/plugins/spaces_oss/common/types';
+import { summarizeCopyResult } from '../lib/summarize_copy_result';
 import type { CopyOptions, ImportRetry, SavedObjectTarget } from '../types';
 import { SpaceResult, SpaceResultProcessing } from './space_result';
 

@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import './filter_popover.scss';
-
-import React, { MouseEventHandler, useEffect, useState } from 'react';
 import { EuiPopover, EuiSpacer } from '@elastic/eui';
-import { FilterValue, defaultLabel, isQueryValid } from '.';
-import { IndexPattern } from '../../../types';
-import { Query } from '../../../../../../../../src/plugins/data/public';
-import { LabelInput } from '../shared_components';
+import type { MouseEventHandler } from 'react';
+import React, { useEffect, useState } from 'react';
+import type { Query } from '../../../../../../../../src/plugins/data/public';
 import { QueryInput } from '../../../query_input';
+import type { IndexPattern } from '../../../types';
+import { LabelInput } from '../shared_components/label_input';
+import type { FilterValue } from './filters';
+import { defaultLabel, isQueryValid } from './filters';
+import './filter_popover.scss';
 
 export const FilterPopover = ({
   filter,

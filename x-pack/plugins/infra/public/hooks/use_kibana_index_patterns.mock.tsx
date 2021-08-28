@@ -8,7 +8,7 @@
 import React, { useMemo } from 'react';
 import { from, of } from 'rxjs';
 import { delay } from 'rxjs/operators';
-import { CoreStart } from '../../../../../src/core/public';
+import { CoreStart } from '../../../../../src/core/public/types';
 import { FieldSpec } from '../../../../../src/plugins/data/common';
 import {
   IIndexPattern,

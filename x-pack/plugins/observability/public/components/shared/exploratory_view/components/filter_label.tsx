@@ -6,9 +6,9 @@
  */
 
 import React from 'react';
-import { IndexPattern } from '../../../../../../../../src/plugins/data/public';
-import { useSeriesFilters } from '../hooks/use_series_filters';
+import { IndexPattern } from '../../../../../../../../src/plugins/data/common/index_patterns/index_patterns/index_pattern';
 import { FilterValueLabel } from '../../filter_value_label/filter_value_label';
+import { useSeriesFilters } from '../hooks/use_series_filters';
 
 interface Props {
   field: string;

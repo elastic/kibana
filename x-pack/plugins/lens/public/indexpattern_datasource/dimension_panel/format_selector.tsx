@@ -4,11 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { useCallback, useMemo, useState } from 'react';
+import { EuiComboBox, EuiFormRow, EuiRange, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EuiFormRow, EuiComboBox, EuiSpacer, EuiRange } from '@elastic/eui';
-import { IndexPatternColumn } from '../indexpattern';
+import React, { useCallback, useMemo, useState } from 'react';
+import type { IndexPatternColumn } from '../operations/definitions';
 
 const supportedFormats: Record<string, { title: string }> = {
   number: {

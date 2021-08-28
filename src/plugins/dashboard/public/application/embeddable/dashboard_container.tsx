@@ -10,7 +10,7 @@ import { I18nProvider } from '@kbn/i18n/react';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import uuid from 'uuid';
-import type { CoreStart } from '../../../../../core/public';
+import type { CoreStart } from '../../../../../core/public/types';
 import type { IUiSettingsClient } from '../../../../../core/public/ui_settings/types';
 import type { KibanaExecutionContext } from '../../../../../core/types/execution_context';
 import type { Filter } from '../../../../data/common/es_query';

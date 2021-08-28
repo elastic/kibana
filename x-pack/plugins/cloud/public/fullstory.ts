@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { sha256 } from 'js-sha256'; // loaded here to reduce page load bundle size when FullStory is disabled
-import type { IBasePath, PackageInfo } from '../../../../src/core/public';
+import type { PackageInfo } from '@kbn/config';
+import { sha256 } from 'js-sha256';
+import type { IBasePath } from '../../../../src/core/public/http/types';
 
 export interface FullStoryDeps {
   basePath: IBasePath;

@@ -4,37 +4,31 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { useEffect, useMemo, useState } from 'react';
-
 import { estypes } from '@elastic/elasticsearch';
-import { EuiDataGridColumn } from '@elastic/eui';
-import { CoreSetup } from 'src/core/public';
-
-import { IndexPattern } from '../../../../../../../../../src/plugins/data/public';
-import { isRuntimeMappings } from '../../../../../../common/util/runtime_field_utils';
-import { RuntimeMappings } from '../../../../../../common/types/fields';
+import type { EuiDataGridColumn } from '@elastic/eui';
+import { useEffect, useMemo, useState } from 'react';
+import type { CoreSetup } from '../../../../../../../../../src/core/public/types';
+import { IndexPattern } from '../../../../../../../../../src/plugins/data/common/index_patterns/index_patterns/index_pattern';
 import { DEFAULT_SAMPLER_SHARD_SIZE } from '../../../../../../common/constants/field_histograms';
-import { newJobCapsServiceAnalytics } from '../../../../services/new_job_capabilities/new_job_capabilities_service_analytics';
-
-import { DataLoader } from '../../../../datavisualizer/index_based/data_loader';
-
+import type { RuntimeMappings } from '../../../../../../common/types/fields';
+import { extractErrorMessage } from '../../../../../../common/util/errors/process_errors';
+import { isRuntimeMappings } from '../../../../../../common/util/runtime_field_utils';
 import {
-  getFieldType,
-  getDataGridSchemaFromKibanaFieldType,
-  getDataGridSchemaFromESFieldType,
-  getFieldsFromKibanaIndexPattern,
-  showDataGridColumnChartErrorMessageToast,
-  useDataGrid,
-  useRenderCellValue,
-  EsSorting,
-  UseIndexDataReturnType,
-  getProcessedFields,
   getCombinedRuntimeMappings,
-} from '../../../../components/data_grid';
-import { extractErrorMessage } from '../../../../../../common/util/errors';
-import { INDEX_STATUS } from '../../../common/analytics';
+  getDataGridSchemaFromESFieldType,
+  getDataGridSchemaFromKibanaFieldType,
+  getFieldsFromKibanaIndexPattern,
+  getProcessedFields,
+  showDataGridColumnChartErrorMessageToast,
+  useRenderCellValue,
+} from '../../../../components/data_grid/common';
+import type { EsSorting, UseIndexDataReturnType } from '../../../../components/data_grid/types';
+import { getFieldType } from '../../../../components/data_grid/use_column_chart';
+import { useDataGrid } from '../../../../components/data_grid/use_data_grid';
+import { DataLoader } from '../../../../datavisualizer/index_based/data_loader/data_loader';
 import { ml } from '../../../../services/ml_api_service';
+import { newJobCapsServiceAnalytics } from '../../../../services/new_job_capabilities/new_job_capabilities_service_analytics';
+import { INDEX_STATUS } from '../../../common/analytics';
 
 type IndexSearchResponse = estypes.SearchResponse;
 

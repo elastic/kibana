@@ -4,8 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { LegacyAuditLogger } from '../audit';
+import type { LegacyAuditLogger } from '../audit/audit_service';
 
 /**
  * @deprecated will be removed in 8.0

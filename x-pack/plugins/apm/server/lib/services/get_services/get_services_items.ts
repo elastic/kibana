@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { Logger } from '@kbn/logging';
+import type { Logger } from '@kbn/logging';
 import { withApmSpan } from '../../../utils/with_apm_span';
-import { Setup, SetupTimeRange } from '../../helpers/setup_request';
+import type { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import { getHealthStatuses } from './get_health_statuses';
 import { getServicesFromMetricDocuments } from './get_services_from_metric_documents';
 import { getServiceTransactionStats } from './get_service_transaction_stats';

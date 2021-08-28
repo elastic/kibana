@@ -4,21 +4,22 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { FC, useCallback, useMemo, useState } from 'react';
-import { EuiComboBoxOptionOption, EuiForm, EuiSpacer } from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiForm, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import type { FC } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
-import { AlertTypeParamsExpressionProps } from '../../../../triggers_actions_ui/public';
-import { MlAnomalyDetectionJobsHealthRuleParams } from '../../../common/types/alerts';
-import { JobSelectorControl } from '../job_selector';
-import { jobsApiProvider } from '../../application/services/ml_api_service/jobs';
-import { HttpService } from '../../application/services/http_service';
-import { useMlKibana } from '../../application/contexts/kibana';
-import { TestsSelectionControl } from './tests_selection_control';
-import { isPopulatedObject } from '../../../common';
+import type { AlertTypeParamsExpressionProps } from '../../../../triggers_actions_ui/public/types';
 import { ALL_JOBS_SELECTION } from '../../../common/constants/alerts';
+import type { MlAnomalyDetectionJobsHealthRuleParams } from '../../../common/types/alerts';
+import { isPopulatedObject } from '../../../common/util/object_utils';
+import { useMlKibana } from '../../application/contexts/kibana/kibana_context';
+import { HttpService } from '../../application/services/http_service';
+import { jobsApiProvider } from '../../application/services/ml_api_service/jobs';
+import { JobSelectorControl } from '../job_selector';
+import { TestsSelectionControl } from './tests_selection_control';
 
 export type MlAnomalyAlertTriggerProps = AlertTypeParamsExpressionProps<MlAnomalyDetectionJobsHealthRuleParams>;
 

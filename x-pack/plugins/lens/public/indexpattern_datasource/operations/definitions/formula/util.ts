@@ -4,16 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { groupBy, isObject } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { groupBy, isObject } from 'lodash';
 import type {
   TinymathAST,
   TinymathFunction,
   TinymathNamedArgument,
   TinymathVariable,
 } from 'packages/kbn-tinymath';
-import type { OperationDefinition, IndexPatternColumn, GenericOperationDefinition } from '../index';
+import type { GenericOperationDefinition, IndexPatternColumn, OperationDefinition } from '..';
 import type { GroupedNodes } from './types';
 
 export const unquotedStringRegex = /[^0-9A-Za-z._@\[\]/]/;

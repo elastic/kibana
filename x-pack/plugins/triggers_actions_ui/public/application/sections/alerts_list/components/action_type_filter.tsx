@@ -4,11 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { useEffect, useState } from 'react';
+import { EuiFilterButton, EuiFilterGroup, EuiFilterSelectItem, EuiPopover } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiFilterGroup, EuiPopover, EuiFilterButton, EuiFilterSelectItem } from '@elastic/eui';
-import { ActionType } from '../../../../types';
+import React, { useEffect, useState } from 'react';
+import type { ActionType } from '../../../../../../actions/common/types';
 
 interface ActionTypeFilterProps {
   actionTypes: ActionType[];

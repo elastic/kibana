@@ -4,15 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { useState, useEffect } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiComboBox, EuiButtonEmpty, EuiFormRow } from '@elastic/eui';
+import { EuiButtonEmpty, EuiComboBox, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ActionParamsProps } from '../../../../types';
-import { EmailActionParams } from '../types';
-import { TextFieldWithMessageVariables } from '../../text_field_with_message_variables';
+import { FormattedMessage } from '@kbn/i18n/react';
+import React, { useEffect, useState } from 'react';
+import type { ActionParamsProps } from '../../../../types';
 import { TextAreaWithMessageVariables } from '../../text_area_with_message_variables';
+import { TextFieldWithMessageVariables } from '../../text_field_with_message_variables';
+import type { EmailActionParams } from '../types';
 
 export const EmailParamsFields = ({
   actionParams,

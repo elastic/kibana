@@ -4,19 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { FC, ReactElement } from 'react';
-
+import type { IconType } from '@elastic/eui';
 import {
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiIcon,
-  IconType,
+  EuiLink,
+  EuiPanel,
   EuiText,
   EuiTitle,
-  EuiFlexItem,
-  EuiFlexGroup,
-  EuiPanel,
-  EuiLink,
 } from '@elastic/eui';
+import type { FC, ReactElement } from 'react';
+import React from 'react';
 
 interface Props {
   icon: IconType | ReactElement;

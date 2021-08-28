@@ -4,13 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { FC, useState, useContext, useEffect } from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiSwitch } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import type { FC } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
+import { ES_AGGREGATION } from '../../../../../../../../../common/constants/aggregation_types';
 import { JobCreatorContext } from '../../../job_creator_context';
 import { Description } from './description';
-import { ES_AGGREGATION } from '../../../../../../../../../common/constants/aggregation_types';
 
 export const SparseDataSwitch: FC = () => {
   const { jobCreator, jobCreatorUpdated, jobCreatorUpdate } = useContext(JobCreatorContext);

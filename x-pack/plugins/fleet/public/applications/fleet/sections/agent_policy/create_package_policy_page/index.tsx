@@ -4,56 +4,55 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { ReactEventHandler } from 'react';
-import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
-import { useRouteMatch, useHistory, useLocation } from 'react-router-dom';
-import styled from 'styled-components';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 import {
-  EuiButtonEmpty,
-  EuiButton,
-  EuiSteps,
   EuiBottomBar,
+  EuiButton,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSpacer,
   EuiLink,
+  EuiSpacer,
+  EuiSteps,
 } from '@elastic/eui';
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
-import type { ApplicationStart } from 'kibana/public';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+import type { ReactEventHandler } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useHistory, useLocation, useRouteMatch } from 'react-router-dom';
+import styled from 'styled-components';
 
-import { toMountPoint } from '../../../../../../../../../src/plugins/kibana_react/public';
-import type {
-  AgentPolicy,
-  PackageInfo,
-  NewPackagePolicy,
-  CreatePackagePolicyRouteState,
-} from '../../../types';
+import type { ApplicationStart } from '../../../../../../../../../src/core/public/application/types';
+import { toMountPoint } from '../../../../../../../../../src/plugins/kibana_react/public/util/to_mount_point';
+import { PLUGIN_ID } from '../../../../../../common/constants/plugin';
+import type { PackagePolicyValidationResults } from '../../../../../../common/services/validate_package_policy';
 import {
-  useLink,
-  useBreadcrumbs,
-  sendCreatePackagePolicy,
-  useStartServices,
-  useConfig,
-  sendGetAgentStatus,
-} from '../../../hooks';
-import { Loading } from '../../../components';
-import { ConfirmDeployAgentPolicyModal } from '../components';
-import { useIntraAppState, useUIExtension } from '../../../hooks';
-import { ExtensionWrapper } from '../../../components';
-import type { PackagePolicyEditExtensionComponentProps } from '../../../types';
-import { PLUGIN_ID } from '../../../../../../common/constants';
-import { pkgKeyFromPackageInfo } from '../../../services';
+  validatePackagePolicy,
+  validationHasErrors,
+} from '../../../../../../common/services/validate_package_policy';
+import type { AgentPolicy } from '../../../../../../common/types/models/agent_policy';
+import type { PackageInfo } from '../../../../../../common/types/models/epm';
+import type { NewPackagePolicy } from '../../../../../../common/types/models/package_policy';
+import { ExtensionWrapper } from '../../../../../components/extension_wrapper';
+import { Loading } from '../../../../../components/loading';
+import { useConfig } from '../../../../../hooks/use_config';
+import { useStartServices } from '../../../../../hooks/use_core';
+import { useIntraAppState } from '../../../../../hooks/use_intra_app_state';
+import { useLink } from '../../../../../hooks/use_link';
+import { sendGetAgentStatus } from '../../../../../hooks/use_request/agents';
+import { sendCreatePackagePolicy } from '../../../../../hooks/use_request/package_policy';
+import { useUIExtension } from '../../../../../hooks/use_ui_extension';
+import { pkgKeyFromPackageInfo } from '../../../../../services/pkg_key_from_package_info';
+import type { CreatePackagePolicyRouteState } from '../../../../../types/intra_app_route_state';
+import type { PackagePolicyEditExtensionComponentProps } from '../../../../../types/ui_extensions';
+import { useBreadcrumbs } from '../../../hooks/use_breadcrumbs';
+import { ConfirmDeployAgentPolicyModal } from '../components/confirm_deploy_modal';
 
-import { CreatePackagePolicyPageLayout } from './components';
-import type { EditPackagePolicyFrom, PackagePolicyFormState } from './types';
-import type { PackagePolicyValidationResults } from './services';
-import { validatePackagePolicy, validationHasErrors } from './services';
-import { StepSelectAgentPolicy } from './step_select_agent_policy';
+import { CreatePackagePolicyPageLayout } from './components/layout';
 import { StepConfigurePackagePolicy } from './step_configure_package';
 import { StepDefinePackagePolicy } from './step_define_package_policy';
+import { StepSelectAgentPolicy } from './step_select_agent_policy';
+import type { EditPackagePolicyFrom, PackagePolicyFormState } from './types';
 
 const StepsWithLessPadding = styled(EuiSteps)`
   .euiStep__content {

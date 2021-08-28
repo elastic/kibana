@@ -4,25 +4,23 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import {
+import type { DragContextState } from '../../../drag_drop/providers/types';
+import type {
   DatasourceDimensionDropProps,
-  isDraggedOperation,
   DraggedOperation,
   DropType,
+  OperationMetadata,
 } from '../../../types';
-import { getOperationDisplay } from '../../operations';
-import { hasField, isDraggedField } from '../../utils';
-import { DragContextState } from '../../../drag_drop/providers';
-import { OperationMetadata } from '../../../types';
-import { getOperationTypesForField } from '../../operations';
-import { IndexPatternColumn } from '../../indexpattern';
-import {
-  IndexPatternPrivateState,
+import { isDraggedOperation } from '../../../types';
+import type { IndexPatternColumn } from '../../operations/definitions';
+import { getOperationDisplay, getOperationTypesForField } from '../../operations/operations';
+import type {
+  DraggedField,
   IndexPattern,
   IndexPatternField,
-  DraggedField,
+  IndexPatternPrivateState,
 } from '../../types';
+import { hasField, isDraggedField } from '../../utils';
 
 type GetDropProps = DatasourceDimensionDropProps<IndexPatternPrivateState> & {
   dragging?: DragContextState['dragging'];

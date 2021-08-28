@@ -8,7 +8,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import type { APMXPackConfig } from '.';
 import { mergeConfigs } from '.';
-import type { APMOSSConfig } from '../../../../src/plugins/apm_oss/server';
+import type { APMOSSConfig } from '../../../../src/plugins/apm_oss/server/config';
 
 describe('mergeConfigs', () => {
   it('merges the configs', () => {

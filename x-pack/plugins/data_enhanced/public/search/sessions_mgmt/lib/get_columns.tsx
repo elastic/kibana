@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiBadge,
-  EuiBasicTableColumn,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -17,19 +16,20 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { CoreStart } from 'kibana/public';
 import { capitalize } from 'lodash';
 import React from 'react';
-import { RedirectAppLinks } from '../../../../../../../src/plugins/kibana_react/public';
-import { IManagementSectionsPluginsSetup, SessionsConfigSchema } from '../';
-import { SearchSessionStatus } from '../../../../../../../src/plugins/data/common';
+import type { IManagementSectionsPluginsSetup, SessionsConfigSchema } from '..';
+import type { CoreStart } from '../../../../../../../src/core/public/types';
+import { SearchSessionStatus } from '../../../../../../../src/plugins/data/common/search/session/status';
+import { RedirectAppLinks } from '../../../../../../../src/plugins/kibana_react/public/app_links/redirect_app_link';
 import { TableText } from '../components';
-import { OnActionComplete, PopoverActionsMenu } from '../components';
+import { PopoverActionsMenu } from '../components/actions/popover_actions';
+import type { OnActionComplete } from '../components/actions/types';
 import { StatusIndicator } from '../components/status';
-import { dateString } from '../lib/date_string';
+import type { UISession } from '../types';
 import { SearchSessionsMgmtAPI } from './api';
+import { dateString } from './date_string';
 import { getExpirationStatus } from './get_expiration_status';
-import { UISession } from '../types';
 
 // Helper function: translate an app string to EuiIcon-friendly string
 const appToIcon = (app: string) => {

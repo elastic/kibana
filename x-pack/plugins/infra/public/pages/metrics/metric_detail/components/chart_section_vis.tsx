@@ -4,34 +4,26 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { useCallback, useMemo } from 'react';
-import moment from 'moment';
-import { i18n } from '@kbn/i18n';
-import {
-  Axis,
-  Chart,
-  niceTimeFormatter,
-  Position,
-  Settings,
-  TooltipValue,
-  BrushEndListener,
-} from '@elastic/charts';
+import type { BrushEndListener, TooltipValue } from '@elastic/charts';
+import { Axis, Chart, niceTimeFormatter, Position, Settings } from '@elastic/charts';
 import { EuiPageContentBody } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import moment from 'moment';
+import React, { useCallback, useMemo } from 'react';
+import { useUiSetting } from '../../../../../../../../src/plugins/kibana_react/public/ui_settings/use_ui_setting';
+import { useKibanaUiSetting } from '../../../../utils/use_kibana_ui_setting';
 import { getChartTheme } from '../../metrics_explorer/components/helpers/get_chart_theme';
-import { SeriesChart } from './series_chart';
+import type { VisSectionProps } from '../types';
+import { ErrorMessage } from './error_message';
 import {
+  getChartColor,
+  getChartName,
+  getChartType,
   getFormatter,
   getMaxMinTimestamp,
-  getChartName,
-  getChartColor,
-  getChartType,
   seriesHasLessThen2DataPoints,
 } from './helpers';
-import { ErrorMessage } from './error_message';
-import { useKibanaUiSetting } from '../../../../utils/use_kibana_ui_setting';
-import { useUiSetting } from '../../../../../../../../src/plugins/kibana_react/public';
-import { VisSectionProps } from '../types';
+import { SeriesChart } from './series_chart';
 
 export const ChartSectionVis = ({
   id,

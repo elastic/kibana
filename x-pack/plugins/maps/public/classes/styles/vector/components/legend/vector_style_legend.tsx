@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { IStyleProperty } from '../../properties/style_property';
+import type { IStyleProperty } from '../../properties/style_property';
 
 interface Props {
   isLinesOnly: boolean;

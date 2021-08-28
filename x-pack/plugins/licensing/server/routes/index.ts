@@ -4,14 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { StartServicesAccessor } from 'src/core/server';
-import { LicensingPluginStart } from '../types';
-import { FeatureUsageServiceSetup } from '../services';
-import { registerInfoRoute } from './info';
+import type { StartServicesAccessor } from '../../../../../src/core/server';
+import type { FeatureUsageServiceSetup } from '../services/feature_usage_service';
+import type { LicensingPluginStart, LicensingRouter } from '../types';
 import { registerFeatureUsageRoute } from './feature_usage';
-import { registerNotifyFeatureUsageRoute, registerRegisterFeatureRoute } from './internal';
-import { LicensingRouter } from '../types';
+import { registerInfoRoute } from './info';
+import { registerNotifyFeatureUsageRoute } from './internal/notify_feature_usage';
+import { registerRegisterFeatureRoute } from './internal/register_feature';
 
 export function registerRoutes(
   router: LicensingRouter,

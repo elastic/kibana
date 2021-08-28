@@ -4,12 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { FC } from 'react';
 import { EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
-
-import { CalloutMessage } from '../../../../../../../common/constants/validation';
-import { Callout } from '../../../../../components/callout';
+import type { FC } from 'react';
+import React from 'react';
+import type { CalloutMessage } from '../../../../../../../common/constants/validation';
+import { Callout } from '../../../../../components/callout/callout';
 import { ANALYTICS_STEPS } from '../../page';
 import { ContinueButton } from '../continue_button';
 

@@ -4,9 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { Feature } from 'geojson';
-import { RangeFieldMeta } from './descriptor_types';
+import type { Feature } from 'geojson';
+import type { RangeFieldMeta } from './descriptor_types/style_property_descriptor_types';
 
 export function pluckRangeFieldMeta(
   features: Feature[],

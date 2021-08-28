@@ -5,20 +5,18 @@
  * 2.0.
  */
 
-import React from 'react';
-import ReactDOM from 'react-dom';
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n/react';
-
-import type { IAggType } from 'src/plugins/data/public';
-import { PaletteRegistry } from 'src/plugins/charts/public';
-import { IUiSettingsClient } from 'kibana/public';
-import { ExpressionRenderDefinition } from 'src/plugins/expressions';
-import { DatatableComponent } from './components/table_basic';
-
+import React from 'react';
+import ReactDOM from 'react-dom';
+import type { IUiSettingsClient } from '../../../../../src/core/public/ui_settings/types';
+import type { PaletteRegistry } from '../../../../../src/plugins/charts/public/services/palettes/types';
+import type { IAggType } from '../../../../../src/plugins/data/common/search/aggs/agg_type';
+import type { ExpressionRenderDefinition } from '../../../../../src/plugins/expressions/common/expression_renderers/types';
+import type { DatatableProps } from '../../common/expressions/datatable/datatable';
+import type { FormatFactory } from '../../common/types';
 import type { ILensInterpreterRenderHandlers } from '../types';
-import type { FormatFactory } from '../../common';
-import { DatatableProps } from '../../common/expressions';
+import { DatatableComponent } from './components/table_basic';
 
 export { datatableColumn, getDatatable } from '../../common/expressions';
 

@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { FC } from 'react';
-import { ExplorerState } from './reducers';
-import { AppStateSelectedCells } from './explorer_utils';
+import type { FC } from 'react';
+import type { AppStateSelectedCells } from './explorer_utils';
+import type { ExplorerState } from './reducers/explorer_reducer/state';
 
 declare interface ExplorerProps {
   explorerState: ExplorerState;

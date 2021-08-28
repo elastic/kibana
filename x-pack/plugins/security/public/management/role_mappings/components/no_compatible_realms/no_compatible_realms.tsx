@@ -4,13 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { EuiCallOut, EuiLink } from '@elastic/eui';
 import React from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
+import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public/context/context';
 
 export const NoCompatibleRealms: React.FunctionComponent = () => {
   const docLinks = useKibana().services.docLinks!;

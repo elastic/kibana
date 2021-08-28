@@ -4,10 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { i18n } from '@kbn/i18n';
-
-import type { AppDeepLink } from 'src/core/public';
+import type { AppDeepLink } from '../../../../../../src/core/public/application/types';
 import { ML_PAGES } from '../../../common/constants/locator';
 
 const OVERVIEW_LINK_DEEP_LINK: AppDeepLink = {

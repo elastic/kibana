@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
+import React from 'react';
 
 /**
  * Create a separator with a text on the right side

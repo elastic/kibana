@@ -4,11 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { first, sortBy } from 'lodash';
-import { isWaffleMapGroupWithGroups, isWaffleMapGroupWithNodes } from './type_guards';
-import { InfraWaffleMapGroup } from '../../../../lib/lib';
+import type { InfraWaffleMapGroup } from '../../../../lib/lib';
 import { sizeOfSquares } from './size_of_squares';
+import { isWaffleMapGroupWithGroups, isWaffleMapGroupWithNodes } from './type_guards';
 
 export function getColumns(n: number, w = 1, h = 1) {
   const pageRatio = w / h;

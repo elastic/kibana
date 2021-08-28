@@ -4,19 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { memo } from 'react';
-import styled from 'styled-components';
+import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import React, { memo } from 'react';
 import semverLt from 'semver/functions/lt';
+import styled from 'styled-components';
 
-import { EuiTitle, EuiFlexGroup, EuiFlexItem, EuiText, EuiSpacer, EuiLink } from '@elastic/eui';
-
-import type { PackageInfo } from '../../../../../types';
-import { InstallStatus } from '../../../../../types';
-import { useGetPackagePolicies, useGetPackageInstallStatus, useLink } from '../../../../../hooks';
-import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../../constants';
-import { UpdateIcon } from '../components';
+import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../../../../../common/constants/package_policy';
+import type { PackageInfo } from '../../../../../../../../common/types/models/epm';
+import { InstallStatus } from '../../../../../../../../common/types/models/epm';
+import { useLink } from '../../../../../../../hooks/use_link';
+import { useGetPackagePolicies } from '../../../../../../../hooks/use_request/package_policy';
+import { useGetPackageInstallStatus } from '../../../../../hooks/use_package_install';
+import { UpdateIcon } from '../components/update_icon';
 
 import { InstallationButton } from './installation_button';
 

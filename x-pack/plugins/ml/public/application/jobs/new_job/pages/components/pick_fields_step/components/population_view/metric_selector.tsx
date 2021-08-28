@@ -4,12 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { FC } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EuiFormRow, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { Field, AggFieldPair } from '../../../../../../../../../common/types/fields';
-import { AggSelect, DropDownLabel, DropDownProps } from '../agg_select';
+import type { FC } from 'react';
+import React from 'react';
+import type { AggFieldPair, Field } from '../../../../../../../../../common/types/fields';
+import type { DropDownLabel, DropDownProps } from '../agg_select/agg_select';
+import { AggSelect } from '../agg_select/agg_select';
 
 interface Props {
   fields: Field[];

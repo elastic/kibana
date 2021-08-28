@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { ANNOTATION_TYPE } from '../constants/annotations';
+import type { PartitionFieldsType } from './anomalies';
 
 // The Annotation interface is based on annotation documents stored in the
 // `.ml-annotations-6` index, accessed via the `.ml-annotations-[read|write]` aliases.
@@ -58,10 +60,6 @@
 //         { "add" : { "index" : ".ml-annotations-6", "alias" : ".ml-annotations-write" } }
 //     ]
 // }
-
-import { PartitionFieldsType } from './anomalies';
-import { ANNOTATION_TYPE } from '../constants/annotations';
-
 export type AnnotationFieldName = 'partition_field_name' | 'over_field_name' | 'by_field_name';
 export type AnnotationFieldValue = 'partition_field_value' | 'over_field_value' | 'by_field_value';
 

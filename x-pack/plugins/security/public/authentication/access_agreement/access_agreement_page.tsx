@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import './access_agreement_page.scss';
-
 import {
   EuiButton,
   EuiFlexGroup,
@@ -23,10 +21,14 @@ import ReactMarkdown from 'react-markdown';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import type { CoreStart, FatalErrorsStart, HttpStart, NotificationsStart } from 'src/core/public';
 
+import type { CoreStart } from '../../../../../../src/core/public/types';
+import type { FatalErrorsStart } from '../../../../../../src/core/public/fatal_errors/fatal_errors_service';
+import type { HttpStart } from '../../../../../../src/core/public/http/types';
+import type { NotificationsStart } from '../../../../../../src/core/public/notifications/notifications_service';
 import { parseNext } from '../../../common/parse_next';
-import { AuthenticationStatePage } from '../components';
+import { AuthenticationStatePage } from '../components/authentication_state_page/authentication_state_page';
+import './access_agreement_page.scss';
 
 interface Props {
   http: HttpStart;

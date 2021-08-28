@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiButtonGroup, EuiFormRow, EuiIconTip, EuiSuperSelect, EuiText } from '@elastic/eui';
-import { fittingFunctionDefinitions } from '../../../common/expressions';
-import type { FittingFunction, ValueLabelConfig } from '../../../common/expressions';
+import { i18n } from '@kbn/i18n';
+import React from 'react';
+import type { FittingFunction } from '../../../common/expressions/xy_chart/fitting_function';
+import { fittingFunctionDefinitions } from '../../../common/expressions/xy_chart/fitting_function';
+import type { ValueLabelConfig } from '../../../common/expressions/xy_chart/xy_args';
 
 export interface MissingValuesOptionProps {
   valueLabels?: ValueLabelConfig;

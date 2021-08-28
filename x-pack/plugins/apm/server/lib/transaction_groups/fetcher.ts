@@ -4,13 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
 import { sortBy } from 'lodash';
 import moment from 'moment';
-import { Unionize } from 'utility-types';
-import { AggregationOptionsByType } from '../../../../../../src/core/types/elasticsearch';
-import { kqlQuery, rangeQuery } from '../../../../observability/server';
+import type { Unionize } from 'utility-types';
+import type { AggregationOptionsByType } from '../../../../../../src/core/types/elasticsearch';
+import {
+  kqlQuery,
+  rangeQuery,
+} from '../../../../observability/server/utils/queries';
 import {
   PARENT_ID,
   SERVICE_NAME,
@@ -25,7 +27,7 @@ import {
   getDocumentTypeFilterForAggregatedTransactions,
   getProcessorEventForAggregatedTransactions,
 } from '../helpers/aggregated_transactions';
-import { Setup, SetupTimeRange } from '../helpers/setup_request';
+import type { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { getAverages, getCounts, getSums } from './get_transaction_group_stats';
 
 export interface TopTraceOptions {

@@ -4,31 +4,33 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { useEffect, useState } from 'react';
 import {
-  EuiFlyout,
-  EuiFlyoutBody,
-  EuiFlyoutHeader,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButtonEmpty,
+  EuiFlyout,
+  EuiFlyoutBody,
   EuiFlyoutFooter,
+  EuiFlyoutHeader,
+  EuiSpacer,
   EuiTab,
   EuiTabs,
+  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import React, { useEffect, useState } from 'react';
 
-import { useGetSettings, useUrlModal, sendGetOneAgentPolicy, useFleetStatus } from '../../hooks';
-import { FLEET_SERVER_PACKAGE } from '../../constants';
-import type { PackagePolicy } from '../../types';
+import { FLEET_SERVER_PACKAGE } from '../../../common/constants/epm';
+import type { PackagePolicy } from '../../../common/types/models/package_policy';
+import { useFleetStatus } from '../../hooks/use_fleet_status';
+import { sendGetOneAgentPolicy } from '../../hooks/use_request/agent_policy';
+import { useGetSettings } from '../../hooks/use_request/settings';
+import { useUrlModal } from '../../hooks/use_url_modal';
 
 import { ManagedInstructions } from './managed_instructions';
-import { StandaloneInstructions } from './standalone_instructions';
 import { MissingFleetServerHostCallout } from './missing_fleet_server_host_callout';
+import { StandaloneInstructions } from './standalone_instructions';
 import type { BaseProps } from './types';
 
 type FlyoutMode = 'managed' | 'standalone';

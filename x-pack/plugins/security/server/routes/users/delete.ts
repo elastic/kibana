@@ -4,11 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { schema } from '@kbn/config-schema';
 
+import type { RouteDefinitionParams } from '..';
 import { wrapIntoCustomErrorResponse } from '../../errors';
-import type { RouteDefinitionParams } from '../index';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
 
 export function defineDeleteUserRoutes({ router }: RouteDefinitionParams) {

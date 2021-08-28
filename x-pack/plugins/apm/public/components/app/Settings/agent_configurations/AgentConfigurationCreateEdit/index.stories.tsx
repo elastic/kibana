@@ -7,7 +7,7 @@
 import { storiesOf } from '@storybook/react';
 import React from 'react';
 import { AgentConfigurationCreateEdit } from '.';
-import type { CoreStart } from '../../../../../../../../../src/core/public';
+import type { CoreStart } from '../../../../../../../../../src/core/public/types';
 import type { AgentConfiguration } from '../../../../../../common/agent_configuration/configuration_types';
 import type { ApmPluginContextValue } from '../../../../../context/apm_plugin/apm_plugin_context';
 import { ApmPluginContext } from '../../../../../context/apm_plugin/apm_plugin_context';

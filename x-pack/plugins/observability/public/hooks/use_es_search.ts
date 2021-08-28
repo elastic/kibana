@@ -4,12 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { estypes } from '@elastic/elasticsearch';
-import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
-import { ESSearchResponse } from '../../../../../src/core/types/elasticsearch';
-import { useKibana } from '../../../../../src/plugins/kibana_react/public';
-import { isCompleteResponse } from '../../../../../src/plugins/data/common';
+import type { ESSearchResponse } from '../../../../../src/core/types/elasticsearch';
+import { isCompleteResponse } from '../../../../../src/plugins/data/common/search/utils';
+import type { DataPublicPluginStart } from '../../../../../src/plugins/data/public/types';
+import { useKibana } from '../../../../../src/plugins/kibana_react/public/context/context';
 import { useFetcher } from './use_fetcher';
 
 export const useEsSearch = <TParams extends estypes.SearchRequest>(

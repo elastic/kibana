@@ -7,8 +7,8 @@
 
 import _ from 'lodash';
 import { DECIMAL_DEGREES_PRECISION } from './constants';
-import { clampToLatBounds } from './elasticsearch_util';
-import { MapExtent } from './descriptor_types';
+import type { MapExtent } from './descriptor_types/map_descriptor';
+import { clampToLatBounds } from './elasticsearch_util/elasticsearch_geo_utils';
 
 const ZOOM_TILE_KEY_INDEX = 0;
 const X_TILE_KEY_INDEX = 1;

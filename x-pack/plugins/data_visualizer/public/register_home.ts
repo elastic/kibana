@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { i18n } from '@kbn/i18n';
-import type { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
-import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public';
+import type { HomePublicPluginSetup } from '../../../../src/plugins/home/public/plugin';
+import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry';
 import { FileDataVisualizerWrapper } from './lazy_load_bundle/component_wrapper';
 
 const FILE_DATA_VIS_TAB_ID = 'fileDataViz';

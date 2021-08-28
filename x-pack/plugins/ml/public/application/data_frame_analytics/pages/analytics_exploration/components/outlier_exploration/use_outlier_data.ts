@@ -4,41 +4,36 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { EuiDataGridColumn } from '@elastic/eui';
 import { useEffect, useMemo } from 'react';
-
-import { EuiDataGridColumn } from '@elastic/eui';
-
-import { IndexPattern } from '../../../../../../../../../../src/plugins/data/public';
-
-import { DataLoader } from '../../../../../datavisualizer/index_based/data_loader';
-
+import { IndexPattern } from '../../../../../../../../../../src/plugins/data/common/index_patterns/index_patterns/index_pattern';
+import { DEFAULT_RESULTS_FIELD } from '../../../../../../../common/constants/data_frame_analytics';
+import type { DataFrameAnalyticsConfig } from '../../../../../../../common/types/data_frame_analytics';
 import {
-  useColorRange,
   COLOR_RANGE,
   COLOR_RANGE_SCALE,
-} from '../../../../../components/color_range_legend';
+  useColorRange,
+} from '../../../../../components/color_range_legend/use_color_range';
 import {
-  getFieldType,
   getDataGridSchemasFromFieldTypes,
   showDataGridColumnChartErrorMessageToast,
   useRenderCellValue,
-  UseIndexDataReturnType,
-} from '../../../../../components/data_grid';
-import { SavedSearchQuery } from '../../../../../contexts/ml';
+} from '../../../../../components/data_grid/common';
+import type { UseIndexDataReturnType } from '../../../../../components/data_grid/types';
+import { getFieldType } from '../../../../../components/data_grid/use_column_chart';
+import type { SavedSearchQuery } from '../../../../../contexts/ml/ml_context';
+import { DataLoader } from '../../../../../datavisualizer/index_based/data_loader/data_loader';
 import { getToastNotifications } from '../../../../../util/dependency_cache';
-
-import { getIndexData, getIndexFields, DataFrameAnalyticsConfig } from '../../../../common';
 import { FEATURE_INFLUENCE } from '../../../../common/constants';
-import { DEFAULT_RESULTS_FIELD } from '../../../../../../../common/constants/data_frame_analytics';
 import {
-  sortExplorationResultsFields,
   ML__ID_COPY,
   ML__INCREMENTAL_ID,
+  sortExplorationResultsFields,
 } from '../../../../common/fields';
-
-import { getFeatureCount, getOutlierScoreFieldName } from './common';
+import { getIndexData } from '../../../../common/get_index_data';
+import { getIndexFields } from '../../../../common/get_index_fields';
 import { useExplorationDataGrid } from '../exploration_results_table/use_exploration_data_grid';
+import { getFeatureCount, getOutlierScoreFieldName } from './common';
 
 export const useOutlierData = (
   indexPattern: IndexPattern | undefined,

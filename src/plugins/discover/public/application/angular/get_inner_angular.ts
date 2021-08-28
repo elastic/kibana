@@ -14,7 +14,7 @@ import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
 import angular from 'angular';
 // required for `ngSanitize` angular module
 import 'angular-sanitize';
-import type { CoreStart } from '../../../../../core/public';
+import type { CoreStart } from '../../../../../core/public/types';
 import type { PluginInitializerContext } from '../../../../../core/public/plugins/plugin_context';
 import type { DataPublicPluginStart } from '../../../../data/public/types';
 import {
@@ -31,7 +31,7 @@ import { createContextAppLegacy } from '../components/context_app/context_app_le
 import '../index.scss';
 import { createDiscoverDirective } from './create_discover_directive';
 import { createDiscoverGridDirective } from './create_discover_grid_directive';
-import { PromiseServiceCreator } from './promises';
+import { PromiseServiceCreator } from './helpers/promises';
 
 /**
  * returns the main inner angular module, it contains all the parts of Angular Discover

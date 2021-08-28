@@ -4,11 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { Fragment } from 'react';
-import { EuiText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { MetricsExplorerSeries } from '../../../../../common/http_api';
+import React, { Fragment } from 'react';
+import type { MetricsExplorerSeries } from '../../../../../common/http_api/metrics_explorer';
 
 interface Props {
   series: MetricsExplorerSeries;

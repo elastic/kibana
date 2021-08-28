@@ -4,14 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { useCallback, useEffect, useRef, useMemo } from 'react';
 import { EuiCallOut, EuiFormRow, EuiSpacer } from '@elastic/eui';
-import * as i18n from './translations';
-import { ActionParamsProps } from '../../../../types';
-import { SwimlaneActionConnector, SwimlaneActionParams, SwimlaneConnectorType } from './types';
-import { TextFieldWithMessageVariables } from '../../text_field_with_message_variables';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import type { ActionParamsProps } from '../../../../types';
 import { TextAreaWithMessageVariables } from '../../text_area_with_message_variables';
+import { TextFieldWithMessageVariables } from '../../text_field_with_message_variables';
+import * as i18n from './translations';
+import type { SwimlaneActionConnector, SwimlaneActionParams } from './types';
+import { SwimlaneConnectorType } from './types';
 
 const SwimlaneParamsFields: React.FunctionComponent<ActionParamsProps<SwimlaneActionParams>> = ({
   actionParams,

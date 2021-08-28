@@ -4,28 +4,27 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { Query } from 'src/plugins/data/public';
-import { Feature, GeoJsonProperties } from 'geojson';
-import { ESTermSource } from '../sources/es_term_source';
-import { getComputedFieldNamePrefix } from '../styles/vector/style_util';
+import type { Feature, GeoJsonProperties } from 'geojson';
+import type { Query } from 'src/plugins/data/public';
+import type { Adapters } from '../../../../../../src/plugins/inspector/common/adapters/types';
 import {
   FORMATTERS_DATA_REQUEST_ID_SUFFIX,
   META_DATA_REQUEST_ID_SUFFIX,
   SOURCE_TYPES,
 } from '../../../common/constants';
-import {
+import type { JoinDescriptor } from '../../../common/descriptor_types/layer_descriptor_types';
+import type {
   ESTermSourceDescriptor,
-  JoinDescriptor,
   TableSourceDescriptor,
   TermJoinSourceDescriptor,
-} from '../../../common/descriptor_types';
-import { IVectorSource } from '../sources/vector_source';
-import { IField } from '../fields/field';
-import { PropertiesMap } from '../../../common/elasticsearch_util';
-import { ITermJoinSource } from '../sources/term_join_source';
-import { TableSource } from '../sources/table_source';
-import { Adapters } from '../../../../../../src/plugins/inspector/common/adapters';
+} from '../../../common/descriptor_types/source_descriptor_types';
+import type { PropertiesMap } from '../../../common/elasticsearch_util/es_agg_utils';
+import type { IField } from '../fields/field';
+import { ESTermSource } from '../sources/es_term_source/es_term_source';
+import { TableSource } from '../sources/table_source/table_source';
+import type { ITermJoinSource } from '../sources/term_join_source/term_join_source';
+import type { IVectorSource } from '../sources/vector_source/vector_source';
+import { getComputedFieldNamePrefix } from '../styles/vector/style_util';
 
 function createJoinTermSource(
   descriptor: Partial<TermJoinSourceDescriptor> | undefined,

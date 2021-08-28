@@ -6,9 +6,8 @@
  */
 
 import * as rt from 'io-ts';
-import type { HttpHandler } from 'src/core/public';
-
-import { getJobId, jobCustomSettingsRT } from '../../../../../common/log_analysis';
+import type { HttpHandler } from '../../../../../../../../src/core/public/http/types';
+import { getJobId, jobCustomSettingsRT } from '../../../../../common/log_analysis/job_parameters';
 import { decodeOrThrow } from '../../../../../common/runtime_types';
 
 interface RequestArgs<JobType extends string> {

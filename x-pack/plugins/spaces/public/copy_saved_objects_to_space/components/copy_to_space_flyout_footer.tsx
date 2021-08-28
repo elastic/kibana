@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -17,11 +16,11 @@ import React, { Fragment } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+
 import type {
   FailedImport,
   ProcessedImportResponse,
-} from 'src/plugins/saved_objects_management/public';
-
+} from '../../../../../../src/plugins/saved_objects_management/public/lib/process_import_response';
 import type { ImportRetry } from '../types';
 
 interface Props {

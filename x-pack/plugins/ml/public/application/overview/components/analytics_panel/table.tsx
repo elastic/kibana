@@ -4,28 +4,24 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { FC, useState } from 'react';
-import {
+import type {
   Direction,
-  EuiBadge,
-  EuiInMemoryTable,
   EuiTableActionsColumnType,
   EuiTableComputedColumnType,
   EuiTableFieldDataColumnType,
 } from '@elastic/eui';
+import { EuiBadge, EuiInMemoryTable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { getAnalysisType } from '../../../data_frame_analytics/common/analytics';
-import {
-  DataFrameAnalyticsListColumn,
-  DataFrameAnalyticsListRow,
-} from '../../../data_frame_analytics/pages/analytics_management/components/analytics_list/common';
+import type { FC } from 'react';
+import React, { useState } from 'react';
+import { getAnalysisType } from '../../../../../common/util/analytics_utils';
+import { formatHumanReadableDateTimeSeconds } from '../../../../../common/util/date_utils';
+import type { DataFrameAnalyticsListRow } from '../../../data_frame_analytics/pages/analytics_management/components/analytics_list/common';
+import { DataFrameAnalyticsListColumn } from '../../../data_frame_analytics/pages/analytics_management/components/analytics_list/common';
 import {
   getTaskStateBadge,
   progressColumn,
 } from '../../../data_frame_analytics/pages/analytics_management/components/analytics_list/use_columns';
-import { formatHumanReadableDateTimeSeconds } from '../../../../../common/util/date_utils';
-
 import { ViewLink } from './actions';
 
 type DataFrameAnalyticsTableColumns = [

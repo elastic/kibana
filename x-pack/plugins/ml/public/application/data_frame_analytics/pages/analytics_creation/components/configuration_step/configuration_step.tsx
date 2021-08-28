@@ -4,14 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { FC } from 'react';
 import { EuiForm } from '@elastic/eui';
-
-import { CreateAnalyticsStepProps } from '../../../analytics_management/hooks/use_create_analytics_form';
+import type { FC } from 'react';
+import React from 'react';
+import type { CreateAnalyticsStepProps } from '../../../analytics_management/hooks/use_create_analytics_form/use_create_analytics_form';
+import { ANALYTICS_STEPS } from '../../page';
 import { ConfigurationStepDetails } from './configuration_step_details';
 import { ConfigurationStepForm } from './configuration_step_form';
-import { ANALYTICS_STEPS } from '../../page';
 
 export interface ConfigurationStepProps extends CreateAnalyticsStepProps {
   isClone: boolean;

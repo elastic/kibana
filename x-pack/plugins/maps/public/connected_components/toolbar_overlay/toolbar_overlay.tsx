@@ -5,15 +5,18 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { Filter } from 'src/plugins/data/public';
-import { ActionExecutionContext, Action } from 'src/plugins/ui_actions/public';
-import { SetViewControl } from './set_view_control';
-import { ToolsControl } from './tools_control';
+import React from 'react';
+import type { Filter } from '../../../../../../src/plugins/data/common/es_query';
+import type {
+  Action,
+  ActionExecutionContext,
+} from '../../../../../../src/plugins/ui_actions/public/actions/action';
 import { FeatureEditTools } from './feature_draw_controls/feature_edit_tools';
 import { FitToData } from './fit_to_data';
+import { SetViewControl } from './set_view_control';
 import { TimesliderToggleButton } from './timeslider_toggle_button';
+import { ToolsControl } from './tools_control';
 
 export interface Props {
   addFilters?: ((filters: Filter[], actionId: string) => Promise<void>) | null;

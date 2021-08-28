@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -19,7 +18,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useEffect } from 'react';
 import type { Query } from '../../../../../../../src/plugins/data/public';
-import { TimeKey } from '../../../../common/time';
+import type { TimeKey } from '../../../../common/time/time_key';
 import { useLogEntry } from '../../../containers/logs/log_entry';
 import { CenteredEuiFlyoutBody } from '../../centered_flyout_body';
 import { DataSearchErrorCallout } from '../../data_search_error_callout';

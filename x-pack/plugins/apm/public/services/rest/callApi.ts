@@ -7,7 +7,7 @@
 import { isString, startsWith } from 'lodash';
 import LRU from 'lru-cache';
 import hash from 'object-hash';
-import type { CoreSetup, CoreStart } from '../../../../../../src/core/public';
+import type { CoreSetup, CoreStart } from '../../../../../../src/core/public/types';
 import { enableInspectEsQueries } from '../../../../observability/common/ui_settings_keys';
 import type { FetchOptions } from '../../../common/fetch_options';
 

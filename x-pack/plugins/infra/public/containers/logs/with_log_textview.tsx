@@ -4,11 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import React, { useContext, useMemo } from 'react';
-
 import { UrlStateContainer } from '../../utils/url_state';
-import { availableTextScales, LogViewConfiguration, TextScale } from './log_view_configuration';
+import type { TextScale } from './log_view_configuration';
+import { availableTextScales, LogViewConfiguration } from './log_view_configuration';
 
 interface LogTextviewUrlState {
   textScale?: TextScale;

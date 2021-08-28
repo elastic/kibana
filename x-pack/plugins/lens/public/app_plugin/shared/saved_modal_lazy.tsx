@@ -4,15 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { Suspense, useEffect, useState } from 'react';
-
 import { EuiLoadingSpinner, EuiOverlayMask } from '@elastic/eui';
-import { CoreStart } from 'kibana/public';
-import type { SaveModalContainerProps } from '../save_modal_container';
+import React, { Suspense, useEffect, useState } from 'react';
+import type { CoreStart } from '../../../../../../src/core/public/types';
 import type { LensAttributeService } from '../../lens_attribute_service';
 import type { LensPluginStartDependencies } from '../../plugin';
+import type { SaveModalContainerProps } from '../save_modal_container';
 import type { LensAppServices } from '../types';
+
 const SaveModal = React.lazy(() => import('../save_modal_container'));
 
 function LoadingSpinnerWithOverlay() {

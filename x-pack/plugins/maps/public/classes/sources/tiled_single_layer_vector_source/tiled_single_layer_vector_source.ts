@@ -4,9 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { VectorSourceRequestMeta } from '../../../../common/descriptor_types';
-import { IVectorSource } from '../vector_source';
+import type { VectorSourceRequestMeta } from '../../../../common/descriptor_types/data_request_descriptor_types';
+import type { IVectorSource } from '../vector_source/vector_source';
 
 export interface ITiledSingleLayerMvtParams {
   layerName: string;

@@ -4,19 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { useCallback, useMemo, useEffect, useRef } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect, EuiSpacer } from '@elastic/eui';
 import { map } from 'lodash/fp';
-import { EuiFormRow, EuiSelect, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import * as i18n from './translations';
-
-import { ConnectorTypes, JiraFieldsType } from '../../../../common';
-import { useKibana } from '../../../common/lib/kibana';
-import { ConnectorFieldsProps } from '../types';
-import { useGetIssueTypes } from './use_get_issue_types';
-import { useGetFieldsByIssueType } from './use_get_fields_by_issue_type';
-import { SearchIssues } from './search_issues';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import { ConnectorTypes } from '../../../../common/api/connectors';
+import type { JiraFieldsType } from '../../../../common/api/connectors/jira';
+import { useKibana } from '../../../common/lib/kibana/kibana_react';
 import { ConnectorCard } from '../card';
+import type { ConnectorFieldsProps } from '../types';
+import { SearchIssues } from './search_issues';
+import * as i18n from './translations';
+import { useGetFieldsByIssueType } from './use_get_fields_by_issue_type';
+import { useGetIssueTypes } from './use_get_issue_types';
 
 const JiraFieldsComponent: React.FunctionComponent<ConnectorFieldsProps<JiraFieldsType>> = ({
   connector,

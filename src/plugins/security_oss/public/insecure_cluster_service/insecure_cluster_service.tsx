@@ -8,7 +8,7 @@
 import { BehaviorSubject, combineLatest, from } from 'rxjs';
 import { distinctUntilChanged, map } from 'rxjs/operators';
 
-import type { CoreSetup, CoreStart } from '../../../../core/public';
+import type { CoreSetup, CoreStart } from '../../../../core/public/types';
 import type { Toast } from '../../../../core/public/notifications/toasts/toasts_api';
 import type { MountPoint } from '../../../../core/public/types';
 import type { AppStateServiceStart } from '../app_state/app_state_service';

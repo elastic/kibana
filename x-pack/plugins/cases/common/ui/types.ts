@@ -4,19 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import {
-  AssociationType,
-  CaseAttributes,
-  CaseConnector,
-  CasePatchRequest,
-  CaseStatuses,
-  CaseType,
-  CommentRequest,
-  User,
-  UserAction,
-  UserActionField,
-} from '../api';
+import type { CaseAttributes, CasePatchRequest } from '../api/cases/case';
+import { CaseType } from '../api/cases/case';
+import type { CommentRequest } from '../api/cases/comment';
+import { AssociationType } from '../api/cases/comment';
+import { CaseStatuses } from '../api/cases/status';
+import type { UserAction, UserActionField } from '../api/cases/user_actions';
+import type { CaseConnector } from '../api/connectors';
+import type { User } from '../api/user';
 
 export interface CasesUiConfigType {
   markdownPlugins: {

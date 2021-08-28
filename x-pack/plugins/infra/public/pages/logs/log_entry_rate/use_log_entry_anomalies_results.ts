@@ -4,20 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { useMemo, useState, useCallback, useEffect, useReducer } from 'react';
+import { useCallback, useEffect, useMemo, useReducer, useState } from 'react';
 import useMount from 'react-use/lib/useMount';
-import { useTrackedPromise, CanceledPromiseError } from '../../../utils/use_tracked_promise';
-import { callGetLogEntryAnomaliesAPI } from './service_calls/get_log_entry_anomalies';
-import { callGetLogEntryAnomaliesDatasetsAPI } from './service_calls/get_log_entry_anomalies_datasets';
-import { GetLogEntryAnomaliesDatasetsSuccessResponsePayload } from '../../../../common/http_api/log_analysis';
-import {
-  AnomaliesSort,
+import type { GetLogEntryAnomaliesDatasetsSuccessResponsePayload } from '../../../../common/http_api/log_analysis/results/log_entry_anomalies_datasets';
+import type {
   Pagination,
   PaginationCursor,
+} from '../../../../common/log_analysis/log_analysis_results';
+import type {
+  AnomaliesSort,
   LogEntryAnomaly,
-} from '../../../../common/log_analysis';
+} from '../../../../common/log_analysis/log_entry_anomalies';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
+import { CanceledPromiseError, useTrackedPromise } from '../../../utils/use_tracked_promise';
+import { callGetLogEntryAnomaliesAPI } from './service_calls/get_log_entry_anomalies';
+import { callGetLogEntryAnomaliesDatasetsAPI } from './service_calls/get_log_entry_anomalies_datasets';
 
 export type SortOptions = AnomaliesSort;
 export type PaginationOptions = Pick<Pagination, 'pageSize'>;

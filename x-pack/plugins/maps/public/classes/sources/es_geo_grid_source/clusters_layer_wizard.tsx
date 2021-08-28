@@ -4,32 +4,32 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-// @ts-ignore
-import { CreateSourceEditor } from './create_source_editor';
-import { ESGeoGridSource, clustersTitle } from './es_geo_grid_source';
-import { LayerWizard, RenderWizardArguments } from '../../layers/layer_wizard_registry';
-import { VectorLayer } from '../../layers/vector_layer';
 import {
-  ESGeoGridSourceDescriptor,
-  ColorDynamicOptions,
-  SizeDynamicOptions,
-} from '../../../../common/descriptor_types';
-import { getDefaultDynamicProperties } from '../../styles/vector/vector_style_defaults';
-import { VectorStyle } from '../../styles/vector/vector_style';
-import {
-  COUNT_PROP_NAME,
   COLOR_MAP_TYPE,
+  COUNT_PROP_NAME,
   FIELD_ORIGIN,
   LAYER_WIZARD_CATEGORY,
   RENDER_AS,
-  VECTOR_STYLES,
   STYLE_TYPE,
+  VECTOR_STYLES,
 } from '../../../../common/constants';
-import { NUMERICAL_COLOR_PALETTES } from '../../styles/color_palettes';
+import type { ESGeoGridSourceDescriptor } from '../../../../common/descriptor_types/source_descriptor_types';
+import type {
+  ColorDynamicOptions,
+  SizeDynamicOptions,
+} from '../../../../common/descriptor_types/style_property_descriptor_types';
 import { ClustersLayerIcon } from '../../layers/icons/clusters_layer_icon';
+import type { LayerWizard, RenderWizardArguments } from '../../layers/layer_wizard_registry';
+import { VectorLayer } from '../../layers/vector_layer/vector_layer';
+import { NUMERICAL_COLOR_PALETTES } from '../../styles/color_palettes';
+import { VectorStyle } from '../../styles/vector/vector_style';
+import { getDefaultDynamicProperties } from '../../styles/vector/vector_style_defaults';
+// @ts-ignore
+import { CreateSourceEditor } from './create_source_editor';
+import { clustersTitle, ESGeoGridSource } from './es_geo_grid_source';
+
 
 export const clustersLayerWizardConfig: LayerWizard = {
   categories: [LAYER_WIZARD_CATEGORY.ELASTICSEARCH],

@@ -4,14 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { EuiIcon, EuiToolTip } from '@elastic/eui';
 import React from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import type { Role } from '../../../../common/model';
-import { isRoleReserved } from '../../../../common/model';
+import type { Role } from '../../../../common/model/role';
+import { isRoleReserved } from '../../../../common/model/role';
 
 interface Props {
   role: Role;

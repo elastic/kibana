@@ -4,10 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { HttpStart } from 'src/core/public';
-
-import type { EditUser, User } from '../../../common/model';
+import type { HttpStart } from '../../../../../../src/core/public/http/types';
+import type { EditUser, User } from '../../../common/model/user';
 
 const usersUrl = '/internal/security/users';
 

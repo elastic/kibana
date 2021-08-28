@@ -4,13 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { useState, useEffect, useRef, useCallback } from 'react';
-import { HttpSetup, ToastsApi } from 'kibana/public';
-import { ActionConnector } from '../../../../types';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import type { HttpSetup } from '../../../../../../../../src/core/public/http/types';
+import { ToastsApi } from '../../../../../../../../src/core/public/notifications/toasts/toasts_api';
+import type { ActionConnector } from '../../../../types';
 import { getChoices } from './api';
-import { Choice } from './types';
 import * as i18n from './translations';
+import type { Choice } from './types';
 
 export interface UseGetChoicesProps {
   http: HttpSetup;

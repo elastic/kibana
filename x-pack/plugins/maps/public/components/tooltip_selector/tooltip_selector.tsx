@@ -4,23 +4,23 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { Component, Fragment } from 'react';
-import classNames from 'classnames';
 import {
   EuiButtonIcon,
   EuiDragDropContext,
   EuiDraggable,
   EuiDroppable,
+  EuiSpacer,
   EuiText,
   EuiTextAlign,
   EuiTextColor,
-  EuiSpacer,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { AddTooltipFieldPopover, FieldProps } from './add_tooltip_field_popover';
-import { IField } from '../../classes/fields/field';
+import { FormattedMessage } from '@kbn/i18n/react';
+import classNames from 'classnames';
+import React, { Component, Fragment } from 'react';
+import type { IField } from '../../classes/fields/field';
+import type { FieldProps } from './add_tooltip_field_popover';
+import { AddTooltipFieldPopover } from './add_tooltip_field_popover';
 
 // TODO import reorder from EUI once its exposed as service
 // https://github.com/elastic/eui/issues/2372

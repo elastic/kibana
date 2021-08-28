@@ -4,8 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { Logger } from 'kibana/server';
+import type { Logger } from '@kbn/logging';
 
 export interface LogInitialization {
   log: Logger;

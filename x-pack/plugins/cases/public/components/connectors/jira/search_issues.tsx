@@ -4,15 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { useMemo, useEffect, useCallback, useState, memo } from 'react';
-import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
-
-import { useKibana } from '../../../common/lib/kibana';
-import { ActionConnector } from '../../../../common';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiComboBox } from '@elastic/eui';
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import type { ActionConnector } from '../../../../common/api/connectors';
+import { useKibana } from '../../../common/lib/kibana/kibana_react';
+import * as i18n from './translations';
 import { useGetIssues } from './use_get_issues';
 import { useGetSingleIssue } from './use_get_single_issue';
-import * as i18n from './translations';
 
 interface Props {
   selectedValue: string | null;

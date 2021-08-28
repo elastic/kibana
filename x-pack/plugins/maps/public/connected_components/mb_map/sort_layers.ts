@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { Map as MbMap, Layer as MbLayer } from '@kbn/mapbox-gl';
-import { ILayer } from '../../classes/layers/layer';
+import type { Layer as MbLayer } from '@kbn/mapbox-gl';
+import { Map as MbMap } from '@kbn/mapbox-gl';
+import type { ILayer } from '../../classes/layers/layer';
 
 // "Layer" is overloaded and can mean the following
 // 1) Map layer (ILayer): A single map layer consists of one to many mapbox layers.

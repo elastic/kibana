@@ -4,15 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { Fragment, FC, useContext, useEffect, useState } from 'react';
-import { JobCreatorContext } from '../../../job_creator_context';
-import { SingleMetricJobCreator } from '../../../../../common/job_creator';
-import { Results, ModelItem, Anomaly } from '../../../../../common/results_loader';
-import { LineChartData } from '../../../../../common/chart_loader';
-import { AnomalyChart, CHART_TYPE } from '../../../charts/anomaly_chart';
+import type { FC } from 'react';
+import React, { Fragment, useContext, useEffect, useState } from 'react';
+import { getToastNotificationService } from '../../../../../../../services/toast_notification_service/toast_notification_service';
+import type { LineChartData } from '../../../../../common/chart_loader/chart_loader';
+import { SingleMetricJobCreator } from '../../../../../common/job_creator/single_metric_job_creator';
+import type {
+  Anomaly,
+  ModelItem,
+  Results,
+} from '../../../../../common/results_loader/results_loader';
+import { AnomalyChart, CHART_TYPE } from '../../../charts/anomaly_chart/anomaly_chart';
 import { getChartSettings } from '../../../charts/common/settings';
-import { getToastNotificationService } from '../../../../../../../services/toast_notification_service';
+import { JobCreatorContext } from '../../../job_creator_context';
 
 const DTR_IDX = 0;
 

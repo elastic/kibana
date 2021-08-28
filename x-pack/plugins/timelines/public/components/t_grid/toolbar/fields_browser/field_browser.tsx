@@ -4,28 +4,33 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import {
+  EuiButton,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiModal,
   EuiModalBody,
+  EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
-  EuiModalFooter,
-  EuiButton,
-  EuiButtonEmpty,
   EuiSpacer,
 } from '@elastic/eui';
-import React, { useEffect, useCallback, useRef, useMemo } from 'react';
-import styled from 'styled-components';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useDispatch } from 'react-redux';
-
-import type { BrowserFields, ColumnHeaderOptions } from '../../../../../common';
-import { isEscape, isTab, stopPropagationAndPreventDefault } from '../../../../../common';
+import styled from 'styled-components';
+import type { BrowserFields } from '../../../../../common/search_strategy/index_fields';
+import type { ColumnHeaderOptions } from '../../../../../common/types/timeline/columns';
+import {
+  isEscape,
+  isTab,
+  stopPropagationAndPreventDefault,
+} from '../../../../../common/utils/accessibility/helpers';
+import { useDeepEqualSelector } from '../../../../hooks/use_selector';
+import * as tGridActions from '../../../../store/t_grid/actions';
+import * as tGridSelectors from '../../../../store/t_grid/selectors';
 import { CategoriesPane } from './categories_pane';
 import { FieldsPane } from './fields_pane';
-import { Search } from './search';
 import {
   CATEGORY_PANE_WIDTH,
   CLOSE_BUTTON_CLASS_NAME,
@@ -37,11 +42,9 @@ import {
   RESET_FIELDS_CLASS_NAME,
   scrollCategoriesPane,
 } from './helpers';
-import type { FieldBrowserProps } from './types';
-import { tGridActions, tGridSelectors } from '../../../../store/t_grid';
-
+import { Search } from './search';
 import * as i18n from './translations';
-import { useDeepEqualSelector } from '../../../../hooks/use_selector';
+import type { FieldBrowserProps } from './types';
 
 const PanesFlexGroup = styled(EuiFlexGroup)`
   width: ${PANES_FLEX_GROUP_WIDTH}px;

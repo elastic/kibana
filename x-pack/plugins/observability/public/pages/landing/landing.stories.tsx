@@ -8,7 +8,7 @@
 import { EuiPageTemplate } from '@elastic/eui';
 import React, { ComponentType } from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { CoreStart } from '../../../../../../src/core/public';
+import { CoreStart } from '../../../../../../src/core/public/types';
 import { createKibanaReactContext } from '../../../../../../src/plugins/kibana_react/public';
 import { PluginContext, PluginContextValue } from '../../context/plugin_context';
 import { LandingPage } from './';

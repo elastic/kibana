@@ -4,23 +4,22 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import { lazy } from 'react';
-import { i18n } from '@kbn/i18n';
-import {
+import type {
   ActionTypeModel,
   ConnectorValidationResult,
   GenericValidationResult,
 } from '../../../../types';
-import {
-  SwimlaneActionConnector,
-  SwimlaneConfig,
-  SwimlaneSecrets,
-  SwimlaneActionParams,
-} from './types';
 import { isValidUrl } from '../../../lib/value_validators';
 import { validateMappingForConnector } from './helpers';
+import type {
+  SwimlaneActionConnector,
+  SwimlaneActionParams,
+  SwimlaneConfig,
+  SwimlaneSecrets,
+} from './types';
 
 export const SW_SELECT_MESSAGE_TEXT = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.selectMessageText',

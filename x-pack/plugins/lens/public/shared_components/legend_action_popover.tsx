@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { useState } from 'react';
+import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
+import { EuiContextMenu, EuiIcon, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EuiContextMenuPanelDescriptor, EuiIcon, EuiPopover, EuiContextMenu } from '@elastic/eui';
+import React, { useState } from 'react';
 import type { LensFilterEvent } from '../types';
 
 export interface LegendActionPopoverProps {

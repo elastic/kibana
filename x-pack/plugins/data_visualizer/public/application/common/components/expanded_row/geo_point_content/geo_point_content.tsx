@@ -4,17 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { FC, useMemo } from 'react';
-
 import { EuiFlexItem } from '@elastic/eui';
-import { Feature, Point } from 'geojson';
-import type { FieldDataRowProps } from '../../stats_table/types/field_data_row';
+import type { Feature, Point } from 'geojson';
+import type { FC } from 'react';
+import React, { useMemo } from 'react';
+import { EmbeddedMapComponent } from '../../embedded_map/embedded_map';
+import { ExamplesList } from '../../examples_list/examples_list';
 import { DocumentStatsTable } from '../../stats_table/components/field_data_expanded_row/document_stats';
-import { EmbeddedMapComponent } from '../../embedded_map';
-import { convertWKTGeoToLonLat, getGeoPointsLayer } from './format_utils';
 import { ExpandedRowContent } from '../../stats_table/components/field_data_expanded_row/expanded_row_content';
-import { ExamplesList } from '../../examples_list';
+import type { FieldDataRowProps } from '../../stats_table/types/field_data_row';
+import { convertWKTGeoToLonLat, getGeoPointsLayer } from './format_utils';
 
 export const DEFAULT_GEO_REGEX = RegExp('(?<lat>.+) (?<lon>.+)');
 

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { FieldMap } from './types';
+import type { FieldMap } from './types';
 
 export function mergeFieldMaps<T1 extends FieldMap, T2 extends FieldMap>(
   first: T1,

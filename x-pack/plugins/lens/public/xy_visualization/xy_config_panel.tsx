@@ -5,51 +5,54 @@
  * 2.0.
  */
 
-import './xy_config_panel.scss';
-import React, { useMemo, useState, memo, useCallback } from 'react';
-import { i18n } from '@kbn/i18n';
-import { Position, ScaleType, VerticalAlignment, HorizontalAlignment } from '@elastic/charts';
-import { debounce } from 'lodash';
+import { HorizontalAlignment, Position, ScaleType, VerticalAlignment } from '@elastic/charts';
+import type { EuiColorPickerProps } from '@elastic/eui';
 import {
   EuiButtonGroup,
+  EuiColorPicker,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  htmlIdGenerator,
-  EuiColorPicker,
-  EuiColorPickerProps,
-  EuiToolTip,
   EuiIcon,
   EuiPopover,
+  EuiPopoverTitle,
   EuiSelectable,
   EuiText,
-  EuiPopoverTitle,
+  EuiToolTip,
+  htmlIdGenerator,
 } from '@elastic/eui';
-import type { PaletteRegistry } from 'src/plugins/charts/public';
+import { i18n } from '@kbn/i18n';
+import { debounce } from 'lodash';
+import React, { memo, useCallback, useMemo, useState } from 'react';
+import type { PaletteRegistry } from '../../../../../src/plugins/charts/public/services/palettes/types';
+import { ToolbarButton } from '../../../../../src/plugins/kibana_react/public/toolbar_button/toolbar_button';
 import type {
-  VisualizationLayerWidgetProps,
-  VisualizationToolbarProps,
-  VisualizationDimensionEditorProps,
-  FramePublicAPI,
-} from '../types';
-import { State, visualizationTypes, XYState } from './types';
-import type { FormatFactory } from '../../common';
-import {
-  SeriesType,
-  YAxisMode,
   AxesSettingsConfig,
   AxisExtentConfig,
-} from '../../common/expressions';
-import { isHorizontalChart, isHorizontalSeries, getSeriesColor } from './state_helpers';
-import { trackUiEvent } from '../lens_ui_telemetry';
-import { LegendSettingsPopover } from '../shared_components';
+  YAxisMode,
+} from '../../common/expressions/xy_chart/axis_config';
+import type { SeriesType } from '../../common/expressions/xy_chart/series_type';
+import type { FormatFactory } from '../../common/types';
+import { trackUiEvent } from '../lens_ui_telemetry/factory';
+import { LegendSettingsPopover } from '../shared_components/legend_settings_popover';
+import { PalettePicker } from '../shared_components/palette_picker';
+import { TooltipWrapper } from '../shared_components/tooltip_wrapper';
+import type {
+  FramePublicAPI,
+  VisualizationDimensionEditorProps,
+  VisualizationLayerWidgetProps,
+  VisualizationToolbarProps,
+} from '../types';
+import type { GroupsConfiguration } from './axes_configuration';
+import { getAxesConfiguration } from './axes_configuration';
 import { AxisSettingsPopover } from './axis_settings_popover';
-import { getAxesConfiguration, GroupsConfiguration } from './axes_configuration';
-import { PalettePicker, TooltipWrapper } from '../shared_components';
 import { getAccessorColorConfig, getColorAssignments } from './color_assignment';
+import { getSeriesColor, isHorizontalChart, isHorizontalSeries } from './state_helpers';
 import { getScaleType, getSortedAccessors } from './to_expression';
+import type { State, XYState } from './types';
+import { visualizationTypes } from './types';
 import { VisualOptionsPopover } from './visual_options_popover/visual_options_popover';
-import { ToolbarButton } from '../../../../../src/plugins/kibana_react/public';
+import './xy_config_panel.scss';
 
 type UnwrapArray<T> = T extends Array<infer P> ? P : T;
 type AxesSettingsConfigKeys = keyof AxesSettingsConfig;

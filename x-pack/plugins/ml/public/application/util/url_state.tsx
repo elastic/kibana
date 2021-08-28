@@ -4,17 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { parse, stringify } from 'query-string';
-import React, { createContext, useCallback, useContext, useMemo, FC } from 'react';
 import { isEqual } from 'lodash';
-import { decode, encode } from 'rison-node';
+import { parse, stringify } from 'query-string';
+import type { FC } from 'react';
+import React, { createContext, useCallback, useContext, useMemo } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
-
-import { Dictionary } from '../../../common/types/common';
-
+import { decode, encode } from 'rison-node';
+import type { MlPages } from '../../../common/constants/locator';
+import type { Dictionary } from '../../../common/types/common';
 import { getNestedProperty } from './object_utils';
-import { MlPages } from '../../../common/constants/locator';
 
 type Accessor = '_a' | '_g';
 export type SetUrlState = (

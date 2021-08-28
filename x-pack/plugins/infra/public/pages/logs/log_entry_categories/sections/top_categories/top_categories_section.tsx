@@ -4,16 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-
-import { LogEntryCategory } from '../../../../../../common/log_analysis';
-import { TimeRange } from '../../../../../../common/time';
+import type { LogEntryCategory } from '../../../../../../common/log_analysis/log_entry_categories_analysis';
+import type { TimeRange } from '../../../../../../common/time/time_range';
 import { LoadingOverlayWrapper } from '../../../../../components/loading_overlay_wrapper';
+import type { ChangeSortOptions, SortOptions } from '../../use_log_entry_categories_results';
 import { TopCategoriesTable } from './top_categories_table';
-import { SortOptions, ChangeSortOptions } from '../../use_log_entry_categories_results';
 
 export const TopCategoriesSection: React.FunctionComponent<{
   isLoadingTopCategories?: boolean;

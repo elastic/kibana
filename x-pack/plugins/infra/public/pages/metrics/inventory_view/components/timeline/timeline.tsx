@@ -4,46 +4,51 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { useMemo, useCallback, useEffect } from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
-import moment from 'moment';
-import { first, last } from 'lodash';
-import { EuiLoadingChart, EuiText, EuiEmptyPrompt, EuiButton } from '@elastic/eui';
+import type {
+  ElementClickListener,
+  GeometryValue,
+  RectAnnotationDatum,
+  TooltipValue,
+} from '@elastic/charts';
 import {
   Axis,
   Chart,
-  Settings,
-  Position,
-  TooltipValue,
   niceTimeFormatter,
-  ElementClickListener,
-  GeometryValue,
+  Position,
   RectAnnotation,
-  RectAnnotationDatum,
+  Settings,
 } from '@elastic/charts';
-import { EuiFlexItem } from '@elastic/eui';
-import { EuiFlexGroup } from '@elastic/eui';
-import { EuiIcon } from '@elastic/eui';
-import { useUiSetting } from '../../../../../../../../../src/plugins/kibana_react/public';
+import {
+  EuiButton,
+  EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiLoadingChart,
+  EuiText,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { first, last } from 'lodash';
+import moment from 'moment';
+import React, { useCallback, useEffect, useMemo } from 'react';
+import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
+import { useUiSetting } from '../../../../../../../../../src/plugins/kibana_react/public/ui_settings/use_ui_setting';
+import { Color, colorTransformer } from '../../../../../../common/color_palette';
+import type { MetricsExplorerAggregation } from '../../../../../../common/http_api/metrics_explorer';
 import { toMetricOpt } from '../../../../../../common/snapshot_metric_i18n';
-import { MetricsExplorerAggregation } from '../../../../../../common/http_api';
-import { colorTransformer, Color } from '../../../../../../common/color_palette';
-import { useSourceContext } from '../../../../../containers/metrics_source';
-import { useTimeline } from '../../hooks/use_timeline';
-import { useWaffleOptionsContext } from '../../hooks/use_waffle_options';
-import { useWaffleTimeContext } from '../../hooks/use_waffle_time';
-import { useWaffleFiltersContext } from '../../hooks/use_waffle_filters';
+import { useSourceContext } from '../../../../../containers/metrics_source/source';
+import type { InfraFormatter } from '../../../../../lib/lib';
+import { calculateDomain } from '../../../metrics_explorer/components/helpers/calculate_domain';
+import { getTimelineChartTheme } from '../../../metrics_explorer/components/helpers/get_chart_theme';
 import { MetricExplorerSeriesChart } from '../../../metrics_explorer/components/series_chart';
 import { MetricsExplorerChartType } from '../../../metrics_explorer/hooks/use_metrics_explorer_options';
-import { getTimelineChartTheme } from '../../../metrics_explorer/components/helpers/get_chart_theme';
-import { calculateDomain } from '../../../metrics_explorer/components/helpers/calculate_domain';
-
-import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
-import { InfraFormatter } from '../../../../../lib/lib';
 import { useMetricsHostsAnomaliesResults } from '../../hooks/use_metrics_hosts_anomalies';
 import { useMetricsK8sAnomaliesResults } from '../../hooks/use_metrics_k8s_anomalies';
+import { useTimeline } from '../../hooks/use_timeline';
+import { useWaffleFiltersContext } from '../../hooks/use_waffle_filters';
+import { useWaffleOptionsContext } from '../../hooks/use_waffle_options';
+import { useWaffleTimeContext } from '../../hooks/use_waffle_time';
 
 interface Props {
   interval: string;

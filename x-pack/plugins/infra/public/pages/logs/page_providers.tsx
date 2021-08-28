@@ -6,10 +6,10 @@
  */
 
 import React from 'react';
+import { LogAnalysisCapabilitiesProvider } from '../../containers/logs/log_analysis/log_analysis_capabilities';
+import { LogSourceProvider } from '../../containers/logs/log_source/log_source';
+import { useSourceId } from '../../containers/source_id/source_id';
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
-import { LogAnalysisCapabilitiesProvider } from '../../containers/logs/log_analysis';
-import { LogSourceProvider } from '../../containers/logs/log_source';
-import { useSourceId } from '../../containers/source_id';
 
 export const LogsPageProviders: React.FunctionComponent = ({ children }) => {
   const [sourceId] = useSourceId();

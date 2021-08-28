@@ -4,21 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
-
-import type { Agent, BulkActionResult } from '../../types';
-import * as APIKeyService from '../api_keys';
+import type { ElasticsearchClient } from '../../../../../../src/core/server/elasticsearch/client/types';
+import type { SavedObjectsClientContract } from '../../../../../../src/core/server/saved_objects/types';
+import type { Agent } from '../../../common/types/models/agent';
 import { HostedAgentPolicyRestrictionRelatedError } from '../../errors';
+import type { BulkActionResult } from '../../types';
+import * as APIKeyService from '../api_keys';
 
-import { createAgentAction, bulkCreateAgentActions } from './actions';
+import { bulkCreateAgentActions, createAgentAction } from './actions';
 import type { GetAgentsOptions } from './crud';
 import {
+  bulkUpdateAgents,
   getAgentById,
+  getAgentPolicyForAgent,
   getAgents,
   updateAgent,
-  getAgentPolicyForAgent,
-  bulkUpdateAgents,
 } from './crud';
 
 async function unenrollAgentIsAllowed(

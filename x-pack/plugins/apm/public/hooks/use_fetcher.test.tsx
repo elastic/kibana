@@ -8,7 +8,7 @@ import type { RenderHookResult } from '@testing-library/react-hooks';
 import { renderHook } from '@testing-library/react-hooks';
 import type { ReactNode } from 'react';
 import React from 'react';
-import type { CoreStart } from '../../../../../src/core/public';
+import type { CoreStart } from '../../../../../src/core/public/types';
 import { createKibanaReactContext } from '../../../../../src/plugins/kibana_react/public/context/context';
 import { delay } from '../utils/testHelpers';
 import type { FetcherResult } from './use_fetcher';

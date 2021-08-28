@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { InfraWaffleMapBounds } from '../../../../lib/lib';
 
-import { InfraWaffleMapBounds } from '../../../../lib/lib';
 export const convertBoundsToPercents = (bounds: InfraWaffleMapBounds) => ({
   min: bounds.min * 100,
   max: (bounds.max || 1) * 100,

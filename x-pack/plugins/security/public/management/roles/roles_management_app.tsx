@@ -10,11 +10,12 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { Route, Router, Switch, useParams } from 'react-router-dom';
 
 import { i18n } from '@kbn/i18n';
-import type { FatalErrorsSetup, StartServicesAccessor } from 'src/core/public';
-import type { RegisterManagementAppArgs } from 'src/plugins/management/public';
 
-import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
-import type { SecurityLicense } from '../../../common/licensing';
+import type { StartServicesAccessor } from '../../../../../../src/core/public/types';
+import type { FatalErrorsSetup } from '../../../../../../src/core/public/fatal_errors/fatal_errors_service';
+import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public/context/context';
+import type { RegisterManagementAppArgs } from '../../../../../../src/plugins/management/public/utils/management_app';
+import type { SecurityLicense } from '../../../common/licensing/license_service';
 import type { PluginStartDependencies } from '../../plugin';
 import { tryDecodeURIComponent } from '../url_utils';
 

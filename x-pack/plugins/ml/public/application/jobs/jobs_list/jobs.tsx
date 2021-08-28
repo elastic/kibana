@@ -4,16 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { FC } from 'react';
-import { NavigationMenu } from '../../components/navigation_menu';
+import type { FC } from 'react';
+import React from 'react';
+import { ML_PAGES } from '../../../../common/constants/locator';
+import type { ListingPageUrlState } from '../../../../common/types/common';
+import { HelpMenu } from '../../components/help_menu/help_menu';
+import { NavigationMenu } from '../../components/navigation_menu/navigation_menu';
+import { useMlKibana } from '../../contexts/kibana/kibana_context';
+import { usePageUrlState } from '../../util/url_state';
 // @ts-ignore
 import { JobsListView } from './components/jobs_list_view/index';
-import { usePageUrlState } from '../../util/url_state';
-import { ML_PAGES } from '../../../../common/constants/locator';
-import { ListingPageUrlState } from '../../../../common/types/common';
-import { HelpMenu } from '../../components/help_menu';
-import { useMlKibana } from '../../contexts/kibana';
 
 interface JobsPageProps {
   blockRefresh?: boolean;

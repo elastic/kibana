@@ -19,7 +19,7 @@ import { App1ToDashboardDrilldown } from './drilldowns/app1_to_dashboard_drilldo
 import { App1HelloWorldDrilldown } from './drilldowns/app1_hello_world_drilldown';
 import { createStartServicesGetter } from '../../../../src/plugins/kibana_utils/public';
 import { DiscoverSetup, DiscoverStart } from '../../../../src/plugins/discover/public';
-import { DashboardSetup, DashboardStart } from '../../../../src/plugins/dashboard/public';
+import type { DashboardSetup, DashboardStart } from '../../../../src/plugins/dashboard/public/plugin_contract';
 import { DashboardHelloWorldOnlyRangeSelectDrilldown } from './drilldowns/dashboard_hello_world_only_range_select_drilldown';
 import { DeveloperExamplesSetup } from '../../../../examples/developer_examples/public';
 import {

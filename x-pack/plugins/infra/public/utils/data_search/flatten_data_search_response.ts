@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { map } from 'rxjs/operators';
-import { IKibanaSearchRequest } from '../../../../../../src/plugins/data/public';
-import { ParsedDataSearchRequestDescriptor } from './types';
+import type { IKibanaSearchRequest } from '../../../../../../src/plugins/data/common/search/types';
+import type { ParsedDataSearchRequestDescriptor } from './types';
 
 export const flattenDataSearchResponseDescriptor = <
   Request extends IKibanaSearchRequest,

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import moment from 'moment';
-import type { CoreSetup } from '../../../../core/public';
+import type { CoreSetup } from '../../../../core/public/types';
 import type { PluginInitializerContext } from '../../../../core/public/plugins/plugin_context';
 import type { UsageCollectionSetup } from '../../../usage_collection/public/plugin';
 import type { ConfigSchema } from '../../config';

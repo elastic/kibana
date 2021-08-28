@@ -38,8 +38,8 @@ import {
   getAuthorizationModeBySource,
 } from './authorization/get_authorization_mode_by_source';
 import { registerBuiltInActionTypes } from './builtin_action_types';
-import { ensureCleanupFailedExecutionsTaskScheduled } from './cleanup_failed_executions/ensure_scheduled';
-import { registerCleanupFailedExecutionsTaskDefinition } from './cleanup_failed_executions/register_task_definition';
+import { ensureScheduled as ensureCleanupFailedExecutionsTaskScheduled } from './cleanup_failed_executions/ensure_scheduled';
+import { registerTaskDefinition as registerCleanupFailedExecutionsTaskDefinition } from './cleanup_failed_executions/register_task_definition';
 import type { ActionsConfig } from './config';
 import { getValidatedConfig } from './config';
 import { EVENT_LOG_ACTIONS, EVENT_LOG_PROVIDER } from './constants/event_log';

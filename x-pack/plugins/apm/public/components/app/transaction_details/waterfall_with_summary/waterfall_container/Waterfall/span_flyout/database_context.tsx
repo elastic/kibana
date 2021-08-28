@@ -8,7 +8,7 @@ import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { tint } from 'polished';
 import React, { Fragment } from 'react';
-import { default as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { Light as SyntaxHighlighter } from 'react-syntax-highlighter';
 import sql from 'react-syntax-highlighter/dist/cjs/languages/hljs/sql';
 import xcode from 'react-syntax-highlighter/dist/cjs/styles/hljs/xcode';
 import { euiStyled } from '../../../../../../../../../../../src/plugins/kibana_react/common/eui_styled_components';

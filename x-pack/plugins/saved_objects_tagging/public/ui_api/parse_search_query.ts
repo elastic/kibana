@@ -4,14 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { Query } from '@elastic/eui';
-import { SavedObjectsFindOptionsReference } from 'src/core/public';
-import {
+import type { SavedObjectsFindOptionsReference } from '../../../../../src/core/server/saved_objects/types';
+import type {
+  ITagsCache,
   ParseSearchQueryOptions,
   SavedObjectsTaggingApiUi,
-} from '../../../../../src/plugins/saved_objects_tagging_oss/public';
-import { ITagsCache } from '../services';
+} from '../../../../../src/plugins/saved_objects_tagging_oss/public/api';
 
 export interface BuildParseSearchQueryOptions {
   cache: ITagsCache;

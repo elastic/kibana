@@ -4,14 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { Geometry, Position } from 'geojson';
 import { set } from '@elastic/safer-lodash-set';
+import type { Geometry, Position } from 'geojson';
 import {
   CHECK_IS_DRAWING_INDEX,
   GET_MATCHING_INDEXES_PATH,
   INDEX_FEATURE_PATH,
-} from '../../../../../common';
+} from '../../../../../common/constants';
 import { getHttp } from '../../../../kibana_services';
 
 export const addFeatureToIndex = async (

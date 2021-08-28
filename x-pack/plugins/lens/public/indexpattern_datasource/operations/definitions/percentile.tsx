@@ -4,23 +4,22 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
-import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { AggFunctionsMapping } from 'src/plugins/data/public';
-import { buildExpressionFunction } from '../../../../../../../src/plugins/expressions/public';
-import { OperationDefinition } from './index';
+import React, { useCallback, useState } from 'react';
+import type { OperationDefinition } from '.';
+import type { AggFunctionsMapping } from '../../../../../../../src/plugins/data/common/search/aggs/types';
+import { buildExpressionFunction } from '../../../../../../../src/plugins/expressions/common/ast/build_function';
+import { useDebounceWithOptions } from '../../../shared_components/helpers';
+import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
+import type { FieldBasedIndexPatternColumn } from './column_types';
 import {
+  getFilter,
   getFormatFromPreviousColumn,
   getInvalidFieldMessage,
   getSafeName,
   isValidNumber,
-  getFilter,
 } from './helpers';
-import { FieldBasedIndexPatternColumn } from './column_types';
-import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
-import { useDebounceWithOptions } from '../../../shared_components';
 
 export interface PercentileIndexPatternColumn extends FieldBasedIndexPatternColumn {
   operationType: 'percentile';

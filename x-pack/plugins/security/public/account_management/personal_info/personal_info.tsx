@@ -4,13 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { EuiDescribedFormGroup, EuiFormRow, EuiText } from '@elastic/eui';
 import React from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import type { AuthenticatedUser } from '../../../common/model';
+import type { AuthenticatedUser } from '../../../common/model/authenticated_user';
 
 export interface PersonalInfoProps {
   user: AuthenticatedUser;

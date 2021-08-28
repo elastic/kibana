@@ -9,12 +9,12 @@
  * React component for rendering EuiEmptyPrompt when no jobs were found.
  */
 
-import React from 'react';
+import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-
-import { EuiEmptyPrompt, EuiButton } from '@elastic/eui';
-import { useMlLocator, useNavigateToPath } from '../../../contexts/kibana';
+import React from 'react';
 import { ML_PAGES } from '../../../../../common/constants/locator';
+import { useMlLocator } from '../../../contexts/kibana/use_create_url';
+import { useNavigateToPath } from '../../../contexts/kibana/use_navigate_to_path';
 
 export const TimeseriesexplorerNoJobsFound = () => {
   const mlLocator = useMlLocator();

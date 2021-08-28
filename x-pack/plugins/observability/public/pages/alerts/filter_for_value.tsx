@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { useCallback, useMemo } from 'react';
+import { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React, { useCallback, useMemo } from 'react';
 
 export const filterForValueButtonLabel = i18n.translate(
   'xpack.observability.hoverActions.filterForValueButtonLabel',
@@ -14,8 +14,6 @@ export const filterForValueButtonLabel = i18n.translate(
     defaultMessage: 'Filter for value',
   }
 );
-
-import { EuiButtonIcon, EuiButtonEmpty } from '@elastic/eui';
 
 interface FilterForValueProps {
   Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;

@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { APMBaseDoc } from './apm_base_doc';
-import { Stackframe } from './fields/stackframe';
-import { TimestampUs } from './fields/timestamp_us';
+import type { APMBaseDoc } from './apm_base_doc';
+import type { Stackframe } from './fields/stackframe';
+import type { TimestampUs } from './fields/timestamp_us';
 
 interface Processor {
   name: 'transaction';

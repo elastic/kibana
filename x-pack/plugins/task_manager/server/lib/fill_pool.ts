@@ -4,16 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { performance } from 'perf_hooks';
 import { Observable } from 'rxjs';
 import { concatMap, last } from 'rxjs/operators';
-import { ClaimOwnershipResult } from '../queries/task_claiming';
-import { ConcreteTaskInstance } from '../task';
-import { WithTaskTiming, startTaskTimer } from '../task_events';
+import type { ClaimOwnershipResult } from '../queries/task_claiming';
+import type { ConcreteTaskInstance } from '../task';
+import type { WithTaskTiming } from '../task_events';
+import { startTaskTimer } from '../task_events';
 import { TaskPoolRunResult } from '../task_pool';
-import { TaskManagerRunner } from '../task_running';
-import { Result, map as mapResult, asErr, asOk } from './result_type';
+import { TaskManagerRunner } from '../task_running/task_runner';
+import type { Result } from './result_type';
+import { asErr, asOk, map as mapResult } from './result_type';
 
 export enum FillPoolResult {
   Failed = 'Failed',

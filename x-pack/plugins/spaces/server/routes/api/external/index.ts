@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { Logger } from '@kbn/logging';
 
-import type { CoreSetup, Logger } from 'src/core/server';
-
-import type { SpacesServiceStart } from '../../../spaces_service';
+import type { CoreSetup } from '../../../../../../../src/core/server';
+import type { SpacesServiceStart } from '../../../spaces_service/spaces_service';
 import type { SpacesRouter } from '../../../types';
-import type { UsageStatsServiceSetup } from '../../../usage_stats';
+import type { UsageStatsServiceSetup } from '../../../usage_stats/usage_stats_service';
 import { initCopyToSpacesApi } from './copy_to_space';
 import { initDeleteSpacesApi } from './delete';
 import { initDisableLegacyUrlAliasesApi } from './disable_legacy_url_aliases';

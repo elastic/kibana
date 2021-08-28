@@ -4,10 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { ISavedObjectTypeRegistry } from 'src/core/server';
-
-import { SavedObjectsUtils } from '../../../../../src/core/server';
+import type { ISavedObjectTypeRegistry } from '../../../../../src/core/server/saved_objects/saved_objects_type_registry';
+import { SavedObjectsUtils } from '../../../../../src/core/server/saved_objects/service/lib/utils';
 
 export const getDescriptorNamespace = (
   typeRegistry: ISavedObjectTypeRegistry,

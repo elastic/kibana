@@ -4,14 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { useRef, useEffect, FC, ReactNode } from 'react';
-import { EuiInMemoryTable, EuiBasicTableColumn, EuiLink, Query } from '@elastic/eui';
+import type { EuiBasicTableColumn } from '@elastic/eui';
+import { EuiInMemoryTable, EuiLink, Query } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { TagsCapabilities, TagWithRelations } from '../../../common';
-import { TagBadge } from '../../components';
-import { TagAction } from '../actions';
+import type { FC, ReactNode } from 'react';
+import React, { useEffect, useRef } from 'react';
+import type { TagsCapabilities } from '../../../common/capabilities';
+import type { TagWithRelations } from '../../../common/types';
+import { TagBadge } from '../../components/base/tag_badge';
+import type { TagAction } from '../actions/types';
 
 interface TagTableProps {
   loading: boolean;

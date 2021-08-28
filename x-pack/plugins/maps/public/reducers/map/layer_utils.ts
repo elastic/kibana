@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { LayerDescriptor } from '../../../common/descriptor_types';
-import { MapState } from './types';
+import type { LayerDescriptor } from '../../../common/descriptor_types/layer_descriptor_types';
 import { copyPersistentState, TRACKED_LAYER_DESCRIPTOR } from '../copy_persistent_state';
+import type { MapState } from './types';
 
 export function getLayerIndex(list: LayerDescriptor[], layerId: string): number {
   return list.findIndex(({ id }) => layerId === id);

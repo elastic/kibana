@@ -4,13 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { merge, pick } from 'lodash';
 import { combineLatest, of } from 'rxjs';
-import { pick, merge } from 'lodash';
 import { map, startWith } from 'rxjs/operators';
-import { AggregatedStatProvider } from './runtime_statistics_aggregator';
-import { TaskManagerConfig } from '../config';
-import { ManagedConfiguration } from '../lib/create_managed_configuration';
+import type { TaskManagerConfig } from '../config';
+import type { ManagedConfiguration } from '../lib/create_managed_configuration';
+import type { AggregatedStatProvider } from './runtime_statistics_aggregator';
 
 const CONFIG_FIELDS_TO_EXPOSE = [
   'request_capacity',

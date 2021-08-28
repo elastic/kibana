@@ -4,13 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { HttpHandler } from 'src/core/public';
+import type { HttpHandler } from '../../../../../../../../src/core/public/http/types';
 import {
   getLogSourceStatusPath,
   getLogSourceStatusSuccessResponsePayloadRT,
-} from '../../../../../common/http_api/log_sources';
-import { FetchLogSourceStatusError } from '../../../../../common/log_sources';
+} from '../../../../../common/http_api/log_sources/get_log_source_status';
+import { FetchLogSourceStatusError } from '../../../../../common/log_sources/errors';
 import { decodeOrThrow } from '../../../../../common/runtime_types';
 
 export const callFetchLogSourceStatusAPI = async (sourceId: string, fetch: HttpHandler) => {

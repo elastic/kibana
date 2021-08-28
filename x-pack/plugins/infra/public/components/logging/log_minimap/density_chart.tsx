@@ -4,14 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { scaleLinear, scaleTime } from 'd3-scale';
 import { area, curveMonotoneY } from 'd3-shape';
 import { max } from 'lodash';
 import * as React from 'react';
-
-import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
-import { LogEntriesSummaryBucket } from '../../../../common/http_api';
+import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
+import type { LogEntriesSummaryBucket } from '../../../../common/http_api/log_entries/summary';
 
 interface DensityChartProps {
   buckets: LogEntriesSummaryBucket[];

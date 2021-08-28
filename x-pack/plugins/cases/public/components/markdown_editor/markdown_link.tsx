@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { EuiLinkAnchorProps } from '@elastic/eui';
+import { EuiLink, EuiToolTip } from '@elastic/eui';
 import React, { memo } from 'react';
-import { EuiLink, EuiLinkAnchorProps, EuiToolTip } from '@elastic/eui';
 
 type MarkdownLinkProps = { disableLinks?: boolean } & EuiLinkAnchorProps;
 

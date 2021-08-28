@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { ActionParamsProps } from '../../../../types';
-import { WebhookActionParams } from '../types';
+import React from 'react';
+import type { ActionParamsProps } from '../../../../types';
 import { JsonEditorWithMessageVariables } from '../../json_editor_with_message_variables';
+import type { WebhookActionParams } from '../types';
 
 const WebhookParamsFields: React.FunctionComponent<ActionParamsProps<WebhookActionParams>> = ({
   actionParams,

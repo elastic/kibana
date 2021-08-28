@@ -4,12 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { useMemo, useCallback } from 'react';
-import { EuiTitle, EuiText, EuiSpacer, EuiSteps } from '@elastic/eui';
-import { createInitialConfigurationStep } from '../initial_configuration_step';
-import { createProcessStep } from '../process_step';
-import { useLogEntryRateSetup } from '../../../../containers/logs/log_analysis/modules/log_entry_rate';
+import { EuiSpacer, EuiSteps, EuiText, EuiTitle } from '@elastic/eui';
+import React, { useCallback, useMemo } from 'react';
+import { useLogEntryRateSetup } from '../../../../containers/logs/log_analysis/modules/log_entry_rate/use_log_entry_rate_setup';
+import { createInitialConfigurationStep } from '../initial_configuration_step/initial_configuration_step';
+import { createProcessStep } from '../process_step/process_step';
 
 export const LogEntryRateSetupView: React.FC<{
   onClose: () => void;

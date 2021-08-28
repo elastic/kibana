@@ -4,19 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { useState, useMemo } from 'react';
-import { HttpHandler } from 'kibana/public';
-import { useKibana } from '../../../../../../../../../src/plugins/kibana_react/public';
-import { useTrackedPromise } from '../../../../../utils/use_tracked_promise';
-import {
+import { useMemo, useState } from 'react';
+import type { HttpHandler } from '../../../../../../../../../src/core/public/http/types';
+import { useKibana } from '../../../../../../../../../src/plugins/kibana_react/public/context/context';
+import type {
+  GetLogAlertsChartPreviewDataAlertParamsSubset,
   GetLogAlertsChartPreviewDataSuccessResponsePayload,
-  getLogAlertsChartPreviewDataSuccessResponsePayloadRT,
+} from '../../../../../../common/http_api/log_alerts/chart_preview_data';
+import {
   getLogAlertsChartPreviewDataRequestPayloadRT,
+  getLogAlertsChartPreviewDataSuccessResponsePayloadRT,
   LOG_ALERTS_CHART_PREVIEW_DATA_PATH,
-} from '../../../../../../common/http_api';
+} from '../../../../../../common/http_api/log_alerts/chart_preview_data';
 import { decodeOrThrow } from '../../../../../../common/runtime_types';
-import { GetLogAlertsChartPreviewDataAlertParamsSubset } from '../../../../../../common/http_api/log_alerts/';
+import { useTrackedPromise } from '../../../../../utils/use_tracked_promise';
 
 interface Options {
   sourceId: string;

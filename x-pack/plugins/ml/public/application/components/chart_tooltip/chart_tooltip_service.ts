@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { BehaviorSubject, Observable } from 'rxjs';
+import type { TooltipValue, TooltipValueFormatter } from '@elastic/charts';
 import { isEqual } from 'lodash';
-import { TooltipValue, TooltipValueFormatter } from '@elastic/charts';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { distinctUntilChanged } from 'rxjs/operators';
 
 export interface ChartTooltipValue extends TooltipValue {

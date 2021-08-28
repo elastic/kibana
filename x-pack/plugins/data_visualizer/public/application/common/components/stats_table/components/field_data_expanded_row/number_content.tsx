@@ -4,21 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { FC, ReactNode, useEffect, useState } from 'react';
 import { EuiBasicTable, EuiFlexItem, EuiText } from '@elastic/eui';
-
-import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+import type { FC, ReactNode } from 'react';
+import React, { useEffect, useState } from 'react';
+import { TopValues } from '../../../top_values/top_values';
+import { kibanaFieldFormat } from '../../../utils/kibana_field_format';
+import { numberAsOrdinal } from '../../../utils/number_as_ordinal';
 import type { FieldDataRowProps } from '../../types/field_data_row';
-import { kibanaFieldFormat, numberAsOrdinal } from '../../../utils';
-import {
-  MetricDistributionChart,
-  MetricDistributionChartData,
-  buildChartDataFromStats,
-} from '../metric_distribution_chart';
-import { TopValues } from '../../../top_values';
-import { ExpandedRowFieldHeader } from '../expanded_row_field_header';
+import { ExpandedRowFieldHeader } from '../expanded_row_field_header/expanded_row_field_header';
+import type { MetricDistributionChartData } from '../metric_distribution_chart/metric_distribution_chart';
+import { MetricDistributionChart } from '../metric_distribution_chart/metric_distribution_chart';
+import { buildChartDataFromStats } from '../metric_distribution_chart/metric_distribution_chart_data_builder';
 import { DocumentStatsTable } from './document_stats';
 import { ExpandedRowContent } from './expanded_row_content';
 

@@ -4,13 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { Component, Fragment } from 'react';
-import _ from 'lodash';
-import { EuiText, EuiLink } from '@elastic/eui';
+import { EuiLink, EuiText } from '@elastic/eui';
 import classNames from 'classnames';
-import { Attribution } from '../../../../common/descriptor_types';
-import { ILayer } from '../../../classes/layers/layer';
+import _ from 'lodash';
+import React, { Component, Fragment } from 'react';
+import type { Attribution } from '../../../../common/descriptor_types/layer_descriptor_types';
+import type { ILayer } from '../../../classes/layers/layer';
 
 export interface Props {
   isFullScreen: boolean;

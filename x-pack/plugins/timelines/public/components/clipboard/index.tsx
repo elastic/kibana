@@ -4,13 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { EuiButtonIcon } from '@elastic/eui';
 import classNames from 'classnames';
 import copy from 'copy-to-clipboard';
 import React from 'react';
 import { useAppToasts } from '../../hooks/use_app_toasts';
-
 import * as i18n from './translations';
 
 export const COPY_TO_CLIPBOARD_BUTTON_CLASS_NAME = 'copy-to-clipboard';

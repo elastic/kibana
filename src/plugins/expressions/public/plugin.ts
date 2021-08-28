@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import { pick } from 'lodash';
-import type { CoreSetup, CoreStart } from '../../../core/public';
+import type { CoreSetup, CoreStart } from '../../../core/public/types';
 import type { Plugin } from '../../../core/public/plugins/plugin';
 import type { PluginInitializerContext } from '../../../core/public/plugins/plugin_context';
 import type {

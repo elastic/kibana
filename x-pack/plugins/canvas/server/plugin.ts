@@ -11,7 +11,7 @@ import {
   PluginStart as DataPluginStart,
 } from 'src/plugins/data/server';
 import { ExpressionsServerSetup } from 'src/plugins/expressions/server';
-import { BfetchServerSetup } from 'src/plugins/bfetch/server';
+import type { BfetchServerSetup } from 'src/plugins/bfetch/server/types';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { HomeServerPluginSetup } from 'src/plugins/home/server';
 import { ESSQL_SEARCH_STRATEGY } from '../common/lib/constants';

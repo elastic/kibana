@@ -4,12 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { i18n } from '@kbn/i18n';
-import type { ApplicationSetup, AppMountParameters, StartServicesAccessor } from 'src/core/public';
 
-import { AppNavLinkStatus } from '../../../../../src/core/public';
-import type { AuthenticationServiceSetup } from '../authentication';
+import type { StartServicesAccessor } from '../../../../../src/core/public/types';
+import type {
+  ApplicationSetup,
+  AppMountParameters,
+} from '../../../../../src/core/public/application/types';
+import { AppNavLinkStatus } from '../../../../../src/core/public/application/types';
+import type { AuthenticationServiceSetup } from '../authentication/authentication_service';
 
 interface CreateDeps {
   application: ApplicationSetup;

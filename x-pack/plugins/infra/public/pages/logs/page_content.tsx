@@ -4,27 +4,25 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { EuiHeaderLinks, EuiHeaderLink } from '@elastic/eui';
+import { EuiHeaderLink, EuiHeaderLinks } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useContext } from 'react';
 import { Route, Switch } from 'react-router-dom';
 import useMount from 'react-use/lib/useMount';
-
-import { AlertDropdown } from '../../alerting/log_threshold';
-import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
+import { useKibana } from '../../../../../../src/plugins/kibana_react/public/context/context';
+import { HeaderMenuPortal } from '../../../../observability/public/components/shared';
+import { AlertDropdown } from '../../alerting/log_threshold/components/alert_dropdown';
 import { DocumentTitle } from '../../components/document_title';
 import { HelpCenterContent } from '../../components/help_center_content';
-import { useLogSourceContext } from '../../containers/logs/log_source';
-import { RedirectWithQueryParams } from '../../utils/redirect_with_query_params';
-import { LogEntryCategoriesPage } from './log_entry_categories';
-import { LogEntryRatePage } from './log_entry_rate';
-import { LogsSettingsPage } from './settings';
-import { StreamPage } from './stream';
-import { HeaderMenuPortal } from '../../../../observability/public';
-import { HeaderActionMenuContext } from '../../utils/header_action_menu_provider';
+import { useLogSourceContext } from '../../containers/logs/log_source/log_source';
 import { useLinkProps } from '../../hooks/use_link_props';
 import { useReadOnlyBadge } from '../../hooks/use_readonly_badge';
+import { HeaderActionMenuContext } from '../../utils/header_action_menu_provider';
+import { RedirectWithQueryParams } from '../../utils/redirect_with_query_params';
+import { LogEntryCategoriesPage } from './log_entry_categories/page';
+import { LogEntryRatePage } from './log_entry_rate/page';
+import { LogsSettingsPage } from './settings/source_configuration_settings';
+import { StreamPage } from './stream/page';
 
 export const LogsPageContent: React.FunctionComponent = () => {
   const uiCapabilities = useKibana().services.application?.capabilities;

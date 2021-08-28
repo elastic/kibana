@@ -4,9 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { plugin } from './plugin';
 import { LensParser } from './parser';
+import { plugin } from './plugin';
 import { LensMarkDownRenderer } from './processor';
 import { INSERT_LENS } from './translations';
 

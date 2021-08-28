@@ -6,7 +6,7 @@
  */
 
 import * as React from 'react';
-import { TriggersAndActionsUIPublicPluginStart } from '../../../triggers_actions_ui/public';
+import type { TriggersAndActionsUIPublicPluginStart } from '../../../triggers_actions_ui/public/plugin';
 
 interface ContextProps {
   triggersActionsUI: TriggersAndActionsUIPublicPluginStart | null;

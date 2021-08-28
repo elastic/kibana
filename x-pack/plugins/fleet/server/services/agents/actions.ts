@@ -6,10 +6,14 @@
  */
 
 import uuid from 'uuid';
-import type { ElasticsearchClient } from 'kibana/server';
 
-import type { Agent, AgentAction, FleetServerAgentAction } from '../../../common/types/models';
-import { AGENT_ACTIONS_INDEX } from '../../../common/constants';
+import type { ElasticsearchClient } from '../../../../../../src/core/server/elasticsearch/client/types';
+import { AGENT_ACTIONS_INDEX } from '../../../common/constants/agent';
+import type {
+  Agent,
+  AgentAction,
+  FleetServerAgentAction,
+} from '../../../common/types/models/agent';
 
 const ONE_MONTH_IN_MS = 2592000000;
 

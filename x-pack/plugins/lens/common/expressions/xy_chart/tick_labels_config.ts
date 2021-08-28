@@ -4,9 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { i18n } from '@kbn/i18n';
-import type { ExpressionFunctionDefinition } from '../../../../../../src/plugins/expressions/common';
+import type { ExpressionFunctionDefinition } from '../../../../../../src/plugins/expressions/common/expression_functions/types';
 import type { AxesSettingsConfig } from './axis_config';
 
 export type TickLabelsConfigResult = AxesSettingsConfig & { type: 'lens_xy_tickLabelsConfig' };

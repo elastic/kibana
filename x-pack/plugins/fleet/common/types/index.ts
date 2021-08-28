@@ -4,11 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { PreconfiguredAgentPolicy, PreconfiguredPackage } from './models/preconfiguration';
 
 export * from './models';
 export * from './rest_spec';
-
-import type { PreconfiguredAgentPolicy, PreconfiguredPackage } from './models/preconfiguration';
 
 export interface FleetConfigType {
   enabled: boolean;

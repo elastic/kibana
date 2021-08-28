@@ -70,7 +70,8 @@ export {
   SearchStrategyDependencies,
   shimHitsTotal,
 } from './search';
-export {
+
+export type {
   DataServerPlugin as Plugin,
   DataPluginSetup as PluginSetup,
   DataPluginStart as PluginStart,

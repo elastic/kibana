@@ -4,9 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { settingsRoutesService } from '../../services';
-import type { PutSettingsResponse, PutSettingsRequest, GetSettingsResponse } from '../../types';
+import { settingsRoutesService } from '../../../common/services/routes';
+import type {
+  GetSettingsResponse,
+  PutSettingsRequest,
+  PutSettingsResponse,
+} from '../../../common/types/rest_spec/settings';
 
 import { sendRequest, useRequest } from './use_request';
 

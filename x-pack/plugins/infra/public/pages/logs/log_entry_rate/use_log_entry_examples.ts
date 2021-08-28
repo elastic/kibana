@@ -4,10 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { useMemo, useState } from 'react';
-
-import { LogEntryExample } from '../../../../common/log_analysis';
+import type { LogEntryExample } from '../../../../common/log_analysis/log_entry_examples';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { useTrackedPromise } from '../../../utils/use_tracked_promise';
 import { callGetLogEntryExamplesAPI } from './service_calls/get_log_entry_examples';

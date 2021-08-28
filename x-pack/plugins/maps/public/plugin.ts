@@ -6,20 +6,54 @@
  */
 
 import React from 'react';
-import type { Setup as InspectorSetupContract } from 'src/plugins/inspector/public';
-import type { UiActionsStart } from 'src/plugins/ui_actions/public';
-import type { NavigationPublicPluginStart } from 'src/plugins/navigation/public';
-import type { Start as InspectorStartContract } from 'src/plugins/inspector/public';
-import type { DashboardStart } from 'src/plugins/dashboard/public';
-import type { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
+import type { CoreSetup, CoreStart } from '../../../../src/core/public/types';
+import type { AppMountParameters } from '../../../../src/core/public/application/types';
+import type { Plugin } from '../../../../src/core/public/plugins/plugin';
+import type { PluginInitializerContext } from '../../../../src/core/public/plugins/plugin_context';
+import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils/default_app_categories';
+import type { ChartsPluginStart } from '../../../../src/plugins/charts/public/types';
+import type { DashboardStart } from '../../../../src/plugins/dashboard/public/plugin_contract';
+import type { DataPublicPluginStart } from '../../../../src/plugins/data/public/types';
+import { CONTEXT_MENU_TRIGGER } from '../../../../src/plugins/embeddable/public/lib/triggers/triggers';
 import type {
-  AppMountParameters,
-  CoreSetup,
-  CoreStart,
-  Plugin,
-  PluginInitializerContext,
-} from '../../../../src/core/public';
-import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
+  EmbeddableSetup,
+  EmbeddableStart,
+} from '../../../../src/plugins/embeddable/public/plugin';
+import { ExpressionsPublicPlugin } from '../../../../src/plugins/expressions/public/plugin';
+import type { HomePublicPluginSetup } from '../../../../src/plugins/home/public/plugin';
+import type {
+  Setup as InspectorSetupContract,
+  Start as InspectorStartContract,
+} from '../../../../src/plugins/inspector/public/plugin';
+import type { MapsEmsPluginSetup } from '../../../../src/plugins/maps_ems/public';
+import type { NavigationPublicPluginStart } from '../../../../src/plugins/navigation/public/types';
+import type { PresentationUtilPluginStart } from '../../../../src/plugins/presentation_util/public/types';
+import type { SavedObjectsStart } from '../../../../src/plugins/saved_objects/public/plugin';
+import type {
+  SharePluginSetup,
+  SharePluginStart,
+} from '../../../../src/plugins/share/public/plugin';
+import type { UiActionsStart } from '../../../../src/plugins/ui_actions/public/plugin';
+import { VISUALIZE_GEO_FIELD_TRIGGER } from '../../../../src/plugins/ui_actions/public/triggers/visualize_geo_field_trigger';
+import type { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public/plugin';
+import type {
+  VisualizationsSetup,
+  VisualizationsStart,
+} from '../../../../src/plugins/visualizations/public/plugin';
+import type { FileUploadPluginStart } from '../../file_upload/public/plugin';
+import type { LicensingPluginSetup, LicensingPluginStart } from '../../licensing/public/types';
+import type { SavedObjectTaggingPluginStart } from '../../saved_objects_tagging/public/types';
+import type { SecurityPluginStart } from '../../security/public/plugin';
+import { APP_ICON_SOLUTION, APP_ID, MAP_SAVED_OBJECT_TYPE } from '../common/constants';
+import { EMSSettings } from '../common/ems_settings';
+import { getAppTitle } from '../common/i18n_getters';
+import type { MapsConfigType, MapsXPackConfig } from '../config';
+import { createLayerDescriptors } from './api/create_layer_descriptors';
+import { suggestEMSTermJoinConfig } from './api/ems';
+import { registerLayerWizard, registerSource } from './api/register';
+import type { MapsStartApi } from './api/start_api';
+import { MapEmbeddableFactory } from './embeddable/map_embeddable_factory';
+import { featureCatalogueEntry } from './feature_catalogue_entry';
 // @ts-ignore
 import { MapView } from './inspector/views/map_view';
 import {
@@ -29,60 +63,28 @@ import {
   setMapAppConfig,
   setStartServices,
 } from './kibana_services';
-import { featureCatalogueEntry } from './feature_catalogue_entry';
-import { getMapsVisTypeAlias } from './maps_vis_type_alias';
-import type { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
-import type {
-  VisualizationsSetup,
-  VisualizationsStart,
-} from '../../../../src/plugins/visualizations/public';
-import type { Plugin as ExpressionsPublicPlugin } from '../../../../src/plugins/expressions/public';
-import { APP_ICON_SOLUTION, APP_ID, MAP_SAVED_OBJECT_TYPE } from '../common/constants';
-import { VISUALIZE_GEO_FIELD_TRIGGER } from '../../../../src/plugins/ui_actions/public';
-import { visualizeGeoFieldAction } from './trigger_actions/visualize_geo_field_action';
-import { filterByMapExtentAction } from './trigger_actions/filter_by_map_extent_action';
-import { MapEmbeddableFactory } from './embeddable/map_embeddable_factory';
-import type { EmbeddableSetup, EmbeddableStart } from '../../../../src/plugins/embeddable/public';
-import { CONTEXT_MENU_TRIGGER } from '../../../../src/plugins/embeddable/public';
-import { MapsXPackConfig, MapsConfigType } from '../config';
-import { getAppTitle } from '../common/i18n_getters';
 import { lazyLoadMapModules } from './lazy_load_bundle';
-import {
-  createLayerDescriptors,
-  registerLayerWizard,
-  registerSource,
-  MapsStartApi,
-  suggestEMSTermJoinConfig,
-} from './api';
-import type { SharePluginSetup, SharePluginStart } from '../../../../src/plugins/share/public';
-import type { MapsEmsPluginSetup } from '../../../../src/plugins/maps_ems/public';
-import type { DataPublicPluginStart } from '../../../../src/plugins/data/public';
-import type { LicensingPluginSetup, LicensingPluginStart } from '../../licensing/public';
-import type { FileUploadPluginStart } from '../../file_upload/public';
-import type { SavedObjectsStart } from '../../../../src/plugins/saved_objects/public';
-import type { PresentationUtilPluginStart } from '../../../../src/plugins/presentation_util/public';
+import { createRegionMapFn } from './legacy_visualizations/region_map/region_map_fn';
+import { regionMapRenderer } from './legacy_visualizations/region_map/region_map_renderer';
+import { regionMapVisType } from './legacy_visualizations/region_map/region_map_vis_type';
+import { createTileMapFn } from './legacy_visualizations/tile_map/tile_map_fn';
+import { tileMapRenderer } from './legacy_visualizations/tile_map/tile_map_renderer';
+import { tileMapVisType } from './legacy_visualizations/tile_map/tile_map_vis_type';
 import {
   getIsEnterprisePlus,
   registerLicensedFeatures,
   setLicensingPluginStart,
 } from './licensed_features';
-import { EMSSettings } from '../common/ems_settings';
-import type { SavedObjectTaggingPluginStart } from '../../saved_objects_tagging/public';
-import type { ChartsPluginStart } from '../../../../src/plugins/charts/public';
 import {
   MapsAppLocatorDefinition,
   MapsAppRegionMapLocatorDefinition,
   MapsAppTileMapLocatorDefinition,
 } from './locators';
-import {
-  createRegionMapFn,
-  regionMapRenderer,
-  regionMapVisType,
-  createTileMapFn,
-  tileMapRenderer,
-  tileMapVisType,
-} from './legacy_visualizations';
-import { SecurityPluginStart } from '../../security/public';
+import { getMapsVisTypeAlias } from './maps_vis_type_alias';
+import { filterByMapExtentAction } from './trigger_actions/filter_by_map_extent_action';
+import { visualizeGeoFieldAction } from './trigger_actions/visualize_geo_field_action';
+
+
 
 export interface MapsPluginSetupDependencies {
   expressions: ReturnType<ExpressionsPublicPlugin['setup']>;

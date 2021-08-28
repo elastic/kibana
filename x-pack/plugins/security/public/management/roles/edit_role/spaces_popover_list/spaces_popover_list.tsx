@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import './spaces_popover_list.scss';
-
 import {
   EuiButtonEmpty,
   EuiContextMenuItem,
@@ -19,10 +17,11 @@ import React, { Component, memo } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import type { Space } from 'src/plugins/spaces_oss/common';
-import type { SpacesApiUi } from 'src/plugins/spaces_oss/public';
 
-import { SPACE_SEARCH_COUNT_THRESHOLD } from '../../../../../../spaces/common';
+import type { Space } from '../../../../../../../../src/plugins/spaces_oss/common/types';
+import type { SpacesApiUi } from '../../../../../../../../src/plugins/spaces_oss/public/api';
+import { SPACE_SEARCH_COUNT_THRESHOLD } from '../../../../../../spaces/common/constants';
+import './spaces_popover_list.scss';
 
 interface Props {
   spaces: Space[];

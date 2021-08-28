@@ -4,15 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { FC, useContext, useEffect, useState } from 'react';
-import { EuiHorizontalRule, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-
-import { RareFieldSelector } from '../rare_field';
+import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
+import type { FC } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
+import { RareJobCreator } from '../../../../../common/job_creator/rare_job_creator';
 import { JobCreatorContext } from '../../../job_creator_context';
-import { RareJobCreator } from '../../../../../common/job_creator';
-import { RareDetector } from '../rare_detector';
-import { PopulationFieldSelector } from '../population_field';
+import { PopulationFieldSelector } from '../population_field/population_field';
+import { RareDetector } from '../rare_detector/rare_detector';
+import { RareFieldSelector } from '../rare_field/rare_field';
 import { DetectorDescription } from './detector_description';
 import { RARE_DETECTOR_TYPE } from './rare_view';
 

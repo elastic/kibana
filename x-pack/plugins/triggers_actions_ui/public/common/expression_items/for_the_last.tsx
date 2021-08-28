@@ -4,24 +4,23 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { i18n } from '@kbn/i18n';
 import {
   EuiExpression,
+  EuiFieldNumber,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
   EuiPopover,
   EuiSelect,
-  EuiFlexGroup,
-  EuiFormRow,
-  EuiFlexItem,
-  EuiFieldNumber,
 } from '@elastic/eui';
-import { getTimeUnitLabel } from '../lib/get_time_unit_label';
-import { TIME_UNITS } from '../../application/constants';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+import React, { useState } from 'react';
+import { TIME_UNITS } from '../../application/constants/time_units';
+import type { IErrorObject } from '../../types';
 import { getTimeOptions } from '../lib/get_time_options';
-import { ClosablePopoverTitle } from './components';
-import { IErrorObject } from '../../types';
+import { getTimeUnitLabel } from '../lib/get_time_unit_label';
+import { ClosablePopoverTitle } from './components/closable_popover_title';
 
 export interface ForLastExpressionProps {
   timeWindowSize?: number;

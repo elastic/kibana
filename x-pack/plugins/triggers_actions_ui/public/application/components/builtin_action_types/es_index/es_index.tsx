@@ -4,16 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
-import {
+import { lazy } from 'react';
+import { ALERT_HISTORY_PREFIX } from '../../../../../../actions/common/alert_history_schema';
+import type {
   ActionTypeModel,
-  GenericValidationResult,
   ConnectorValidationResult,
-  ALERT_HISTORY_PREFIX,
+  GenericValidationResult,
 } from '../../../../types';
-import { EsIndexActionConnector, EsIndexConfig, IndexActionParams } from '../types';
+import type { EsIndexActionConnector, EsIndexConfig, IndexActionParams } from '../types';
 
 export function getActionType(): ActionTypeModel<EsIndexConfig, unknown, IndexActionParams> {
   return {

@@ -11,49 +11,43 @@
  * rescheduling, middleware application, etc.
  */
 
-import apm from 'elastic-apm-node';
 import { withSpan } from '@kbn/apm-utils';
+import type { Logger } from '@kbn/logging';
+import apm from 'elastic-apm-node';
+import { defaults, flow, identity } from 'lodash';
 import { performance } from 'perf_hooks';
-import { identity, defaults, flow } from 'lodash';
-import {
-  Logger,
-  SavedObjectsErrorHelpers,
-  ExecutionContextStart,
-} from '../../../../../src/core/server';
-
-import { Middleware } from '../lib/middleware';
-import {
-  asOk,
-  asErr,
-  mapErr,
-  eitherAsync,
-  unwrap,
-  isOk,
-  mapOk,
-  Result,
-  promiseResult,
-} from '../lib/result_type';
-import {
-  TaskRun,
-  TaskMarkRunning,
-  asTaskRunEvent,
-  asTaskMarkRunningEvent,
-  startTaskTimer,
-  TaskTiming,
-  TaskPersistence,
-} from '../task_events';
+import type { ExecutionContextStart } from '../../../../../src/core/server/execution_context/execution_context_service';
+import { SavedObjectsErrorHelpers } from '../../../../../src/core/server/saved_objects/service/lib/errors';
 import { intervalFromDate, maxIntervalFromDate } from '../lib/intervals';
+import type { Middleware } from '../lib/middleware';
+import type { Result } from '../lib/result_type';
 import {
+  asErr,
+  asOk,
+  eitherAsync,
+  isOk,
+  mapErr,
+  mapOk,
+  promiseResult,
+  unwrap,
+} from '../lib/result_type';
+import type {
   CancelFunction,
   CancellableTask,
   ConcreteTaskInstance,
-  isFailedRunResult,
-  SuccessfulRunResult,
   FailedRunResult,
   FailedTaskResult,
+  SuccessfulRunResult,
   TaskDefinition,
-  TaskStatus,
 } from '../task';
+import { isFailedRunResult, TaskStatus } from '../task';
+import type { TaskMarkRunning, TaskRun, TaskTiming } from '../task_events';
+import {
+  asTaskMarkRunningEvent,
+  asTaskRunEvent,
+  startTaskTimer,
+  TaskPersistence,
+} from '../task_events';
 import { TaskTypeDictionary } from '../task_type_dictionary';
 import { isUnrecoverableError } from './errors';
 

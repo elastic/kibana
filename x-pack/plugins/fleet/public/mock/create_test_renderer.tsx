@@ -11,7 +11,7 @@ import React, { memo } from 'react';
 import type { RenderOptions, RenderResult } from '@testing-library/react';
 import { render as reactRender, act } from '@testing-library/react';
 
-import { ScopedHistory } from '../../../../../src/core/public';
+// import { ScopedHistory } from '../../../../../src/core/public';
 import { FleetAppContext } from '../applications/fleet/app';
 import { IntegrationsAppContext } from '../applications/integrations/app';
 import type { FleetConfigType } from '../plugin';

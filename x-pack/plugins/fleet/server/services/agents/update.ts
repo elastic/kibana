@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
-
-import { AGENT_SAVED_OBJECT_TYPE } from '../../constants';
+import type { ElasticsearchClient } from '../../../../../../src/core/server/elasticsearch/client/types';
+import type { SavedObjectsClientContract } from '../../../../../../src/core/server/saved_objects/types';
+import { AGENT_SAVED_OBJECT_TYPE } from '../../../common/constants/agent';
 
 import { getAgentsByKuery } from './crud';
 import { unenrollAgent } from './unenroll';

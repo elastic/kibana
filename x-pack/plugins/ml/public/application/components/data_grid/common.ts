@@ -5,53 +5,42 @@
  * 2.0.
  */
 
-import moment from 'moment-timezone';
 import { estypes } from '@elastic/elasticsearch';
-import { useEffect, useMemo } from 'react';
-
-import {
+import type {
   EuiDataGridCellValueElementProps,
   EuiDataGridSorting,
   EuiDataGridStyle,
 } from '@elastic/eui';
-
 import { i18n } from '@kbn/i18n';
-
-import { CoreSetup } from 'src/core/public';
-
-import {
-  IndexPattern,
-  IFieldType,
-  ES_FIELD_TYPES,
-  KBN_FIELD_TYPES,
-} from '../../../../../../../src/plugins/data/public';
-
+import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
+import moment from 'moment-timezone';
+import { useEffect, useMemo } from 'react';
+import type { CoreSetup } from '../../../../../../../src/core/public/types';
+import type { IFieldType } from '../../../../../../../src/plugins/data/common/index_patterns/fields/types';
+import { IndexPattern } from '../../../../../../../src/plugins/data/common/index_patterns/index_patterns/index_pattern';
 import { DEFAULT_RESULTS_FIELD } from '../../../../common/constants/data_frame_analytics';
-import { extractErrorMessage } from '../../../../common/util/errors';
-import {
+import type {
   FeatureImportance,
   FeatureImportanceClassName,
   TopClasses,
 } from '../../../../common/types/feature_importance';
-
-import {
-  BASIC_NUMERICAL_TYPES,
-  EXTENDED_NUMERICAL_TYPES,
-} from '../../data_frame_analytics/common/fields';
-
+import type { RuntimeMappings } from '../../../../common/types/fields';
+import { formatHumanReadableDateTimeSeconds } from '../../../../common/util/date_utils';
+import { extractErrorMessage } from '../../../../common/util/errors/process_errors';
+import { isRuntimeMappings } from '../../../../common/util/runtime_field_utils';
 import {
   FEATURE_IMPORTANCE,
   FEATURE_INFLUENCE,
   OUTLIER_SCORE,
   TOP_CLASSES,
 } from '../../data_frame_analytics/common/constants';
-import { formatHumanReadableDateTimeSeconds } from '../../../../common/util/date_utils';
-import { getNestedProperty } from '../../util/object_utils';
+import {
+  BASIC_NUMERICAL_TYPES,
+  EXTENDED_NUMERICAL_TYPES,
+} from '../../data_frame_analytics/common/fields';
 import { mlFieldFormatService } from '../../services/field_format_service';
-
-import { DataGridItem, IndexPagination, RenderCellValue } from './types';
-import { RuntimeMappings } from '../../../../common/types/fields';
-import { isRuntimeMappings } from '../../../../common/util/runtime_field_utils';
+import { getNestedProperty } from '../../util/object_utils';
+import type { DataGridItem, IndexPagination, RenderCellValue } from './types';
 
 export const INIT_MAX_COLUMNS = 10;
 export const COLUMN_CHART_DEFAULT_VISIBILITY_ROWS_THRESHOLED = 10000;

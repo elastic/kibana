@@ -17,8 +17,6 @@ export { createDashboardEditUrl, DashboardConstants } from './dashboard_constant
 export { DashboardAppLocator, DashboardAppLocatorParams } from './locator';
 export {
   DashboardFeatureFlagConfig,
-  DashboardSetup,
-  DashboardStart,
   DashboardUrlGenerator,
 } from './plugin';
 export { DashboardSavedObject } from './saved_dashboards';

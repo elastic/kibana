@@ -4,11 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
-
 import { RecreateJobCallout } from './recreate_job_callout';
 
 export const JobDefinitionOutdatedCallout: React.FC<{

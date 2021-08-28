@@ -4,14 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { IBasePath, KibanaRequest } from 'src/core/server';
-import type { Space } from 'src/plugins/spaces_oss/common';
-
-import { getSpaceIdFromPath } from '../../common';
+import type { IBasePath } from '../../../../../src/core/server/http/base_path_service';
+import type { KibanaRequest } from '../../../../../src/core/server/http/router/request';
+import type { Space } from '../../../../../src/plugins/spaces_oss/common/types';
 import { DEFAULT_SPACE_ID } from '../../common/constants';
+import { getSpaceIdFromPath } from '../../common/lib/spaces_url_parser';
 import { namespaceToSpaceId, spaceIdToNamespace } from '../lib/utils/namespace';
-import type { ISpacesClient, SpacesClientServiceStart } from '../spaces_client';
+import type { ISpacesClient } from '../spaces_client/spaces_client';
+import type { SpacesClientServiceStart } from '../spaces_client/spaces_client_service';
 
 /**
  * The Spaces service setup contract.

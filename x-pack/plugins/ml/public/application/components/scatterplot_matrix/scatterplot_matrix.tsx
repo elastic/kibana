@@ -4,15 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { useMemo, useEffect, useState, FC } from 'react';
-
+// Separate imports for lazy loadable VegaChart and related code
 import { estypes } from '@elastic/elasticsearch';
-
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiCallOut,
   EuiComboBox,
-  EuiComboBoxOptionOption,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
@@ -21,33 +18,26 @@ import {
   EuiSpacer,
   EuiSwitch,
 } from '@elastic/eui';
-
 import { i18n } from '@kbn/i18n';
-
-import { IndexPattern } from '../../../../../../../src/plugins/data/public';
-import { extractErrorMessage } from '../../../../common';
+import type { FC } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { IndexPattern } from '../../../../../../../src/plugins/data/common/index_patterns/index_patterns/index_pattern';
+import type { RuntimeMappings } from '../../../../common/types/fields';
+import { extractErrorMessage } from '../../../../common/util/errors/process_errors';
 import { isRuntimeMappings } from '../../../../common/util/runtime_field_utils';
 import { stringHash } from '../../../../common/util/string_utils';
-import { RuntimeMappings } from '../../../../common/types/fields';
+import { useMlApiContext } from '../../contexts/kibana/use_ml_api_context';
 import type { ResultsSearchQuery } from '../../data_frame_analytics/common/analytics';
-import { getCombinedRuntimeMappings } from '../../components/data_grid';
-
-import { useMlApiContext } from '../../contexts/kibana';
-
-import { getProcessedFields } from '../data_grid';
-import { useCurrentEuiTheme } from '../color_range_legend';
-
-// Separate imports for lazy loadable VegaChart and related code
-import { VegaChart } from '../vega_chart';
+import { useCurrentEuiTheme } from '../color_range_legend/use_color_range';
+import { getCombinedRuntimeMappings, getProcessedFields } from '../data_grid/common';
 import type { LegendType } from '../vega_chart/common';
+import { VegaChart } from '../vega_chart/vega_chart';
 import { VegaChartLoading } from '../vega_chart/vega_chart_loading';
-
+import './scatterplot_matrix.scss';
 import {
   getScatterplotMatrixVegaLiteSpec,
   OUTLIER_SCORE_FIELD,
 } from './scatterplot_matrix_vega_lite_spec';
-
-import './scatterplot_matrix.scss';
 
 const SCATTERPLOT_MATRIX_DEFAULT_FIELDS = 4;
 const SCATTERPLOT_MATRIX_DEFAULT_FETCH_SIZE = 1000;

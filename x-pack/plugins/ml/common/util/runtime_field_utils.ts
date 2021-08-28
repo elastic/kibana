@@ -5,9 +5,9 @@
  * 2.0.
  */
 import { estypes } from '@elastic/elasticsearch';
-import { isPopulatedObject } from './object_utils';
-import { RUNTIME_FIELD_TYPES } from '../../../../../src/plugins/data/common';
+import { RUNTIME_FIELD_TYPES } from '../../../../../src/plugins/data/common/index_patterns/constants';
 import type { RuntimeMappings } from '../types/fields';
+import { isPopulatedObject } from './object_utils';
 
 type RuntimeType = typeof RUNTIME_FIELD_TYPES[number];
 

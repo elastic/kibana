@@ -6,8 +6,8 @@
  */
 
 import * as rt from 'io-ts';
-import type { HttpHandler } from 'src/core/public';
-import { getDatafeedId, getJobId } from '../../../../common/infra_ml';
+import type { HttpHandler } from '../../../../../../../src/core/public/http/types';
+import { getDatafeedId, getJobId } from '../../../../common/infra_ml/job_parameters';
 import { decodeOrThrow } from '../../../../common/runtime_types';
 
 interface DeleteJobsRequestArgs<JobType extends string> {

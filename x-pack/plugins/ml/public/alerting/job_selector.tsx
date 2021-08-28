@@ -4,14 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { FC, ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
+import type { EuiComboBoxOptionOption, EuiComboBoxProps } from '@elastic/eui';
+import { EuiComboBox, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiComboBox, EuiComboBoxOptionOption, EuiComboBoxProps, EuiFormRow } from '@elastic/eui';
-import { JobId } from '../../common/types/anomaly_detection_jobs';
-import { MlApiServices } from '../application/services/ml_api_service';
+import type { FC, ReactNode } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { ALL_JOBS_SELECTION } from '../../common/constants/alerts';
+import type { JobId } from '../../common/types/anomaly_detection_jobs/job';
+import type { MlApiServices } from '../application/services/ml_api_service';
 
 interface JobSelection {
   jobIds?: JobId[];

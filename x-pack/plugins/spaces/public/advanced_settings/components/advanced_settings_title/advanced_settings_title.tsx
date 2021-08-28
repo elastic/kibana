@@ -4,14 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiTitle } from '@elastic/eui';
 import React, { lazy, Suspense, useEffect, useState } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
-import type { Space } from 'src/plugins/spaces_oss/common';
 
-import { getSpaceAvatarComponent } from '../../../space_avatar';
+import type { Space } from '../../../../../../../src/plugins/spaces_oss/common/types';
+import { getSpaceAvatarComponent } from '../../../space_avatar/space_avatar';
 
 // No need to wrap LazySpaceAvatar in an error boundary, because it is one of the first chunks loaded when opening Kibana.
 const LazySpaceAvatar = lazy(() =>

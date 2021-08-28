@@ -4,11 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { EuiAccordion, EuiPanel, EuiSpacer, EuiTitle, EuiButton } from '@elastic/eui';
+import { EuiAccordion, EuiButton, EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import React from 'react';
-import { ErrorPanel } from './error_panel';
 import { usePluginContext } from '../../../hooks/use_plugin_context';
+import { ErrorPanel } from './error_panel';
 
 interface AppLink {
   label: string;

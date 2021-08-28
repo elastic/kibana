@@ -5,11 +5,12 @@
  * 2.0.
  */
 
+import type { DropResult } from '@elastic/eui';
+import { EuiDragDropContext, EuiDraggable, EuiDroppable } from '@elastic/eui';
 import _ from 'lodash';
 import React, { Component } from 'react';
-import { DropResult, EuiDragDropContext, EuiDroppable, EuiDraggable } from '@elastic/eui';
+import type { ILayer } from '../../../../classes/layers/layer';
 import { TOCEntry } from './toc_entry';
-import { ILayer } from '../../../../classes/layers/layer';
 
 export interface Props {
   isReadOnly: boolean;

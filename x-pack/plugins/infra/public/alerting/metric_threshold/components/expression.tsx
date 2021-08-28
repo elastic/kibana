@@ -4,41 +4,40 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { debounce } from 'lodash';
-import { Unit } from '@elastic/datemath';
-import React, { ChangeEvent, useCallback, useMemo, useEffect, useState } from 'react';
+import type { Unit } from '@elastic/datemath';
 import {
-  EuiSpacer,
-  EuiText,
-  EuiFormRow,
+  EuiAccordion,
   EuiButtonEmpty,
   EuiCheckbox,
-  EuiToolTip,
-  EuiIcon,
   EuiFieldSearch,
-  EuiAccordion,
+  EuiFormRow,
+  EuiIcon,
   EuiPanel,
+  EuiSpacer,
+  EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { Comparator, Aggregators } from '../../../../common/alerting/metrics';
-import { ForLastExpression } from '../../../../../triggers_actions_ui/public';
-import {
-  IErrorObject,
-  AlertTypeParams,
+import { FormattedMessage } from '@kbn/i18n/react';
+import { debounce } from 'lodash';
+import type { ChangeEvent } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import type { AlertTypeParams } from '../../../../../alerting/common/alert';
+import { ForLastExpression } from '../../../../../triggers_actions_ui/public/common/expression_items';
+import type {
   AlertTypeParamsExpressionProps,
-} from '../../../../../triggers_actions_ui/public';
-import { MetricsExplorerKueryBar } from '../../../pages/metrics/metrics_explorer/components/kuery_bar';
-import { MetricsExplorerOptions } from '../../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
-import { MetricsExplorerGroupBy } from '../../../pages/metrics/metrics_explorer/components/group_by';
+  IErrorObject,
+} from '../../../../../triggers_actions_ui/public/types';
+import { Aggregators, Comparator } from '../../../../common/alerting/metrics/types';
 import { useSourceViaHttp } from '../../../containers/metrics_source/use_source_via_http';
-import { convertKueryToElasticSearchQuery } from '../../../utils/kuery';
-
-import { ExpressionRow } from './expression_row';
-import { MetricExpression, AlertParams, AlertContextMeta } from '../types';
-import { ExpressionChart } from './expression_chart';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
+import { MetricsExplorerGroupBy } from '../../../pages/metrics/metrics_explorer/components/group_by';
+import { MetricsExplorerKueryBar } from '../../../pages/metrics/metrics_explorer/components/kuery_bar';
+import type { MetricsExplorerOptions } from '../../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
+import { convertKueryToElasticSearchQuery } from '../../../utils/kuery';
+import type { AlertContextMeta, AlertParams, MetricExpression } from '../types';
+import { ExpressionChart } from './expression_chart';
+import { ExpressionRow } from './expression_row';
 
 const FILTER_TYPING_DEBOUNCE_MS = 500;
 

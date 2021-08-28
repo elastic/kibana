@@ -4,42 +4,43 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { i18n } from '@kbn/i18n';
 import { capitalize } from 'lodash';
-import {
-  CountIndexPatternColumn,
-  DateHistogramIndexPatternColumn,
+import type { ExistsFilter } from '../../../../../../../../src/plugins/data/common/es_query';
+import { IndexPattern } from '../../../../../../../../src/plugins/data/common/index_patterns/index_patterns/index_pattern';
+import type { SeriesType } from '../../../../../../lens/common/expressions/xy_chart/series_type';
+import type { XYCurveType } from '../../../../../../lens/common/expressions/xy_chart/xy_args';
+import type { PersistableFilter } from '../../../../../../lens/common/types';
+import type { TypedLensByValueInput } from '../../../../../../lens/public/embeddable/embeddable_component';
+import type {
+  FieldBasedIndexPatternColumn,
+  OperationType,
+} from '../../../../../../lens/public/indexpattern_datasource/operations/definitions';
+import type { CardinalityIndexPatternColumn } from '../../../../../../lens/public/indexpattern_datasource/operations/definitions/cardinality';
+import type { CountIndexPatternColumn } from '../../../../../../lens/public/indexpattern_datasource/operations/definitions/count';
+import type { DateHistogramIndexPatternColumn } from '../../../../../../lens/public/indexpattern_datasource/operations/definitions/date_histogram';
+import type {
   AvgIndexPatternColumn,
   MedianIndexPatternColumn,
-  PercentileIndexPatternColumn,
-  OperationType,
-  PersistedIndexPatternLayer,
-  RangeIndexPatternColumn,
-  SeriesType,
-  TypedLensByValueInput,
-  XYState,
-  XYCurveType,
-  DataType,
-  OperationMetadata,
-  FieldBasedIndexPatternColumn,
   SumIndexPatternColumn,
-  TermsIndexPatternColumn,
-  CardinalityIndexPatternColumn,
-} from '../../../../../../lens/public';
+} from '../../../../../../lens/public/indexpattern_datasource/operations/definitions/metrics';
+import type { PercentileIndexPatternColumn } from '../../../../../../lens/public/indexpattern_datasource/operations/definitions/percentile';
+import type { RangeIndexPatternColumn } from '../../../../../../lens/public/indexpattern_datasource/operations/definitions/ranges/ranges';
+import type { TermsIndexPatternColumn } from '../../../../../../lens/public/indexpattern_datasource/operations/definitions/terms';
+import type { PersistedIndexPatternLayer } from '../../../../../../lens/public/indexpattern_datasource/types';
+import type { DataType, OperationMetadata } from '../../../../../../lens/public/types';
+import type { XYState } from '../../../../../../lens/public/xy_visualization/types';
+import { parseAbsoluteDate } from '../series_date_picker/date_range_picker';
+import type { ColumnFilter, SeriesConfig, UrlFilter, URLReportDefinition } from '../types';
 import { urlFiltersToKueryString } from '../utils/stringify_kueries';
-import { ExistsFilter, IndexPattern } from '../../../../../../../../src/plugins/data/common';
 import {
   FILTER_RECORDS,
-  USE_BREAK_DOWN_COLUMN,
-  TERMS_COLUMN,
-  REPORT_METRIC_FIELD,
   RECORDS_FIELD,
   RECORDS_PERCENTAGE_FIELD,
-} from './constants';
-import { ColumnFilter, SeriesConfig, UrlFilter, URLReportDefinition } from '../types';
-import { PersistableFilter } from '../../../../../../lens/common';
-import { parseAbsoluteDate } from '../series_date_picker/date_range_picker';
+  REPORT_METRIC_FIELD,
+  TERMS_COLUMN,
+  USE_BREAK_DOWN_COLUMN,
+} from './constants/constants';
 import { getDistributionInPercentageColumn } from './lens_columns/overall_column';
 
 function getLayerReferenceName(layerId: string) {

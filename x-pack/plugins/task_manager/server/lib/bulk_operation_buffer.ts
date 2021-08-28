@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { Logger } from 'src/core/server';
+import type { Logger } from '@kbn/logging';
 import { map } from 'lodash';
-import { Subject, race, from } from 'rxjs';
-import { bufferWhen, filter, bufferCount, flatMap, mapTo, first } from 'rxjs/operators';
-import { either, Result, asOk, asErr, Ok, Err } from './result_type';
+import { from, race, Subject } from 'rxjs';
+import { bufferCount, bufferWhen, filter, first, flatMap, mapTo } from 'rxjs/operators';
+import type { Err, Ok, Result } from './result_type';
+import { asErr, asOk, either } from './result_type';
 
 export interface BufferOptions {
   bufferMaxDuration?: number;

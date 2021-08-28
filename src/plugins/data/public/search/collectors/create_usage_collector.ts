@@ -8,7 +8,7 @@
 import type { UiCounterMetricType } from '@kbn/analytics';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { first } from 'rxjs/operators';
-import type { StartServicesAccessor } from '../../../../../core/public';
+import type { StartServicesAccessor } from '../../../../../core/public/type';
 import type { UsageCollectionSetup } from '../../../../usage_collection/public/plugin';
 import type { SearchUsageCollector } from './types';
 import { SEARCH_EVENT_TYPE } from './types';

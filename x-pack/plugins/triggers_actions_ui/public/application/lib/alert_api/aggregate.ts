@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { HttpSetup } from 'kibana/public';
-import { AlertAggregations } from '../../../types';
-import { INTERNAL_BASE_ALERTING_API_PATH } from '../../constants';
+import type { HttpSetup } from '../../../../../../../src/core/public/http/types';
+import type { RewriteRequestCase } from '../../../../../actions/common/rewrite_request_case';
+import { INTERNAL_BASE_ALERTING_API_PATH } from '../../../../../alerting/common';
+import type { AlertAggregations } from '../../../../../alerting/common/alert';
 import { mapFiltersToKql } from './map_filters_to_kql';
-import { RewriteRequestCase } from '../../../../../actions/common';
 
 const rewriteBodyRes: RewriteRequestCase<AlertAggregations> = ({
   rule_execution_status: alertExecutionStatus,

@@ -4,15 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { i18n } from '@kbn/i18n';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
-import {
-  FieldFormat,
-  FieldFormatInstanceType,
-} from '../../../../../src/plugins/field_formats/common';
+import { i18n } from '@kbn/i18n';
+import { FieldFormat } from '../../../../../src/plugins/field_formats/common/field_format';
+import type { FieldFormatInstanceType } from '../../../../../src/plugins/field_formats/common/types';
+import type { TimeScaleUnit } from '../expressions/time_scale/types';
 import type { FormatFactory } from '../types';
-import type { TimeScaleUnit } from '../expressions/time_scale';
 
 const unitSuffixes: Record<TimeScaleUnit, string> = {
   s: i18n.translate('xpack.lens.fieldFormats.suffix.s', { defaultMessage: '/s' }),

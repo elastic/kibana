@@ -4,13 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { memo, FC } from 'react';
+import { EuiDescribedFormGroup, EuiFormRow, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiDescribedFormGroup, EuiFormRow, EuiLink } from '@elastic/eui';
-import { Validation } from '../../../../../common/job_validator';
-import { useMlKibana } from '../../../../../../../contexts/kibana';
+import type { FC } from 'react';
+import React, { memo } from 'react';
+import { useMlKibana } from '../../../../../../../contexts/kibana/kibana_context';
+import type { Validation } from '../../../../../common/job_validator/job_validator';
 
 interface Props {
   validation: Validation;

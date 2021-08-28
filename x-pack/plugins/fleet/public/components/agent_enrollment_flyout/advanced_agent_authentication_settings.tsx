@@ -4,23 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { FunctionComponent } from 'react';
-import React, { useEffect, useState, useCallback } from 'react';
+import { EuiButton, EuiButtonEmpty, EuiCallOut, EuiSelect, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiButtonEmpty, EuiButton, EuiCallOut, EuiSelect, EuiSpacer, EuiText } from '@elastic/eui';
+import type { FunctionComponent } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
-import { SO_SEARCH_LIMIT } from '../../applications/fleet/constants';
-import type {
-  EnrollmentAPIKey,
-  GetEnrollmentAPIKeysResponse,
-} from '../../applications/fleet/types';
+import { SO_SEARCH_LIMIT } from '../../../common/constants';
+import type { EnrollmentAPIKey } from '../../../common/types/models/enrollment_api_key';
+import type { GetEnrollmentAPIKeysResponse } from '../../../common/types/rest_spec/enrollment_api_key';
+import { useStartServices } from '../../hooks/use_core';
 import {
-  sendGetEnrollmentAPIKeys,
-  useStartServices,
   sendCreateEnrollmentAPIKey,
-} from '../../applications/fleet/hooks';
+  sendGetEnrollmentAPIKeys,
+} from '../../hooks/use_request/enrollment_api_keys';
 import { Loading } from '../loading';
 
 const NoEnrollmentKeysCallout: React.FunctionComponent<{

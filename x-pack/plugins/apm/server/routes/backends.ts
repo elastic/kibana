@@ -5,18 +5,19 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
 import { toNumberRt } from '@kbn/io-ts-utils';
-import { setupRequest } from '../lib/helpers/setup_request';
-import { environmentRt, kueryRt, offsetRt, rangeRt } from './default_api_types';
-import { createApmServerRoute } from './create_apm_server_route';
-import { createApmServerRouteRepository } from './create_apm_server_route_repository';
-import { getMetadataForBackend } from '../lib/backends/get_metadata_for_backend';
+import * as t from 'io-ts';
+import { environmentRt } from '../../common/environment_rt';
+import { getErrorRateChartsForBackend } from '../lib/backends/get_error_rate_charts_for_backend';
 import { getLatencyChartsForBackend } from '../lib/backends/get_latency_charts_for_backend';
+import { getMetadataForBackend } from '../lib/backends/get_metadata_for_backend';
+import { getThroughputChartsForBackend } from '../lib/backends/get_throughput_charts_for_backend';
 import { getTopBackends } from '../lib/backends/get_top_backends';
 import { getUpstreamServicesForBackend } from '../lib/backends/get_upstream_services_for_backend';
-import { getThroughputChartsForBackend } from '../lib/backends/get_throughput_charts_for_backend';
-import { getErrorRateChartsForBackend } from '../lib/backends/get_error_rate_charts_for_backend';
+import { setupRequest } from '../lib/helpers/setup_request';
+import { createApmServerRoute } from './create_apm_server_route';
+import { createApmServerRouteRepository } from './create_apm_server_route_repository';
+import { kueryRt, offsetRt, rangeRt } from './default_api_types';
 
 const topBackendsRoute = createApmServerRoute({
   endpoint: 'GET /api/apm/backends/top_backends',

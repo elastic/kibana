@@ -4,8 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { ReportViewType } from '../../types';
+import type { ReportViewType } from '../../types';
 import {
   CLS_FIELD,
   FCP_FIELD,
@@ -16,6 +15,7 @@ import {
 } from './elasticsearch_fieldnames';
 import {
   AGENT_HOST_LABEL,
+  BACKEND_TIME_LABEL,
   BROWSER_FAMILY_LABEL,
   BROWSER_VERSION_LABEL,
   CLS_LABEL,
@@ -26,8 +26,8 @@ import {
   FCP_LABEL,
   FID_LABEL,
   HOST_NAME_LABEL,
-  KPI_OVER_TIME_LABEL,
   KPI_LABEL,
+  KPI_OVER_TIME_LABEL,
   LCP_LABEL,
   LOCATION_LABEL,
   METRIC_LABEL,
@@ -44,7 +44,6 @@ import {
   TAGS_LABEL,
   TBT_LABEL,
   URL_LABEL,
-  BACKEND_TIME_LABEL,
 } from './labels';
 
 export const DEFAULT_TIME = { from: 'now-1h', to: 'now' };

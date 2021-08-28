@@ -7,7 +7,7 @@
  */
 
 import _ from 'lodash';
-import type { CoreSetup } from '../../../../../core/public';
+import type { CoreSetup } from '../../../../../core/public/types';
 import { seedColors } from '../../static/colors/seed_colors';
 import { MappedColors } from '../mapped_colors/mapped_colors';
 

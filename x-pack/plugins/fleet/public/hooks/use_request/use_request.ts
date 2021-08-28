@@ -4,19 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { useEffect, useState } from 'react';
 
-import { useState, useEffect } from 'react';
-import type { HttpSetup } from 'src/core/public';
-
-import {
-  sendRequest as _sendRequest,
-  useRequest as _useRequest,
-} from '../../../../../../src/plugins/es_ui_shared/public';
+import type { HttpSetup } from '../../../../../../src/core/public/http/types';
 import type {
   SendRequestConfig,
   SendRequestResponse,
-  UseRequestConfig,
-} from '../../../../../../src/plugins/es_ui_shared/public';
+} from '../../../../../../src/plugins/es_ui_shared/public/request/send_request';
+import { sendRequest as _sendRequest } from '../../../../../../src/plugins/es_ui_shared/public/request/send_request';
+import type { UseRequestConfig } from '../../../../../../src/plugins/es_ui_shared/public/request/use_request';
+import { useRequest as _useRequest } from '../../../../../../src/plugins/es_ui_shared/public/request/use_request';
 
 let httpClient: HttpSetup;
 

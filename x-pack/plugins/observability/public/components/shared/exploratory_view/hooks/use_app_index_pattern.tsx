@@ -4,14 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { createContext, useContext, Context, useState, useCallback, useMemo } from 'react';
-import { IndexPattern } from '../../../../../../../../src/plugins/data/common';
-import { AppDataType } from '../types';
-import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
-import { ObservabilityPublicPluginsStart } from '../../../../plugin';
-import { ObservabilityIndexPatterns } from '../utils/observability_index_patterns';
+import type { Context } from 'react';
+import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
+import { IndexPattern } from '../../../../../../../../src/plugins/data/common/index_patterns/index_patterns/index_pattern';
+import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public/context/context';
 import { getDataHandler } from '../../../../data_handler';
+import type { ObservabilityPublicPluginsStart } from '../../../../plugin';
+import type { AppDataType } from '../types';
+import { ObservabilityIndexPatterns } from '../utils/observability_index_patterns';
 
 export interface IndexPatternContext {
   loading: boolean;

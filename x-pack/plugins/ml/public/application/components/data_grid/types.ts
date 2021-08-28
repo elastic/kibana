@@ -4,23 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { Dispatch, SetStateAction } from 'react';
-
 import { estypes } from '@elastic/elasticsearch';
-import {
+import type {
   EuiDataGridCellValueElementProps,
+  EuiDataGridColumn,
   EuiDataGridPaginationProps,
   EuiDataGridSorting,
-  EuiDataGridColumn,
 } from '@elastic/eui';
-
-import { Dictionary } from '../../../../common/types/common';
-import { ChartData } from '../../../../common/types/field_histograms';
-
+import type { Dispatch, SetStateAction } from 'react';
+import type { Dictionary } from '../../../../common/types/common';
+import type { FeatureImportanceBaseline } from '../../../../common/types/feature_importance';
+import type { ChartData } from '../../../../common/types/field_histograms';
 import { INDEX_STATUS } from '../../data_frame_analytics/common/analytics';
-
-import { FeatureImportanceBaseline } from '../../../../common/types/feature_importance';
 
 export type ColumnId = string;
 export type DataGridItem = Record<string, any>;

@@ -4,26 +4,30 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { memo, useMemo } from 'react';
 import type { EuiBasicTableProps } from '@elastic/eui';
 import {
+  EuiAccordion,
+  EuiBasicTable,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
-  EuiAccordion,
+  EuiPanel,
   EuiTitle,
   EuiToolTip,
-  EuiPanel,
-  EuiButtonIcon,
-  EuiBasicTable,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React, { memo, useMemo } from 'react';
 import styled from 'styled-components';
 
-import type { Agent, AgentPolicy, PackagePolicy, PackagePolicyInput } from '../../../../../types';
-import { useLink } from '../../../../../hooks';
-import { PackageIcon } from '../../../../../components';
+import type { Agent } from '../../../../../../../../common/types/models/agent';
+import type { AgentPolicy } from '../../../../../../../../common/types/models/agent_policy';
+import type {
+  PackagePolicy,
+  PackagePolicyInput,
+} from '../../../../../../../../common/types/models/package_policy';
+import { PackageIcon } from '../../../../../../../components/package_icon';
+import { useLink } from '../../../../../../../hooks/use_link';
 
 import { displayInputType, getLogsQueryByInputType } from './input_type_utils';
 

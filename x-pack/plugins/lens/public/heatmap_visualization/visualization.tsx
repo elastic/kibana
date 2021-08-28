@@ -5,16 +5,19 @@
  * 2.0.
  */
 
-import React from 'react';
-import { render } from 'react-dom';
+import { Position } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
-import { Ast } from '@kbn/interpreter/common';
-import { Position } from '@elastic/charts';
-import { PaletteRegistry } from '../../../../../src/plugins/charts/public';
+import type { Ast } from '@kbn/interpreter/common';
+import React from 'react';
+import { render } from 'react-dom';
+import type { PaletteRegistry } from '../../../../../src/plugins/charts/public/services/palettes/types';
+import { layerTypes } from '../../common/constants';
+import type { CustomPaletteParams } from '../../common/types';
+import { LensIconChartHeatmap } from '../assets/chart_heatmap';
+import { CUSTOM_PALETTE } from '../shared_components/coloring/constants';
+import { getStopsForFixedMode } from '../shared_components/coloring/utils';
 import type { OperationMetadata, Visualization } from '../types';
-import type { HeatmapVisualizationState } from './types';
-import { getSuggestions } from './suggestions';
 import {
   CHART_NAMES,
   CHART_SHAPES,
@@ -25,13 +28,11 @@ import {
   LEGEND_FUNCTION,
   LENS_HEATMAP_ID,
 } from './constants';
-import { HeatmapToolbar } from './toolbar_component';
-import { LensIconChartHeatmap } from '../assets/chart_heatmap';
-import { CUSTOM_PALETTE, getStopsForFixedMode } from '../shared_components';
 import { HeatmapDimensionEditor } from './dimension_editor';
+import { getSuggestions } from './suggestions';
+import { HeatmapToolbar } from './toolbar_component';
+import type { HeatmapVisualizationState } from './types';
 import { getSafePaletteParams } from './utils';
-import type { CustomPaletteParams } from '../../common';
-import { layerTypes } from '../../common';
 
 const groupLabelForBar = i18n.translate('xpack.lens.heatmapVisualization.heatmapGroupLabel', {
   defaultMessage: 'Heatmap',

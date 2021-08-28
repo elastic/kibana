@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { estypes } from '@elastic/elasticsearch';
+import { estypes } from '@elastic/elasticsearch';
 import { set } from '@elastic/safer-lodash-set';
-import { FieldMap } from './field_map/types';
+import type { FieldMap } from './field_map/types';
 
 export function mappingFromFieldMap(
   fieldMap: FieldMap,

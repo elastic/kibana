@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import type { OnPostAuthInterceptorDeps } from './on_post_auth_interceptor';
 import { initSpacesOnPostAuthRequestInterceptor } from './on_post_auth_interceptor';
 import type { OnRequestInterceptorDeps } from './on_request_interceptor';

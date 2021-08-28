@@ -6,7 +6,7 @@
  */
 
 import { useState, useCallback } from 'react';
-import { SavedObjectsBatchResponse } from 'src/core/public';
+import { SavedObjectsBatchResponse } from 'src/core/public/types';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 
 export const useBulkGetSavedObject = (type: string) => {

@@ -5,28 +5,28 @@
  * 2.0.
  */
 
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
 import React, { Component } from 'react';
-import { EuiFlexItem, EuiFlexGroup, EuiButtonIcon } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import type { IFieldType, IndexPattern, Query } from 'src/plugins/data/public';
+import type { Query } from 'src/plugins/data/public';
+import type { IFieldType } from '../../../../../../../../src/plugins/data/common/index_patterns/fields/types';
+import { IndexPattern } from '../../../../../../../../src/plugins/data/common/index_patterns/index_patterns/index_pattern';
+import { indexPatterns } from '../../../../../../../../src/plugins/data/public';
+import { AGG_TYPE, SOURCE_TYPES } from '../../../../../common/constants';
+import type { JoinDescriptor } from '../../../../../common/descriptor_types/layer_descriptor_types';
+import type {
+  AggDescriptor,
+  ESTermSourceDescriptor,
+} from '../../../../../common/descriptor_types/source_descriptor_types';
+import type { ILayer } from '../../../../classes/layers/layer';
+import { GlobalFilterCheckbox } from '../../../../components/global_filter_checkbox';
+import { GlobalTimeCheckbox } from '../../../../components/global_time_checkbox';
+import { getIndexPatternService } from '../../../../kibana_services';
+import type { JoinField } from '../join_editor';
 import { JoinExpression } from './join_expression';
 import { MetricsExpression } from './metrics_expression';
 import { WhereExpression } from './where_expression';
-import { GlobalFilterCheckbox } from '../../../../components/global_filter_checkbox';
-import { GlobalTimeCheckbox } from '../../../../components/global_time_checkbox';
-import {
-  AggDescriptor,
-  ESTermSourceDescriptor,
-  JoinDescriptor,
-} from '../../../../../common/descriptor_types';
-import { ILayer } from '../../../../classes/layers/layer';
-
-import { indexPatterns } from '../../../../../../../../src/plugins/data/public';
-
-import { getIndexPatternService } from '../../../../kibana_services';
-import { AGG_TYPE, SOURCE_TYPES } from '../../../../../common/constants';
-import type { JoinField } from '../join_editor';
 
 interface Props {
   join: JoinDescriptor;

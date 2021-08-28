@@ -7,7 +7,7 @@
 
 import * as React from 'react';
 
-import type { SpacesManager } from '../spaces_manager';
+import type { SpacesManager } from '../spaces_manager/spaces_manager';
 import type { ShareToSpacesData } from '../types';
 import type { KibanaServices, SpacesReactContext, SpacesReactContextValue } from './types';
 

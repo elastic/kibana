@@ -4,15 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import {
-  ImportFailure,
-  IngestPipeline,
+import type {
   ImportDoc,
+  ImportFailure,
   ImportResponse,
+  IngestPipeline,
   Mappings,
   Settings,
-} from '../../common';
+} from '../../common/types';
 
 export interface ImportConfig {
   settings: Settings;

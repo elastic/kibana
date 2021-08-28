@@ -4,9 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { AlertExecutionStatus } from '../../../../../alerting/common';
-import { AsApiContract, RewriteRequestCase } from '../../../../../actions/common';
-import { Alert, AlertAction, ResolvedRule } from '../../../types';
+import type {
+  AsApiContract,
+  RewriteRequestCase,
+} from '../../../../../actions/common/rewrite_request_case';
+import type { AlertAction, AlertExecutionStatus } from '../../../../../alerting/common/alert';
+import type { Alert, ResolvedRule } from '../../../types';
 
 const transformAction: RewriteRequestCase<AlertAction> = ({
   group,

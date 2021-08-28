@@ -4,11 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { FC, useState, useCallback } from 'react';
-import { ITagsClient, Tag, TagAttributes } from '../../../common/types';
-import { TagValidation } from '../../../common/validation';
-import { isServerValidationError } from '../../services/tags';
+import type { FC } from 'react';
+import React, { useCallback, useState } from 'react';
+import type {
+  ITagsClient,
+  Tag,
+  TagAttributes,
+} from '../../../../../../src/plugins/saved_objects_tagging_oss/common/types';
+import type { TagValidation } from '../../../common/validation';
+import { isServerValidationError } from '../../services/tags/errors';
 import { CreateOrEditModal } from './create_or_edit_modal';
 import { validateTag } from './utils';
 

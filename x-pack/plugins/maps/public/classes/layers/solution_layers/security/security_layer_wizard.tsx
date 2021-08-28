@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
 import { i18n } from '@kbn/i18n';
+import React from 'react';
 import { LAYER_WIZARD_CATEGORY } from '../../../../../common/constants';
-import { LayerWizard, RenderWizardArguments } from '../../layer_wizard_registry';
+import type { LayerWizard, RenderWizardArguments } from '../../layer_wizard_registry';
 import { getSecurityIndexPatterns } from './security_index_pattern_utils';
 import { SecurityLayerTemplate } from './security_layer_template';
 

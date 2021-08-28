@@ -4,13 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { useCallback, useEffect } from 'react';
-
-import useUpdateEffect from 'react-use/lib/useUpdateEffect';
 import useMount from 'react-use/lib/useMount';
+import useUpdateEffect from 'react-use/lib/useUpdateEffect';
+import type { TimeRange } from '../../../../../src/plugins/data/common/query/timefilter/types';
+import type { TimefilterContract } from '../../../../../src/plugins/data/public/query/timefilter/timefilter';
 import { useKibanaContextForPlugin } from './use_kibana';
-import { TimeRange, TimefilterContract } from '../../../../../src/plugins/data/public';
 
 export const useKibanaTimefilterTime = ({
   from: fromDefault,

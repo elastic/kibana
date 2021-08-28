@@ -4,21 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { Subject, Observable, Subscription } from 'rxjs';
+import type { Logger } from '@kbn/logging';
+import { Observable, Subject, Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';
-import { Logger, ExecutionContextStart } from '../../../../src/core/server';
-
-import { Result, asErr, asOk } from './lib/result_type';
-import { TaskManagerConfig } from './config';
-
-import { asTaskManagerStatEvent, isTaskRunEvent, isTaskPollingCycleEvent } from './task_events';
-import { Middleware } from './lib/middleware';
-import { EphemeralTaskInstance } from './task';
-import { TaskTypeDictionary } from './task_type_dictionary';
-import { TaskLifecycleEvent } from './polling_lifecycle';
-import { EphemeralTaskManagerRunner } from './task_running/ephemeral_task_runner';
+import type { ExecutionContextStart } from '../../../../src/core/server/execution_context/execution_context_service';
+import type { TaskManagerConfig } from './config';
+import type { Middleware } from './lib/middleware';
+import type { Result } from './lib/result_type';
+import { asErr, asOk } from './lib/result_type';
+import type { TaskLifecycleEvent } from './polling_lifecycle';
+import type { EphemeralTaskInstance } from './task';
+import { asTaskManagerStatEvent, isTaskPollingCycleEvent, isTaskRunEvent } from './task_events';
 import { TaskPool } from './task_pool';
+import { EphemeralTaskManagerRunner } from './task_running/ephemeral_task_runner';
+import { TaskTypeDictionary } from './task_type_dictionary';
 
 export interface EphemeralTaskLifecycleOpts {
   logger: Logger;

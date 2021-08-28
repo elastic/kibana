@@ -4,13 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { memo, useMemo } from 'react';
 import { EuiCard, EuiIcon, EuiLoadingSpinner } from '@elastic/eui';
+import React, { memo, useMemo } from 'react';
 import styled from 'styled-components';
-
-import { ConnectorTypes } from '../../../common';
-import { useKibana } from '../../common/lib/kibana';
+import { ConnectorTypes } from '../../../common/api/connectors';
+import { useKibana } from '../../common/lib/kibana/kibana_react';
 import { getConnectorIcon } from '../utils';
 
 interface ConnectorCardProps {

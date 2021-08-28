@@ -19,11 +19,11 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n/react';
 import * as UiSharedDeps from '@kbn/ui-shared-deps';
-import type { IBasePath } from 'src/core/server';
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import type { IBasePath } from '../../../../src/core/server/http/base_path_service';
 import { Fonts } from '../../../../src/core/server/rendering/views/fonts';
 
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 // Preload the alert icon used by `EuiEmptyPrompt` to ensure that it's loaded
 // in advance the first time this page is rendered server-side. If not, the
 // icon svg wouldn't contain any paths the first time the page was rendered.

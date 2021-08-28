@@ -4,11 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { pick, transform, uniq } from 'lodash';
 
-import type { IClusterClient, KibanaRequest } from 'src/core/server';
-
+import type { IClusterClient } from '../../../../../src/core/server/elasticsearch/client/cluster_client';
+import type { KibanaRequest } from '../../../../../src/core/server/http/router/request';
 import { GLOBAL_RESOURCE } from '../../common/constants';
 import { ResourceSerializer } from './resource_serializer';
 import type {

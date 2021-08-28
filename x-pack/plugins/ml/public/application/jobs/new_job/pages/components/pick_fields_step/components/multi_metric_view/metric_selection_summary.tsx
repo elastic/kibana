@@ -4,16 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { Fragment, FC, useContext, useEffect, useState } from 'react';
-
+import type { FC } from 'react';
+import React, { Fragment, useContext, useEffect, useState } from 'react';
+import { getToastNotificationService } from '../../../../../../../services/toast_notification_service/toast_notification_service';
+import type { LineChartData } from '../../../../../common/chart_loader/chart_loader';
+import { MultiMetricJobCreator } from '../../../../../common/job_creator/multi_metric_job_creator';
+import type {
+  Anomaly,
+  ModelItem,
+  Results,
+} from '../../../../../common/results_loader/results_loader';
+import { defaultChartSettings, getChartSettings } from '../../../charts/common/settings';
 import { JobCreatorContext } from '../../../job_creator_context';
-import { MultiMetricJobCreator } from '../../../../../common/job_creator';
-import { Results, ModelItem, Anomaly } from '../../../../../common/results_loader';
-import { LineChartData } from '../../../../../common/chart_loader';
-import { getChartSettings, defaultChartSettings } from '../../../charts/common/settings';
 import { ChartGrid } from './chart_grid';
-import { getToastNotificationService } from '../../../../../../../services/toast_notification_service';
 
 export const MultiMetricDetectorsSummary: FC = () => {
   const { jobCreator: jc, chartLoader, resultsLoader, chartInterval } = useContext(

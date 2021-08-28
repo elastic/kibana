@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { CoreStart } from '../../../core/public';
+import type { CoreStart } from '../../../core/public/types';
 import type { Plugin } from '../../../core/public/plugins/plugin';
 import type { DataPublicPluginStart } from '../../data/public/types';
 import { LISTING_LIMIT_SETTING, PER_PAGE_SETTING } from '../common';

@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { EuiErrorBoundary } from '@elastic/eui';
 import React from 'react';
-import { Source } from '../../../containers/metrics_source';
+import { Source } from '../../../containers/metrics_source/source';
 import { MetricsTimeProvider } from './hooks/use_metrics_time';
 
 export const withMetricPageProviders = <T extends object>(Component: React.ComponentType<T>) => (

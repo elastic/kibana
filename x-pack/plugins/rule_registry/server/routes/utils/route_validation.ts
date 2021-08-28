@@ -10,17 +10,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { exactCheck, formatErrors } from '@kbn/securitysolution-io-ts-utils';
 import { fold } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 import * as rt from 'io-ts';
-import { exactCheck, formatErrors } from '@kbn/securitysolution-io-ts-utils';
-
-import {
-  RouteValidationError,
+import type {
   RouteValidationFunction,
   RouteValidationResultFactory,
-} from '../../../../../../src/core/server';
+} from '../../../../../../src/core/server/http/router/validator/validator';
+import { RouteValidationError } from '../../../../../../src/core/server/http/router/validator/validator_error';
 
 type RequestValidationResult<T> =
   | {

@@ -4,9 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { useCallback, useState } from 'react';
-import { useMlKibana } from '../kibana';
+import { useMlKibana } from '../kibana/kibana_context';
 
 /**
  * Hook for accessing and changing a value in the storage.

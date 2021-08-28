@@ -11,7 +11,7 @@ import { RecursivePartial } from '@elastic/eui/src/components/common';
 import { coreMock } from '../../../../../src/core/public/mocks';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 import { EuiTheme } from '../../../../../src/plugins/kibana_react/common';
-import { CoreStart } from '../../../../../src/core/public';
+import type { CoreStart } from '../../../../../src/core/public/types';
 
 export const mockGetAllCasesSelectorModal = jest.fn();
 export const mockNavigateToApp = jest.fn();

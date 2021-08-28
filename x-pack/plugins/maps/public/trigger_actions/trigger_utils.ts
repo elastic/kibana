@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { Action } from 'src/plugins/ui_actions/public';
-import { RawValue } from '../../common/constants';
-import { DatatableColumnType } from '../../../../../src/plugins/expressions';
+import type { DatatableColumnType } from '../../../../../src/plugins/expressions/common/expression_types/specs/datatable';
+import type { Action } from '../../../../../src/plugins/ui_actions/public/actions/action';
+import type { RawValue } from '../../common/constants';
 
 export function isUrlDrilldown(action: Action) {
   return action.type === 'URL_DRILLDOWN';

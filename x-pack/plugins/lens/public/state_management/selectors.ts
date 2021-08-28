@@ -4,13 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { createSelector } from '@reduxjs/toolkit';
-import { SavedObjectReference } from 'kibana/server';
-import { LensState } from './types';
-import { extractFilterReferences } from '../persistence';
-import { Datasource, DatasourceMap, VisualizationMap } from '../types';
-import { createDatasourceLayers } from '../editor_frame_service/editor_frame';
+import type { SavedObjectReference } from '../../../../../src/core/types/saved_objects';
+import { createDatasourceLayers } from '../editor_frame_service/editor_frame/state_helpers';
+import { extractFilterReferences } from '../persistence/filter_references';
+import type { Datasource, DatasourceMap, VisualizationMap } from '../types';
+import type { LensState } from './types';
 
 export const selectPersistedDoc = (state: LensState) => state.lens.persistedDoc;
 export const selectQuery = (state: LensState) => state.lens.query;

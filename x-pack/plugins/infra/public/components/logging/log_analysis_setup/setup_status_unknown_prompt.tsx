@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
+import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiEmptyPrompt, EuiButton } from '@elastic/eui';
-import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
+import React from 'react';
+import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
 
 interface Props {
   retry: () => void;

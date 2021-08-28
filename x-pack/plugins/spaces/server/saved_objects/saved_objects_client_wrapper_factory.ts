@@ -4,12 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import type {
   SavedObjectsClientWrapperFactory,
   SavedObjectsClientWrapperOptions,
-} from 'src/core/server';
-
+} from '../../../../../src/core/server/saved_objects/service/lib/scoped_client_provider';
 import type { SpacesServiceStart } from '../spaces_service/spaces_service';
 import { SpacesSavedObjectsClient } from './spaces_saved_objects_client';
 

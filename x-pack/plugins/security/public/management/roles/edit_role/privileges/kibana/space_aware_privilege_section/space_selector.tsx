@@ -4,15 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox, EuiHealth, EuiHighlight } from '@elastic/eui';
 import React, { Component } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import type { Space } from '../../../../../../../../spaces/public';
-import { getSpaceColor } from '../../../../../../../../spaces/public';
+import type { Space } from '../../../../../../../../../../src/plugins/spaces_oss/common/types';
+import { getSpaceColor } from '../../../../../../../../spaces/public/space_avatar/space_attributes';
 
 const spaceToOption = (space?: Space, currentSelection?: 'global' | 'spaces') => {
   if (!space) {

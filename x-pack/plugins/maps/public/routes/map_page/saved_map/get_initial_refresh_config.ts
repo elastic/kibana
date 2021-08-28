@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { QueryState } from 'src/plugins/data/public';
+import { UI_SETTINGS } from '../../../../../../../src/plugins/data/common/constants';
+import type { QueryState } from '../../../../../../../src/plugins/data/public/query/state_sync/types';
 import { getUiSettings } from '../../../kibana_services';
-import { UI_SETTINGS } from '../../../../../../../src/plugins/data/public';
 
 export function getInitialRefreshConfig({
   mapStateJSON,

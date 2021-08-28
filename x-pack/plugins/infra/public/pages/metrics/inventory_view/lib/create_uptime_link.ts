@@ -4,11 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { get } from 'lodash';
-import { InfraWaffleMapNode, InfraWaffleMapOptions } from '../../../../lib/lib';
-import { InventoryItemType } from '../../../../../common/inventory_models/types';
-import { LinkDescriptor } from '../../../../hooks/use_link_props';
+import type { InventoryItemType } from '../../../../../common/inventory_models/types';
+import type { LinkDescriptor } from '../../../../hooks/use_link_props';
+import type { InfraWaffleMapNode, InfraWaffleMapOptions } from '../../../../lib/lib';
 
 export const createUptimeLink = (
   options: InfraWaffleMapOptions,

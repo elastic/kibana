@@ -4,21 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { useContext, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { JobCreatorContext } from '../../../job_creator_context';
+import { useContext, useState } from 'react';
 import { EVENT_RATE_FIELD_ID } from '../../../../../../../../../common/types/fields';
-import { BucketSpanEstimatorData } from '../../../../../../../../../common/types/job_service';
+import type { BucketSpanEstimatorData } from '../../../../../../../../../common/types/job_service';
+import { useMlContext } from '../../../../../../../contexts/ml/use_ml_context';
+import { ml } from '../../../../../../../services/ml_api_service';
+import { getToastNotificationService } from '../../../../../../../services/toast_notification_service/toast_notification_service';
 import {
+  isAdvancedJobCreator,
   isMultiMetricJobCreator,
   isPopulationJobCreator,
-  isAdvancedJobCreator,
   isRareJobCreator,
-} from '../../../../../common/job_creator';
-import { ml } from '../../../../../../../services/ml_api_service';
-import { useMlContext } from '../../../../../../../contexts/ml';
-import { getToastNotificationService } from '../../../../../../../services/toast_notification_service';
+} from '../../../../../common/job_creator/type_guards';
+import { JobCreatorContext } from '../../../job_creator_context';
 
 export enum ESTIMATE_STATUS {
   NOT_RUNNING,

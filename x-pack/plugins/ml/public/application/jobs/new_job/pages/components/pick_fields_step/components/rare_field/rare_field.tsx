@@ -4,18 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { FC, useContext, useEffect, useState, useMemo } from 'react';
-
-import { RareFieldSelect } from './rare_field_select';
-import { JobCreatorContext } from '../../../job_creator_context';
+import type { FC } from 'react';
+import React, { useContext, useEffect, useMemo, useState } from 'react';
+import type { Field } from '../../../../../../../../../common/types/fields';
 import {
-  newJobCapsService,
   filterCategoryFields,
+  newJobCapsService,
 } from '../../../../../../../services/new_job_capabilities/new_job_capabilities_service';
+import { RareJobCreator } from '../../../../../common/job_creator/rare_job_creator';
+import { JobCreatorContext } from '../../../job_creator_context';
 import { Description } from './description';
-import { Field } from '../../../../../../../../../common/types/fields';
-import { RareJobCreator } from '../../../../../common/job_creator';
+import { RareFieldSelect } from './rare_field_select';
 
 export const RareFieldSelector: FC = () => {
   const { jobCreator: jc, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);

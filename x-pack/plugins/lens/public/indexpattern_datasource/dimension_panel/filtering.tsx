@@ -4,22 +4,23 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState, useEffect, useCallback } from 'react';
-import { i18n } from '@kbn/i18n';
-import { isEqual } from 'lodash';
+import type { EuiPopoverProps } from '@elastic/eui';
 import {
   EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
   EuiLink,
   EuiPanel,
   EuiPopover,
-  EuiFormRow,
-  EuiFlexItem,
-  EuiFlexGroup,
-  EuiPopoverProps,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { isEqual } from 'lodash';
+import React, { useCallback, useEffect, useState } from 'react';
 import type { Query } from 'src/plugins/data/public';
-import { IndexPatternColumn, operationDefinitionMap } from '../operations';
-import { validateQuery } from '../operations/definitions/filters';
+import type { IndexPatternColumn } from '../operations/definitions';
+import { operationDefinitionMap } from '../operations/definitions';
+import { validateQuery } from '../operations/definitions/filters/filters';
 import { QueryInput } from '../query_input';
 import type { IndexPattern, IndexPatternLayer } from '../types';
 

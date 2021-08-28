@@ -4,11 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { HttpStart } from 'src/core/public';
+import type { HttpStart } from '../../../../../src/core/public/http/types';
+import { KibanaAssetType } from '../../common/types/models/epm';
 
-import { KibanaAssetType } from '../types';
-
-import { useStartServices } from './';
+import { useStartServices } from './use_core';
 
 const KIBANA_BASE_PATH = '/app/kibana';
 

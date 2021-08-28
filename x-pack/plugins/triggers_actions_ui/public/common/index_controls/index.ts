@@ -4,15 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { uniq } from 'lodash';
-import { HttpSetup } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
+import { uniq } from 'lodash';
+import type { HttpSetup } from '../../../../../../src/core/public/http/types';
 import {
-  loadIndexPatterns,
-  getMatchingIndices,
   getESIndexFields,
+  getMatchingIndices,
   getSavedObjectsClient,
+  loadIndexPatterns,
 } from '../lib/data_apis';
 
 export interface IOption {

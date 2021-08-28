@@ -4,13 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { useEffect } from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiSuperSelect } from '@elastic/eui';
-
+import { i18n } from '@kbn/i18n';
+import React, { useEffect } from 'react';
+import type { OperationType } from '../../../../../../../lens/public/indexpattern_datasource/operations/definitions';
 import { useSeriesStorage } from '../../hooks/use_series_storage';
-import { OperationType } from '../../../../../../../lens/public';
 
 export function OperationTypeSelect({
   seriesId,

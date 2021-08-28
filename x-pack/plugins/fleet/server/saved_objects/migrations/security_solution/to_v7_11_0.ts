@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { SavedObjectMigrationFn, SavedObjectUnsanitizedDoc } from 'kibana/server';
 import { cloneDeep } from 'lodash';
 
-import type { PackagePolicy } from '../../../../common';
+import type { SavedObjectMigrationFn } from '../../../../../../../src/core/server/saved_objects/migrations/types';
+import type { SavedObjectUnsanitizedDoc } from '../../../../../../../src/core/server/saved_objects/serialization/types';
+import type { PackagePolicy } from '../../../../common/types/models/package_policy';
 
 export const migratePackagePolicyToV7110: SavedObjectMigrationFn<PackagePolicy, PackagePolicy> = (
   packagePolicyDoc

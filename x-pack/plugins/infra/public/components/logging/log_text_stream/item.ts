@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { bisector } from 'd3-array';
-import { compareToTimeKey, TimeKey } from '../../../../common/time';
-import { LogEntry } from '../../../../common/log_entry';
+import type { LogEntry } from '../../../../common/log_entry/log_entry';
+import type { TimeKey } from '../../../../common/time/time_key';
+import { compareToTimeKey } from '../../../../common/time/time_key';
 
 export type StreamItem = LogEntryStreamItem;
 

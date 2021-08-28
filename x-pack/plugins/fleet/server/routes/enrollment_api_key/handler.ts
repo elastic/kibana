@@ -4,24 +4,23 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { RequestHandler } from 'src/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 
+import type { RequestHandler } from '../../../../../../src/core/server/http/router/router';
 import type {
-  GetEnrollmentAPIKeysRequestSchema,
-  PostEnrollmentAPIKeyRequestSchema,
-  DeleteEnrollmentAPIKeyRequestSchema,
-  GetOneEnrollmentAPIKeyRequestSchema,
-} from '../../types';
-import type {
+  DeleteEnrollmentAPIKeyResponse,
   GetEnrollmentAPIKeysResponse,
   GetOneEnrollmentAPIKeyResponse,
-  DeleteEnrollmentAPIKeyResponse,
   PostEnrollmentAPIKeyResponse,
-} from '../../../common';
+} from '../../../common/types/rest_spec/enrollment_api_key';
+import { defaultIngestErrorHandler } from '../../errors/handlers';
 import * as APIKeyService from '../../services/api_keys';
-import { defaultIngestErrorHandler } from '../../errors';
+import type {
+  DeleteEnrollmentAPIKeyRequestSchema,
+  GetEnrollmentAPIKeysRequestSchema,
+  GetOneEnrollmentAPIKeyRequestSchema,
+  PostEnrollmentAPIKeyRequestSchema,
+} from '../../types/rest_spec/enrollment_api_key';
 
 export const getEnrollmentApiKeysHandler: RequestHandler<
   undefined,

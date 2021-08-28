@@ -4,14 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { EuiFlexGroup, EuiFlexItem, EuiScreenReaderOnly, EuiTitle } from '@elastic/eui';
 import React from 'react';
-
-import { CountBadge, getFieldBrowserCategoryTitleClassName, getFieldCount } from './helpers';
-import type { BrowserFields, OnUpdateColumns } from '../../../../../common';
-
+import type { BrowserFields } from '../../../../../common/search_strategy/index_fields';
+import type { OnUpdateColumns } from '../../../../../common/types/timeline/store';
 import { ViewAllButton } from './category_columns';
+import { CountBadge, getFieldBrowserCategoryTitleClassName, getFieldCount } from './helpers';
 import * as i18n from './translations';
 
 interface Props {

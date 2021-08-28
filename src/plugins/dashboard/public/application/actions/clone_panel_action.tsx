@@ -8,7 +8,7 @@
 
 import _ from 'lodash';
 import uuid from 'uuid';
-import type { CoreStart } from '../../../../../core/public';
+import type { CoreStart } from '../../../../../core/public/types';
 import type { SavedObjectEmbeddableInput } from '../../../../embeddable/common/lib/saved_object_embeddable';
 import type { EmbeddableInput, PanelState } from '../../../../embeddable/common/types';
 import { ViewMode } from '../../../../embeddable/common/types';

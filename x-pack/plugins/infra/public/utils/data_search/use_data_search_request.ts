@@ -4,18 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { useCallback } from 'react';
-import { OperatorFunction, ReplaySubject } from 'rxjs';
+import type { OperatorFunction } from 'rxjs';
+import { ReplaySubject } from 'rxjs';
 import { share, tap } from 'rxjs/operators';
-import {
+import type {
   IKibanaSearchRequest,
   IKibanaSearchResponse,
   ISearchOptions,
-} from '../../../../../../src/plugins/data/public';
+} from '../../../../../../src/plugins/data/common/search/types';
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 import { tapUnsubscribe, useObservable } from '../use_observable';
-import { ParsedDataSearchRequestDescriptor, ParsedKibanaSearchResponse } from './types';
+import type { ParsedDataSearchRequestDescriptor, ParsedKibanaSearchResponse } from './types';
 
 export type DataSearchRequestFactory<Args extends any[], Request extends IKibanaSearchRequest> = (
   ...args: Args

@@ -4,15 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { i18n } from '@kbn/i18n';
+import type { OperationDefinition } from '..';
 import type {
   FormattedIndexPatternColumn,
   ReferenceBasedIndexPatternColumn,
 } from '../column_types';
-import { optionallHistogramBasedOperationToExpression } from './utils';
-import type { OperationDefinition } from '..';
 import { getFormatFromPreviousColumn } from '../helpers';
+import { optionallHistogramBasedOperationToExpression } from './utils';
 
 type OverallMetricIndexPatternColumn<T extends string> = FormattedIndexPatternColumn &
   ReferenceBasedIndexPatternColumn & {

@@ -7,8 +7,8 @@
 
 import deepEqual from 'fast-deep-equal';
 import { pick } from 'lodash';
-import { AlertTypeParams } from '../../../types';
-import { InitialAlert } from './alert_reducer';
+import type { AlertTypeParams } from '../../../../../alerting/common/alert';
+import type { InitialAlert } from './alert_reducer';
 
 const DEEP_COMPARE_FIELDS = ['tags', 'schedule', 'actions', 'notifyWhen'];
 

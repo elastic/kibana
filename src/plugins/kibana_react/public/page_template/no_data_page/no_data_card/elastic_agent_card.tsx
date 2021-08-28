@@ -9,7 +9,7 @@ import { EuiButton, EuiCard } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { FunctionComponent } from 'react';
 import React from 'react';
-import type { CoreStart } from '../../../../../../core/public';
+import type { CoreStart } from '../../../../../../core/public/types';
 import { useKibana } from '../../../context/context';
 import type { NoDataPageActions } from '../no_data_page';
 import { NO_DATA_RECOMMENDED } from '../no_data_page';

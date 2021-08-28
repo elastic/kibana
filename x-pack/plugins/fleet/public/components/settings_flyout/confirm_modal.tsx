@@ -5,24 +5,23 @@
  * 2.0.
  */
 
-import React from 'react';
+import type { EuiBasicTableProps } from '@elastic/eui';
 import {
-  EuiModal,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
-  EuiModalFooter,
-  EuiModalBody,
-  EuiCallOut,
+  EuiBasicTable,
   EuiButton,
   EuiButtonEmpty,
-  EuiBasicTable,
-  EuiText,
+  EuiCallOut,
+  EuiModal,
+  EuiModalBody,
+  EuiModalFooter,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
   EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
-import type { EuiBasicTableProps } from '@elastic/eui';
-
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import React from 'react';
 
 export interface SettingsConfirmModalProps {
   changes: Array<{

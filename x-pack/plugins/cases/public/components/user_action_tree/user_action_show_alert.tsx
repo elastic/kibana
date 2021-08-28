@@ -4,9 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import React, { memo, useCallback } from 'react';
-import { EuiToolTip, EuiButtonIcon } from '@elastic/eui';
 import * as i18n from './translations';
 
 interface UserActionShowAlertProps {

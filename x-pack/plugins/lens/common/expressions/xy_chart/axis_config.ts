@@ -5,10 +5,8 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import type {
-  ArgumentType,
-  ExpressionFunctionDefinition,
-} from '../../../../../../src/plugins/expressions/common';
+import type { ArgumentType } from '../../../../../../src/plugins/expressions/common/expression_functions/arguments';
+import type { ExpressionFunctionDefinition } from '../../../../../../src/plugins/expressions/common/expression_functions/types';
 
 export interface AxesSettingsConfig {
   x: boolean;

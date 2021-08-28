@@ -5,22 +5,30 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
 import type { estypes } from '@elastic/elasticsearch';
-import type { SavedObjectsClientContract, ElasticsearchClient } from 'src/core/server';
-
+import Boom from '@hapi/boom';
 import type { KueryNode } from '@kbn/es-query';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 
-import type { AgentSOAttributes, Agent, BulkActionResult, ListWithKuery } from '../../types';
-import { appContextService, agentPolicyService } from '../../services';
-import type { FleetServerAgent } from '../../../common';
-import { isAgentUpgradeable, SO_SEARCH_LIMIT } from '../../../common';
-import { AGENT_SAVED_OBJECT_TYPE, AGENTS_INDEX } from '../../constants';
+import type { ElasticsearchClient } from '../../../../../../src/core/server/elasticsearch/client/types';
+import type { SavedObjectsClientContract } from '../../../../../../src/core/server/saved_objects/types';
+import { SO_SEARCH_LIMIT } from '../../../common/constants';
+import { AGENTS_INDEX, AGENT_SAVED_OBJECT_TYPE } from '../../../common/constants/agent';
+import { isAgentUpgradeable } from '../../../common/services/is_agent_upgradeable';
+import type {
+  Agent,
+  AgentSOAttributes,
+  FleetServerAgent,
+} from '../../../common/types/models/agent';
+import { AgentNotFoundError, IngestManagerError } from '../../errors';
+import { isESClientError } from '../../errors/utils';
+import type { BulkActionResult } from '../../types';
+import type { ListWithKuery } from '../../types/rest_spec/common';
+import { agentPolicyService } from '../agent_policy';
+import { appContextService } from '../app_context';
 import { escapeSearchQueryPhrase, normalizeKuery } from '../saved_object';
-import { IngestManagerError, isESClientError, AgentNotFoundError } from '../../errors';
 
-import { searchHitToAgent, agentSOAttributesToFleetServerAgentDoc } from './helpers';
+import { agentSOAttributesToFleetServerAgentDoc, searchHitToAgent } from './helpers';
 
 const ACTIVE_AGENT_CONDITION = 'active:true';
 const INACTIVE_AGENT_CONDITION = `NOT (${ACTIVE_AGENT_CONDITION})`;

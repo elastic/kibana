@@ -4,13 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { EuiSpacer, EuiSteps, EuiText, EuiTitle } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import useMount from 'react-use/lib/useMount';
-import { useLogEntryCategoriesSetup } from '../../../../containers/logs/log_analysis/modules/log_entry_categories';
-import { createInitialConfigurationStep } from '../initial_configuration_step';
-import { createProcessStep } from '../process_step';
+import { useLogEntryCategoriesSetup } from '../../../../containers/logs/log_analysis/modules/log_entry_categories/use_log_entry_categories_setup';
+import { createInitialConfigurationStep } from '../initial_configuration_step/initial_configuration_step';
+import { createProcessStep } from '../process_step/process_step';
 
 export const LogEntryCategoriesSetupView: React.FC<{
   onClose: () => void;

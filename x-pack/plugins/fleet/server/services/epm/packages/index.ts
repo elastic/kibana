@@ -4,32 +4,29 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { SavedObject } from 'src/core/server';
-
-import { unremovablePackages, installationStatuses } from '../../../../common';
-import { KibanaAssetType } from '../../../types';
-import type { AssetType, Installable, Installation } from '../../../types';
+import type { SavedObject } from '../../../../../../../src/core/types/saved_objects';
+import { installationStatuses, unremovablePackages } from '../../../../common/constants/epm';
+import type { AssetType, Installable, Installation } from '../../../../common/types/models/epm';
+import { KibanaAssetType } from '../../../../common/types/models/epm';
 
 export { bulkInstallPackages, isBulkInstallError } from './bulk_install_packages';
 export {
   getCategories,
   getFile,
-  getInstallationObject,
   getInstallation,
+  getInstallationObject,
   getInstallations,
+  getLimitedPackages,
   getPackageInfo,
   getPackages,
-  getLimitedPackages,
   SearchParams,
 } from './get';
-
 export {
   BulkInstallResponse,
-  IBulkInstallPackageError,
-  handleInstallPackageFailure,
-  installPackage,
   ensureInstalledPackage,
+  handleInstallPackageFailure,
+  IBulkInstallPackageError,
+  installPackage,
 } from './install';
 export { removeInstallation } from './remove';
 

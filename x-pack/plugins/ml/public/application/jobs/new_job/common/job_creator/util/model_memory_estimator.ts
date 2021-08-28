@@ -4,32 +4,31 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { i18n } from '@kbn/i18n';
+import { cloneDeep, isEqual } from 'lodash';
+import { useEffect, useMemo } from 'react';
 import { combineLatest, Observable, of, Subject, Subscription } from 'rxjs';
-import { isEqual, cloneDeep } from 'lodash';
 import {
   catchError,
   debounceTime,
   distinctUntilChanged,
-  pluck,
-  startWith,
-  switchMap,
+  filter,
   map,
   pairwise,
-  filter,
+  pluck,
   skipWhile,
+  startWith,
+  switchMap,
 } from 'rxjs/operators';
-import { useEffect, useMemo } from 'react';
 import { DEFAULT_MODEL_MEMORY_LIMIT } from '../../../../../../../common/constants/new_job';
-import { ml } from '../../../../../services/ml_api_service';
-import { JobValidator, VALIDATION_DELAY_MS } from '../../job_validator/job_validator';
-import {
+import { extractErrorMessage } from '../../../../../../../common/util/errors/process_errors';
+import type {
   MLHttpFetchError,
   MLResponseError,
-  extractErrorMessage,
-} from '../../../../../../../common/util/errors';
-import { useMlKibana } from '../../../../../contexts/kibana';
+} from '../../../../../../../common/util/errors/types';
+import { useMlKibana } from '../../../../../contexts/kibana/kibana_context';
+import { ml } from '../../../../../services/ml_api_service';
+import { JobValidator, VALIDATION_DELAY_MS } from '../../job_validator/job_validator';
 import { JobCreator } from '../job_creator';
 
 export type CalculatePayload = Parameters<typeof ml.calculateModelMemoryLimit$>[0];

@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import type { RouteDefinitionParams } from '../..';
 import { defineDeleteRolesRoutes } from './delete';
 import { defineGetRolesRoutes } from './get';

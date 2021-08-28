@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import './space_selector.scss';
-
 import {
   EuiFieldSearch,
   EuiFlexGroup,
@@ -27,12 +25,13 @@ import ReactDOM from 'react-dom';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import type { CoreStart } from 'src/core/public';
-import type { Space } from 'src/plugins/spaces_oss/common';
 
+import type { CoreStart } from '../../../../../src/core/public/types';
+import type { Space } from '../../../../../src/plugins/spaces_oss/common/types';
 import { SPACE_SEARCH_COUNT_THRESHOLD } from '../../common/constants';
-import type { SpacesManager } from '../spaces_manager';
-import { SpaceCards } from './components';
+import type { SpacesManager } from '../spaces_manager/spaces_manager';
+import { SpaceCards } from './components/space_cards';
+import './space_selector.scss';
 
 interface Props {
   spacesManager: SpacesManager;

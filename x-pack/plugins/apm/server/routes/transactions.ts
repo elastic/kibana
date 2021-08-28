@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { jsonRt, toNumberRt } from '@kbn/io-ts-utils';
 import * as t from 'io-ts';
+import { environmentRt } from '../../common/environment_rt';
 import {
   LatencyAggregationType,
   latencyAggregationTypeRt,
@@ -16,18 +16,13 @@ import { setupRequest } from '../lib/helpers/setup_request';
 import { getServiceTransactionGroups } from '../lib/services/get_service_transaction_groups';
 import { getServiceTransactionGroupDetailedStatisticsPeriods } from '../lib/services/get_service_transaction_group_detailed_statistics';
 import { getTransactionBreakdown } from '../lib/transactions/breakdown';
-import { getTransactionTraceSamples } from '../lib/transactions/trace_samples';
 import { getAnomalySeries } from '../lib/transactions/get_anomaly_data';
 import { getLatencyPeriods } from '../lib/transactions/get_latency_charts';
+import { getTransactionTraceSamples } from '../lib/transactions/trace_samples';
 import { getErrorRatePeriods } from '../lib/transaction_groups/get_error_rate';
 import { createApmServerRoute } from './create_apm_server_route';
 import { createApmServerRouteRepository } from './create_apm_server_route_repository';
-import {
-  comparisonRangeRt,
-  environmentRt,
-  kueryRt,
-  rangeRt,
-} from './default_api_types';
+import { comparisonRangeRt, kueryRt, rangeRt } from './default_api_types';
 
 const transactionGroupsMainStatisticsRoute = createApmServerRoute({
   endpoint:

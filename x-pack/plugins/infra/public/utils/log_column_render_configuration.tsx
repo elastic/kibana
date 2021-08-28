@@ -4,9 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { ReactNode } from 'react';
-import { JsonValue } from '@kbn/utility-types';
+import type { JsonValue } from '@kbn/utility-types';
+import type { ReactNode } from 'react';
 
 /**
  * Interface for common configuration properties, regardless of the column type.

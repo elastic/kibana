@@ -4,9 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { KibanaFeatureConfig } from '../../../../../features/common';
-import { KibanaFeature } from '../../../../../features/common';
+import type { KibanaFeatureConfig } from '../../../../../features/common/kibana_feature';
+import { KibanaFeature } from '../../../../../features/common/kibana_feature';
 import { PrimaryFeaturePrivilege } from './primary_feature_privilege';
 import { SecuredSubFeature } from './secured_sub_feature';
 import type { SubFeaturePrivilege } from './sub_feature_privilege';

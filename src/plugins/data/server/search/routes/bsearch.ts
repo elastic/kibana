@@ -7,7 +7,7 @@
  */
 import { catchError, first } from 'rxjs/operators';
 import type { ExecutionContextSetup } from '../../../../../core/server/execution_context/execution_context_service';
-import type { BfetchServerSetup } from '../../../../bfetch/server/plugin';
+import type { BfetchServerSetup } from '../../../../bfetch/server/types';
 import type {
   IKibanaSearchRequest,
   IKibanaSearchResponse,

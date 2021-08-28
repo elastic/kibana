@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { EuiComboBox } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
-import { IFieldType } from 'src/plugins/data/public';
+import type { IFieldType } from '../../../../../../../src/plugins/data/common/index_patterns/fields/types';
 
 interface Props {
   selectedGroups?: string[];

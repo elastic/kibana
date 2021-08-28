@@ -6,8 +6,9 @@
  */
 
 import React from 'react';
-import { FieldIcon, FieldIconProps } from '../../../../../src/plugins/kibana_react/public';
-import { DataType } from '../types';
+import type { FieldIconProps } from '../../../../../src/plugins/kibana_react/public/field_icon/field_icon';
+import { FieldIcon } from '../../../../../src/plugins/kibana_react/public/field_icon/field_icon';
+import type { DataType } from '../types';
 import { normalizeOperationDataType } from './utils';
 
 export function LensFieldIcon({ type, ...rest }: FieldIconProps & { type: DataType }) {

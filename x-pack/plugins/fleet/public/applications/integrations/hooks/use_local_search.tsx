@@ -4,11 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { Search as LocalSearch, AllSubstringsIndexStrategy } from 'js-search';
+import { AllSubstringsIndexStrategy, Search as LocalSearch } from 'js-search';
 import { useEffect, useRef } from 'react';
 
-import type { PackageList } from '../../../types';
+import type { PackageList } from '../../../../common/types/models/epm';
 
 export const searchIdField = 'id';
 export const fieldsToSearch = ['name', 'title'];

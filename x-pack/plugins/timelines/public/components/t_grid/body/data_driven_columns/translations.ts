@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { i18n } from '@kbn/i18n';
 
 export const YOU_ARE_IN_A_TABLE_CELL = ({ column, row }: { column: number; row: number }) =>

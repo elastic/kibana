@@ -4,8 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { AuthenticatedUser } from '../../common/model';
+import type { AuthenticatedUser } from '../../common/model/authenticated_user';
 
 export type AuthenticationInfo = Omit<AuthenticatedUser, 'authentication_provider'>;
 export {

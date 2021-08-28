@@ -10,7 +10,7 @@ import { monaco } from '@kbn/monaco';
 import * as React from 'react';
 import { CodeEditor } from '../code_editor';
 import type { Props as CodeEditorProps } from '../code_editor/code_editor';
-import { HandlebarsLang } from '../code_editor/languages/handlebars';
+import { Lang as HandlebarsLang } from '../code_editor/languages/handlebars';
 import './styles.scss';
 
 export interface UrlTemplateEditorVariable {

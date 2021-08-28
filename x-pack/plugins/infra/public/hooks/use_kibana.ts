@@ -4,14 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { CoreStart } from '../../../../../src/core/public';
+import type { CoreStart } from '../../../../../src/core/public/types';
 import {
   createKibanaReactContext,
-  KibanaReactContextValue,
   useKibana,
-} from '../../../../../src/plugins/kibana_react/public';
-import { InfraClientStartDeps } from '../types';
+} from '../../../../../src/plugins/kibana_react/public/context/context';
+import type { KibanaReactContextValue } from '../../../../../src/plugins/kibana_react/public/context/types';
+import type { InfraClientStartDeps } from '../types';
 
 export type PluginKibanaContextValue = CoreStart & InfraClientStartDeps;
 

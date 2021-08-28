@@ -4,11 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { i18n } from '@kbn/i18n';
-import { APP_ID, APP_ICON } from '../common/constants';
+import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry';
+import { APP_ICON, APP_ID } from '../common/constants';
 import { getAppTitle } from '../common/i18n_getters';
-import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public';
 
 export const featureCatalogueEntry = {
   id: APP_ID,

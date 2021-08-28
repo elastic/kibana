@@ -4,9 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { parse, stringify } from 'query-string';
-import { url } from '../../../../../src/plugins/kibana_utils/public';
+import { url } from '../../../../../src/plugins/kibana_utils/common/url';
 
 export function toQuery(search?: string) {
   return search ? parse(search.slice(1), { sort: false }) : {};

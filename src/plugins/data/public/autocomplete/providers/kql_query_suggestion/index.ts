@@ -8,7 +8,7 @@
 import { fromKueryExpression } from '@kbn/es-query';
 import { flatten, uniqBy } from 'lodash';
 import type { $Keys } from 'utility-types';
-import type { CoreSetup } from '../../../../../../core/public';
+import type { CoreSetup } from '../../../../../../core/public/types';
 import type { DataPublicPluginStart } from '../../../types';
 import type {
   QuerySuggestion,

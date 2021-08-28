@@ -4,16 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { first } from 'rxjs/operators';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import React, { useCallback, useEffect, useState } from 'react';
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiText, EuiSpacer } from '@elastic/eui';
-import styled from 'styled-components';
 import { useLocation } from 'react-router-dom';
-
-import { createGlobalStyle } from '../../../../../../../../src/plugins/kibana_react/common';
-import { TypedLensByValueInput } from '../../../../../../lens/public';
-import { useKibana } from '../../../../common/lib/kibana';
+import { first } from 'rxjs/operators';
+import styled from 'styled-components';
+import { createGlobalStyle } from '../../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
+import type { TypedLensByValueInput } from '../../../../../../lens/public/embeddable/embeddable_component';
+import { useKibana } from '../../../../common/lib/kibana/kibana_react';
 import { LENS_VISUALIZATION_HEIGHT } from './constants';
 
 const Container = styled.div`

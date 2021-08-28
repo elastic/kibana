@@ -4,8 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { UxLocalUIFilterName } from '../common/ux_ui_filter';
+import type { UxLocalUIFilterName } from '../common/ux_ui_filter';
 
 export type UxUIFilters = {
   environment?: string;

@@ -11,9 +11,8 @@
  * The service processes the data required to draw each of the charts
  * and manages the layout of the charts in the containing div.
  */
-
-import type { JobId } from '../../../../common/types/anomaly_detection_jobs';
-import { SeriesConfigWithMetadata } from '../../services/anomaly_explorer_charts_service';
+import type { JobId } from '../../../../common/types/anomaly_detection_jobs/job';
+import type { SeriesConfigWithMetadata } from '../../services/anomaly_explorer_charts_service';
 
 export interface ExplorerChartSeriesErrorMessages {
   [key: string]: Set<JobId>;

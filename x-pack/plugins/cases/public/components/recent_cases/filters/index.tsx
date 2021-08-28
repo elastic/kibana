@@ -4,13 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { EuiButtonGroup, EuiButtonGroupOptionProps } from '@elastic/eui';
+import type { EuiButtonGroupOptionProps } from '@elastic/eui';
+import { EuiButtonGroup } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
-
-import { FilterMode } from '../types';
-
 import * as i18n from '../translations';
+import type { FilterMode } from '../types';
 
 const MY_RECENTLY_REPORTED_ID = 'myRecentlyReported';
 

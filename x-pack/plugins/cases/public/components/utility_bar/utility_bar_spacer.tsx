@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-
 import { BarSpacer } from './styles';
 
 export interface UtilityBarSpacerProps {

@@ -4,29 +4,29 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import React, { useCallback, useRef } from 'react';
-import { CoreStart } from 'kibana/public';
-import { ReactExpressionRendererType } from '../../../../../../src/plugins/expressions/public';
-import { DatasourceMap, FramePublicAPI, VisualizationMap } from '../../types';
-import { DataPanelWrapper } from './data_panel_wrapper';
-import { ConfigPanelWrapper } from './config_panel';
-import { FrameLayout } from './frame_layout';
-import { SuggestionPanelWrapper } from './suggestion_panel';
-import { WorkspacePanel } from './workspace_panel';
-import { DragDropIdentifier, RootDragDropProvider } from '../../drag_drop';
-import { EditorFrameStartPlugins } from '../service';
-import { getTopSuggestionForField, switchToSuggestion, Suggestion } from './suggestion_helpers';
-import { trackUiEvent } from '../../lens_ui_telemetry';
+import type { CoreStart } from '../../../../../../src/core/public/types';
+import type { ReactExpressionRendererType } from '../../../../../../src/plugins/expressions/public/react_expression_renderer';
+import { RootDragDropProvider } from '../../drag_drop/providers/providers';
+import type { DragDropIdentifier } from '../../drag_drop/providers/types';
+import { trackUiEvent } from '../../lens_ui_telemetry/factory';
+import { useLensDispatch, useLensSelector } from '../../state_management';
 import {
-  useLensSelector,
-  useLensDispatch,
-  selectAreDatasourcesLoaded,
-  selectFramePublicAPI,
   selectActiveDatasourceId,
+  selectAreDatasourcesLoaded,
   selectDatasourceStates,
+  selectFramePublicAPI,
   selectVisualization,
-} from '../../state_management';
+} from '../../state_management/selectors';
+import type { DatasourceMap, FramePublicAPI, VisualizationMap } from '../../types';
+import type { EditorFrameStartPlugins } from '../service';
+import { ConfigPanelWrapper } from './config_panel/config_panel';
+import { DataPanelWrapper } from './data_panel_wrapper';
+import { FrameLayout } from './frame_layout';
+import type { Suggestion } from './suggestion_helpers';
+import { getTopSuggestionForField, switchToSuggestion } from './suggestion_helpers';
+import { SuggestionPanelWrapper } from './suggestion_panel';
+import { WorkspacePanel } from './workspace_panel/workspace_panel';
 
 export interface EditorFrameProps {
   datasourceMap: DatasourceMap;

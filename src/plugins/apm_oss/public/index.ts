@@ -13,4 +13,5 @@ import { ApmOssPlugin } from './plugin';
 export function plugin() {
   return new ApmOssPlugin();
 }
-export { ApmOssPluginSetup, ApmOssPluginStart } from './types';
+
+export type { ApmOssPluginSetup, ApmOssPluginStart } from './types';

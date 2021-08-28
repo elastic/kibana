@@ -4,14 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { EuiLink } from '@elastic/eui';
 import type { FunctionComponent } from 'react';
 import React, { useCallback } from 'react';
 
-import type { CoreStart } from 'src/core/public';
-
-import { useKibana } from '../../../../../src/plugins/kibana_react/public';
+import type { CoreStart } from '../../../../../src/core/public/types';
+import { useKibana } from '../../../../../src/plugins/kibana_react/public/context/context';
 
 export type DocLinks = CoreStart['docLinks']['links'];
 export type GetDocLinkFunction = (app: string, doc: string) => string;

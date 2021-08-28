@@ -4,11 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { SavedObjectsManagementPluginSetup } from 'src/plugins/saved_objects_management/public';
-import type { SpacesApiUi } from 'src/plugins/spaces_oss/public';
-
+import type { SavedObjectsManagementPluginSetup } from '../../../../../src/plugins/saved_objects_management/public/plugin';
+import type { SpacesApiUi } from '../../../../../src/plugins/spaces_oss/public/api';
 import { ShareToSpaceSavedObjectsManagementAction } from './share_saved_objects_to_space_action';
+
 // import { ShareToSpaceSavedObjectsManagementColumn } from './share_saved_objects_to_space_column';
 
 interface SetupDeps {

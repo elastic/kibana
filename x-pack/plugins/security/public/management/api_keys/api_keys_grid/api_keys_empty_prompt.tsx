@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { EuiAccordion, EuiEmptyPrompt, EuiErrorBoundary, EuiSpacer, EuiText } from '@elastic/eui';
 import type { FunctionComponent } from 'react';
 import React from 'react';

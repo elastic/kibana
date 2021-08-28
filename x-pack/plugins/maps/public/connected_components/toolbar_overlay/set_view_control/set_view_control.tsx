@@ -4,23 +4,23 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { ChangeEvent, Component } from 'react';
 import {
+  EuiButton,
+  EuiButtonIcon,
+  EuiFieldNumber,
   EuiForm,
   EuiFormRow,
-  EuiButton,
-  EuiFieldNumber,
-  EuiButtonIcon,
-  EuiPopover,
-  EuiTextAlign,
-  EuiSpacer,
   EuiPanel,
+  EuiPopover,
+  EuiSpacer,
+  EuiTextAlign,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { MapCenter } from '../../../../common/descriptor_types';
-import { MapSettings } from '../../../reducers/map';
+import type { ChangeEvent } from 'react';
+import React, { Component } from 'react';
+import type { MapCenter } from '../../../../common/descriptor_types/map_descriptor';
+import type { MapSettings } from '../../../reducers/map/types';
 
 export interface Props {
   settings: MapSettings;

@@ -4,15 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { once } from 'lodash';
 import { i18n } from '@kbn/i18n';
-
-import type { DocLinksStart } from 'kibana/public';
-
-import { JOB_ID_MAX_LENGTH, VALIDATION_STATUS } from './validation';
-
+import { once } from 'lodash';
+import type { DocLinksStart } from '../../../../../src/core/public/doc_links/doc_links_service';
 import { renderTemplate } from '../util/string_utils';
+import { JOB_ID_MAX_LENGTH, VALIDATION_STATUS } from './validation';
 
 export type MessageId = keyof ReturnType<typeof getMessages>;
 

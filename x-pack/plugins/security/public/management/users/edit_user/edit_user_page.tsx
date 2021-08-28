@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import {
   EuiAvatar,
   EuiButton,
@@ -28,8 +27,8 @@ import useAsyncFn from 'react-use/lib/useAsyncFn';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
-import { getUserDisplayName } from '../../../../common/model';
+import { useKibana } from '../../../../../../../src/plugins/kibana_react/public/context/context';
+import { getUserDisplayName } from '../../../../common/model/user';
 import { UserAPIClient } from '../user_api_client';
 import { isUserDeprecated, isUserReserved } from '../user_utils';
 import { ChangePasswordFlyout } from './change_password_flyout';

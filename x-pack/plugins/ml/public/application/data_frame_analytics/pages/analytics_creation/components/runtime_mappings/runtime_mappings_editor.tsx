@@ -4,14 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { isEqual } from 'lodash';
-import React, { memo, FC } from 'react';
 import { i18n } from '@kbn/i18n';
-
-import { CodeEditor } from '../../../../../../../../../../src/plugins/kibana_react/public';
+import { isEqual } from 'lodash';
+import type { FC } from 'react';
+import React, { memo } from 'react';
+import { CodeEditor } from '../../../../../../../../../../src/plugins/kibana_react/public/code_editor';
 import { isRuntimeMappings } from '../../../../../../../common/util/runtime_field_utils';
-import { XJsonModeType } from './runtime_mappings';
+import type { XJsonModeType } from './runtime_mappings';
 
 interface Props {
   convertToJson: (data: string) => string;

@@ -4,14 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { parse, stringify } from 'query-string';
-import { History, Location } from 'history';
+import type { History, Location } from 'history';
 import { throttle } from 'lodash';
+import { parse, stringify } from 'query-string';
 import React from 'react';
-import { Route, RouteProps } from 'react-router-dom';
-import { decode, encode, RisonValue } from 'rison-node';
-import { url } from '../../../../../src/plugins/kibana_utils/public';
+import type { RouteProps } from 'react-router-dom';
+import { Route } from 'react-router-dom';
+import type { RisonValue } from 'rison-node';
+import { decode, encode } from 'rison-node';
+import { url } from '../../../../../src/plugins/kibana_utils/common/url';
 
 interface UrlStateContainerProps<UrlState> {
   urlState: UrlState | undefined;

@@ -8,7 +8,7 @@ import { EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { defaults, map, omit } from 'lodash';
 import React from 'react';
-import type { CoreStart } from '../../../../../../../src/core/public';
+import type { CoreStart } from '../../../../../../../src/core/public/types';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public/context/context';
 import { ForLastExpression } from '../../../../../triggers_actions_ui/public/common/expression_items';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';

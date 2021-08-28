@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { EuiButtonGroup, EuiButtonGroupProps } from '@elastic/eui';
+import type { EuiButtonGroupProps } from '@elastic/eui';
+import { EuiButtonGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 

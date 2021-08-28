@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import type { AgentLogsState } from './agent_logs';
 
 export const AGENT_LOG_INDEX_PATTERN = 'logs-elastic_agent-*,logs-elastic_agent.*-*';

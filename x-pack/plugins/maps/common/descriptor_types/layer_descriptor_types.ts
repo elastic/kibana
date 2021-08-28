@@ -6,24 +6,23 @@
  */
 
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
-
-import { Query } from 'src/plugins/data/public';
-import { Feature } from 'geojson';
-import {
-  FieldMeta,
-  HeatmapStyleDescriptor,
-  StyleDescriptor,
-  VectorStyleDescriptor,
-} from './style_property_descriptor_types';
-import { DataRequestDescriptor } from './data_request_descriptor_types';
-import { AbstractSourceDescriptor, TermJoinSourceDescriptor } from './source_descriptor_types';
-import { VectorShapeTypeCounts } from '../get_geometry_counts';
+import type { Feature } from 'geojson';
+import type { Query } from 'src/plugins/data/public';
 import {
   KBN_FEATURE_COUNT,
   KBN_IS_TILE_COMPLETE,
   KBN_METADATA_FEATURE,
   KBN_VECTOR_SHAPE_TYPE_COUNTS,
 } from '../constants';
+import type { VectorShapeTypeCounts } from '../get_geometry_counts';
+import type { DataRequestDescriptor } from './data_request_descriptor_types';
+import type { AbstractSourceDescriptor, TermJoinSourceDescriptor } from './source_descriptor_types';
+import type {
+  FieldMeta,
+  HeatmapStyleDescriptor,
+  StyleDescriptor,
+  VectorStyleDescriptor,
+} from './style_property_descriptor_types';
 
 export type Attribution = {
   label: string;

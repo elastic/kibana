@@ -9,11 +9,10 @@
  * Contains functions for operations commonly performed on anomaly data
  * to extract information for display in dashboards.
  */
-
 import { i18n } from '@kbn/i18n';
+import { ANOMALY_SEVERITY, ANOMALY_THRESHOLD, SEVERITY_COLORS } from '../constants/anomalies';
 import { CONDITIONS_NOT_SUPPORTED_FUNCTIONS } from '../constants/detector_rule';
 import { MULTI_BUCKET_IMPACT } from '../constants/multi_bucket_impact';
-import { ANOMALY_SEVERITY, ANOMALY_THRESHOLD, SEVERITY_COLORS } from '../constants/anomalies';
 import type { AnomalyRecordDoc } from '../types/anomalies';
 
 export interface SeverityType {

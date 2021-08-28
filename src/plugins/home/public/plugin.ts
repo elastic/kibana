@@ -7,7 +7,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import { first } from 'rxjs/operators';
-import type { CoreSetup, CoreStart } from '../../../core/public';
+import type { CoreSetup, CoreStart } from '../../../core/public/types';
 import type { AppMountParameters } from '../../../core/public/application/types';
 import { AppNavLinkStatus } from '../../../core/public/application/types';
 import type { Plugin } from '../../../core/public/plugins/plugin';

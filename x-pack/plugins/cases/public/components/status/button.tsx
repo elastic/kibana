@@ -4,11 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { memo, useCallback, useMemo } from 'react';
 import { EuiButton } from '@elastic/eui';
-
-import { CaseStatuses, caseStatuses } from '../../../common';
+import React, { memo, useCallback, useMemo } from 'react';
+import { CaseStatuses, caseStatuses } from '../../../common/api/cases/status';
 import { statuses } from './config';
 
 interface Props {

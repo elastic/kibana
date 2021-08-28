@@ -4,14 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { memo } from 'react';
+import { EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiText, EuiLink, EuiSpacer } from '@elastic/eui';
-import type { TutorialModuleNoticeComponent } from 'src/plugins/home/public';
+import React, { memo } from 'react';
 
-import { useGetPackages, useLink, useCapabilities } from '../../hooks';
-import { pkgKeyFromPackageInfo } from '../../services';
+import type { TutorialModuleNoticeComponent } from '../../../../../../src/plugins/home/public/services/tutorials/tutorial_service';
+import { useCapabilities } from '../../hooks/use_capabilities';
+import { useLink } from '../../hooks/use_link';
+import { useGetPackages } from '../../hooks/use_request/epm';
+import { pkgKeyFromPackageInfo } from '../../services/pkg_key_from_package_info';
 
 const TutorialModuleNotice: TutorialModuleNoticeComponent = memo(({ moduleName }) => {
   const { getHref } = useLink();

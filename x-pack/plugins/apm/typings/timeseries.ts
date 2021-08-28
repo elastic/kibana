@@ -4,16 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import {
+import type {
   AccessorFn,
   AreaSeriesStyle,
-  Fit,
   FitConfig,
   LineSeriesStyle,
 } from '@elastic/charts';
-import { DeepPartial } from 'utility-types';
-import { Maybe } from '../typings/common';
+import { Fit } from '@elastic/charts';
+import type { DeepPartial } from 'utility-types';
+import type { Maybe } from '../typings/common';
 
 export interface Coordinate {
   x: number;

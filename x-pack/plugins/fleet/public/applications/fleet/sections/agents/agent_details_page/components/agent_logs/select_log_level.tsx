@@ -4,14 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { memo, useState, useCallback } from 'react';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiFormLabel, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiSelect, EuiFormLabel, EuiButtonEmpty, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
+import React, { memo, useCallback, useState } from 'react';
 
-import type { Agent } from '../../../../../types';
-import { sendPostAgentAction, useStartServices } from '../../../../../hooks';
+import type { Agent } from '../../../../../../../../common/types/models/agent';
+import { useStartServices } from '../../../../../../../hooks/use_core';
+import { sendPostAgentAction } from '../../../../../../../hooks/use_request/agents';
 
 import { AGENT_LOG_LEVELS, DEFAULT_LOG_LEVEL } from './constants';
 

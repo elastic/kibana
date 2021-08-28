@@ -4,19 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { flatten, isObject, mapValues } from 'lodash';
 
+import type { Logger } from '@kbn/logging';
 import type { RecursiveReadonly, RecursiveReadonlyArray } from '@kbn/utility-types';
-import type { KibanaRequest, Logger } from 'src/core/server';
-import type { Capabilities as UICapabilities } from 'src/core/types';
 
-import type {
-  ElasticsearchFeature,
-  FeatureElasticsearchPrivileges,
-  KibanaFeature,
-} from '../../../features/server';
-import type { AuthenticatedUser } from '../../common/model';
+import type { KibanaRequest } from '../../../../../src/core/server/http/router/request';
+import type { Capabilities as UICapabilities } from '../../../../../src/core/types/capabilities';
+import type { ElasticsearchFeature } from '../../../features/common/elasticsearch_feature';
+import type { FeatureElasticsearchPrivileges } from '../../../features/common/feature_elasticsearch_privileges';
+import type { KibanaFeature } from '../../../features/common/kibana_feature';
+import type { AuthenticatedUser } from '../../common/model/authenticated_user';
 import type { AuthorizationServiceSetup } from './authorization_service';
 import type { CheckPrivilegesResponse } from './types';
 

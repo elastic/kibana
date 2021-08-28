@@ -4,17 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { LAYER_WIZARD_CATEGORY, RENDER_AS } from '../../../../common/constants';
+import type { ESGeoGridSourceDescriptor } from '../../../../common/descriptor_types/source_descriptor_types';
+import { HeatmapLayer } from '../../layers/heatmap_layer/heatmap_layer';
+import { HeatmapLayerIcon } from '../../layers/icons/heatmap_layer_icon';
+import type { LayerWizard, RenderWizardArguments } from '../../layers/layer_wizard_registry';
 // @ts-ignore
 import { CreateSourceEditor } from './create_source_editor';
 import { ESGeoGridSource, heatmapTitle } from './es_geo_grid_source';
-import { LayerWizard, RenderWizardArguments } from '../../layers/layer_wizard_registry';
-import { HeatmapLayer } from '../../layers/heatmap_layer';
-import { ESGeoGridSourceDescriptor } from '../../../../common/descriptor_types';
-import { LAYER_WIZARD_CATEGORY, RENDER_AS } from '../../../../common/constants';
-import { HeatmapLayerIcon } from '../../layers/icons/heatmap_layer_icon';
+
 
 export const heatmapLayerWizardConfig: LayerWizard = {
   categories: [LAYER_WIZARD_CATEGORY.ELASTICSEARCH],

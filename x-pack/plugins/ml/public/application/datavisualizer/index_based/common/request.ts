@@ -4,9 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { KBN_FIELD_TYPES } from '../../../../../../../../src/plugins/data/public';
-import { MlJobFieldType } from '../../../../../common/types/field_types';
+import type { MlJobFieldType } from '../../../../../common/types/field_types';
+import { KBN_FIELD_TYPES } from '@kbn/field-types';
 
 export interface FieldRequestConfig {
   fieldName?: string;

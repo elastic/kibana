@@ -6,7 +6,7 @@
  */
 
 import * as rt from 'io-ts';
-import { SnapshotMetricTypeRT, ItemTypeRT } from '../inventory_models/types';
+import { ItemTypeRT, SnapshotMetricTypeRT } from '../inventory_models/types';
 import { MetricsAPISeriesRT } from './metrics_api';
 
 export const SnapshotNodePathRT = rt.intersection([

@@ -4,39 +4,39 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { IconType } from '@elastic/eui';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { DocLinksStart } from 'kibana/public';
-import { ComponentType } from 'react';
-import { ChartsPluginSetup } from 'src/plugins/charts/public';
-import { DataPublicPluginStart } from 'src/plugins/data/public';
-import { IconType } from '@elastic/eui';
+import type { ComponentType } from 'react';
+import type { DocLinksStart } from '../../../../src/core/public/doc_links/doc_links_service';
+import type { ChartsPluginSetup } from '../../../../src/plugins/charts/public/types';
+import type { DataPublicPluginStart } from '../../../../src/plugins/data/public/types';
 import {
-  ActionType,
-  AlertHistoryEsIndexConnectorId,
-  AlertHistoryDocumentTemplate,
-  ALERT_HISTORY_PREFIX,
   AlertHistoryDefaultIndexName,
-  AsApiContract,
-} from '../../actions/common';
-import { TypeRegistry } from './application/type_registry';
-import {
-  ActionGroup,
-  AlertActionParam,
-  SanitizedAlert,
-  ResolvedSanitizedRule,
-  AlertAction,
-  AlertAggregations,
-  AlertTaskState,
-  AlertInstanceSummary,
-  AlertInstanceStatus,
-  RawAlertInstance,
-  AlertingFrameworkHealth,
-  AlertNotifyWhenType,
-  AlertTypeParams,
+  AlertHistoryDocumentTemplate,
+  AlertHistoryEsIndexConnectorId,
+  ALERT_HISTORY_PREFIX,
+} from '../../actions/common/alert_history_schema';
+import type { AsApiContract } from '../../actions/common/rewrite_request_case';
+import type { ActionType } from '../../actions/common/types';
+import type { AlertingFrameworkHealth } from '../../alerting/common';
+import type {
   ActionVariable,
-  AlertType as CommonAlertType,
-} from '../../alerting/common';
+  AlertAction,
+  AlertActionParam,
+  AlertAggregations,
+  AlertTypeParams,
+  ResolvedSanitizedRule,
+  SanitizedAlert,
+} from '../../alerting/common/alert';
+import type { RawAlertInstance } from '../../alerting/common/alert_instance';
+import type {
+  AlertInstanceStatus,
+  AlertInstanceSummary,
+} from '../../alerting/common/alert_instance_summary';
+import type { AlertNotifyWhenType } from '../../alerting/common/alert_notify_when_type';
+import type { AlertTaskState } from '../../alerting/common/alert_task_instance';
+import type { ActionGroup, AlertType as CommonAlertType } from '../../alerting/common/alert_type';
+import { TypeRegistry } from './application/type_registry';
 
 // In Triggers and Actions we treat all `Alert`s as `SanitizedAlert<AlertTypeParams>`
 // so the `Params` is a black-box of Record<string, unknown>

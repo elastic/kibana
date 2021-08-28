@@ -4,28 +4,24 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { EuiPopover, EuiToolTip } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { first } from 'lodash';
 import { darken, readableColor } from 'polished';
 import React from 'react';
-
-import { i18n } from '@kbn/i18n';
-
-import { first } from 'lodash';
-import { EuiPopover, EuiToolTip } from '@elastic/eui';
-import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
-import {
+import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
+import { findInventoryFields } from '../../../../../../common/inventory_models';
+import type { InventoryItemType } from '../../../../../../common/inventory_models/types';
+import { AlertFlyout } from '../../../../../alerting/inventory/components/alert_flyout';
+import type {
   InfraWaffleMapBounds,
   InfraWaffleMapNode,
   InfraWaffleMapOptions,
 } from '../../../../../lib/lib';
-import { ConditionalToolTip } from './conditional_tooltip';
 import { colorFromValue } from '../../lib/color_from_value';
-import { InventoryItemType } from '../../../../../../common/inventory_models/types';
 import { NodeContextPopover } from '../node_details/overlay';
-
+import { ConditionalToolTip } from './conditional_tooltip';
 import { NodeContextMenu } from './node_context_menu';
-import { AlertFlyout } from '../../../../../alerting/inventory/components/alert_flyout';
-import { findInventoryFields } from '../../../../../../common/inventory_models';
 
 const initialState = {
   isPopoverOpen: false,

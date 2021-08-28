@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { FormattedRelative } from '@kbn/i18n/react';
 import moment from 'moment-timezone';
 import React from 'react';
-import { FormattedRelative } from '@kbn/i18n/react';
-
-import { useDateFormat, useTimeZone, useUiSetting$ } from '../../common/lib/kibana';
+import { useUiSetting$ } from '../../../../../../src/plugins/kibana_react/public/ui_settings/use_ui_setting';
+import { useDateFormat, useTimeZone } from '../../common/lib/kibana/hooks';
 import { getOrEmptyTagFromValue } from '../empty_value';
 import { LocalizedDateTooltip } from '../localized_date_tooltip';
 import { getMaybeDate } from './maybe_date';

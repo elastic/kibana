@@ -4,21 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
-import {
+import { lazy } from 'react';
+import type {
   ActionTypeModel,
-  GenericValidationResult,
   ConnectorValidationResult,
+  GenericValidationResult,
 } from '../../../../types';
-import {
+import { isValidUrl } from '../../../lib/value_validators';
+import type {
+  WebhookActionConnector,
   WebhookActionParams,
   WebhookConfig,
   WebhookSecrets,
-  WebhookActionConnector,
 } from '../types';
-import { isValidUrl } from '../../../lib/value_validators';
 
 export function getActionType(): ActionTypeModel<
   WebhookConfig,

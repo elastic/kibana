@@ -10,17 +10,15 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { Route, Router, Switch, useParams } from 'react-router-dom';
 
 import { i18n } from '@kbn/i18n';
-import type { StartServicesAccessor } from 'src/core/public';
-import type { RegisterManagementAppArgs } from 'src/plugins/management/public';
-import type { Space } from 'src/plugins/spaces_oss/common';
 
-import { APP_WRAPPER_CLASS } from '../../../../../src/core/public';
-import {
-  KibanaContextProvider,
-  RedirectAppLinks,
-} from '../../../../../src/plugins/kibana_react/public';
+import type { StartServicesAccessor } from '../../../../../src/core/public/types';
+import { APP_WRAPPER_CLASS } from '../../../../../src/core/utils/app_wrapper_class';
+import { RedirectAppLinks } from '../../../../../src/plugins/kibana_react/public/app_links/redirect_app_link';
+import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public/context/context';
+import type { RegisterManagementAppArgs } from '../../../../../src/plugins/management/public/utils/management_app';
+import type { Space } from '../../../../../src/plugins/spaces_oss/common/types';
 import type { PluginsStart } from '../plugin';
-import type { SpacesManager } from '../spaces_manager';
+import type { SpacesManager } from '../spaces_manager/spaces_manager';
 
 interface CreateParams {
   getStartServices: StartServicesAccessor<PluginsStart>;

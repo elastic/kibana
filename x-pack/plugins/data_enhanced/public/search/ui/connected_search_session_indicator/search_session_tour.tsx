@@ -4,15 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { useCallback, useEffect } from 'react';
 import { once } from 'lodash';
-import { IStorageWrapper } from '../../../../../../../src/plugins/kibana_utils/public';
-import { SearchSessionIndicatorRef } from '../search_session_indicator';
-import {
-  SearchSessionState,
-  SearchUsageCollector,
-} from '../../../../../../../src/plugins/data/public';
+import { useCallback, useEffect } from 'react';
+import type { SearchUsageCollector } from '../../../../../../../src/plugins/data/public/search/collectors/types';
+import { SearchSessionState } from '../../../../../../../src/plugins/data/public/search/session/search_session_state';
+import type { IStorageWrapper } from '../../../../../../../src/plugins/kibana_utils/public/storage/types';
+import type { SearchSessionIndicatorRef } from '../search_session_indicator/search_session_indicator';
 
 const TOUR_TAKING_TOO_LONG_TIMEOUT = 10000;
 export const TOUR_TAKING_TOO_LONG_STEP_KEY = `data.searchSession.tour.takingTooLong`;

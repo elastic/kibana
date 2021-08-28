@@ -4,14 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { memo } from 'react';
 import { EuiModal, EuiModalBody, EuiModalHeader, EuiModalHeaderTitle } from '@elastic/eui';
-
-import { Case } from '../../containers/types';
+import React, { memo } from 'react';
+import { CaseType } from '../../../common/api/cases/case';
+import type { Case } from '../../../common/ui/types';
 import * as i18n from '../../common/translations';
-import { CaseType } from '../../../common';
-import { getCreateCaseLazy as getCreateCase } from '../../methods';
+import { getCreateCaseLazy as getCreateCase } from '../../methods/get_create_case';
 
 export interface CreateCaseModalProps {
   caseType?: CaseType;

@@ -4,15 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { useMemo } from 'react';
 import semverLt from 'semver/functions/lt';
 
-import { installationStatuses } from '../../common/constants';
-import type { PackagePolicy } from '../types';
+import { installationStatuses } from '../../common/constants/epm';
+import type { PackagePolicy } from '../../common/types/models/package_policy';
 
-import { useGetPackages } from './use_request/epm';
 import { useGetAgentPolicies } from './use_request/agent_policy';
+import { useGetPackages } from './use_request/epm';
 
 interface UpdatableIntegration {
   currentVersion: string;

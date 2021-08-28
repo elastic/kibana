@@ -4,19 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { memo, useMemo } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EuiText, EuiIcon, EuiToolTip, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from 'kibana/public';
-import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
-import { DatasourceDimensionTriggerProps, DatasourceDimensionEditorProps } from '../../types';
-import { DataPublicPluginStart } from '../../../../../../src/plugins/data/public';
-import { IndexPatternColumn } from '../indexpattern';
+import React, { memo, useMemo } from 'react';
+import type { HttpSetup } from '../../../../../../src/core/public/http/types';
+import type { SavedObjectsClientContract } from '../../../../../../src/core/public/saved_objects/saved_objects_client';
+import type { IUiSettingsClient } from '../../../../../../src/core/public/ui_settings/types';
+import type { DataPublicPluginStart } from '../../../../../../src/plugins/data/public/types';
+import type { IStorageWrapper } from '../../../../../../src/plugins/kibana_utils/public/storage/types';
+import type { DateRange } from '../../../common/types';
+import type { DatasourceDimensionEditorProps, DatasourceDimensionTriggerProps } from '../../types';
+import type { IndexPatternColumn } from '../operations/definitions';
+import type { IndexPatternPrivateState } from '../types';
 import { isColumnInvalid } from '../utils';
-import { IndexPatternPrivateState } from '../types';
 import { DimensionEditor } from './dimension_editor';
-import type { DateRange } from '../../../common';
 import { getOperationSupportMatrix } from './operation_support';
 
 export type IndexPatternDimensionTriggerProps = DatasourceDimensionTriggerProps<IndexPatternPrivateState> & {

@@ -4,16 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { useState, useMemo } from 'react';
 import { EuiScreenReaderOnly } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import {
-  DropIdentifier,
-  DraggingIdentifier,
-  DragDropIdentifier,
-  RegisteredDropTargets,
+import React, { useMemo, useState } from 'react';
+import type {
   DragContextState,
+  DragDropIdentifier,
+  DraggingIdentifier,
+  DropIdentifier,
+  RegisteredDropTargets,
 } from './types';
 
 /**

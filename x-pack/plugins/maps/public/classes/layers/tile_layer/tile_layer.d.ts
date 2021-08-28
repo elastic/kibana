@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { LayerDescriptor } from '../../../../common/descriptor_types/layer_descriptor_types';
+import type { ITMSSource } from '../../sources/tms_source';
 import { AbstractLayer } from '../layer';
-import { ITMSSource } from '../../sources/tms_source';
-import { LayerDescriptor } from '../../../../common/descriptor_types';
 
 interface ITileLayerArguments {
   source: ITMSSource;

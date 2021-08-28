@@ -4,13 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { EuiLoadingSpinner } from '@elastic/eui';
 import type { PropsWithChildren } from 'react';
 import React, { Component, Suspense } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import type { NotificationsStart } from 'src/core/public';
+
+import type { NotificationsStart } from '../../../../../src/core/public/notifications/notifications_service';
 
 interface Props {
   notifications: NotificationsStart;

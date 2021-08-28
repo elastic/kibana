@@ -5,19 +5,22 @@
  * 2.0.
  */
 import { mapKeys, mapValues } from 'lodash';
-import { ProcessorEvent } from '../../../../common/processor_event';
+import {
+  kqlQuery,
+  rangeQuery,
+} from '../../../../../observability/server/utils/queries';
 import {
   PROFILE_ID,
   SERVICE_NAME,
 } from '../../../../common/elasticsearch_fieldnames';
+import { ProcessorEvent } from '../../../../common/processor_event';
 import {
   getValueTypeConfig,
   ProfilingValueType,
 } from '../../../../common/profiling';
-import { Setup, SetupTimeRange } from '../../helpers/setup_request';
-import { getBucketSize } from '../../helpers/get_bucket_size';
 import { environmentQuery } from '../../../../common/utils/environment_query';
-import { kqlQuery, rangeQuery } from '../../../../../observability/server';
+import { getBucketSize } from '../../helpers/get_bucket_size';
+import type { Setup, SetupTimeRange } from '../../helpers/setup_request';
 
 const configMap = mapValues(
   mapKeys(ProfilingValueType, (val, key) => val),

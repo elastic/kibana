@@ -4,12 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { PluginInitializerContext } from '../../../../src/core/public';
+import type { PluginInitializerContext } from '../../../../src/core/public/plugins/plugin_context';
 import { SavedObjectTaggingPlugin } from './plugin';
 
-export { SavedObjectTaggingPluginStart } from './types';
 export { Tag } from '../common';
+export { SavedObjectTaggingPluginStart } from './types';
 
 export const plugin = (initializerContext: PluginInitializerContext) =>
   new SavedObjectTaggingPlugin(initializerContext);

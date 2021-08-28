@@ -4,11 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { useState, useEffect } from 'react';
-import { EuiSwitch, EuiLoadingSpinner } from '@elastic/eui';
-
-import { Alert, AlertTableItem } from '../../../../types';
+import { EuiLoadingSpinner, EuiSwitch } from '@elastic/eui';
+import React, { useEffect, useState } from 'react';
+import type { Alert, AlertTableItem } from '../../../../types';
 
 export interface ComponentOpts {
   item: AlertTableItem;

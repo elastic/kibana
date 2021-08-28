@@ -7,8 +7,8 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import type { ExpressionRenderDefinition } from 'src/plugins/expressions';
-import { TileMapVisRenderValue } from './tile_map_fn';
+import type { ExpressionRenderDefinition } from '../../../../../../src/plugins/expressions/common/expression_renderers/types';
+import type { TileMapVisRenderValue } from './tile_map_fn';
 import { TileMapVisualization } from './tile_map_visualization';
 import { TILE_MAP_RENDER } from './types';
 

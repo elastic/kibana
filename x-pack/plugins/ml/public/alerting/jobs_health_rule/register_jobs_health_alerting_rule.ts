@@ -4,13 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
-import { TriggersAndActionsUIPublicPluginSetup } from '../../../../triggers_actions_ui/public';
-import { PluginSetupContract as AlertingSetup } from '../../../../alerting/public';
+import { lazy } from 'react';
+import type { PluginSetupContract as AlertingSetup } from '../../../../alerting/public/plugin';
+import type { TriggersAndActionsUIPublicPluginSetup } from '../../../../triggers_actions_ui/public/plugin';
 import { ML_ALERT_TYPES } from '../../../common/constants/alerts';
-import { MlAnomalyDetectionJobsHealthRuleParams } from '../../../common/types/alerts';
+import type { MlAnomalyDetectionJobsHealthRuleParams } from '../../../common/types/alerts';
 import { getResultJobsHealthRuleConfig } from '../../../common/util/alerts';
 import { validateLookbackInterval } from '../validators';
 

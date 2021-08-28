@@ -4,23 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { EuiDataGridColumnActions } from '@elastic/eui';
+import type { EuiDataGridColumnActions } from '@elastic/eui';
 import { get, keyBy } from 'lodash/fp';
 import React from 'react';
-
 import type {
   BrowserField,
   BrowserFields,
 } from '../../../../../common/search_strategy/index_fields';
-import type { ColumnHeaderOptions } from '../../../../../common/types/timeline';
+import type { ColumnHeaderOptions } from '../../../../../common/types/timeline/columns';
 import {
+  DEFAULT_ACTIONS_COLUMN_WIDTH,
   DEFAULT_COLUMN_MIN_WIDTH,
   DEFAULT_DATE_COLUMN_MIN_WIDTH,
-  SHOW_CHECK_BOXES_COLUMN_WIDTH,
   EVENTS_VIEWER_ACTIONS_COLUMN_WIDTH,
-  DEFAULT_ACTIONS_COLUMN_WIDTH,
   MINIMUM_ACTIONS_COLUMN_WIDTH,
+  SHOW_CHECK_BOXES_COLUMN_WIDTH,
 } from '../constants';
 import { allowSorting } from '../helpers';
 import * as i18n from './translations';

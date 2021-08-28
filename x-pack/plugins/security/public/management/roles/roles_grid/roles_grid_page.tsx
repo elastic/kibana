@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import type { EuiBasicTableColumn, EuiSwitchEvent } from '@elastic/eui';
 import {
   EuiButton,
@@ -24,21 +23,24 @@ import React, { Component } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { NotificationsStart, ScopedHistory } from 'src/core/public';
 
-import { reactRouterNavigate } from '../../../../../../../src/plugins/kibana_react/public';
-import type { Role } from '../../../../common/model';
+import type { ScopedHistory } from '../../../../../../../src/core/public/application/scoped_history';
+import type { NotificationsStart } from '../../../../../../../src/core/public/notifications/notifications_service';
+import { reactRouterNavigate } from '../../../../../../../src/plugins/kibana_react/public/react_router_navigate/react_router_navigate';
+import type { Role } from '../../../../common/model/role';
 import {
   getExtendedRoleDeprecationNotice,
   isRoleDeprecated,
   isRoleEnabled,
   isRoleReadOnly,
   isRoleReserved,
-} from '../../../../common/model';
-import { DeprecatedBadge, DisabledBadge, ReservedBadge } from '../../badges';
+} from '../../../../common/model/role';
+import { DeprecatedBadge } from '../../badges/deprecated_badge';
+import { DisabledBadge } from '../../badges/disabled_badge';
+import { ReservedBadge } from '../../badges/reserved_badge';
 import type { RolesAPIClient } from '../roles_api_client';
-import { ConfirmDelete } from './confirm_delete';
-import { PermissionDenied } from './permission_denied';
+import { ConfirmDelete } from './confirm_delete/confirm_delete';
+import { PermissionDenied } from './permission_denied/permission_denied';
 
 interface Props {
   notifications: NotificationsStart;

@@ -4,8 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
+import type { IStorageWrapper } from '../../../../src/plugins/kibana_utils/public/storage/types';
 
 const STORAGE_KEY = 'lens-settings';
 

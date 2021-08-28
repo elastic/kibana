@@ -4,16 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import type { Observable } from 'rxjs';
 
-import type {
-  CoreStart,
-  ISavedObjectsRepository,
-  KibanaRequest,
-  SavedObjectsServiceStart,
-} from 'src/core/server';
-
+import type { CoreStart } from '../../../../../src/core/server';
+import type { KibanaRequest } from '../../../../../src/core/server/http/router/request';
+import type { SavedObjectsServiceStart } from '../../../../../src/core/server/saved_objects/saved_objects_service';
+import type { ISavedObjectsRepository } from '../../../../../src/core/server/saved_objects/service/lib/repository';
 import type { ConfigType } from '../config';
 import type { ISpacesClient } from './spaces_client';
 import { SpacesClient } from './spaces_client';

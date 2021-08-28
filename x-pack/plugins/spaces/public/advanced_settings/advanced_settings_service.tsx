@@ -7,10 +7,10 @@
 
 import React from 'react';
 
-import type { AdvancedSettingsSetup } from 'src/plugins/advanced_settings/public';
-import type { Space } from 'src/plugins/spaces_oss/common';
-
-import { AdvancedSettingsSubtitle, AdvancedSettingsTitle } from './components';
+import type { AdvancedSettingsSetup } from '../../../../../src/plugins/advanced_settings/public/types';
+import type { Space } from '../../../../../src/plugins/spaces_oss/common/types';
+import { AdvancedSettingsSubtitle } from './components/advanced_settings_subtitle/advanced_settings_subtitle';
+import { AdvancedSettingsTitle } from './components/advanced_settings_title/advanced_settings_title';
 
 interface SetupDeps {
   getActiveSpace: () => Promise<Space>;

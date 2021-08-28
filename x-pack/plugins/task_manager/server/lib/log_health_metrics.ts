@@ -4,12 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { Logger } from '@kbn/logging';
 import { isEmpty } from 'lodash';
-import { Logger } from '../../../../../src/core/server';
-import { HealthStatus } from '../monitoring';
-import { TaskManagerConfig } from '../config';
-import { MonitoredHealth } from '../routes/health';
+import type { TaskManagerConfig } from '../config';
+import { HealthStatus } from '../monitoring/monitoring_stats_stream';
+import type { MonitoredHealth } from '../routes/health';
 import { calculateHealthStatus } from './calculate_health_status';
 
 enum LogLevel {

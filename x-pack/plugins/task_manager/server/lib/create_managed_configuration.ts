@@ -4,11 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { interval, merge, of, Observable } from 'rxjs';
-import { filter, mergeScan, map, scan, distinctUntilChanged, startWith } from 'rxjs/operators';
-import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
-import { Logger } from '../../../../../src/core/server';
+import type { Logger } from '@kbn/logging';
+import { interval, merge, Observable, of } from 'rxjs';
+import { distinctUntilChanged, filter, map, mergeScan, scan, startWith } from 'rxjs/operators';
+import { SavedObjectsErrorHelpers } from '../../../../../src/core/server/saved_objects/service/lib/errors';
 import { isEsCannotExecuteScriptError } from './identify_es_error';
 
 const FLUSH_MARKER = Symbol('flush');

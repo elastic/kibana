@@ -4,22 +4,22 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { useEffect, useState } from 'react';
 import {
+  EuiButton,
   EuiCodeBlock,
   EuiLoadingContent,
   EuiModal,
   EuiModalBody,
-  EuiModalHeader,
   EuiModalFooter,
+  EuiModalHeader,
   EuiModalHeaderTitle,
-  EuiButton,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import React, { useEffect, useState } from 'react';
 
-import { sendGetFileByPath, useStartServices } from '../../../../../hooks';
+import { useStartServices } from '../../../../../../../hooks/use_core';
+import { sendGetFileByPath } from '../../../../../../../hooks/use_request/epm';
 
 interface Props {
   noticePath: string;

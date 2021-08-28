@@ -4,25 +4,22 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { FC, useReducer, useState, useEffect } from 'react';
-import { useModelMemoryEstimator } from '../../common/job_creator/util/model_memory_estimator';
-
-import { WIZARD_STEPS } from '../components/step_types';
-
-import { TimeBuckets } from '../../../../util/time_buckets';
-
-import { JobCreatorContext, JobCreatorContextValue } from '../components/job_creator_context';
-import { ExistingJobsAndGroups } from '../../../../services/job_service';
-
-import { JobCreatorType } from '../../common/job_creator';
-import { ChartLoader } from '../../common/chart_loader';
-import { ResultsLoader } from '../../common/results_loader';
-import { JobValidator } from '../../common/job_validator';
-import { newJobCapsService } from '../../../../services/new_job_capabilities/new_job_capabilities_service';
-import { WizardSteps } from './wizard_steps';
-import { WizardHorizontalSteps } from './wizard_horizontal_steps';
+import type { FC } from 'react';
+import React, { useEffect, useReducer, useState } from 'react';
 import { JOB_TYPE } from '../../../../../../common/constants/new_job';
+import type { ExistingJobsAndGroups } from '../../../../services/job_service';
+import { newJobCapsService } from '../../../../services/new_job_capabilities/new_job_capabilities_service';
+import { TimeBuckets } from '../../../../util/time_buckets';
+import { ChartLoader } from '../../common/chart_loader/chart_loader';
+import type { JobCreatorType } from '../../common/job_creator/type_guards';
+import { useModelMemoryEstimator } from '../../common/job_creator/util/model_memory_estimator';
+import { JobValidator } from '../../common/job_validator/job_validator';
+import { ResultsLoader } from '../../common/results_loader/results_loader';
+import type { JobCreatorContextValue } from '../components/job_creator_context';
+import { JobCreatorContext } from '../components/job_creator_context';
+import { WIZARD_STEPS } from '../components/step_types';
+import { WizardHorizontalSteps } from './wizard_horizontal_steps';
+import { WizardSteps } from './wizard_steps';
 
 interface Props {
   jobCreator: JobCreatorType;

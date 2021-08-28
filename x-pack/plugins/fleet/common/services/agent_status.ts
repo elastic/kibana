@@ -4,9 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { AGENT_POLLING_THRESHOLD_MS } from '../constants';
-import type { Agent, AgentStatus } from '../types';
+import { AGENT_POLLING_THRESHOLD_MS } from '../constants/agent';
+import type { Agent, AgentStatus } from '../types/models/agent';
 
 export function getAgentStatus(agent: Agent, now: number = Date.now()): AgentStatus {
   const { last_checkin: lastCheckIn } = agent;

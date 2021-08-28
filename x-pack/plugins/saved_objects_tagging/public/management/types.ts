@@ -4,9 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import { Observable } from 'rxjs';
-import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 
 /**
  * Represents a tag `bulk action`

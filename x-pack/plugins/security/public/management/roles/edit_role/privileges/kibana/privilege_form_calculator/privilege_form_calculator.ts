@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { Role } from '../../../../../../../common/model';
-import type { KibanaPrivileges, SubFeaturePrivilegeGroup } from '../../../../model';
+import type { Role } from '../../../../../../../common/model/role';
+import type { KibanaPrivileges } from '../../../../model/kibana_privileges';
+import type { SubFeaturePrivilegeGroup } from '../../../../model/sub_feature_privilege_group';
 import { isGlobalPrivilegeDefinition } from '../../../privilege_utils';
 
 /**

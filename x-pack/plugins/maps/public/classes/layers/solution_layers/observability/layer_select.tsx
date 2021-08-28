@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { ChangeEvent } from 'react';
 import { EuiFormRow, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { ChangeEvent } from 'react';
+import React from 'react';
 
 export enum OBSERVABILITY_LAYER_TYPE {
   APM_RUM_PERFORMANCE = 'APM_RUM_PERFORMANCE',

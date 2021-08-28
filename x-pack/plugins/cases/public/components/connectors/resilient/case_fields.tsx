@@ -4,25 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { useMemo, useCallback, useEffect, useRef } from 'react';
-import {
-  EuiComboBox,
-  EuiComboBoxOptionOption,
-  EuiFormRow,
-  EuiSelect,
-  EuiSelectOption,
-  EuiSpacer,
-} from '@elastic/eui';
-
-import { useKibana } from '../../../common/lib/kibana';
-import { ConnectorFieldsProps } from '../types';
+import type { EuiComboBoxOptionOption, EuiSelectOption } from '@elastic/eui';
+import { EuiComboBox, EuiFormRow, EuiSelect, EuiSpacer } from '@elastic/eui';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import { ConnectorTypes } from '../../../../common/api/connectors';
+import type { ResilientFieldsType } from '../../../../common/api/connectors/resilient';
+import { useKibana } from '../../../common/lib/kibana/kibana_react';
+import { ConnectorCard } from '../card';
+import type { ConnectorFieldsProps } from '../types';
+import * as i18n from './translations';
 import { useGetIncidentTypes } from './use_get_incident_types';
 import { useGetSeverity } from './use_get_severity';
-
-import * as i18n from './translations';
-import { ConnectorTypes, ResilientFieldsType } from '../../../../common';
-import { ConnectorCard } from '../card';
 
 const ResilientFieldsComponent: React.FunctionComponent<
   ConnectorFieldsProps<ResilientFieldsType>

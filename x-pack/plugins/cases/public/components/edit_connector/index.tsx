@@ -4,34 +4,35 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { useCallback, useReducer } from 'react';
-import deepEqual from 'fast-deep-equal';
 import {
-  EuiText,
-  EuiHorizontalRule,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiButton,
   EuiButtonEmpty,
-  EuiLoadingSpinner,
   EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
+  EuiLoadingSpinner,
+  EuiText,
 } from '@elastic/eui';
-import styled from 'styled-components';
+import deepEqual from 'fast-deep-equal';
 import { isEmpty, noop } from 'lodash/fp';
-
-import { FieldConfig, Form, UseField, useForm } from '../../common/shared_imports';
-import { ActionConnector, Case, ConnectorTypeFields } from '../../../common';
-import { ConnectorSelector } from '../connector_selector/form';
+import React, { useCallback, useReducer } from 'react';
+import styled from 'styled-components';
+import { Form } from '../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/components/form';
+import { UseField } from '../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/components/use_field';
+import { useForm } from '../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/hooks/use_form';
+import type { FieldConfig } from '../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/types';
+import type { ActionConnector, ConnectorTypeFields } from '../../../common/api/connectors';
+import type { Case, CaseUserActions } from '../../../common/ui/types';
+import type { CaseServices } from '../../containers/use_get_case_user_actions';
 import { ConnectorFieldsForm } from '../connectors/fields_form';
-import { CaseUserActions } from '../../containers/types';
-import { schema } from './schema';
-import { getConnectorFieldsFromUserActions } from './helpers';
-import * as i18n from './translations';
-import { getConnectorById, getConnectorsFormValidators } from '../utils';
+import { ConnectorSelector } from '../connector_selector/form';
+import type { CasesNavigation } from '../links';
 import { usePushToService } from '../use_push_to_service';
-import { CasesNavigation } from '../links';
-import { CaseServices } from '../../containers/use_get_case_user_actions';
+import { getConnectorById, getConnectorsFormValidators } from '../utils';
+import { getConnectorFieldsFromUserActions } from './helpers';
+import { schema } from './schema';
+import * as i18n from './translations';
 
 export interface EditConnectorProps {
   caseData: Case;

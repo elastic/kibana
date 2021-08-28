@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { ESFilter } from '../../../../../../src/core/types/elasticsearch';
+import type { ESFilter } from '../../../../../../src/core/types/elasticsearch';
+import { rangeQuery } from '../../../../observability/server/utils/queries';
 import {
   METRIC_CGROUP_MEMORY_USAGE_BYTES,
   METRIC_SYSTEM_CPU_PERCENT,
@@ -19,7 +19,6 @@ import {
   TRANSACTION_PAGE_LOAD,
   TRANSACTION_REQUEST,
 } from '../../../common/transaction_types';
-import { rangeQuery } from '../../../../observability/server';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { withApmSpan } from '../../utils/with_apm_span';
 import {
@@ -27,7 +26,7 @@ import {
   getProcessorEventForAggregatedTransactions,
   getTransactionDurationFieldForAggregatedTransactions,
 } from '../helpers/aggregated_transactions';
-import { Setup, SetupTimeRange } from '../helpers/setup_request';
+import type { Setup, SetupTimeRange } from '../helpers/setup_request';
 import {
   percentCgroupMemoryUsedScript,
   percentSystemMemoryUsedScript,

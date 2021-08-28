@@ -7,7 +7,7 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import type { PluginInitializerContext } from '../../../../src/core/server/plugins/types';
-import type { APMOSSConfig } from '../../../../src/plugins/apm_oss/server';
+import type { APMOSSConfig } from '../../../../src/plugins/apm_oss/server/config';
 import { SearchAggregatedTransactionSetting } from '../common/aggregated_transactions';
 import { APMPlugin } from './plugin';
 

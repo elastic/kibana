@@ -4,9 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { boomify, isBoom } from '@hapi/boom';
-import { ResponseError, CustomHttpResponseOptions } from 'kibana/server';
+import type {
+  CustomHttpResponseOptions,
+  ResponseError,
+} from '../../../../../src/core/server/http/router/response';
 
 export function wrapError(error: any): CustomHttpResponseOptions<ResponseError> {
   const boom = isBoom(error)

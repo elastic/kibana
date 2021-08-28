@@ -4,22 +4,22 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { FC, memo } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHorizontalRule,
   EuiIcon,
   EuiLoadingSpinner,
+  EuiSpacer,
   EuiText,
   EuiTitle,
-  EuiHorizontalRule,
-  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { KibanaObjectUi } from '../page';
-import { extractErrorMessage } from '../../../../../../common/util/errors';
+import { FormattedMessage } from '@kbn/i18n/react';
+import type { FC } from 'react';
+import React, { memo } from 'react';
+import { extractErrorMessage } from '../../../../../../common/util/errors/process_errors';
+import type { KibanaObjectUi } from '../page';
 
 export interface KibanaObjectItemProps {
   objectType: string;

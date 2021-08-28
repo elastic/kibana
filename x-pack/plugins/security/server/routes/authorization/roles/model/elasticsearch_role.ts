@@ -4,12 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import {
   GLOBAL_RESOURCE,
   RESERVED_PRIVILEGES_APPLICATION_WILDCARD,
 } from '../../../../../common/constants';
-import type { Role, RoleKibanaPrivilege } from '../../../../../common/model';
+import type { Role, RoleKibanaPrivilege } from '../../../../../common/model/role';
 import { PrivilegeSerializer } from '../../../../authorization/privilege_serializer';
 import { ResourceSerializer } from '../../../../authorization/resource_serializer';
 

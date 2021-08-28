@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { Logger } from '@kbn/logging';
 
-import type { HttpResources, IBasePath, Logger } from 'src/core/server';
-
-import { ENTER_SPACE_PATH } from '../../../common';
+import type { IBasePath } from '../../../../../../src/core/server/http/base_path_service';
+import type { HttpResources } from '../../../../../../src/core/server/http_resources/types';
+import { ENTER_SPACE_PATH } from '../../../common/constants';
 import { wrapError } from '../../lib/errors';
 
 export interface ViewRouteDeps {

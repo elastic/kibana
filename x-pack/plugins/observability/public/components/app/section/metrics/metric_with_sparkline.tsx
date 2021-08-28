@@ -4,18 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { Chart, Settings, AreaSeries } from '@elastic/charts';
-import { EuiFlexItem, EuiFlexGroup, EuiIcon, EuiTextColor } from '@elastic/eui';
-import React, { useContext } from 'react';
+import { AreaSeries, Chart, Settings } from '@elastic/charts';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiTextColor } from '@elastic/eui';
 import {
   EUI_CHARTS_THEME_DARK,
   EUI_CHARTS_THEME_LIGHT,
   EUI_SPARKLINE_THEME_PARTIAL,
 } from '@elastic/eui/dist/eui_charts_theme';
+import React, { useContext } from 'react';
 import { ThemeContext } from 'styled-components';
-
-import { NumberOrNull } from '../../../..';
+import type { NumberOrNull } from '../../../../typings/fetch_overview_data';
 
 interface Props {
   id: string;

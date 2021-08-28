@@ -4,29 +4,26 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { FC } from 'react';
-import './_index.scss';
+import type { FC } from 'react';
+import React from 'react';
 import ReactDOM from 'react-dom';
-
-import { AppMountParameters, CoreStart, HttpStart } from 'kibana/public';
-
-import type { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
-import { Storage } from '../../../../../src/plugins/kibana_utils/public';
-
-import {
-  KibanaContextProvider,
-  RedirectAppLinks,
-} from '../../../../../src/plugins/kibana_react/public';
-import { setDependencyCache, clearCache } from './util/dependency_cache';
-import { setLicenseCache } from './license';
-import type { MlSetupDependencies, MlStartDependencies } from '../plugin';
-import { mlUsageCollectionProvider } from './services/usage_collection';
-
-import { MlRouter } from './routing';
-import { mlApiServicesProvider } from './services/ml_api_service';
-import { HttpService } from './services/http_service';
+import type { CoreStart } from '../../../../../src/core/public/types';
+import type { AppMountParameters } from '../../../../../src/core/public/application/types';
+import type { HttpStart } from '../../../../../src/core/public/http/types';
+import { RedirectAppLinks } from '../../../../../src/plugins/kibana_react/public/app_links/redirect_app_link';
+import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public/context/context';
+import { Storage } from '../../../../../src/plugins/kibana_utils/public/storage/storage';
+import type { UsageCollectionSetup } from '../../../../../src/plugins/usage_collection/public/plugin';
 import { ML_APP_LOCATOR, ML_PAGES } from '../../common/constants/locator';
+import type { MlSetupDependencies, MlStartDependencies } from '../plugin';
+import { setLicenseCache } from './license/check_license';
+import { MlRouter } from './routing/router';
+import { HttpService } from './services/http_service';
+import { mlApiServicesProvider } from './services/ml_api_service';
+import { mlUsageCollectionProvider } from './services/usage_collection';
+import { clearCache, setDependencyCache } from './util/dependency_cache';
+import './_index.scss';
+
 export type MlDependencies = Omit<MlSetupDependencies, 'share' | 'indexPatternManagement'> &
   MlStartDependencies;
 

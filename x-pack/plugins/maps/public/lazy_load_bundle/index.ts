@@ -4,24 +4,23 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { IndexPatternsContract } from 'src/plugins/data/public/index_patterns';
-import { AppMountParameters } from 'kibana/public';
-import { IContainer } from '../../../../../src/plugins/embeddable/public';
-import { LayerDescriptor } from '../../common/descriptor_types';
+import type { AppMountParameters } from '../../../../../src/core/public/application/types';
+import type { IndexPatternsContract } from '../../../../../src/plugins/data/common/index_patterns/index_patterns/index_patterns';
+import type { IContainer } from '../../../../../src/plugins/embeddable/public/lib/containers/i_container';
+import type { LayerDescriptor } from '../../common/descriptor_types/layer_descriptor_types';
+import type { CreateRegionMapLayerDescriptorParams } from '../classes/layers/create_region_map_layer_descriptor';
+import type { CreateTileMapLayerDescriptorParams } from '../classes/layers/create_tile_map_layer_descriptor';
+import type { LayerWizard } from '../classes/layers/layer_wizard_registry';
+import type { CreateLayerDescriptorParams } from '../classes/sources/es_search_source/create_layer_descriptor';
+import type { SourceRegistryEntry } from '../classes/sources/source_registry';
 import type {
   MapEmbeddableConfig,
   MapEmbeddableInput,
   MapEmbeddableType,
 } from '../embeddable/types';
-import { SourceRegistryEntry } from '../classes/sources/source_registry';
-import { LayerWizard } from '../classes/layers/layer_wizard_registry';
-import type { CreateLayerDescriptorParams } from '../classes/sources/es_search_source';
-import type { EMSTermJoinConfig, SampleValuesConfig } from '../ems_autosuggest';
-import type { CreateTileMapLayerDescriptorParams } from '../classes/layers/create_tile_map_layer_descriptor';
-import type { CreateRegionMapLayerDescriptorParams } from '../classes/layers/create_region_map_layer_descriptor';
+import type { EMSTermJoinConfig, SampleValuesConfig } from '../ems_autosuggest/ems_autosuggest';
 
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 let loadModulesPromise: Promise<LazyLoadedMapModules>;
 
 export interface LazyLoadedMapModules {

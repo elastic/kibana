@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import type { FC, MouseEvent } from 'react';
 import React from 'react';
-import type { CoreStart } from '../../../../../core/public';
+import type { CoreStart } from '../../../../../core/public/types';
 import { RedirectAppLinks } from '../../app_links/redirect_app_link';
 import { useKibana } from '../../context/context';
 import { useUiSetting$ } from '../../ui_settings/use_ui_setting';

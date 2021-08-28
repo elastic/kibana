@@ -15,20 +15,20 @@ import {
   STYLE_TYPE,
   VECTOR_STYLES,
 } from '../../../../common/constants';
-import { getJoinAggKey } from '../../../../common/get_agg_key';
-import {
-  ColorDynamicOptions,
+import type {
   CountAggDescriptor,
   EMSFileSourceDescriptor,
   ESSearchSourceDescriptor,
-} from '../../../../common/descriptor_types';
+} from '../../../../common/descriptor_types/source_descriptor_types';
+import type { ColorDynamicOptions } from '../../../../common/descriptor_types/style_property_descriptor_types';
+import { getJoinAggKey } from '../../../../common/get_agg_key';
+import { EMSFileSource } from '../../sources/ems_file_source/ems_file_source';
+import { ESSearchSource } from '../../sources/es_search_source/es_search_source';
 import { VectorStyle } from '../../styles/vector/vector_style';
-import { VectorLayer } from '../vector_layer';
-import { EMSFileSource } from '../../sources/ems_file_source';
-// @ts-ignore
-import { ESSearchSource } from '../../sources/es_search_source';
 import { getDefaultDynamicProperties } from '../../styles/vector/vector_style_defaults';
+import { VectorLayer } from '../vector_layer/vector_layer';
 
+// @ts-ignore
 const defaultDynamicProperties = getDefaultDynamicProperties();
 
 function createChoroplethLayerDescriptor({

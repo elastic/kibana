@@ -4,9 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { HttpFetchError } from 'kibana/public';
 import Boom from '@hapi/boom';
+import { HttpFetchError } from '../../../../../../src/core/public/http/http_fetch_error';
 
 export interface EsErrorRootCause {
   type: string;

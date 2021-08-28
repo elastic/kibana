@@ -4,18 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { i18n } from '@kbn/i18n';
-import type {
-  ExpressionFunctionDefinition,
-  Datatable,
-  ExecutionContext,
-} from '../../../../../../src/plugins/expressions/common';
-import { toAbsoluteDates } from '../../../../../../src/plugins/data/common';
-import type { ExpressionValueSearchContext } from '../../../../../../src/plugins/data/common';
-
+import { toAbsoluteDates } from '../../../../../../src/plugins/data/common/search/aggs/utils/date_interval_utils/to_absolute_dates';
+import type { ExpressionValueSearchContext } from '../../../../../../src/plugins/data/common/search/expressions/kibana_context_type';
+import type { ExecutionContext } from '../../../../../../src/plugins/expressions/common/execution/types';
+import type { ExpressionFunctionDefinition } from '../../../../../../src/plugins/expressions/common/expression_functions/types';
+import type { Datatable } from '../../../../../../src/plugins/expressions/common/expression_types/specs/datatable';
+import type { Adapters } from '../../../../../../src/plugins/inspector/common/adapters/types';
 import type { LensMultiTable } from '../../types';
-import { Adapters } from '../../../../../../src/plugins/inspector/common';
 
 interface MergeTables {
   layerIds: string[];

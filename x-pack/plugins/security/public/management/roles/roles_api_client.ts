@@ -4,11 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { HttpStart } from 'src/core/public';
-
-import type { Role, RoleIndexPrivilege } from '../../../common/model';
-import { copyRole } from '../../../common/model';
+import type { HttpStart } from '../../../../../../src/core/public/http/types';
+import type { Role, RoleIndexPrivilege } from '../../../common/model/role';
+import { copyRole } from '../../../common/model/role';
 import { isGlobalPrivilegeDefinition } from './edit_role/privilege_utils';
 
 export class RolesAPIClient {

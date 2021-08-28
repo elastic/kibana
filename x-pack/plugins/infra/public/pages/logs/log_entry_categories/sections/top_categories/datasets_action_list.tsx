@@ -6,10 +6,9 @@
  */
 
 import React from 'react';
-
-import { LogEntryCategoryDataset } from '../../../../../../common/log_analysis';
-import { TimeRange } from '../../../../../../common/time';
-import { getFriendlyNameForPartitionId } from '../../../../../../common/log_analysis';
+import { getFriendlyNameForPartitionId } from '../../../../../../common/log_analysis/log_analysis_results';
+import type { LogEntryCategoryDataset } from '../../../../../../common/log_analysis/log_entry_categories_analysis';
+import type { TimeRange } from '../../../../../../common/time/time_range';
 import { AnalyzeCategoryDatasetInMlAction } from './analyze_dataset_in_ml_action';
 
 export const DatasetActionsList: React.FunctionComponent<{

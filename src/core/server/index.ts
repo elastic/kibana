@@ -14,48 +14,34 @@ import type {
   CoreEnvironmentUsageData,
   CoreServicesUsageData,
   CoreUsageData,
-  CoreUsageDataStart,
   CoreUsageStats,
 } from './core_usage_data/types';
 import type {
   DeprecationsClient,
-  DeprecationsServiceSetup,
 } from './deprecations/deprecations_service';
 import type { IScopedClusterClient } from './elasticsearch/client/scoped_cluster_client';
 import { configSchema as elasticsearchConfigSchema } from './elasticsearch/elasticsearch_config';
 import type {
   ElasticsearchServicePreboot,
-  ElasticsearchServiceSetup,
-  ElasticsearchServiceStart,
 } from './elasticsearch/types';
 import type {
   ExecutionContextSetup,
   ExecutionContextStart,
 } from './execution_context/execution_context_service';
-import type { HttpServicePreboot, HttpServiceSetup, HttpServiceStart } from './http/types';
+import type { HttpServicePreboot } from './http/types';
 import type { HttpResources } from './http_resources/types';
-import type { I18nServiceSetup } from './i18n/i18n_service';
 import type { AppenderConfigType } from './logging/appenders/appenders';
 import { appendersSchema } from './logging/appenders/appenders';
-import type { LoggingServiceSetup } from './logging/logging_service';
-import type { MetricsServiceSetup, MetricsServiceStart } from './metrics/types';
 import type { PluginsServiceSetup, PluginsServiceStart } from './plugins/plugins_service';
 import type { PluginOpaqueId } from './plugins/types';
 import type { PrebootServicePreboot } from './preboot/types';
 import type { ISavedObjectsExporter } from './saved_objects/export/saved_objects_exporter';
 import type { ISavedObjectsImporter } from './saved_objects/import/saved_objects_importer';
-import type {
-  SavedObjectsServiceSetup,
-  SavedObjectsServiceStart,
-} from './saved_objects/saved_objects_service';
 import type { ISavedObjectTypeRegistry } from './saved_objects/saved_objects_type_registry';
 import type { SavedObjectsClientProviderOptions } from './saved_objects/service/lib/scoped_client_provider';
 import type { SavedObjectsClientContract } from './saved_objects/types';
-import type { StatusServiceSetup } from './status/types';
 import type {
   IUiSettingsClient,
-  UiSettingsServiceSetup,
-  UiSettingsServiceStart,
 } from './ui_settings/types';
 
 // Because of #79265 we need to explicitly import, then export these types for
@@ -391,6 +377,11 @@ export type {
   PluginOpaqueId,
 };
 
+export type {
+  CoreStart,
+  CoreSetup
+} from './plugin_contract';
+
 /**
  * Plugin specific context passed to a route handler.
  *
@@ -438,84 +429,6 @@ export interface CorePreboot {
   http: HttpServicePreboot;
   /** {@link PrebootServicePreboot} */
   preboot: PrebootServicePreboot;
-}
-
-/**
- * Context passed to the `setup` method of `standard` plugins.
- *
- * @typeParam TPluginsStart - the type of the consuming plugin's start dependencies. Should be the same
- *                            as the consuming {@link Plugin}'s `TPluginsStart` type. Used by `getStartServices`.
- * @typeParam TStart - the type of the consuming plugin's start contract. Should be the same as the
- *                     consuming {@link Plugin}'s `TStart` type. Used by `getStartServices`.
- * @public
- */
-export interface CoreSetup<TPluginsStart extends object = object, TStart = unknown> {
-  /** {@link CapabilitiesSetup} */
-  capabilities: CapabilitiesSetup;
-  /** {@link ContextSetup} */
-  context: ContextSetup;
-  /** {@link ElasticsearchServiceSetup} */
-  elasticsearch: ElasticsearchServiceSetup;
-  /** {@link ExecutionContextSetup} */
-  executionContext: ExecutionContextSetup;
-  /** {@link HttpServiceSetup} */
-  http: HttpServiceSetup & {
-    /** {@link HttpResources} */
-    resources: HttpResources;
-  };
-  /** {@link I18nServiceSetup} */
-  i18n: I18nServiceSetup;
-  /** {@link LoggingServiceSetup} */
-  logging: LoggingServiceSetup;
-  /** {@link MetricsServiceSetup} */
-  metrics: MetricsServiceSetup;
-  /** {@link SavedObjectsServiceSetup} */
-  savedObjects: SavedObjectsServiceSetup;
-  /** {@link StatusServiceSetup} */
-  status: StatusServiceSetup;
-  /** {@link UiSettingsServiceSetup} */
-  uiSettings: UiSettingsServiceSetup;
-  /** {@link DeprecationsServiceSetup} */
-  deprecations: DeprecationsServiceSetup;
-  /** {@link StartServicesAccessor} */
-  getStartServices: StartServicesAccessor<TPluginsStart, TStart>;
-}
-
-/**
- * Allows plugins to get access to APIs available in start inside async handlers.
- * Promise will not resolve until Core and plugin dependencies have completed `start`.
- * This should only be used inside handlers registered during `setup` that will only be executed
- * after `start` lifecycle.
- *
- * @public
- */
-export type StartServicesAccessor<
-  TPluginsStart extends object = object,
-  TStart = unknown
-> = () => Promise<[CoreStart, TPluginsStart, TStart]>;
-
-/**
- * Context passed to the plugins `start` method.
- *
- * @public
- */
-export interface CoreStart {
-  /** {@link CapabilitiesStart} */
-  capabilities: CapabilitiesStart;
-  /** {@link ElasticsearchServiceStart} */
-  elasticsearch: ElasticsearchServiceStart;
-  /** {@link ExecutionContextStart} */
-  executionContext: ExecutionContextStart;
-  /** {@link HttpServiceStart} */
-  http: HttpServiceStart;
-  /** {@link MetricsServiceStart} */
-  metrics: MetricsServiceStart;
-  /** {@link SavedObjectsServiceStart} */
-  savedObjects: SavedObjectsServiceStart;
-  /** {@link UiSettingsServiceStart} */
-  uiSettings: UiSettingsServiceStart;
-  /** @internal {@link CoreUsageDataStart} */
-  coreUsageData: CoreUsageDataStart;
 }
 
 /**

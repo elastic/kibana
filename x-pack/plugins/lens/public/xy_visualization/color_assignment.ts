@@ -4,14 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { uniq, mapValues } from 'lodash';
-import type { PaletteOutput, PaletteRegistry } from 'src/plugins/charts/public';
-import type { Datatable } from 'src/plugins/expressions';
+import { mapValues, uniq } from 'lodash';
+import type { PaletteOutput } from '../../../../../src/plugins/charts/common/palette';
+import type { PaletteRegistry } from '../../../../../src/plugins/charts/public/services/palettes/types';
+import type { Datatable } from '../../../../../src/plugins/expressions/common/expression_types/specs/datatable';
+import type { XYLayerConfig } from '../../common/expressions/xy_chart/layer_config';
+import type { FormatFactory } from '../../common/types';
 import type { AccessorConfig, FramePublicAPI } from '../types';
 import { getColumnToLabelMap } from './state_helpers';
-import type { FormatFactory } from '../../common';
-import type { XYLayerConfig } from '../../common/expressions';
 
 const isPrimitive = (value: unknown): boolean => value != null && typeof value !== 'object';
 

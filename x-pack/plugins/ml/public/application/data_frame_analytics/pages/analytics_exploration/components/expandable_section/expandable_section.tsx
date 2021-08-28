@@ -5,10 +5,6 @@
  * 2.0.
  */
 
-import './expandable_section.scss';
-
-import React, { FC, ReactNode, useCallback, useMemo } from 'react';
-
 import {
   EuiBadge,
   EuiButtonEmpty,
@@ -18,11 +14,14 @@ import {
   EuiPanel,
   EuiText,
 } from '@elastic/eui';
+import type { FC, ReactNode } from 'react';
+import React, { useCallback, useMemo } from 'react';
+import type { ExpandablePanels } from '../../../../../../../common/types/locator';
 import {
   getDefaultExplorationPageUrlState,
   useExplorationUrlState,
 } from '../../hooks/use_exploration_url_state';
-import { ExpandablePanels } from '../../../../../../../common/types/locator';
+import './expandable_section.scss';
 
 interface HeaderItem {
   // id is used as the React key and to construct a data-test-subj

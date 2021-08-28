@@ -4,24 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { FC, useCallback, useMemo } from 'react';
-
-import { i18n } from '@kbn/i18n';
-
+import type { BrushEndListener, ElementClickListener, XYChartElementEvent } from '@elastic/charts';
 import {
   Axis,
   BarSeries,
-  BrushEndListener,
   Chart,
-  ElementClickListener,
   niceTimeFormatter,
   Position,
   ScaleType,
   Settings,
-  XYChartElementEvent,
 } from '@elastic/charts';
+import { i18n } from '@kbn/i18n';
 import moment from 'moment';
+import type { FC } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { useDataVisualizerKibana } from '../../../../kibana_context';
 
 export interface DocumentCountChartPoint {

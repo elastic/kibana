@@ -4,11 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { SavedObjectsClientContract, SavedObject } from 'src/core/server';
-
-import type { EnrollmentAPIKey, EnrollmentAPIKeySOAttributes } from '../../types';
-import { ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE } from '../../constants';
+import type { SavedObjectsClientContract } from '../../../../../../src/core/server/saved_objects/types';
+import type { SavedObject } from '../../../../../../src/core/types/saved_objects';
+import { ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE } from '../../../common/constants/enrollment_api_key';
+import type {
+  EnrollmentAPIKey,
+  EnrollmentAPIKeySOAttributes,
+} from '../../../common/types/models/enrollment_api_key';
 import { appContextService } from '../app_context';
 import { normalizeKuery } from '../saved_object';
 

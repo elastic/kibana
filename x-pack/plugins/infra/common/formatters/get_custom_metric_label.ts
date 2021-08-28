@@ -4,9 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { i18n } from '@kbn/i18n';
-import { SnapshotCustomMetricInput } from '../http_api/snapshot_api';
+import type { SnapshotCustomMetricInput } from '../http_api/snapshot_api';
 
 export const getCustomMetricLabel = (metric: SnapshotCustomMetricInput) => {
   const METRIC_LABELS = {

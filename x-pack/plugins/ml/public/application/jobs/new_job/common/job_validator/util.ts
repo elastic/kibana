@@ -4,16 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { i18n } from '@kbn/i18n';
-import { BasicValidations } from './job_validator';
-import { Job, Datafeed } from '../../../../../../common/types/anomaly_detection_jobs';
 import {
   ALLOWED_DATA_UNITS,
   JOB_ID_MAX_LENGTH,
 } from '../../../../../../common/constants/validation';
+import type { Datafeed } from '../../../../../../common/types/anomaly_detection_jobs/datafeed';
+import type { Job } from '../../../../../../common/types/anomaly_detection_jobs/job';
+import type { ValidationResults } from '../../../../../../common/util/job_utils';
 import { getNewJobLimits } from '../../../../services/ml_server_info';
-import { ValidationResults } from '../../../../../../common/util/job_utils';
+import type { BasicValidations } from './job_validator';
 
 export function populateValidationMessages(
   validationResults: ValidationResults,

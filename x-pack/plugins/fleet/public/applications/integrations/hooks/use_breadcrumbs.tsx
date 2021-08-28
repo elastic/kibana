@@ -5,12 +5,11 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import type { ChromeBreadcrumb } from 'src/core/public';
 
-import type { Page, DynamicPagePathValues } from '../constants';
-import { INTEGRATIONS_BASE_PATH, pagePathGetters } from '../constants';
-
-import { useStartServices } from './index';
+import type { ChromeBreadcrumb } from '../../../../../../../src/core/public/chrome/types';
+import type { DynamicPagePathValues, Page } from '../../../constants/page_paths';
+import { INTEGRATIONS_BASE_PATH, pagePathGetters } from '../../../constants/page_paths';
+import { useStartServices } from '../../../hooks/use_core';
 
 const BASE_BREADCRUMB: ChromeBreadcrumb = {
   href: pagePathGetters.integrations()[1],

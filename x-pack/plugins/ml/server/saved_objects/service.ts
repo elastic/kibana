@@ -6,17 +6,18 @@
  */
 
 import RE2 from 're2';
-import {
-  KibanaRequest,
+import { KibanaRequest } from '../../../../../src/core/server/http/router/request';
+import type { SavedObjectsFindResult } from '../../../../../src/core/server/saved_objects/service/saved_objects_client';
+import type {
   SavedObjectsClientContract,
   SavedObjectsFindOptions,
-  SavedObjectsFindResult,
-} from 'kibana/server';
-import type { SecurityPluginSetup } from '../../../security/server';
-import { JobType, ML_SAVED_OBJECT_TYPE } from '../../common/types/saved_objects';
-import { MLJobNotFound } from '../lib/ml_client';
-import { getSavedObjectClientError } from './util';
+} from '../../../../../src/core/server/saved_objects/types';
+import type { SecurityPluginSetup } from '../../../security/server/plugin';
+import type { JobType } from '../../common/types/saved_objects';
+import { ML_SAVED_OBJECT_TYPE } from '../../common/types/saved_objects';
+import { MLJobNotFound } from '../lib/ml_client/errors';
 import { authorizationProvider } from './authorization';
+import { getSavedObjectClientError } from './util';
 
 export interface JobObject {
   job_id: string;

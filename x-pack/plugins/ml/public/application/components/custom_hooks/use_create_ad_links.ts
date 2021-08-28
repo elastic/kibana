@@ -4,13 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { useCallback } from 'react';
-import { useMlKibana, useUiSettings } from '../../contexts/kibana';
 import {
   ANOMALY_DETECTION_DEFAULT_TIME_RANGE,
   ANOMALY_DETECTION_ENABLE_TIME_RANGE,
 } from '../../../../common/constants/settings';
+import { useMlKibana } from '../../contexts/kibana/kibana_context';
+import { useUiSettings } from '../../contexts/kibana/use_ui_settings_context';
 import { mlJobService } from '../../services/job_service';
 
 export const useCreateADLinks = () => {

@@ -4,29 +4,31 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { FC, useState, useEffect } from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 import {
-  EuiFlyout,
-  EuiFlyoutHeader,
-  EuiFlyoutFooter,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiButton,
   EuiButtonEmpty,
-  EuiTitle,
-  EuiFlyoutBody,
-  EuiText,
   EuiCallOut,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiFlyoutHeader,
   EuiSpacer,
+  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
-
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+import type { FC } from 'react';
+import React, { useEffect, useState } from 'react';
+import type {
+  SavedObjectResult,
+  SyncSavedObjectResponse,
+} from '../../../../common/types/saved_objects';
 import { ml } from '../../services/ml_api_service';
-import { SyncSavedObjectResponse, SavedObjectResult } from '../../../../common/types/saved_objects';
+import { useToastNotificationService } from '../../services/toast_notification_service/toast_notification_service';
 import { SyncList } from './sync_list';
-import { useToastNotificationService } from '../../services/toast_notification_service';
 
 interface Props {
   onClose: () => void;

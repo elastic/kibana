@@ -8,14 +8,14 @@
 import type { UiCounterMetricType } from '@kbn/analytics';
 import { auto } from 'angular';
 import type { History } from 'history';
-import type { CoreStart } from '../../../core/public';
+import type { CoreStart } from '../../../core/public/types';
 import type { ChromeStart } from '../../../core/public/chrome/types';
 import type { DocLinksStart } from '../../../core/public/doc_links/doc_links_service';
 import type { ToastsStart } from '../../../core/public/notifications/toasts/toasts_service';
 import type { PluginInitializerContext } from '../../../core/public/plugins/plugin_context';
 import type { IUiSettingsClient } from '../../../core/public/ui_settings/types';
 import type { Capabilities } from '../../../core/types/capabilities';
-import type { ChartsPluginStart } from '../../charts/public/plugin';
+import type { ChartsPluginStart } from '../../charts/public/types';
 import type { IndexPatternsContract } from '../../data/common/index_patterns/index_patterns/index_patterns';
 import { FilterManager } from '../../data/public/query/filter_manager/filter_manager';
 import type { TimefilterContract } from '../../data/public/query/timefilter/timefilter';

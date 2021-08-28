@@ -4,20 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { useMemo, useState } from 'react';
 import useDeepCompareEffect from 'react-use/lib/useDeepCompareEffect';
-import {
+import type { LogEntryCategoriesDatasetStats } from '../../../../../../common/http_api/log_analysis/results/log_entry_category_datasets_stats';
+import type {
   CategoryQualityWarningReason,
   QualityWarning,
-} from '../../../../../../common/log_analysis';
+} from '../../../../../../common/log_analysis/log_analysis_quality';
 import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
 import { useTrackedPromise } from '../../../../../utils/use_tracked_promise';
-import {
-  callGetLatestCategoriesDatasetsStatsAPI,
-  LogEntryCategoriesDatasetStats,
-} from '../../api/get_latest_categories_datasets_stats';
-import { JobModelSizeStats, JobSummary } from '../../log_analysis_module_types';
+import { callGetLatestCategoriesDatasetsStatsAPI } from '../../api/get_latest_categories_datasets_stats';
+import type { JobModelSizeStats, JobSummary } from '../../api/ml_get_jobs_summary_api';
 
 export const useLogEntryCategoriesQuality = ({ jobSummaries }: { jobSummaries: JobSummary[] }) => {
   const {

@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { EuiSuperDatePicker } from '@elastic/eui';
 import React, { useEffect } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
+import { UI_SETTINGS } from '../../../../../../../src/plugins/data/common/constants';
 import { useHasData } from '../../../hooks/use_has_data';
-import { UI_SETTINGS, useKibanaUISettings } from '../../../hooks/use_kibana_ui_settings';
+import { useKibanaUISettings } from '../../../hooks/use_kibana_ui_settings';
 import { usePluginContext } from '../../../hooks/use_plugin_context';
 import { fromQuery, toQuery } from '../../../utils/url';
 

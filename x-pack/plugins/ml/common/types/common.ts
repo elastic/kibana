@@ -4,8 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { MlPages } from '../constants/locator';
+import type { MlPages } from '../constants/locator';
 
 export interface Dictionary<TValue> {
   [id: string]: TValue;

@@ -4,27 +4,27 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { EuiFlexGroup, EuiFlexItem, EuiSuperDatePicker, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
-import { IIndexPattern, UI_SETTINGS } from '../../../../../../../../src/plugins/data/public';
-import {
-  MetricsExplorerMetric,
+import { UI_SETTINGS } from '../../../../../../../../src/plugins/data/common/constants';
+import type { IIndexPattern } from '../../../../../../../../src/plugins/data/common/index_patterns/types';
+import type {
   MetricsExplorerAggregation,
+  MetricsExplorerMetric,
 } from '../../../../../common/http_api/metrics_explorer';
-import {
+import { mapKibanaQuickRangesToDatePickerRanges } from '../../../../utils/map_timepicker_quickranges_to_datepicker_ranges';
+import { useKibanaUiSetting } from '../../../../utils/use_kibana_ui_setting';
+import type {
+  MetricsExplorerChartOptions,
   MetricsExplorerOptions,
   MetricsExplorerTimeOptions,
-  MetricsExplorerChartOptions,
 } from '../hooks/use_metrics_explorer_options';
-import { MetricsExplorerKueryBar } from './kuery_bar';
-import { MetricsExplorerMetrics } from './metrics';
-import { MetricsExplorerGroupBy } from './group_by';
 import { MetricsExplorerAggregationPicker } from './aggregation';
 import { MetricsExplorerChartOptions as MetricsExplorerChartOptionsComponent } from './chart_options';
-import { useKibanaUiSetting } from '../../../../utils/use_kibana_ui_setting';
-import { mapKibanaQuickRangesToDatePickerRanges } from '../../../../utils/map_timepicker_quickranges_to_datepicker_ranges';
+import { MetricsExplorerGroupBy } from './group_by';
+import { MetricsExplorerKueryBar } from './kuery_bar';
+import { MetricsExplorerMetrics } from './metrics';
 
 interface Props {
   derivedIndexPattern: IIndexPattern;

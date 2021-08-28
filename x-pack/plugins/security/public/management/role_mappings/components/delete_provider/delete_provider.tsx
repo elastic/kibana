@@ -4,16 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { EuiConfirmModal } from '@elastic/eui';
 import type { ReactElement } from 'react';
 import React, { Fragment, useRef, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { NotificationsStart } from 'src/core/public';
 
-import type { RoleMapping } from '../../../../../common/model';
+import type { NotificationsStart } from '../../../../../../../../src/core/public/notifications/notifications_service';
+import type { RoleMapping } from '../../../../../common/model/role_mapping';
 import type { RoleMappingsAPIClient } from '../../role_mappings_api_client';
 
 interface Props {

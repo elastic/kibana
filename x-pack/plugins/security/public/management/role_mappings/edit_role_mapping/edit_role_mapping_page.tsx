@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -21,19 +20,19 @@ import React, { Component } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { DocLinksStart, NotificationsStart, ScopedHistory } from 'src/core/public';
 
-import type { RoleMapping } from '../../../../common/model';
-import type { RolesAPIClient } from '../../roles';
-import {
-  DeleteProvider,
-  NoCompatibleRealms,
-  PermissionDenied,
-  SectionLoading,
-} from '../components';
+import type { ScopedHistory } from '../../../../../../../src/core/public/application/scoped_history';
+import type { DocLinksStart } from '../../../../../../../src/core/public/doc_links/doc_links_service';
+import type { NotificationsStart } from '../../../../../../../src/core/public/notifications/notifications_service';
+import type { RoleMapping } from '../../../../common/model/role_mapping';
+import type { RolesAPIClient } from '../../roles/roles_api_client';
+import { DeleteProvider } from '../components/delete_provider/delete_provider';
+import { NoCompatibleRealms } from '../components/no_compatible_realms/no_compatible_realms';
+import { PermissionDenied } from '../components/permission_denied/permission_denied';
+import { SectionLoading } from '../components/section_loading/section_loading';
 import type { RoleMappingsAPIClient } from '../role_mappings_api_client';
-import { MappingInfoPanel } from './mapping_info_panel';
-import { RuleEditorPanel } from './rule_editor_panel';
+import { MappingInfoPanel } from './mapping_info_panel/mapping_info_panel';
+import { RuleEditorPanel } from './rule_editor_panel/rule_editor_panel';
 import { validateRoleMappingForSave } from './services/role_mapping_validation';
 
 interface State {

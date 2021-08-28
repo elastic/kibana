@@ -4,21 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { AnyAction, Dispatch } from 'redux';
 import { connect } from 'react-redux';
-import { LayerSettings } from './layer_settings';
+import type { AnyAction, Dispatch } from 'redux';
+import type { Attribution } from '../../../../common/descriptor_types/layer_descriptor_types';
 import {
   clearLayerAttribution,
   setLayerAttribution,
+  updateFittableFlag,
+  updateLabelsOnTop,
+  updateLayerAlpha,
   updateLayerLabel,
   updateLayerMaxZoom,
   updateLayerMinZoom,
-  updateLayerAlpha,
-  updateLabelsOnTop,
-  updateFittableFlag,
-} from '../../../actions';
-import { Attribution } from '../../../../common/descriptor_types';
+} from '../../../actions/layer_actions';
+import { LayerSettings } from './layer_settings';
 
 function mapDispatchToProps(dispatch: Dispatch<AnyAction>) {
   return {

@@ -4,73 +4,75 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import {
-  EuiDataGrid,
-  EuiDataGridColumn,
+import type {
   EuiDataGridCellValueElementProps,
+  EuiDataGridColumn,
   EuiDataGridControlColumn,
   EuiDataGridStyle,
   EuiDataGridToolBarVisibilityOptions,
-  EuiLoadingSpinner,
-  EuiFlexGroup,
-  EuiFlexItem,
 } from '@elastic/eui';
+import { EuiDataGrid, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
+import type { ComponentType } from 'react';
 import React, {
-  ComponentType,
   lazy,
   Suspense,
   useCallback,
+  useContext,
   useEffect,
   useMemo,
   useState,
-  useContext,
 } from 'react';
-
-import { connect, ConnectedProps, useDispatch } from 'react-redux';
-
+import type { ConnectedProps } from 'react-redux';
+import { connect, useDispatch } from 'react-redux';
 import { ThemeContext } from 'styled-components';
-import {
-  TGridCellAction,
-  BulkActionsProp,
-  CellValueElementProps,
-  ColumnHeaderOptions,
-  ControlColumnProps,
-  RowRenderer,
+import type { EuiTheme } from '../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
+import type { BrowserFields } from '../../../../common/search_strategy/index_fields';
+import type {
+  TimelineItem,
+  TimelineNonEcsData,
+} from '../../../../common/search_strategy/timeline/events/all';
+import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
+import type {
   AlertStatus,
-  SortColumnTimeline,
-  TimelineId,
-  TimelineTabs,
-  SetEventsLoading,
+  BulkActionsProp,
+  ControlColumnProps,
   SetEventsDeleted,
-} from '../../../../common/types/timeline';
-
-import type { TimelineItem, TimelineNonEcsData } from '../../../../common/search_strategy/timeline';
-
+  SetEventsLoading,
+} from '../../../../common/types/timeline/actions';
+import type { CellValueElementProps } from '../../../../common/types/timeline/cells';
+import type {
+  ColumnHeaderOptions,
+  TGridCellAction,
+} from '../../../../common/types/timeline/columns';
+import type { RowRenderer } from '../../../../common/types/timeline/rows';
+import type {
+  OnRowSelected,
+  OnSelectAll,
+  SortColumnTimeline,
+} from '../../../../common/types/timeline/store';
+import { useDeepEqualSelector } from '../../../hooks/use_selector';
+import * as tGridActions from '../../../store/t_grid/actions';
+import type { Refetch } from '../../../store/t_grid/inputs';
+import type { TGridModel } from '../../../store/t_grid/model';
+import * as tGridSelectors from '../../../store/t_grid/selectors';
+import type { TimelineState } from '../../../store/t_grid/types';
+import { EventRenderedView } from '../event_rendered_view';
+import type { ViewSelection } from '../event_rendered_view/selector';
+import { DEFAULT_ICON_BUTTON_WIDTH } from '../helpers';
+import { AlertCount } from '../styles';
+import { StatefulFieldsBrowser } from '../toolbar/fields_browser';
 import { getActionsColumnWidth, getColumnHeaders } from './column_headers/helpers';
+import { checkBoxControlColumn } from './control_columns';
 import {
   addBuildingBlockStyle,
   getEventIdToDataMapping,
   mapSortDirectionToDirection,
   mapSortingColumns,
 } from './helpers';
-
-import { DEFAULT_ICON_BUTTON_WIDTH } from '../helpers';
-import type { BrowserFields } from '../../../../common/search_strategy/index_fields';
-import type { OnRowSelected, OnSelectAll } from '../types';
-import type { Refetch } from '../../../store/t_grid/inputs';
-import { StatefulFieldsBrowser } from '../../../';
-import { tGridActions, TGridModel, tGridSelectors, TimelineState } from '../../../store/t_grid';
-import { useDeepEqualSelector } from '../../../hooks/use_selector';
 import { RowAction } from './row_action';
 import * as i18n from './translations';
-import { AlertCount } from '../styles';
-import { checkBoxControlColumn } from './control_columns';
-import type { EuiTheme } from '../../../../../../../src/plugins/kibana_react/common';
-import { ViewSelection } from '../event_rendered_view/selector';
-import { EventRenderedView } from '../event_rendered_view';
 
 const StatefulAlertStatusBulkActions = lazy(
   () => import('../toolbar/bulk_actions/alert_status_bulk_actions')

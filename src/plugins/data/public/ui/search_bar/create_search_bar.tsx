@@ -9,7 +9,7 @@
 import _ from 'lodash';
 import React, { useEffect, useRef } from 'react';
 import { SearchBar } from '.';
-import type { CoreStart } from '../../../../../core/public';
+import type { CoreStart } from '../../../../../core/public/types';
 import { KibanaContextProvider } from '../../../../kibana_react/public/context/context';
 import type { IStorageWrapper } from '../../../../kibana_utils/public/storage/types';
 import type { UsageCollectionSetup } from '../../../../usage_collection/public/plugin';

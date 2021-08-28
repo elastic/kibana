@@ -4,11 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { schema } from '@kbn/config-schema';
 
-import type { RouteDefinitionParams } from '../';
-import { SAMLAuthenticationProvider, SAMLLogin } from '../../authentication';
+import type { RouteDefinitionParams } from '..';
+import { SAMLAuthenticationProvider, SAMLLogin } from '../../authentication/providers/saml';
 import { ROUTE_TAG_AUTH_FLOW, ROUTE_TAG_CAN_REDIRECT } from '../tags';
 
 /**

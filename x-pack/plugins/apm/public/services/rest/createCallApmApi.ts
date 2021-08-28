@@ -13,9 +13,13 @@ import type {
   ServerRouteRepository,
 } from '@kbn/server-route-repository';
 import { formatRequest as formatRequestType } from '@kbn/server-route-repository';
+// @ts-expect-error cannot find module or correspondent type declarations
+// The code and types are at separated folders on @kbn/server-route-repository
+// so in order to do targeted imports they must me imported separately, and
+// an error is expected here
 import { formatRequest } from '@kbn/server-route-repository/target_node/format_request';
 import * as t from 'io-ts';
-import type { CoreSetup, CoreStart } from '../../../../../../src/core/public';
+import type { CoreSetup, CoreStart } from '../../../../../../src/core/public/types';
 import type { FetchOptions } from '../../../common/fetch_options';
 import type { APMServerRouteRepository } from '../../../server/routes/get_global_apm_server_route_repository';
 import type {
@@ -24,10 +28,6 @@ import type {
 } from '../../../server/routes/typings';
 import { callApi } from './callApi';
 
-// @ts-expect-error cannot find module or correspondent type declarations
-// The code and types are at separated folders on @kbn/server-route-repository
-// so in order to do targeted imports they must me imported separately, and
-// an error is expected here
 export type APMClientOptions = Omit<
   FetchOptions,
   'query' | 'body' | 'pathname' | 'signal'

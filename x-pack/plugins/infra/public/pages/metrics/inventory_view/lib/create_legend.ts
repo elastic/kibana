@@ -4,8 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { InventoryColorPalette, InfraWaffleMapSteppedGradientLegend } from '../../../../lib/lib';
+import type {
+  InfraWaffleMapSteppedGradientLegend,
+  InventoryColorPalette,
+} from '../../../../lib/lib';
 import { getColorPalette } from './get_color_palette';
 
 export const createLegend = (

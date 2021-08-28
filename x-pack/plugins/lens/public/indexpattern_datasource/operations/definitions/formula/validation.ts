@@ -4,12 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { isObject, partition } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { parse, TinymathLocation, TinymathVariable } from '@kbn/tinymath';
-import type { TinymathAST, TinymathFunction, TinymathNamedArgument } from '@kbn/tinymath';
-import { esKuery, esQuery } from '../../../../../../../../src/plugins/data/public';
+import type {
+  TinymathAST,
+  TinymathFunction,
+  TinymathLocation,
+  TinymathNamedArgument,
+  TinymathVariable,
+} from '@kbn/tinymath';
+import { parse } from '@kbn/tinymath';
+import { isObject, partition } from 'lodash';
+import type { GenericOperationDefinition, IndexPatternColumn, OperationDefinition } from '..';
+import { parseTimeShift } from '../../../../../../../../src/plugins/data/common/search/aggs/utils/parse_time_shift';
+import { esKuery, esQuery } from '../../../../../../../../src/plugins/data/public/deprecated';
+import type { IndexPattern, IndexPatternLayer } from '../../../types';
+import type { TinymathNodeTypes } from './types';
 import {
   findMathNodes,
   findVariables,
@@ -19,11 +28,6 @@ import {
   isMathNode,
   tinymathFunctions,
 } from './util';
-
-import type { OperationDefinition, IndexPatternColumn, GenericOperationDefinition } from '../index';
-import type { IndexPattern, IndexPatternLayer } from '../../../types';
-import type { TinymathNodeTypes } from './types';
-import { parseTimeShift } from '../../../../../../../../src/plugins/data/common';
 
 interface ValidationErrors {
   missingField: { message: string; type: { variablesLength: number; variablesList: string } };

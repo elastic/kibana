@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { FC, MouseEventHandler } from 'react';
 import { EuiFlexItem, EuiLink, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { JobSelectorBadge } from '../job_selector_badge';
-import { JobSelectionMaps } from '../job_selector';
+import type { FC, MouseEventHandler } from 'react';
+import React from 'react';
+import type { JobSelectionMaps } from '../job_selector';
+import { JobSelectorBadge } from '../job_selector_badge/job_selector_badge';
 
 interface NewSelectionIdBadgesProps {
   limit: number;

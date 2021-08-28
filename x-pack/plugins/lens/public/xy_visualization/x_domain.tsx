@@ -4,12 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { uniq } from 'lodash';
 import React from 'react';
-import { Endzones } from '../../../../../src/plugins/charts/public';
-import type { LensMultiTable } from '../../common';
-import type { LayerArgs } from '../../common/expressions';
+import { Endzones } from '../../../../../src/plugins/charts/public/static/components/endzones';
+import type { LayerArgs } from '../../common/expressions/xy_chart/layer_config';
+import type { LensMultiTable } from '../../common/types';
 
 export interface XDomain {
   min?: number;

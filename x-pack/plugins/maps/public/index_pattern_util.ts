@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { IFieldType, IndexPattern } from 'src/plugins/data/public';
 import { i18n } from '@kbn/i18n';
-import { getIndexPatternService } from './kibana_services';
+import type { IFieldType } from '../../../../src/plugins/data/common/index_patterns/fields/types';
+import { IndexPattern } from '../../../../src/plugins/data/common/index_patterns/index_patterns/index_pattern';
 import { indexPatterns } from '../../../../src/plugins/data/public';
 import { ES_GEO_FIELD_TYPE, ES_GEO_FIELD_TYPES } from '../common/constants';
+import { getIndexPatternService } from './kibana_services';
 import { getIsGoldPlus } from './licensed_features';
 
 export function getGeoTileAggNotSupportedReason(field: IFieldType): string | null {

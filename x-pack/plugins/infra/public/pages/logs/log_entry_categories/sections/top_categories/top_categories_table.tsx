@@ -4,28 +4,27 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { EuiBasicTable, EuiBasicTableColumn } from '@elastic/eui';
+import type { EuiBasicTableColumn } from '@elastic/eui';
+import { EuiBasicTable } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
-import React, { useMemo, useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import useSet from 'react-use/lib/useSet';
-
-import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
-import {
+import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
+import type {
   LogEntryCategory,
   LogEntryCategoryDataset,
   LogEntryCategoryHistogram,
-} from '../../../../../../common/log_analysis';
-import { TimeRange } from '../../../../../../common/time';
-import { RowExpansionButton } from '../../../../../components/basic_table';
+} from '../../../../../../common/log_analysis/log_entry_categories_analysis';
+import type { TimeRange } from '../../../../../../common/time/time_range';
+import { RowExpansionButton } from '../../../../../components/basic_table/row_expansion_button';
+import { RegularExpressionRepresentation } from '../../../../../components/logging/log_analysis_results/category_expression';
+import type { ChangeSortOptions, SortOptions } from '../../use_log_entry_categories_results';
 import { AnomalySeverityIndicatorList } from './anomaly_severity_indicator_list';
 import { CategoryDetailsRow } from './category_details_row';
-import { RegularExpressionRepresentation } from '../../../../../components/logging/log_analysis_results/category_expression';
 import { DatasetActionsList } from './datasets_action_list';
 import { DatasetsList } from './datasets_list';
 import { LogEntryCountSparkline } from './log_entry_count_sparkline';
-import { SortOptions, ChangeSortOptions } from '../../use_log_entry_categories_results';
 
 export const TopCategoriesTable = euiStyled(
   ({

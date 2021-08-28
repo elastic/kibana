@@ -4,29 +4,26 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { useMemo, useState, useCallback } from 'react';
-import { debounce } from 'lodash';
-import { i18n } from '@kbn/i18n';
 import {
+  EuiButton,
+  EuiEmptyPrompt,
+  EuiIconTip,
   EuiSearchBar,
   EuiSpacer,
-  EuiEmptyPrompt,
-  EuiButton,
   EuiText,
-  EuiIconTip,
   Query,
 } from '@elastic/eui';
-import {
-  useProcessList,
-  SortBy,
-  ProcessListContextProvider,
-} from '../../../../hooks/use_process_list';
-import { TabContent, TabProps } from '../shared';
+import { i18n } from '@kbn/i18n';
+import { debounce } from 'lodash';
+import React, { useCallback, useMemo, useState } from 'react';
+import type { SortBy } from '../../../../hooks/use_process_list';
+import { ProcessListContextProvider, useProcessList } from '../../../../hooks/use_process_list';
+import type { TabProps } from '../shared';
+import { TabContent } from '../shared';
+import { parseSearchString } from './parse_search_string';
+import { ProcessesTable } from './processes_table';
 import { STATE_NAMES } from './states';
 import { SummaryTable } from './summary_table';
-import { ProcessesTable } from './processes_table';
-import { parseSearchString } from './parse_search_string';
 
 const TabComponent = ({ currentTime, node, nodeType, options }: TabProps) => {
   const [searchBarState, setSearchBarState] = useState<Query>(Query.MATCH_ALL);

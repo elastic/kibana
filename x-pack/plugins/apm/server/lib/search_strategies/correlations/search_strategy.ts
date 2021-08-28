@@ -5,22 +5,18 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
 import { of } from 'rxjs';
-
-import type { ISearchStrategy } from '../../../../../../../src/plugins/data/server';
-import {
+import uuid from 'uuid';
+import type {
   IKibanaSearchRequest,
   IKibanaSearchResponse,
-} from '../../../../../../../src/plugins/data/common';
-
+} from '../../../../../../../src/plugins/data/common/search/types';
+import type { ISearchStrategy } from '../../../../../../../src/plugins/data/server/search/types';
+import type { ApmIndicesConfig } from '../../../../../observability/common/typings';
 import type {
   SearchServiceParams,
   SearchServiceValue,
 } from '../../../../common/search_strategies/correlations/types';
-
-import type { ApmIndicesConfig } from '../../settings/apm_indices/get_apm_indices';
-
 import { asyncSearchServiceProvider } from './async_search_service';
 
 export type PartialSearchRequest = IKibanaSearchRequest<SearchServiceParams>;

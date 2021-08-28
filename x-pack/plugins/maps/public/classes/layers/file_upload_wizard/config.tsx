@@ -4,12 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { LayerWizard, RenderWizardArguments } from '../../layers/layer_wizard_registry';
-import { ClientFileCreateSourceEditor, UPLOAD_STEPS } from './wizard';
 import { getFileUpload } from '../../../kibana_services';
+import type { LayerWizard, RenderWizardArguments } from '../layer_wizard_registry';
+import { ClientFileCreateSourceEditor, UPLOAD_STEPS } from './wizard';
 
 export const uploadLayerWizardConfig: LayerWizard = {
   categories: [],

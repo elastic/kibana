@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
 import { injectI18n } from '@kbn/i18n/react';
-import { esFilters, Filter, IndexPattern } from '../../../../../../../src/plugins/data/public';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import React from 'react';
+import type { Filter } from '../../../../../../../src/plugins/data/common/es_query';
+import { IndexPattern } from '../../../../../../../src/plugins/data/common/index_patterns/index_patterns/index_pattern';
+import { esFilters } from '../../../../../../../src/plugins/data/public/deprecated';
+import { useKibana } from '../../../../../../../src/plugins/kibana_react/public/context/context';
 
 export function buildFilterLabel({
   field,

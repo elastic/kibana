@@ -4,7 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import {
+  kqlQuery,
+  rangeQuery,
+} from '../../../../observability/server/utils/queries';
 import {
   EVENT_OUTCOME,
   SERVICE_NAME,
@@ -12,20 +15,19 @@ import {
   TRANSACTION_TYPE,
 } from '../../../common/elasticsearch_fieldnames';
 import { EventOutcome } from '../../../common/event_outcome';
-import { offsetPreviousPeriodCoordinates } from '../../../common/utils/offset_previous_period_coordinate';
-import { kqlQuery, rangeQuery } from '../../../../observability/server';
 import { environmentQuery } from '../../../common/utils/environment_query';
-import { Coordinate } from '../../../typings/timeseries';
+import { offsetPreviousPeriodCoordinates } from '../../../common/utils/offset_previous_period_coordinate';
+import type { Coordinate } from '../../../typings/timeseries';
 import {
   getDocumentTypeFilterForAggregatedTransactions,
   getProcessorEventForAggregatedTransactions,
 } from '../helpers/aggregated_transactions';
 import { getBucketSizeForAggregatedTransactions } from '../helpers/get_bucket_size_for_aggregated_transactions';
-import { Setup, SetupTimeRange } from '../helpers/setup_request';
+import type { Setup, SetupTimeRange } from '../helpers/setup_request';
 import {
   calculateFailedTransactionRate,
-  getOutcomeAggregation,
   getFailedTransactionRateTimeSeries,
+  getOutcomeAggregation,
 } from '../helpers/transaction_error_rate';
 
 export async function getErrorRate({

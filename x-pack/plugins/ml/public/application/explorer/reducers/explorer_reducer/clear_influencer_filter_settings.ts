@@ -4,10 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { getClearedSelectedAnomaliesState } from '../../explorer_utils';
-
-import { ExplorerState } from './state';
+import type { ExplorerState } from './state';
 
 export function clearInfluencerFilterSettings(state: ExplorerState): ExplorerState {
   return {

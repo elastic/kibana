@@ -4,16 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import {
+import { useMemo } from 'react';
+import type {
   ClassificationFeatureImportanceBaseline,
   FeatureImportance,
   FeatureImportanceBaseline,
+  TopClasses,
+} from '../../../../../../../common/types/feature_importance';
+import {
   isClassificationFeatureImportanceBaseline,
   isRegressionFeatureImportanceBaseline,
-  TopClasses,
 } from '../../../../../../../common/types/feature_importance';
 import type { ExtendedFeatureImportance } from './decision_path_popover';
 

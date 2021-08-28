@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { CoreSetup, CoreStart } from '../../../core/public';
+import type { CoreSetup, CoreStart } from '../../../core/public/types';
 import type { PluginInitializerContext } from '../../../core/public/plugins/plugin_context';
 import type { ConfigSchema } from '../config';
 import { injectHeaderStyle } from './utils/inject_header_style';

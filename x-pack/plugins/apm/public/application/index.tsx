@@ -9,7 +9,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import 'react-vis/dist/style.css';
 import type { ConfigSchema } from '..';
-import type { CoreStart } from '../../../../../src/core/public';
+import type { CoreStart } from '../../../../../src/core/public/types';
 import type { AppMountParameters } from '../../../../../src/core/public/application/types';
 import { APP_WRAPPER_CLASS } from '../../../../../src/core/utils/app_wrapper_class';
 import type { ObservabilityRuleTypeRegistry } from '../../../observability/public/rules/create_observability_rule_type_registry';

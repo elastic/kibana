@@ -5,13 +5,11 @@
  * 2.0.
  */
 
+import { estypes } from '@elastic/elasticsearch';
 import Boom from '@hapi/boom';
-import type { estypes } from '@elastic/elasticsearch';
-import { RuntimeMappings } from './fields';
-
-import { EsErrorBody } from '../util/errors';
-import { ANALYSIS_CONFIG_TYPE } from '../constants/data_frame_analytics';
-import { DATA_FRAME_TASK_STATE } from '../constants/data_frame_analytics';
+import { ANALYSIS_CONFIG_TYPE, DATA_FRAME_TASK_STATE } from '../constants/data_frame_analytics';
+import type { EsErrorBody } from '../util/errors/types';
+import type { RuntimeMappings } from './fields';
 
 export interface DeleteDataFrameAnalyticsWithIndexStatus {
   success: boolean;

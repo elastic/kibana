@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { Subject, Observable, throwError, timer, Subscription } from 'rxjs';
 import { noop } from 'lodash';
-import { exhaustMap, tap, takeUntil, switchMap, switchMapTo, catchError } from 'rxjs/operators';
+import { Observable, Subject, Subscription, throwError, timer } from 'rxjs';
+import { catchError, exhaustMap, switchMap, switchMapTo, takeUntil, tap } from 'rxjs/operators';
 
 const DEFAULT_HEARTBEAT_INTERVAL = 1000;
 

@@ -4,24 +4,25 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import React, { memo, useMemo } from 'react';
-import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
-import { LogColumn, LogMessagePart } from '../../../../common/log_entry';
+import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
+import type { LogColumn, LogMessagePart } from '../../../../common/log_entry/log_entry';
 import {
   isConstantSegment,
   isFieldSegment,
+  isMessageColumn,
+} from '../../../utils/log_entry/log_entry';
+import {
   isHighlightFieldSegment,
   isHighlightMessageColumn,
-  isMessageColumn,
-} from '../../../utils/log_entry';
+} from '../../../utils/log_entry/log_entry_highlight';
 import { FieldValue } from './field_value';
 import { LogEntryColumnContent } from './log_entry_column';
+import type { WrapMode } from './text_styles';
 import {
   longWrappedContentStyle,
   preWrappedContentStyle,
   unwrappedContentStyle,
-  WrapMode,
 } from './text_styles';
 
 interface LogEntryMessageColumnProps {

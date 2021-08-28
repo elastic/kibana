@@ -4,14 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { EuiBreadcrumb } from '@elastic/eui';
-
+import type { EuiBreadcrumb } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-
-import { ChromeBreadcrumb } from 'kibana/public';
-
-import { NavigateToPath } from '../contexts/kibana';
+import type { ChromeBreadcrumb } from '../../../../../../src/core/public/chrome/types';
+import type { NavigateToPath } from '../contexts/kibana/use_navigate_to_path';
 
 export const ML_BREADCRUMB: ChromeBreadcrumb = Object.freeze({
   text: i18n.translate('xpack.ml.machineLearningBreadcrumbLabel', {

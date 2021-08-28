@@ -4,18 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { useState } from 'react';
+import { EuiCallOut, EuiCheckbox, EuiConfirmModal, EuiFormFieldset, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EuiCallOut, EuiConfirmModal, EuiFormFieldset, EuiCheckbox, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import React, { useState } from 'react';
 
-import type { Agent } from '../../../../types';
+import type { Agent } from '../../../../../../../common/types/models/agent';
+import { useStartServices } from '../../../../../../hooks/use_core';
 import {
   sendPostAgentUnenroll,
   sendPostBulkAgentUnenroll,
-  useStartServices,
-} from '../../../../hooks';
+} from '../../../../../../hooks/use_request/agents';
 
 interface Props {
   onClose: () => void;

@@ -4,16 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Logger } from '@kbn/logging';
-import { IRuleDataClient } from '../rule_data_client';
-import {
+import type { Logger } from '@kbn/logging';
+import type { AlertTypeParams, AlertTypeState } from '../../../alerting/common/alert';
+import type {
   AlertInstanceContext,
   AlertInstanceState,
-  AlertTypeParams,
-  AlertTypeState,
-} from '../../../alerting/common';
-import { AlertTypeWithExecutor } from '../types';
-import { LifecycleAlertService, createLifecycleExecutor } from './create_lifecycle_executor';
+} from '../../../alerting/common/alert_instance';
+import type { IRuleDataClient } from '../rule_data_client/types';
+import type { AlertTypeWithExecutor } from '../types';
+import type { LifecycleAlertService } from './create_lifecycle_executor';
+import { createLifecycleExecutor } from './create_lifecycle_executor';
 
 export const createLifecycleRuleTypeFactory = ({
   logger,

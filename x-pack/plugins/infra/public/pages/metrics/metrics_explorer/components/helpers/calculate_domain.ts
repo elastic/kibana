@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { min, max, sum, isNumber } from 'lodash';
-import { MetricsExplorerSeries } from '../../../../../../common/http_api/metrics_explorer';
-import { MetricsExplorerOptionsMetric } from '../../hooks/use_metrics_explorer_options';
+import { isNumber, max, min, sum } from 'lodash';
+import type { MetricsExplorerSeries } from '../../../../../../common/http_api/metrics_explorer';
+import type { MetricsExplorerOptionsMetric } from '../../hooks/use_metrics_explorer_options';
 import { getMetricId } from './get_metric_id';
 
 const getMin = (values: Array<number | null>) => {

@@ -4,11 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { FC, Suspense } from 'react';
-
 import { EuiErrorBoundary } from '@elastic/eui';
-
+import type { FC } from 'react';
+import React, { Suspense } from 'react';
 import { VegaChartLoading } from './vega_chart_loading';
 import type { VegaChartViewProps } from './vega_chart_view';
 

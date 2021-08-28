@@ -4,20 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { FC, Fragment, useEffect, useMemo, useRef } from 'react';
-import { debounce } from 'lodash';
 import { EuiCallOut, EuiFieldText, EuiForm, EuiFormRow, EuiSpacer, EuiSwitch } from '@elastic/eui';
-
 import { i18n } from '@kbn/i18n';
-
-import { CodeEditor } from '../../../../../../../../../../src/plugins/kibana_react/public';
-import { useNotifications } from '../../../../../contexts/kibana';
+import { debounce } from 'lodash';
+import type { FC } from 'react';
+import React, { Fragment, useEffect, useMemo, useRef } from 'react';
+import { CodeEditor } from '../../../../../../../../../../src/plugins/kibana_react/public/code_editor';
+import { extractErrorMessage } from '../../../../../../../common/util/errors/process_errors';
+import { useNotifications } from '../../../../../contexts/kibana/use_notifications_context';
 import { ml } from '../../../../../services/ml_api_service';
-import { extractErrorMessage } from '../../../../../../../common/util/errors';
-import { CreateAnalyticsFormProps } from '../../../analytics_management/hooks/use_create_analytics_form';
-import { CreateStep } from '../create_step';
+import type { CreateAnalyticsFormProps } from '../../../analytics_management/hooks/use_create_analytics_form/use_create_analytics_form';
 import { ANALYTICS_STEPS } from '../../page';
+import { CreateStep } from '../create_step/create_step';
 
 export const CreateAnalyticsAdvancedEditor: FC<CreateAnalyticsFormProps> = (props) => {
   const { actions, state } = props;

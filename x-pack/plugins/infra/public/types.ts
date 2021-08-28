@@ -4,30 +4,32 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { CoreSetup, CoreStart, Plugin as PluginClass } from 'kibana/public';
-import { IHttpFetchError } from 'src/core/public';
-import type { DataPublicPluginStart } from '../../../../src/plugins/data/public';
-import type { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
-import type { EmbeddableSetup } from '../../../../src/plugins/embeddable/public';
+import type { CoreSetup, CoreStart } from '../../../../src/core/public/types';
+import type { IHttpFetchError } from '../../../../src/core/public/http/types';
+import type { Plugin as PluginClass } from '../../../../src/core/public/plugins/plugin';
+import type { DataPublicPluginStart } from '../../../../src/plugins/data/public/types';
+import type {
+  EmbeddableSetup,
+  EmbeddableStart,
+} from '../../../../src/plugins/embeddable/public/plugin';
+import type { HomePublicPluginSetup } from '../../../../src/plugins/home/public/plugin';
 import type {
   UsageCollectionSetup,
   UsageCollectionStart,
-} from '../../../../src/plugins/usage_collection/public';
-import type {
-  TriggersAndActionsUIPublicPluginSetup,
-  TriggersAndActionsUIPublicPluginStart,
-} from '../../../plugins/triggers_actions_ui/public';
-import type { DataEnhancedSetup, DataEnhancedStart } from '../../data_enhanced/public';
+} from '../../../../src/plugins/usage_collection/public/plugin';
+import type { DataEnhancedSetup, DataEnhancedStart } from '../../data_enhanced/public/plugin';
+import type { MlPluginSetup, MlPluginStart } from '../../ml/public/plugin';
 import type {
   ObservabilityPublicSetup,
   ObservabilityPublicStart,
-} from '../../observability/public';
-// import type { OsqueryPluginStart } from '../../osquery/public';
-import type { SpacesPluginStart } from '../../spaces/public';
-import { MlPluginStart, MlPluginSetup } from '../../ml/public';
-import type { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
+} from '../../observability/public/plugin';
+import type { SpacesPluginStart } from '../../spaces/public/plugin';
+import type {
+  TriggersAndActionsUIPublicPluginSetup,
+  TriggersAndActionsUIPublicPluginStart,
+} from '../../triggers_actions_ui/public/plugin';
 
+// import type { OsqueryPluginStart } from '../../osquery/public';
 // Our own setup and start contract values
 export type InfraClientSetupExports = void;
 export type InfraClientStartExports = void;

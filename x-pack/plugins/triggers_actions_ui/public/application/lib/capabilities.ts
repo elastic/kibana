@@ -4,9 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { AlertType } from '../../types';
-import { InitialAlert } from '../sections/alert_form/alert_reducer';
+import type { AlertType } from '../../types';
+import type { InitialAlert } from '../sections/alert_form/alert_reducer';
 
 /**
  * NOTE: Applications that want to show the alerting UIs will need to add

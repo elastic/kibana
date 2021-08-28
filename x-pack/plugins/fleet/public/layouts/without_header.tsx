@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { EuiPage, EuiPageBody, EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
-import { EuiPage, EuiPageBody, EuiSpacer } from '@elastic/eui';
 
 export const Wrapper = styled.div`
   background-color: ${(props) => props.theme.eui.euiColorEmptyShade};

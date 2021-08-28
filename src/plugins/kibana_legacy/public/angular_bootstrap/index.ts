@@ -1,11 +1,11 @@
 /* eslint-disable */
 import angular from 'angular';
 import { once } from "lodash";
+// @ts-ignore
 import { initBindHtml } from "./bind_html/bind_html";
+// @ts-ignore
 import { initBootstrapTooltip } from "./tooltip/tooltip";
 import tooltipUnsafePopup from './tooltip/tooltip_html_unsafe_popup.html';
-// @ts-ignore
-// @ts-ignore
 import tooltipPopup from './tooltip/tooltip_popup.html';
 
 

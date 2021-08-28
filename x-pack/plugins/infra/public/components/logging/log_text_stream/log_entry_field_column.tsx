@@ -5,18 +5,19 @@
  * 2.0.
  */
 
+import type { JsonValue } from '@kbn/utility-types';
 import React from 'react';
-import { JsonValue } from '@kbn/utility-types';
-import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
-import { LogColumn } from '../../../../common/log_entry';
-import { isFieldColumn, isHighlightFieldColumn } from '../../../utils/log_entry';
+import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
+import type { LogColumn } from '../../../../common/log_entry/log_entry';
+import { isFieldColumn } from '../../../utils/log_entry/log_entry';
+import { isHighlightFieldColumn } from '../../../utils/log_entry/log_entry_highlight';
 import { FieldValue } from './field_value';
 import { LogEntryColumnContent } from './log_entry_column';
+import type { WrapMode } from './text_styles';
 import {
   longWrappedContentStyle,
   preWrappedContentStyle,
   unwrappedContentStyle,
-  WrapMode,
 } from './text_styles';
 
 interface LogEntryFieldColumnProps {

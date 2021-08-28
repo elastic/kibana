@@ -4,32 +4,33 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { isEqual } from 'lodash';
-import { IndexPattern } from '../../../../../../../../../src/plugins/data/public';
-import { SavedSearchSavedObject } from '../../../../../../common/types/kibana';
-import { JobCreator } from './job_creator';
-import { Field, Aggregation, mlCategory } from '../../../../../../common/types/fields';
-import { Job, Datafeed, Detector } from '../../../../../../common/types/anomaly_detection_jobs';
-import { createBasicDetector } from './util/default_configs';
+import { IndexPattern } from '../../../../../../../../../src/plugins/data/common/index_patterns/index_patterns/index_pattern';
+import { ML_JOB_AGGREGATION } from '../../../../../../common/constants/aggregation_types';
+import { CATEGORY_EXAMPLES_VALIDATION_STATUS } from '../../../../../../common/constants/categorization_job';
 import {
-  JOB_TYPE,
   CREATED_BY_LABEL,
   DEFAULT_BUCKET_SPAN,
   DEFAULT_RARE_BUCKET_SPAN,
+  JOB_TYPE,
 } from '../../../../../../common/constants/new_job';
-import { CATEGORY_EXAMPLES_VALIDATION_STATUS } from '../../../../../../common/constants/categorization_job';
-import { ML_JOB_AGGREGATION } from '../../../../../../common/constants/aggregation_types';
-import {
+import type { Datafeed } from '../../../../../../common/types/anomaly_detection_jobs/datafeed';
+import type { Detector, Job } from '../../../../../../common/types/anomaly_detection_jobs/job';
+import type {
   CategorizationAnalyzer,
   CategoryFieldExample,
   FieldExampleCheck,
-  VALIDATION_RESULT,
 } from '../../../../../../common/types/categories';
-import { getRichDetectors } from './util/general';
-import { CategorizationExamplesLoader } from '../results_loader';
+import { VALIDATION_RESULT } from '../../../../../../common/types/categories';
+import type { Aggregation, Field } from '../../../../../../common/types/fields';
+import { mlCategory } from '../../../../../../common/types/fields';
+import type { SavedSearchSavedObject } from '../../../../../../common/types/kibana';
 import { getNewJobDefaults } from '../../../../services/ml_server_info';
 import { isCcsIndexPattern } from '../../../../util/index_utils';
+import { CategorizationExamplesLoader } from '../results_loader/categorization_examples_loader';
+import { JobCreator } from './job_creator';
+import { createBasicDetector } from './util/default_configs';
+import { getRichDetectors } from './util/general';
 
 export class CategorizationJobCreator extends JobCreator {
   protected _type: JOB_TYPE = JOB_TYPE.CATEGORIZATION;

@@ -4,9 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { FC, Fragment, useRef, useEffect, useMemo, useState } from 'react';
-import { debounce } from 'lodash';
 import {
   EuiFieldText,
   EuiFormRow,
@@ -17,14 +14,16 @@ import {
   EuiTextArea,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-
-import { useMlKibana } from '../../../../../contexts/kibana';
-import { CreateAnalyticsStepProps } from '../../../analytics_management/hooks/use_create_analytics_form';
+import { debounce } from 'lodash';
+import type { FC } from 'react';
+import React, { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import { JOB_ID_MAX_LENGTH } from '../../../../../../../common/constants/validation';
-import { ContinueButton } from '../continue_button';
-import { ANALYTICS_STEPS } from '../../page';
+import { extractErrorMessage } from '../../../../../../../common/util/errors/process_errors';
+import { useMlKibana } from '../../../../../contexts/kibana/kibana_context';
 import { ml } from '../../../../../services/ml_api_service';
-import { extractErrorMessage } from '../../../../../../../common/util/errors';
+import type { CreateAnalyticsStepProps } from '../../../analytics_management/hooks/use_create_analytics_form/use_create_analytics_form';
+import { ANALYTICS_STEPS } from '../../page';
+import { ContinueButton } from '../continue_button';
 
 const DEFAULT_RESULTS_FIELD = 'ml';
 

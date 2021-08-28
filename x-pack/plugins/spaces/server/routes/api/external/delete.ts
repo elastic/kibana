@@ -9,10 +9,10 @@ import Boom from '@hapi/boom';
 
 import { schema } from '@kbn/config-schema';
 
-import { SavedObjectsErrorHelpers } from '../../../../../../../src/core/server';
+import type { ExternalRouteDeps } from '.';
+import { SavedObjectsErrorHelpers } from '../../../../../../../src/core/server/saved_objects/service/lib/errors';
 import { wrapError } from '../../../lib/errors';
-import { createLicensedRouteHandler } from '../../lib';
-import type { ExternalRouteDeps } from './';
+import { createLicensedRouteHandler } from '../../lib/licensed_route_handler';
 
 export function initDeleteSpacesApi(deps: ExternalRouteDeps) {
   const { externalRouter, log, getSpacesService } = deps;

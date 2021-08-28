@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Visualization } from '../../../types';
+import React from 'react';
+import type { Visualization } from '../../../types';
 
 export function RemoveLayerButton({
   onRemoveLayer,

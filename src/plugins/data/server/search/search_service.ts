@@ -17,7 +17,7 @@ import type {
   PluginInitializerContext,
   SharedGlobalConfig,
 } from '../../../../core/server/plugins/types';
-import type { BfetchServerSetup } from '../../../bfetch/server/plugin';
+import type { BfetchServerSetup } from '../../../bfetch/server/types';
 import type { ExpressionsServerSetup } from '../../../expressions/server/plugin';
 import type { FieldFormatsStart } from '../../../field_formats/server/types';
 import { KbnServerError } from '../../../kibana_utils/server/report_server_error';

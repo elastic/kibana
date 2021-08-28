@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import React, { memo } from 'react';
 
-import type { AgentPolicy, PackagePolicy } from '../../../../../types';
-import { useBreadcrumbs } from '../../../../../hooks';
+import type { AgentPolicy } from '../../../../../../../../common/types/models/agent_policy';
+import type { PackagePolicy } from '../../../../../../../../common/types/models/package_policy';
+import { useBreadcrumbs } from '../../../../../hooks/use_breadcrumbs';
 
 import { NoPackagePolicies } from './no_package_policies';
 import { PackagePoliciesTable } from './package_policies_table';

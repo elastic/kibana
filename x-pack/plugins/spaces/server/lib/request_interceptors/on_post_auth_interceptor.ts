@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { Logger } from '@kbn/logging';
 
-import type { CoreSetup, Logger } from 'src/core/server';
-import type { Space } from 'src/plugins/spaces_oss/common';
-
-import { addSpaceIdToPath } from '../../../common';
+import type { CoreSetup } from '../../../../../../src/core/server';
+import type { Space } from '../../../../../../src/plugins/spaces_oss/common/types';
 import { DEFAULT_SPACE_ID, ENTER_SPACE_PATH } from '../../../common/constants';
+import { addSpaceIdToPath } from '../../../common/lib/spaces_url_parser';
 import type { PluginsSetup } from '../../plugin';
 import type { SpacesServiceStart } from '../../spaces_service/spaces_service';
 import { wrapError } from '../errors';

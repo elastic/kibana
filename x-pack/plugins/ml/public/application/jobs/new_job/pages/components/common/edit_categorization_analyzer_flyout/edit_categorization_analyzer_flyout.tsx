@@ -4,26 +4,26 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { Fragment, FC, useEffect, useState, useContext } from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 import {
-  EuiFlyout,
-  EuiFlyoutFooter,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiButton,
   EuiButtonEmpty,
-  EuiTitle,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFlyout,
   EuiFlyoutBody,
+  EuiFlyoutFooter,
   EuiSpacer,
+  EuiTitle,
 } from '@elastic/eui';
-import { MLJobEditor } from '../../../../../jobs_list/components/ml_job_editor';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+import type { FC } from 'react';
+import React, { Fragment, useContext, useEffect, useState } from 'react';
 import { isValidJson } from '../../../../../../../../common/util/validation_utils';
-import { JobCreatorContext } from '../../job_creator_context';
-import { CategorizationJobCreator } from '../../../../common/job_creator';
 import { getNewJobDefaults } from '../../../../../../services/ml_server_info';
+import { MLJobEditor } from '../../../../../jobs_list/components/ml_job_editor/ml_job_editor';
+import { CategorizationJobCreator } from '../../../../common/job_creator/categorization_job_creator';
+import { JobCreatorContext } from '../../job_creator_context';
 
 const EDITOR_HEIGHT = '800px';
 

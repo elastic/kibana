@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { Field, NewJobCapsResponse } from '../../../../common/types/fields';
-import { ES_FIELD_TYPES, IIndexPattern } from '../../../../../../../src/plugins/data/public';
-import { processTextAndKeywordFields, NewJobCapabilitiesServiceBase } from './new_job_capabilities';
+import { ES_FIELD_TYPES } from '@kbn/field-types';
+import type { IIndexPattern } from '../../../../../../../src/plugins/data/common/index_patterns/types';
+import type { Field, NewJobCapsResponse } from '../../../../common/types/fields';
 import { ml } from '../ml_api_service';
+import { NewJobCapabilitiesServiceBase, processTextAndKeywordFields } from './new_job_capabilities';
 
 // Keep top nested field and remove all <nested_field>.* fields
 export function removeNestedFieldChildren(resp: NewJobCapsResponse, indexPatternTitle: string) {

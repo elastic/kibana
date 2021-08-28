@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { CoreStart } from '../../../../../core/public';
+import type { CoreStart } from '../../../../../core/public/types';
 import { ViewMode } from '../../../../embeddable/common/types';
 import type { IEmbeddable } from '../../../../embeddable/public/lib/embeddables/i_embeddable';
 import type { EmbeddableStart } from '../../../../embeddable/public/plugin';

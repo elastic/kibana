@@ -7,7 +7,7 @@
  */
 
 import { AppMountParameters, AppNavLinkStatus, CoreSetup, Plugin } from '../../../src/core/public';
-import { DashboardStart } from '../../../src/plugins/dashboard/public';
+import type { DashboardStart } from '../../../src/plugins/dashboard/public/plugin_contract';
 import { DeveloperExamplesSetup } from '../../developer_examples/public';
 import { EmbeddableExamplesStart } from '../../embeddable_examples/public/plugin';
 

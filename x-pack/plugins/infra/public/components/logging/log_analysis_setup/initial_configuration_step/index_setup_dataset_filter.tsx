@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { EuiSelectableOption } from '@elastic/eui';
 import {
   EuiFilterButton,
   EuiFilterGroup,
@@ -12,11 +12,11 @@ import {
   EuiPopover,
   EuiPopoverTitle,
   EuiSelectable,
-  EuiSelectableOption,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useCallback, useMemo } from 'react';
-import { DatasetFilter, QualityWarning } from '../../../../../common/log_analysis';
+import type { DatasetFilter } from '../../../../../common/log_analysis/job_parameters';
+import type { QualityWarning } from '../../../../../common/log_analysis/log_analysis_quality';
 import { useVisibilityState } from '../../../../utils/use_visibility_state';
 import { CategoryQualityWarningReasonDescription } from '../../log_analysis_job_status/quality_warning_notices';
 

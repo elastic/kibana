@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import * as rt from 'io-ts';
 import { estypes } from '@elastic/elasticsearch';
-import { logSourceColumnConfigurationRT } from '../../log_sources/log_source_configuration';
+import * as rt from 'io-ts';
+import { logEntryRT } from '../../log_entry/log_entry';
 import {
   logEntryAfterCursorRT,
   logEntryBeforeCursorRT,
   logEntryCursorRT,
-  logEntryRT,
-} from '../../log_entry';
+} from '../../log_entry/log_entry_cursor';
+import { logSourceColumnConfigurationRT } from '../../log_sources/log_source_configuration';
 import { jsonObjectRT } from '../../typed_json';
 import { searchStrategyErrorRT } from '../common/errors';
 

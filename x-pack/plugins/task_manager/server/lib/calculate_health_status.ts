@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { JsonValue } from '@kbn/utility-types';
 import { isString } from 'lodash';
-import { JsonValue } from '@kbn/utility-types';
-import { HealthStatus, RawMonitoringStats } from '../monitoring';
-import { TaskManagerConfig } from '../config';
+import type { TaskManagerConfig } from '../config';
+import type { RawMonitoringStats } from '../monitoring/monitoring_stats_stream';
+import { HealthStatus } from '../monitoring/monitoring_stats_stream';
 
 export function calculateHealthStatus(
   summarizedStats: RawMonitoringStats,

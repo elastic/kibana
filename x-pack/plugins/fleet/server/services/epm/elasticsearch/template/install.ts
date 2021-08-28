@@ -6,29 +6,30 @@
  */
 
 import Boom from '@hapi/boom';
-import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
 
-import { ElasticsearchAssetType } from '../../../../types';
+import type { ElasticsearchClient } from '../../../../../../../../src/core/server/elasticsearch/client/types';
+import type { SavedObjectsClientContract } from '../../../../../../../../src/core/server/saved_objects/types';
 import type {
-  RegistryDataStream,
   IndexTemplateEntry,
-  RegistryElasticsearch,
   InstallablePackage,
-} from '../../../../types';
-import { loadFieldsFromYaml, processFields } from '../../fields/field';
-import type { Field } from '../../fields/field';
-import { getPipelineNameForInstallation } from '../ingest_pipeline/install';
-import { getAsset, getPathParts } from '../../archive';
-import { removeAssetTypesFromInstalledEs, saveInstalledEsRefs } from '../../packages/install';
+  RegistryDataStream,
+  RegistryElasticsearch,
+} from '../../../../../common/types/models/epm';
+import { ElasticsearchAssetType } from '../../../../../common/types/models/epm';
 import {
-  FLEET_GLOBAL_COMPONENT_TEMPLATE_NAME,
   FLEET_GLOBAL_COMPONENT_TEMPLATE_CONTENT,
-} from '../../../../constants';
+  FLEET_GLOBAL_COMPONENT_TEMPLATE_NAME,
+} from '../../../../constants/fleet_es_assets';
+import { getAsset, getPathParts } from '../../archive';
+import type { Field } from '../../fields/field';
+import { loadFieldsFromYaml, processFields } from '../../fields/field';
+import { removeAssetTypesFromInstalledEs, saveInstalledEsRefs } from '../../packages/install';
+import { getPipelineNameForInstallation } from '../ingest_pipeline/install';
 
 import {
   generateMappings,
-  generateTemplateName,
   generateTemplateIndexPattern,
+  generateTemplateName,
   getTemplate,
   getTemplatePriority,
 } from './template';

@@ -4,20 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import type { Subscription } from 'rxjs';
 import { distinctUntilKeyChanged, map } from 'rxjs/operators';
 
-import type {
-  HttpServiceSetup,
-  KibanaRequest,
-  Logger,
-  LoggerContextConfigInput,
-  LoggingServiceSetup,
-} from 'src/core/server';
+import type { Logger } from '@kbn/logging';
 
-import type { SpacesPluginSetup } from '../../../spaces/server';
-import type { SecurityLicense, SecurityLicenseFeatures } from '../../common/licensing';
+import type { KibanaRequest } from '../../../../../src/core/server/http/router/request';
+import type { HttpServiceSetup } from '../../../../../src/core/server/http/types';
+import type { LoggerContextConfigInput } from '../../../../../src/core/server/logging/logging_config';
+import type { LoggingServiceSetup } from '../../../../../src/core/server/logging/logging_service';
+import type { SpacesPluginSetup } from '../../../spaces/server/plugin';
+import type { SecurityLicenseFeatures } from '../../common/licensing/license_features';
+import type { SecurityLicense } from '../../common/licensing/license_service';
 import type { ConfigType } from '../config';
 import type { SecurityPluginSetup } from '../plugin';
 import type { AuditEvent } from './audit_events';

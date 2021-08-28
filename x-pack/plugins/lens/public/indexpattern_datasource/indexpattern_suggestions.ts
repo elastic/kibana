@@ -4,32 +4,30 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { flatten, minBy, pick, mapValues, partition } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { generateId } from '../id_generator';
-import { DatasourceSuggestion, TableChangeType } from '../types';
-import { columnToOperation } from './indexpattern';
-import {
-  insertNewColumn,
-  replaceColumn,
-  getMetricOperationTypes,
-  getOperationTypesForField,
-  operationDefinitionMap,
-  IndexPatternColumn,
-  OperationType,
-  getExistingColumnGroups,
-  isReferenced,
-  getReferencedColumnIds,
-} from './operations';
-import { hasField } from './utils';
-import {
-  IndexPattern,
-  IndexPatternPrivateState,
-  IndexPatternLayer,
-  IndexPatternField,
-} from './types';
+import { flatten, mapValues, minBy, partition, pick } from 'lodash';
+import { generateId } from '../id_generator/id_generator';
+import type { DatasourceSuggestion, TableChangeType } from '../types';
 import { documentField } from './document_field';
+import { columnToOperation } from './indexpattern';
+import type { IndexPatternColumn, OperationType } from './operations/definitions';
+import { operationDefinitionMap } from './operations/definitions';
+import {
+  getExistingColumnGroups,
+  getMetricOperationTypes,
+  getReferencedColumnIds,
+  insertNewColumn,
+  isReferenced,
+  replaceColumn,
+} from './operations/layer_helpers';
+import { getOperationTypesForField } from './operations/operations';
+import type {
+  IndexPattern,
+  IndexPatternField,
+  IndexPatternLayer,
+  IndexPatternPrivateState,
+} from './types';
+import { hasField } from './utils';
 
 export type IndexPatternSuggestion = DatasourceSuggestion<IndexPatternPrivateState>;
 

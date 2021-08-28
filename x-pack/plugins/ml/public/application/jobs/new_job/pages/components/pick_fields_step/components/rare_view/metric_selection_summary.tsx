@@ -4,17 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { FC, useContext, useEffect, useState, useMemo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
+import type { FC } from 'react';
+import React, { useContext, useEffect, useMemo, useState } from 'react';
+import type { LineChartPoint } from '../../../../../common/chart_loader/chart_loader';
+import { RareJobCreator } from '../../../../../common/job_creator/rare_job_creator';
+import type { Anomaly, Results } from '../../../../../common/results_loader/results_loader';
+import { EventRateChart } from '../../../charts/event_rate_chart/event_rate_chart';
 import { JobCreatorContext } from '../../../job_creator_context';
-import { RareJobCreator } from '../../../../../common/job_creator';
-import { Results, Anomaly } from '../../../../../common/results_loader';
-import { LineChartPoint } from '../../../../../common/chart_loader';
-import { EventRateChart } from '../../../charts/event_rate_chart';
-
-import { RARE_DETECTOR_TYPE } from './rare_view';
 import { DetectorDescription } from './detector_description';
+import { RARE_DETECTOR_TYPE } from './rare_view';
 
 const DTR_IDX = 0;
 

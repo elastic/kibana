@@ -4,27 +4,26 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { useState, useEffect, useCallback } from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import type { EuiSuperSelectOption } from '@elastic/eui';
 import {
+  EuiFieldNumber,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIconTip,
   EuiFormRow,
-  EuiFieldNumber,
+  EuiIconTip,
   EuiSelect,
-  EuiText,
   EuiSpacer,
   EuiSuperSelect,
-  EuiSuperSelectOption,
+  EuiText,
 } from '@elastic/eui';
-import { some, filter, map } from 'fp-ts/lib/Option';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { filter, map, some } from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { InitialAlert } from './alert_reducer';
+import React, { useCallback, useEffect, useState } from 'react';
+import type { AlertNotifyWhenType } from '../../../../../alerting/common/alert_notify_when_type';
 import { getTimeOptions } from '../../../common/lib/get_time_options';
-import { AlertNotifyWhenType } from '../../../types';
+import type { InitialAlert } from './alert_reducer';
 
 const DEFAULT_NOTIFY_WHEN_VALUE: AlertNotifyWhenType = 'onActionGroupChange';
 

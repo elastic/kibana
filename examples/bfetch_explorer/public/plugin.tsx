@@ -7,7 +7,7 @@
  */
 
 import { Plugin, CoreSetup, AppNavLinkStatus } from '../../../src/core/public';
-import { BfetchPublicSetup, BfetchPublicStart } from '../../../src/plugins/bfetch/public';
+import { BfetchPublicSetup, BfetchPublicStart } from '../../../src/plugins/bfetch/public/types';
 import { mount } from './mount';
 import { DeveloperExamplesSetup } from '../../developer_examples/public';
 

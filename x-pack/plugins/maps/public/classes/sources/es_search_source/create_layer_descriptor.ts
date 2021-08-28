@@ -4,13 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { Query } from 'src/plugins/data/public';
-import { LayerDescriptor } from '../../../../common/descriptor_types';
+import type { Query } from 'src/plugins/data/public';
 import { ES_GEO_FIELD_TYPE, SCALING_TYPES } from '../../../../common/constants';
-import { ESSearchSource } from './es_search_source';
-import { VectorLayer } from '../../layers/vector_layer';
+import type { LayerDescriptor } from '../../../../common/descriptor_types/layer_descriptor_types';
 import { getIsGoldPlus } from '../../../licensed_features';
+import { VectorLayer } from '../../layers/vector_layer/vector_layer';
+import { ESSearchSource } from './es_search_source';
 
 export interface CreateLayerDescriptorParams {
   indexPatternId: string;

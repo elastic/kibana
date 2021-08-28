@@ -4,22 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { ProcessorEvent } from '../../../common/processor_event';
+import { rangeQuery } from '../../../../observability/server/utils/queries';
 import {
   AGENT_NAME,
   CLOUD_PROVIDER,
   CONTAINER_ID,
-  KUBERNETES,
-  SERVICE_NAME,
-  POD_NAME,
   HOST_OS_PLATFORM,
+  KUBERNETES,
+  POD_NAME,
+  SERVICE_NAME,
 } from '../../../common/elasticsearch_fieldnames';
-import { ContainerType } from '../../../common/service_metadata';
-import { rangeQuery } from '../../../../observability/server';
-import { TransactionRaw } from '../../../typings/es_schemas/raw/transaction_raw';
+import { ProcessorEvent } from '../../../common/processor_event';
+import type { ContainerType } from '../../../common/service_metadata';
+import type { TransactionRaw } from '../../../typings/es_schemas/raw/transaction_raw';
 import { getProcessorEventForAggregatedTransactions } from '../helpers/aggregated_transactions';
-import { Setup, SetupTimeRange } from '../helpers/setup_request';
+import type { Setup, SetupTimeRange } from '../helpers/setup_request';
 
 type ServiceMetadataIconsRaw = Pick<
   TransactionRaw,

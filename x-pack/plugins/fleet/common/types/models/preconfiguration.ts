@@ -4,13 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { NewAgentPolicy } from './agent_policy';
 import type {
-  PackagePolicyPackage,
   NewPackagePolicy,
   NewPackagePolicyInput,
+  PackagePolicyPackage,
 } from './package_policy';
-import type { NewAgentPolicy } from './agent_policy';
 
 export type InputsOverride = Partial<NewPackagePolicyInput> & {
   vars?: Array<NewPackagePolicyInput['vars'] & { name: string }>;

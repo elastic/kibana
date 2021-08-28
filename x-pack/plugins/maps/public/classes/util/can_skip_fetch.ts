@@ -5,13 +5,16 @@
  * 2.0.
  */
 
-import _ from 'lodash';
 import turfBboxPolygon from '@turf/bbox-polygon';
 import turfBooleanContains from '@turf/boolean-contains';
-import { isRefreshOnlyQuery } from './is_refresh_only_query';
-import { ISource } from '../sources/source';
-import { DataMeta, Timeslice } from '../../../common/descriptor_types';
+import _ from 'lodash';
+import type {
+  DataMeta,
+  Timeslice,
+} from '../../../common/descriptor_types/data_request_descriptor_types';
+import type { ISource } from '../sources/source';
 import { DataRequest } from './data_request';
+import { isRefreshOnlyQuery } from './is_refresh_only_query';
 
 const SOURCE_UPDATE_REQUIRED = true;
 const NO_SOURCE_UPDATE_REQUIRED = false;

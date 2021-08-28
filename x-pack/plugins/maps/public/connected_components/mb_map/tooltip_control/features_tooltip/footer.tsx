@@ -4,22 +4,22 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { ChangeEvent, Component, Fragment } from 'react';
+import type { EuiSelectOption } from '@elastic/eui';
 import {
-  EuiPagination,
-  EuiSelect,
-  EuiSelectOption,
-  EuiHorizontalRule,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiTextColor,
   EuiFormRow,
+  EuiHorizontalRule,
+  EuiPagination,
+  EuiSelect,
+  EuiTextColor,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { TooltipFeature } from '../../../../../common/descriptor_types';
-import { IVectorLayer } from '../../../../classes/layers/vector_layer';
+import type { ChangeEvent } from 'react';
+import React, { Component, Fragment } from 'react';
+import type { TooltipFeature } from '../../../../../common/descriptor_types/map_descriptor';
+import type { IVectorLayer } from '../../../../classes/layers/vector_layer/vector_layer';
 
 const ALL_LAYERS = '_ALL_LAYERS_';
 const DEFAULT_PAGE_NUMBER = 0;

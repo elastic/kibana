@@ -6,9 +6,8 @@
  */
 
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
-
-import { ISource } from './source';
-import { Adapters } from '../../../../../../src/plugins/inspector/common/adapters';
+import type { Adapters } from '../../../../../../src/plugins/inspector/common/adapters/types';
+import type { ISource } from './source';
 
 export type SourceRegistryEntry = {
   ConstructorFunction: new (

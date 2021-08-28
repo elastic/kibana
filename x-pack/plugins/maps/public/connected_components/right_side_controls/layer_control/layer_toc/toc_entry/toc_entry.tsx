@@ -4,21 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { Component } from 'react';
-import classNames from 'classnames';
-import type { DraggableProvidedDragHandleProps } from 'react-beautiful-dnd';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiIcon, EuiButtonIcon, EuiConfirmModal, EuiButtonEmpty } from '@elastic/eui';
+import { EuiButtonEmpty, EuiButtonIcon, EuiConfirmModal, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { TOCEntryActionsPopover } from './toc_entry_actions_popover';
+import { FormattedMessage } from '@kbn/i18n/react';
+import classNames from 'classnames';
+import React, { Component } from 'react';
+import type { DraggableProvidedDragHandleProps } from 'react-beautiful-dnd';
+import type { ILayer } from '../../../../../classes/layers/layer';
 import {
-  getVisibilityToggleIcon,
-  getVisibilityToggleLabel,
   EDIT_LAYER_SETTINGS_LABEL,
   FIT_TO_DATA_LABEL,
+  getVisibilityToggleIcon,
+  getVisibilityToggleLabel,
 } from './action_labels';
-import { ILayer } from '../../../../../classes/layers/layer';
+import { TOCEntryActionsPopover } from './toc_entry_actions_popover';
 
 function escapeLayerName(name: string) {
   return name.split(' ').join('_');

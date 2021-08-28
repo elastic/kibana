@@ -4,14 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { SavedObjectsClientContract } from '../../../../../../../src/core/server';
+import type { SavedObjectsClientContract } from '../../../../../../../src/core/server/saved_objects/types';
+import type { ApmIndicesConfig } from '../../../../../observability/common/typings';
 import {
-  APM_INDICES_SAVED_OBJECT_TYPE,
   APM_INDICES_SAVED_OBJECT_ID,
+  APM_INDICES_SAVED_OBJECT_TYPE,
 } from '../../../../common/apm_saved_object_constants';
 import { withApmSpan } from '../../../utils/with_apm_span';
-import { ApmIndicesConfig } from './get_apm_indices';
 
 export function saveApmIndices(
   savedObjectsClient: SavedObjectsClientContract,

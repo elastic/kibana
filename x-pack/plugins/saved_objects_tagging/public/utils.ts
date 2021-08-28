@@ -4,16 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { SavedObject, SavedObjectReference } from 'src/core/types';
-import { SavedObjectsFindOptionsReference } from 'src/core/public';
-import { Tag, tagSavedObjectTypeName } from '../common';
+import type { SavedObjectsFindOptionsReference } from '../../../../src/core/server/saved_objects/types';
+import type { SavedObject, SavedObjectReference } from '../../../../src/core/types/saved_objects';
+import type { Tag } from '../../../../src/plugins/saved_objects_tagging_oss/common/types';
+import { tagSavedObjectTypeName } from '../common/constants';
 
 type SavedObjectReferenceLike = SavedObjectReference | SavedObjectsFindOptionsReference;
 
 export {
-  tagIdToReference,
   replaceTagReferences as updateTagsReferences,
+  tagIdToReference,
 } from '../common/references';
 
 export const getObjectTags = (object: SavedObject, allTags: Tag[]) => {

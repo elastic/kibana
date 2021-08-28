@@ -4,12 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { isString } from 'lodash';
 
-import type { Capabilities as UICapabilities } from 'src/core/server';
-
-import { uiCapabilitiesRegex } from '../../../../features/server';
+import type { Capabilities as UICapabilities } from '../../../../../../src/core/types/capabilities';
+import { uiCapabilitiesRegex } from '../../../../features/server/feature_schema';
 
 export class UIActions {
   private readonly prefix: string;

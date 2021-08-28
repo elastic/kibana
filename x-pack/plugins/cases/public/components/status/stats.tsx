@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { memo, useMemo } from 'react';
 import { EuiDescriptionList, EuiLoadingSpinner } from '@elastic/eui';
-import { CaseStatuses } from '../../../common';
+import React, { memo, useMemo } from 'react';
+import { CaseStatuses } from '../../../common/api/cases/status';
 import { statuses } from './config';
 
 export interface Props {

@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { EuiLinkProps, EuiText, EuiTextProps } from '@elastic/eui';
+import type { EuiLinkProps, EuiTextProps } from '@elastic/eui';
+import { EuiText } from '@elastic/eui';
 import React from 'react';
 import extendSessionIcon from '../icons/extend_session.svg';
 

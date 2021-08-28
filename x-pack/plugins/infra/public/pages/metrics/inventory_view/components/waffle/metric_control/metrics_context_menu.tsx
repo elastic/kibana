@@ -4,19 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
+import { EuiContextMenu } from '@elastic/eui';
 import React, { useCallback } from 'react';
-import { EuiContextMenuPanelDescriptor, EuiContextMenu } from '@elastic/eui';
 import { getCustomMetricLabel } from '../../../../../../../common/formatters/get_custom_metric_label';
-import {
-  SnapshotMetricInput,
+import type {
   SnapshotCustomMetricInput,
-  SnapshotCustomMetricInputRT,
+  SnapshotMetricInput,
 } from '../../../../../../../common/http_api/snapshot_api';
-import {
-  SnapshotMetricTypeRT,
-  SnapshotMetricType,
-} from '../../../../../../../common/inventory_models/types';
+import { SnapshotCustomMetricInputRT } from '../../../../../../../common/http_api/snapshot_api';
+import type { SnapshotMetricType } from '../../../../../../../common/inventory_models/types';
+import { SnapshotMetricTypeRT } from '../../../../../../../common/inventory_models/types';
 
 interface Props {
   options: Array<{ text: string; value: string }>;

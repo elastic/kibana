@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import { forOwn } from 'lodash';
-import { extractSearchSourceReferences } from '../../../../data/common/search/search_source/extract_references';
+import { extractReferences as extractSearchSourceReferences } from '../../../../data/common/search/search_source/extract_references';
 import type { SavedObject, SavedObjectConfig } from '../../types';
 import { expandShorthand } from './field_mapping/mapping_setup';
 

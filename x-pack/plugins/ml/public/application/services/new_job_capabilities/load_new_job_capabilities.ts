@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { IIndexPattern, IndexPatternsContract } from '../../../../../../../src/plugins/data/public';
+import type { IndexPatternsContract } from '../../../../../../../src/plugins/data/common/index_patterns/index_patterns/index_patterns';
+import type { IIndexPattern } from '../../../../../../../src/plugins/data/common/index_patterns/types';
+import type { JobType } from '../../../../common/types/saved_objects';
 import { getIndexPatternAndSavedSearch } from '../../util/index_utils';
-import { JobType } from '../../../../common/types/saved_objects';
-import { newJobCapsServiceAnalytics } from '../new_job_capabilities/new_job_capabilities_service_analytics';
-import { newJobCapsService } from '../new_job_capabilities/new_job_capabilities_service';
+import { newJobCapsService } from './new_job_capabilities_service';
+import { newJobCapsServiceAnalytics } from './new_job_capabilities_service_analytics';
 
 export const ANOMALY_DETECTOR = 'anomaly-detector';
 export const DATA_FRAME_ANALYTICS = 'data-frame-analytics';

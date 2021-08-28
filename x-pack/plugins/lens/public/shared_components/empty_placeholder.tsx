@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiIcon, EuiText, IconType, EuiSpacer } from '@elastic/eui';
+import type { IconType } from '@elastic/eui';
+import { EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import React from 'react';
 
 export const EmptyPlaceholder = (props: { icon: IconType }) => (
   <>

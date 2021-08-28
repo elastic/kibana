@@ -4,12 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { cloneDeep } from 'lodash';
 
-import type { SavedObjectUnsanitizedDoc } from 'src/core/server';
-
-import type { UsageStats } from '../../usage_stats';
+import type { SavedObjectUnsanitizedDoc } from '../../../../../../src/core/server/saved_objects/serialization/types';
+import type { UsageStats } from '../../usage_stats/types';
 
 export const migrateTo7141 = (doc: SavedObjectUnsanitizedDoc<UsageStats>) => {
   try {

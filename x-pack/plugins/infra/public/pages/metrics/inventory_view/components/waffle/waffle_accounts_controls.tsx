@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { EuiContextMenuPanelDescriptor, EuiPopover, EuiContextMenu } from '@elastic/eui';
-import React, { useCallback, useState, useMemo } from 'react';
+import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
+import { EuiContextMenu, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { InventoryCloudAccount } from '../../../../../../common/http_api/inventory_meta_api';
+import React, { useCallback, useMemo, useState } from 'react';
+import type { InventoryCloudAccount } from '../../../../../../common/http_api/inventory_meta_api';
 import { DropdownButton } from '../dropdown_button';
 
 interface Props {

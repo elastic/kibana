@@ -4,19 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { ESFilter } from '../../../../../../src/core/types/elasticsearch';
+import type { ESFilter } from '../../../../../../src/core/types/elasticsearch';
+import {
+  kqlQuery,
+  rangeQuery,
+} from '../../../../observability/server/utils/queries';
 import {
   SERVICE_NAME,
   TRANSACTION_TYPE,
 } from '../../../common/elasticsearch_fieldnames';
-import { kqlQuery, rangeQuery } from '../../../../observability/server';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import {
   getDocumentTypeFilterForAggregatedTransactions,
   getProcessorEventForAggregatedTransactions,
 } from '../helpers/aggregated_transactions';
-import { Setup } from '../helpers/setup_request';
+import type { Setup } from '../helpers/setup_request';
 
 interface Options {
   environment: string;

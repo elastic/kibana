@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { i18n } from '@kbn/i18n';
 import { mapValues } from 'lodash';
-import { SnapshotMetricType } from './inventory_models/types';
+import type { SnapshotMetricType } from './inventory_models/types';
 
 // Lowercase versions of all metrics, for when they need to be used in the middle of a sentence;
 // these may need to be translated differently depending on language, e.g. still capitalizing "CPU"

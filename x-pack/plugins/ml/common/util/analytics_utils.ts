@@ -4,15 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import {
+import { ANALYSIS_CONFIG_TYPE } from '../constants/data_frame_analytics';
+import type {
   AnalysisConfig,
   ClassificationAnalysis,
+  DataFrameAnalysisConfigType,
   OutlierAnalysis,
   RegressionAnalysis,
 } from '../types/data_frame_analytics';
-import { ANALYSIS_CONFIG_TYPE } from '../constants/data_frame_analytics';
-import { DataFrameAnalysisConfigType } from '../types/data_frame_analytics';
 
 export const isOutlierAnalysis = (arg: any): arg is OutlierAnalysis => {
   if (typeof arg !== 'object' || arg === null) return false;

@@ -4,35 +4,33 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { estypes } from '@elastic/elasticsearch';
 import { schema } from '@kbn/config-schema';
+import type { Datafeed } from '../../common/types/anomaly_detection_jobs/datafeed';
+import type { Job } from '../../common/types/anomaly_detection_jobs/job';
 import { wrapError } from '../client/error_wrapper';
-import { RouteInitialization } from '../types';
+import { getAuthorizationHeader } from '../lib/request_authorization';
+import { jobServiceProvider } from '../models/job_service';
+import { categorizationExamplesProvider } from '../models/job_service/new_job/categorization/examples';
+import type { RouteInitialization } from '../types';
+import { jobIdSchema } from './schemas/anomaly_detectors_schema';
 import {
-  categorizationFieldExamplesSchema,
   basicChartSchema,
-  populationChartSchema,
+  bulkCreateSchema,
+  categorizationFieldExamplesSchema,
   datafeedIdsSchema,
+  datafeedPreviewSchema,
   forceStartDatafeedSchema,
   jobIdsSchema,
-  optionalJobIdsSchema,
+  jobsExistSchema,
   jobsWithTimerangeSchema,
   lookBackProgressSchema,
+  optionalJobIdsSchema,
+  populationChartSchema,
+  revertModelSnapshotSchema,
   topCategoriesSchema,
   updateGroupsSchema,
-  revertModelSnapshotSchema,
-  jobsExistSchema,
-  datafeedPreviewSchema,
-  bulkCreateSchema,
 } from './schemas/job_service_schema';
-
-import { jobIdSchema } from './schemas/anomaly_detectors_schema';
-
-import { jobServiceProvider } from '../models/job_service';
-import { categorizationExamplesProvider } from '../models/job_service/new_job';
-import { getAuthorizationHeader } from '../lib/request_authorization';
-import { Datafeed, Job } from '../../common/types/anomaly_detection_jobs';
 
 /**
  * Routes for job service

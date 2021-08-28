@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import React from 'react';
+import type { SeriesConfig } from '../types';
 import { Breakdowns } from './columns/breakdowns';
-import { SeriesConfig } from '../types';
 import { ChartOptions } from './columns/chart_options';
 
 interface Props {

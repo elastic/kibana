@@ -4,15 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { useCallback, useEffect, useState, useRef } from 'react';
 import { isEmpty } from 'lodash/fp';
-
-import { User } from '../../common';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import type { User } from '../../common/api/user';
+import { useToasts } from '../common/lib/kibana/hooks';
+import { useOwnerContext } from '../components/owner_context/use_owner_context';
 import { getReporters } from './api';
 import * as i18n from './translations';
-import { useToasts } from '../common/lib/kibana';
-import { useOwnerContext } from '../components/owner_context/use_owner_context';
 
 interface ReportersState {
   reporters: string[];

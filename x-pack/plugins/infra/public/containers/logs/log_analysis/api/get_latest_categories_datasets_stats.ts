@@ -4,15 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { HttpHandler } from 'src/core/public';
-import {
+import type { HttpHandler } from '../../../../../../../../src/core/public/http/types';
+import type {
   CategorizerStatus,
+  LogEntryCategoriesDatasetStats,
+} from '../../../../../common/http_api/log_analysis/results/log_entry_category_datasets_stats';
+import {
   getLatestLogEntryCategoryDatasetsStatsRequestPayloadRT,
   getLatestLogEntryCategoryDatasetsStatsSuccessResponsePayloadRT,
-  LogEntryCategoriesDatasetStats,
   LOG_ANALYSIS_GET_LATEST_LOG_ENTRY_CATEGORY_DATASETS_STATS_PATH,
-} from '../../../../../common/http_api';
+} from '../../../../../common/http_api/log_analysis/results/log_entry_category_datasets_stats';
 import { decodeOrThrow } from '../../../../../common/runtime_types';
 
 export { LogEntryCategoriesDatasetStats };

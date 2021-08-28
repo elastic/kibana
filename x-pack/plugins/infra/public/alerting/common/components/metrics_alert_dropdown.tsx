@@ -4,20 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
+import { EuiContextMenu, EuiHeaderLink, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useState, useCallback, useMemo } from 'react';
-import {
-  EuiPopover,
-  EuiHeaderLink,
-  EuiContextMenu,
-  EuiContextMenuPanelDescriptor,
-} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import React, { useCallback, useMemo, useState } from 'react';
+import { useKibana } from '../../../../../../../src/plugins/kibana_react/public/context/context';
+import { useLinkProps } from '../../../hooks/use_link_props';
 import { PrefilledInventoryAlertFlyout } from '../../inventory/components/alert_flyout';
 import { PrefilledThresholdAlertFlyout } from '../../metric_threshold/components/alert_flyout';
-import { useLinkProps } from '../../../hooks/use_link_props';
 
 type VisibleFlyoutType = 'inventory' | 'threshold' | null;
 

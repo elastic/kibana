@@ -10,7 +10,7 @@ import type { ReactNode } from 'react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { ServiceOverview } from '.';
-import type { CoreStart } from '../../../../../../../src/core/public';
+import type { CoreStart } from '../../../../../../../src/core/public/types';
 import { uiSettingsServiceMock } from '../../../../../../../src/core/public/ui_settings/ui_settings_service.mock';
 import { createKibanaReactContext } from '../../../../../../../src/plugins/kibana_react/public/context/context';
 import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';

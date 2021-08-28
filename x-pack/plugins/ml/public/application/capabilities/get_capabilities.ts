@@ -4,11 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { MlCapabilitiesResponse } from '../../../common/types/capabilities';
 import { ml } from '../services/ml_api_service';
-
 import { setUpgradeInProgress } from '../services/upgrade_service';
-import { MlCapabilitiesResponse } from '../../../common/types/capabilities';
 
 export function getCapabilities(): Promise<MlCapabilitiesResponse> {
   return new Promise((resolve, reject) => {

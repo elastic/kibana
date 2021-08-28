@@ -4,11 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { i18n } from '@kbn/i18n';
-import type { FeatureCatalogueEntry } from 'src/plugins/home/public';
 
-import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public';
+import type { FeatureCatalogueEntry } from '../../../../src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry';
+import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry';
 import { getSpacesFeatureDescription } from './constants';
 
 export const createSpacesFeatureCatalogueEntry = (): FeatureCatalogueEntry => {

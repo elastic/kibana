@@ -5,23 +5,24 @@
  * 2.0.
  */
 
-import React from 'react';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiComboBox, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EuiFormRow, EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
-import { AggFunctionsMapping } from '../../../../../../../src/plugins/data/public';
-import { buildExpressionFunction } from '../../../../../../../src/plugins/expressions/public';
-import { OperationDefinition } from './index';
-import { FieldBasedIndexPatternColumn } from './column_types';
-import { IndexPatternField, IndexPattern } from '../../types';
+import React from 'react';
+import type { OperationDefinition } from '.';
+import type { AggFunctionsMapping } from '../../../../../../../src/plugins/data/common/search/aggs/types';
+import { buildExpressionFunction } from '../../../../../../../src/plugins/expressions/common/ast/build_function';
+import type { DataType } from '../../../types';
+import type { IndexPattern, IndexPatternField } from '../../types';
 import { updateColumnParam } from '../layer_helpers';
-import { DataType } from '../../../types';
+import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
+import type { FieldBasedIndexPatternColumn } from './column_types';
 import {
+  getFilter,
   getFormatFromPreviousColumn,
   getInvalidFieldMessage,
   getSafeName,
-  getFilter,
 } from './helpers';
-import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
 
 function ofName(name: string, timeShift: string | undefined) {
   return adjustTimeScaleLabelSuffix(

@@ -4,12 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import React, { useCallback, useMemo, useState } from 'react';
 import type { FluidDragActions } from 'react-beautiful-dnd';
-
 import { useAddToTimeline } from '../../../hooks/use_add_to_timeline';
-
 import { draggableKeyDownHandler } from '../helpers';
 
 export interface UseDraggableKeyboardWrapperProps {

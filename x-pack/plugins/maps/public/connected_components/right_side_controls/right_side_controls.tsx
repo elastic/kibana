@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import React from 'react';
+import type { MapSettings } from '../../reducers/map/types';
+import { AttributionControl } from './attribution_control';
 import { LayerControl } from './layer_control';
 import { MouseCoordinatesControl } from './mouse_coordinates_control';
-import { AttributionControl } from './attribution_control';
-import { MapSettings } from '../../reducers/map';
 
 export interface Props {
   settings: MapSettings;

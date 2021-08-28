@@ -4,18 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiText, EuiTitle } from '@elastic/eui';
 import React, { useMemo, useState } from 'react';
-
-import * as i18n from './translations';
-import { CaseDetailsHrefSchema, CasesNavigation, LinkAnchor } from '../links';
+import { useCurrentUser } from '../../common/lib/kibana/hooks';
+import type { Owner } from '../../types';
+import type { CaseDetailsHrefSchema, CasesNavigation } from '../links';
+import { LinkAnchor } from '../links';
+import { OwnerProvider } from '../owner_context';
 import { RecentCasesFilters } from './filters';
 import { RecentCasesComp } from './recent_cases';
-import { FilterMode as RecentCasesFilterMode } from './types';
-import { useCurrentUser } from '../../common/lib/kibana';
-import { Owner } from '../../types';
-import { OwnerProvider } from '../owner_context';
+import * as i18n from './translations';
+import type { FilterMode as RecentCasesFilterMode } from './types';
 
 export interface RecentCasesProps extends Owner {
   allCasesNavigation: CasesNavigation;

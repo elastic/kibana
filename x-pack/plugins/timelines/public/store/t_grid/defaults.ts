@@ -4,9 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { Direction } from '../../../common/search_strategy';
-import type { ColumnHeaderOptions, ColumnHeaderType } from '../../../common/types/timeline';
+import { Direction } from '../../../common/search_strategy/common';
+import type { ColumnHeaderOptions, ColumnHeaderType } from '../../../common/types/timeline/columns';
 import {
   DEFAULT_COLUMN_MIN_WIDTH,
   DEFAULT_DATE_COLUMN_MIN_WIDTH,

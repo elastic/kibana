@@ -4,18 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { FC, ReactNode, useMemo } from 'react';
-import { EuiBasicTable, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { Axis, BarSeries, Chart, Settings } from '@elastic/charts';
-
-import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiBasicTable, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+import type { FC, ReactNode } from 'react';
+import React, { useMemo } from 'react';
+import { roundToDecimalPlace } from '../../../utils/round_to_decimal_place';
+import { useDataVizChartTheme } from '../../hooks/use_data_viz_chart_theme';
 import type { FieldDataRowProps } from '../../types/field_data_row';
-import { ExpandedRowFieldHeader } from '../expanded_row_field_header';
 import { getTFPercentage } from '../../utils';
-import { roundToDecimalPlace } from '../../../utils';
-import { useDataVizChartTheme } from '../../hooks';
+import { ExpandedRowFieldHeader } from '../expanded_row_field_header/expanded_row_field_header';
 import { DocumentStatsTable } from './document_stats';
 import { ExpandedRowContent } from './expanded_row_content';
 

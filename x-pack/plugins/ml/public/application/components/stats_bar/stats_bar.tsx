@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { FC } from 'react';
-import { Stat, StatsBarStat } from './stat';
+import type { FC } from 'react';
+import React from 'react';
+import type { StatsBarStat } from './stat';
+import { Stat } from './stat';
 
 interface Stats {
   total: StatsBarStat;

@@ -4,21 +4,23 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { i18n } from '@kbn/i18n';
-import { FormattedIndexPatternColumn, ReferenceBasedIndexPatternColumn } from '../column_types';
-import { IndexPatternLayer } from '../../../types';
+import type { OperationDefinition } from '..';
+import type { IndexPatternLayer } from '../../../types';
+import { adjustTimeScaleOnOtherColumnChange } from '../../time_scale_utils';
+import type {
+  FormattedIndexPatternColumn,
+  ReferenceBasedIndexPatternColumn,
+} from '../column_types';
+import { getFilter, getFormatFromPreviousColumn } from '../helpers';
 import {
   buildLabelFunction,
-  checkForDateHistogram,
-  getErrorsForDateReference,
-  dateBasedOperationToExpression,
-  hasDateField,
   checkForDataLayerType,
+  checkForDateHistogram,
+  dateBasedOperationToExpression,
+  getErrorsForDateReference,
+  hasDateField,
 } from './utils';
-import { adjustTimeScaleOnOtherColumnChange } from '../../time_scale_utils';
-import { OperationDefinition } from '..';
-import { getFormatFromPreviousColumn, getFilter } from '../helpers';
 
 const OPERATION_NAME = 'differences';
 

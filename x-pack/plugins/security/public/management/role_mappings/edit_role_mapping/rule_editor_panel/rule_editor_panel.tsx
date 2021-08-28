@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import {
   EuiCallOut,
   EuiConfirmModal,
@@ -23,11 +22,11 @@ import React, { Component, Fragment } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import type { DocLinksStart } from 'src/core/public';
 
-import type { RoleMapping } from '../../../../../common/model';
-import type { Rule } from '../../model';
-import { generateRulesFromRaw } from '../../model';
+import type { DocLinksStart } from '../../../../../../../../src/core/public/doc_links/doc_links_service';
+import type { RoleMapping } from '../../../../../common/model/role_mapping';
+import type { Rule } from '../../model/rule';
+import { generateRulesFromRaw } from '../../model/rule_builder';
 import { VISUAL_MAX_RULE_DEPTH } from '../services/role_mapping_constants';
 import { validateRoleMappingRules } from '../services/role_mapping_validation';
 import { JSONRuleEditor } from './json_rule_editor';

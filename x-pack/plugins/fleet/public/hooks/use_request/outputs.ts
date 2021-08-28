@@ -4,9 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { outputRoutesService } from '../../services';
-import type { PutOutputRequest, GetOutputsResponse } from '../../types';
+import { outputRoutesService } from '../../../common/services/routes';
+import type { GetOutputsResponse, PutOutputRequest } from '../../../common/types/rest_spec/output';
 
 import { sendRequest, useRequest } from './use_request';
 

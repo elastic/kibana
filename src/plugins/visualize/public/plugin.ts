@@ -41,7 +41,7 @@ import type { VisualizationsStart } from '../../visualizations/public';
 import type { VisualizeServices } from './application/types';
 import type { SavedObjectsStart } from '../../saved_objects/public';
 import type { EmbeddableStart } from '../../embeddable/public';
-import type { DashboardStart } from '../../dashboard/public';
+import type { DashboardStart } from '../../dashboard/public/plugin_contract';
 import type { SavedObjectTaggingOssPluginStart } from '../../saved_objects_tagging_oss/public';
 import type { UsageCollectionStart } from '../../usage_collection/public';
 

@@ -4,27 +4,31 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { memo } from 'react';
-import styled from 'styled-components';
-import { FormattedMessage } from '@kbn/i18n/react';
 import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiCallOut,
   EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
-  EuiFlyoutHeader,
-  EuiTitle,
   EuiFlyoutBody,
   EuiFlyoutFooter,
-  EuiButtonEmpty,
-  EuiButton,
-  EuiCallOut,
+  EuiFlyoutHeader,
+  EuiTitle,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
+import React, { memo } from 'react';
+import styled from 'styled-components';
 
-import { useGetOneAgentPolicyFull, useGetOneAgentPolicy, useStartServices } from '../../../hooks';
-import { Loading } from '../../../components';
-import { fullAgentPolicyToYaml, agentPolicyRouteService } from '../../../services';
+import { fullAgentPolicyToYaml } from '../../../../../../common/services/full_agent_policy_to_yaml';
+import { agentPolicyRouteService } from '../../../../../../common/services/routes';
+import { Loading } from '../../../../../components/loading';
+import { useStartServices } from '../../../../../hooks/use_core';
+import {
+  useGetOneAgentPolicy,
+  useGetOneAgentPolicyFull,
+} from '../../../../../hooks/use_request/agent_policy';
 
 const FlyoutBody = styled(EuiFlyoutBody)`
   .euiFlyoutBody__overflowContent {

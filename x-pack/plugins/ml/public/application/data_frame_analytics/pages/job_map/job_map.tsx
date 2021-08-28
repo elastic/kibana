@@ -4,19 +4,23 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { FC, useEffect, useState } from 'react';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { Cytoscape, Controls, JobMapLegend } from './components';
-import { useMlKibana, useMlLocator } from '../../../contexts/kibana';
+import type { FC } from 'react';
+import React, { useEffect, useState } from 'react';
 import { JOB_MAP_NODE_TYPES } from '../../../../../common/constants/data_frame_analytics';
 import { ML_PAGES } from '../../../../../common/constants/locator';
-import { useCurrentEuiTheme, EuiThemeType } from '../../../components/color_range_legend';
+import type { EuiThemeType } from '../../../components/color_range_legend/use_color_range';
+import { useCurrentEuiTheme } from '../../../components/color_range_legend/use_color_range';
+import { useMlKibana } from '../../../contexts/kibana/kibana_context';
+import { useMlLocator } from '../../../contexts/kibana/use_create_url';
+import { Controls } from './components/controls';
+import { Cytoscape } from './components/cytoscape';
+import { JobMapLegend } from './components/legend';
 import { useRefDimensions } from './components/use_ref_dimensions';
-import { useFetchAnalyticsMapData } from './use_fetch_analytics_map_data';
 import { JobMapTitle } from './job_map_title';
+import { useFetchAnalyticsMapData } from './use_fetch_analytics_map_data';
 
 const getCytoscapeDivStyle = (theme: EuiThemeType) => ({
   background: `linear-gradient(

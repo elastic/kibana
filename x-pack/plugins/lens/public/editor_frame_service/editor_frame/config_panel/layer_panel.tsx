@@ -5,36 +5,36 @@
  * 2.0.
  */
 
-import './layer_panel.scss';
-
-import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import {
-  EuiPanel,
-  EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
   EuiIconTip,
+  EuiPanel,
+  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { NativeRenderer } from '../../../native_renderer';
-import { StateSetter, Visualization, DraggedOperation, DropType } from '../../../types';
-import { DragDropIdentifier, ReorderProvider } from '../../../drag_drop';
-import { LayerSettings } from './layer_settings';
-import { trackUiEvent } from '../../../lens_ui_telemetry';
-import { LayerPanelProps, ActiveDimensionState } from './types';
-import { DimensionContainer } from './dimension_container';
-import { RemoveLayerButton } from './remove_layer_button';
-import { EmptyDimensionButton } from './buttons/empty_dimension_button';
-import { DimensionButton } from './buttons/dimension_button';
-import { DraggableDimensionButton } from './buttons/draggable_dimension_button';
-import { useFocusUpdate } from './use_focus_update';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { ReorderProvider } from '../../../drag_drop/providers/reorder_provider';
+import type { DragDropIdentifier } from '../../../drag_drop/providers/types';
+import { trackUiEvent } from '../../../lens_ui_telemetry/factory';
+import { NativeRenderer } from '../../../native_renderer/native_renderer';
+import { useLensSelector } from '../../../state_management';
 import {
-  useLensSelector,
+  selectDatasourceStates,
   selectIsFullscreenDatasource,
   selectResolvedDateRange,
-  selectDatasourceStates,
-} from '../../../state_management';
+} from '../../../state_management/selectors';
+import type { DraggedOperation, DropType, StateSetter, Visualization } from '../../../types';
+import { DimensionButton } from './buttons/dimension_button';
+import { DraggableDimensionButton } from './buttons/draggable_dimension_button';
+import { EmptyDimensionButton } from './buttons/empty_dimension_button';
+import { DimensionContainer } from './dimension_container';
+import './layer_panel.scss';
+import { LayerSettings } from './layer_settings';
+import { RemoveLayerButton } from './remove_layer_button';
+import type { ActiveDimensionState, LayerPanelProps } from './types';
+import { useFocusUpdate } from './use_focus_update';
 
 const initialActiveDimensionState = {
   isNew: false,

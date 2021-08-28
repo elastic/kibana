@@ -5,12 +5,15 @@
  * 2.0.
  */
 
+import type { GeoJsonProperties, Geometry } from 'geojson';
 import _ from 'lodash';
-import { GeoJsonProperties, Geometry } from 'geojson';
-import { Filter } from 'src/plugins/data/public';
-import { ActionExecutionContext, Action } from 'src/plugins/ui_actions/public';
-import { RawValue } from '../../../../../plugins/maps/common/constants';
-import type { TooltipFeature } from '../../../../../plugins/maps/common/descriptor_types';
+import type { Filter } from '../../../../../../src/plugins/data/common/es_query';
+import type {
+  Action,
+  ActionExecutionContext,
+} from '../../../../../../src/plugins/ui_actions/public/actions/action';
+import type { RawValue } from '../../../common/constants';
+import type { TooltipFeature } from '../../../common/descriptor_types/map_descriptor';
 
 export interface ITooltipProperty {
   getPropertyKey(): string;

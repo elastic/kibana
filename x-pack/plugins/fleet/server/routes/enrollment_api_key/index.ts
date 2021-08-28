@@ -4,21 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { IRouter } from 'src/core/server';
-
-import { PLUGIN_ID, ENROLLMENT_API_KEY_ROUTES } from '../../constants';
+import type { IRouter } from '../../../../../../src/core/server/http/router/router';
+import { PLUGIN_ID } from '../../../common/constants/plugin';
+import { ENROLLMENT_API_KEY_ROUTES } from '../../../common/constants/routes';
 import {
+  DeleteEnrollmentAPIKeyRequestSchema,
   GetEnrollmentAPIKeysRequestSchema,
   GetOneEnrollmentAPIKeyRequestSchema,
-  DeleteEnrollmentAPIKeyRequestSchema,
   PostEnrollmentAPIKeyRequestSchema,
-} from '../../types';
+} from '../../types/rest_spec/enrollment_api_key';
 
 import {
+  deleteEnrollmentApiKeyHandler,
   getEnrollmentApiKeysHandler,
   getOneEnrollmentApiKeyHandler,
-  deleteEnrollmentApiKeyHandler,
   postEnrollmentApiKeyHandler,
 } from './handler';
 

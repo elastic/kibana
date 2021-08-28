@@ -4,25 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-/**
- * These are the core source configuration types that represent a Source Configuration in
- * it's entirety. There are then subsets of this configuration that form the Logs Source Configuration
- * and Metrics Source Configuration. The Logs Source Configuration is further expanded to it's resolved form.
- * -> Source Configuration
- *  -> Logs source configuration
- *    -> Resolved Logs Source Configuration
- *  -> Metrics Source Configuration
- */
-
-/* eslint-disable @typescript-eslint/no-empty-interface */
-
-import { omit } from 'lodash';
-import * as rt from 'io-ts';
-import moment from 'moment';
-import { pipe } from 'fp-ts/lib/pipeable';
 import { chain } from 'fp-ts/lib/Either';
-import { logIndexReferenceRT } from '../log_sources';
+import { pipe } from 'fp-ts/lib/pipeable';
+import * as rt from 'io-ts';
+import { omit } from 'lodash';
+import moment from 'moment';
+import { logIndexReferenceRT } from '../log_sources/log_source_configuration';
 
 export const TimestampFromString = new rt.Type<number, string>(
   'TimestampFromString',
@@ -157,8 +144,7 @@ export const SavedSourceConfigurationRuntimeType = rt.intersection([
   }),
 ]);
 
-export interface InfraSavedSourceConfiguration
-  extends rt.TypeOf<typeof SavedSourceConfigurationRuntimeType> {}
+export type InfraSavedSourceConfiguration = rt.TypeOf<typeof SavedSourceConfigurationRuntimeType>;
 
 /**
  * Static source configuration, the result of merging values from the config file and
@@ -171,8 +157,7 @@ export const StaticSourceConfigurationRuntimeType = rt.partial({
   fields: StaticSourceConfigurationFieldsRuntimeType,
 });
 
-export interface InfraStaticSourceConfiguration
-  extends rt.TypeOf<typeof StaticSourceConfigurationRuntimeType> {}
+export type InfraStaticSourceConfiguration = rt.TypeOf<typeof StaticSourceConfigurationRuntimeType>;
 
 /**
  * Full source configuration type after all cleanup has been done at the edges
@@ -186,8 +171,7 @@ export const SourceConfigurationRuntimeType = rt.type({
   logColumns: rt.array(SourceConfigurationColumnRuntimeType),
 });
 
-export interface InfraSourceConfiguration
-  extends rt.TypeOf<typeof SourceConfigurationRuntimeType> {}
+export type InfraSourceConfiguration = rt.TypeOf<typeof SourceConfigurationRuntimeType>;
 
 /**
  * Source status
@@ -208,7 +192,7 @@ export const SourceStatusRuntimeType = rt.type({
   indexFields: rt.array(SourceStatusFieldRuntimeType),
 });
 
-export interface InfraSourceStatus extends rt.TypeOf<typeof SourceStatusRuntimeType> {}
+export type InfraSourceStatus = rt.TypeOf<typeof SourceStatusRuntimeType>;
 
 /**
  * Source configuration along with source status and metadata
@@ -230,7 +214,7 @@ export const SourceRuntimeType = rt.intersection([
   }),
 ]);
 
-export interface InfraSource extends rt.TypeOf<typeof SourceRuntimeType> {}
+export type InfraSource = rt.TypeOf<typeof SourceRuntimeType>;
 
 export const SourceResponseRuntimeType = rt.type({
   source: SourceRuntimeType,
@@ -253,5 +237,6 @@ export const SourceConfigurationSavedObjectRuntimeType = rt.intersection([
   }),
 ]);
 
-export interface SourceConfigurationSavedObject
-  extends rt.TypeOf<typeof SourceConfigurationSavedObjectRuntimeType> {}
+export type SourceConfigurationSavedObject = rt.TypeOf<
+  typeof SourceConfigurationSavedObjectRuntimeType
+>;

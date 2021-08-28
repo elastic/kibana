@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-// @ts-expect-error
+
 import type { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
 import { getDiscoverQuery } from './DiscoverTransactionLink';
 

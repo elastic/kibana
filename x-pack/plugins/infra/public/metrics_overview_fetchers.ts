@@ -12,10 +12,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { FetchDataParams, MetricsFetchDataResponse } from '../../observability/public';
-import { TopNodesRequest, TopNodesResponse } from '../common/http_api/overview_api';
-import { InfraClientCoreSetup } from './types';
+import type {
+  FetchDataParams,
+  MetricsFetchDataResponse,
+} from '../../observability/public/typings/fetch_overview_data';
+import type { TopNodesRequest, TopNodesResponse } from '../common/http_api/overview_api';
+import type { InfraClientCoreSetup } from './types';
 
 export const createMetricsHasData = (
   getStartServices: InfraClientCoreSetup['getStartServices']

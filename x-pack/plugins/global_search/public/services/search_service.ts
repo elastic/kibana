@@ -4,29 +4,28 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { merge, Observable, timer, throwError } from 'rxjs';
-import { map, takeUntil } from 'rxjs/operators';
+import { i18n } from '@kbn/i18n';
 import { uniq } from 'lodash';
 import { duration } from 'moment';
-import { i18n } from '@kbn/i18n';
-import { HttpStart } from 'src/core/public';
-import {
+import { merge, Observable, throwError, timer } from 'rxjs';
+import { map, takeUntil } from 'rxjs/operators';
+import type { HttpStart } from '../../../../../src/core/public/http/types';
+import { defaultMaxProviderResults } from '../../common/constants';
+import { GlobalSearchFindError } from '../../common/errors';
+import type { ILicenseChecker } from '../../common/license_checker';
+import { takeInArray } from '../../common/operators/take_in_array';
+import { processProviderResult } from '../../common/process_result';
+import type {
+  GlobalSearchBatchedResults,
   GlobalSearchFindParams,
   GlobalSearchProviderResult,
-  GlobalSearchBatchedResults,
 } from '../../common/types';
-import { GlobalSearchFindError } from '../../common/errors';
-import { takeInArray } from '../../common/operators';
-import { defaultMaxProviderResults } from '../../common/constants';
-import { processProviderResult } from '../../common/process_result';
-import { ILicenseChecker } from '../../common/license_checker';
-import { GlobalSearchResultProvider } from '../types';
-import { GlobalSearchClientConfigType } from '../config';
-import { GlobalSearchFindOptions } from './types';
-import { getDefaultPreference } from './utils';
+import type { GlobalSearchClientConfigType } from '../config';
+import type { GlobalSearchResultProvider } from '../types';
 import { fetchServerResults } from './fetch_server_results';
 import { fetchServerSearchableTypes } from './fetch_server_searchable_types';
+import type { GlobalSearchFindOptions } from './types';
+import { getDefaultPreference } from './utils';
 
 /** @public */
 export interface SearchServiceSetup {

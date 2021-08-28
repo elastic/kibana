@@ -4,17 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import React, { useContext } from 'react';
-
+import { LogFilterState } from '../../../containers/logs/log_filter/log_filter_state';
+import { WithLogFilterUrlState } from '../../../containers/logs/log_filter/with_log_filter_url_state';
 import { LogFlyout } from '../../../containers/logs/log_flyout';
-import { LogViewConfiguration } from '../../../containers/logs/log_view_configuration';
 import { LogHighlightsState } from '../../../containers/logs/log_highlights/log_highlights';
-import { LogPositionState, WithLogPositionUrlState } from '../../../containers/logs/log_position';
-import { LogFilterState, WithLogFilterUrlState } from '../../../containers/logs/log_filter';
-import { useLogSourceContext } from '../../../containers/logs/log_source';
-import { ViewLogInContext } from '../../../containers/logs/view_log_in_context';
+import { LogPositionState } from '../../../containers/logs/log_position/log_position_state';
+import { WithLogPositionUrlState } from '../../../containers/logs/log_position/with_log_position_url_state';
+import { useLogSourceContext } from '../../../containers/logs/log_source/log_source';
 import { LogStreamProvider, useLogStreamContext } from '../../../containers/logs/log_stream';
+import { LogViewConfiguration } from '../../../containers/logs/log_view_configuration';
+import { ViewLogInContext } from '../../../containers/logs/view_log_in_context/view_log_in_context';
 
 const LogFilterStateProvider: React.FC = ({ children }) => {
   const { derivedIndexPattern } = useLogSourceContext();

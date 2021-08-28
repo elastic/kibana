@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { Vis } from '../../../../../../src/plugins/visualizations/public';
-import { RegionMapVisParams } from './types';
+import { Vis } from '../../../../../../src/plugins/visualizations/public/vis';
 import { title } from './region_map_vis_type';
+import type { RegionMapVisParams } from './types';
 
 function getEmsLayerId(id: string | number, layerId: string) {
   if (typeof id === 'string') {

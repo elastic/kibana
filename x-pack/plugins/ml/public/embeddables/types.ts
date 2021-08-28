@@ -4,30 +4,32 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { CoreStart } from 'kibana/public';
 import type { Filter, Query } from '@kbn/es-query';
-import type { JobId } from '../../common/types/anomaly_detection_jobs';
-import type { SwimlaneType } from '../application/explorer/explorer_constants';
-import type { RefreshInterval, TimeRange } from '../../../../../src/plugins/data/common';
+import type { CoreStart } from '../../../../../src/core/public/types';
+import { IndexPattern } from '../../../../../src/plugins/data/common/index_patterns/index_patterns/index_pattern';
 import type {
-  EmbeddableInput,
+  RefreshInterval,
+  TimeRange,
+} from '../../../../../src/plugins/data/common/query/timefilter/types';
+import type { EmbeddableInput } from '../../../../../src/plugins/embeddable/common/types';
+import type {
   EmbeddableOutput,
   IEmbeddable,
-} from '../../../../../src/plugins/embeddable/public';
-import type { AnomalyDetectorService } from '../application/services/anomaly_detector_service';
-import type { AnomalyTimelineService } from '../application/services/anomaly_timeline_service';
-import type { MlDependencies } from '../application/app';
-import type { AppStateSelectedCells } from '../application/explorer/explorer_utils';
-import { AnomalyExplorerChartsService } from '../application/services/anomaly_explorer_charts_service';
-import { EntityField } from '../../common/util/anomaly_utils';
+} from '../../../../../src/plugins/embeddable/public/lib/embeddables/i_embeddable';
+import type { JobId } from '../../common/types/anomaly_detection_jobs/job';
+import type { EntityField } from '../../common/util/anomaly_utils';
 import { isPopulatedObject } from '../../common/util/object_utils';
+import type { MlDependencies } from '../application/app';
+import type { SwimlaneType } from '../application/explorer/explorer_constants';
+import type { AppStateSelectedCells } from '../application/explorer/explorer_utils';
+import { AnomalyDetectorService } from '../application/services/anomaly_detector_service';
+import { AnomalyExplorerChartsService } from '../application/services/anomaly_explorer_charts_service';
+import { AnomalyTimelineService } from '../application/services/anomaly_timeline_service';
+import type { MlResultsService } from '../application/services/results_service';
 import {
   ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
   ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
 } from './constants';
-import { MlResultsService } from '../application/services/results_service';
-import { IndexPattern } from '../../../../../src/plugins/data/common/index_patterns/index_patterns';
 
 export interface AnomalySwimlaneEmbeddableCustomInput {
   jobIds: JobId[];

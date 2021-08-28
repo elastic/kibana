@@ -4,14 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { IndexPattern } from 'src/plugins/data/public';
+import { IndexPattern } from '../../../../../../../src/plugins/data/common/index_patterns/index_patterns/index_pattern';
 import { AGG_TYPE } from '../../../../common/constants';
-import { CountAggField } from './count_agg_field';
+import { addFieldToDSL, getField } from '../../../../common/elasticsearch_util/es_agg_utils';
 import { isMetricCountable } from '../../util/is_metric_countable';
-import { CountAggFieldParams } from './agg_field_types';
-import { addFieldToDSL, getField } from '../../../../common/elasticsearch_util';
-import { IField } from '../field';
+import type { IField } from '../field';
+import type { CountAggFieldParams } from './agg_field_types';
+import { CountAggField } from './count_agg_field';
 
 const TERMS_AGG_SHARD_SIZE = 5;
 

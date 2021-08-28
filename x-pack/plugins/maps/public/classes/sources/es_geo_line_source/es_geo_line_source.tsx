@@ -5,40 +5,39 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
+import type { GeoJsonProperties } from 'geojson';
 import _ from 'lodash';
 import React from 'react';
-
-import { GeoJsonProperties } from 'geojson';
-import { i18n } from '@kbn/i18n';
-import type { Filter } from 'src/plugins/data/public';
+import type { Filter } from '../../../../../../../src/plugins/data/common/es_query';
+import { esFilters } from '../../../../../../../src/plugins/data/public/deprecated';
+import type { Adapters } from '../../../../../../../src/plugins/inspector/common/adapters/types';
 import {
   EMPTY_FEATURE_COLLECTION,
   FIELD_ORIGIN,
   SOURCE_TYPES,
   VECTOR_SHAPE_TYPE,
 } from '../../../../common/constants';
-import { getField, addFieldToDSL } from '../../../../common/elasticsearch_util';
-import {
-  ESGeoLineSourceDescriptor,
+import type {
   ESGeoLineSourceResponseMeta,
   VectorSourceRequestMeta,
-} from '../../../../common/descriptor_types';
+} from '../../../../common/descriptor_types/data_request_descriptor_types';
+import type { ESGeoLineSourceDescriptor } from '../../../../common/descriptor_types/source_descriptor_types';
+import { addFieldToDSL, getField } from '../../../../common/elasticsearch_util/es_agg_utils';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
-import { AbstractESAggSource } from '../es_agg_source';
-import { DataRequest } from '../../util/data_request';
-import { registerSource } from '../source_registry';
-import { convertToGeoJson } from './convert_to_geojson';
+import { getIsGoldPlus, LICENSED_FEATURES } from '../../../licensed_features';
 import { ESDocField } from '../../fields/es_doc_field';
-import { UpdateSourceEditor } from './update_source_editor';
-import { ImmutableSourceProperty, SourceEditorArgs } from '../source';
-import { GeoJsonWithMeta } from '../vector_source';
+import type { IField } from '../../fields/field';
+import type { ITooltipProperty } from '../../tooltips/tooltip_property';
+import { TooltipProperty } from '../../tooltips/tooltip_property';
+import { DataRequest } from '../../util/data_request';
 import { isValidStringConfig } from '../../util/valid_string_config';
-import { Adapters } from '../../../../../../../src/plugins/inspector/common/adapters';
-import { IField } from '../../fields/field';
-import { ITooltipProperty, TooltipProperty } from '../../tooltips/tooltip_property';
-import { esFilters } from '../../../../../../../src/plugins/data/public';
-import { getIsGoldPlus } from '../../../licensed_features';
-import { LICENSED_FEATURES } from '../../../licensed_features';
+import { AbstractESAggSource } from '../es_agg_source/es_agg_source';
+import type { ImmutableSourceProperty, SourceEditorArgs } from '../source';
+import { registerSource } from '../source_registry';
+import type { GeoJsonWithMeta } from '../vector_source/vector_source';
+import { convertToGeoJson } from './convert_to_geojson';
+import { UpdateSourceEditor } from './update_source_editor';
 
 const MAX_TRACKS = 250;
 

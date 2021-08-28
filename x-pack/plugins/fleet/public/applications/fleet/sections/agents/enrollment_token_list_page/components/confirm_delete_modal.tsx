@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
+import { EuiCallOut, EuiConfirmModal } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EuiConfirmModal, EuiCallOut } from '@elastic/eui';
+import React from 'react';
 
-import type { EnrollmentAPIKey } from '../../../../types';
+import type { EnrollmentAPIKey } from '../../../../../../../common/types/models/enrollment_api_key';
 
 interface Props {
   onCancel: () => void;

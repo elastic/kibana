@@ -5,23 +5,24 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import React from 'react';
 import styled from 'styled-components';
-
-import { Field, getUseField } from '../../common/shared_imports';
-import * as i18n from './translations';
+import { Field } from '../../../../../../src/plugins/es_ui_shared/static/forms/components/field';
+import { getUseField } from '../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/components/use_field';
+import { CaseType } from '../../../common/api/cases/case';
+import type { Case } from '../../../common/ui/types';
+import type { UsePostComment } from '../../containers/use_post_comment';
+import type { Owner } from '../../types';
+import { InsertTimeline } from '../insert_timeline';
+import { OwnerProvider } from '../owner_context';
+import type { CasesTimelineIntegration } from '../timeline_context';
+import { CasesTimelineIntegrationProvider } from '../timeline_context';
+import { fieldName as descriptionFieldName } from './description';
 import { CreateCaseForm } from './form';
 import { FormContext } from './form_context';
 import { SubmitCaseButton } from './submit_button';
-import { Case } from '../../containers/types';
-import { CaseType } from '../../../common';
-import { CasesTimelineIntegration, CasesTimelineIntegrationProvider } from '../timeline_context';
-import { fieldName as descriptionFieldName } from './description';
-import { InsertTimeline } from '../insert_timeline';
-import { UsePostComment } from '../../containers/use_post_comment';
-import { Owner } from '../../types';
-import { OwnerProvider } from '../owner_context';
+import * as i18n from './translations';
 
 export const CommonUseField = getUseField({ component: Field });
 

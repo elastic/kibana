@@ -4,13 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import {
   DEFAULT_EMS_FILE_API_URL,
   DEFAULT_EMS_FONT_LIBRARY_URL,
   DEFAULT_EMS_LANDING_PAGE_URL,
   DEFAULT_EMS_TILE_API_URL,
-} from '../../../../src/plugins/maps_ems/common';
+} from '../../../../src/plugins/maps_ems/common/ems_defaults';
 
 export interface IEMSConfig {
   emsUrl?: string;

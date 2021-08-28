@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { InstallablePackage } from '../../../types';
-import { getArchiveFilelist, getAsset } from '../archive';
+import type { InstallablePackage } from '../../../../common/types/models/epm';
 import type { ArchiveEntry } from '../archive';
+import { getAsset } from '../archive';
+import { getArchiveFilelist } from '../archive/cache';
 
 // paths from RegistryPackage are routes to the assets on EPR
 // e.g. `/package/nginx/1.2.0/data_stream/access/fields/fields.yml`

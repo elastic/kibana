@@ -4,16 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { VisualizeFieldContext } from 'src/plugins/ui_actions/public';
-import { EmbeddableEditorState } from 'src/plugins/embeddable/public';
-import { Filter, Query, SavedQuery } from '../../../../../src/plugins/data/public';
-import { Document } from '../persistence';
-
-import { TableInspectorAdapter } from '../editor_frame_service/types';
-import { DateRange } from '../../common';
-import { LensAppServices } from '../app_plugin/types';
-import { DatasourceMap, VisualizationMap } from '../types';
+import type { Filter } from '../../../../../src/plugins/data/common/es_query';
+import type { Query } from '../../../../../src/plugins/data/public';
+import type { SavedQuery } from '../../../../../src/plugins/data/public/query/saved_query/types';
+import type { EmbeddableEditorState } from '../../../../../src/plugins/embeddable/public/lib/state_transfer/types';
+import type { VisualizeFieldContext } from '../../../../../src/plugins/ui_actions/public/types';
+import type { DateRange } from '../../common/types';
+import type { LensAppServices } from '../app_plugin/types';
+import type { TableInspectorAdapter } from '../editor_frame_service/types';
+import type { Document } from '../persistence/saved_object_store';
+import type { DatasourceMap, VisualizationMap } from '../types';
 
 export interface VisualizationState {
   activeId: string | null;

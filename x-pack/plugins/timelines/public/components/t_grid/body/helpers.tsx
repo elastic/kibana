@@ -4,24 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
-
-import { EuiDataGridCellValueElementProps } from '@elastic/eui';
+import type { EuiTheme } from '../../../../../../../src/plugins/kibana_react/common/eui_styled_components';
 import type { Ecs } from '../../../../common/ecs';
+import type { BrowserField } from '../../../../common/search_strategy/index_fields';
 import type {
-  BrowserField,
   TimelineItem,
   TimelineNonEcsData,
-} from '../../../../common/search_strategy';
-import type {
-  ColumnHeaderOptions,
-  SortColumnTimeline,
-  SortDirection,
-  TimelineEventsType,
-} from '../../../../common/types/timeline';
-
-import type { EuiTheme } from '../../../../../../../src/plugins/kibana_react/common';
+} from '../../../../common/search_strategy/timeline/events/all';
+import type { TimelineEventsType } from '../../../../common/types/timeline';
+import type { ColumnHeaderOptions } from '../../../../common/types/timeline/columns';
+import type { SortColumnTimeline, SortDirection } from '../../../../common/types/timeline/store';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const omitTypenameAndEmpty = (k: string, v: any): any | undefined =>

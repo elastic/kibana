@@ -4,8 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { FeatureKibanaPrivileges } from '../../../../../features/public';
+import type { FeatureKibanaPrivileges } from '../../../../../features/common/feature_kibana_privileges';
 import { KibanaPrivilege } from './kibana_privilege';
 
 export class PrimaryFeaturePrivilege extends KibanaPrivilege {

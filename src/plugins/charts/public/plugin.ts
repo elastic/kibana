@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { CoreSetup } from '../../../core/public';
+import type { CoreSetup } from '../../../core/public/types';
 import type { Plugin } from '../../../core/public/plugins/plugin';
 import type { ExpressionsSetup } from '../../expressions/public/plugin';
 import { palette, systemPalette } from '../common/palette';
@@ -14,24 +14,14 @@ import { LegacyColorsService } from './services/legacy_colors/colors';
 import { PaletteService } from './services/palettes/service';
 import { ThemeService } from './services/theme/theme';
 
-export type Theme = Omit<ThemeService, 'init'>;
-export type Color = Omit<LegacyColorsService, 'init'>;
+import type {
+  ChartsPluginStart,
+  ChartsPluginSetup,
+} from './types';
 
 interface SetupDependencies {
   expressions: ExpressionsSetup;
 }
-
-/** @public */
-export interface ChartsPluginSetup {
-  legacyColors: Color;
-  theme: Theme;
-  palettes: ReturnType<PaletteService['setup']>;
-}
-
-/** @public */
-export type ChartsPluginStart = ChartsPluginSetup & {
-  activeCursor: ActiveCursor;
-};
 
 /** @public */
 export class ChartsPlugin implements Plugin<ChartsPluginSetup, ChartsPluginStart> {

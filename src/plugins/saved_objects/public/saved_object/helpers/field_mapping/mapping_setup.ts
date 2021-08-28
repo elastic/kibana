@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import { isString, mapValues } from 'lodash';
-import { ES_FIELD_TYPES } from '../common';
+import { ES_FIELD_TYPES } from '@kbn/field-types';
 import type { FieldMappingSpec, MappingObject } from './types';
 
 // import from ./common/types to prevent circular dependency of kibana_utils <-> data plugin
